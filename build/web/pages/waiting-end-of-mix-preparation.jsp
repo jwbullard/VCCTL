@@ -1,0 +1,1 @@
+The mix that you want to hydrate is not ready now. The hydration will begin as soon as the mix preparation is finished.

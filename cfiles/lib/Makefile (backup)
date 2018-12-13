@@ -1,0 +1,133 @@
+# For gcc
+#CC= gcc
+# For ANSI compilers
+CC= gcc
+
+#For Optimization
+#CFLAGS= -O2
+#For debugging
+
+INCLUDE= ./include
+CFLAGS=  -c -fPIC -I${INCLUDE}
+
+LIBS= -lm
+
+VERSION= vcctl50
+
+CFILES= \
+	bailout.c \
+	breakflocs.c \
+	busymodule.c \
+	cemcolors.c \
+	checkbc.c \
+	complex.c \
+	convert_id.c \
+	filehandler.c \
+	fread_pathname.c \
+	get_imgres.c \
+	get_imgsize.c \
+	get_version.c \
+	gtime.c \
+	memutil.c \
+	probe_imgheader.c \
+	ran1.c \
+	read_imgheader.c \
+	read_pathname.c \
+	skip_imgheader.c \
+	write_imgheader.c
+
+OBJS= ${CFILES:.c=.o}
+
+USER_LIB= /usr/lib
+INSTALL_LIB= ${USER_LIB}/vcctl
+INSTALL_INCLUDE= /usr/include/vcctl
+
+RM= /bin/rm -f
+CP= /bin/cp -f
+#--- You shouldn't have to edit anything else. ---
+
+all:	libvcctl.so libvcctl.a
+
+libvcctl.so:	${OBJS}
+	gcc -shared ${OBJS} -o libvcctl.so
+
+libvcctl.a:	${OBJS}
+	ar rc libvcctl.a ${OBJS}
+	ranlib libvcctl.a
+	
+bailout.o :	bailout.c	
+	${CC} ${CFLAGS} $?
+
+breakflocs.o :	breakflocs.c
+	${CC} ${CFLAGS} $?
+	
+busymodule.o :	busymodule.c	
+	${CC} ${CFLAGS} $?
+
+cemcolors.o :	cemcolors.c	
+	${CC} ${CFLAGS} $?
+
+checkbc.o :	checkbc.c	
+	${CC} ${CFLAGS} $?
+
+complex.o :	complex.c	
+	${CC} ${CFLAGS} $?
+
+convert_id.o :	convert_id.c	
+	${CC} ${CFLAGS} $?
+
+filehandler.o :	filehandler.c	
+	${CC} ${CFLAGS} $?
+
+fread_pathname.o :	fread_pathname.c	
+	${CC} ${CFLAGS} $?
+
+get_imgres.o :	get_imgres.c	
+	${CC} ${CFLAGS} $?
+
+get_imgsize.o :	get_imgsize.c	
+	${CC} ${CFLAGS} $?
+
+get_version.o :	get_version.c	
+	${CC} ${CFLAGS} $?
+
+gtime.o :	gtime.c	
+	${CC} ${CFLAGS} $?
+
+memutil.o :	memutil.c	
+	${CC} ${CFLAGS} $?
+
+probe_imgheader.o :	probe_imgheader.c	
+	${CC} ${CFLAGS} $?
+
+ran1.o :	ran1.c	
+	${CC} ${CFLAGS} $?
+
+read_imgheader.o :	read_imgheader.c	
+	${CC} ${CFLAGS} $?
+
+read_pathname.o :	read_pathname.c	
+	${CC} ${CFLAGS} $?
+
+skip_imgheader.o :	skip_imgheader.c	
+	${CC} ${CFLAGS} $?
+
+write_imgheader.o :	write_imgheader.c	
+	${CC} ${CFLAGS} $?
+
+install:	libvcctl.a libvcctl.so
+	mkdir -p ${INSTALL_LIB}
+	mkdir -p ${INSTALL_INCLUDE}
+	${CP} libvcctl.so ${INSTALL_LIB}
+	${CP} ${INCLUDE}/vcctl.h ${INSTALL_INCLUDE}
+	${CP} ${INCLUDE}/vcctlfuncs.h ${INSTALL_INCLUDE}
+	${CP} ${INCLUDE}/vcctlcomplex.h ${INSTALL_INCLUDE}
+	ln -s ${INSTALL_LIB}/libvcctl.so ${USER_LIB}/libvcctl.so
+
+clean:
+	${RM} *.o libvcctl.so libvcctl.a
+
+cleanall:
+	${RM} ${INSTALL_LIB}/libvcctl.*
+	${RM} ${USER_LIB}/libvcctl.*
+	${RM} ${INSTALL_INCLUDE}/vcctl.h

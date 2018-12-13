@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/vcctl">
+  <Logger className="org.apache.catalina.logger.FileLogger" prefix="vcctl." suffix=".log" timestamp="true"/>
+</Context>

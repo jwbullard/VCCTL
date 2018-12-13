@@ -1,0 +1,28 @@
+name	Holcim_Clarksville 
+blaine	??
+method	0
+dir		ma71
+suff1	sil
+suff2	c3s
+suff3	c3a
+numimg	three
+c3sv	0.7140	0.0863
+c3sa	0.6132	0.0693
+c2sv	0.0913	0.0341
+c2sa	0.1471	0.0571
+c3av	0.1380	0.0522
+c3aa	0.1813	0.0305
+c4fv	0.0567	0.0214
+c4fa	0.0584	0.0159
+C<SUB>3</SUB>S	0.6098	0.0993
+C<SUB>2</SUB>S	0.0778	0.0301
+C<SUB>3</SUB>A	0.1152	0.0376
+C<SUB>4</SUB>AF	0.0473	0.0150
+Gypsum	0.0783	0.0362
+Free_Lime	0.0004	0.0006
+Kaolin	0.0008	0.0002
+Slag	0.0031	0.0022
+Alk._Sulf	0.0060	0.0012
+Mg/Ca	0.0496	0.0041
+Silica	0.0116	0.0044
+gypamount	0.0784

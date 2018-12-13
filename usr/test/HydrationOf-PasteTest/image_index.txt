@@ -1,0 +1,7 @@
+24.025434	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.24.03h.25.000
+48.174427	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.48.17h.25.000
+72.458885	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.72.46h.25.000
+96.468910	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.96.47h.25.000
+120.599327	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.120.60h.25.000
+144.707321	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/PasteTest.img.144.71h.25.000
+168.087326	/Users/bullard/vcctl/usr/test/HydrationOf-PasteTest/HydrationOf-PasteTest.img.25.000

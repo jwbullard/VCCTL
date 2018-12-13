@@ -1,0 +1,320 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+#header {
+	width: 100%;
+	height: 150px;
+	background: url("../images/logo.jpg") no-repeat scroll center;
+}
+
+body {
+	margin: 5px auto 20px;
+	width: 780px;
+}
+
+/* @group Checking messages */
+
+.problem_msg {
+	background-color: #fcc;
+	border: 1px solid #c00;
+	padding: 5px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+#fine_aggregate_grading_name .problem_msg {
+	font-size: 10pt;
+	position: relative;
+}
+
+.matching_img {
+	float: right;
+}
+
+/* @end */
+
+/* @group Main Content */
+
+#main {
+	width: 780px;
+	margin-top: 20px;
+}
+
+#content-left {
+	background: url(../images/main-left-border.gif) repeat-y left;
+	padding-left: 4px;
+}
+
+#content-right {
+	background: #fff url(../images/main-right.gif) repeat-y right;
+}
+
+#content {
+	text-indent: 1em;
+	padding-right: 20px;
+	padding-left: 20px;
+	padding-top: 12px;
+}
+
+.notes {
+	vertical-align: top;
+}
+
+h3 {
+	display: inline;
+}
+
+.help-icon {
+	background: url(../images/help.jpg) no-repeat;
+	margin-left: 5px;
+	padding-left: 16px;
+}
+
+.tooltip {
+	background-color: #ecf3ff;
+	text-align: justify;
+	text-indent: 2ex;
+	border: 1px solid #7faeff;
+	width: 600px;
+	padding: 10px;
+}
+
+#preloader {
+	background-color: white;
+	width: 96%;
+	height: 96px;
+}
+
+#preloadIMG {
+	width: 32px;
+	height: 32px;
+	position: relative;
+	left: 384px;
+	top: 32px;
+	background-image: url(../images/ajax-loader.gif);
+}
+
+fieldset {
+	border: 1px solid #bfbfbf;
+	padding: 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+user-info-fieldset {
+	padding: 10px;
+	width: 800px;
+	margin: 10px;
+}
+
+fieldset.collapsed {
+	border-style: none;
+	height: 0;
+}
+
+legend {
+	text-align: center;
+	text-indent: 0;
+	padding-right: 5px;
+	padding-left: 5px;
+}
+
+.user-info-legend {
+	font-weight: bold;
+}
+
+.block-displayed {
+	margin: 5px;
+	display: block;
+}
+
+.box-content {
+	border: 1px solid #bfbfbf;
+	padding: 10px;
+}
+
+.link {
+	color: #2971a7;
+	text-decoration: none;
+}
+
+.link:hover {
+	text-decoration: underline;
+}
+
+.item {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	float: left;
+}
+
+.popup {
+	padding-top: 10px;
+}
+
+.collapsable-element {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.collapsable-content.collapsed {
+	display: none;
+}
+
+.collapsable-content.expanded {
+
+}
+
+.collapsable-title {
+	cursor: pointer;
+}
+
+.collapsable-title.collapsed a {
+	background: url(../images/collapse_closed.gif) no-repeat left;
+	padding-left: 20px;
+}
+
+.collapsable-title.expanded a {
+	background: url(../images/collapse_open.gif) no-repeat left;
+	padding-left: 20px;
+}
+
+.hidden {
+	display: none;
+}
+
+hr {
+	height: 1px;
+	background-color: #bfbfbf;
+	border: 0px solid #bfbfbf;
+}
+
+.slider-track {
+	width: 100px;
+	height: 5px;
+	background-image: url(../images/slider-background.gif);
+	display: inline-block;
+}
+
+.slider-track-left {
+	width: 4px;
+	height: 5px;
+	background: url(../images/slider-background-left.gif) no-repeat;
+	float: left;
+}
+
+.slider-track-right {
+	width: 4px;
+	height: 5px;
+	background: url(../images/slider-background-right.gif) no-repeat;
+	float: right;
+}
+
+.slider-handle {
+	cursor: move;
+	background-image: url(../images/slider-handle.gif);
+	width: 19px;
+	height: 19px;
+	bottom: 7px;
+}
+
+.radio-buttons-group {
+	vertical-align: top;
+	text-indent: 0;
+	margin-left: 5px;
+	margin-bottom: 10px;
+}
+
+/* @group Measurements */
+
+#result_graph_img {
+	cursor: crosshair;
+}
+
+#selection-rect {
+	position: absolute;
+	cursor: crosshair;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+}
+
+/* @end */
+
+/* @end */
+
+/* @group Top Border */
+
+#top-left-border {
+	background: url(../images/top-left-corner.gif) no-repeat;
+	float: left;
+	width: 13px;
+	height: 13px;
+}
+
+#top-right-border {
+	background: url(../images/top-right.gif) no-repeat right;
+	height: 13px;
+}
+
+/* @end */
+
+/* @group Bottom border */
+
+#bottom-left-border {
+	background: url(../images/bottom-left-corner.gif) no-repeat;
+	float: left;
+	width: 13px;
+	height: 13px;
+}
+
+#bottom-right-border {
+	background: url(../images/bottom-right.gif) no-repeat right;
+	height: 13px;
+}
+
+/* @end */
+
+/* @group IE only */
+
+/* IE has lot of bugs, so we have to do this... */
+
+* html body {
+	text-align: center;
+
+
+/* Allow to center the design with IE 5.5 */
+}
+
+/* @group Main content */
+
+* html #main * {
+	text-align: justify;
+}
+
+/* @end */
+
+/* @group Bottom borders */
+
+* html #bottom-right-border {
+	margin-top: -3px;
+	position: relative;
+	left: -3px;
+	margin-right: -3px;
+}
+
+/* @end */
+
+/* Nested unformatted list */
+
+ul
+{
+    padding: 0;
+    margin: 0;
+    margin-left: 9px;
+}
+
+/* @end */
+
+/* @end */

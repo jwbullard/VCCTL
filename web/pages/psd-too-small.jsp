@@ -1,0 +1,1 @@
+The PSD must conatain at least 2 different parameters.

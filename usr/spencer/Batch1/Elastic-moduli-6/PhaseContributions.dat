@@ -1,0 +1,180 @@
+Phase POROSITY
+	Vfrac 0.453293
+	Bulk_Modulus 1.457561
+	Bulk_Modulus_Fraction 0.181845
+	Shear_Modulus 0.000000
+	Shear_Modulus_Fraction 0.000000
+	Young_Modulus 0.000000
+	Young_Modulus_Fraction 0.000000
+
+Phase C3S
+	Vfrac 0.039301
+	Bulk_Modulus 0.694865
+	Bulk_Modulus_Fraction 0.086691
+	Shear_Modulus 0.341935
+	Shear_Modulus_Fraction 0.101445
+	Young_Modulus 0.881254
+	Young_Modulus_Fraction 0.099366
+
+Phase C2S
+	Vfrac 0.023533
+	Bulk_Modulus 0.406131
+	Bulk_Modulus_Fraction 0.050669
+	Shear_Modulus 0.227332
+	Shear_Modulus_Fraction 0.067444
+	Young_Modulus 0.574756
+	Young_Modulus_Fraction 0.064806
+
+Phase C3A
+	Vfrac 0.004814
+	Bulk_Modulus 0.091407
+	Bulk_Modulus_Fraction 0.011404
+	Shear_Modulus 0.047705
+	Shear_Modulus_Fraction 0.014153
+	Young_Modulus 0.121907
+	Young_Modulus_Fraction 0.013746
+
+Phase C4AF
+	Vfrac 0.016353
+	Bulk_Modulus 0.285556
+	Bulk_Modulus_Fraction 0.035626
+	Shear_Modulus 0.149685
+	Shear_Modulus_Fraction 0.044408
+	Young_Modulus 0.382263
+	Young_Modulus_Fraction 0.043102
+
+Phase K2SO4
+	Vfrac 0.003032
+	Bulk_Modulus 0.036294
+	Bulk_Modulus_Fraction 0.004528
+	Shear_Modulus 0.020402
+	Shear_Modulus_Fraction 0.006053
+	Young_Modulus 0.051547
+	Young_Modulus_Fraction 0.005812
+
+Phase GYPSUM
+	Vfrac 0.000001
+	Bulk_Modulus 0.000005
+	Bulk_Modulus_Fraction 0.000001
+	Shear_Modulus 0.000000
+	Shear_Modulus_Fraction 0.000000
+	Young_Modulus 0.000000
+	Young_Modulus_Fraction 0.000000
+
+Phase AGG
+	Vfrac 0.010000
+	Bulk_Modulus 0.305742
+	Bulk_Modulus_Fraction 0.038144
+	Shear_Modulus 0.123044
+	Shear_Modulus_Fraction 0.036504
+	Young_Modulus 0.325471
+	Young_Modulus_Fraction 0.036698
+
+Phase CH
+	Vfrac 0.096334
+	Bulk_Modulus 1.340598
+	Bulk_Modulus_Fraction 0.167253
+	Shear_Modulus 0.667725
+	Shear_Modulus_Fraction 0.198099
+	Young_Modulus 1.717950
+	Young_Modulus_Fraction 0.193707
+
+Phase CSH
+	Vfrac 0.256208
+	Bulk_Modulus 2.385544
+	Bulk_Modulus_Fraction 0.297620
+	Shear_Modulus 1.256561
+	Shear_Modulus_Fraction 0.372793
+	Young_Modulus 3.206658
+	Young_Modulus_Fraction 0.361566
+
+Phase C3AH6
+	Vfrac 0.032494
+	Bulk_Modulus 0.321148
+	Bulk_Modulus_Fraction 0.040066
+	Shear_Modulus 0.167771
+	Shear_Modulus_Fraction 0.049774
+	Young_Modulus 0.428666
+	Young_Modulus_Fraction 0.048334
+
+Phase ETTR
+	Vfrac 0.035044
+	Bulk_Modulus 0.348971
+	Bulk_Modulus_Fraction 0.043538
+	Shear_Modulus 0.190401
+	Shear_Modulus_Fraction 0.056488
+	Young_Modulus 0.483304
+	Young_Modulus_Fraction 0.054495
+
+Phase ETTRC4AF
+	Vfrac 0.012043
+	Bulk_Modulus 0.114711
+	Bulk_Modulus_Fraction 0.014311
+	Shear_Modulus 0.062512
+	Shear_Modulus_Fraction 0.018546
+	Young_Modulus 0.158707
+	Young_Modulus_Fraction 0.017895
+
+Phase AFM
+	Vfrac 0.000257
+	Bulk_Modulus 0.003548
+	Bulk_Modulus_Fraction 0.000443
+	Shear_Modulus 0.001610
+	Shear_Modulus_Fraction 0.000478
+	Young_Modulus 0.004196
+	Young_Modulus_Fraction 0.000473
+
+Phase FH3
+	Vfrac 0.002565
+	Bulk_Modulus 0.023858
+	Bulk_Modulus_Fraction 0.002976
+	Shear_Modulus 0.012962
+	Shear_Modulus_Fraction 0.003845
+	Young_Modulus 0.032923
+	Young_Modulus_Fraction 0.003712
+
+Phase GYPSUMS
+	Vfrac 0.000045
+	Bulk_Modulus 0.000685
+	Bulk_Modulus_Fraction 0.000086
+	Shear_Modulus 0.000342
+	Shear_Modulus_Fraction 0.000101
+	Young_Modulus 0.000880
+	Young_Modulus_Fraction 0.000099
+
+Phase ABSGYP
+	Vfrac 0.002492
+	Bulk_Modulus 0.036785
+	Bulk_Modulus_Fraction 0.004589
+	Shear_Modulus 0.018296
+	Shear_Modulus_Fraction 0.005428
+	Young_Modulus 0.047083
+	Young_Modulus_Fraction 0.005309
+
+Phase CACO3
+	Vfrac 0.008768
+	Bulk_Modulus 0.133838
+	Bulk_Modulus_Fraction 0.016698
+	Shear_Modulus 0.068580
+	Shear_Modulus_Fraction 0.020346
+	Young_Modulus 0.175726
+	Young_Modulus_Fraction 0.019814
+
+Phase AFMC
+	Vfrac 0.002051
+	Bulk_Modulus 0.028161
+	Bulk_Modulus_Fraction 0.003513
+	Shear_Modulus 0.013799
+	Shear_Modulus_Fraction 0.004094
+	Young_Modulus 0.035584
+	Young_Modulus_Fraction 0.004012
+
+Phase OC3A
+	Vfrac 0.001373
+	Bulk_Modulus 0.000000
+	Bulk_Modulus_Fraction 0.000000
+	Shear_Modulus 0.000000
+	Shear_Modulus_Fraction 0.000000
+	Young_Modulus -1.#IND00
+	Young_Modulus_Fraction -1.#IND00
+

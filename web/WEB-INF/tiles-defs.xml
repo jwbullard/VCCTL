@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE tiles-definitions PUBLIC
+"-//Apache Software Foundation//DTD Tiles Configuration 1.3//EN"
+"http://struts.apache.org/dtds/tiles-config_1_3.dtd">
+
+<tiles-definitions>
+	<definition name=".default.layout" path="/layout/default-layout.jsp">
+		<put name="title" value="Virtual Cement and Concrete Testing Laboratory 9.5" />
+		<put name="header" value="/common/header.jsp" />
+		<put name="menu" value="/common/menubar.jsp" />
+		<put name="content" value="/pages/home.jsp" />
+		<put name="footer" value="/common/footer.jsp" />
+		<put name="sub-menu" value="/common/sub-menu.jsp" />
+	</definition>
+
+	<definition name=".main" extends=".default.layout" />
+
+	<definition name=".home" path="/pages/home.jsp" />
+
+	<definition name=".registration" path="/pages/registration.jsp" />
+	
+	<definition name=".database.problem" path="/pages/database-problem.jsp" />
+        
+        <definition name=".wrong.user" path="/pages/wrong-user.jsp" />
+        
+        <definition name=".wrong.password" path="/pages/wrong-password.jsp" />
+	
+	<definition name=".database.no-psd" path="/pages/database-no-psd.jsp" />
+	
+	<definition name=".database.no-slag" path="/pages/database-no-slag.jsp" />
+	
+	<definition name=".database.no-fly-ash" path="/pages/database-no-fly-ash.jsp" />
+	
+	<definition name=".database.no-inert-filler" path="/pages/database-no-inert-filler.jsp" />
+	
+	<definition name=".database.no-cement-data-file" path="/pages/database-no-cement-data-file.jsp" />
+	
+	<definition name=".database.no-cement" path="/pages/database-no-cement.jsp" />
+
+	<definition name=".database.no-fine-aggregate-grading" path="/pages/database-no-fine-aggregate-grading.jsp" />
+
+	<definition name=".database.no-coarse-aggregate" path="/pages/database-no-coarse-aggregate.jsp" />
+
+	<definition name=".database.no-coarse-aggregate-grading" path="/pages/database-no-coarse-aggregate-grading.jsp" />
+
+	<definition name=".database.no-fine-aggregate" path="/pages/database-no-fine-aggregate.jsp" />
+
+	<definition name=".database.no-alkali-characteristics" path="/pages/database-no-alkali-characteristics.jsp" />
+
+	<definition name=".database.no-slag-characteristics" path="/pages/database-no-slag-characteristics.jsp" />
+
+	<definition name=".prepareMix" path="/operations/prepare-mix/prepare-mix.jsp">
+		<put name="binder" value="/operations/prepare-mix/binder.jsp" />
+		<put name="phase-distribution" value="/operations/prepare-mix/phase-distribution.jsp" />
+		<put name="calcium-sulfate-amounts" value="/operations/prepare-mix/calcium-sulfate-amounts.jsp" />
+		<put name="add-SCM" value="/operations/prepare-mix/scm.jsp" />
+		<put name="mixing-proportions" value="/operations/prepare-mix/mixing-proportions.jsp" />
+		<put name="microstructure-simulation-parameters" value="/operations/prepare-mix/microstructure-simulation-parameters.jsp" />
+	</definition>
+
+        <definition name=".cemdbimage" path="/lab-materials/cemdbimage.jsp" />
+	<definition name=".hydrateMix" path="/operations/hydrate-mix/hydrate-mix.jsp" >
+		<put name="mix-properties" value="/operations/hydrate-mix/mix-properties.jsp" />
+		<put name="curing-conditions" value="/operations/hydrate-mix/curing-conditions.jsp" />
+		<put name="hydration-simulation-parameters" value="/operations/hydrate-mix/hydration-simulation-parameters.jsp" />
+		<put name="data-output" value="/operations/hydrate-mix/data-output.jsp" />
+	</definition>
+
+	<definition name=".measureHydratedMix" path="/measurements/measure-hydrated-mix.jsp" >
+	</definition>
+
+	<definition name=".measureConcreteMicrostructure" path="/measurements/measure-concrete-microstructure.jsp" >
+	</definition>
+
+	<definition name=".admin.login" path="/index.jsp"/>
+
+	<definition name=".admin.register" path="/pages/registration.jsp"/>
+
+	<definition name=".name.already-used" path="/pages/name-already-used.jsp" />
+
+	<definition name=".name.incorrect" path="/pages/incorrect-name.jsp" />
+
+	<definition name=".cement-name.incorrect" path="/pages/incorrect-cement-name.jsp" />
+
+	<definition name=".coarse-aggregate-name.incorrect" path="/pages/incorrect-coarse-aggregate-name.jsp" />
+
+	<definition name=".fine-aggregate-name.incorrect" path="/pages/incorrect-fine-aggregate-name.jsp" />
+
+	<definition name=".coarse-aggregate-grading-name.incorrect" path="/pages/incorrect-coarse-aggregate-grading-name.jsp" />
+
+	<definition name=".fine-aggregate-grading-name.incorrect" path="/pages/incorrect-fine-aggregate-grading-name.jsp" />
+
+	<definition name=".cement-alkali-characteristics-name.incorrect" path="/pages/incorrect-cement-alkali-characteristics-name.jsp" />
+
+	<definition name=".fly-ash-alkali-characteristics-name.incorrect" path="/pages/incorrect-fly-ash-alkali-characteristics-name.jsp" />
+
+	<definition name=".slag-characteristics-name.incorrect" path="/pages/incorrect-slag-characteristics-name.jsp" />
+
+	<definition name=".cement-alkali-characteristics.empty" path="/pages/database-empty-cement-alkali-characteristics.jsp" />
+
+	<definition name=".fly-ash-alkali-characteristics.empty" path="/pages/database-empty-fly-ash-alkali-characteristics.jsp" />
+
+	<definition name=".slag-characteristics.empty" path="/pages/database-empty-slag-characteristics.jsp" />
+
+	<definition name=".calorimetry-file.empty" path="/pages/database-empty-calorimetry-file.jsp" />
+
+	<definition name=".chemical-shrinkage.empty" path="/pages/database-empty-chemical-shrinkage.jsp" />
+
+	<definition name=".parameter-file.empty" path="/pages/database-empty-parameter-file.jsp" />
+
+	<definition name=".timing-output-file.empty" path="/pages/database-empty-timing-output-file.jsp" />
+
+	<definition name=".unknown_type.empty" path="/pages/database-empty-unknown-type.jsp" />
+
+	<definition name=".psd.empty" path="/pages/database-empty-psd.jsp" />
+
+	<definition name=".psd.too-small" path="/pages/psd-too-small.jsp" />
+
+	<definition name=".user.no-mix" path="/pages/no-mix-for-user.jsp" />
+
+	<definition name=".user.no-hydrated-mix" path="/pages/no-hydrated-mix-for-user.jsp" />
+
+	<definition name=".user.no-operation" path="/pages/no-operation-for-user.jsp" />
+
+	<definition name=".user.no-file" path="/pages/no-file-for-user.jsp" />
+
+	<definition name=".user.no-such-operation" path="/pages/no-such-operation-for-user.jsp" />
+
+	<definition name=".mix.not-finished" path="/pages/waiting-end-of-mix-preparation.jsp" />
+
+        <definition name=".user.no-hydrated-results-ready-yet" path="/pages/no-hydrated-results-ready-yet.jsp" />
+
+	<definition name=".displayBigChart" path="/measurements/big-chart.jsp" />
+
+	<definition name=".my-operations.view" path="/my-operations/my-operations.jsp" />
+
+	<definition name=".my-files.view" path="/my-files/my-files.jsp" />
+
+        <definition name=".my-microstructure-files.view" path="/my-files/my-microstructure-files.jsp" />
+
+        <definition name=".my-aggregate-files.view" path="/my-files/my-aggregate-files.jsp" />
+
+        <definition name=".my-hydration-files.view" path="/my-files/my-hydration-files.jsp" />
+
+        <definition name=".my-mechanical-files.view" path="/my-files/my-mechanical-files.jsp" />
+
+        <definition name=".my-transport-files.view" path="/my-files/my-transport-files.jsp" />
+
+	<definition name=".image.view" path="/my-files/view-image.jsp" />
+        <definition name=".hydmovie.view" path="/my-files/view-hydration-movie.jsp" />
+
+	<definition name=".image.not-found" path="/pages/image-not-found.jsp" />
+
+        <definition name=".movie.not-found" path="/pages/movie-not-found.jsp" />
+
+	<definition name=".lab-materials" path="/lab-materials/lab-materials.jsp">
+		<put name="edit-cement" value="/lab-materials/edit-cement.jsp" />
+		<put name="edit-slag" value="/lab-materials/edit-slag.jsp" />
+	</definition>
+
+        <definition name=".cement-materials" path="/lab-materials/cement-materials.jsp" />
+        
+        <definition name=".cemdbimage" path="/lab-materials/cemdbimage.jsp" />
+
+        <definition name=".slag-materials" path="/lab-materials/slag-materials.jsp" />
+
+        <definition name=".flyash-materials" path="/lab-materials/flyash-materials.jsp" />
+
+        <definition name=".filler-materials" path="/lab-materials/filler-materials.jsp" />
+        
+        <definition name=".aggregate-materials" path="/lab-materials/aggregate-materials.jsp" />
+
+</tiles-definitions>

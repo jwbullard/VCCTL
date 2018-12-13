@@ -1,0 +1,16 @@
+CEMENT PASTE ELASTIC MODULI:
+	bulk_modulus 7.320941 GPa
+	shear_modulus 2.863004 GPa
+	Youngs_modulus 7.598497 GPa
+	Poissons_ratio 0.327015
+
+CONCRETE ELASTIC MODULI INFORMATION:
+	aggfrac: 0.294600
+	airfrac: 0.405300
+	Matrix_vol_frac: 0.3001
+	Eff_Young_mod: 8.7396 GPa
+	Eff_Shear_mod: 3.3996 GPa
+	Eff_Bulk_mod: 6.7864 GPa
+	Estimated_Cylinder_Compressive_strength: 0.0210 MPa
+	Estimated_Cube_Compressive_strength (Neville): 0.4648 MPa
+	Estimated_Cube_Compressive_strength (cyl/0.83): 0.0253 MPa

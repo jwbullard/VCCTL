@@ -1,0 +1,181 @@
+/* @group Tab menu */
+
+/* @group Menu bar */
+
+#tab-menu * {
+	height: 38px;
+}
+
+#tab-menu {
+	width: 780px;
+}
+
+#tabs-left-corner {
+	background: url(../images/tab-left-corner.gif) no-repeat left;
+	width: 14px;
+	float: left;
+}
+
+#tabs-right {
+	background: url(../images/tab-right.gif) no-repeat right;
+}
+
+#tab-menu ul {
+	list-style: none;
+	margin: auto;
+	display: table;
+	margin: auto;
+	padding-right: 13px;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+#tab-menu li {
+	float: left;
+	padding-left: 11px;
+	padding-right: 10px;
+	/* padding-right = padding-left + 1 in order the text to be centered (with separator, which is 2px width) */
+	background: url(../images/tab-separation.gif) no-repeat left;
+}
+
+#tab-menu .first-tab {
+	/* Can't use first-child because IE doesn't support it */
+	background: none;
+	/* Hide first separation */
+}
+
+#tab-menu a {
+	color: #525252;
+	font: 0.9em/34px "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
+	text-decoration: none;
+	text-shadow: #fff 0px 1px 1px;
+	vertical-align: middle;
+	text-align: center;
+	cursor: pointer;
+}
+
+#tab-menu li.current-left {
+	background: url(../images/selected-tab-left.gif) no-repeat;
+	padding: 0 0 0 1px;
+}
+
+#tab-menu li.current-left .current-right {
+	background: url(../images/selected-tab-right.gif) right;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+#tab-menu li.current-left .current-right a {
+	cursor: default;
+	color: #666;
+	text-shadow: #fff 0px 1px 1px;
+	background: url(../images/cursor.gif) no-repeat center bottom;
+	display: block;
+}
+
+#tab-menu li > a:hover {
+	color: gray;
+}
+
+#tab-menu li.after-current {
+	/* can't use .current-left + li because IE doesn't support "+" */
+	background-image: none;
+	/* Remove separation after the selected tab (wich already include its own separation) */
+}
+
+/* @end */
+
+/* @end */
+
+
+/* @group Subtab menu */
+
+#subtab-menu * {
+	height: 29px;
+}
+
+#subtab-menu {
+	background: url(../images/subtab-right-corner.gif) right;
+}
+
+#subtab-menu li {
+	background: url(../images/subtab-right.gif) right;
+	float: left;
+	padding-left: 10px;
+	padding-right: 11px;
+	list-style-type: none;
+}
+
+#subtabs-left-corner {
+	background: url(../images/subtab-left-corner.gif) no-repeat left;
+	width: 30px;
+	float: left;
+}
+
+#subtab-menu li.current-submenu {
+	background: url(../images/selected-subtab-right.gif) right;
+}
+
+#subtab-menu a {
+	color: #525252;
+	text-decoration: none;
+	text-shadow: #fff 0px 1px 1px;
+	text-align: center;
+	cursor: pointer;
+	top: 7px;
+	position: relative;
+	font: smaller "Lucida Grande", Lucida, Verdana, sans-serif;
+}
+
+#subtab-menu li.current-submenu a {
+	color: #525252;
+	cursor: default;
+	text-shadow: #fff 0px 1px 1px;
+	text-align: center;
+}
+
+#subtab-menu a:hover {
+	color: gray;
+}
+
+/* @end */
+
+
+
+/* @group IE only */
+
+/* IE has lot of bugs, so we have to do this... */
+
+/* @group Tab menu */
+
+/* @group Menu bar */
+
+* html #tabs-left-corner {
+	width: 13px !important;
+	width: 11px;
+}
+
+* html #tabs-right {
+	float: left;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+* html #tab-menu li {
+	display: inline;
+	min-width: 1%;
+	width: auto !important;
+	/* For IE7 */
+	width: 1%;
+	white-space: nowrap;
+}
+
+/* @end */
+
+/* @end */
+
+/* @end */

@@ -1,0 +1,34 @@
+Enter name of file with raw (3-D image) data 
+/Users/bullard/vcctl/usr/rush/MyMortar/MyMortar.img
+Enter name of image file to create 
+/Users/bullard/test/git/VCCTL/build/web/image/MyMortar.img.3.50.x5.png
+View orthogonal to:
+	1. yz plane
+	2. xz plane
+	3. xy plane
+Enter orientation to view:  3
+
+Enter slice to view: 50
+
+Depth perception enabled? (Yes = 1, No = 0): 1
+
+Simulate backscattered electron image? (Yes = 1, No = 0): 0
+
+Done reading image header:
+	Version = 7.000000
+	xsyssize = 100
+	ysyssize = 100
+	zsyssize = 100
+	res = 1.000000
+Enter factor by which to scale image:  
+5
+
+Successfully allocated memory for image pixels.
+Successfully allocated memory for dshade array.
+Successfully allocated memory for mic array.
+Preparing to scan image file... done
+
+Successfully made image with all pixels.
+Saving as png file: /Users/bullard/test/git/VCCTL/build/web/image/MyMortar.img.3.50.x5.png
+PNG file saved.
+

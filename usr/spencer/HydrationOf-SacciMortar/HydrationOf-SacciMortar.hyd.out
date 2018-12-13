@@ -1,0 +1,251 @@
+
+Executing disrealnew now...
+Enter name of file containing hydration parameters
+/Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/parameter_file.prm
+Enter random number seed 
+-28300
+Enter name of directory containing initial microstructure files
+Be sure to include final file separator:  /Users/bullard/vcctl/usr/spencer/SacciMortar/
+Enter name of file from which the initial microstructure will be read
+SacciMortar.img
+
+Enter name of particle image file:  SacciMortar.pimg
+
+Enter name of directory to store OUTPUT files
+Be sure to include final file separator:  /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/
+Enter fraction of C3A that is to be orthorhombic instead of cubic: 0.000000
+Enter number of seeds for CSH nucleation per um3 of mix water: 0.000000
+Enter aging time in days: 
+7.000000 
+Place a crack (y or n)? [n] n
+Customize times for outputting microstructure (y or n)? [n] n
+Output hydrating microstructure every ____ hours: 
+72.000000
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+1 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+2 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+3 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+4 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+7 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+1.014030
+Enter phase to add 
+33 
+Enter number of one pixel particles to add (-1 to quit) 
+0
+Enter dissolution bias for these one pixel particles
+0.788773
+Enter phase to add 
+8 
+Enter number of one pixel particles to add (-1 to quit) 
+-1
+Enter the initial temperature of binder in degrees Celsius 
+25.000000 
+Hydration under 0) isothermal, 1) adiabatic or 2) programmed temperature history conditions 
+0 
+Enter the ambient temperature in degrees Celsius 
+25.000000 
+Enter the overall heat transfer coefficient in J/g/C/s 
+0.000000 
+Enter apparent activation energy for hydration in kJ/mole 
+40.000000 
+Enter apparent activation energy for pozzolanic reactions in kJ/mole 
+83.139999 
+Enter apparent activation energy for slag reactions in kJ/mole 
+50.000000 
+Calibrate time using beta factor (0), early-age calorimetry data (1), or early-age chemical shrinkage data (2): 
+Enter kinetic factor to convert cycles to time at 25 C 
+0.000350 
+Enter maximum degree of hydration to achieve before terminating 
+1.000000 
+Do you wish hydration under 0) saturated or 1) sealed conditions 
+0 
+Enter time frequency for checking pore space percolation (in h): 
+1.000000
+Enter time frequency for checking percolation of solids (set) (in h): 
+0.500000
+Enter time frequency for checking hydration of particles (in h): 
+1000.000000
+Enter mass fraction of aggregate in concrete 
+0.666667 
+Enter initial temperature of aggregate in concrete 
+25.000000 
+Enter heat transfer coefficient between aggregate and binder 
+0.000000 
+CSH to pozzolanic CSH 0) prohibited or 1) allowed 
+0 
+CH precipitation on aggregate surfaces 0) prohibited or 1) allowed 
+0 
+Output hydration movie frame every ____ hours: 
+12.000000 
+Enter phase id of surface to deactivate (-1 to quit) 
+-1
+Does pH influence hydration kinetics 0) no or 1) yes 
+1
+
+Probability of CSH growing on a seed in solution = 0.000000
+
+
+******SulftoC3A = 0.211883
+
+
+******Just changed Molarvcsh from 107.809998 to 107.809998 ***************
+
+
+
+Making movie frame
+Movie file not found.  Creating it now...Success.
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Calculating pore size distribution now...
+==>Inside calcporedist3d library function...
+==>Microstructure file for calculating pore size distribution = /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.72.14h.25.000
+==>Microstructure file opened successfully.
+==>Read image header successfully.
+==>Allocated mic memory successfully.
+==>Read microstructure image successfully.
+==>Allocated tmic memory successfully.
+==>Assigned tmic array successfully.
+==>Allocated ndiam memory successfully.
+==>Maxsph = 4945
+==>Allocated xsph memory successfully
+==>Allocated ysph memory successfully
+==>Allocated zsph memory successfully
+==>Allocated pores memory successfully
+==>Loaded pores array successfully
+==>Initialized ndiam array successfully
+=====>nd = 21
+=====>nd = 19
+=====>nd = 17
+=====>nd = 15
+=====>nd = 13
+=====>nd = 11
+=====>nd = 9
+=====>nd = 7
+=====>nd = 5
+=====>nd = 3
+=====>nd = 1
+==>Finished checking all pore pixels
+==>Opened /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.72.14h.25.000.poredist successfullyDone calculating pore size distribution.
+
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Calculating pore size distribution now...
+==>Inside calcporedist3d library function...
+==>Microstructure file for calculating pore size distribution = /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.144.26h.25.000
+==>Microstructure file opened successfully.
+==>Read image header successfully.
+==>Allocated mic memory successfully.
+==>Read microstructure image successfully.
+==>Allocated tmic memory successfully.
+==>Assigned tmic array successfully.
+==>Allocated ndiam memory successfully.
+==>Maxsph = 4945
+==>Allocated xsph memory successfully
+==>Allocated ysph memory successfully
+==>Allocated zsph memory successfully
+==>Allocated pores memory successfully
+==>Loaded pores array successfully
+==>Initialized ndiam array successfully
+=====>nd = 21
+=====>nd = 19
+=====>nd = 17
+=====>nd = 15
+=====>nd = 13
+=====>nd = 11
+=====>nd = 9
+=====>nd = 7
+=====>nd = 5
+=====>nd = 3
+=====>nd = 1
+==>Finished checking all pore pixels
+==>Opened /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.144.26h.25.000.poredist successfullyDone calculating pore size distribution.
+
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+Making movie frame
+Movie file exists.  Appending to it...
+Made movie frame successfully and closed movie file
+==>Inside calcporedist3d library function...
+==>Microstructure file for calculating pore size distribution = /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/HydrationOf-SacciMortar.img.25.000
+==>Microstructure file opened successfully.
+==>Read image header successfully.
+==>Allocated mic memory successfully.
+==>Read microstructure image successfully.
+==>Allocated tmic memory successfully.
+==>Assigned tmic array successfully.
+==>Allocated ndiam memory successfully.
+==>Maxsph = 4945
+==>Allocated xsph memory successfully
+==>Allocated ysph memory successfully
+==>Allocated zsph memory successfully
+==>Allocated pores memory successfully
+==>Loaded pores array successfully
+==>Initialized ndiam array successfully
+=====>nd = 21
+=====>nd = 19
+=====>nd = 17
+=====>nd = 15
+=====>nd = 13
+=====>nd = 11
+=====>nd = 9
+=====>nd = 7
+=====>nd = 5
+=====>nd = 3
+=====>nd = 1
+==>Finished checking all pore pixels
+==>Opened /Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/HydrationOf-SacciMortar.img.25.000.poredist successfully

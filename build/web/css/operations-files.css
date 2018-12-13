@@ -1,0 +1,109 @@
+.list-table {
+	border-collapse: collapse;
+	border: 1px solid #bfbfbf;
+	text-align: left;
+	margin-bottom: 10px;
+}
+
+.list-table td {
+	border-right: 1px solid #bfbfbf;
+	border-left: 1px solid #bfbfbf;
+	padding: 5px 10px;
+	text-indent: 0;
+}
+
+.list-table thead tr {
+	border: 1px solid #bfbfbf;
+}
+
+.list-table th {
+	padding: 5px 10px;
+	text-indent: 0;
+	text-align: center;
+	border: 1px solid #bfbfbf;
+}
+
+.list-table a {
+	color: #2971a7;
+	text-decoration: none;
+}
+
+.list-table a:hover {
+	text-decoration: underline;
+}
+
+.list-table img {
+	border: 1px solid #bfbfbf;
+	padding: 3px;
+	background-color: white;
+}
+
+.even-running-operation {
+	background-color: #e5ffe5;
+}
+
+.odd-running-operation {
+	background-color: #f9fff9;
+}
+
+.even-finished-operation {
+	background-color: #e5f1ff;
+}
+
+.odd-finished-operation {
+	background-color: #f9fcff;
+}
+
+.even-cancelled-operation {
+	background-color: #ffe5e5;
+}
+
+.odd-cancelled-operation {
+	background-color: #fff9f9;
+}
+
+.even-queued-operation {
+	background-color: #feffe5;
+}
+
+.odd-queued-operation {
+	background-color: #fefff9;
+}
+
+.even-file {
+	background-color: #ecf3ff;
+}
+
+.odd-file {
+	background-color: #fff;
+}
+
+.file-text-area {
+	white-space: pre;
+	overflow: auto;
+	width: 400px;
+	height: 5em;
+	border: 1px solid #bfbfbf;
+	margin-top: 5px;
+	padding: 5px;
+	background-color: white;
+}
+
+.legend {
+	width: 800px;
+	border: 1px solid #bfbfbf;
+	padding: 10px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.legend-item {
+	width: 100px;
+	text-align: center;
+	float: left;
+}
+
+.legend-title {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}

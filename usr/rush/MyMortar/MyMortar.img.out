@@ -1,0 +1,3094 @@
+
+Made it into genmicEnter random number seed value (a negative integer) 
+-1848 
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+2 
+Enter X dimension of system 
+100
+Enter Y dimension of system 
+100
+Enter Z dimension of system 
+100
+Enter system resolution (micrometers per pixel) 
+1.00
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+6 
+
+Placing one-pixel slab at x = 50
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+3 
+Add all SPHERES (0), all REAL-SHAPE (1), or MIXED (2)  particles? 0
+Enter the binder SOLID volume fraction: 
+0.257500
+Enter the binder WATER volume fraction: 
+0.372800
+Enter number of solid binder phases to add: 
+5
+Enter phase id to add: 
+7
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.017123
+Will need to enter 6995 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 7 particles in size class 0: 
+0.098241
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 7 particles in size class 1: 
+0.061239
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 7 particles in size class 2: 
+0.048684
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 7 particles in size class 3: 
+0.040563
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 7 particles in size class 4: 
+0.035377
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 7 particles in size class 5: 
+0.032199
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 7 particles in size class 6: 
+0.029597
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 7 particles in size class 7: 
+0.027962
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 7 particles in size class 8: 
+0.026756
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 7 particles in size class 9: 
+0.025860
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 7 particles in size class 10: 
+0.024936
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 7 particles in size class 11: 
+0.024356
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 7 particles in size class 12: 
+0.023938
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 7 particles in size class 13: 
+0.023094
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 7 particles in size class 14: 
+0.022717
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 7 particles in size class 15: 
+0.021995
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 7 particles in size class 16: 
+0.021498
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 7 particles in size class 17: 
+0.020668
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 7 particles in size class 18: 
+0.020420
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 7 particles in size class 19: 
+0.019031
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 7 particles in size class 20: 
+0.019031
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 7 particles in size class 21: 
+0.017786
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 7 particles in size class 22: 
+0.017086
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 7 particles in size class 23: 
+0.017086
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 7 particles in size class 24: 
+0.015320
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 7 particles in size class 25: 
+0.014885
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 7 particles in size class 26: 
+0.014885
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 7 particles in size class 27: 
+0.013487
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 7 particles in size class 28: 
+0.012540
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 7 particles in size class 29: 
+0.012540
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 7 particles in size class 30: 
+0.012540
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 7 particles in size class 31: 
+0.183683
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 0
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 0
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 1
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 1
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 1
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 3
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 5
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 18
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 54
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 687
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 2683
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 1285
+Extra pixels (cumulative) = 1285
+Target pixels in size class 1 = 88
+Extra pixels (cumulative) = 1373
+Target pixels in size class 2 = 88
+Extra pixels (cumulative) = 1461
+Target pixels in size class 3 = 88
+Extra pixels (cumulative) = 1549
+Target pixels in size class 4 = 94
+Extra pixels (cumulative) = 1643
+Target pixels in size class 5 = 104
+Extra pixels (cumulative) = 1747
+Target pixels in size class 6 = 104
+Extra pixels (cumulative) = 1851
+Target pixels in size class 7 = 107
+Extra pixels (cumulative) = 1958
+Target pixels in size class 8 = 120
+Extra pixels (cumulative) = 2078
+Target pixels in size class 9 = 120
+Extra pixels (cumulative) = 2198
+Target pixels in size class 10 = 124
+Extra pixels (cumulative) = 2322
+Target pixels in size class 11 = 133
+Extra pixels (cumulative) = 2455
+Target pixels in size class 12 = 133
+Extra pixels (cumulative) = 2588
+Target pixels in size class 13 = 143
+Extra pixels (cumulative) = 2731
+Target pixels in size class 14 = 145
+Extra pixels (cumulative) = 2876
+Target pixels in size class 15 = 150
+Extra pixels (cumulative) = 3026
+Reduced number of particles in size class 15 by 1
+Target pixels in size class 16 = 154
+Extra pixels (cumulative) = 627
+Target pixels in size class 17 = 159
+Extra pixels (cumulative) = 786
+Target pixels in size class 18 = 162
+Extra pixels (cumulative) = 948
+Target pixels in size class 19 = 167
+Extra pixels (cumulative) = 1115
+Target pixels in size class 20 = 170
+Extra pixels (cumulative) = 1285
+Reduced number of particles in size class 20 by 1
+Target pixels in size class 21 = 174
+Extra pixels (cumulative) = 371
+Target pixels in size class 22 = 181
+Extra pixels (cumulative) = 552
+Target pixels in size class 23 = 187
+Extra pixels (cumulative) = 739
+Reduced number of particles in size class 23 by 1
+Target pixels in size class 24 = 196
+Extra pixels (cumulative) = 186
+Target pixels in size class 25 = 207
+Extra pixels (cumulative) = 214
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 225
+Extra pixels (cumulative) = 100
+Target pixels in size class 27 = 247
+Extra pixels (cumulative) = 104
+Reduced number of particles in size class 27 by 1
+Target pixels in size class 28 = 284
+Extra pixels (cumulative) = 27
+Target pixels in size class 29 = 341
+Extra pixels (cumulative) = 26
+Reduced number of particles in size class 29 by 1
+Target pixels in size class 30 = 428
+Extra pixels (cumulative) = 3
+Enter phase id to add: 
+1
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.886986
+Will need to enter 362365 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 1 particles in size class 0: 
+0.098241
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 1 particles in size class 1: 
+0.061239
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 1 particles in size class 2: 
+0.048684
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 1 particles in size class 3: 
+0.040563
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 1 particles in size class 4: 
+0.035377
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 1 particles in size class 5: 
+0.032199
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 1 particles in size class 6: 
+0.029597
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 1 particles in size class 7: 
+0.027962
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 1 particles in size class 8: 
+0.026756
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 1 particles in size class 9: 
+0.025860
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 1 particles in size class 10: 
+0.024936
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 1 particles in size class 11: 
+0.024356
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 1 particles in size class 12: 
+0.023938
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 1 particles in size class 13: 
+0.023094
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 1 particles in size class 14: 
+0.022717
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 1 particles in size class 15: 
+0.021995
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 1 particles in size class 16: 
+0.021498
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 1 particles in size class 17: 
+0.020668
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 1 particles in size class 18: 
+0.020420
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 1 particles in size class 19: 
+0.019031
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 1 particles in size class 20: 
+0.019031
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 1 particles in size class 21: 
+0.017786
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 1 particles in size class 22: 
+0.017086
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 1 particles in size class 23: 
+0.017086
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 1 particles in size class 24: 
+0.015320
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 1 particles in size class 25: 
+0.014885
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 1 particles in size class 26: 
+0.014885
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 1 particles in size class 27: 
+0.013487
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 1 particles in size class 28: 
+0.012540
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 1 particles in size class 29: 
+0.012540
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 1 particles in size class 30: 
+0.012540
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 1 particles in size class 31: 
+0.183683
+Number of particles of diameter 32.000000 = 4
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 1
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 1
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 1
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 1
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 1
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 1
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 1
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 1
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 2
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 2
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 3
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 3
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 5
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 5
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 7
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 8
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 12
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 14
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 25
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 28
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 60
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 73
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 158
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 262
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 929
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 2774
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 35599
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 361668
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 66560
+Extra pixels (cumulative) = -8064
+Target pixels in size class 1 = 4544
+Extra pixels (cumulative) = -3520
+Target pixels in size class 2 = 4544
+Extra pixels (cumulative) = 1024
+Target pixels in size class 3 = 4544
+Extra pixels (cumulative) = 5568
+Target pixels in size class 4 = 4887
+Extra pixels (cumulative) = 10455
+Target pixels in size class 5 = 5394
+Extra pixels (cumulative) = 5454
+Target pixels in size class 6 = 5394
+Extra pixels (cumulative) = 704
+Target pixels in size class 7 = 5552
+Extra pixels (cumulative) = -1961
+Target pixels in size class 8 = 6191
+Extra pixels (cumulative) = -3914
+Target pixels in size class 9 = 6191
+Extra pixels (cumulative) = -4126
+Target pixels in size class 10 = 6445
+Extra pixels (cumulative) = -3953
+Target pixels in size class 11 = 6896
+Extra pixels (cumulative) = -2002
+Target pixels in size class 12 = 6896
+Extra pixels (cumulative) = 118
+Target pixels in size class 13 = 7399
+Extra pixels (cumulative) = 127
+Target pixels in size class 14 = 7490
+Extra pixels (cumulative) = 529
+Target pixels in size class 15 = 7790
+Extra pixels (cumulative) = 660
+Target pixels in size class 16 = 7970
+Extra pixels (cumulative) = 1094
+Target pixels in size class 17 = 8232
+Extra pixels (cumulative) = 371
+Target pixels in size class 18 = 8368
+Extra pixels (cumulative) = 59
+Target pixels in size class 19 = 8674
+Extra pixels (cumulative) = 410
+Target pixels in size class 20 = 8826
+Extra pixels (cumulative) = 532
+Target pixels in size class 21 = 9036
+Extra pixels (cumulative) = 700
+Target pixels in size class 22 = 9371
+Extra pixels (cumulative) = 663
+Target pixels in size class 23 = 9695
+Extra pixels (cumulative) = 633
+Reduced number of particles in size class 23 by 1
+Target pixels in size class 24 = 10133
+Extra pixels (cumulative) = 297
+Target pixels in size class 25 = 10725
+Extra pixels (cumulative) = 282
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 11668
+Extra pixels (cumulative) = 91
+Target pixels in size class 27 = 12819
+Extra pixels (cumulative) = 112
+Reduced number of particles in size class 27 by 1
+Target pixels in size class 28 = 14699
+Extra pixels (cumulative) = 58
+Reduced number of particles in size class 28 by 1
+Target pixels in size class 29 = 17642
+Extra pixels (cumulative) = -7
+Target pixels in size class 30 = 22191
+Extra pixels (cumulative) = -8
+Enter phase id to add: 
+8
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.035562
+Will need to enter 14528 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 8 particles in size class 0: 
+0.098241
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 8 particles in size class 1: 
+0.061239
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 8 particles in size class 2: 
+0.048684
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 8 particles in size class 3: 
+0.040563
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 8 particles in size class 4: 
+0.035377
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 8 particles in size class 5: 
+0.032199
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 8 particles in size class 6: 
+0.029597
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 8 particles in size class 7: 
+0.027962
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 8 particles in size class 8: 
+0.026756
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 8 particles in size class 9: 
+0.025860
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 8 particles in size class 10: 
+0.024936
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 8 particles in size class 11: 
+0.024356
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 8 particles in size class 12: 
+0.023938
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 8 particles in size class 13: 
+0.023094
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 8 particles in size class 14: 
+0.022717
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 8 particles in size class 15: 
+0.021995
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 8 particles in size class 16: 
+0.021498
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 8 particles in size class 17: 
+0.020668
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 8 particles in size class 18: 
+0.020420
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 8 particles in size class 19: 
+0.019031
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 8 particles in size class 20: 
+0.019031
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 8 particles in size class 21: 
+0.017786
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 8 particles in size class 22: 
+0.017086
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 8 particles in size class 23: 
+0.017086
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 8 particles in size class 24: 
+0.015320
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 8 particles in size class 25: 
+0.014885
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 8 particles in size class 26: 
+0.014885
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 8 particles in size class 27: 
+0.013487
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 8 particles in size class 28: 
+0.012540
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 8 particles in size class 29: 
+0.012540
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 8 particles in size class 30: 
+0.012540
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 8 particles in size class 31: 
+0.183683
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 1
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 1
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 1
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 2
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 3
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 6
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 11
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 37
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 111
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 1427
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 6379
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 2669
+Extra pixels (cumulative) = 2669
+Target pixels in size class 1 = 182
+Extra pixels (cumulative) = 2851
+Target pixels in size class 2 = 182
+Extra pixels (cumulative) = 3033
+Target pixels in size class 3 = 182
+Extra pixels (cumulative) = 3215
+Target pixels in size class 4 = 196
+Extra pixels (cumulative) = 3411
+Target pixels in size class 5 = 216
+Extra pixels (cumulative) = 3627
+Target pixels in size class 6 = 216
+Extra pixels (cumulative) = 3843
+Target pixels in size class 7 = 223
+Extra pixels (cumulative) = 4066
+Target pixels in size class 8 = 248
+Extra pixels (cumulative) = 4314
+Target pixels in size class 9 = 248
+Extra pixels (cumulative) = 4562
+Target pixels in size class 10 = 258
+Extra pixels (cumulative) = 4820
+Target pixels in size class 11 = 276
+Extra pixels (cumulative) = 5096
+Reduced number of particles in size class 11 by 1
+Target pixels in size class 12 = 276
+Extra pixels (cumulative) = 427
+Target pixels in size class 13 = 297
+Extra pixels (cumulative) = 724
+Target pixels in size class 14 = 300
+Extra pixels (cumulative) = 1024
+Target pixels in size class 15 = 312
+Extra pixels (cumulative) = 1336
+Target pixels in size class 16 = 320
+Extra pixels (cumulative) = 1656
+Target pixels in size class 17 = 330
+Extra pixels (cumulative) = 1986
+Reduced number of particles in size class 17 by 1
+Target pixels in size class 18 = 336
+Extra pixels (cumulative) = 531
+Target pixels in size class 19 = 348
+Extra pixels (cumulative) = 879
+Target pixels in size class 20 = 354
+Extra pixels (cumulative) = 1233
+Reduced number of particles in size class 20 by 1
+Target pixels in size class 21 = 362
+Extra pixels (cumulative) = 507
+Target pixels in size class 22 = 376
+Extra pixels (cumulative) = 211
+Target pixels in size class 23 = 389
+Extra pixels (cumulative) = 211
+Target pixels in size class 24 = 406
+Extra pixels (cumulative) = 257
+Target pixels in size class 25 = 430
+Extra pixels (cumulative) = 329
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 468
+Extra pixels (cumulative) = 138
+Target pixels in size class 27 = 514
+Extra pixels (cumulative) = 166
+Reduced number of particles in size class 27 by 2
+Target pixels in size class 28 = 589
+Extra pixels (cumulative) = -23
+Target pixels in size class 29 = 707
+Extra pixels (cumulative) = -19
+Target pixels in size class 30 = 890
+Extra pixels (cumulative) = -17
+Reduced number of particles in size class 30 by -2
+Enter phase id to add: 
+9
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.001129
+Will need to enter 461 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 9 particles in size class 0: 
+0.098241
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 9 particles in size class 1: 
+0.061239
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 9 particles in size class 2: 
+0.048684
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 9 particles in size class 3: 
+0.040563
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 9 particles in size class 4: 
+0.035377
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 9 particles in size class 5: 
+0.032199
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 9 particles in size class 6: 
+0.029597
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 9 particles in size class 7: 
+0.027962
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 9 particles in size class 8: 
+0.026756
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 9 particles in size class 9: 
+0.025860
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 9 particles in size class 10: 
+0.024936
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 9 particles in size class 11: 
+0.024356
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 9 particles in size class 12: 
+0.023938
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 9 particles in size class 13: 
+0.023094
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 9 particles in size class 14: 
+0.022717
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 9 particles in size class 15: 
+0.021995
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 9 particles in size class 16: 
+0.021498
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 9 particles in size class 17: 
+0.020668
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 9 particles in size class 18: 
+0.020420
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 9 particles in size class 19: 
+0.019031
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 9 particles in size class 20: 
+0.019031
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 9 particles in size class 21: 
+0.017786
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 9 particles in size class 22: 
+0.017086
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 9 particles in size class 23: 
+0.017086
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 9 particles in size class 24: 
+0.015320
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 9 particles in size class 25: 
+0.014885
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 9 particles in size class 26: 
+0.014885
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 9 particles in size class 27: 
+0.013487
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 9 particles in size class 28: 
+0.012540
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 9 particles in size class 29: 
+0.012540
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 9 particles in size class 30: 
+0.012540
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 9 particles in size class 31: 
+0.183683
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 0
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 0
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 0
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 0
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 0
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 0
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 0
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 1
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 4
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 45
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 96
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 85
+Extra pixels (cumulative) = 85
+Target pixels in size class 1 = 6
+Extra pixels (cumulative) = 91
+Target pixels in size class 2 = 6
+Extra pixels (cumulative) = 97
+Target pixels in size class 3 = 6
+Extra pixels (cumulative) = 103
+Target pixels in size class 4 = 6
+Extra pixels (cumulative) = 109
+Target pixels in size class 5 = 7
+Extra pixels (cumulative) = 116
+Target pixels in size class 6 = 7
+Extra pixels (cumulative) = 123
+Target pixels in size class 7 = 7
+Extra pixels (cumulative) = 130
+Target pixels in size class 8 = 8
+Extra pixels (cumulative) = 138
+Target pixels in size class 9 = 8
+Extra pixels (cumulative) = 146
+Target pixels in size class 10 = 8
+Extra pixels (cumulative) = 154
+Target pixels in size class 11 = 9
+Extra pixels (cumulative) = 163
+Target pixels in size class 12 = 9
+Extra pixels (cumulative) = 172
+Target pixels in size class 13 = 9
+Extra pixels (cumulative) = 181
+Target pixels in size class 14 = 10
+Extra pixels (cumulative) = 191
+Target pixels in size class 15 = 10
+Extra pixels (cumulative) = 201
+Target pixels in size class 16 = 10
+Extra pixels (cumulative) = 211
+Target pixels in size class 17 = 10
+Extra pixels (cumulative) = 221
+Target pixels in size class 18 = 11
+Extra pixels (cumulative) = 232
+Target pixels in size class 19 = 11
+Extra pixels (cumulative) = 243
+Target pixels in size class 20 = 11
+Extra pixels (cumulative) = 254
+Target pixels in size class 21 = 11
+Extra pixels (cumulative) = 265
+Target pixels in size class 22 = 12
+Extra pixels (cumulative) = 277
+Target pixels in size class 23 = 12
+Extra pixels (cumulative) = 289
+Target pixels in size class 24 = 13
+Extra pixels (cumulative) = 302
+Target pixels in size class 25 = 14
+Extra pixels (cumulative) = 316
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 15
+Extra pixels (cumulative) = 152
+Target pixels in size class 27 = 16
+Extra pixels (cumulative) = 168
+Reduced number of particles in size class 27 by 2
+Target pixels in size class 28 = 19
+Extra pixels (cumulative) = 25
+Target pixels in size class 29 = 22
+Extra pixels (cumulative) = 28
+Reduced number of particles in size class 29 by 1
+Target pixels in size class 30 = 28
+Extra pixels (cumulative) = 5
+Enter phase id to add: 
+33
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.059200
+Will need to enter 24185 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 33 particles in size class 0: 
+0.070795
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 33 particles in size class 1: 
+0.062251
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 33 particles in size class 2: 
+0.059134
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 33 particles in size class 3: 
+0.050176
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 33 particles in size class 4: 
+0.042244
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 33 particles in size class 5: 
+0.037283
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 33 particles in size class 6: 
+0.033598
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 33 particles in size class 7: 
+0.031597
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 33 particles in size class 8: 
+0.030274
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 33 particles in size class 9: 
+0.029351
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 33 particles in size class 10: 
+0.028376
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 33 particles in size class 11: 
+0.027689
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 33 particles in size class 12: 
+0.027180
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 33 particles in size class 13: 
+0.026051
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 33 particles in size class 14: 
+0.025521
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 33 particles in size class 15: 
+0.024508
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 33 particles in size class 16: 
+0.023809
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 33 particles in size class 17: 
+0.022644
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 33 particles in size class 18: 
+0.022304
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 33 particles in size class 19: 
+0.020404
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 33 particles in size class 20: 
+0.020404
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 33 particles in size class 21: 
+0.018750
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 33 particles in size class 22: 
+0.017820
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 33 particles in size class 23: 
+0.017820
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 33 particles in size class 24: 
+0.015554
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 33 particles in size class 25: 
+0.014994
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 33 particles in size class 26: 
+0.014994
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 33 particles in size class 27: 
+0.013273
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 33 particles in size class 28: 
+0.012107
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 33 particles in size class 29: 
+0.012107
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 33 particles in size class 30: 
+0.012107
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 33 particles in size class 31: 
+0.134883
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 1
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 1
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 1
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 1
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 2
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 2
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 5
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 6
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 13
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 22
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 75
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 188
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 1712
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 13967
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 3262
+Extra pixels (cumulative) = 3262
+Target pixels in size class 1 = 293
+Extra pixels (cumulative) = 3555
+Target pixels in size class 2 = 293
+Extra pixels (cumulative) = 3848
+Target pixels in size class 3 = 293
+Extra pixels (cumulative) = 4141
+Target pixels in size class 4 = 321
+Extra pixels (cumulative) = 4462
+Target pixels in size class 5 = 363
+Extra pixels (cumulative) = 4825
+Target pixels in size class 6 = 363
+Extra pixels (cumulative) = 5188
+Target pixels in size class 7 = 376
+Extra pixels (cumulative) = 5564
+Target pixels in size class 8 = 431
+Extra pixels (cumulative) = 5995
+Target pixels in size class 9 = 431
+Extra pixels (cumulative) = 6426
+Reduced number of particles in size class 9 by 1
+Target pixels in size class 10 = 453
+Extra pixels (cumulative) = 476
+Target pixels in size class 11 = 493
+Extra pixels (cumulative) = 969
+Target pixels in size class 12 = 493
+Extra pixels (cumulative) = 1462
+Target pixels in size class 13 = 539
+Extra pixels (cumulative) = 2001
+Target pixels in size class 14 = 548
+Extra pixels (cumulative) = 2549
+Target pixels in size class 15 = 576
+Extra pixels (cumulative) = 3125
+Reduced number of particles in size class 15 by 1
+Target pixels in size class 16 = 593
+Extra pixels (cumulative) = 1165
+Target pixels in size class 17 = 617
+Extra pixels (cumulative) = 1782
+Target pixels in size class 18 = 630
+Extra pixels (cumulative) = 2412
+Reduced number of particles in size class 18 by 1
+Target pixels in size class 19 = 657
+Extra pixels (cumulative) = 144
+Target pixels in size class 20 = 670
+Extra pixels (cumulative) = -274
+Target pixels in size class 21 = 686
+Extra pixels (cumulative) = -327
+Target pixels in size class 22 = 710
+Extra pixels (cumulative) = -289
+Target pixels in size class 23 = 732
+Extra pixels (cumulative) = -335
+Target pixels in size class 24 = 764
+Extra pixels (cumulative) = -291
+Target pixels in size class 25 = 813
+Extra pixels (cumulative) = -373
+Reduced number of particles in size class 25 by -2
+Target pixels in size class 26 = 902
+Extra pixels (cumulative) = -73
+Target pixels in size class 27 = 1022
+Extra pixels (cumulative) = -104
+Reduced number of particles in size class 27 by -1
+Target pixels in size class 28 = 1214
+Extra pixels (cumulative) = -41
+Target pixels in size class 29 = 1430
+Extra pixels (cumulative) = -36
+Reduced number of particles in size class 29 by -1
+Target pixels in size class 30 = 1506
+Extra pixels (cumulative) = -15
+Reduced number of particles in size class 30 by -1
+Enter dispersion factor (separation distance in pixels) for spheres (0-2)
+0 corresponds to totally random placement
+0 
+Enter probability for gypsum particles on a random particle basis (0.0-1.0) 
+0.000000 
+Enter probability for hemihydrate form of gypsum (0.0-1.0)
+0.000000
+Enter probability for anhydrite form of gypsum (0.0-1.0)
+0.000000
+Going to place 4 particles of phase 1, size 16.000000
+Going to place 1 particles of phase 1, size 13.500000
+Going to place 1 particles of phase 1, size 13.000000
+Going to place 1 particles of phase 1, size 12.500000
+Going to place 1 particles of phase 1, size 12.000000
+Going to place 1 particles of phase 1, size 11.500000
+Going to place 1 particles of phase 33, size 11.500000
+Going to place 1 particles of phase 1, size 11.000000
+Going to place 1 particles of phase 8, size 10.500000
+Going to place 1 particles of phase 1, size 10.500000
+Going to place 1 particles of phase 1, size 10.000000
+Going to place 2 particles of phase 1, size 9.500000
+Going to place 2 particles of phase 1, size 9.000000
+Going to place 3 particles of phase 1, size 8.500000
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 7, size 8.500000
+Going to place 1 particles of phase 33, size 8.500000
+Going to place 3 particles of phase 1, size 8.000000
+Going to place 5 particles of phase 1, size 7.500000
+Going to place 1 particles of phase 8, size 7.500000
+Going to place 5 particles of phase 1, size 7.000000
+Going to place 1 particles of phase 33, size 7.000000
+Going to place 7 particles of phase 1, size 6.500000
+Going to place 1 particles of phase 33, size 6.500000
+Going to place 1 particles of phase 7, size 6.000000
+Going to place 1 particles of phase 8, size 6.000000
+Going to place 8 particles of phase 1, size 6.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 33, size 6.000000
+Going to place 12 particles of phase 1, size 5.500000
+Going to place 1 particles of phase 33, size 5.500000
+Going to place 14 particles of phase 1, size 5.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 8, size 5.000000
+Going to place 1 particles of phase 33, size 5.000000
+Going to place 1 particles of phase 7, size 4.500000
+Going to place 1 particles of phase 8, size 4.500000
+Going to place 26 particles of phase 1, size 4.500000
+
+Cannot place a particle with center at 50
+Going to place 2 particles of phase 33, size 4.500000
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 8, size 4.000000
+Going to place 1 particles of phase 7, size 4.000000
+Going to place 28 particles of phase 1, size 4.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 2 particles of phase 33, size 4.000000
+Going to place 2 particles of phase 7, size 3.500000
+Going to place 3 particles of phase 8, size 3.500000
+Going to place 1 particles of phase 9, size 3.500000
+Going to place 61 particles of phase 1, size 3.500000
+
+Cannot place a particle with center at 50
+Going to place 3 particles of phase 33, size 3.500000
+Going to place 3 particles of phase 8, size 3.000000
+Going to place 1 particles of phase 7, size 3.000000
+Going to place 73 particles of phase 1, size 3.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 6 particles of phase 33, size 3.000000
+Going to place 2 particles of phase 9, size 2.500000
+Going to place 4 particles of phase 7, size 2.500000
+Going to place 8 particles of phase 8, size 2.500000
+Going to place 159 particles of phase 1, size 2.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 12 particles of phase 33, size 2.500000
+Going to place 11 particles of phase 8, size 2.000000
+Going to place 5 particles of phase 7, size 2.000000
+Going to place 263 particles of phase 1, size 2.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 22 particles of phase 33, size 2.000000
+Going to place 929 particles of phase 1, size 1.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 19 particles of phase 7, size 1.500000
+
+Cannot place a particle with center at 50
+Going to place 2 particles of phase 9, size 1.500000
+Going to place 37 particles of phase 8, size 1.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 74 particles of phase 33, size 1.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 109 particles of phase 8, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 4 particles of phase 9, size 1.000000
+
+Cannot place a particle with center at 50
+Going to place 54 particles of phase 7, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 2774 particles of phase 1, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 187 particles of phase 33, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+9 
+Enter path/root name of cement correlation files
+/Users/bullard/vcctl/usr/rush/MyMortar/cement151
+vvvvv
+In rand3d, line 5692:  filecorr = /Users/bullard/vcctl/usr/rush/MyMortar/cement151.sil, nskip = 0
+In rand3d, line 5969:  instring = 60
+In rand3d, line 5971:  ido = 60
+In rand3d, line 5982, Fsize = 31
+In rand3d, line 5985, i = 0 of 60:  instring = 0
+In rand3d, line 5987:  valin = 0
+In rand3d, line 5989, i = 0 of 60:  instring = 0.377157
+In rand3d, line 5991:  val2 = 0.377157
+In rand3d, line 5985, i = 1 of 60:  instring = 1
+In rand3d, line 5987:  valin = 1
+In rand3d, line 5989, i = 1 of 60:  instring = 0.242224
+In rand3d, line 5991:  val2 = 0.242224
+In rand3d, line 5985, i = 2 of 60:  instring = 2
+In rand3d, line 5987:  valin = 2
+In rand3d, line 5989, i = 2 of 60:  instring = 0.197761
+In rand3d, line 5991:  val2 = 0.197761
+In rand3d, line 5985, i = 3 of 60:  instring = 3
+In rand3d, line 5987:  valin = 3
+In rand3d, line 5989, i = 3 of 60:  instring = 0.175307
+In rand3d, line 5991:  val2 = 0.175307
+In rand3d, line 5985, i = 4 of 60:  instring = 4
+In rand3d, line 5987:  valin = 4
+In rand3d, line 5989, i = 4 of 60:  instring = 0.162290
+In rand3d, line 5991:  val2 = 0.162290
+In rand3d, line 5985, i = 5 of 60:  instring = 5
+In rand3d, line 5987:  valin = 5
+In rand3d, line 5989, i = 5 of 60:  instring = 0.154663
+In rand3d, line 5991:  val2 = 0.154663
+In rand3d, line 5985, i = 6 of 60:  instring = 6
+In rand3d, line 5987:  valin = 6
+In rand3d, line 5989, i = 6 of 60:  instring = 0.151020
+In rand3d, line 5991:  val2 = 0.151020
+In rand3d, line 5985, i = 7 of 60:  instring = 7
+In rand3d, line 5987:  valin = 7
+In rand3d, line 5989, i = 7 of 60:  instring = 0.148050
+In rand3d, line 5991:  val2 = 0.148050
+In rand3d, line 5985, i = 8 of 60:  instring = 8
+In rand3d, line 5987:  valin = 8
+In rand3d, line 5989, i = 8 of 60:  instring = 0.146421
+In rand3d, line 5991:  val2 = 0.146421
+In rand3d, line 5985, i = 9 of 60:  instring = 9
+In rand3d, line 5987:  valin = 9
+In rand3d, line 5989, i = 9 of 60:  instring = 0.145114
+In rand3d, line 5991:  val2 = 0.145114
+In rand3d, line 5985, i = 10 of 60:  instring = 10
+In rand3d, line 5987:  valin = 10
+In rand3d, line 5989, i = 10 of 60:  instring = 0.144444
+In rand3d, line 5991:  val2 = 0.144444
+In rand3d, line 5985, i = 11 of 60:  instring = 11
+In rand3d, line 5987:  valin = 11
+In rand3d, line 5989, i = 11 of 60:  instring = 0.143704
+In rand3d, line 5991:  val2 = 0.143704
+In rand3d, line 5985, i = 12 of 60:  instring = 12
+In rand3d, line 5987:  valin = 12
+In rand3d, line 5989, i = 12 of 60:  instring = 0.143082
+In rand3d, line 5991:  val2 = 0.143082
+In rand3d, line 5985, i = 13 of 60:  instring = 13
+In rand3d, line 5987:  valin = 13
+In rand3d, line 5989, i = 13 of 60:  instring = 0.143110
+In rand3d, line 5991:  val2 = 0.143110
+In rand3d, line 5985, i = 14 of 60:  instring = 14
+In rand3d, line 5987:  valin = 14
+In rand3d, line 5989, i = 14 of 60:  instring = 0.142984
+In rand3d, line 5991:  val2 = 0.142984
+In rand3d, line 5985, i = 15 of 60:  instring = 15
+In rand3d, line 5987:  valin = 15
+In rand3d, line 5989, i = 15 of 60:  instring = 0.142361
+In rand3d, line 5991:  val2 = 0.142361
+In rand3d, line 5985, i = 16 of 60:  instring = 16
+In rand3d, line 5987:  valin = 16
+In rand3d, line 5989, i = 16 of 60:  instring = 0.141946
+In rand3d, line 5991:  val2 = 0.141946
+In rand3d, line 5985, i = 17 of 60:  instring = 17
+In rand3d, line 5987:  valin = 17
+In rand3d, line 5989, i = 17 of 60:  instring = 0.142068
+In rand3d, line 5991:  val2 = 0.142068
+In rand3d, line 5985, i = 18 of 60:  instring = 18
+In rand3d, line 5987:  valin = 18
+In rand3d, line 5989, i = 18 of 60:  instring = 0.142105
+In rand3d, line 5991:  val2 = 0.142105
+In rand3d, line 5985, i = 19 of 60:  instring = 19
+In rand3d, line 5987:  valin = 19
+In rand3d, line 5989, i = 19 of 60:  instring = 0.141849
+In rand3d, line 5991:  val2 = 0.141849
+In rand3d, line 5985, i = 20 of 60:  instring = 20
+In rand3d, line 5987:  valin = 20
+In rand3d, line 5989, i = 20 of 60:  instring = 0.141764
+In rand3d, line 5991:  val2 = 0.141764
+In rand3d, line 5985, i = 21 of 60:  instring = 21
+In rand3d, line 5987:  valin = 21
+In rand3d, line 5989, i = 21 of 60:  instring = 0.141711
+In rand3d, line 5991:  val2 = 0.141711
+In rand3d, line 5985, i = 22 of 60:  instring = 22
+In rand3d, line 5987:  valin = 22
+In rand3d, line 5989, i = 22 of 60:  instring = 0.142002
+In rand3d, line 5991:  val2 = 0.142002
+In rand3d, line 5985, i = 23 of 60:  instring = 23
+In rand3d, line 5987:  valin = 23
+In rand3d, line 5989, i = 23 of 60:  instring = 0.142304
+In rand3d, line 5991:  val2 = 0.142304
+In rand3d, line 5985, i = 24 of 60:  instring = 24
+In rand3d, line 5987:  valin = 24
+In rand3d, line 5989, i = 24 of 60:  instring = 0.142353
+In rand3d, line 5991:  val2 = 0.142353
+In rand3d, line 5985, i = 25 of 60:  instring = 25
+In rand3d, line 5987:  valin = 25
+In rand3d, line 5989, i = 25 of 60:  instring = 0.142301
+In rand3d, line 5991:  val2 = 0.142301
+In rand3d, line 5985, i = 26 of 60:  instring = 26
+In rand3d, line 5987:  valin = 26
+In rand3d, line 5989, i = 26 of 60:  instring = 0.142288
+In rand3d, line 5991:  val2 = 0.142288
+In rand3d, line 5985, i = 27 of 60:  instring = 27
+In rand3d, line 5987:  valin = 27
+In rand3d, line 5989, i = 27 of 60:  instring = 0.142436
+In rand3d, line 5991:  val2 = 0.142436
+In rand3d, line 5985, i = 28 of 60:  instring = 28
+In rand3d, line 5987:  valin = 28
+In rand3d, line 5989, i = 28 of 60:  instring = 0.142664
+In rand3d, line 5991:  val2 = 0.142664
+In rand3d, line 5985, i = 29 of 60:  instring = 29
+In rand3d, line 5987:  valin = 29
+In rand3d, line 5989, i = 29 of 60:  instring = 0.142944
+In rand3d, line 5991:  val2 = 0.142944
+In rand3d, line 5985, i = 30 of 60:  instring = 30
+In rand3d, line 5987:  valin = 30
+In rand3d, line 5989, i = 30 of 60:  instring = 0.142967
+In rand3d, line 5991:  val2 = 0.142967
+In rand3d, line 5985, i = 31 of 60:  instring = 31
+In rand3d, line 5987:  valin = 31
+In rand3d, line 5989, i = 31 of 60:  instring = 0.143092
+In rand3d, line 5991:  val2 = 0.143092
+In rand3d, line 5985, i = 32 of 60:  instring = 32
+In rand3d, line 5987:  valin = 32
+In rand3d, line 5989, i = 32 of 60:  instring = 0.143138
+In rand3d, line 5991:  val2 = 0.143138
+In rand3d, line 5985, i = 33 of 60:  instring = 33
+In rand3d, line 5987:  valin = 33
+In rand3d, line 5989, i = 33 of 60:  instring = 0.143268
+In rand3d, line 5991:  val2 = 0.143268
+In rand3d, line 5985, i = 34 of 60:  instring = 34
+In rand3d, line 5987:  valin = 34
+In rand3d, line 5989, i = 34 of 60:  instring = 0.143375
+In rand3d, line 5991:  val2 = 0.143375
+In rand3d, line 5985, i = 35 of 60:  instring = 35
+In rand3d, line 5987:  valin = 35
+In rand3d, line 5989, i = 35 of 60:  instring = 0.143575
+In rand3d, line 5991:  val2 = 0.143575
+In rand3d, line 5985, i = 36 of 60:  instring = 36
+In rand3d, line 5987:  valin = 36
+In rand3d, line 5989, i = 36 of 60:  instring = 0.143837
+In rand3d, line 5991:  val2 = 0.143837
+In rand3d, line 5985, i = 37 of 60:  instring = 37
+In rand3d, line 5987:  valin = 37
+In rand3d, line 5989, i = 37 of 60:  instring = 0.144430
+In rand3d, line 5991:  val2 = 0.144430
+In rand3d, line 5985, i = 38 of 60:  instring = 38
+In rand3d, line 5987:  valin = 38
+In rand3d, line 5989, i = 38 of 60:  instring = 0.145203
+In rand3d, line 5991:  val2 = 0.145203
+In rand3d, line 5985, i = 39 of 60:  instring = 39
+In rand3d, line 5987:  valin = 39
+In rand3d, line 5989, i = 39 of 60:  instring = 0.145749
+In rand3d, line 5991:  val2 = 0.145749
+In rand3d, line 5985, i = 40 of 60:  instring = 40
+In rand3d, line 5987:  valin = 40
+In rand3d, line 5989, i = 40 of 60:  instring = 0.145825
+In rand3d, line 5991:  val2 = 0.145825
+In rand3d, line 5985, i = 41 of 60:  instring = 41
+In rand3d, line 5987:  valin = 41
+In rand3d, line 5989, i = 41 of 60:  instring = 0.145840
+In rand3d, line 5991:  val2 = 0.145840
+In rand3d, line 5985, i = 42 of 60:  instring = 42
+In rand3d, line 5987:  valin = 42
+In rand3d, line 5989, i = 42 of 60:  instring = 0.145863
+In rand3d, line 5991:  val2 = 0.145863
+In rand3d, line 5985, i = 43 of 60:  instring = 43
+In rand3d, line 5987:  valin = 43
+In rand3d, line 5989, i = 43 of 60:  instring = 0.145874
+In rand3d, line 5991:  val2 = 0.145874
+In rand3d, line 5985, i = 44 of 60:  instring = 44
+In rand3d, line 5987:  valin = 44
+In rand3d, line 5989, i = 44 of 60:  instring = 0.146024
+In rand3d, line 5991:  val2 = 0.146024
+In rand3d, line 5985, i = 45 of 60:  instring = 45
+In rand3d, line 5987:  valin = 45
+In rand3d, line 5989, i = 45 of 60:  instring = 0.146100
+In rand3d, line 5991:  val2 = 0.146100
+In rand3d, line 5985, i = 46 of 60:  instring = 46
+In rand3d, line 5987:  valin = 46
+In rand3d, line 5989, i = 46 of 60:  instring = 0.146160
+In rand3d, line 5991:  val2 = 0.146160
+In rand3d, line 5985, i = 47 of 60:  instring = 47
+In rand3d, line 5987:  valin = 47
+In rand3d, line 5989, i = 47 of 60:  instring = 0.146087
+In rand3d, line 5991:  val2 = 0.146087
+In rand3d, line 5985, i = 48 of 60:  instring = 48
+In rand3d, line 5987:  valin = 48
+In rand3d, line 5989, i = 48 of 60:  instring = 0.145615
+In rand3d, line 5991:  val2 = 0.145615
+In rand3d, line 5985, i = 49 of 60:  instring = 49
+In rand3d, line 5987:  valin = 49
+In rand3d, line 5989, i = 49 of 60:  instring = 0.145441
+In rand3d, line 5991:  val2 = 0.145441
+In rand3d, line 5985, i = 50 of 60:  instring = 50
+In rand3d, line 5987:  valin = 50
+In rand3d, line 5989, i = 50 of 60:  instring = 0.145142
+In rand3d, line 5991:  val2 = 0.145142
+In rand3d, line 5985, i = 51 of 60:  instring = 51
+In rand3d, line 5987:  valin = 51
+In rand3d, line 5989, i = 51 of 60:  instring = 0.144947
+In rand3d, line 5991:  val2 = 0.144947
+In rand3d, line 5985, i = 52 of 60:  instring = 52
+In rand3d, line 5987:  valin = 52
+In rand3d, line 5989, i = 52 of 60:  instring = 0.144817
+In rand3d, line 5991:  val2 = 0.144817
+In rand3d, line 5985, i = 53 of 60:  instring = 53
+In rand3d, line 5987:  valin = 53
+In rand3d, line 5989, i = 53 of 60:  instring = 0.144697
+In rand3d, line 5991:  val2 = 0.144697
+In rand3d, line 5985, i = 54 of 60:  instring = 54
+In rand3d, line 5987:  valin = 54
+In rand3d, line 5989, i = 54 of 60:  instring = 0.144731
+In rand3d, line 5991:  val2 = 0.144731
+In rand3d, line 5985, i = 55 of 60:  instring = 55
+In rand3d, line 5987:  valin = 55
+In rand3d, line 5989, i = 55 of 60:  instring = 0.144921
+In rand3d, line 5991:  val2 = 0.144921
+In rand3d, line 5985, i = 56 of 60:  instring = 56
+In rand3d, line 5987:  valin = 56
+In rand3d, line 5989, i = 56 of 60:  instring = 0.145139
+In rand3d, line 5991:  val2 = 0.145139
+In rand3d, line 5985, i = 57 of 60:  instring = 57
+In rand3d, line 5987:  valin = 57
+In rand3d, line 5989, i = 57 of 60:  instring = 0.145472
+In rand3d, line 5991:  val2 = 0.145472
+In rand3d, line 5985, i = 58 of 60:  instring = 58
+In rand3d, line 5987:  valin = 58
+In rand3d, line 5989, i = 58 of 60:  instring = 0.145415
+In rand3d, line 5991:  val2 = 0.145415
+In rand3d, line 5985, i = 59 of 60:  instring = 59
+In rand3d, line 5987:  valin = 59
+In rand3d, line 5989, i = 59 of 60:  instring = 0.145336
+In rand3d, line 5991:  val2 = 0.145336
+vvvvv
+In rand3d, line 5692:  filecorr = /Users/bullard/vcctl/usr/rush/MyMortar/cement151.c3s, nskip = 0
+In rand3d, line 5969:  instring = 60
+In rand3d, line 5971:  ido = 60
+In rand3d, line 5982, Fsize = 31
+In rand3d, line 5985, i = 0 of 60:  instring = 0
+In rand3d, line 5987:  valin = 0
+In rand3d, line 5989, i = 0 of 60:  instring = 0.284709
+In rand3d, line 5991:  val2 = 0.284709
+In rand3d, line 5985, i = 1 of 60:  instring = 1
+In rand3d, line 5987:  valin = 1
+In rand3d, line 5989, i = 1 of 60:  instring = 0.182923
+In rand3d, line 5991:  val2 = 0.182923
+In rand3d, line 5985, i = 2 of 60:  instring = 2
+In rand3d, line 5987:  valin = 2
+In rand3d, line 5989, i = 2 of 60:  instring = 0.142014
+In rand3d, line 5991:  val2 = 0.142014
+In rand3d, line 5985, i = 3 of 60:  instring = 3
+In rand3d, line 5987:  valin = 3
+In rand3d, line 5989, i = 3 of 60:  instring = 0.117183
+In rand3d, line 5991:  val2 = 0.117183
+In rand3d, line 5985, i = 4 of 60:  instring = 4
+In rand3d, line 5987:  valin = 4
+In rand3d, line 5989, i = 4 of 60:  instring = 0.101901
+In rand3d, line 5991:  val2 = 0.101901
+In rand3d, line 5985, i = 5 of 60:  instring = 5
+In rand3d, line 5987:  valin = 5
+In rand3d, line 5989, i = 5 of 60:  instring = 0.093267
+In rand3d, line 5991:  val2 = 0.093267
+In rand3d, line 5985, i = 6 of 60:  instring = 6
+In rand3d, line 5987:  valin = 6
+In rand3d, line 5989, i = 6 of 60:  instring = 0.088640
+In rand3d, line 5991:  val2 = 0.088640
+In rand3d, line 5985, i = 7 of 60:  instring = 7
+In rand3d, line 5987:  valin = 7
+In rand3d, line 5989, i = 7 of 60:  instring = 0.085715
+In rand3d, line 5991:  val2 = 0.085715
+In rand3d, line 5985, i = 8 of 60:  instring = 8
+In rand3d, line 5987:  valin = 8
+In rand3d, line 5989, i = 8 of 60:  instring = 0.084177
+In rand3d, line 5991:  val2 = 0.084177
+In rand3d, line 5985, i = 9 of 60:  instring = 9
+In rand3d, line 5987:  valin = 9
+In rand3d, line 5989, i = 9 of 60:  instring = 0.083008
+In rand3d, line 5991:  val2 = 0.083008
+In rand3d, line 5985, i = 10 of 60:  instring = 10
+In rand3d, line 5987:  valin = 10
+In rand3d, line 5989, i = 10 of 60:  instring = 0.082469
+In rand3d, line 5991:  val2 = 0.082469
+In rand3d, line 5985, i = 11 of 60:  instring = 11
+In rand3d, line 5987:  valin = 11
+In rand3d, line 5989, i = 11 of 60:  instring = 0.081997
+In rand3d, line 5991:  val2 = 0.081997
+In rand3d, line 5985, i = 12 of 60:  instring = 12
+In rand3d, line 5987:  valin = 12
+In rand3d, line 5989, i = 12 of 60:  instring = 0.081541
+In rand3d, line 5991:  val2 = 0.081541
+In rand3d, line 5985, i = 13 of 60:  instring = 13
+In rand3d, line 5987:  valin = 13
+In rand3d, line 5989, i = 13 of 60:  instring = 0.081746
+In rand3d, line 5991:  val2 = 0.081746
+In rand3d, line 5985, i = 14 of 60:  instring = 14
+In rand3d, line 5987:  valin = 14
+In rand3d, line 5989, i = 14 of 60:  instring = 0.081684
+In rand3d, line 5991:  val2 = 0.081684
+In rand3d, line 5985, i = 15 of 60:  instring = 15
+In rand3d, line 5987:  valin = 15
+In rand3d, line 5989, i = 15 of 60:  instring = 0.081167
+In rand3d, line 5991:  val2 = 0.081167
+In rand3d, line 5985, i = 16 of 60:  instring = 16
+In rand3d, line 5987:  valin = 16
+In rand3d, line 5989, i = 16 of 60:  instring = 0.080818
+In rand3d, line 5991:  val2 = 0.080818
+In rand3d, line 5985, i = 17 of 60:  instring = 17
+In rand3d, line 5987:  valin = 17
+In rand3d, line 5989, i = 17 of 60:  instring = 0.080503
+In rand3d, line 5991:  val2 = 0.080503
+In rand3d, line 5985, i = 18 of 60:  instring = 18
+In rand3d, line 5987:  valin = 18
+In rand3d, line 5989, i = 18 of 60:  instring = 0.080626
+In rand3d, line 5991:  val2 = 0.080626
+In rand3d, line 5985, i = 19 of 60:  instring = 19
+In rand3d, line 5987:  valin = 19
+In rand3d, line 5989, i = 19 of 60:  instring = 0.080555
+In rand3d, line 5991:  val2 = 0.080555
+In rand3d, line 5985, i = 20 of 60:  instring = 20
+In rand3d, line 5987:  valin = 20
+In rand3d, line 5989, i = 20 of 60:  instring = 0.080592
+In rand3d, line 5991:  val2 = 0.080592
+In rand3d, line 5985, i = 21 of 60:  instring = 21
+In rand3d, line 5987:  valin = 21
+In rand3d, line 5989, i = 21 of 60:  instring = 0.080589
+In rand3d, line 5991:  val2 = 0.080589
+In rand3d, line 5985, i = 22 of 60:  instring = 22
+In rand3d, line 5987:  valin = 22
+In rand3d, line 5989, i = 22 of 60:  instring = 0.080716
+In rand3d, line 5991:  val2 = 0.080716
+In rand3d, line 5985, i = 23 of 60:  instring = 23
+In rand3d, line 5987:  valin = 23
+In rand3d, line 5989, i = 23 of 60:  instring = 0.081062
+In rand3d, line 5991:  val2 = 0.081062
+In rand3d, line 5985, i = 24 of 60:  instring = 24
+In rand3d, line 5987:  valin = 24
+In rand3d, line 5989, i = 24 of 60:  instring = 0.081233
+In rand3d, line 5991:  val2 = 0.081233
+In rand3d, line 5985, i = 25 of 60:  instring = 25
+In rand3d, line 5987:  valin = 25
+In rand3d, line 5989, i = 25 of 60:  instring = 0.081168
+In rand3d, line 5991:  val2 = 0.081168
+In rand3d, line 5985, i = 26 of 60:  instring = 26
+In rand3d, line 5987:  valin = 26
+In rand3d, line 5989, i = 26 of 60:  instring = 0.081173
+In rand3d, line 5991:  val2 = 0.081173
+In rand3d, line 5985, i = 27 of 60:  instring = 27
+In rand3d, line 5987:  valin = 27
+In rand3d, line 5989, i = 27 of 60:  instring = 0.081325
+In rand3d, line 5991:  val2 = 0.081325
+In rand3d, line 5985, i = 28 of 60:  instring = 28
+In rand3d, line 5987:  valin = 28
+In rand3d, line 5989, i = 28 of 60:  instring = 0.081571
+In rand3d, line 5991:  val2 = 0.081571
+In rand3d, line 5985, i = 29 of 60:  instring = 29
+In rand3d, line 5987:  valin = 29
+In rand3d, line 5989, i = 29 of 60:  instring = 0.081643
+In rand3d, line 5991:  val2 = 0.081643
+In rand3d, line 5985, i = 30 of 60:  instring = 30
+In rand3d, line 5987:  valin = 30
+In rand3d, line 5989, i = 30 of 60:  instring = 0.081074
+In rand3d, line 5991:  val2 = 0.081074
+In rand3d, line 5985, i = 31 of 60:  instring = 31
+In rand3d, line 5987:  valin = 31
+In rand3d, line 5989, i = 31 of 60:  instring = 0.080538
+In rand3d, line 5991:  val2 = 0.080538
+In rand3d, line 5985, i = 32 of 60:  instring = 32
+In rand3d, line 5987:  valin = 32
+In rand3d, line 5989, i = 32 of 60:  instring = 0.080119
+In rand3d, line 5991:  val2 = 0.080119
+In rand3d, line 5985, i = 33 of 60:  instring = 33
+In rand3d, line 5987:  valin = 33
+In rand3d, line 5989, i = 33 of 60:  instring = 0.080028
+In rand3d, line 5991:  val2 = 0.080028
+In rand3d, line 5985, i = 34 of 60:  instring = 34
+In rand3d, line 5987:  valin = 34
+In rand3d, line 5989, i = 34 of 60:  instring = 0.080159
+In rand3d, line 5991:  val2 = 0.080159
+In rand3d, line 5985, i = 35 of 60:  instring = 35
+In rand3d, line 5987:  valin = 35
+In rand3d, line 5989, i = 35 of 60:  instring = 0.080497
+In rand3d, line 5991:  val2 = 0.080497
+In rand3d, line 5985, i = 36 of 60:  instring = 36
+In rand3d, line 5987:  valin = 36
+In rand3d, line 5989, i = 36 of 60:  instring = 0.081086
+In rand3d, line 5991:  val2 = 0.081086
+In rand3d, line 5985, i = 37 of 60:  instring = 37
+In rand3d, line 5987:  valin = 37
+In rand3d, line 5989, i = 37 of 60:  instring = 0.081891
+In rand3d, line 5991:  val2 = 0.081891
+In rand3d, line 5985, i = 38 of 60:  instring = 38
+In rand3d, line 5987:  valin = 38
+In rand3d, line 5989, i = 38 of 60:  instring = 0.082506
+In rand3d, line 5991:  val2 = 0.082506
+In rand3d, line 5985, i = 39 of 60:  instring = 39
+In rand3d, line 5987:  valin = 39
+In rand3d, line 5989, i = 39 of 60:  instring = 0.082577
+In rand3d, line 5991:  val2 = 0.082577
+In rand3d, line 5985, i = 40 of 60:  instring = 40
+In rand3d, line 5987:  valin = 40
+In rand3d, line 5989, i = 40 of 60:  instring = 0.082587
+In rand3d, line 5991:  val2 = 0.082587
+In rand3d, line 5985, i = 41 of 60:  instring = 41
+In rand3d, line 5987:  valin = 41
+In rand3d, line 5989, i = 41 of 60:  instring = 0.082499
+In rand3d, line 5991:  val2 = 0.082499
+In rand3d, line 5985, i = 42 of 60:  instring = 42
+In rand3d, line 5987:  valin = 42
+In rand3d, line 5989, i = 42 of 60:  instring = 0.082557
+In rand3d, line 5991:  val2 = 0.082557
+In rand3d, line 5985, i = 43 of 60:  instring = 43
+In rand3d, line 5987:  valin = 43
+In rand3d, line 5989, i = 43 of 60:  instring = 0.082820
+In rand3d, line 5991:  val2 = 0.082820
+In rand3d, line 5985, i = 44 of 60:  instring = 44
+In rand3d, line 5987:  valin = 44
+In rand3d, line 5989, i = 44 of 60:  instring = 0.083200
+In rand3d, line 5991:  val2 = 0.083200
+In rand3d, line 5985, i = 45 of 60:  instring = 45
+In rand3d, line 5987:  valin = 45
+In rand3d, line 5989, i = 45 of 60:  instring = 0.083508
+In rand3d, line 5991:  val2 = 0.083508
+In rand3d, line 5985, i = 46 of 60:  instring = 46
+In rand3d, line 5987:  valin = 46
+In rand3d, line 5989, i = 46 of 60:  instring = 0.083661
+In rand3d, line 5991:  val2 = 0.083661
+In rand3d, line 5985, i = 47 of 60:  instring = 47
+In rand3d, line 5987:  valin = 47
+In rand3d, line 5989, i = 47 of 60:  instring = 0.083505
+In rand3d, line 5991:  val2 = 0.083505
+In rand3d, line 5985, i = 48 of 60:  instring = 48
+In rand3d, line 5987:  valin = 48
+In rand3d, line 5989, i = 48 of 60:  instring = 0.083129
+In rand3d, line 5991:  val2 = 0.083129
+In rand3d, line 5985, i = 49 of 60:  instring = 49
+In rand3d, line 5987:  valin = 49
+In rand3d, line 5989, i = 49 of 60:  instring = 0.082949
+In rand3d, line 5991:  val2 = 0.082949
+In rand3d, line 5985, i = 50 of 60:  instring = 50
+In rand3d, line 5987:  valin = 50
+In rand3d, line 5989, i = 50 of 60:  instring = 0.082687
+In rand3d, line 5991:  val2 = 0.082687
+In rand3d, line 5985, i = 51 of 60:  instring = 51
+In rand3d, line 5987:  valin = 51
+In rand3d, line 5989, i = 51 of 60:  instring = 0.082675
+In rand3d, line 5991:  val2 = 0.082675
+In rand3d, line 5985, i = 52 of 60:  instring = 52
+In rand3d, line 5987:  valin = 52
+In rand3d, line 5989, i = 52 of 60:  instring = 0.082767
+In rand3d, line 5991:  val2 = 0.082767
+In rand3d, line 5985, i = 53 of 60:  instring = 53
+In rand3d, line 5987:  valin = 53
+In rand3d, line 5989, i = 53 of 60:  instring = 0.082851
+In rand3d, line 5991:  val2 = 0.082851
+In rand3d, line 5985, i = 54 of 60:  instring = 54
+In rand3d, line 5987:  valin = 54
+In rand3d, line 5989, i = 54 of 60:  instring = 0.082827
+In rand3d, line 5991:  val2 = 0.082827
+In rand3d, line 5985, i = 55 of 60:  instring = 55
+In rand3d, line 5987:  valin = 55
+In rand3d, line 5989, i = 55 of 60:  instring = 0.082755
+In rand3d, line 5991:  val2 = 0.082755
+In rand3d, line 5985, i = 56 of 60:  instring = 56
+In rand3d, line 5987:  valin = 56
+In rand3d, line 5989, i = 56 of 60:  instring = 0.082731
+In rand3d, line 5991:  val2 = 0.082731
+In rand3d, line 5985, i = 57 of 60:  instring = 57
+In rand3d, line 5987:  valin = 57
+In rand3d, line 5989, i = 57 of 60:  instring = 0.082923
+In rand3d, line 5991:  val2 = 0.082923
+In rand3d, line 5985, i = 58 of 60:  instring = 58
+In rand3d, line 5987:  valin = 58
+In rand3d, line 5989, i = 58 of 60:  instring = 0.082789
+In rand3d, line 5991:  val2 = 0.082789
+In rand3d, line 5985, i = 59 of 60:  instring = 59
+In rand3d, line 5987:  valin = 59
+In rand3d, line 5989, i = 59 of 60:  instring = 0.082628
+In rand3d, line 5991:  val2 = 0.082628
+vvvvv
+In rand3d, line 5692:  filecorr = /Users/bullard/vcctl/usr/rush/MyMortar/cement151.alu, nskip = 0
+In rand3d, line 5969:  instring = 60
+In rand3d, line 5971:  ido = 60
+In rand3d, line 5982, Fsize = 31
+In rand3d, line 5985, i = 0 of 60:  instring = 0
+In rand3d, line 5987:  valin = 0
+In rand3d, line 5989, i = 0 of 60:  instring = 0.085612
+In rand3d, line 5991:  val2 = 0.085612
+In rand3d, line 5985, i = 1 of 60:  instring = 1
+In rand3d, line 5987:  valin = 1
+In rand3d, line 5989, i = 1 of 60:  instring = 0.039066
+In rand3d, line 5991:  val2 = 0.039066
+In rand3d, line 5985, i = 2 of 60:  instring = 2
+In rand3d, line 5987:  valin = 2
+In rand3d, line 5989, i = 2 of 60:  instring = 0.022706
+In rand3d, line 5991:  val2 = 0.022706
+In rand3d, line 5985, i = 3 of 60:  instring = 3
+In rand3d, line 5987:  valin = 3
+In rand3d, line 5989, i = 3 of 60:  instring = 0.015028
+In rand3d, line 5991:  val2 = 0.015028
+In rand3d, line 5985, i = 4 of 60:  instring = 4
+In rand3d, line 5987:  valin = 4
+In rand3d, line 5989, i = 4 of 60:  instring = 0.011237
+In rand3d, line 5991:  val2 = 0.011237
+In rand3d, line 5985, i = 5 of 60:  instring = 5
+In rand3d, line 5987:  valin = 5
+In rand3d, line 5989, i = 5 of 60:  instring = 0.009407
+In rand3d, line 5991:  val2 = 0.009407
+In rand3d, line 5985, i = 6 of 60:  instring = 6
+In rand3d, line 5987:  valin = 6
+In rand3d, line 5989, i = 6 of 60:  instring = 0.008482
+In rand3d, line 5991:  val2 = 0.008482
+In rand3d, line 5985, i = 7 of 60:  instring = 7
+In rand3d, line 5987:  valin = 7
+In rand3d, line 5989, i = 7 of 60:  instring = 0.008092
+In rand3d, line 5991:  val2 = 0.008092
+In rand3d, line 5985, i = 8 of 60:  instring = 8
+In rand3d, line 5987:  valin = 8
+In rand3d, line 5989, i = 8 of 60:  instring = 0.007992
+In rand3d, line 5991:  val2 = 0.007992
+In rand3d, line 5985, i = 9 of 60:  instring = 9
+In rand3d, line 5987:  valin = 9
+In rand3d, line 5989, i = 9 of 60:  instring = 0.007845
+In rand3d, line 5991:  val2 = 0.007845
+In rand3d, line 5985, i = 10 of 60:  instring = 10
+In rand3d, line 5987:  valin = 10
+In rand3d, line 5989, i = 10 of 60:  instring = 0.007618
+In rand3d, line 5991:  val2 = 0.007618
+In rand3d, line 5985, i = 11 of 60:  instring = 11
+In rand3d, line 5987:  valin = 11
+In rand3d, line 5989, i = 11 of 60:  instring = 0.007324
+In rand3d, line 5991:  val2 = 0.007324
+In rand3d, line 5985, i = 12 of 60:  instring = 12
+In rand3d, line 5987:  valin = 12
+In rand3d, line 5989, i = 12 of 60:  instring = 0.007178
+In rand3d, line 5991:  val2 = 0.007178
+In rand3d, line 5985, i = 13 of 60:  instring = 13
+In rand3d, line 5987:  valin = 13
+In rand3d, line 5989, i = 13 of 60:  instring = 0.007129
+In rand3d, line 5991:  val2 = 0.007129
+In rand3d, line 5985, i = 14 of 60:  instring = 14
+In rand3d, line 5987:  valin = 14
+In rand3d, line 5989, i = 14 of 60:  instring = 0.007245
+In rand3d, line 5991:  val2 = 0.007245
+In rand3d, line 5985, i = 15 of 60:  instring = 15
+In rand3d, line 5987:  valin = 15
+In rand3d, line 5989, i = 15 of 60:  instring = 0.007233
+In rand3d, line 5991:  val2 = 0.007233
+In rand3d, line 5985, i = 16 of 60:  instring = 16
+In rand3d, line 5987:  valin = 16
+In rand3d, line 5989, i = 16 of 60:  instring = 0.007186
+In rand3d, line 5991:  val2 = 0.007186
+In rand3d, line 5985, i = 17 of 60:  instring = 17
+In rand3d, line 5987:  valin = 17
+In rand3d, line 5989, i = 17 of 60:  instring = 0.007239
+In rand3d, line 5991:  val2 = 0.007239
+In rand3d, line 5985, i = 18 of 60:  instring = 18
+In rand3d, line 5987:  valin = 18
+In rand3d, line 5989, i = 18 of 60:  instring = 0.007238
+In rand3d, line 5991:  val2 = 0.007238
+In rand3d, line 5985, i = 19 of 60:  instring = 19
+In rand3d, line 5987:  valin = 19
+In rand3d, line 5989, i = 19 of 60:  instring = 0.007244
+In rand3d, line 5991:  val2 = 0.007244
+In rand3d, line 5985, i = 20 of 60:  instring = 20
+In rand3d, line 5987:  valin = 20
+In rand3d, line 5989, i = 20 of 60:  instring = 0.007305
+In rand3d, line 5991:  val2 = 0.007305
+In rand3d, line 5985, i = 21 of 60:  instring = 21
+In rand3d, line 5987:  valin = 21
+In rand3d, line 5989, i = 21 of 60:  instring = 0.007375
+In rand3d, line 5991:  val2 = 0.007375
+In rand3d, line 5985, i = 22 of 60:  instring = 22
+In rand3d, line 5987:  valin = 22
+In rand3d, line 5989, i = 22 of 60:  instring = 0.007349
+In rand3d, line 5991:  val2 = 0.007349
+In rand3d, line 5985, i = 23 of 60:  instring = 23
+In rand3d, line 5987:  valin = 23
+In rand3d, line 5989, i = 23 of 60:  instring = 0.007331
+In rand3d, line 5991:  val2 = 0.007331
+In rand3d, line 5985, i = 24 of 60:  instring = 24
+In rand3d, line 5987:  valin = 24
+In rand3d, line 5989, i = 24 of 60:  instring = 0.007282
+In rand3d, line 5991:  val2 = 0.007282
+In rand3d, line 5985, i = 25 of 60:  instring = 25
+In rand3d, line 5987:  valin = 25
+In rand3d, line 5989, i = 25 of 60:  instring = 0.007250
+In rand3d, line 5991:  val2 = 0.007250
+In rand3d, line 5985, i = 26 of 60:  instring = 26
+In rand3d, line 5987:  valin = 26
+In rand3d, line 5989, i = 26 of 60:  instring = 0.007281
+In rand3d, line 5991:  val2 = 0.007281
+In rand3d, line 5985, i = 27 of 60:  instring = 27
+In rand3d, line 5987:  valin = 27
+In rand3d, line 5989, i = 27 of 60:  instring = 0.007335
+In rand3d, line 5991:  val2 = 0.007335
+In rand3d, line 5985, i = 28 of 60:  instring = 28
+In rand3d, line 5987:  valin = 28
+In rand3d, line 5989, i = 28 of 60:  instring = 0.007289
+In rand3d, line 5991:  val2 = 0.007289
+In rand3d, line 5985, i = 29 of 60:  instring = 29
+In rand3d, line 5987:  valin = 29
+In rand3d, line 5989, i = 29 of 60:  instring = 0.007328
+In rand3d, line 5991:  val2 = 0.007328
+In rand3d, line 5985, i = 30 of 60:  instring = 30
+In rand3d, line 5987:  valin = 30
+In rand3d, line 5989, i = 30 of 60:  instring = 0.007387
+In rand3d, line 5991:  val2 = 0.007387
+In rand3d, line 5985, i = 31 of 60:  instring = 31
+In rand3d, line 5987:  valin = 31
+In rand3d, line 5989, i = 31 of 60:  instring = 0.007451
+In rand3d, line 5991:  val2 = 0.007451
+In rand3d, line 5985, i = 32 of 60:  instring = 32
+In rand3d, line 5987:  valin = 32
+In rand3d, line 5989, i = 32 of 60:  instring = 0.007457
+In rand3d, line 5991:  val2 = 0.007457
+In rand3d, line 5985, i = 33 of 60:  instring = 33
+In rand3d, line 5987:  valin = 33
+In rand3d, line 5989, i = 33 of 60:  instring = 0.007453
+In rand3d, line 5991:  val2 = 0.007453
+In rand3d, line 5985, i = 34 of 60:  instring = 34
+In rand3d, line 5987:  valin = 34
+In rand3d, line 5989, i = 34 of 60:  instring = 0.007436
+In rand3d, line 5991:  val2 = 0.007436
+In rand3d, line 5985, i = 35 of 60:  instring = 35
+In rand3d, line 5987:  valin = 35
+In rand3d, line 5989, i = 35 of 60:  instring = 0.007338
+In rand3d, line 5991:  val2 = 0.007338
+In rand3d, line 5985, i = 36 of 60:  instring = 36
+In rand3d, line 5987:  valin = 36
+In rand3d, line 5989, i = 36 of 60:  instring = 0.007230
+In rand3d, line 5991:  val2 = 0.007230
+In rand3d, line 5985, i = 37 of 60:  instring = 37
+In rand3d, line 5987:  valin = 37
+In rand3d, line 5989, i = 37 of 60:  instring = 0.007131
+In rand3d, line 5991:  val2 = 0.007131
+In rand3d, line 5985, i = 38 of 60:  instring = 38
+In rand3d, line 5987:  valin = 38
+In rand3d, line 5989, i = 38 of 60:  instring = 0.007181
+In rand3d, line 5991:  val2 = 0.007181
+In rand3d, line 5985, i = 39 of 60:  instring = 39
+In rand3d, line 5987:  valin = 39
+In rand3d, line 5989, i = 39 of 60:  instring = 0.007251
+In rand3d, line 5991:  val2 = 0.007251
+In rand3d, line 5985, i = 40 of 60:  instring = 40
+In rand3d, line 5987:  valin = 40
+In rand3d, line 5989, i = 40 of 60:  instring = 0.007267
+In rand3d, line 5991:  val2 = 0.007267
+In rand3d, line 5985, i = 41 of 60:  instring = 41
+In rand3d, line 5987:  valin = 41
+In rand3d, line 5989, i = 41 of 60:  instring = 0.007345
+In rand3d, line 5991:  val2 = 0.007345
+In rand3d, line 5985, i = 42 of 60:  instring = 42
+In rand3d, line 5987:  valin = 42
+In rand3d, line 5989, i = 42 of 60:  instring = 0.007382
+In rand3d, line 5991:  val2 = 0.007382
+In rand3d, line 5985, i = 43 of 60:  instring = 43
+In rand3d, line 5987:  valin = 43
+In rand3d, line 5989, i = 43 of 60:  instring = 0.007342
+In rand3d, line 5991:  val2 = 0.007342
+In rand3d, line 5985, i = 44 of 60:  instring = 44
+In rand3d, line 5987:  valin = 44
+In rand3d, line 5989, i = 44 of 60:  instring = 0.007286
+In rand3d, line 5991:  val2 = 0.007286
+In rand3d, line 5985, i = 45 of 60:  instring = 45
+In rand3d, line 5987:  valin = 45
+In rand3d, line 5989, i = 45 of 60:  instring = 0.007358
+In rand3d, line 5991:  val2 = 0.007358
+In rand3d, line 5985, i = 46 of 60:  instring = 46
+In rand3d, line 5987:  valin = 46
+In rand3d, line 5989, i = 46 of 60:  instring = 0.007267
+In rand3d, line 5991:  val2 = 0.007267
+In rand3d, line 5985, i = 47 of 60:  instring = 47
+In rand3d, line 5987:  valin = 47
+In rand3d, line 5989, i = 47 of 60:  instring = 0.007163
+In rand3d, line 5991:  val2 = 0.007163
+In rand3d, line 5985, i = 48 of 60:  instring = 48
+In rand3d, line 5987:  valin = 48
+In rand3d, line 5989, i = 48 of 60:  instring = 0.007106
+In rand3d, line 5991:  val2 = 0.007106
+In rand3d, line 5985, i = 49 of 60:  instring = 49
+In rand3d, line 5987:  valin = 49
+In rand3d, line 5989, i = 49 of 60:  instring = 0.007042
+In rand3d, line 5991:  val2 = 0.007042
+In rand3d, line 5985, i = 50 of 60:  instring = 50
+In rand3d, line 5987:  valin = 50
+In rand3d, line 5989, i = 50 of 60:  instring = 0.006969
+In rand3d, line 5991:  val2 = 0.006969
+In rand3d, line 5985, i = 51 of 60:  instring = 51
+In rand3d, line 5987:  valin = 51
+In rand3d, line 5989, i = 51 of 60:  instring = 0.006859
+In rand3d, line 5991:  val2 = 0.006859
+In rand3d, line 5985, i = 52 of 60:  instring = 52
+In rand3d, line 5987:  valin = 52
+In rand3d, line 5989, i = 52 of 60:  instring = 0.006732
+In rand3d, line 5991:  val2 = 0.006732
+In rand3d, line 5985, i = 53 of 60:  instring = 53
+In rand3d, line 5987:  valin = 53
+In rand3d, line 5989, i = 53 of 60:  instring = 0.006696
+In rand3d, line 5991:  val2 = 0.006696
+In rand3d, line 5985, i = 54 of 60:  instring = 54
+In rand3d, line 5987:  valin = 54
+In rand3d, line 5989, i = 54 of 60:  instring = 0.006786
+In rand3d, line 5991:  val2 = 0.006786
+In rand3d, line 5985, i = 55 of 60:  instring = 55
+In rand3d, line 5987:  valin = 55
+In rand3d, line 5989, i = 55 of 60:  instring = 0.006849
+In rand3d, line 5991:  val2 = 0.006849
+In rand3d, line 5985, i = 56 of 60:  instring = 56
+In rand3d, line 5987:  valin = 56
+In rand3d, line 5989, i = 56 of 60:  instring = 0.007004
+In rand3d, line 5991:  val2 = 0.007004
+In rand3d, line 5985, i = 57 of 60:  instring = 57
+In rand3d, line 5987:  valin = 57
+In rand3d, line 5989, i = 57 of 60:  instring = 0.007143
+In rand3d, line 5991:  val2 = 0.007143
+In rand3d, line 5985, i = 58 of 60:  instring = 58
+In rand3d, line 5987:  valin = 58
+In rand3d, line 5989, i = 58 of 60:  instring = 0.007216
+In rand3d, line 5991:  val2 = 0.007216
+In rand3d, line 5985, i = 59 of 60:  instring = 59
+In rand3d, line 5987:  valin = 59
+In rand3d, line 5989, i = 59 of 60:  instring = 0.007248
+In rand3d, line 5991:  val2 = 0.007248
+vvvvv
+In rand3d, line 5692:  filecorr = /Users/bullard/vcctl/usr/rush/MyMortar/cement151.k2o, nskip = 0
+In rand3d, line 5969:  instring = 60
+In rand3d, line 5971:  ido = 60
+In rand3d, line 5982, Fsize = 31
+In rand3d, line 5985, i = 0 of 60:  instring = 0
+In rand3d, line 5987:  valin = 0
+In rand3d, line 5989, i = 0 of 60:  instring = 0.001709
+In rand3d, line 5991:  val2 = 0.001709
+In rand3d, line 5985, i = 1 of 60:  instring = 1
+In rand3d, line 5987:  valin = 1
+In rand3d, line 5989, i = 1 of 60:  instring = 0.000378
+In rand3d, line 5991:  val2 = 0.000378
+In rand3d, line 5985, i = 2 of 60:  instring = 2
+In rand3d, line 5987:  valin = 2
+In rand3d, line 5989, i = 2 of 60:  instring = 0.000139
+In rand3d, line 5991:  val2 = 0.000139
+In rand3d, line 5985, i = 3 of 60:  instring = 3
+In rand3d, line 5987:  valin = 3
+In rand3d, line 5989, i = 3 of 60:  instring = 0.000043
+In rand3d, line 5991:  val2 = 0.000043
+In rand3d, line 5985, i = 4 of 60:  instring = 4
+In rand3d, line 5987:  valin = 4
+In rand3d, line 5989, i = 4 of 60:  instring = 0.000007
+In rand3d, line 5991:  val2 = 0.000007
+In rand3d, line 5985, i = 5 of 60:  instring = 5
+In rand3d, line 5987:  valin = 5
+In rand3d, line 5989, i = 5 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 6 of 60:  instring = 6
+In rand3d, line 5987:  valin = 6
+In rand3d, line 5989, i = 6 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 7 of 60:  instring = 7
+In rand3d, line 5987:  valin = 7
+In rand3d, line 5989, i = 7 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 8 of 60:  instring = 8
+In rand3d, line 5987:  valin = 8
+In rand3d, line 5989, i = 8 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 9 of 60:  instring = 9
+In rand3d, line 5987:  valin = 9
+In rand3d, line 5989, i = 9 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 10 of 60:  instring = 10
+In rand3d, line 5987:  valin = 10
+In rand3d, line 5989, i = 10 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 11 of 60:  instring = 11
+In rand3d, line 5987:  valin = 11
+In rand3d, line 5989, i = 11 of 60:  instring = 0.000000
+In rand3d, line 5991:  val2 = 0.000000
+In rand3d, line 5985, i = 12 of 60:  instring = 12
+In rand3d, line 5987:  valin = 12
+In rand3d, line 5989, i = 12 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 13 of 60:  instring = 13
+In rand3d, line 5987:  valin = 13
+In rand3d, line 5989, i = 13 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 14 of 60:  instring = 14
+In rand3d, line 5987:  valin = 14
+In rand3d, line 5989, i = 14 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 15 of 60:  instring = 15
+In rand3d, line 5987:  valin = 15
+In rand3d, line 5989, i = 15 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 16 of 60:  instring = 16
+In rand3d, line 5987:  valin = 16
+In rand3d, line 5989, i = 16 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 17 of 60:  instring = 17
+In rand3d, line 5987:  valin = 17
+In rand3d, line 5989, i = 17 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 18 of 60:  instring = 18
+In rand3d, line 5987:  valin = 18
+In rand3d, line 5989, i = 18 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 19 of 60:  instring = 19
+In rand3d, line 5987:  valin = 19
+In rand3d, line 5989, i = 19 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 20 of 60:  instring = 20
+In rand3d, line 5987:  valin = 20
+In rand3d, line 5989, i = 20 of 60:  instring = 0.000008
+In rand3d, line 5991:  val2 = 0.000008
+In rand3d, line 5985, i = 21 of 60:  instring = 21
+In rand3d, line 5987:  valin = 21
+In rand3d, line 5989, i = 21 of 60:  instring = 0.000007
+In rand3d, line 5991:  val2 = 0.000007
+In rand3d, line 5985, i = 22 of 60:  instring = 22
+In rand3d, line 5987:  valin = 22
+In rand3d, line 5989, i = 22 of 60:  instring = 0.000005
+In rand3d, line 5991:  val2 = 0.000005
+In rand3d, line 5985, i = 23 of 60:  instring = 23
+In rand3d, line 5987:  valin = 23
+In rand3d, line 5989, i = 23 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 24 of 60:  instring = 24
+In rand3d, line 5987:  valin = 24
+In rand3d, line 5989, i = 24 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 25 of 60:  instring = 25
+In rand3d, line 5987:  valin = 25
+In rand3d, line 5989, i = 25 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 26 of 60:  instring = 26
+In rand3d, line 5987:  valin = 26
+In rand3d, line 5989, i = 26 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 27 of 60:  instring = 27
+In rand3d, line 5987:  valin = 27
+In rand3d, line 5989, i = 27 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 28 of 60:  instring = 28
+In rand3d, line 5987:  valin = 28
+In rand3d, line 5989, i = 28 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 29 of 60:  instring = 29
+In rand3d, line 5987:  valin = 29
+In rand3d, line 5989, i = 29 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 30 of 60:  instring = 30
+In rand3d, line 5987:  valin = 30
+In rand3d, line 5989, i = 30 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 31 of 60:  instring = 31
+In rand3d, line 5987:  valin = 31
+In rand3d, line 5989, i = 31 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 32 of 60:  instring = 32
+In rand3d, line 5987:  valin = 32
+In rand3d, line 5989, i = 32 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 33 of 60:  instring = 33
+In rand3d, line 5987:  valin = 33
+In rand3d, line 5989, i = 33 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 34 of 60:  instring = 34
+In rand3d, line 5987:  valin = 34
+In rand3d, line 5989, i = 34 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 35 of 60:  instring = 35
+In rand3d, line 5987:  valin = 35
+In rand3d, line 5989, i = 35 of 60:  instring = 0.000005
+In rand3d, line 5991:  val2 = 0.000005
+In rand3d, line 5985, i = 36 of 60:  instring = 36
+In rand3d, line 5987:  valin = 36
+In rand3d, line 5989, i = 36 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 37 of 60:  instring = 37
+In rand3d, line 5987:  valin = 37
+In rand3d, line 5989, i = 37 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 38 of 60:  instring = 38
+In rand3d, line 5987:  valin = 38
+In rand3d, line 5989, i = 38 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 39 of 60:  instring = 39
+In rand3d, line 5987:  valin = 39
+In rand3d, line 5989, i = 39 of 60:  instring = 0.000005
+In rand3d, line 5991:  val2 = 0.000005
+In rand3d, line 5985, i = 40 of 60:  instring = 40
+In rand3d, line 5987:  valin = 40
+In rand3d, line 5989, i = 40 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 41 of 60:  instring = 41
+In rand3d, line 5987:  valin = 41
+In rand3d, line 5989, i = 41 of 60:  instring = 0.000005
+In rand3d, line 5991:  val2 = 0.000005
+In rand3d, line 5985, i = 42 of 60:  instring = 42
+In rand3d, line 5987:  valin = 42
+In rand3d, line 5989, i = 42 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 43 of 60:  instring = 43
+In rand3d, line 5987:  valin = 43
+In rand3d, line 5989, i = 43 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 44 of 60:  instring = 44
+In rand3d, line 5987:  valin = 44
+In rand3d, line 5989, i = 44 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 45 of 60:  instring = 45
+In rand3d, line 5987:  valin = 45
+In rand3d, line 5989, i = 45 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 46 of 60:  instring = 46
+In rand3d, line 5987:  valin = 46
+In rand3d, line 5989, i = 46 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 47 of 60:  instring = 47
+In rand3d, line 5987:  valin = 47
+In rand3d, line 5989, i = 47 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 48 of 60:  instring = 48
+In rand3d, line 5987:  valin = 48
+In rand3d, line 5989, i = 48 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 49 of 60:  instring = 49
+In rand3d, line 5987:  valin = 49
+In rand3d, line 5989, i = 49 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 50 of 60:  instring = 50
+In rand3d, line 5987:  valin = 50
+In rand3d, line 5989, i = 50 of 60:  instring = 0.000004
+In rand3d, line 5991:  val2 = 0.000004
+In rand3d, line 5985, i = 51 of 60:  instring = 51
+In rand3d, line 5987:  valin = 51
+In rand3d, line 5989, i = 51 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+In rand3d, line 5985, i = 52 of 60:  instring = 52
+In rand3d, line 5987:  valin = 52
+In rand3d, line 5989, i = 52 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 53 of 60:  instring = 53
+In rand3d, line 5987:  valin = 53
+In rand3d, line 5989, i = 53 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 54 of 60:  instring = 54
+In rand3d, line 5987:  valin = 54
+In rand3d, line 5989, i = 54 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 55 of 60:  instring = 55
+In rand3d, line 5987:  valin = 55
+In rand3d, line 5989, i = 55 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 56 of 60:  instring = 56
+In rand3d, line 5987:  valin = 56
+In rand3d, line 5989, i = 56 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 57 of 60:  instring = 57
+In rand3d, line 5987:  valin = 57
+In rand3d, line 5989, i = 57 of 60:  instring = 0.000001
+In rand3d, line 5991:  val2 = 0.000001
+In rand3d, line 5985, i = 58 of 60:  instring = 58
+In rand3d, line 5987:  valin = 58
+In rand3d, line 5989, i = 58 of 60:  instring = 0.000002
+In rand3d, line 5991:  val2 = 0.000002
+In rand3d, line 5985, i = 59 of 60:  instring = 59
+In rand3d, line 5987:  valin = 59
+In rand3d, line 5989, i = 59 of 60:  instring = 0.000003
+In rand3d, line 5991:  val2 = 0.000003
+vvvvv
+In rand3d, line 5692:  filecorr = /Users/bullard/vcctl/usr/rush/MyMortar/cement151.c4f, nskip = 0
+In rand3d, line 5969:  instring = 60
+In rand3d, line 5971:  ido = 60
+In rand3d, line 5982, Fsize = 31
+In rand3d, line 5985, i = 0 of 60:  instring = 0
+In rand3d, line 5987:  valin = 0
+In rand3d, line 5989, i = 0 of 60:  instring = 0.045898
+In rand3d, line 5991:  val2 = 0.045898
+In rand3d, line 5985, i = 1 of 60:  instring = 1
+In rand3d, line 5987:  valin = 1
+In rand3d, line 5989, i = 1 of 60:  instring = 0.017397
+In rand3d, line 5991:  val2 = 0.017397
+In rand3d, line 5985, i = 2 of 60:  instring = 2
+In rand3d, line 5987:  valin = 2
+In rand3d, line 5989, i = 2 of 60:  instring = 0.009678
+In rand3d, line 5991:  val2 = 0.009678
+In rand3d, line 5985, i = 3 of 60:  instring = 3
+In rand3d, line 5987:  valin = 3
+In rand3d, line 5989, i = 3 of 60:  instring = 0.005985
+In rand3d, line 5991:  val2 = 0.005985
+In rand3d, line 5985, i = 4 of 60:  instring = 4
+In rand3d, line 5987:  valin = 4
+In rand3d, line 5989, i = 4 of 60:  instring = 0.004192
+In rand3d, line 5991:  val2 = 0.004192
+In rand3d, line 5985, i = 5 of 60:  instring = 5
+In rand3d, line 5987:  valin = 5
+In rand3d, line 5989, i = 5 of 60:  instring = 0.003292
+In rand3d, line 5991:  val2 = 0.003292
+In rand3d, line 5985, i = 6 of 60:  instring = 6
+In rand3d, line 5987:  valin = 6
+In rand3d, line 5989, i = 6 of 60:  instring = 0.002768
+In rand3d, line 5991:  val2 = 0.002768
+In rand3d, line 5985, i = 7 of 60:  instring = 7
+In rand3d, line 5987:  valin = 7
+In rand3d, line 5989, i = 7 of 60:  instring = 0.002582
+In rand3d, line 5991:  val2 = 0.002582
+In rand3d, line 5985, i = 8 of 60:  instring = 8
+In rand3d, line 5987:  valin = 8
+In rand3d, line 5989, i = 8 of 60:  instring = 0.002500
+In rand3d, line 5991:  val2 = 0.002500
+In rand3d, line 5985, i = 9 of 60:  instring = 9
+In rand3d, line 5987:  valin = 9
+In rand3d, line 5989, i = 9 of 60:  instring = 0.002412
+In rand3d, line 5991:  val2 = 0.002412
+In rand3d, line 5985, i = 10 of 60:  instring = 10
+In rand3d, line 5987:  valin = 10
+In rand3d, line 5989, i = 10 of 60:  instring = 0.002278
+In rand3d, line 5991:  val2 = 0.002278
+In rand3d, line 5985, i = 11 of 60:  instring = 11
+In rand3d, line 5987:  valin = 11
+In rand3d, line 5989, i = 11 of 60:  instring = 0.002198
+In rand3d, line 5991:  val2 = 0.002198
+In rand3d, line 5985, i = 12 of 60:  instring = 12
+In rand3d, line 5987:  valin = 12
+In rand3d, line 5989, i = 12 of 60:  instring = 0.002081
+In rand3d, line 5991:  val2 = 0.002081
+In rand3d, line 5985, i = 13 of 60:  instring = 13
+In rand3d, line 5987:  valin = 13
+In rand3d, line 5989, i = 13 of 60:  instring = 0.002067
+In rand3d, line 5991:  val2 = 0.002067
+In rand3d, line 5985, i = 14 of 60:  instring = 14
+In rand3d, line 5987:  valin = 14
+In rand3d, line 5989, i = 14 of 60:  instring = 0.002119
+In rand3d, line 5991:  val2 = 0.002119
+In rand3d, line 5985, i = 15 of 60:  instring = 15
+In rand3d, line 5987:  valin = 15
+In rand3d, line 5989, i = 15 of 60:  instring = 0.002101
+In rand3d, line 5991:  val2 = 0.002101
+In rand3d, line 5985, i = 16 of 60:  instring = 16
+In rand3d, line 5987:  valin = 16
+In rand3d, line 5989, i = 16 of 60:  instring = 0.002106
+In rand3d, line 5991:  val2 = 0.002106
+In rand3d, line 5985, i = 17 of 60:  instring = 17
+In rand3d, line 5987:  valin = 17
+In rand3d, line 5989, i = 17 of 60:  instring = 0.002071
+In rand3d, line 5991:  val2 = 0.002071
+In rand3d, line 5985, i = 18 of 60:  instring = 18
+In rand3d, line 5987:  valin = 18
+In rand3d, line 5989, i = 18 of 60:  instring = 0.002069
+In rand3d, line 5991:  val2 = 0.002069
+In rand3d, line 5985, i = 19 of 60:  instring = 19
+In rand3d, line 5987:  valin = 19
+In rand3d, line 5989, i = 19 of 60:  instring = 0.002086
+In rand3d, line 5991:  val2 = 0.002086
+In rand3d, line 5985, i = 20 of 60:  instring = 20
+In rand3d, line 5987:  valin = 20
+In rand3d, line 5989, i = 20 of 60:  instring = 0.002110
+In rand3d, line 5991:  val2 = 0.002110
+In rand3d, line 5985, i = 21 of 60:  instring = 21
+In rand3d, line 5987:  valin = 21
+In rand3d, line 5989, i = 21 of 60:  instring = 0.002144
+In rand3d, line 5991:  val2 = 0.002144
+In rand3d, line 5985, i = 22 of 60:  instring = 22
+In rand3d, line 5987:  valin = 22
+In rand3d, line 5989, i = 22 of 60:  instring = 0.002140
+In rand3d, line 5991:  val2 = 0.002140
+In rand3d, line 5985, i = 23 of 60:  instring = 23
+In rand3d, line 5987:  valin = 23
+In rand3d, line 5989, i = 23 of 60:  instring = 0.002158
+In rand3d, line 5991:  val2 = 0.002158
+In rand3d, line 5985, i = 24 of 60:  instring = 24
+In rand3d, line 5987:  valin = 24
+In rand3d, line 5989, i = 24 of 60:  instring = 0.002129
+In rand3d, line 5991:  val2 = 0.002129
+In rand3d, line 5985, i = 25 of 60:  instring = 25
+In rand3d, line 5987:  valin = 25
+In rand3d, line 5989, i = 25 of 60:  instring = 0.002078
+In rand3d, line 5991:  val2 = 0.002078
+In rand3d, line 5985, i = 26 of 60:  instring = 26
+In rand3d, line 5987:  valin = 26
+In rand3d, line 5989, i = 26 of 60:  instring = 0.002113
+In rand3d, line 5991:  val2 = 0.002113
+In rand3d, line 5985, i = 27 of 60:  instring = 27
+In rand3d, line 5987:  valin = 27
+In rand3d, line 5989, i = 27 of 60:  instring = 0.002110
+In rand3d, line 5991:  val2 = 0.002110
+In rand3d, line 5985, i = 28 of 60:  instring = 28
+In rand3d, line 5987:  valin = 28
+In rand3d, line 5989, i = 28 of 60:  instring = 0.002073
+In rand3d, line 5991:  val2 = 0.002073
+In rand3d, line 5985, i = 29 of 60:  instring = 29
+In rand3d, line 5987:  valin = 29
+In rand3d, line 5989, i = 29 of 60:  instring = 0.002105
+In rand3d, line 5991:  val2 = 0.002105
+In rand3d, line 5985, i = 30 of 60:  instring = 30
+In rand3d, line 5987:  valin = 30
+In rand3d, line 5989, i = 30 of 60:  instring = 0.002186
+In rand3d, line 5991:  val2 = 0.002186
+In rand3d, line 5985, i = 31 of 60:  instring = 31
+In rand3d, line 5987:  valin = 31
+In rand3d, line 5989, i = 31 of 60:  instring = 0.002247
+In rand3d, line 5991:  val2 = 0.002247
+In rand3d, line 5985, i = 32 of 60:  instring = 32
+In rand3d, line 5987:  valin = 32
+In rand3d, line 5989, i = 32 of 60:  instring = 0.002281
+In rand3d, line 5991:  val2 = 0.002281
+In rand3d, line 5985, i = 33 of 60:  instring = 33
+In rand3d, line 5987:  valin = 33
+In rand3d, line 5989, i = 33 of 60:  instring = 0.002249
+In rand3d, line 5991:  val2 = 0.002249
+In rand3d, line 5985, i = 34 of 60:  instring = 34
+In rand3d, line 5987:  valin = 34
+In rand3d, line 5989, i = 34 of 60:  instring = 0.002183
+In rand3d, line 5991:  val2 = 0.002183
+In rand3d, line 5985, i = 35 of 60:  instring = 35
+In rand3d, line 5987:  valin = 35
+In rand3d, line 5989, i = 35 of 60:  instring = 0.002118
+In rand3d, line 5991:  val2 = 0.002118
+In rand3d, line 5985, i = 36 of 60:  instring = 36
+In rand3d, line 5987:  valin = 36
+In rand3d, line 5989, i = 36 of 60:  instring = 0.002106
+In rand3d, line 5991:  val2 = 0.002106
+In rand3d, line 5985, i = 37 of 60:  instring = 37
+In rand3d, line 5987:  valin = 37
+In rand3d, line 5989, i = 37 of 60:  instring = 0.002103
+In rand3d, line 5991:  val2 = 0.002103
+In rand3d, line 5985, i = 38 of 60:  instring = 38
+In rand3d, line 5987:  valin = 38
+In rand3d, line 5989, i = 38 of 60:  instring = 0.002115
+In rand3d, line 5991:  val2 = 0.002115
+In rand3d, line 5985, i = 39 of 60:  instring = 39
+In rand3d, line 5987:  valin = 39
+In rand3d, line 5989, i = 39 of 60:  instring = 0.002149
+In rand3d, line 5991:  val2 = 0.002149
+In rand3d, line 5985, i = 40 of 60:  instring = 40
+In rand3d, line 5987:  valin = 40
+In rand3d, line 5989, i = 40 of 60:  instring = 0.002177
+In rand3d, line 5991:  val2 = 0.002177
+In rand3d, line 5985, i = 41 of 60:  instring = 41
+In rand3d, line 5987:  valin = 41
+In rand3d, line 5989, i = 41 of 60:  instring = 0.002200
+In rand3d, line 5991:  val2 = 0.002200
+In rand3d, line 5985, i = 42 of 60:  instring = 42
+In rand3d, line 5987:  valin = 42
+In rand3d, line 5989, i = 42 of 60:  instring = 0.002166
+In rand3d, line 5991:  val2 = 0.002166
+In rand3d, line 5985, i = 43 of 60:  instring = 43
+In rand3d, line 5987:  valin = 43
+In rand3d, line 5989, i = 43 of 60:  instring = 0.002135
+In rand3d, line 5991:  val2 = 0.002135
+In rand3d, line 5985, i = 44 of 60:  instring = 44
+In rand3d, line 5987:  valin = 44
+In rand3d, line 5989, i = 44 of 60:  instring = 0.002056
+In rand3d, line 5991:  val2 = 0.002056
+In rand3d, line 5985, i = 45 of 60:  instring = 45
+In rand3d, line 5987:  valin = 45
+In rand3d, line 5989, i = 45 of 60:  instring = 0.002060
+In rand3d, line 5991:  val2 = 0.002060
+In rand3d, line 5985, i = 46 of 60:  instring = 46
+In rand3d, line 5987:  valin = 46
+In rand3d, line 5989, i = 46 of 60:  instring = 0.002042
+In rand3d, line 5991:  val2 = 0.002042
+In rand3d, line 5985, i = 47 of 60:  instring = 47
+In rand3d, line 5987:  valin = 47
+In rand3d, line 5989, i = 47 of 60:  instring = 0.002012
+In rand3d, line 5991:  val2 = 0.002012
+In rand3d, line 5985, i = 48 of 60:  instring = 48
+In rand3d, line 5987:  valin = 48
+In rand3d, line 5989, i = 48 of 60:  instring = 0.001975
+In rand3d, line 5991:  val2 = 0.001975
+In rand3d, line 5985, i = 49 of 60:  instring = 49
+In rand3d, line 5987:  valin = 49
+In rand3d, line 5989, i = 49 of 60:  instring = 0.001951
+In rand3d, line 5991:  val2 = 0.001951
+In rand3d, line 5985, i = 50 of 60:  instring = 50
+In rand3d, line 5987:  valin = 50
+In rand3d, line 5989, i = 50 of 60:  instring = 0.001920
+In rand3d, line 5991:  val2 = 0.001920
+In rand3d, line 5985, i = 51 of 60:  instring = 51
+In rand3d, line 5987:  valin = 51
+In rand3d, line 5989, i = 51 of 60:  instring = 0.001898
+In rand3d, line 5991:  val2 = 0.001898
+In rand3d, line 5985, i = 52 of 60:  instring = 52
+In rand3d, line 5987:  valin = 52
+In rand3d, line 5989, i = 52 of 60:  instring = 0.001852
+In rand3d, line 5991:  val2 = 0.001852
+In rand3d, line 5985, i = 53 of 60:  instring = 53
+In rand3d, line 5987:  valin = 53
+In rand3d, line 5989, i = 53 of 60:  instring = 0.001824
+In rand3d, line 5991:  val2 = 0.001824
+In rand3d, line 5985, i = 54 of 60:  instring = 54
+In rand3d, line 5987:  valin = 54
+In rand3d, line 5989, i = 54 of 60:  instring = 0.001858
+In rand3d, line 5991:  val2 = 0.001858
+In rand3d, line 5985, i = 55 of 60:  instring = 55
+In rand3d, line 5987:  valin = 55
+In rand3d, line 5989, i = 55 of 60:  instring = 0.001894
+In rand3d, line 5991:  val2 = 0.001894
+In rand3d, line 5985, i = 56 of 60:  instring = 56
+In rand3d, line 5987:  valin = 56
+In rand3d, line 5989, i = 56 of 60:  instring = 0.001988
+In rand3d, line 5991:  val2 = 0.001988
+In rand3d, line 5985, i = 57 of 60:  instring = 57
+In rand3d, line 5987:  valin = 57
+In rand3d, line 5989, i = 57 of 60:  instring = 0.002044
+In rand3d, line 5991:  val2 = 0.002044
+In rand3d, line 5985, i = 58 of 60:  instring = 58
+In rand3d, line 5987:  valin = 58
+In rand3d, line 5989, i = 58 of 60:  instring = 0.002089
+In rand3d, line 5991:  val2 = 0.002089
+In rand3d, line 5985, i = 59 of 60:  instring = 59
+In rand3d, line 5987:  valin = 59
+In rand3d, line 5989, i = 59 of 60:  instring = 0.002102
+In rand3d, line 5991:  val2 = 0.002102
+
+Done with distributing clinker phases.  Freeing memory now. 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+11 
+
+Adding 0 of phase 0
+Adding 35591 of phase 1
+Adding 0 of phase 2
+Adding 0 of phase 3
+Adding 0 of phase 4
+Adding 0 of phase 5
+Adding 0 of phase 6
+Adding 690 of phase 7
+Adding 1427 of phase 8
+Adding 50 of phase 9
+Adding 0 of phase 10
+Adding 0 of phase 11
+Adding 0 of phase 12
+Adding 0 of phase 13
+Adding 0 of phase 14
+Adding 0 of phase 15
+Adding 0 of phase 16
+Adding 0 of phase 17
+Adding 0 of phase 18
+Adding 0 of phase 19
+Adding 0 of phase 20
+Adding 0 of phase 21
+Adding 0 of phase 22
+Adding 0 of phase 23
+Adding 0 of phase 24
+Adding 0 of phase 25
+Adding 0 of phase 26
+Adding 0 of phase 27
+Adding 0 of phase 28
+Adding 0 of phase 29
+Adding 0 of phase 30
+Adding 0 of phase 31
+Adding 0 of phase 32
+Adding 1704 of phase 33
+Adding 0 of phase 34
+Adding 0 of phase 35
+Adding 0 of phase 36
+Adding 0 of phase 37
+Adding 0 of phase 38
+Adding 0 of phase 39
+Adding 0 of phase 40
+Adding 0 of phase 41
+Adding 0 of phase 42
+Adding 0 of phase 43
+Adding 0 of phase 44
+Adding 0 of phase 45
+Adding 0 of phase 46
+Adding 0 of phase 47
+Adding 0 of phase 48
+Adding 0 of phase 49
+Adding 0 of phase 50
+Adding 0 of phase 51
+Adding 0 of phase 52
+Adding 0 of phase 53
+Adding 0 of phase 54
+Adding 0 of phase 55
+Adding 0 of phase 56
+Adding 0 of phase 57
+Adding 0 of phase 58
+Adding 0 of phase 59
+Adding 0 of phase 60
+Adding 0 of phase 61
+Adding 0 of phase 62
+Adding 0 of phase 63
+Adding 0 of phase 64 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+10 
+Enter name of file for final microstructure image
+/Users/bullard/vcctl/usr/rush/MyMortar/MyMortar.img
+Enter name of file to save particle IDs to 
+/Users/bullard/vcctl/usr/rush/MyMortar/MyMortar.pimg
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+1 

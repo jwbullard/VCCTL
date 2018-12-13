@@ -1,0 +1,181 @@
+/* @group Tab menu */
+
+/* @group Menu bar */
+
+#tab-menu * {
+    height: 38px;
+}
+
+#tab-menu {
+    width: 780px;
+}
+
+#tabs-left-corner {
+    background: url(../images/tab-left-corner.gif) no-repeat left;
+    width: 14px;
+    float: left;
+}
+
+#tabs-right {
+    background: url(../images/tab-right.gif) no-repeat right;
+}
+
+#tab-menu ul {
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    display: table;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+#tab-menu ul li {
+    float: left;
+    padding-left: 11px;
+    padding-right: 10px;
+    /* padding-right = padding-left + 1 in order the text to be centered (with separator, which is 2px width) */
+    background: url(../images/tab-separation.gif) no-repeat left;
+    text-align: center;
+}
+
+#tab-menu .first-tab {
+    /* Can't use first-child because IE doesn't support it */
+    background: none;
+    /* Hide first separation */
+}
+
+#tab-menu ul li a {
+    color: #525252;
+    font: 0.9em/34px "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
+    text-decoration: none;
+    text-shadow: #fff 0px 1px 1px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+}
+
+#tab-menu li.current-left {
+    background: url(../images/selected-tab-left.gif) no-repeat;
+    padding: 0 0 0 1px;
+}
+
+#tab-menu li.current-left .current-right {
+    background: url(../images/selected-tab-right.gif) right;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+#tab-menu li.current-left .current-right a {
+    cursor: default;
+    color: #666;
+    text-shadow: #fff 0px 1px 1px;
+    background: url(../images/cursor.gif) no-repeat center bottom;
+    display: block;
+}
+
+#tab-menu li > a:hover {
+    color: gray;
+}
+
+#tab-menu li.after-current {
+    /* can't use .current-left + li because IE doesn't support "+" */
+    background-image: none;
+    /* Remove separation after the selected tab (wich already include its own separation) */
+}
+
+/* @end */
+
+/* @end */
+
+
+/* @group Subtab menu */
+
+#subtab-menu * {
+    height: 29px;
+}
+
+#subtab-menu {
+    background: url(../images/subtab-right-corner.gif) no-repeat right top;
+}
+
+#subtab-menu li {
+    background: url(../images/subtab-right.gif) no-repeat right top;
+    float: left;
+    padding-left: 10px;
+    padding-right: 11px;
+    list-style-type: none;
+}
+
+#subtabs-left-corner {
+    background: url(../images/subtab-left-corner.gif) no-repeat left top;
+    width: 30px;
+    float: left;
+}
+
+#subtab-menu li.current-submenu {
+    background: url(../images/selected-subtab-right.gif) no-repeat right top;
+}
+
+#subtab-menu a {
+    color: #525252;
+    text-decoration: none;
+    text-shadow: #fff 0px 1px 1px;
+    text-align: center;
+    cursor: pointer;
+    top: 7px;
+    font: smaller "Lucida Grande", Lucida, Verdana, sans-serif;
+    /* Can't use poistion: relative because of an Internet Explorer */
+    padding-top: 7px;
+    float: left;
+}
+
+#subtab-menu li.current-submenu a {
+    color: #525252;
+    cursor: default;
+    text-shadow: #fff 0px 1px 1px;
+    text-align: center;
+}
+
+#subtab-menu a:hover {
+    color: gray;
+}
+
+/* @end */
+
+/* @group IE 7 only */
+
+*+html #tab-menu {
+    text-align: center;
+}
+
+*+html #tab-menu ul {
+   display: inline;
+   zoom: 1;
+}
+
+/* @end */
+
+/* @group IE 6 and previous only */
+
+* html #tabs-right {
+    float: left;
+}
+
+* html #tab-menu ul li {
+    white-space: nowrap;
+    width: 1px;
+}
+
+* html #subtab-menu {
+    float: left;
+    margin-top: 3px;
+    margin-bottom: -4px;
+}
+
+* html #subtabs-left-corner {
+    margin-right: -3px;
+}
+
+/* @end */
