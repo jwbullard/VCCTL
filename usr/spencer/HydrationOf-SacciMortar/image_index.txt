@@ -1,3 +1,0 @@
-72.140732	/Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.72.14h.25.000
-144.257568	/Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/SacciMortar.img.144.26h.25.000
-168.087326	/Users/bullard/vcctl/usr/spencer/HydrationOf-SacciMortar/HydrationOf-SacciMortar.img.25.000

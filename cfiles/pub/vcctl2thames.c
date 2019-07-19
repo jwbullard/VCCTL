@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "vcctl.h"
+#include "./vcctl.h"
 
 int Xsize,Ysize,Zsize;
 int Xsizeorig,Ysizeorig,Zsizeorig;

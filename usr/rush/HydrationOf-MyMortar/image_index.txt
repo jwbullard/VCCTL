@@ -1,9 +1,0 @@
-72.140732	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.72.14h.25.000
-144.257568	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.144.26h.25.000
-216.779282	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.216.78h.25.000
-289.198425	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.289.20h.25.000
-361.289703	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.361.29h.25.000
-433.569305	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.433.57h.25.000
-505.681641	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.505.68h.25.000
-577.928894	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/MyMortar.img.577.93h.25.000
-648.312439	/Users/bullard/vcctl/usr/rush/HydrationOf-MyMortar/HydrationOf-MyMortar.img.25.000

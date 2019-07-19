@@ -1,7 +1,0 @@
-ERROR in distrib3d, fn. rand3d:
-
-	Cannot open correlation function file
-	called /Users/bullard/vcctl/usr/Pichet/TestConcrete01/cement152.c3s.  Exiting now.
-ERROR in distrib3d:
-	Problem with rand3d
-	Exiting now.
