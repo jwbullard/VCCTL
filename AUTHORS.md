@@ -10,7 +10,7 @@ Engineering Laboratory
 Materials and Structural Systems Division
 100 Bureau Drive, Stop 8615
 Gaithersburg, Maryland USA  20899-8615
-Phone: (301) 975-5725 || Email: jeffrey.bullard@nist.gov
+Phone: (301) 975-5725 || Email: jwbullard@tamu.edu
 
 Edward J. Garboczi, PhD
 National Institute of Standards and Technology
