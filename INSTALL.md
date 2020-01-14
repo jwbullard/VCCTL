@@ -3,7 +3,7 @@
 ## INTRODUCTION
 
 For further information, or in case of problems, please contact the author,
-Jeff Bullard (jeffrey.bullard@nist.gov).
+Jeff Bullard (jwbullard@tamu.edu).
 
 ## PREREQUISITES
 
