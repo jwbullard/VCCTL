@@ -246,6 +246,13 @@ long int Npartc,Burnt,Maxburning;
 int Allocated = 0;
 int Shape = 0;
 
+/***
+*  Set the number of distinct shapes to use within a size class
+*  Negative number indicates a new shape for every particle
+***/
+
+int Shapesperbin = 25;
+
 const int Erase = 0;
 const int Draw = 1;
 
@@ -1500,8 +1507,9 @@ void striplayer(int nxp, int nyp, int nzp)
 void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 {
     int m,n,i,j,k,ii,jj,x,y,z,ig,tries,na,foundpart;
+    int iii,jjj,kkk,totpix;
     int phnow,nofit,n1,nxp,nyp,nzp,nnxp,nnyp,nnzp,partc,extpix,pcount[10];
-    int shapesperbin,numpershape,nump;
+    int numpershape,nump;
     int klow,khigh,mp,pixfrac,numlines,numitems,toobig;
     int absdiff,oldabsdiff,diam,darg,numpix;
     int cx,cy,cz;
@@ -1533,7 +1541,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
     for (ig = 0; ig < numgen; ig++) {
 
         phnow = pheach[ig];        /* phase for this class */
-        printf("Going to place %ld particles of phase %d, size %f\n",numeach[ig],phnow,sizeeach[ig]);
+        printf("Going to place %ld particles of phase %d, radius %f\n",numeach[ig],phnow,sizeeach[ig]);
 
         switch (Phase_shape[phnow].shapetype) {
 
@@ -1701,6 +1709,8 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                 }
 
+                
+
                 break;
 
             case REALSHAPE:
@@ -1775,8 +1785,6 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                 numlines = numitems - 1;
                 fclose(geomfile);
 
-                shapesperbin = 25;
-    
                 frad = sizeeach[ig];    /* radius in pixel edge lengths */
                 vol = Volpart[ig];    /* target volume in pixels */
 
@@ -1784,7 +1792,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
         
                 if (phnow == C3S) N_target += (numeach[ig] * vol);
 
-                numpershape = max((numeach[ig] / shapesperbin),1);
+                numpershape = max((numeach[ig] / Shapesperbin),1);
 
                 numpartplaced = 0;
 
@@ -1806,8 +1814,10 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                 toobig = 0;
                                 foundpart = 1;
 
-                                if (Verbose) printf("\n\tNeed to choose a new shape...");
-                                fflush(stdout);
+                                if (Verbose) {
+                                    printf("\n\tNeed to choose a new shape...");
+                                    fflush(stdout);
+                                }
 
                                 /***
                                 *    Generate the shape by selecting randomly
@@ -2396,6 +2406,20 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                 /* Neither REALSHAPE nor SPHERES... What to do? */
                 break;
         }
+
+        /*** Sanity check on placed pixels ***/
+        /*
+        totpix = 0;
+        for (kkk = 0; kkk < Zsyssize; ++kkk) {
+            for (jjj = 0; jjj < Ysyssize; ++jjj) {
+                for (iii = 0; iii < Xsyssize; ++iii) {
+                    if (Cemreal.val[getInt3dindex(Cemreal,iii,jjj,kkk)] == phnow) totpix++;
+                }
+            }
+        }
+        printf("... Total pixels of %d is now %d\n",phnow,totpix);
+        fflush(stdout);
+        */
     }
     
     fflush(fscratch);
@@ -2418,9 +2442,10 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 void create(void)
 {
     int i,j,k,numsize,phase[NUMSIZES],phase_id,num_phases_to_add;
-    long int num[NUMSIZES],total_solid_pixels;
-    long int extra_pixels,target_pixels_i,linval;
-    long int delta_particles,total_pixels;
+    int iii,jjj,kkk,totpix;
+    long int num[NUMSIZES],target_phase_vox;
+    long int extra_pixels,target_vox_i,linval;
+    long int delta_particles,total_phase_vox;
     int ip,inval,shapevar;
     long int numparts[NPHASES][NUMSIZES];
     float frad[NUMSIZES],tval,val1,val2,binder_vfrac,water_vfrac;
@@ -2531,9 +2556,11 @@ void create(void)
             fscanf(fgauss,"%f %f",&val1,&val2);
             if (!feof(fgauss)) {
                 Ntheta++;
-                Nphi++;
             }
         }
+
+        Nphi = Ntheta;
+
         fclose(fgauss);
 
         /* Allocate memory for Gaussian quadrature points */
@@ -2606,9 +2633,12 @@ void create(void)
         read_string(instring,sizeof(instring));
         Vol_frac[phase_id] = atof(instring);
         printf("\n%f\n",Vol_frac[phase_id]);
-        Vol_frac[phase_id] *= binder_vfrac;  /* Converts to total VOLUME basis, binder + water system */
-        total_solid_pixels = (long int)((Vol_frac[phase_id] * (float)Binderpix) + 0.5);
-        printf("Will need to enter %ld pixels of this phase...\n",total_solid_pixels);
+
+        /* Convert to total VOLUME basis, binder + water system */
+        Vol_frac[phase_id] *= binder_vfrac;
+
+        target_phase_vox = (long int)((Vol_frac[phase_id] * (float)Binderpix) + 0.5);
+        printf("Will need to enter %ld pixels of this phase...\n",target_phase_vox);
         printf("Enter number of size classes for this phase (max is %d): ",NUMSIZES);
         read_string(instring,sizeof(instring));
         Size_classes[phase_id] = atoi(instring);
@@ -2689,7 +2719,6 @@ void create(void)
             }
         }
 
-
         /***
          * Now bubble sort the diameters in descending order
          ***/
@@ -2716,32 +2745,32 @@ void create(void)
          * to stay close to the desired fraction of particles this diameter
          * and larger
          *
-         * Remember, total_solid_pixels and total_pixels refer only to the phase
+         * Remember, target_phase_vox and total_phase_vox refer only to the phase
          * in question, not the combination of all the phases.
          ***/
              
-        total_pixels = 0;
+        total_phase_vox = 0;
         for (i = 0; i < Size_classes[phase_id]; i++) {
             Volpart[i] = diam2vol(Dinput[phase_id][i]);
-            numparts[phase_id][i] = (int)(((float)(total_solid_pixels) * Pdf[phase_id][i]/(float)(Volpart[i])) + 0.5);
-            total_pixels += numparts[phase_id][i] * Volpart[i];
+            numparts[phase_id][i] = (int)(((float)(target_phase_vox) * Pdf[phase_id][i]/(float)(Volpart[i])) + 0.5);
+            total_phase_vox += numparts[phase_id][i] * Volpart[i];
             printf("Number of particles of diameter %f = %ld\n",Dinput[phase_id][i],numparts[phase_id][i]);
             printf("Volume of each particle of diameter %f = %ld\n",Dinput[phase_id][i],Volpart[i]);
         }
-        printf("Total pixels based on PDF is %ld\n",total_pixels);
+        printf("Total pixels based on PDF is %ld\n",total_phase_vox);
         printf("Making adjustments of particle numbers now...\n");
 
 
         extra_pixels = 0;
         for (i = 0; i < Size_classes[phase_id] - 1; i++) {
-            target_pixels_i = (int)(((float)(total_solid_pixels) * Pdf[phase_id][i]) + 0.5);
-            printf("Target pixels in size class %d = %ld\n",i,target_pixels_i);
-            extra_pixels += (target_pixels_i - (numparts[phase_id][i] * Volpart[i]));
+            target_vox_i = (int)(((float)(target_phase_vox) * Pdf[phase_id][i]) + 0.5);
+            printf("Target pixels in size class %d = %ld\n",i,target_vox_i);
+            extra_pixels += (target_vox_i - (numparts[phase_id][i] * Volpart[i]));
             printf("Extra pixels (cumulative) = %ld\n",extra_pixels);
             if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
                 delta_particles = (long int)((float)(extra_pixels)/(float)(Volpart[i]));
                 numparts[phase_id][i] += delta_particles;
-                total_pixels += (delta_particles * Volpart[i]);
+                total_phase_vox += (delta_particles * Volpart[i]);
                 extra_pixels -= (delta_particles * Volpart[i]);
                 printf("Reduced number of particles in size class %d by %ld\n",i,delta_particles);
             }
@@ -2753,20 +2782,43 @@ void create(void)
          ***/
 
         if (Dinput[phase_id][Size_classes[phase_id]-1] <= 1.0) {
-            numparts[phase_id][Size_classes[phase_id]-1] += (total_solid_pixels - total_pixels);
+            numparts[phase_id][Size_classes[phase_id]-1] += (target_phase_vox - total_phase_vox);
         }
 
         /***
-         * Done with this phase.  Move on to the next one
+         * Done with this phase.  Sanity check on PDF and total voxels of this phase to be added.
          ***/
+
+        /*
+        total_phase_vox = 0;
+        for (i = 0; i < Size_classes[phase_id]; i++) {
+            total_phase_vox += (Volpart[i] * numparts[phase_id][i]);
+        }
+
+        printf("\n***************************************************************\n");
+        printf("    Targeted %ld vox of phase %d, and will be adding %ld vox\n",
+                target_phase_vox,phase_id,total_phase_vox);
+        printf("\n***************************************************************\n");
+
+        target_vox_i = 0;
+        for (i = 0; i < Size_classes[phase_id]; i++) {
+            target_vox_i = (float)(Volpart[i] * numparts[phase_id][i]);
+            printf("    Size class %2d, diam = %2d, target pdf = %.4f, target_vox_i = %ld\n",
+                    i, (int)(Dinput[phase_id][i]),Pdf[phase_id][i],target_vox_i);
+        }
+        printf("\n***************************************************************\n");
+        */
+
+        fflush(stdout);
+
     }
 
     /*  All phases are done, except possibly the fine portion of the aggregate grading */
 
     if (Size_classes[INERTAGG] > 0) {
         Vol_frac[INERTAGG] *= binder_vfrac;  /* Converts to total VOLUME basis, binder + water system */
-        total_solid_pixels = (long int)((Vol_frac[INERTAGG] * (float)Binderpix) + 0.5);
-        printf("Will need to enter %ld pixels of INERT AGGREGATE to binder...\n",total_solid_pixels);
+        target_phase_vox = (long int)((Vol_frac[INERTAGG] * (float)Binderpix) + 0.5);
+        printf("Will need to enter %ld pixels of INERT AGGREGATE to binder...\n",target_phase_vox);
         printf("Number of size classes for INERTAGG phase is %ld\n",Size_classes[INERTAGG]);
         fflush(stdout);
 
@@ -2830,34 +2882,34 @@ void create(void)
          * to stay close to the desired fraction of particles this diameter
          * and larger
          *
-         * Remember, total_solid_pixels and total_pixels refer only to the phase
+         * Remember, target_phase_vox and total_phase_vox refer only to the phase
          * in question, not the combination of all the phases.
          ***/
              
         /*  MUST NORMALIZE PDF OF AGGREGATE TO 1 */
 
-        total_pixels = 0;
+        total_phase_vox = 0;
         for (i = 0; i < Size_classes[INERTAGG]; i++) {
             Volpart[i] = diam2vol(Dinput[INERTAGG][i]);
-            numparts[INERTAGG][i] = (int)(((float)(total_solid_pixels) * Pdf[INERTAGG][i]/(float)(Volpart[i])) + 0.5);
-            total_pixels += numparts[INERTAGG][i] * Volpart[i];
+            numparts[INERTAGG][i] = (int)(((float)(target_phase_vox) * Pdf[INERTAGG][i]/(float)(Volpart[i])) + 0.5);
+            total_phase_vox += numparts[INERTAGG][i] * Volpart[i];
             printf("Number of particles of diameter %f = %ld\n",Dinput[INERTAGG][i],numparts[INERTAGG][i]);
             printf("Volume of each particle of diameter %f = %ld\n",Dinput[INERTAGG][i],Volpart[i]);
         }
-        printf("Total pixels based on PDF is %ld\n",total_pixels);
+        printf("Total pixels based on PDF is %ld\n",total_phase_vox);
         printf("Making adjustments of particle numbers now...\n");
 
 
         extra_pixels = 0;
         for (i = 0; i < Size_classes[INERTAGG] - 1; i++) {
-            target_pixels_i = (int)(((float)(total_solid_pixels) * Pdf[INERTAGG][i]) + 0.5);
-            printf("Target pixels in size class %d = %ld\n",i,target_pixels_i);
-            extra_pixels += (target_pixels_i - (numparts[INERTAGG][i] * Volpart[i]));
+            target_vox_i = (int)(((float)(target_phase_vox) * Pdf[INERTAGG][i]) + 0.5);
+            printf("Target pixels in size class %d = %ld\n",i,target_vox_i);
+            extra_pixels += (target_vox_i - (numparts[INERTAGG][i] * Volpart[i]));
             printf("Extra pixels (cumulative) = %ld\n",extra_pixels);
             if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
                 delta_particles = (long int)((float)(extra_pixels)/(float)(Volpart[i]));
                 numparts[INERTAGG][i] += delta_particles;
-                total_pixels += (delta_particles * Volpart[i]);
+                total_phase_vox += (delta_particles * Volpart[i]);
                 extra_pixels -= (delta_particles * Volpart[i]);
                 printf("Reduced number of particles in size class %d by %ld\n",i,delta_particles);
             }
@@ -2869,7 +2921,7 @@ void create(void)
          ***/
 
         if (Dinput[INERTAGG][Size_classes[INERTAGG]-1] <= 1.0) {
-            numparts[INERTAGG][Size_classes[INERTAGG]-1] += (total_solid_pixels - total_pixels);
+            numparts[INERTAGG][Size_classes[INERTAGG]-1] += (target_phase_vox - total_phase_vox);
         }
     }
 
@@ -3014,7 +3066,7 @@ void create(void)
                 /* Modify probability of calcium sulfate so that all calcium sulfates
                     are placed at diameters less than 15 micrometers */
 
-                if (Target_total_lt15 > 0) Probgyp = (Target_sulfate/Target_total_lt15);
+        if (Target_total_lt15 > 0) Probgyp = (Target_sulfate/Target_total_lt15);
         if (Verbose) {
                printf("\nTarget_sulfate = %ld",Target_sulfate);
             printf("\nTarget_anhydrite = %ld",Target_anhydrite);
@@ -3035,6 +3087,19 @@ void create(void)
             printf("\nBack Out of genparticles now...");
             fflush(stdout);
         }
+
+        /*** Sanity check on pore voxels ***/
+        /*
+        totpix = 0;
+        for (kkk = 0; kkk < Zsyssize; ++kkk) {
+            for (jjj = 0; jjj < Ysyssize; ++jjj) {
+                for (iii = 0; iii < Xsyssize; ++iii) {
+                    if (Cemreal.val[getInt3dindex(Cemreal,iii,jjj,kkk)] == 0) totpix++;
+                }
+            }
+        }
+        printf("\nTotal pore voxels now is %d",totpix);
+        */
     }
 
 
@@ -3767,9 +3832,22 @@ void connect(void)
 void outmic(void)
 {
     int ix,iy,iz,valout;
+    int totpix,iii,jjj,kkk;
     char filen[MAXSTRING],filepart[MAXSTRING],filestruct[MAXSTRING],ch;
     FILE *outfile,*partfile,*infile;
 
+    /*** Sanity check on placed pixels ***/
+    totpix = 0;
+    for (kkk = 0; kkk < Zsyssize; ++kkk) {
+        for (jjj = 0; jjj < Ysyssize; ++jjj) {
+            for (iii = 0; iii < Xsyssize; ++iii) {
+                if (Cemreal.val[getInt3dindex(Cemreal,iii,jjj,kkk)] == 0) totpix++;
+            }
+        }
+    }
+    printf("... Total pore voxels is now %d\n",totpix);
+    fflush(stdout);
+    
     printf("Enter name of file for final microstructure image\n");
     read_string(filen,sizeof(filen));
     printf("%s\n",filen);
@@ -5997,7 +6075,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
 
     /*** Skip over resolution information if it is given ***/
 
-    printf("vvvvv\nIn rand3d, line 5692:  filecorr = %s, nskip = %d\n",filecorr,nskip);
+    printf("\nIn rand3d, line 6032:  filecorr = %s, nskip = %d\n",filecorr,nskip);
 
     for (i = 1; i <= nskip; i++) {
         fscanf(corrfile,"%s",buff);
@@ -6273,7 +6351,7 @@ int addonepixels(void)
         read_string(instring,sizeof(instring));
         onepixfloc = atoi(instring);
         */
-        onepixfloc = 1;
+        onepixfloc = 0;
 
         nadd = Onepixnum[phtodo];
         printf("\nAdding %ld of phase %d",nadd,phtodo);
@@ -6292,7 +6370,6 @@ int addonepixels(void)
                         target[i] = 0;
                     }
 
-                    /*
                     for (k = 0; k < Zsyssize; k++) {
                         for (j = 0; j < Ysyssize; j++) {
                             for (i = 0; i < Xsyssize; i++) {
@@ -6318,7 +6395,6 @@ int addonepixels(void)
                             }
                         }
                     }
-                    */
 
                     /***
                     * After adding one-pixel particles, there will
@@ -6354,7 +6430,6 @@ int addonepixels(void)
                     }
                     */
 
-                    if (Verbose) printf("\nAdding %ld cement pixels now...\n",tottarget);
                     for (i = C3S; (i <= NA2SO4) && (nleft > 0); i++) {
         
                         if (Verbose) {
