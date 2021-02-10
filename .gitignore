@@ -1,3 +1,57 @@
+# Ignore .DS_Store
+.DS_Store
+
+# Ignore this weird file that will not go away!
 Z
+
+# Ignore any derby database detritus
 derby.log
+*.lck
+
+# Ignore the contents of the usr folder but not the folder itself
 /usr/*
+
+# Ignore all object files
+*.o
+
+# Ignore any library files
+*.a
+
+# Ignore any swap files
+*.swp
+
+# Ignore compiled executables for Mac or Linux
+aggvrml
+apstats
+chlorattack3d
+disrealnew
+distfapart
+distfarand
+dryout
+elastic
+genaggpack
+genmic
+hydmovie
+image100
+leach3d
+measagg
+oneimage
+onepimage
+perc3d
+perc3d-leach
+poredist3d
+rand3d
+stat3d
+sulfattack3d
+thames2vcctl
+thames2vcctlcorr
+totsurf
+transport
+transport_for_jason
+vcctl2thames
+
+# Ignore specialty C programs just for me
+disrealnew-UFlorida.c
+transport_for_jason.c
+vcctl2thames.c
+

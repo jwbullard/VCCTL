@@ -4647,6 +4647,21 @@ void dissolve(int cycle)
 
     /* PASS ONE: identify all edge points which are soluble */
 
+    /***
+    *    Molesh2o is the number of MOLES of water consumed by all hydration
+    *        reactions over all cycles. It is set to zero at the
+    *        beginning of each dissolve cycle and
+    *        recalculated by counting the current number of voxels of
+    *        each hydration product and multiplying by number of moles
+    *        of water per voxel of that hydration product, which is
+    *        Waterc[i] / Molarv[i].
+    *
+    *        Note Waterc[i] is the number of moles of water consumed per
+    *        mole of the product created, Molarv[i] is the volume per
+    *        mole of the the product, so Waterc[i] / Molarv[i] is the
+    *        moles of water consumed per unit volume of the product created.
+    ***/
+
     Soluble[C3AH6] = 0;
     Heatsum = Molesh2o = 0.0;
 
@@ -5047,6 +5062,10 @@ void dissolve(int cycle)
             *    reactions so far
             ***/
 
+            /***
+             *   Molesh2o is the MOLES of water consumed by
+             *   hydration reactions
+             ***/
             Molesh2o += ((double)Count[i] * Waterc[i] / Molarv[i]);
         }
 
@@ -5398,6 +5417,13 @@ void dissolve(int cycle)
         Alpha_fa_vol = 0.0;
     }
 
+    /***
+     * h2oinit is the intial number of MOLES of water.  Water
+     * and saturated porosity are assumed to be one and the same,
+     * so Porinit, being the number of voxels of saturated porosity
+     * and therefore a measure of the saturated pore volume, is
+     * assumed to be the same as the volume of pure water
+     ***/
     h2oinit = (float)Porinit / Molarv[POROSITY];
 
     /***
@@ -5446,6 +5472,17 @@ void dissolve(int cycle)
     *    Adjust heat sum for water left in system...
     *    The addition of 0.5 ensures that we round to the
     *    nearest integer
+    *
+    *    h2oinit is the initial MOLES of water in the system
+    *    Molesh2o is the number of MOLES of water consumed by all hydration
+    *        reactions over all cycles. It is set to zero at the
+    *        beginning of each dissolve cycle and
+    *        recalculated
+    *
+    *    Water_left is the VOLUME of liquid water remaining in the system,
+    *    which should include water in capillary pores AND water in
+    *    CSH gel pores.
+    *
     ***/
 
     Water_left = (long int)((h2oinit - Molesh2o) * Molarv[POROSITY] + 0.5);
@@ -5507,11 +5544,50 @@ void dissolve(int cycle)
     /***
     *    Attempt to create empty porosity to account
     *    for self-desiccation
+    *
+    *    Water_left is the total volume of LIQUID water in the system,
+    *    which can occupy both capillary pores, (POROSITY) voxels, and
+    *    also part of the CSH voxels depending on the internal
+    *    gel porosity.
+    *
+    *    Water_off is the volume of LIQUID water that was in the
+    *    system at the moment the pore space depercolated, otherwise
+    *    it is zero.
+    *
+    *   See H.F.W. Taylor, Mater. Res. Soc. Proc.
+	* 	Vol. 85, p. 47 (1987) for information on
+	* 	stoichiometry at 105 C
+	*
+    *   In that paper, Taylor proposes that the molar
+    *   ratio of BOUND H2O to Ca is 1.4. So if C-S-H
+    *   is defined as 1 mol CSH = 1 mol Si, then 1 mol
+    *   of CSH has 1.7 mol Ca and therefore 2.38 moles
+    *   of bound water per mole of CSH.
+    *
+    *   So Waterc[CSH] of 4.0 assumes
+    *   1.62 moles of free water per mole of CSH.
+    *   Using the Molarv[CSH] value of 107.81 cm3
+    *   below, and the fact that 1.62 moles of free water
+    *   occupies a volume of 29.16 cm3, this implies that 
+    *   CSH has an internal free-water pore volume
+    *   of 29.16 cm3/mole or a free water volume
+    *   fraction of 0.27.
+    *
+    *   Therefore, the condition below was changed to account
+    *   for the free water in CSH. 
+    *
+    *   @TODO Change the hard-wired 0.27 factor below to account
+    *   for changes in free water volume fraction due to
+    *   temperature change.
+    *
+	*	18 Dec 2020
+    *
     ***/
 
-    if ((Sealed == 1) && ((Count[POROSITY] + Count[CRACKP] - Water_left) > 0)) {
-        Poretodo = (Count[POROSITY] + Count[CRACKP] - Pore_off)
-                    - (Water_left - Water_off) - Slagemptyp;
+    if ((Sealed == 1) && ((Count[POROSITY] + Count[CRACKP]
+                    + (0.27*Count[CSH]) - Water_left) > 0)) {
+        Poretodo = (Count[POROSITY] + Count[CRACKP] + (0.27*Count[CSH])
+                - Pore_off) - (Water_left - Water_off) - Slagemptyp;
 
         if (Poretodo > 0) {
             makeinert(Poretodo);

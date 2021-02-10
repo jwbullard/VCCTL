@@ -479,7 +479,7 @@ void pHpred(void)
 			if (Istrength < 1.0) Istrength = 1.0;
 
                         nt = 0;
-			while ( ((abs(Istrength - Inew) / Istrength) > 0.10) && nt < 10000) {
+			while ( ((fabs(Istrength - Inew) / Istrength) > 0.10) && nt < 10000) {
 
                                 nt++;
 				Istrength = (zK * zK * Conckplus);
@@ -643,7 +643,7 @@ void pHpred(void)
 			if (Istrength < 1.0) Istrength = 1.0;
 
                         nt = 0;
-			while (((abs(Istrength - Inew) / Istrength) > 0.10) && nt < 10000) {
+			while (((fabs(Istrength - Inew) / Istrength) > 0.10) && nt < 10000) {
 
                                 nt++;
 				Istrength = (zK * zK * Conckplus);

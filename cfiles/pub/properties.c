@@ -22,7 +22,7 @@
 *			Nh2o[i][1] = stoichiometric coeff of water at 105C
 *
 *	On the other hand, water consumption, Waterc,
-*	is the number of moles of water consumed in the hydration
+*	is the number of MOLES of water consumed in the hydration
 *	reaction that produces the given phase.  Thus, the
 *	water content for dihydrate is 2.0, while the water
 *	consumption is 0.0 because it is a starting phase.
@@ -178,7 +178,22 @@ void assign_properties(void)
 	* 	Vol. 85, p. 47 (1987) for information on
 	* 	stoichiometry at 105 C
 	*
-	*	24 May 1995
+    *   In that paper, Taylor proposes that the molar
+    *   ratio of BOUND H2O to Ca is 1.4. So if C-S-H
+    *   is defined as 1 mol CSH = 1 mol Si, then 1 mol
+    *   of CSH has 1.7 mol Ca and therefore 2.38 moles
+    *   of bound water per mole of CSH.
+    *
+    *   So Waterc[CSH] of 4.0 assumes that there is
+    *   1.62 moles of free water per mole of CSH.
+    *   Using the Molarv[CSH] value of 107.81 cm3
+    *   below, and that 1.62 moles of water occupies
+    *   a volume of 29.16 cm3, this implies that 
+    *   CSH has an internal free-water pore volume
+    *   of 29.16 cm3/mole or a free water volume
+    *   fraction of 0.27.
+    *
+	*	18 Dec 2020
 	*
 	***/
 
