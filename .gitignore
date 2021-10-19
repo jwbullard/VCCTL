@@ -12,10 +12,14 @@ derby.log
 /usr/*
 
 # Ignore all object files
-*.o
+cfiles/lib/*.o
+cfiles/pub/*.o
+cfiles/pub/tools/cement-analysis/*.o
 
 # Ignore any library files
-*.a
+cfiles/lib/*.a
+cfiles/pub/*.a
+cfiles/pub/tools/cement-analysis/*.a
 
 # Ignore any swap files
 *.swp
