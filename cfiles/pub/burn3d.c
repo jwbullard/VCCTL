@@ -98,7 +98,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3)
 	*	No convenient way to reset the system after
 	*	burning is done, so just store the initial
 	*	(transformed) microstructure by brute force and then
-	*	reset at the end (1 June 2004)
+	*	reset at the end (1 Jun004)
 	***/
 
     xformMic = ibox(dimensions[0],dimensions[1],dimensions[2]);

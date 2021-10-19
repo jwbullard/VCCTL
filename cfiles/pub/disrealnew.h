@@ -108,6 +108,31 @@ static float PSFUME = 0.05;				/* Probability for pozzolanic reaction,
 									high surface area */
 
 /***
+* Parameters for adjusting silica fume reactivity based
+* on its silica content and loss on ignition.  Parameters
+* based on linear regression to experimental data from
+* Jedadiah Burroughs PhD thesis.
+***/
+
+static float SF_SiO2_max = 98.0;
+static float SF_SiO2_mid = 94.3;
+static float SF_SiO2_min = 83.0;
+static float SF_SiO2_val = 94.3;
+static float SF_LOI_max = 3.0;
+static float SF_LOI_mid = 2.0;
+static float SF_LOI_min = 0.85;
+static float SF_LOI_val = 2.0;
+
+static float SF_SiO2_norm = 0.7533;
+static float SF_SiO2_level = 0.7533;
+static float SF_LOI_norm = 0.5349;
+static float SF_LOI_level = 0.5349;
+
+static float SF_SiO2_coeff = 0.155;
+static float SF_LOI_coeff = 0.624;
+static float SF_offset = -0.356;
+
+/***
 *	Introduce a pozzolanic phase for fly ash, less reactive
 *	than silica fume, referred to as AMSIL
 *	(stands for amorphous silica).  This is its intrinsic

@@ -64,10 +64,7 @@ int calcporedist3d(char *name)
     /* VCCTL software version used to create input file */
     float version;
 
-    printf("\n==>Inside calcporedist3d library function...");
     sprintf(filename,"%s",name);
-    printf("\n==>Microstructure file for calculating pore size distribution = %s",filename);
-    fflush(stdout);
 
     infile = filehandler("calcporedist3d",filename,"READ");
     if (!infile) {
@@ -75,8 +72,6 @@ int calcporedist3d(char *name)
         fflush(stdout);
         return(1);
     }
-    printf("\n==>Microstructure file opened successfully.");
-    fflush(stdout);
 
     /***
     *    Determine whether system size and resolution
@@ -89,8 +84,6 @@ int calcporedist3d(char *name)
         return(1);
     }
 
-    printf("\n==>Read image header successfully.");
-    fflush(stdout);
 
     /***
     *    Define the number of histogram bins
@@ -114,8 +107,6 @@ int calcporedist3d(char *name)
         fflush(stdout);
         return(1);
     }
-    printf("\n==>Allocated mic memory successfully.");
-    fflush(stdout);
 
     /***
     *    Read the microstructure file
@@ -134,8 +125,6 @@ int calcporedist3d(char *name)
 
     fclose(infile);
 
-    printf("\n==>Read microstructure image successfully.");
-    fflush(stdout);
 
     /* Allocate memory for temporary microstructure image */
 
@@ -146,9 +135,6 @@ int calcporedist3d(char *name)
         warning("calcporedist3d", "Could not allocate required memory for temporary microstructure image");
         return(1);
     }
-
-    printf("\n==>Allocated tmic memory successfully.");
-    fflush(stdout);
 
     porecnt = 0;
     for (iz = 0; iz < zsize; iz++) {
@@ -167,9 +153,6 @@ int calcporedist3d(char *name)
         }
     }
 
-    printf("\n==>Assigned tmic array successfully.");
-    fflush(stdout);
-
     mindim = xsize;
     if (ysize < mindim) mindim = ysize;
     if (zsize < mindim) mindim = zsize;
@@ -186,15 +169,9 @@ int calcporedist3d(char *name)
         return(1);
     }
 
-    printf("\n==>Allocated ndiam memory successfully.");
-    fflush(stdout);
-
     /* Ensure that diameter is odd */
     if (max_allowed_diam%2 == 0) max_allowed_diam++;
     maxsph = diam2vol((float)max_allowed_diam);
-
-    printf("\n==>Maxsph = %ld",maxsph);
-    fflush(stdout);
 
     /* Allocate memory for xsph,ysph, and zsph vectors */
     xsph = NULL;
@@ -206,8 +183,6 @@ int calcporedist3d(char *name)
         free_ibox(mic,xsize+1,ysize+1);
         return(1);
     }
-    printf("\n==>Allocated xsph memory successfully");
-    fflush(stdout);
 
     ysph = NULL;
     ysph = ivector(maxsph);
@@ -219,8 +194,6 @@ int calcporedist3d(char *name)
         free_ibox(mic,xsize+1,ysize+1);
         return(1);
     }
-    printf("\n==>Allocated ysph memory successfully");
-    fflush(stdout);
 
     zsph = NULL;
     zsph = ivector(maxsph);
@@ -233,9 +206,6 @@ int calcporedist3d(char *name)
         free_ibox(mic,xsize+1,ysize+1);
         return(1);
     }
-    printf("\n==>Allocated zsph memory successfully");
-    fflush(stdout);
-
 
     /* Allocate memory for porosity locator vector */
 
@@ -252,9 +222,6 @@ int calcporedist3d(char *name)
         free_ibox(mic,xsize+1,ysize+1);
         return(1);
     }
-    printf("\n==>Allocated pores memory successfully");
-    fflush(stdout);
-
 
     /* Load up the locator vector */
 
@@ -274,23 +241,14 @@ int calcporedist3d(char *name)
             }
         }
     }
-    printf("\n==>Loaded pores array successfully");
-    fflush(stdout);
-
 
     /* Initialize the ndiam vector */
 
     for (i = 0; i <= max_allowed_diam; i++) ndiam[i] = 0;
 
-    printf("\n==>Initialized ndiam array successfully");
-    fflush(stdout);
-
     /* Start with largest allowed pore diameter */
 
     for (nd = max_allowed_diam; nd >= 1; nd -= 2) {
-        printf("\n=====>nd = %d",nd);
-        fflush(stdout);
-
         nrad = nd/2;
         nsph = maketemp(nrad,xsph,ysph,zsph);
 
@@ -329,9 +287,6 @@ int calcporedist3d(char *name)
         }
     }
 
-    printf("\n==>Finished checking all pore pixels");
-    fflush(stdout);
-
     strcat(filename,".poredist");
     outfile = filehandler("poredist3d",filename,"WRITE");
     if (!outfile) {
@@ -345,9 +300,6 @@ int calcporedist3d(char *name)
         free_ibox(mic,xsize+1,ysize+1);
         return(1);
     }
-    printf("\n==>Opened %s successfully",filename);
-    fflush(stdout);
-
 
     fprintf(outfile,"Total pore volume = %f um^3",((float)porecnt));
     fprintf(outfile,"\n\nDiameter_(um)\tNumber\tFraction");
