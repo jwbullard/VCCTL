@@ -47,7 +47,7 @@ OBJFILES= ${CFILES:.c=.o} ${HYDCFILES:.c=.o}
 EXECS= ${CFILES:.c=}
 HYDEXEC= ${HYDCFILES:.c=}
 
-BINDIR= ../../bin
+BINDIR= $(HOME)/bin
 HOMEDIR=$(BINDIR)
 
 MATHLIB = -lm

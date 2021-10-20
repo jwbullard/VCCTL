@@ -3,7 +3,7 @@
 
 MAKE = /usr/bin/make
 CMAKE = /opt/local/bin/cmake
-PREFIX = /Users/bullard/Software/MyProjects/vcctl
+PREFIX = /Users/macbook/software/VCCTL
 
 BINDIR = $(PREFIX)/bin
 LIBDIR = $(PREFIX)/cfiles/lib
