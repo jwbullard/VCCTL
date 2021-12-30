@@ -49,8 +49,10 @@
 *            for calibration of kinetics, to partially supplant
 *            the time conversion factor 6/29/07
 *    (31) More robust fitting to calorimetry data and chemical
-             shrinkage data 3/6/13
-*
+*            shrinkage data 3/6/13
+*    (32) Changed Cshscale to 35000, 12/22/2021
+*    (33) Added ability for and CSH CH to nucleate on silica
+*            fume, 12/22/2021
 *
 * Other notes:
 *
@@ -60,21 +62,22 @@
 *     (b) Modelling of induction period based on an impermeable layer
 *            theory
 *
-* Programmer:    Dale P. Bentz and Jeffrey W. Bullard
-*                 Building and Fire Research Laboratory
+* Programmers:   Dale P. Bentz and Jeffrey W. Bullard
+*                Engineering Laboratory
 *                NIST
 *                100 Bureau Drive Mail Stop 8621
 *                Gaithersburg, MD  20899-8621   USA
 *                (301) 975-5865      FAX: (301) 990-6891
 *                E-mail: dale.bentz@nist.gov
 *                                                                     
-* Contact:        Jeffrey W. Bullard
-*                 Building and Fire Research Laboratory
-*                NIST
-*                100 Bureau Drive Mail Stop 8621
-*                Gaithersburg, MD  20899-8621   USA
-*                (301) 975-5725      FAX: (301) 990-6891
-*                E-mail: bullard@nist.gov
+* Contact:       Jeffrey W. Bullard
+*                Zachry Department of Civil and Environmental Engineering
+*                Department of Materials Science and Engineering
+*                Texas A&M University
+*                3136 TAMU
+*                College Station, TX  77845   USA
+*                (979) 458-6482
+*                E-mail: jwbullard@tamu.edu
 *******************************************************/
 #include <stdio.h>
 #include <string.h>
@@ -131,7 +134,7 @@ int main(int argc, char *argv[])
     int pixtmp,i,j,k;
     long int customentry;
     float pnucch,pscalech,pnuchg,pscalehg,pnucfh3,pscalefh3;
-    float pnucgyp,pscalegyp;
+    float psfact,betfact,pnucgyp,pscalegyp;
     float thtimelo,thtimehi,thtemplo,thtemphi;
     float kslag;
     float act_nrg,recip_Tdiff,tmod,smod;
@@ -263,33 +266,26 @@ int main(int argc, char *argv[])
     ***/
 
     /***
-     * First, normalize the percentage of silica and
-     * percentage of LOI values for silica fume.
-     ***/
+    *    Modify silica fume probabilities first.  There are
+    *    two effects postulated:
+    *    1. Early age effect due to nucleating capability
+    *       of silica fume with high BET values
+    *    2. Later age pozzolanic reactivity due to
+    *       SiO2 content of the silica fume (Psfume)
+    ***/
 
-    SF_SiO2_level = (SF_SiO2_mid - SF_SiO2_min) / (SF_SiO2_max - SF_SiO2_min);
-    SF_LOI_level = (SF_LOI_mid - SF_LOI_min) / (SF_LOI_max - SF_LOI_min);
-    SF_SiO2_norm = (SF_SiO2_val - SF_SiO2_min) / (SF_SiO2_max - SF_SiO2_min);
-    SF_LOI_norm = (SF_LOI_val - SF_LOI_min) / (SF_LOI_max - SF_LOI_min);
+    /** Late age effect dictated by Psfume **/
+    /** Psfume is for converting DIFFCH to POZZCSH **/
 
     Psfume = PSFUME * (kpozz / Krate);
-
-    /***
-     * Adjust probability of silica fume reaction based
-     * on departure from normal SiO2 and LOI values
-     ***/
-
-    Psfume *= (
-                (SF_SiO2_coeff * SF_SiO2_norm)
-                + (SF_LOI_coeff * SF_LOI_norm)
-                + SF_offset
-              );
-
-    Psfume /= (
-                (SF_SiO2_coeff * SF_SiO2_level)
-                + (SF_LOI_coeff * SF_LOI_level)
-                + SF_offset
-              );
+    psfact = (SF_SiO2_val)/(SF_SiO2_normal);
+    betfact = (SF_BET_val)/(SF_BET_normal);
+    Psfume *= (3.0 * psfact * psfact * betfact);
+    if (Psfume > 1.0) Psfume = 1.0;
+    LOI_factor = 25.0 * (SF_LOI_val / SF_LOI_normal);
+    if (LOI_factor < 1.0) LOI_factor = 1.0;
+   
+    if (Verbose) printf("\n01. Psfume = %f",Psfume);
 
     Pamsil = PAMSIL * (kpozz / Krate);
 
@@ -341,10 +337,7 @@ int main(int argc, char *argv[])
     customentry = 0;
     previousUncorrectedTime = 0.0;
 
-    for (Icyc = 1;
-            ((Icyc <= Ncyc)
-              && (Alpha_cur < Alpha_max)
-              && (Time_cur < End_time)); Icyc++) {
+    for (Icyc = 1; ((Icyc <= Ncyc) && (Alpha_cur < Alpha_max) && (Time_cur < End_time)); Icyc++) {
 
         /* Write progress to progress file */
 
@@ -516,12 +509,31 @@ int main(int argc, char *argv[])
             kslag = exp(-(act_nrg * recip_Tdiff));
 
             /***
+            *    Modify silica fume probabilities.  There are
+            *    two effects postulated:
+            *    1. Early age effect due to nucleating capability
+            *       of silica fume with high BET values
+            *    2. Later age pozzolanic reactivity due to
+            *       SiO2 content of the silica fume (Psfume)
+            ***/
+
+            /** Late age effect dictated by Psfume **/
+            /** Psfume is for converting DIFFCH to POZZCSH **/
+
+            Psfume = PSFUME * (kpozz / Krate);
+            psfact = (SF_SiO2_val)/(SF_SiO2_normal);
+            betfact = (SF_BET_val)/(SF_BET_normal);
+            Psfume *= (3.0 * psfact * psfact * betfact);
+            if (Psfume > 1.0) Psfume = 1.0;
+            LOI_factor = 25.0 * (SF_LOI_val / SF_LOI_normal);
+            if (LOI_factor < 1.0) LOI_factor = 1.0;
+
+            /***
             *    Modify probability of pozzolanic and slag
             *    reactions based on ratio of pozzolanic (slag)
             *    reaction rate to the hydration rate
             ***/
 
-            Psfume = PSFUME * (kpozz / Krate);
             Pamsil = PAMSIL * (kpozz / Krate);
             Disprob[ASG] = Disbase[ASG] * (kpozz / Krate);
             Disprob[CAS2] = Disbase[CAS2] * (kpozz / Krate);
@@ -608,7 +620,17 @@ int main(int argc, char *argv[])
             *    reaction rate to the hydration rate
             ***/
 
+            /** Late age effect dictated by Psfume **/
+            /** Psfume is for converting DIFFCH to POZZCSH **/
+
             Psfume = PSFUME * (kpozz / Krate);
+            psfact = (SF_SiO2_val)/(SF_SiO2_normal);
+            betfact = (SF_BET_val)/(SF_BET_normal);
+            Psfume *= (3.0 * psfact * psfact * betfact);
+            if (Psfume > 1.0) Psfume = 1.0;
+            LOI_factor = 25.0 * (SF_LOI_val / SF_LOI_normal);
+            if (LOI_factor < 1.0) LOI_factor = 1.0;
+
             Pamsil = PAMSIL * (kpozz / Krate);
             Disprob[ASG] = Disbase[ASG] * (kpozz / Krate);
             Disprob[CAS2] = Disbase[CAS2] * (kpozz / Krate);
@@ -628,9 +650,7 @@ int main(int argc, char *argv[])
                     dval = Heat_new * Heat_cf;
                     sprintf(typestring,"calorimetric");
                     if (dval < DataValue[0]) {
-                        if (Verbose) printf("\ndval = %f, DataValue[0] = %f, "
-                                            "DataValue[1] = %f\n",
-                                            dval,DataValue[0],DataValue[1]);
+                        if (Verbose) printf("\ndval = %f, DataValue[0] = %f, DataValue[1] = %f\n",dval,DataValue[0],DataValue[1]);
                         TimeHistory[Cyccnt] = DataTime[0];
                     } else {
                         findnewtime(dval,act_nrg,&previousUncorrectedTime,typestring);
@@ -641,9 +661,7 @@ int main(int argc, char *argv[])
                     if (dval <= 0.0) dval = 0.00001;
                     sprintf(typestring,"chemical shrinkage");
                     if (dval < DataValue[0]) {
-                        if (Verbose) printf("\ndval = %f, DataValue[0] = %f, "
-                                            "DataValue[1] = %f\n",
-                                            dval,DataValue[0],DataValue[1]);
+                        if (Verbose) printf("\ndval = %f, DataValue[0] = %f, DataValue[1] = %f\n",dval,DataValue[0],DataValue[1]);
                         TimeHistory[Cyccnt] = DataTime[0];
                     } else {
                         findnewtime(dval,act_nrg,&previousUncorrectedTime,typestring);
@@ -757,28 +775,24 @@ int main(int argc, char *argv[])
                     Water_off = Water_left;
                     Pore_off = Countkeep;
                     Sealed = 1;
-                    if (Verbose) printf("Switching to self-desiccating "
-                                        "at cycle %d \n",Cyccnt);
+                    if (Verbose) printf("Switching to self-desiccating at cycle %d \n",Cyccnt);
                 }
             } else {
                  if ((Porefl1 == 0) && (Crackorient == 1) && (!Sealed)) {
                      Water_off = Water_left;
                      Pore_off = Countkeep;
                      Sealed = 1;
-                     if (Verbose) printf("Switching to self-desiccating "
-                                         "at cycle %d \n",Cyccnt);
+                     if (Verbose) printf("Switching to self-desiccating at cycle %d \n",Cyccnt);
                  } else if ((Porefl2 == 0) && (Crackorient == 2) && (!Sealed)) {
                      Water_off = Water_left;
                      Pore_off = Countkeep;
                      Sealed = 1;
-                     if (Verbose) printf("Switching to self-desiccating "
-                                         "at cycle %d \n",Cyccnt);
+                     if (Verbose) printf("Switching to self-desiccating at cycle %d \n",Cyccnt);
                  } else if ((Porefl3 == 0) && (Crackorient == 3) && (!Sealed)) {
                      Water_off = Water_left;
                      Pore_off = Countkeep;
                      Sealed = 1;
-                     if (Verbose) printf("Switching to self-desiccating "
-                                         "at cycle %d \n",Cyccnt);
+                     if (Verbose) printf("Switching to self-desiccating at cycle %d \n",Cyccnt);
                  }
             }
 */
@@ -1135,9 +1149,11 @@ int main(int argc, char *argv[])
             fclose(Micfile);
 
             /* With microstructure now written, calculate pore size distribution */
+            printf("\nCalculating pore size distribution now...");
             if (calcporedist3d(Micname)) {
                 printf("\nThere was a problem calculating the pore size distribution.\n");
             }
+            printf("Done calculating pore size distribution.\n");
         }
 
         /* Attempt to open master data file */
@@ -1147,57 +1163,33 @@ int main(int argc, char *argv[])
             freeallmem();
             exit(1);
         }
-        fprintf(Datafile,"%d\t%.4f\t%.4f\t%.4f\t",Cyccnt-1,Time_cur,
-                         Alpha_cur,Alpha_fa_cur);
-        fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",(Heat_new * Heat_cf),
-                         Temp_cur_b,Gsratio2);
-        fprintf(Datafile,"%.4f\t%.4f\t%.5f\t%.4f\t",Wn_o,Wn_i,Chs_new,PH_cur);
-        fprintf(Datafile,"%.4f\t%.4f\t%.4f\t%.4f\t",Conductivity,Concnaplus,
-                         Conckplus,Conccaplus);
-        fprintf(Datafile,"%.4f\t%.4f\t%.4f\t%.4f\t",Concsulfate,ActivityK,
-                         ActivityCa,ActivityOH);
-        fprintf(Datafile,"%.4f\t%.4f\t",ActivitySO4,
-                         ((float)Count[POROSITY]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",Con_fracp[0],Con_fracp[1],
-                         Con_fracp[2]);
-        fprintf(Datafile,"%.4f\t",(Con_fracp[0]+Con_fracp[1]+Con_fracp[2])/3.0);
-        fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",Con_fracs[0],Con_fracs[1],
-                         Con_fracs[2]);
-        fprintf(Datafile,"%.4f\t",(Con_fracs[0]+Con_fracs[1]+Con_fracs[2])/3.0);
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3S]/(float)Syspix),
-                         ((float)Count[C2S]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3A]/(float)Syspix),
-                         ((float)Count[OC3A]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C4AF]/(float)Syspix),
-                         ((float)Count[K2SO4]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[NA2SO4]/(float)Syspix),
-                         ((float)Count[GYPSUM]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[HEMIHYD]/(float)Syspix),
-                         ((float)Count[ANHYDRITE]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CACO3]/(float)Syspix),
-                         ((float)Count[FREELIME]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[SFUME]/(float)Syspix),
-                         ((float)Count[INERT]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[SLAG]/(float)Syspix),
-                         ((float)Count[ASG]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CAS2]/(float)Syspix),
-                         ((float)Count[AMSIL]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CH]/(float)Syspix),
-                         ((float)Count[CSH]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[POZZCSH]/(float)Syspix),
-                         ((float)Count[SLAGCSH]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3AH6]/(float)Syspix),
-                         ((float)(Count[ETTR]+Count[ETTRC4AF])/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[AFM]/(float)Syspix),
-                         ((float)Count[FH3]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CACL2]/(float)Syspix),
-                         ((float)Count[FRIEDEL]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[STRAT]/(float)Syspix),
-                         ((float)Count[GYPSUMS]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[ABSGYP]/(float)Syspix),
-                         ((float)Count[AFMC]/(float)Syspix));
-        fprintf(Datafile,"%.4f\t%.4f\n",((float)Count[INERTAGG]/(float)Syspix),
-                         ((float)Count[EMPTYP]/(float)Syspix));
+        fprintf(Datafile,"%d,%.4f,%.4f,%.4f,",Cyccnt-1,Time_cur,Alpha_cur,Alpha_fa_cur);
+        fprintf(Datafile,"%.4f,%.4f,%.4f,",(Heat_new * Heat_cf),Temp_cur_b,Gsratio2);
+        fprintf(Datafile,"%.4f,%.4f,%.5f,%.4f,",Wn_o,Wn_i,Chs_new,PH_cur);
+        fprintf(Datafile,"%.4f,%.4f,%.4f,%.4f,",Conductivity,Concnaplus,Conckplus,Conccaplus);
+        fprintf(Datafile,"%.4f,%.4f,%.4f,%.4f,",Concsulfate,ActivityK,ActivityCa,ActivityOH);
+        fprintf(Datafile,"%.4f,%.4f,",ActivitySO4,((float)Count[POROSITY]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,%.4f,",Con_fracp[0],Con_fracp[1],Con_fracp[2]);
+        fprintf(Datafile,"%.4f,",(Con_fracp[0]+Con_fracp[1]+Con_fracp[2])/3.0);
+        fprintf(Datafile,"%.4f,%.4f,%.4f,",Con_fracs[0],Con_fracs[1],Con_fracs[2]);
+        fprintf(Datafile,"%.4f,",(Con_fracs[0]+Con_fracs[1]+Con_fracs[2])/3.0);
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3S]/(float)Syspix),((float)Count[C2S]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3A]/(float)Syspix),((float)Count[OC3A]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[C4AF]/(float)Syspix),((float)Count[K2SO4]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[NA2SO4]/(float)Syspix),((float)Count[GYPSUM]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[HEMIHYD]/(float)Syspix),((float)Count[ANHYDRITE]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[CACO3]/(float)Syspix),((float)Count[FREELIME]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[SFUME]/(float)Syspix),((float)Count[INERT]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[SLAG]/(float)Syspix),((float)Count[ASG]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[CAS2]/(float)Syspix),((float)Count[AMSIL]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[CH]/(float)Syspix),((float)Count[CSH]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[POZZCSH]/(float)Syspix),((float)Count[SLAGCSH]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3AH6]/(float)Syspix),((float)(Count[ETTR]+Count[ETTRC4AF])/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[AFM]/(float)Syspix),((float)Count[FH3]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[CACL2]/(float)Syspix),((float)Count[FRIEDEL]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[STRAT]/(float)Syspix),((float)Count[GYPSUMS]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f,",((float)Count[ABSGYP]/(float)Syspix),((float)Count[AFMC]/(float)Syspix));
+        fprintf(Datafile,"%.4f,%.4f\n",((float)Count[INERTAGG]/(float)Syspix),((float)Count[EMPTYP]/(float)Syspix));
         fclose(Datafile);
 
     }    /*    End of loop over all hydration cycles */
@@ -1337,58 +1329,33 @@ int main(int argc, char *argv[])
         freeallmem();
         exit(1);
     }
-    fprintf(Datafile,"%d\t%.4f\t%.4f\t%.4f\t",
-                     Cyccnt-1,Time_cur,Alpha_cur,Alpha_fa_cur);
-    fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",
-                     (Heat_new * Heat_cf),Temp_cur_b,Gsratio2);
-    fprintf(Datafile,"%.4f\t%.4f\t%.5f\t%.4f\t",
-                     Wn_o,Wn_i,Chs_new,PH_cur);
-    fprintf(Datafile,"%.4f\t%.4f\t%.4f\t%.4f\t",
-                     Conductivity,Concnaplus,Conckplus,Conccaplus);
-    fprintf(Datafile,"%.4f\t%.4f\t%.4f\t%.4f\t",
-                     Concsulfate,ActivityK,ActivityCa,ActivityOH);
-    fprintf(Datafile,"%.4f\t%.4f\t",
-                     ActivitySO4,((float)Count[POROSITY]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",Con_fracp[0],Con_fracp[1],
-                     Con_fracp[2]);
-    fprintf(Datafile,"%.4f\t",(Con_fracp[0]+Con_fracp[1]+Con_fracp[2])/3.0);
-    fprintf(Datafile,"%.4f\t%.4f\t%.4f\t",Con_fracs[0],Con_fracs[1],
-                     Con_fracs[2]);
-    fprintf(Datafile,"%.4f\t",(Con_fracs[0]+Con_fracs[1]+Con_fracs[2])/3.0);
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3S]/(float)Syspix),
-                     ((float)Count[C2S]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3A]/(float)Syspix),
-                     ((float)Count[OC3A]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C4AF]/(float)Syspix),
-                     ((float)Count[K2SO4]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[NA2SO4]/(float)Syspix),
-                     ((float)Count[GYPSUM]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[HEMIHYD]/(float)Syspix),
-                     ((float)Count[ANHYDRITE]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CACO3]/(float)Syspix),
-                     ((float)Count[FREELIME]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[SFUME]/(float)Syspix),
-                     ((float)Count[INERT]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[SLAG]/(float)Syspix),
-                     ((float)Count[ASG]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CAS2]/(float)Syspix),
-                     ((float)Count[AMSIL]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CH]/(float)Syspix),
-                     ((float)Count[CSH]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[POZZCSH]/(float)Syspix),
-                     ((float)Count[SLAGCSH]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[C3AH6]/(float)Syspix),
-                     ((float)(Count[ETTR]+Count[ETTRC4AF])/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[AFM]/(float)Syspix),
-                     ((float)Count[FH3]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[CACL2]/(float)Syspix),
-                     ((float)Count[FRIEDEL]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[STRAT]/(float)Syspix),
-                     ((float)Count[GYPSUMS]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\t",((float)Count[ABSGYP]/(float)Syspix),
-                     ((float)Count[AFMC]/(float)Syspix));
-    fprintf(Datafile,"%.4f\t%.4f\n",((float)Count[INERTAGG]/(float)Syspix),
-                     ((float)Count[EMPTYP]/(float)Syspix));
+    fprintf(Datafile,"%d,%.4f,%.4f,%.4f,",Cyccnt-1,Time_cur,Alpha_cur,Alpha_fa_cur);
+    fprintf(Datafile,"%.4f,%.4f,%.4f,",(Heat_new * Heat_cf),Temp_cur_b,Gsratio2);
+    fprintf(Datafile,"%.4f,%.4f,%.5f,%.4f,",Wn_o,Wn_i,Chs_new,PH_cur);
+    fprintf(Datafile,"%.4f,%.4f,%.4f,%.4f,",Conductivity,Concnaplus,Conckplus,Conccaplus);
+    fprintf(Datafile,"%.4f,%.4f,%.4f,%.4f,",Concsulfate,ActivityK,ActivityCa,ActivityOH);
+    fprintf(Datafile,"%.4f,%.4f,",ActivitySO4,((float)Count[POROSITY]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,%.4f,",Con_fracp[0],Con_fracp[1],Con_fracp[2]);
+    fprintf(Datafile,"%.4f,",(Con_fracp[0]+Con_fracp[1]+Con_fracp[2])/3.0);
+    fprintf(Datafile,"%.4f,%.4f,%.4f,",Con_fracs[0],Con_fracs[1],Con_fracs[2]);
+    fprintf(Datafile,"%.4f,",(Con_fracs[0]+Con_fracs[1]+Con_fracs[2])/3.0);
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3S]/(float)Syspix),((float)Count[C2S]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3A]/(float)Syspix),((float)Count[OC3A]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[C4AF]/(float)Syspix),((float)Count[K2SO4]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[NA2SO4]/(float)Syspix),((float)Count[GYPSUM]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[HEMIHYD]/(float)Syspix),((float)Count[ANHYDRITE]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[CACO3]/(float)Syspix),((float)Count[FREELIME]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[SFUME]/(float)Syspix),((float)Count[INERT]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[SLAG]/(float)Syspix),((float)Count[ASG]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[CAS2]/(float)Syspix),((float)Count[AMSIL]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[CH]/(float)Syspix),((float)Count[CSH]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[POZZCSH]/(float)Syspix),((float)Count[SLAGCSH]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[C3AH6]/(float)Syspix),((float)(Count[ETTR]+Count[ETTRC4AF])/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[AFM]/(float)Syspix),((float)Count[FH3]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[CACL2]/(float)Syspix),((float)Count[FRIEDEL]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[STRAT]/(float)Syspix),((float)Count[GYPSUMS]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f,",((float)Count[ABSGYP]/(float)Syspix),((float)Count[AFMC]/(float)Syspix));
+    fprintf(Datafile,"%.4f,%.4f\n",((float)Count[INERTAGG]/(float)Syspix),((float)Count[EMPTYP]/(float)Syspix));
     fclose(Datafile);
 
     /* Attempt to open time history file */
@@ -1447,8 +1414,6 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
 {
     int i,j,k,status = 0;
     int onepixfloc = 0;
-    int inputcounter;
-    const int num_pre_pH_params = 67;
     int nlen,phtodo,valin,ovalin,dphase,deactphase;
     int ix,iy,iz,x,y;
     int newx,newy,newz;
@@ -1591,205 +1556,462 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         return(1);
     }
 
-    inputcounter = 0;
-
-    while (inputcounter < num_pre_pH_params) {
-        fscanf(fprmfile,"%s %s",name,instring);
-        if (feof(fprmfile)) {
-            printf("Premature end of parameter file!!\n");
-            return(1);
-        }
-        if (Verbose) printf("%s %s\n",name,instring);
-        inputcounter++;
-        if (!strcmp(name,"Cubesize")) {                           /*  1  */
-            Cubesize = atoi(instring);
-        } else if (!strcmp(name,"Cubemin")) {                     /*  2  */
-            CUBEMIN = atoi(instring);
-        } else if (!strcmp(name,"Psfume")) {                      /*  3  */
-            PSFUME = atof(instring);
-        } else if (!strcmp(name,"SF_SiO2_max")) {                 /*  4  */
-            SF_SiO2_max = atof(instring);
-        } else if (!strcmp(name,"SF_SiO2_mid")) {                 /*  5  */
-            SF_SiO2_mid = atof(instring);
-        } else if (!strcmp(name,"SF_SiO2_min")) {                 /*  6  */
-            SF_SiO2_min = atof(instring);
-        } else if (!strcmp(name,"SF_SiO2_val")) {                 /*  7  */
-            SF_SiO2_val = atof(instring);
-        } else if (!strcmp(name,"SF_LOI_max")) {                  /*  8  */
-            SF_LOI_max = atof(instring);
-        } else if (!strcmp(name,"SF_LOI_mid")) {                  /*  9  */
-            SF_LOI_mid = atof(instring);
-        } else if (!strcmp(name,"SF_LOI_min")) {                  /* 10  */
-            SF_LOI_min = atof(instring);
-        } else if (!strcmp(name,"SF_LOI_val")) {                  /* 11  */
-            SF_LOI_val = atof(instring);
-        } else if (!strcmp(name,"SF_SiO2_coeff")) {               /* 12  */
-            SF_SiO2_coeff = atof(instring);
-        } else if (!strcmp(name,"SF_LOI_coeff")) {                /* 13  */
-            SF_LOI_coeff = atof(instring);
-        } else if (!strcmp(name,"SF_offset")) {                   /* 14  */
-            SF_offset = atof(instring);
-        } else if (!strcmp(name,"Pamsil")) {                      /* 15  */
-            PAMSIL = atof(instring);
-        } else if (!strcmp(name,"Maxtries")) {                    /* 16  */
-            MAXTRIES = atoi(instring);
-        } else if (!strcmp(name,"Disbias")) {                     /* 17  */
-            DISBIAS = atof(instring);
-            Disbias = DISBIAS;
-        } else if (!strcmp(name,"Dismin")) {                      /* 18  */
-            DISMIN = atof(instring);
-            Dismin = DISMIN;
-        } else if (!strcmp(name,"Dismin2")) {                     /* 19  */
-            DISMIN2 = atof(instring);
-            Dismin2 = DISMIN2;
-        } else if (!strcmp(name,"Disminslag")) {                  /* 20  */
-            DISMINSLAG = atof(instring);
-            Disminslag = DISMINSLAG;
-        } else if (!strcmp(name,"Disminasg")) {                   /* 21  */
-            DISMINASG = atof(instring);
-            Disminasg = DISMINASG;
-        } else if (!strcmp(name,"Dismincas2")) {                  /* 22  */
-            DISMINCAS2 = atof(instring);
-            Dismincas2 = DISMINCAS2;
-        } else if (!strcmp(name,"Dismin_c3a_0")) {                /* 23  */
-            DISMIN_C3A_0 = atof(instring);
-            Dismin_c3a = DISMIN_C3A_0;
-        } else if (!strcmp(name,"Dismin_c4af_0")) {               /* 24  */
-            DISMIN_C4AF_0 = atof(instring);
-            Dismin_c4af = DISMIN_C4AF_0;
-        } else if (!strcmp(name,"Dk2so4max")) {                   /* 25  */
-            DK2SO4MAX = atoi(instring);
-        } else if (!strcmp(name,"Dna2so4max")) {                  /* 26  */
-            DNA2SO4MAX = atoi(instring);
-        } else if (!strcmp(name,"Dettrmax")) {                    /* 27  */
-            DETTRMAX = atoi(instring);
-        } else if (!strcmp(name,"Dgypmax")) {                     /* 28  */
-            DGYPMAX = atoi(instring);
-        } else if (!strcmp(name,"Dcaco3max")) {                   /* 29  */
-            DCACO3MAX = atoi(instring);
-        } else if (!strcmp(name,"Dcacl2max")) {                   /* 30  */
-            DCACL2MAX = atoi(instring);
-        } else if (!strcmp(name,"Dcas2max")) {                    /* 31  */
-            DCAS2MAX = atoi(instring);
-        } else if (!strcmp(name,"Dasmax")) {                      /* 32  */
-            DASMAX = atoi(instring);
-        } else if (!strcmp(name,"Chcrit")) {                      /* 33  */
-            CHCRIT = atof(instring);
-        } else if (!strcmp(name,"pnucch")) {                      /* 34  */
-            *pnucch = atof(instring);
-        } else if (!strcmp(name,"pscalech")) {                    /* 35  */
-            *pscalech = atof(instring);
-        } else if (!strcmp(name,"pnucgyp")) {                     /* 36  */
-            *pnucgyp = atof(instring);
-        } else if (!strcmp(name,"pscalegyp")) {                   /* 37  */
-            *pscalegyp = atof(instring);
-        } else if (!strcmp(name,"pnuchg")) {                      /* 38  */
-            *pnuchg = atof(instring);
-        } else if (!strcmp(name,"pscalehg")) {                    /* 39  */
-            *pscalehg = atof(instring);
-        } else if (!strcmp(name,"pnucfh3")) {                     /* 40  */
-            *pnucfh3 = atof(instring);
-        } else if (!strcmp(name,"pscalefh3")) {                   /* 41  */
-            *pscalefh3 = atof(instring);
-        } else if (!strcmp(name,"C3ah6crit")) {                   /* 42  */
-            C3AH6CRIT = atof(instring);
-        } else if (!strcmp(name,"Cshscale")) {                    /* 43  */
-            CSHSCALE = atof(instring);
-        } else if (!strcmp(name,"C3ah6_scale")) {                 /* 44  */
-            C3AH6_SCALE = atof(instring);
-        } else if (!strcmp(name,"C3ah6grow")) {                   /* 45  */
-            C3AH6GROW = atof(instring);
-        } else if (!strcmp(name,"Chgrow")) {                      /* 46  */
-            CHGROW = atof(instring);
-        } else if (!strcmp(name,"Chgrowagg")) {                   /* 47  */
-            CHGROWAGG = atof(instring) ;
-        } else if (!strcmp(name,"Ettrgrow")) {                    /* 48  */
-            ETTRGROW = atof(instring);
-        } else if (!strcmp(name,"C3aettr")) {                     /* 49  */
-            C3AETTR = atof(instring);
-        } else if (!strcmp(name,"C3agyp")) {                      /* 50  */
-            C3AGYP = atof(instring);
-        } else if (!strcmp(name,"Solidc3agyp")) {                 /* 51  */
-            SOLIDC3AGYP = atof(instring);
-        } else if (!strcmp(name,"Solidc4afgyp")) {                /* 52  */
-            SOLIDC4AFGYP = atof(instring);
-        } else if (!strcmp(name,"Agrate")) {                      /* 53  */
-            AGRATE = atof(instring);
-        } else if (!strcmp(name,"Pcsh2csh")) {                    /* 54  */
-            PCSH2CSH = atof(instring);
-        } else if (!strcmp(name,"A0_chsol")) {                    /* 55  */
-            A0_CHSOL = atof(instring);
-        } else if (!strcmp(name,"A1_chsol")) {                    /* 56  */
-            A1_CHSOL = atof(instring);
-        } else if (!strcmp(name,"Wcscale")) {                     /* 57  */
-            WCSCALE = atof(instring);
-        } else if (!strcmp(name,"Distloccsh")) {                  /* 58  */
-            DISTLOCCSH = atoi(instring);
-        } else if (!strcmp(name,"Neighbors")) {                   /* 59  */
-            NEIGHBORS = atoi(instring);
-        } else if (!strcmp(name,"Wn")) {                          /* 60  */
-            WN = atof(instring);
-        } else if (!strcmp(name,"Wchsh")) {                       /* 61  */
-            WCHSH = atof(instring);
-        } else if (!strcmp(name,"Maxdiffsteps")) {                /* 62  */
-            MAXDIFFSTEPS = atoi(instring);
-        } else if (!strcmp(name,"Pdiffcsh")) {                    /* 63  */
-            PDIFFCSH = atof(instring);
-        } else if (!strcmp(name,"Gypabsprob")) {                  /* 64  */
-            /***
-            *    Number of sulfates absorbed per 100 CSH units
-            *    Currently not used by program
-            ***/
-
-            Gypabsprob = atof(instring);
-        } else if (!strcmp(name,"CSH_Porosity")) {                /* 65  */
-
-            /***
-            *    Gel porosity of CSH, POZZCSH, and SLAGCSH
-            *    Used in pHpred function
-            ***/
-
-            CSH_Porosity = atof(instring);
-        } else if (!strcmp(name,"POZZCSH_Porosity")) {            /* 66  */
-
-            /***
-            *    Gel porosity of CSH, POZZCSH, and SLAGCSH
-            *    Used in pHpred function
-            ***/
-
-            POZZCSH_Porosity = atof(instring);
-        } else if (!strcmp(name,"SLAGCSH_Porosity")) {            /* 67  */
-
-            /***
-            *    Gel porosity of CSH, POZZCSH, and SLAGCSH
-            *    Used in pHpred function
-            ***/
-
-            SLAGCSH_Porosity = atof(instring);
-        } else {
-            printf("\n\nWARNING: Unknown parameter name "
-                   "%s in parameter file!\n\n",instring);
-        }
+    fscanf(fprmfile,"%s %s",name,instring);
+    Cubesize = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,Cubesize);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    CUBEMIN = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,CUBEMIN);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    PSFUME = atof(instring);
+    if (Verbose) printf("%s %f\n",name,PSFUME);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_SiO2_val = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_SiO2_val);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_BET_val = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_BET_val);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_LOI_val = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_LOI_val);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_SiO2_normal = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_SiO2_normal);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_BET_normal = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_BET_normal);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SF_LOI_normal = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SF_LOI_normal);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    PAMSIL = atof(instring);
+    if (Verbose) printf("%s %f\n",name,PAMSIL);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    MAXTRIES = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,MAXTRIES);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISBIAS = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISBIAS);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Disbias = DISBIAS;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMIN = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMIN);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Dismin = DISMIN;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMIN2 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMIN2);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Dismin2 = DISMIN2;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMINSLAG = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMINSLAG);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Disminslag = DISMINSLAG;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMINASG = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMINASG);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Disminasg = DISMINASG;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMINCAS2 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMINCAS2);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Dismincas2 = DISMINCAS2;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMIN_C3A_0 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMIN_C3A_0);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Dismin_c3a = DISMIN_C3A_0;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISMIN_C4AF_0 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,DISMIN_C4AF_0);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    Dismin_c4af = DISMIN_C4AF_0;
+    fscanf(fprmfile,"%s %s",name,instring);
+    DK2SO4MAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DK2SO4MAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DNA2SO4MAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DNA2SO4MAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DETTRMAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DETTRMAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DGYPMAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DGYPMAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DCACO3MAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DCACO3MAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DCACL2MAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DCACL2MAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DCAS2MAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DCAS2MAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DASMAX = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DASMAX);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    CHCRIT = atof(instring);
+    if (Verbose) printf("%s %f\n",name,CHCRIT);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pnucch = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pnucch);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pscalech = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pscalech);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pnucgyp = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pnucgyp);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pscalegyp = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pscalegyp);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pnuchg = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pnuchg);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pscalehg = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pscalehg);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pnucfh3 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pnucfh3);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    *pscalefh3 = atof(instring);
+    if (Verbose) printf("%s %f\n",name,*pscalefh3);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    C3AH6CRIT = atof(instring);
+    if (Verbose) printf("%s %f\n",name,C3AH6CRIT);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    CSHSCALE = atof(instring);
+    if (Verbose) printf("%s %f\n",name,CSHSCALE);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    C3AH6_SCALE = atof(instring);
+    if (Verbose) printf("%s %f\n",name,C3AH6_SCALE);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    C3AH6GROW = atof(instring);
+    if (Verbose) printf("%s %f\n",name,C3AH6GROW);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    CHGROW = atof(instring);
+    if (Verbose) printf("%s %f\n",name,CHGROW);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    CHGROWAGG = atof(instring);
+    if (Verbose) printf("%s %f\n",name,CHGROWAGG);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    ETTRGROW = atof(instring);
+    if (Verbose) printf("%s %f\n",name,ETTRGROW);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    C3AETTR = atof(instring);
+    if (Verbose) printf("%s %f\n",name,C3AETTR);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    C3AGYP = atof(instring);
+    if (Verbose) printf("%s %f\n",name,C3AGYP);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SOLIDC3AGYP = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SOLIDC3AGYP);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    SOLIDC4AFGYP = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SOLIDC4AFGYP);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    AGRATE = atof(instring);
+    if (Verbose) printf("%s %f\n",name,AGRATE);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    PCSH2CSH = atof(instring);
+    if (Verbose) printf("%s %f\n",name,PCSH2CSH);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    A0_CHSOL = atof(instring);
+    if (Verbose) printf("%s %f\n",name,A0_CHSOL);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    A1_CHSOL = atof(instring);
+    if (Verbose) printf("%s %f\n",name,A1_CHSOL);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    WCSCALE = atof(instring);
+    if (Verbose) printf("%s %f\n",name,WCSCALE);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    DISTLOCCSH = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,DISTLOCCSH);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    NEIGHBORS = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,NEIGHBORS);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    WN = atof(instring);
+    if (Verbose) printf("%s %f\n",name,WN);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    WCHSH = atof(instring);
+    if (Verbose) printf("%s %f\n",name,WCHSH);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    MAXDIFFSTEPS = atoi(instring);
+    if (Verbose) printf("%s %d\n",name,MAXDIFFSTEPS);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+    fscanf(fprmfile,"%s %s",name,instring);
+    PDIFFCSH = atof(instring);
+    if (Verbose) printf("%s %f\n",name,PDIFFCSH);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
     }
 
-    if (SF_SiO2_max <= SF_SiO2_min) {
-        printf("\n\nWARNING: Max and min values on SF SiO2 range are ill-defined");
-        printf("\n       Arbitrarily setting max to (min + 0.5)\n");
-        if (SF_SiO2_min < 100.0) {
-            SF_SiO2_max = SF_SiO2_min + 0.5;
-            if (SF_SiO2_max > 100.0) SF_SiO2_max = 100.0;
-        }
-    }
-    SF_SiO2_level = (SF_SiO2_mid - SF_SiO2_min) / (SF_SiO2_max - SF_SiO2_min);
-    SF_SiO2_norm = (SF_SiO2_val - SF_SiO2_min) / (SF_SiO2_max - SF_SiO2_min);
+    /***
+    *    Number of sulfates absorbed per 100 CSH units
+    *    Currently not used by program
+    ***/
 
-    if (SF_LOI_max <= SF_LOI_min) {
-        printf("\n\nWARNING: Max and min values on SF LOI range are ill-defined");
-        printf("\n       Arbitrarily setting max to (min + 0.1)\n");
-        SF_LOI_max = SF_LOI_min + 0.1;
+    fscanf(fprmfile,"%s %s",name,instring);
+    Gypabsprob = atof(instring);
+    if (Verbose) printf("%s %f\n",name,Gypabsprob);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
     }
-    SF_LOI_level = (SF_LOI_mid - SF_LOI_min) / (SF_LOI_max - SF_LOI_min);
-    SF_LOI_norm = (SF_LOI_val - SF_LOI_min) / (SF_LOI_max - SF_LOI_min);
+
+    /***
+    *    Gel porosity of CSH, POZZCSH, and SLAGCSH
+    *    Used in pHpred function
+    ***/
+
+    fscanf(fprmfile,"%s %s",name,instring);
+    CSH_Porosity = atof(instring);
+    if (Verbose) printf("%s %f\n",name,CSH_Porosity);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+
+    fscanf(fprmfile,"%s %s",name,instring);
+    POZZCSH_Porosity = atof(instring);
+    if (Verbose) printf("%s %f\n",name,POZZCSH_Porosity);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
+
+    fscanf(fprmfile,"%s %s",name,instring);
+    SLAGCSH_Porosity = atof(instring);
+    if (Verbose) printf("%s %f\n",name,SLAGCSH_Porosity);
+    if (feof(fprmfile)) {
+        printf("Premature end of parameter file!!\n");
+        return(1);
+    }
 
     /***
     *    Read X and Y values for a second-order fit
@@ -2177,8 +2399,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         return(1);
     }
 
-    if (read_imgheader(fimgfile,&Version,&Xsyssize_orig,
-                       &Ysyssize_orig,&Zsyssize_orig,&Res)) {
+    if (read_imgheader(fimgfile,&Version,&Xsyssize_orig,&Ysyssize_orig,&Zsyssize_orig,&Res)) {
         fclose(fimgfile);
         freeallmem();
         bailout("disrealnew","Error reading image header");
@@ -2216,8 +2437,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     *    (See disrealnew.h for their declaration)
     ***/
 
-    if (Verbose) printf("\tAllocating Mic with dimensions "
-                        "%d %d %d...",Xsyssize,Ysyssize,Zsyssize);
+    if (Verbose) printf("\tAllocating Mic with dimensions %d %d %d...",Xsyssize,Ysyssize,Zsyssize);
     Mic = cbox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
     if (!Mic) {
         freeallmem();
@@ -2520,9 +2740,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     E_act_slag = atof(instring);
     printf("%f \n",E_act_slag);
 
-    printf("Calibrate time using beta factor (0), "
-           "early-age calorimetry data (1), or early-age "
-           "chemical shrinkage data (2): ");
+    printf("Calibrate time using beta factor (0), early-age calorimetry data (1), or early-age chemical shrinkage data (2): ");
     read_string(instring,sizeof(instring));
     TimeCalibrationMethod = atoi(instring);
     if (TimeCalibrationMethod == BETAFACTOR) {
@@ -2611,23 +2829,19 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
             if (i == 0) {
                 DataTime[i] = atof(buff1);
                 DataValue[i] = atof(buff2);
-                if (Verbose) printf("\nDataTime[%d] = %f, "
-                                    "DataValue[%d] = %f\n",
-                                    i,DataTime[i],i,DataValue[i]);
+                if (Verbose) printf("\nDataTime[%d] = %f, DataValue[%d] = %f\n",i,DataTime[i],i,DataValue[i]);
                 i++;
             } else {
                 DataTime[i] = atof(buff1);
                 DataValue[i] = atof(buff2);
-                if ((DataTime[i] > DataTime[i-1])
-                        && (DataValue[i] >= DataValue[i-1])) i++;
+                if ((DataTime[i] > DataTime[i-1]) && (DataValue[i] >= DataValue[i-1])) i++;
             }
         }
 
         NDataLines = i;
 
         fclose(fcalfile);
-        printf("Enter temperature at which calibration "
-               "data were obtained (in deg C): ");
+        printf("Enter temperature at which calibration data was obtained (in deg C): ");
         read_string(buff,sizeof(buff));
         printf("%s \n",buff);
         DataMeasuredAtTemperature = atof(buff);
@@ -2636,9 +2850,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     /* Have enough informatino to calculate upper bound on number of cycles */
 
     if (TimeCalibrationMethod == BETAFACTOR) {
-        b_estimate = Beta * exp(
-                (1000.0 * E_act/8.314)*((1.0/(Temp_0 + 273.15)) - (1.0/298.15))
-                               );
+        b_estimate = Beta * exp((1000.0 * E_act/8.314)*((1.0/(Temp_0 + 273.15)) - (1.0/298.15)));
         Ncyc = (int)((2.0 * sqrt(End_time/b_estimate)) + 0.5);
     } else {
         /* No way to estimate Ncyc rationally, so set it to a very large value and be
@@ -2649,8 +2861,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     if (Crackwidth == 0) Cracktime = End_time + 100.0;
     if (CustomImageTime != NULL) {
         OutTimefreq = End_time + 1.0;
-        printf("\nSetting DOH frequency for outputting "
-               "microstructure = %f\n",OutTimefreq);
+        printf("\nSetting DOH frequency for outputting microstructure = %f\n",OutTimefreq);
         fflush(stdout);
     }
 
@@ -2737,7 +2948,6 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     read_string(instring,sizeof(instring));
     Phydtimefreq = atof(instring);
     printf("\n%f\n",Phydtimefreq);
-
 
     printf("Enter mass fraction of aggregate in concrete \n");
     read_string(buff,sizeof(buff));
@@ -2907,8 +3117,8 @@ void init(void)
 
     /* Initialize counters, etc. */
 
-    Npr = Nasr = Nslagr = 0;
-    Nfill = 0;
+    Nsilica_rx = Nasr = Nslagr = 0;
+    Nsilica = 0;
     Ncsbar = 0;
     Netbar = 0;
     Porinit = 0;
@@ -2954,11 +3164,6 @@ void init(void)
 
     PH_cur = 7.0;
 
-    /***
-     * System resolution is not fully implemented, so one
-     * should always use Res = 1.0 (length of a voxel edge
-     * in micrometers), meaning refact = 1
-     ***/
     resfact = pow((1.0/Res),1.25);
 
     for (i = C3S; i <= NSPHASES; i++) {
@@ -2978,9 +3183,7 @@ void init(void)
         *    Disprob[x] - probability of dissolution (relative diss. rate)
         ***/
 
-        if (Verbose) printf("\nSetting Disbase[%d]: resfact = %f, "
-                            "Discoeff[%d] = %f, DISBIAS = %f",
-                            i,resfact,i,Discoeff[i],DISBIAS);
+        if (Verbose) printf("\nSetting Disbase[%d]: resfact = %f, Discoeff[%d] = %f, DISBIAS = %f",i,resfact,i,Discoeff[i],DISBIAS);
         Disprob[i] = Disbase[i] = resfact * Discoeff[i] / DISBIAS;
 
         switch (i) {
@@ -3585,12 +3788,10 @@ void manage_deactivation_behavior(void)
             if (Time_cur == Deactterm[j]) {
                 Stopflag[j] = 1;
                 if (Verbose) {
-                    printf("\nTerminating deactivation for phase %d "
-                           "\nat time %f\n",j,Time_cur);
+                    printf("\nTerminating deactivation for phase %d \nat time %f\n",j,Time_cur);
                 }
             } else if (Verbose) {
-                printf("\nPartially reactivating for phase %d "
-                       "\nat time %f\n",j,Time_cur);
+                printf("\nPartially reactivating for phase %d \nat time %f\n",j,Time_cur);
             }
 
             performreactivation(j,Reactfrac[j],Stopflag[j]);
@@ -3599,8 +3800,7 @@ void manage_deactivation_behavior(void)
             && (Time_cur >= Deactterm[j]) && Stopflag[j] == 0) {
 
             Stopflag[j] = 1;
-            if (Verbose) printf("\nTerminating deactivation for phase %d "
-                                "\nat time %f\n",j,Time_cur);
+            if (Verbose) printf("\nTerminating deactivation for phase %d \nat time %f\n",j,Time_cur);
         }
     }
 
@@ -3882,11 +4082,11 @@ void resetcrackpores(void)
 /***
 *    countphase
 *
-*    Scan microstructure and determine the number of voxels of a particular phase
+*       Scan microstructure and determine the number of voxels of a particular phase
 *
-*    Arguments:    int phid (phase id to check)
+*     Arguments:    int phid (phase id to check)
 *
-*    Returns:    long int number of voxels of that phase
+*     Returns:    long int number of voxels of that phase
 *
 *    Calls:        nothing
 *    Called by:    main
@@ -3918,11 +4118,10 @@ long int countphase(int phid)
 *     Low and high indicate the phase ID range to check for
 *     surface sites.
 *
-*     Arguments:  int low, high (phase id range to check)
-*                 int cycid, the cycle number of each dissolution iteration
+*     Arguments:    int low, high (phase id range to check)
+*                 int cycid
 *                 int cshexflag (0 or 1 only)
 *
-*     @note phase ids are in the vcctl.h file
 *     Returns:    nothing
 *
 *    Calls:        chckedge
@@ -3940,14 +4139,6 @@ void passone(int low, int high, int cycid, int cshexflag)
 
     /* Zero out count for the relevant phases */
 
-    /***
-     * Count is the number of voxels of each phase in
-     * the range we are checking.  So we start with
-     * Count = 0 for all those phases and then increase
-     * the Count value by 1 each time we find a voxel
-     * of that phase
-     ***/
-
     for (i = low; i <= high; i++) {
         Count[i] = 0;
     }
@@ -3958,45 +4149,22 @@ void passone(int low, int high, int cycid, int cshexflag)
         for (yid = 0; yid < Ysyssize; yid++) {
             for (xid = 0; xid < Xsyssize; xid++) {
 
-                /***
-                 * Store the value of the phase at location xid,yid,zid
-                 * in the variable phread
-                 ***/
                 phread = Mic[xid][yid][zid];
 
-                /* Update heat data and water consumed for solid CSH
-                 * Do this ONLY if we are keeping track of the time-dependent
-                 * properties of CSH (cshexflag = 1) and only if
-                 * this particular voxel is CSH
-                 ***/
+                /* Update heat data and water consumed for solid CSH */
 
                 if ((cshexflag) && (phread == CSH)) {
-                    /* In which cycle this voxel of CSH was formed */
                     cshcyc = Cshage[xid][yid][zid];
-                    /* The molar volume can be a function of CSH age */
                     Heatsum += Heatf[CSH] / Molarvcsh[cshcyc];
-                    /* The water content can be a function of CSH age */
                     Molesh2o += Watercsh[cshcyc] / Molarvcsh[cshcyc];
                 }
 
                 /* Identify phase and update count */
 
-                /***
-                 * NPHASES is the total number of different phases
-                 * that can exist in the microstructure, as defined
-                 * in the vcctl.h file.  So NPHASES + 10 should
-                 * never be encountered.
-                 ***/
-
                 phid = NPHASES + 10; /* Clearly out of bounds */
 
                 for (i = low; ((i <= high) && (phid == NPHASES + 10)); i++) {
 
-                    /***
-                     * If the phase in the voxel at (xid,yid,zid) is
-                     * within the range of interest (i between low and high),
-                     * then execute this block below
-                     ***/
                     if (Mic[xid][yid][zid] == i) {
 
                         phid = i;
@@ -4045,7 +4213,7 @@ void passone(int low, int high, int cycid, int cshexflag)
                             } else if (i == HEMIHYD) {
                                 Heminit++;
                             } else if (i == SFUME || i == AMSIL) {
-                                Nfill++;
+                                Nsilica++;
                             } else if (i == SLAG) {
                                 Slaginit++;
                             } else if (i == FREELIME) {
@@ -4069,14 +4237,6 @@ void passone(int low, int high, int cycid, int cshexflag)
                 *    Uncomment above and comment below to identify
                 *    SURFACE pixels of K2SO4 and NA2SO4
                 ***/
-
-                /***
-                 * At this point phid will NOT be equal to NPHASES + 10
-                 * unless this voxel is NOT in the range of phases we
-                 * care about.  So the block below will be executed
-                 * as long as this voxel IS in the range of the phases we
-                 * care about.
-                 ***/
 
                 if (phid != NPHASES + 10 && Mic[xid][yid][zid] != K2SO4
                     && Mic[xid][yid][zid] != NA2SO4) {
@@ -4524,14 +4684,6 @@ void extslagcsh(int xpres, int ypres, int zpres)
 void dissolve(int cycle)
 {
     int gct=0;
-    
-    /***
-     * These next variables will keep track of the number
-     * of extra voxels of C3A, CSH, CH, gypsum, and anhydrite,
-     * on average, that must be used due to volumetric
-     * stoichiometry of the reactions.
-     ***/
-
     long int nc3aext,ncshext,nchext,ngypext,nanhext;
     long int nsum5,nsum4,nsum3,nsum2,nhemext,nsum6,nsum7,nsum8,nc4aext,nso4ext,vcement;
     long int nkspix,nnaspix,totks,totnas,skipnodes;
@@ -4542,23 +4694,24 @@ void dissolve(int cycle)
     long int ctest,ncshgo,nsurf,suminit;
     long int xext,nhgd,npchext,nslagc3a=0;
     float na2omintotmass,k2omintotmass,mwna2so4,mwna2o,mwk2so4,mwk2o;
-    float ranval,savechgone,sulfavemolarv,mk2so4,mna2so4;
+    float plfh3,savechgone,sulfavemolarv,mk2so4,mna2so4;
     float dfact,dfact1,molesdh2o,h2oinit,heat4,fhemext,fc4aext;
+    double factCSH,factPOZZCSH,factTfract;
+    double Pozzcshscale = 20000.0;
     float pconvert,pc3scsh,pc2scsh,calcx,calcy,calcz,tdisfact;
     float frafm,frettr,frhyg,frtot,mc3ar,mc4ar,p3init,fact,satsquared;
     float resfact,molwh2o,volpix,ohadj;
-    double massdiff,mass105,mass1000,fchext,fc3aext,fanhext,mass_now,tot_mass,heatfill,mass_fa_now,vol_fa_now;
-    double pdis;
-    float invcemdens,refporefrac,xv1,yv1,yv3;
+    double massdiff,mass105,mass1000,fchext,fc3aext,fanhext;
+    double mass_now,tot_mass,mass_fa_now,vol_fa_now,pdis,psfact;
+    double other_solid_volume_per_gcem;
+    double empty_volume_per_gcem;
+    double water_volume_per_gcem;
+    double cement_volume_per_gcem;
+    float refporefrac,xv1,yv1,yv3;
     struct Ants *antadd;
     struct Alksulf *curas;
+    FILE *fpout01;
 
-    /***
-     * Differences in system resolution is not
-     * yet fully implemented, so ALWAYS use Res = 1.0 (length of
-     * a voxel edge in micrometers), in which case
-     * resfact = 1 always
-     ***/
     resfact = pow((1.0/Res),1.25);
 
     /***
@@ -4572,29 +4725,11 @@ void dissolve(int cycle)
 
     /* Initialize variables */
 
-    /***
-     * Nmade keeps a count of all of the "diffusing" voxels that
-     * get created by this dissolution function.  We initialize
-     * it to zero here first so the count can begin.
-     ***/
     Nmade = 0;
 
     /***
     *    Counter for number of CSH diffusing species to
     *    be located at random locations in microstructure
-    *
-    *    npchext is the number of voxels of CH that
-    *    need to be dissolved due to CSH converting to
-    *    pozzolanic CSH.
-    *
-    *    ncshgo is the number of diffusing CSH pixels that are
-    *    being created in this dissolution step.
-    *
-    *    cshrand is the number of voxels of solid CSH that should
-    *    have been created but were not created because there
-    *    was no local volume to fit them.  These voxels will
-    *    have to be randomly placed at some other place in the
-    *    microstructure where there is room for them
     ***/
 
     npchext = ncshgo = cshrand = 0;
@@ -4781,7 +4916,7 @@ void dissolve(int cycle)
                     + Count[ANHYDRITE];
 
         Meancemdens = Cemmasswgyp / ((float) vcement);
-        invcemdens = 1.0 / Meancemdens;
+        cement_volume_per_gcem = 1.0 / Meancemdens;
 
         CH_mass = Specgrav[CH] * (float)Count[CH];
 
@@ -4866,60 +5001,74 @@ void dissolve(int cycle)
         }
 
         /* Convert to kJ/kg for heat produced */
+
+        water_volume_per_gcem = W_to_c;
         if (Cemmass != 0.0) {
-            heatfill = (float)( (double)(Count[INERT] + Count[INERTAGG] + Count[SLAG]
-                            + Count[AMSIL] + Count[SFUME] + Count[CACL2]
-                            + Count[ASG] + Count[CAS2] ) / Cemmass);
+            empty_volume_per_gcem = (double)((Count[EMPTYP]
+                                             + Count[CRACKP]) / Cemmass);
+            other_solid_volume_per_gcem = (double)(
+                            (double)(
+                                Count[INERT] + Count[INERTAGG]
+                                + Count[SLAG] + Count[AMSIL]
+                                + Count[SFUME] + Count[CACL2]
+                                + Count[ASG] + Count[CAS2]
+                             ) / Cemmass );
         } else {
-            heatfill = 0.0;
+            empty_volume_per_gcem = 0.0;
+            other_solid_volume_per_gcem = 0.0;
         }
 
         if (W_to_c > 0.01) {
 
         /***
         *    Heat conversion factor converts the model heat
-        *    units to kJ per kg of cement.
+        *    units to kJ per kg of CEMENT (not including other solids).
         *
-        *    Model units of heat are (kJ/system)*(system/pixels)*(pixels/cm^3)
+        *    Model units of heat are (kJ/system volume)
         *
-        *        kJ           kJ    pix cm^3  system  cm^3
-        *    ----------- = ------- ---- ---- ------- -------
-        *    kg cement      system  cm^3 pix   cm^3   kg cem
+        *       J                kJ       cm3 sys
+        *    ------- = 1000 * -------     -------
+        *     g cem             cm3 sys    g cem
         *
         *
         * where 
         *
-        *         cm^3        cm^3     g
-        *     ---------- = --------- ---- = (invcemdens + w/c + heatfill) * 1000
-        *      kg cem       g cem     kg
+        *      cm^3 sys    cm^3 cem     cm3 H2O   cm3 other solid
+        *     ---------- = --------- + -------- + ----------------
+        *      g cem       g cem        g cem       g cem
         *
+        *                + cm3 Empty
+        *                  ---------
+        *                   g cem
         *
-        * Also,
-        *
-        *     cm^3    system    system      1
-        * -------- ------- = ------- =  -------
-        *   pix         cm^3       pix         Syspix
+        *                = (cement_volume_per_gcem
+        *                   + water_volume_per_gcem
+        *                   + other_solid_volume_per_gcem
+        *                   + empty_volume_per_gcem)
         *
         ***/
 
             Heat_cf = (double)((1000.0/((double)Syspix))
-                        * (invcemdens + W_to_c + heatfill));
+                        * ( cement_volume_per_gcem
+                            + water_volume_per_gcem
+                            + other_solid_volume_per_gcem
+                            + empty_volume_per_gcem
+                          ));
                         
         } else {
 
             /***
-            *    invcemdens + w/c + heatfill is no longer the
-            *    description for the volume per g of cement.
-            *    Instead, we use volume per 1 gram of SILICA FUME.
-            *    Otherwise, the conversion is the same as in the
-            *    previous comment
+            *    With w/c < 0.01, we use volume per 1 gram
+            *    of SILICA FUME. Otherwise, the conversion
+            *    is the same as in the previous comment
             ***/
 
-            Heat_cf = (double)((1000.0/((double)Syspix)) * ( (1.0 / Specgrav[SFUME])
+            Heat_cf = (double)((1000.0/((double)Syspix))
+                          * ( (1.0 / Specgrav[SFUME])
                             + (double)( Count[POROSITY]
                                         + Count[CH]
                                         + Count[INERT] )
-                                / (Specgrav[SFUME] * (double)Count[SFUME]) ));
+                          / (Specgrav[SFUME] * (double)Count[SFUME]) ));
         }
 
         Mass_fill_pozz = (1.0 - Mass_agg)
@@ -4931,6 +5080,7 @@ void dissolve(int cycle)
                         + (double)Count[ASG]*Specgrav[ASG]
                         + (double)Count[SLAG]*Specgrav[SLAG]
                         + (double)Count[CAS2]*Specgrav[CAS2]
+                        + (double)Count[CACO3]*Specgrav[CACO3]
                         + (double)Count[SFUME]*Specgrav[SFUME]
                         + (double)Count[AMSIL]*Specgrav[AMSIL]
                         + (double)Count[CACL2]*Specgrav[CACL2] )
@@ -4945,7 +5095,7 @@ void dissolve(int cycle)
         }
     }
 
-    invcemdens = 1.0 / Meancemdens;
+    cement_volume_per_gcem = 1.0 / Meancemdens;
     molesdh2o = 0.0;
 
     /* Alpha is the degree of hydration */
@@ -5338,20 +5488,6 @@ void dissolve(int cycle)
     *    Calculate non-evaporable water content on relative to
     *        (1) original dry cement powder
     *        (2) ignited cement powder
-    *
-    *        Wn_o is the nonevaporable water mass per unit
-    *        mass of original cement 
-    *
-    *        Wn_i is the nonevaporable water mass per unit
-    *        mass of the original cement AFTER it is ignited
-    *        at 1000C to drive off any water in gypsum, hemihydrate,
-    *        and any other water that may be chemically bound in
-    *        phases due to prehydration.
-    *        carbon dioxide, etc.
-    *
-    *        Mass_105 and Mass_1000 are calculated in the first
-    *        cycle before any hydration happens, so they represent
-    *        the condition of the original cement
     ***/
 
     if (mass1000 <= 0.0 || Mass_105 <= 0.0) {
@@ -5418,11 +5554,12 @@ void dissolve(int cycle)
     *    ASSUME 0.78 kJ/g S for pozzolanic reaction 
     *
     *    Each unit of silica fume consumes 1.35 units of CH,
-    *    so divide Npr by 1.35 to get silca fume which has reacted
-    *    (Npr = number pozzolan units that have reacted)
+    *    so divide Nsilica_rx by 1.35 to get silca fume which has reacted
+    *    (Nsilica_rx = number silica units that have reacted)
     ***/
 
-    heat4 += 0.78 * ((float)Npr / 1.35) * Specgrav[SFUME];
+    psfact = (SF_SiO2_val)/100.0;
+    heat4 += 0.78 * psfact * ((float)Nsilica_rx / 1.35) * Specgrav[SFUME];
 
     /***
     *    ASSUME 0.8 kJ/g S for slag reaction 
@@ -5476,24 +5613,31 @@ void dissolve(int cycle)
             freeallmem();
             exit(1);
         }
-        fprintf(Datafile,"Cycle\ttime(h)\tAlpha_mass\t");
-        fprintf(Datafile,"Alpha_fa_mass\theat(kJ/kg_solid)\t");
-        fprintf(Datafile,"Temperature(C)\tGsratio\t");
-        fprintf(Datafile,"Wno(g/g)\tWni(g/g)\tChemShrink(mL/g)\tpH\t");
-        fprintf(Datafile,"Conductivity(S/m)\t[Na+](M)\t[K+](M)\t[Ca++](M)\t");
-        fprintf(Datafile,"[SO4--](M)\t{K+}\t{Ca++}\t{OH-}\t{SO4--}\t");
-        fprintf(Datafile,"Vfpore\tPoreconnx\tPoreconny\tPoreconnz\tPoreconnave\t");
-        fprintf(Datafile,"Solidconnx\tSolidconny\tSolidconnz\tSolidconnave\t");
-        fprintf(Datafile,"VfC3S\tVfC2S\tVfC3A\tVfOC3A\t");
-        fprintf(Datafile,"VfC4AF\tVfK2SO4\tVfNA2SO4\tVfGYPSUM\t");
-        fprintf(Datafile,"VfHEMIHYD\tVfANHYDRITE\tVfCACO3\t");
-        fprintf(Datafile,"VfFREELIME\tVfSFUME\tVfINERT\t");
-        fprintf(Datafile,"VfSLAG\tVfASG\tVfCAS2\tVfAMSIL\t");
-        fprintf(Datafile,"VfCH\tVfCSH\tVfPOZZCSH\tVfSLAGCSH\t");
-        fprintf(Datafile,"VfC3AH6\tVfETTR\tVfAFM\tVfFH3\t");
-        fprintf(Datafile,"VfCACL2\tVfFRIEDEL\tVfSTRAT\tVfGYPSUMS\t");
-        fprintf(Datafile,"VfABSGYP\tVfAFMC\tVfINERTAGG\tVfEMPTYP\n");
+        fprintf(Datafile,"Cycle,time(h),Alpha_mass,");
+        fprintf(Datafile,"Alpha_fa_mass,heat(kJ/kg_cem),");
+        fprintf(Datafile,"Temperature(C),Gsratio,");
+        fprintf(Datafile,"Wno(g/g),Wni(g/g),ChemShrink(mL/g),pH,");
+        fprintf(Datafile,"Conductivity(S/m),[Na+](M),[K+](M),[Ca++](M),");
+        fprintf(Datafile,"[SO4--](M),{K+},{Ca++},{OH-},{SO4--},");
+        fprintf(Datafile,"Vfpore,Poreconnx,Poreconny,Poreconnz,Poreconnave,");
+        fprintf(Datafile,"Solidconnx,Solidconny,Solidconnz,Solidconnave,");
+        fprintf(Datafile,"VfC3S,VfC2S,VfC3A,VfOC3A,");
+        fprintf(Datafile,"VfC4AF,VfK2SO4,VfNA2SO4,VfGYPSUM,");
+        fprintf(Datafile,"VfHEMIHYD,VfANHYDRITE,VfCACO3,");
+        fprintf(Datafile,"VfFREELIME,VfSFUME,VfINERT,");
+        fprintf(Datafile,"VfSLAG,VfASG,VfCAS2,VfAMSIL,");
+        fprintf(Datafile,"VfCH,VfCSH,VfPOZZCSH,VfSLAGCSH,");
+        fprintf(Datafile,"VfC3AH6,VfETTR,VfAFM,VfFH3,");
+        fprintf(Datafile,"VfCACL2,VfFRIEDEL,VfSTRAT,VfGYPSUMS,");
+        fprintf(Datafile,"VfABSGYP,VfAFMC,VfINERTAGG,VfEMPTYP\n");
         fclose(Datafile);
+
+        if ((fpout01 = fopen("SfumeEffect.csv","w")) == NULL) {
+            printf("\nWARNING:  Could not open SfumeEffect.csv to write header\n");
+        } else {
+            fprintf(fpout01,"CSH,TOTCSH,Cs_acc,Psfume,dface,Cshscale,Disprob[C3S]\n");
+            fclose(fpout01);
+        }
     }
 
     /***
@@ -5754,11 +5898,8 @@ void dissolve(int cycle)
     *    and adjust based on availability of pozzolan
     ***/
 
-    if (Verbose) printf("Count[DIFFCH] = %ld, Chcrit = %f, "
-                        "Disbase[CH] = %f\n",
-                        Count[DIFFCH],Chcrit,Disbase[CH]);
-    if (Verbose) printf("CH dissolution probability changes "
-                        "from %f ",Disprob[CH]);
+    if (Verbose) printf("Count[DIFFCH] = %ld, Chcrit = %f, Disbase[CH] = %f\n", Count[DIFFCH],Chcrit,Disbase[CH]);
+    if (Verbose) printf("CH dissolution probability changes from %f ",Disprob[CH]);
     Disprob[CH] *= ((A0_CHSOL - (A1_CHSOL * Temp_cur_b))
                 / (A0_CHSOL - (A1_CHSOL * 25.0)));
 
@@ -5907,23 +6048,30 @@ void dissolve(int cycle)
         }
     }
 
+    factCSH = (double)(Count[CSH])/(double)(Cshscale);
+    factPOZZCSH = (double)(Count[POZZCSH])/(double)(Pozzcshscale);
+    factTfract = Tfractw04/(Surffract*Totfract);
 
-    fact = ((double)Count[CSH]*Tfractw04)
-                / ((double)Cshscale
-                    * Surffract*Totfract);
+    fact = (factCSH + factPOZZCSH) * factTfract;
 
     dfact = tdisfact * fact * fact * Cs_acc;
+    if (Count[SFUME] >= (0.05 * (double)(Syspix))) {
+        dfact /= LOI_factor;
+    }
     if (Verbose) {
         printf("\n****Modifying dissolution probabilities : ");
         printf("\n    tdisfact = %f and Cs_acc = %f",tdisfact,Cs_acc);
+        printf("\n    Psfume = %f",Psfume);
         printf("\n    fact = %f",fact);
-        printf("\n        Count[CSH] = %ld Tfractw04 = %f Cshscale = %f",
-               Count[CSH],Tfractw04,Cshscale);
-        printf("\n        Surffract = %f Totfract = %f\n",
-               Surffract,Totfract);
+        printf("\n        Count[CSH] = %ld",Count[CSH]);
+        printf(" Tfractw04 = %f",Tfractw04);
+        printf(" Cshscale = %f",Cshscale);
+        printf("\n        Surffract = %f",Surffract);
+        printf(" Totfract = %f\n",Totfract);
         printf("\n        resfact = %f dfact = %f\n",resfact,dfact);
-        printf("\n        A0_CHSOL = %f A1_CHSOL = %f Temp_cur_b = %f\n\n",
-               A0_CHSOL,A1_CHSOL,Temp_cur_b);
+        printf("\n        A0_CHSOL = %f",A0_CHSOL);
+        printf(" A1_CHSOL = %f",A1_CHSOL);
+        printf(" Temp_cur_b = %f\n\n",Temp_cur_b);
         fflush(stdout);
     }
 
@@ -5937,6 +6085,16 @@ void dissolve(int cycle)
 
     if (Disprob[C2S] > (1.0 * Disbase[C2S])) {
         Disprob[C2S] = (1.0 * Disbase[C2S]);
+    }
+
+    if ((fpout01 = fopen("SfumeEffect.csv","a")) == NULL) {
+        printf("\nWARNING:  Could not open");
+        printf(" SfumeEffect.csv for writing\n");
+    } else {
+        fprintf(fpout01,"\n%f,%f,%f,%f,%f,%f,%f",
+                (double)Count[CSH],(double)(Count[CSH]+Count[POZZCSH]),
+                Cs_acc,Psfume,dfact,Cshscale,Disprob[C3S]);
+        fclose(fpout01);
     }
 
     /***
@@ -5956,7 +6114,9 @@ void dissolve(int cycle)
     *    most likely
     ***/
 
-    Disprob[SLAG] = Slagreact * ((resfact * DISMINSLAG) + dfact * Disbase[SLAG]) / 10.0;
+    Disprob[SLAG] = Slagreact * ((resfact * DISMINSLAG)
+                                  + dfact * Disbase[SLAG]
+                                ) / 10.0;
 
     if (Disprob[SLAG] > (Slagreact * Disbase[SLAG])) {
         Disprob[SLAG] = (Slagreact * Disbase[SLAG]);
@@ -6004,7 +6164,8 @@ void dissolve(int cycle)
         Disprob[ASG] *= pow((Dasmax/((double)Count[DIFFAS])),2.0);
     }
 
-    if (Verbose) printf("Silicate probabilities: %f %f\n",Disprob[C3S],Disprob[C2S]);
+    if (Verbose) printf("Silicate probabilities: %f %f\n",
+                         Disprob[C3S],Disprob[C2S]);
 
     /***
     *    ASSUME that aluminate dissolution controlled by formation
@@ -6235,12 +6396,9 @@ void dissolve(int cycle)
     if (Verbose) {
         printf("Silicate and aluminate probabilities: ");
         printf("%f %f ",Disprob[C3S],Disprob[C2S]);
-        printf("%f %f %f %f %f\n",Disprob[C3A],Disprob[OC3A],
-                Disprob[C4AF],Disprob[GYPSUM],Disprob[HEMIHYD]);
-        printf("Cs_acc is %f and Ca_acc is %f Sulf_cur is %ld "
-               "Sulf_conc is %f\n",Cs_acc,Ca_acc,Sulf_cur,Sulf_conc);
-        printf("Pfract is %f and Totfract is %f and Tfractw05 is %f "
-               "and Pfractw05 is %f\n",Pfract, Totfract,Tfractw05,Pfractw05);
+        printf("%f %f %f %f %f\n",Disprob[C3A],Disprob[OC3A],Disprob[C4AF],Disprob[GYPSUM],Disprob[HEMIHYD]);
+        printf("Cs_acc is %f and Ca_acc is %f Sulf_cur is %ld Sulf_conc is %f\n",Cs_acc,Ca_acc,Sulf_cur,Sulf_conc);
+        printf("Pfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 is %f\n",Pfract,Totfract,Tfractw05,Pfractw05);
     }
 
     /***
@@ -6538,35 +6696,18 @@ void dissolve(int cycle)
                         /* Special dissolution for C4AF */
 
                         if (phid == C4AF) {
-                            ranval = ran1(Seed);
-                            if ((ranval < 0.0) || (ranval > 1.0)) ranval=1.0;
+                            plfh3 = ran1(Seed);
+                            if ((plfh3 < 0.0) || (plfh3 > 1.0)) plfh3=1.0;
 
                             /***
                             *    For every C4AF that dissolves, 0.5453 
                             *    diffusing FH3 species should be created
                             ***/
 
-                            if (ranval <= 0.5453) {
+                            if (plfh3 <= 0.5453) {
                                 cread = DIFFFH3;
                             }
                         }
-
-                        /***
-                         * The value of cread is the phase of the voxel
-                         * that should be created when a solid voxel dissolves.
-                         * Sometimes that will be porosity, meaning that the
-                         * solid voxel disappears and is replaced by a pore
-                         * voxel (filled with water).  Other times, the
-                         * value of cread will be something like DIFFCSH,
-                         * which means that the solid voxel disappears and is
-                         * replaced by a "diffusing" CSH voxel that can
-                         * move around the pore solution by diffusion in
-                         * future cycles.
-                         *
-                         * The value of cread is dependent on the type of
-                         * dissolution reaction that is performed, which
-                         * is determined above already
-                         ***/
 
                         if (cread == POROSITY) {
 
@@ -6579,14 +6720,6 @@ void dissolve(int cycle)
                             Count[sourcepore]++;
 
                         } else {
-
-                            /***
-                             * If we are in this part, then some kind of
-                             * diffusing voxel is being created, and the
-                             * variable Nmade keeps a count of all of the
-                             * diffusing voxels in the system
-                             ***/
-
                             Nmade++;
                             Ngoing++;
                             phnew = cread;
@@ -6620,9 +6753,9 @@ void dissolve(int cycle)
 
                         if ((phid == C3S) || (phid == C2S)) {
 
-                            ranval = ran1(Seed);
-                            if (((phid == C2S) && (ranval <= pc2scsh))
-                                || (ranval <= pc3scsh)) {
+                            plfh3 = ran1(Seed);
+                            if (((phid == C2S) && (plfh3 <= pc2scsh))
+                                || (plfh3 <= pc3scsh)) {
 
                                 placed = loccsh(xc,yc,zc,sourcepore);
                                 if (placed) {
@@ -6635,8 +6768,8 @@ void dissolve(int cycle)
                         }
 
                         if ((phid == C2S) && (pc2scsh > 1.0)) {
-                            ranval = ran1(Seed);
-                            if (ranval <= (pc2scsh - 1.0)) {
+                            plfh3 = ran1(Seed);
+                            if (plfh3 <= (pc2scsh - 1.0)) {
                                 placed = loccsh(xc,yc,zc,sourcepore);
                                 if (placed) {
                                     Count[DIFFCSH]++;
@@ -6665,14 +6798,15 @@ void dissolve(int cycle)
                 *    Now check if CSH to pozzolanic CSH conversion is
                 *    possible:
                 *
-                *        (1) Only if CH is less than 15% in volume,
+                *        (1) Only if CH is less than 30% in volume,
                 *        (2) Only if CSH is in contact with at
                 *            least one porosity, AND
                 *        (3) User wishes to implement this option
                 ***/
 
-                if (((Count[SFUME]+Count[AMSIL]) >= (0.013 * (double)(Syspix)))
-                    && (Chnew < (0.15 * (double)(Syspix)))
+                if (((Count[SFUME]+Count[AMSIL])
+                            >= (0.013 * (double)(Syspix)))
+                    && (Chnew < (0.30 * (double)(Syspix)))
                     && (Csh2flag == 1)) {
 
                     if (Mic[xl][yl][zl] == CSH) {
@@ -6680,7 +6814,7 @@ void dissolve(int cycle)
                             pconvert = ran1(Seed);
                             if (pconvert < PCSH2CSH) {
                                 Count[CSH]--;
-                                ranval=ran1(Seed);
+                                plfh3=ran1(Seed);
 
                                 /***
                                 *    Molarvcsh units of C1.7SHx goes to
@@ -6694,15 +6828,16 @@ void dissolve(int cycle)
                                 if (calcy > 1.0) {
                                     calcz = calcy - 1.0;
                                     calcy = 1.0;
-                                    if (Verbose) printf("WARNING:  Problem "
-                                                        "of not creating enough "
-                                                        "pozzolanic CSH during "
-                                                        "CSH conversion"
-                                                        "\nCurrent binder temperature "
-                                                        "is %f C\n",Temp_cur_b);
+                                    if (Verbose) {
+                                        printf("WARNING:  Problem of not ");
+                                        printf("creating enough pozzolanic ");
+                                        printf("CSH during CSH conversion");
+                                        printf("\nCurrent binder temperature");
+                                        printf("is %f C\n",Temp_cur_b);
+                                    }
                                 }
 
-                                if (ranval <= calcy) {
+                                if (plfh3 <= calcy) {
                                     Mic[xl][yl][zl] = POZZCSH;
                                     Count[POZZCSH]++;
                                 } else {
@@ -6744,20 +6879,20 @@ void dissolve(int cycle)
 
                                 /*
                                 if (calcz > 0.0) {
-                                    ranval = ran1(Seed);
-                                    if (ranval <= calcz) {
+                                    plfh3 = ran1(Seed);
+                                    if (plfh3 <= calcz) {
                                         cshrand++;
                                     }
                                 }
                                 */
 
-                                ranval = ran1(Seed);
+                                plfh3 = ran1(Seed);
                                 calcx = (19.86 / Molarvcsh[cycnew])
                                             - (1.0 - calcy);
 
                                 /* Ex. 0.12658=(19.86/108.)-(1.-0.94269) */
 
-                                if (ranval < calcx) npchext++;
+                                if (plfh3 < calcx) npchext++;
                             }
                         }
                     }
@@ -6780,13 +6915,13 @@ void dissolve(int cycle)
 
                             /* Check on extra C3A generation */
 
-                            ranval = ran1(Seed);
-                            if (ranval < P5slag) nslagc3a++;
+                            plfh3 = ran1(Seed);
+                            if (plfh3 < P5slag) nslagc3a++;
 
                             /* Convert slag to reaction products */
 
-                            ranval = ran1(Seed);
-                            if (ranval < P1slag) {
+                            plfh3 = ran1(Seed);
+                            if (plfh3 < P1slag) {
                                 Mic[xl][yl][zl] = SLAGCSH;
                                 Count[SLAGCSH]++;
                             } else {
@@ -6817,8 +6952,8 @@ void dissolve(int cycle)
                                 p3init -= 1.0;
                             }
 
-                            ranval = ran1(Seed);
-                            if (ranval < p3init) extslagcsh(xl,yl,zl);
+                            plfh3 = ran1(Seed);
+                            if (plfh3 < p3init) extslagcsh(xl,yl,zl);
 
                         }
                     }
@@ -6839,8 +6974,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nLeaving Main dissolve loop, Count[DIFFSO4] = %ld, "
-                        "Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nLeaving Main dissolve loop, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     fflush(stdout);
     */
 
@@ -6881,7 +7015,7 @@ void dissolve(int cycle)
     
     /*
     if (Verbose) {
-        printf("\n***Ksulfinit = %ld Count[K2SO4] = %ld",Ksulfinit,Count[K2SO4]);
+          printf("\n***Ksulfinit = %ld Count[K2SO4] = %ld",Ksulfinit,Count[K2SO4]);
         printf("\n***Releasedk = %f Totpotassium = %f",Releasedk,Totpotassium);
         printf("\n***nkspix = %ld",nkspix);
         printf("\n***Nasulfinit = %ld Count[NA2SO4] = %ld",Nasulfinit,Count[NA2SO4]);
@@ -6948,9 +7082,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nEntering loop for ksulf list, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nEntering loop for ksulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7027,9 +7159,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nEntering loop for nasulf list, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nEntering loop for nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     if (nnaspix < Count[NA2SO4] && nnaspix > 0) {
@@ -7096,9 +7226,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nLeaving loop for nasulf list, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nLeaving loop for nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7213,9 +7341,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished processing ksulf list, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished processing ksulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7235,9 +7361,7 @@ void dissolve(int cycle)
     }
 
     /*
-    if (Verbose) printf("\nFinished processing ksulf ants, "
-                        "step 2, in dissolve...\nnnaspix = %ld, "
-                        "totnas = %ld\n",nnaspix,totnas);
+    if (Verbose) printf("\nFinished processing ksulf ants, step 2, in dissolve...\nnnaspix = %ld, totnas = %ld\n",nnaspix,totnas);
     */
 
     while (nnaspix > 0 && totnas > 0) {
@@ -7346,9 +7470,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished processing nasulf list, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished processing nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7379,18 +7501,14 @@ void dissolve(int cycle)
     }
 
     if (Verbose) {
-        printf("\nFinished resetting nasulf ids, Count[DIFFSO4] = %ld,"
-               " Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+        printf("\nFinished resetting nasulf ids, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
         printf("\nEligible gypsum count = %d\n",gct);
     }
     */
 
-    if ((ncshgo != 0) && (Verbose == 1))
-        printf("CSH dissolved is %ld \n",ncshgo);
+    if ((ncshgo != 0) && (Verbose == 1)) printf("CSH dissolved is %ld \n",ncshgo);
 
-    if ((npchext > 0) && (Verbose == 1))
-        printf("Extra CH dissolved due to pozzolanic conversion of CSH "
-               "is %ld at cycle %d \n",npchext,cycle);
+    if ((npchext > 0) && (Verbose == 1)) printf("Extra CH required is %ld at cycle %d \n",npchext,cycle);
 
     /***
     *    Now add in the extra diffusing species for dissolution
@@ -7517,9 +7635,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nGetting ready to add DIFFSO4, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nGetting ready to add DIFFSO4, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     nso4ext = (Discount[K2SO4] + Discount[NA2SO4]);
@@ -7615,9 +7731,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished adding DIFFSO4, "
-                        "Count[DIFFSO4] = %ld, Count[NA2SO4] = "
-                        "%ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished adding DIFFSO4, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     if (Verbose) {
@@ -7661,8 +7775,7 @@ void dissolve(int cycle)
     }
 
     if (Verbose) {
-        printf("\nEnd of dissolve cycle, Count[DIFFSO4] = %ld, "
-               "Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+        printf("\nEnd of dissolve cycle, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
         printf("C3AH6 dissolved- %ld with prob. of %f \n",nhgd,Disprob[C3AH6]);
     }
     */
@@ -8062,10 +8175,8 @@ void calcT(double mass)
 
 /*
     printf("\nIN CALCT:  AggTempEffect = %d",AggTempEffect);
-    printf("\n\tMass = %f\tMass_agg = %f\n\tCp_b = %f\tCp_agg = %f",
-           mass,Mass_agg,Cp_b,Cp_agg);
-    printf("\n\tTbo = %f\tTao = %f\n\tdtime = %f\tfact = %f",
-           Tbo,Tao,Time_step,fact);
+    printf("\n\tMass = %f\tMass_agg = %f\n\tCp_b = %f\tCp_agg = %f",mass,Mass_agg,Cp_b,Cp_agg);
+    printf("\n\tTbo = %f\tTao = %f\n\tdtime = %f\tfact = %f",Tbo,Tao,Time_step,fact);
     printf("\n\tdg = %f\tdTagg = %f\tdTb = %f",dg,dTagg,dTb);
     printf("\n\tTemp_cur_b = %f\tTemp_cur_agg = %f",Temp_cur_b,Temp_cur_agg);
     printf("\n\tU_coeff = %f\tU_coeff_agg = %f\n",U_coeff,U_coeff_agg);
@@ -8142,15 +8253,23 @@ void measuresurf(void)
                                 break;
                         }
 
-                        if ((Mic[jx][jy][jz]==C3S)||(Mic[jx][jy][jz]==C2S)||(Mic[jx][jy][jz]==C3A)
-                            ||(Mic[jx][jy][jz]==OC3A)||(Mic[jx][jy][jz]==C4AF)||(Mic[jx][jy][jz]==INERT)
-                            ||(Mic[jx][jy][jz]==CACO3)) {
+                        if ((Mic[jx][jy][jz]==C3S)
+                             || (Mic[jx][jy][jz]==C2S)
+                             || (Mic[jx][jy][jz]==C3A)
+                             || (Mic[jx][jy][jz]==OC3A)
+                             || (Mic[jx][jy][jz]==C4AF)
+                             || (Mic[jx][jy][jz]==INERT)
+                             || (Mic[jx][jy][jz]==SFUME)
+                             || (Mic[jx][jy][jz]==CACO3)) {
 
-                            Scnttotal++;
-                            if ((Mic[jx][jy][jz]==C3S)||(Mic[jx][jy][jz]==C2S)||(Mic[jx][jy][jz]==C3A)
-                                ||(Mic[jx][jy][jz]==OC3A)||(Mic[jx][jy][jz]==C4AF)) {
+                             Scnttotal++;
+                             if ((Mic[jx][jy][jz]==C3S)
+                                  ||(Mic[jx][jy][jz]==C2S)
+                                  ||(Mic[jx][jy][jz]==C3A)
+                                  ||(Mic[jx][jy][jz]==OC3A)
+                                  ||(Mic[jx][jy][jz]==C4AF)) {
 
-                                Scntcement++;
+                                  Scntcement++;
                             }
                         }
                     }
@@ -8194,14 +8313,11 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime, char
     float h_interp_factor = -1.0;
     float calFileSaysTimeShouldBe,uncorrectedTime_step,recip_Tdiff;
 
-    if (Verbose) printf("\nCurDataLine = %d, NDataLines = %d\n",
-                        CurDataLine,NDataLines);
+    if (Verbose) printf("\nCurDataLine = %d, NDataLines = %d\n",CurDataLine,NDataLines);
     if (CurDataLine < NDataLines) {
         /* Use linear interpolation of the measured data to get the current time */
         for (i = CurDataLine; (i < NDataLines) && (h_interp_factor < 0.0); i++) {
-            /* if (Verbose) */ printf("\ndval = %f, DataValue[%d] = %f, "
-                                      "DataValue[%d] = %f\n",
-                                      dval,i-1,DataValue[i-1],i,DataValue[i]);
+            /* if (Verbose) */ printf("\ndval = %f, DataValue[%d] = %f, DataValue[%d] = %f\n",dval,i-1,DataValue[i-1],i,DataValue[i]);
             if ((dval >= DataValue[i-1]) && (dval <= DataValue[i])) {
                 h_interp_factor = (dval - DataValue[i-1]) / (DataValue[i] - DataValue[i-1]);
 
@@ -8210,38 +8326,29 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime, char
                 /* is the same as that used to measure the */
                 /* the isothermal calorimetry data */
 
-                calFileSaysTimeShouldBe = DataTime[i-1] +
-                                   (h_interp_factor * (DataTime[i] - DataTime[i-1]));
+                calFileSaysTimeShouldBe = DataTime[i-1] + (h_interp_factor * (DataTime[i] - DataTime[i-1]));
                 uncorrectedTime_step = calFileSaysTimeShouldBe - *previousUncorrectedTime;
 
                 /* Now we correct the time difference for the actual temperature */
                 /* prevailing during this heat change */
 
-                recip_Tdiff = (1.0/(Temp_cur_b + 273.15))
-                             - (1.0/(DataMeasuredAtTemperature + 273.15));
+                recip_Tdiff = (1.0/(Temp_cur_b + 273.15)) - (1.0/(DataMeasuredAtTemperature + 273.15));
                 CalKrate = exp(-(act_nrg * recip_Tdiff));
                 Time_step = uncorrectedTime_step / CalKrate;
                 TimeHistory[Cyccnt] = TimeHistory[Cyccnt-1] + Time_step;
                 Time_cur = TimeHistory[Cyccnt];
-                printf("\n**calFileSaysTimeShouldBe = %f, "
-                       "previousUncorrectedTime = %f",
-                       calFileSaysTimeShouldBe,*previousUncorrectedTime);
+                printf("\n**calFileSaysTimeShouldBe = %f, previousUncorrectedTime = %f",calFileSaysTimeShouldBe,*previousUncorrectedTime);
                 printf("\n**uncorrectedTime_step = %f",uncorrectedTime_step);
-                printf("\n**Temp_cur_b = %f, DataMeasuredAtTemperature = %f",
-                        Temp_cur_b,DataMeasuredAtTemperature);
+                printf("\n**Temp_cur_b = %f, DataMeasuredAtTemperature = %f",Temp_cur_b,DataMeasuredAtTemperature);
                 printf("\n**recip_Tdiff = %f",recip_Tdiff);
                 printf("\n**act_nrg = %f, CalKrate = %f",act_nrg,CalKrate);
                 printf("\n**Time_step = %f, Time_cur = %f\n",Time_step,Time_cur);
                 /* if (Verbose) { */
                     printf("\n**dval = %f",dval);
-                    printf("\n**DataValue[%d] = %f, DataValue[%d] = %f",
-                            i-1,DataValue[i-1],i,DataValue[i]);
-                    printf("\n**DataTime[%d] = %f, DataTime[%d] = %f",
-                            i-1,DataTime[i-1],i,DataTime[i]);
+                    printf("\n**DataValue[%d] = %f, DataValue[%d] = %f",i-1,DataValue[i-1],i,DataValue[i]);
+                    printf("\n**DataTime[%d] = %f, DataTime[%d] = %f",i-1,DataTime[i-1],i,DataTime[i]);
                     printf("\n**h_interp_factor = %f",h_interp_factor);
-                    printf("\n**TimeHistory[%d] = %f and "
-                           "TimeHistory[%d] = %f\n",Cyccnt,TimeHistory[Cyccnt],
-                            Cyccnt-1,TimeHistory[Cyccnt-1]);
+                    printf("\n**TimeHistory[%d] = %f and TimeHistory[%d] = %f\n",Cyccnt,TimeHistory[Cyccnt],Cyccnt-1,TimeHistory[Cyccnt-1]);
                     printf("\n**Time_cur = %f\n",Time_cur);
                 /* } */
                 fflush(stdout);
@@ -8256,8 +8363,7 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime, char
 
             CurDataLine = NDataLines + 1;
 
-            /* if (Verbose) */ printf("\nNo more useful %s data "
-                                      "for calibration\n",typestring);
+            /* if (Verbose) */ printf("\nNo more useful %s data for calibration\n",typestring);
             fflush(stdout);
 
             /* Now need to estimate Beta for the remaining iterations   */
@@ -8286,8 +8392,7 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime, char
                 exit(1);
             }
             TimeHistory[Cyccnt] = TimeHistory[Cyccnt-1] + Time_step;
-            /* if (Verbose) */ printf("\nQuadratic fit is %g n*n + "
-                                      "%g n + %g\n",Bvec[0],Bvec[1],Bvec[2]);
+            /* if (Verbose) */ printf("\nQuadratic fit is %g n*n + %g n + %g\n",Bvec[0],Bvec[1],Bvec[2]);
         }
     } else {
 

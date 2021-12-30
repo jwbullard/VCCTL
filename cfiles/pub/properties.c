@@ -450,8 +450,8 @@ void assign_properties(void)
 
 	Molarv[POZZCSH] = 101.81;
 	Heatf[POZZCSH] = (-2299.1);
-	Waterc[POZZCSH] = 3.9;
-	Nh2o[POZZCSH][0] = 3.9;
+	Waterc[POZZCSH] = 2.9;
+	Nh2o[POZZCSH][0] = 2.9;
 	Nh2o[POZZCSH][1] = 0.60 * Nh2o[POZZCSH][0];
 	Specgrav[POZZCSH] = 1.884;
 

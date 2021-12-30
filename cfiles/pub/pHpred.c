@@ -318,7 +318,7 @@ void pHpred(void)
 
 	/* Compute grams of pozzolan which have reacted */
 
-	pozzreact = ((double)Npr / 1.35) * mf3 * Specgrav[SFUME];
+	pozzreact = ((double)Nsilica_rx / 1.35) * mf3 * Specgrav[SFUME];
 
 	/***
 	*	Compute moles of released potassium and

@@ -2,8 +2,8 @@
 *                                                                      
 * Header file specific to program disrealnew.h
 *
-* Programmer:	Dale P. Bentz
-* 				Building and Fire Research Laboratory
+* Programmer:	Dale P. Bentz and Jeffrey W. Bullard
+* 				Engineering Laboratory
 *				NIST
 *				100 Bureau Drive Mail Stop 8621
 *				Gaithersburg, MD  20899-8621   USA
@@ -11,12 +11,13 @@
 *				E-mail: dale.bentz@nist.gov
 *                                                                     
 * Contact:		Jeffrey W. Bullard
-* 				Building and Fire Research Laboratory
-*				NIST
-*				100 Bureau Drive Mail Stop 8621
-*				Gaithersburg, MD  20899-8621   USA
-*				(301) 975-5725      FAX: (301) 990-6891
-*				E-mail: bullard@nist.gov
+*               Zachry Department of Civil and Environmental Engineering
+*				Department of Materials Science and Engineering
+*				Texas A&M University
+*				3136 TAMU
+*				College Station, TX  77845  USA
+*				(979) 458-6482
+*				E-mail: jwbullard@tamu.edu
 *
 *******************************************************/
 
@@ -63,7 +64,7 @@ static float DISMIN_C4AF_0 = 0.0005;			/* Minimum dissolution for C4AF */
 *	Default maximum number of diffusing ants
 ***/
 static int DK2SO4MAX = 200000;		/* Added 3 June 2004 */
-static int DNA2SO4MAX = 2000000;		/* Added 3 June 2004 */
+static int DNA2SO4MAX = 2000000;	/* Added 3 June 2004 */
 static int DETTRMAX = 1200;
 static int DGYPMAX = 2000;
 static int DCACO3MAX = 1000;
@@ -104,33 +105,16 @@ static float SOLIDC3AGYP = 0.5;			/* Solid C3A with diffusing sulfate */
 static float SOLIDC4AFGYP = 0.1;			/* Solid C4AF with diffusing sulfate */
 
 static float PSFUME = 0.05;				/* Probability for pozzolanic reaction,
-									assuming a silica-fume source with
-									high surface area */
+									       assuming a silica-fume source with
+									       high surface area */
 
-/***
-* Parameters for adjusting silica fume reactivity based
-* on its silica content and loss on ignition.  Parameters
-* based on linear regression to experimental data from
-* Jedadiah Burroughs PhD thesis.
-***/
-
-static float SF_SiO2_max = 98.0;
-static float SF_SiO2_mid = 94.3;
-static float SF_SiO2_min = 83.0;
 static float SF_SiO2_val = 94.3;
-static float SF_LOI_max = 3.0;
-static float SF_LOI_mid = 2.0;
-static float SF_LOI_min = 0.85;
+static float SF_SiO2_normal = 94.3;
+static float SF_BET_val = 24.0;
+static float SF_BET_normal = 24.0;
 static float SF_LOI_val = 2.0;
-
-static float SF_SiO2_norm = 0.7533;
-static float SF_SiO2_level = 0.7533;
-static float SF_LOI_norm = 0.5349;
-static float SF_LOI_level = 0.5349;
-
-static float SF_SiO2_coeff = 0.155;
-static float SF_LOI_coeff = 0.624;
-static float SF_offset = -0.356;
+static float SF_LOI_normal = 2.0;
+static float LOI_factor = 1.0;
 
 /***
 *	Introduce a pozzolanic phase for fly ash, less reactive
@@ -338,7 +322,8 @@ long int Ncshplateinit=0;
 *	gypsum, ettringite, initial porosity, and
 *	aluminosilicate reacted
 ***/
-long int Npr=0,Nfill=0,Ncsbar=0,Netbar=0,Porinit=0,Freelimeinit=0;
+long int Nsilica_rx=0,Nsilica=0,Ncsbar=0,Netbar=0;
+long int Porinit=0,Freelimeinit=0;
 long int Ksbarinit,Nsbarinit;
 long int Nasr=0,Nslagr=0,Slagemptyp=0;
 
@@ -369,8 +354,11 @@ float End_time,Cracktime;
 float Temp_0,Temp_0_agg,Temp_cur,Temp_cur_b,Temp_cur_agg,Time_step=0.0;
 float Time_cur,*TimeHistory,E_act,Beta;
 float W_to_c=0.0,W_to_s=0.0,S_to_c,Krate,CalKrate;
-float Totfract=1.0,Tfractw04=0.438596,Tfractw05=0.384615;
-float Surffract,Pfract,Pfractw05=0.615385,Sulf_conc;
+float Totfract=1.0;
+float Tfractw04=0.438596;
+float Tfractw05=0.384615;
+float Pfractw05=0.615385;
+float Surffract,Pfract,Sulf_conc;
 long int Scntcement=0,Scnttotal=0,TimeCalibrationMethod;
 float U_coeff=0.0,U_coeff_agg=0.0,T_ambient=25.;
 float Alpha,Alpha_cur,Alpha_max,Alpha_fa_cur,Alpha_fa_vol;
@@ -423,7 +411,7 @@ float Meancemdens = 3.2;
 float Heatsum,Molesh2o,Saturation=1.0;
 
 /* Arrays for dissolution probabilities for each phase */
-float Gypabsprob,Psfume,Pamsil;
+float Gypabsprob,Psfume,Psfnuc,Pamsil;
 
 /* Solubility flags and diffusing species created for each phase */
 /* Also flag for C1.7SH4.0 to C1.1SH3.9 conversion */

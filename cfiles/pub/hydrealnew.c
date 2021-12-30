@@ -28,6 +28,8 @@
 *                moveettr, extpozz, movefh3, extc3ah5, movec3a,
 *                extfriedel, movecacl2, extstrat, moveas
 ***/
+void extpozz(int xpres, int ypres, int zpres, int *poreid);
+
 int moveone(int *xloc, int *yloc, int *zloc, int *act, int sumold)
 {
     int plok,sumnew,xl1,yl1,zl1,act1;
@@ -252,7 +254,7 @@ int edgecnt(int xck, int yck, int zck, int ph1, int ph2, int ph3)
 ***/
 void extcsh(int xpres, int ypres, int zpres, int *poreid)
 {
-    int numnear,xchr,ychr,zchr,fchr,check,msface,pval;
+    int numnear1,numnear2,xchr,ychr,zchr,fchr,check,msface,pval;
     long int tries;
 
     fchr = tries = 0;
@@ -291,14 +293,17 @@ void extcsh(int xpres, int ypres, int zpres, int *poreid)
 
         if (check == pval) {
 
-            numnear = edgecnt(xchr,ychr,zchr,CSH,C3S,C2S);
+            numnear1 = edgecnt(xchr,ychr,zchr,CSH,C3S,C2S);
+            numnear2 = edgecnt(xchr,ychr,zchr,POZZCSH,SFUME,CACO3);
 
             /***
             *    Be sure that at least one neighboring pixel
             *    is C2S, C3S, or diffusing CSH
             ***/
 
-            if ((numnear < 26) || (tries > MAXTRIES)) {
+            if ((numnear1 < 26)
+                    || (numnear2 < 26)
+                    || (tries > MAXTRIES)) {
                 Mic[xchr][ychr][zchr] = CSH;
                 Count[CSH]++;
                 Count[pval]--;
@@ -395,9 +400,10 @@ int movecsh(int xcur, int ycur, int zcur, int finalstep, int cycorig)
     pc3acrit = 0.2;
     pchcrit = 0.01;
     
-    if ((check == CSH) && ((Cshgeom == RANDOM) || (Faces[xnew][ynew][znew] == 0)
-        || (Faces[xnew][ynew][znew] == mstest)
-        || (Faces[xnew][ynew][znew] == mstest2))) {
+    if ((check == CSH) && ((Cshgeom == RANDOM)
+                || (Faces[xnew][ynew][znew] == 0)
+                || (Faces[xnew][ynew][znew] == mstest)
+                || (Faces[xnew][ynew][znew] == mstest2))) {
 
         /* Decrement count of diffusing CSH species ... */
 
@@ -405,7 +411,7 @@ int movecsh(int xcur, int ycur, int zcur, int finalstep, int cycorig)
 
         /* ... and increment count of solid CSH if needed */
 
-          prtest = Molarvcsh[Cyccnt] / Molarvcsh[cycorig];
+        prtest = Molarvcsh[Cyccnt] / Molarvcsh[cycorig];
         prcsh1 = ran1(Seed);
         if (prcsh1 <= prtest) {
             Mic[xcur][ycur][zcur] = CSH;
@@ -457,7 +463,7 @@ int movecsh(int xcur, int ycur, int zcur, int finalstep, int cycorig)
 
         /* ... and increment count of solid CSH if needed */
 
-          prtest = Molarvcsh[Cyccnt] / Molarvcsh[cycorig];
+        prtest = Molarvcsh[Cyccnt] / Molarvcsh[cycorig];
         prcsh1 = ran1(Seed);
         if (prcsh1 <= prtest) {
             Mic[xcur][ycur][zcur] = CSH;
@@ -497,6 +503,51 @@ int movecsh(int xcur, int ycur, int zcur, int finalstep, int cycorig)
             prcsh2 = ran1(Seed);
             if (prcsh2 < (prtest - 1.0)) {
                 extcsh(xcur,ycur,zcur,&poreid);
+            }
+        }
+
+        action = 0;
+
+    } else if (check == SFUME) {
+
+        /***
+        *    Check for pozzolanic reaction with silica fume
+        *
+        *    Molar reaction postulate: 
+        *
+        *    CSH + 0.545 S -> 1.545 (POZZCSH)
+        *
+        *    This works out because Ca/Si = 1.7 for CSH and
+        *    Ca/Si = 1.1 for POZZCSH.
+        *
+        *    On a volume basis, 1 unit of CSH can react
+        *    with 0.136 units of SFUME to make 1.46 units
+        *    of POZZCSH
+        ***/
+
+        /* Decrement count of diffusing CSH species ... */
+
+        Count[DIFFCSH]--;
+        Mic[xcur][ycur][zcur] = POZZCSH;
+        Count[POZZCSH]++;
+
+        /* Check to see if we need to dissolve the SFUME */
+
+        prcsh1 = ran1(Seed);
+        if (prcsh1 <= 0.136) {
+            /* YES, dissolve the silica fume */
+            Mic[xnew][ynew][znew] = POZZCSH;
+            Count[POZZCSH]++;
+            Count[SFUME]--;
+            Nsilica_rx++;
+            prcsh1 = ran1(Seed);
+            if (prcsh1 <= (0.46 - 0.136)) {
+                extpozz(xcur,ycur,zcur,&poreid);
+            }
+        } else {
+            prcsh1 = ran1(Seed);
+            if (prcsh1 <= 0.46) {
+                extpozz(xcur,ycur,zcur,&poreid);
             }
         }
 
@@ -3909,7 +3960,7 @@ void extpozz(int xpres, int ypres, int zpres, int *poreid)
         check = Mic[xchr][ychr][zchr];
 
         /***
-        *     If neighbor is porosity, locate the AFm phase there.
+        *     If neighbor is porosity, locate the phase there.
         *     We allow growth into any kind of saturated porosity
         *     (CRACKP or POROSITY) because the growth is local
         *     (24 May 2004)
@@ -4167,24 +4218,25 @@ int movech(int xcur, int ycur, int zcur, int finalstep, float nucprob)
         *    (suggestion of Sidney Diamond)
         ***/
 
-        if (((check == INERTAGG) || (check == CACO3)) && (pgen <= CHGROWAGG) && (Chflag)) {
+        if (((check == INERTAGG) || (check == CACO3))
+                && (pgen <= CHGROWAGG) && (Chflag)) {
             Mic[xcur][ycur][zcur] = CH;
             Count[DIFFCH]--;
             Count[CH]++;
             action = 0;
 
-        /***
-        *    Check for pozzolanic reaction with silica fume
-        *
-        *    36.41 units CH can react with 27 units of S
-        ***/
+            /***
+            *    Check for pozzolanic reaction with silica fume
+            *
+            *    36.41 units CH can react with 27 units of S to make POZZCSH
+            ***/
 
-        /**** ASK DALE ABOUT FACTOR OF 1.35 ****/
-
-        } else if ( ( ((pgen <= PHfactor[SFUME] * Psfume) && (check == SFUME)) 
-                        || ( (pgen <= PHfactor[AMSIL] * Pamsil)
-                                && (check == AMSIL) ) )
-            && (Npr <= (long int)((double)Nfill * 1.35))) {
+        } else if ( ( ((pgen <= PHfactor[SFUME] * Psfume)
+                       && (check == SFUME)) 
+                       || ( (pgen <= PHfactor[AMSIL] * Pamsil)
+                       && (check == AMSIL) )
+                    )
+            && (Nsilica_rx <= (long int)((double)Nsilica * 1.35))) {
 
             action = 0;
             Mic[xcur][ycur][zcur] = POZZCSH;
@@ -4195,7 +4247,7 @@ int movech(int xcur, int ycur, int zcur, int finalstep, float nucprob)
             *    that have reacted pozzolanically
             ***/
 
-            Npr++;
+            Nsilica_rx++;
             Count[DIFFCH]--;
 
             /* Convert pozzolan to pozzolanic CSH as needed */
