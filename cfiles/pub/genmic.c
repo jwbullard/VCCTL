@@ -10,12 +10,13 @@
 * either flocculated, random, or dispersed.
 *
 * Programmer:    Jeffrey W. Bullard
-*                 Building and Fire Research Laboratory
-*                NIST
-*                100 Bureau Drive Mail Stop 8621
-*                Gaithersburg, MD  20899-8621   USA
-*                (301) 975-5725      FAX: (301) 990-6891
-*                E-mail: bullard@nist.gov
+*                Zachry Department of Civil and Environmental Engineering
+*                Department of Materials Science and Engineering
+*                Texas A&M University
+*                3136 TAMU
+*                College Station, TX  77843   USA
+*                (979) 458-6482
+*                E-mail: jwbullard@tamu.edu
 *                                                                     
 *******************************************************/
 #include <stdio.h>
@@ -62,7 +63,7 @@
 #define TMPAGGID          -100    
 
 /* max. number of particles allowed in box */
-#define NPARTC            30000
+#define NPARTC            1000000
 
 /* Default for burned id must be at least 100 greater than NPARTC */
 #define BURNT            34000
@@ -387,7 +388,7 @@ FILE *Fprog;
 int getsystemsize(void);
 int checksphere(int xin, int yin, int zin, int diam, int wflg,
     int phasein,int phase2);
-void genparticles(int numgen, long int *numeach,
+int genparticles(int numgen, long int *numeach,
     float *sizeeach, int *pheach);
 int checkpart(int xin, int yin, int zin, int nxp, int nyp, int nzp,
     int volume, int phasein, int phase2, int wflg);
@@ -405,7 +406,7 @@ void connect(void);
 int distrib3d(void);
 int distfa(int fadchoice);
 int addonepixels(void);
-void addrand(int randid, long int nneed, int onepixfloc);
+void addrand(int randid, long int nneed, int onepixfloc, int assignpartnum);
 void outmic(void);
 struct particle *particlevector(int size);
 void free_particlevector(struct particle *ps);
@@ -718,7 +719,7 @@ int getsystemsize(void)
     Binderpix = Syspix;
     Sizemag = ((float)Syspix) / (pow(((double)DEFAULTSYSTEMSIZE),3.0));
     Isizemag = (int)(Sizemag + 0.5);
-    if (Isizemag > 1.0) {
+    if (Isizemag > 1) {
         Npartc = (long)(NPARTC * Isizemag);
         Burnt = (long)(BURNT * Isizemag);
         Maxburning = (long)(MAXBURNING * Isizemag);
@@ -1386,32 +1387,58 @@ void addlayer(int nxp, int nyp, int nzp)
         for (j = 1; j < nyp; j++) {
             for (i = 1; i < nxp; i++) {
                 if (Bbox.val[getInt3dindex(Bbox,i,j,k)] == C3S) {
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k-1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k+1)] = FCHECK;
-                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j+1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j-1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j+1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j+1,k-1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j-1,k+1)] = FCHECK;
+                    if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY)
+                        Bbox.val[getInt3dindex(Bbox,i-1,j-1,k-1)] = FCHECK;
                 }
             }
         }
@@ -1422,32 +1449,58 @@ void addlayer(int nxp, int nyp, int nzp)
             for (j = 1; j < nyp; j++) {
                 for (i = 1; i < nxp; i++) {
                     if (Bbox.val[getInt3dindex(Bbox,i,j,k)] == FCHECK) {
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j+1,k-1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k+1)] = FCHECK+1;
-                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY) Bbox.val[getInt3dindex(Bbox,i-1,j-1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j+1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j-1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j+1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j-1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j+1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j-1,k)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j+1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j+1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j-1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i,j-1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j+1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j+1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j+1,k-1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k+1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j-1,k+1)] = FCHECK+1;
+                        if (Bbox.val[getInt3dindex(Bbox,i+1,j-1,k-1)] == POROSITY)
+                            Bbox.val[getInt3dindex(Bbox,i-1,j-1,k-1)] = FCHECK+1;
                     }
                 }
             }
@@ -1499,19 +1552,18 @@ void striplayer(int nxp, int nyp, int nzp)
 *        int pheach holds the phase of each size class
 *        int shape is 0 if sphere or 1 if real shapes
 *    Returns:    
-*        nothing
+*        Number of particles placed of last kind tried
 *
 *    Calls:        makesph, ran1
 *    Called by:    create
 ***/
-void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
+int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 {
     int m,n,i,j,k,ii,jj,x,y,z,ig,tries,na,foundpart;
-    int iii,jjj,kkk,totpix;
     int phnow,nofit,n1,nxp,nyp,nzp,nnxp,nnyp,nnzp,partc,extpix,pcount[10];
     int numpershape,nump;
     int klow,khigh,mp,pixfrac,numlines,numitems,toobig;
-    int absdiff,oldabsdiff,diam,darg,numpix;
+    int absdiff,oldabsdiff,diam,darg,numpix,shapetype,dispdist;
     int cx,cy,cz;
     long int jg,numpartplaced,vol;
     float rx,ry,rz,testgyp,typegyp,frad,aa1,aa2;
@@ -1540,21 +1592,27 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
     for (ig = 0; ig < numgen; ig++) {
 
+        dispdist = Dispdist;
         phnow = pheach[ig];        /* phase for this class */
         printf("Going to place %ld particles of phase %d, radius %f\n",numeach[ig],phnow,sizeeach[ig]);
 
-        switch (Phase_shape[phnow].shapetype) {
+        if (Phase_shape[phnow].shapetype == SPHERES || sizeeach[ig] < 1.0) {
+            shapetype = SPHERES;
+        } else {
+            shapetype = REALSHAPE;
+        }
+
+        switch (shapetype) {
 
             case SPHERES:
 
                 frad = sizeeach[ig];    /* float radius for this class */
-                diam = (int)(2.0 * frad);   /* integer diameter */
+                diam = (int)((2.0 * frad) + 0.5);   /* nearest integer diameter */
                 numpix = diam2vol((float)diam);
 
                 /* loop for each sphere in this size class */
 
                 for (jg = 0; jg < numeach[ig]; jg++) {
-
                     tries = 0;
 
                     /* Stop after MAXTRIES random tries */
@@ -1573,11 +1631,14 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         *    to ensure requested separation between spheres
                         ***/
 
-                        darg = diam + (2 * Dispdist);
+                        darg = diam + (2 * dispdist);
                         nofit = checksphere(x,y,z,darg,Check,Npart+1,0);
-                        if ((tries > MAXTRIES) && (Dispdist == 2)) {
+                        if ((tries > MAXTRIES) && (dispdist > 0)) {
+                            printf("\nAble to place %ld particles ",jg);
+                            printf("out of %ld needed before reducing dispersion distance ",numeach[ig]);
                             tries = 0;
-                            Dispdist--;
+                            dispdist--;
+                            printf("to %d\n",dispdist);
                         }
 
                         if (tries > MAXTRIES) {
@@ -1589,7 +1650,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                             warning("genmic","Could not place a sphere");
                             fflush(stdout);
-                            return;
+                            return(jg);
                         }
                     } while(nofit);
 
@@ -1605,7 +1666,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         printf("\nWas working on bin %d out of %d\n",ig,numgen);
                         warning("genmic","Too many spheres");
                         fflush(stdout);
-                        return;
+                        return(jg);
                     }
 
                     /* Allocate space for new particle info */
@@ -1709,15 +1770,17 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                 }
 
-                
-
                 break;
 
             case REALSHAPE:
 
                 if (Verbose) printf("\nPlacing REAL shapes now...");
 
-                sprintf(filename,"%s%s%c%s-geom.dat",Phase_shape[phnow].pathroot,Phase_shape[phnow].shapeset,Filesep,Phase_shape[phnow].shapeset);
+                sprintf(filename,"%s%s%c%s-geom.dat",
+                        Phase_shape[phnow].pathroot,
+                        Phase_shape[phnow].shapeset,
+                        Filesep,
+                        Phase_shape[phnow].shapeset);
 
                 geomfile = filehandler("genmic",filename,"READ");
                 if (!geomfile) {
@@ -1831,7 +1894,11 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                                 n1 = (int)(numlines * ran1(Seed));
 
-                                sprintf(filename,"%s%s%c%s",Phase_shape[phnow].pathroot,Phase_shape[phnow].shapeset,Filesep,line[n1].name);
+                                sprintf(filename,"%s%s%c%s",
+                                        Phase_shape[phnow].pathroot,
+                                        Phase_shape[phnow].shapeset,
+                                        Filesep,
+                                        line[n1].name);
                                 if (Verbose) printf(" %s",filename);
                                 fflush(stdout);
 
@@ -2007,7 +2074,10 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                             volume *= factor;
                             vol1 = volume;
                             #ifdef DEBUG
-                            printf("\nComputed volume = %f Tabulated = %f saveratio = %f partc = %d",vol1,line[n1].volume,saveratio,partc);
+                            printf("\nComputed volume = %f ",vol1);
+                            printf("Tabulated = %f ",line[n1].volume);
+                            printf("saveratio = %f ",saveratio);
+                            printf("partc = %d",partc);
                             fflush(stdout);
                             #endif
         
@@ -2075,10 +2145,10 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
         
                                 /* Make the box a little bigger if dispersion is required */
 
-                                if (Dispdist > 0) {
-                                    nxp += Dispdist + 1;
-                                    nyp += Dispdist + 1;
-                                    nzp += Dispdist + 1;
+                                if (dispdist > 0) {
+                                    nxp += dispdist + 1;
+                                    nyp += dispdist + 1;
+                                    nzp += dispdist + 1;
                                 }
                                 
                                 /* Do the digitization */
@@ -2101,7 +2171,8 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                     foundpart = 0;
                                 }
                                 #ifdef DEBUG
-                                printf("\nAfter image function, nominal particle size %ld, actual %ld",vol,partc);
+                                printf("\nAfter image function, nominal particle ");
+                                printf("size %ld, actual %ld",vol,partc);
                                 fflush(stdout);
                                 #endif
                                 saveratio = ratio[na];
@@ -2139,7 +2210,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                 *    is actually placed)
                                 ***/
 
-                                if (Dispdist > 0) {
+                                if (dispdist > 0) {
                                     addlayer(nxp,nyp,nzp);
                                 }
 
@@ -2162,7 +2233,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                         } else {
                             partc = smallimage(&nxp,&nyp,&nzp,vol);
-                            if (Dispdist > 0) {
+                            if (dispdist > 0) {
                                 addlayer(nnxp,nnyp,nnzp);
                             }
                             /* orient = 1 + (int)(14.0 * ran1(Seed)); */
@@ -2214,9 +2285,9 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                         nofit = checkpart(x,y,z,nnxp,nnyp,nnzp,vol,Npart+1,0,Check);
 
-                        if ((tries > MAXTRIES) && (Dispdist == 2)) {
+                        if ((tries > MAXTRIES) && (dispdist > 0)) {
                             tries = 0;
-                            Dispdist--;
+                            dispdist--;
                             striplayer(nnxp,nnyp,nnzp);
                         }
 
@@ -2228,7 +2299,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                             printf("\nWas working on bin %d out of %d\n",ig,numgen);
                             warning("genmic","Could not place a particle");
                             fflush(stdout);
-                            return;
+                            return(jg);
                         }
 
                     } while(nofit);
@@ -2248,7 +2319,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         printf("\nWas working on bin %d out of %d\n",ig,numgen);
                         warning("genmic","Too many particles");
                         fflush(stdout);
-                        return;
+                        return(jg);
                     }
 
                     /* Allocate space for new particle info */
@@ -2425,7 +2496,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
     fflush(fscratch);
     fclose(fscratch);
 
-    return;
+    return(jg);
 }
 
 /***
@@ -2441,8 +2512,7 @@ void genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 ***/
 void create(void)
 {
-    int i,j,k,numsize,phase[NUMSIZES],phase_id,num_phases_to_add;
-    int iii,jjj,kkk,totpix;
+    int i,j,k,numsize,phase[NUMSIZES],phase_id,num_phases_to_add,nplaced;
     long int num[NUMSIZES],target_phase_vox;
     long int extra_pixels,target_vox_i,linval;
     long int delta_particles,total_phase_vox;
@@ -3082,7 +3152,9 @@ void create(void)
             printf("\nGoing into genparticles now...");
             fflush(stdout);
         }
-        genparticles(numsize,num,frad,phase);
+        
+        /* We don't need the return value in this case */
+        nplaced = genparticles(numsize,num,frad,phase);
         if (Verbose) {
             printf("\nBack Out of genparticles now...");
             fflush(stdout);
@@ -6332,9 +6404,20 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
 int addonepixels(void)
 {
     register int i,j,k;
-    int phtodo,onepixfloc;
+    int phtodo,onepixfloc,pheach,assignpartnum,numsizes,nplaced;
     long int nadd,totclinkpix,totfapix,tot[NPHASES],target[NPHASES];
-    long int nleft,tottarget;
+    long int nleft,tottarget,numeach;
+    float sizeeach;
+
+    /***
+     * One-pixel particles are assigned a particle number of zero
+     ***/
+    /* assignpartnum = 0; */
+
+    /***
+     * One-pixel particles are assigned a unique particle number
+     ***/
+    assignpartnum = 1;
 
     i = j = 1;
 
@@ -6459,7 +6542,21 @@ int addonepixels(void)
                             }
                         }
 
-                        addrand(i,target[i],onepixfloc);
+                        if (Dispdist == 1) {
+                            numsizes = 1;
+                            numeach = target[i];
+                            sizeeach = 0.5;
+                            pheach = i;
+                            nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
+                            if (nplaced < numeach) {
+                                numeach -= ((long int)(nplaced));
+                                printf("\nCould not add all one-pixel particles dispersed.");
+                                printf("\nAdding %ld extra random locations to make up...",numeach);
+                                addrand(i,numeach,onepixfloc,assignpartnum);
+                            }
+                        } else {
+                            addrand(i,target[i],onepixfloc,assignpartnum);
+                        }
                    }
 
                    break;
@@ -6630,13 +6727,41 @@ int addonepixels(void)
                                 break;
                         }
 
-                        addrand(j,target[j],onepixfloc);
+                        if (Dispdist == 1) {
+                            numsizes = 1;
+                            numeach = target[j];
+                            sizeeach = 0.5;
+                            pheach = j;
+                            nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
+                            if (nplaced < numeach) {
+                                numeach -= ((long int)(nplaced));
+                                printf("\nCould not add all one-pixel particles dispersed.");
+                                printf("\nAdding %ld extra random locations to make up...",numeach);
+                                addrand(j,numeach,onepixfloc,assignpartnum);
+                            }
+                        } else {
+                            addrand(j,target[j],onepixfloc,assignpartnum);
+                        }
                     }
 
                     break;
 
                 default:
-                    addrand(phtodo,nadd,0);
+                    if (Dispdist == 1) {
+                        numsizes = 1;
+                        numeach = nadd;
+                        sizeeach = 0.5;
+                        pheach = phtodo;
+                        nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
+                        if (nplaced < numeach) {
+                            numeach -= ((long int)(nplaced));
+                            printf("\nCould not add all one-pixel particles dispersed.");
+                            printf("\nAdding %ld extra random locations to make up...",numeach);
+                            addrand(phtodo,numeach,0,assignpartnum);
+                        }
+                    } else {
+                        addrand(phtodo,nadd,0,assignpartnum);
+                    }
                     break;
             }
 
@@ -6656,13 +6781,14 @@ int addonepixels(void)
 *     Arguments:    int phase id
 *                 long int number to place
 *                 int flocculate (1) or not (0)
+*                 int whether or not to assign a particle number
 *
 *     Returns:    nothing
 *
 *    Calls:        no other routines
 *    Called by:    main program
 ***/
-void addrand(int randid, long int nneed, int onepixfloc)
+void addrand(int randid, long int nneed, int onepixfloc, int assignpartnum)
 {
     int inc,ic,success,ix,iy,iz,dim,dir,newsite,oldval;
 
@@ -6684,9 +6810,14 @@ void addrand(int randid, long int nneed, int onepixfloc)
             if (iy == Ysyssize) iy = 0;
             if (iz == Zsyssize) iz = 0;
 
-            if (Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] == POROSITY || Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] == CRACKP) {
+            if (Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] == POROSITY
+                    || Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] == CRACKP) {
                 oldval = Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)];
                 Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] = randid;
+                if (assignpartnum) {
+                    Npart++;
+                    Cement.val[getInt3dindex(Cement,ix,iy,iz)] = Npart;
+                }
                 success = 1;
                 if (onepixfloc == 1) {
                     /***
@@ -6701,7 +6832,8 @@ void addrand(int randid, long int nneed, int onepixfloc)
                         case 0:           /* X-direction flight */
                             newsite = ix + inc;
                             newsite += checkbc(newsite,Xsyssize);     
-                            while ((newsite != ix) && ((Cemreal.val[getInt3dindex(Cemreal,newsite,iy,iz)] == POROSITY)
+                            while ((newsite != ix)
+                                    && ((Cemreal.val[getInt3dindex(Cemreal,newsite,iy,iz)] == POROSITY)
                                     || (Cemreal.val[getInt3dindex(Cemreal,newsite,iy,iz)] == CRACKP))) {
                                 newsite += inc;
                                 newsite += checkbc(newsite,Xsyssize);
@@ -6709,14 +6841,21 @@ void addrand(int randid, long int nneed, int onepixfloc)
                             if (newsite != ix) {
                                 newsite -= inc;
                                 newsite += checkbc(newsite,Xsyssize);
-                                Cemreal.val[getInt3dindex(Cemreal,newsite,iy,iz)] = Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)];
+                                Cemreal.val[getInt3dindex(Cemreal,newsite,iy,iz)] =
+                                    Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)];
                                 Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] = oldval;
+                                if (assignpartnum) {
+                                    Cement.val[getInt3dindex(Cement,newsite,iy,iz)] =
+                                        Cement.val[getInt3dindex(Cement,ix,iy,iz)];
+                                    Cement.val[getInt3dindex(Cement,ix,iy,iz)] = 0;
+                                }
                             }
                             break;
                         case 1:           /* Y-direction flight */
                             newsite = iy + inc;
                             newsite += checkbc(newsite,Ysyssize);     
-                            while ((newsite != iy) && ((Cemreal.val[getInt3dindex(Cemreal,ix,newsite,iz)] == POROSITY)
+                            while ((newsite != iy)
+                                    && ((Cemreal.val[getInt3dindex(Cemreal,ix,newsite,iz)] == POROSITY)
                                     || (Cemreal.val[getInt3dindex(Cemreal,ix,newsite,iz)] == CRACKP))) {
                                 newsite += inc;
                                 newsite += checkbc(newsite,Ysyssize);
@@ -6726,6 +6865,10 @@ void addrand(int randid, long int nneed, int onepixfloc)
                                 newsite += checkbc(newsite,Ysyssize);
                                 Cemreal.val[getInt3dindex(Cemreal,ix,newsite,iz)] = Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)];
                                 Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] = oldval;
+                                if (assignpartnum) {
+                                    Cement.val[getInt3dindex(Cement,ix,newsite,iz)] = Cement.val[getInt3dindex(Cement,ix,iy,iz)];
+                                    Cement.val[getInt3dindex(Cement,ix,iy,iz)] = 0;
+                                }
                             }
                             break;
                         case 2:           /* Z-direction flight */
@@ -6741,6 +6884,10 @@ void addrand(int randid, long int nneed, int onepixfloc)
                                 newsite += checkbc(newsite,Zsyssize);
                                 Cemreal.val[getInt3dindex(Cemreal,ix,iy,newsite)] = Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)];
                                 Cemreal.val[getInt3dindex(Cemreal,ix,iy,iz)] = oldval;
+                                if (assignpartnum) {
+                                    Cement.val[getInt3dindex(Cement,ix,iy,newsite)] = Cement.val[getInt3dindex(Cement,ix,iy,iz)];
+                                    Cement.val[getInt3dindex(Cement,ix,iy,iz)] = 0;
+                                }
                              }
                              break;
                          case 3:         /* Do nothing */
@@ -6750,6 +6897,7 @@ void addrand(int randid, long int nneed, int onepixfloc)
             }
         }
     }
+    return;
 }
 
 

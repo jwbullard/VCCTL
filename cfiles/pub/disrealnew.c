@@ -2613,8 +2613,12 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
 
     /***
     *    Allow user to iteratively add one-pixel
-    *    particles of various phases.  Typical application
-    *    would be for addition of silica fume
+    *    particles of various phases.
+    *
+    *    VCCTL software adds the one-pixel particles at the
+    *    microstructure creation stage rather than here, but
+    *    we keep this structure in place for possible manual
+    *    addition of one-pixel particles by the user.
     ***/
 
     printf("Enter number of one pixel particles to add (-1 to quit) \n");
@@ -2625,12 +2629,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
 
     while (nadd >= 0) {
 
+        onepixfloc = 0;  /* No flocculation of one-pixel particles */
         /*
-        printf("Should these particles flocculate to surfaces? No (0) or Yes (1): ");
+        printf("Should these particles flocculate ");
+        printf("to surfaces? No (0) or Yes (1): ");
         read_string(instring,sizeof(instring));
         onepixfloc = atoi(instring);
         */
-        onepixfloc = 0;  /* No flocculation of one-pixel particles */
 
         printf("Enter dissolution bias for these one pixel particles\n");
         read_string(instring,sizeof(instring));
@@ -2685,7 +2690,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
 
         if (nadd > 0) addrand(phtodo,nadd,onepixfloc);
 
-        printf("Enter number of one pixel particles to add (-1 to quit) \n");
+        printf("Enter number of one pixel particles ");
+        printf("to add (-1 to quit) \n");
         read_string(instring,sizeof(instring));
         nadd = (long int)(atoi(instring));
         printf("%ld\n",nadd);
@@ -2697,7 +2703,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     *    Parameters for adiabatic temperature rise calculation
     ***/
 
-    printf("Enter the initial temperature of binder in degrees Celsius \n");
+    printf("Enter the initial temperature of binder ");
+    printf("in degrees Celsius \n");
     read_string(instring,sizeof(instring));
     Temp_0 = atof(instring);
     printf("%f \n",Temp_0);
@@ -2712,12 +2719,14 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     if ((Adiaflag == 0) || (Mass_agg * Cp_agg <= 0.0)
             || (fabs(Temp_0_agg - Temp_0) < 0.5) || (U_coeff_agg <= 0.0)) AggTempEffect = 0;
 
-    printf("Enter the ambient temperature in degrees Celsius \n");
+    printf("Enter the ambient temperature ");
+    printf("in degrees Celsius \n");
     read_string(instring,sizeof(instring));
     T_ambient = atof(instring);
     printf("%f \n",T_ambient);
 
-    printf("Enter the overall heat transfer coefficient in J/g/C/s \n");
+    printf("Enter the overall heat transfer coefficient ");
+    printf("in J/g/C/s \n");
     read_string(instring,sizeof(instring));
     U_coeff = atof(instring);
     printf("%f \n",U_coeff);
@@ -2740,11 +2749,14 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     E_act_slag = atof(instring);
     printf("%f \n",E_act_slag);
 
-    printf("Calibrate time using beta factor (0), early-age calorimetry data (1), or early-age chemical shrinkage data (2): ");
+    printf("Calibrate time using beta factor (0), ");
+    printf("early-age calorimetry data (1), or ");
+    printf("early-age chemical shrinkage data (2): ");
     read_string(instring,sizeof(instring));
     TimeCalibrationMethod = atoi(instring);
     if (TimeCalibrationMethod == BETAFACTOR) {
-        printf("\nEnter kinetic factor to convert cycles to time at 25 C \n");
+        printf("\nEnter kinetic factor to convert cycles ");
+        printf("to time at 25 C \n");
         read_string(instring,sizeof(instring));
         Beta = atof(instring);
         printf("%f \n",Beta);
@@ -2755,7 +2767,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         sprintf(calfilename,"%s",name);
 
         /***
-         *  At this point, the isothermal calorimetry file must have data taken
+         *  At this point, the isothermal calorimetry file
+         *  must have data taken
          *  AT 25 degrees C.  We will correct the time scale using the
          *  user-supplied activation energy for hydration
          ***/
@@ -2763,16 +2776,18 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         fcalfile=filehandler("disrealnew",calfilename,"READ");
         if (!fcalfile) {
             freeallmem();
-            sprintf(buff,"Could not open time calibration file %s",calfilename);
+            sprintf(buff,"Could not open time calibration ");
+            sprintf(buff,"file %s",calfilename);
             bailout("disrealnew",buff);
             return(1);
         }
 
         /***
-         * The calorimetry file must be two-column ASCII text file.  First column
-         * must be time in hours, second column must be CUMULATIVE heat in J per
-         * gram of solid material initially.  There must be a header line, but it
-         * does not matter what is on it.
+         * The calorimetry file must be two-column ASCII text file.
+         * First column must be time in hours, second column must
+         * be CUMULATIVE heat in J per gram of CEMENT initially.
+         * There must be a header line, but it does not matter
+         * what is on it.
          ***/
 
         NDataLines = 0;
@@ -2787,7 +2802,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
 
         if (NDataLines == 0) {
             freeallmem();
-            sprintf(buff,"Calibration file ended prematurely: %s",calfilename);
+            sprintf(buff,"Calibration file ended ");
+            sprintf(buff,"prematurely: %s",calfilename);
             bailout("disrealnew",buff);
             return(1);
         }
@@ -2801,7 +2817,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         if (!DataTime) {
             freeallmem();
             fclose(fcalfile);
-            bailout("disrealnew","Could not allocate memory for DataTime array");
+            bailout("disrealnew",
+                    "Could not allocate memory for DataTime array");
             return(1);
         }
 
@@ -2809,7 +2826,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         if (!DataValue) {
             freeallmem();
             fclose(fcalfile);
-            bailout("disrealnew","Could not allocate memory for DataValue array");
+            bailout("disrealnew",
+                    "Could not allocate memory for DataValue array");
             return(1);
         }
 
@@ -2829,25 +2847,30 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
             if (i == 0) {
                 DataTime[i] = atof(buff1);
                 DataValue[i] = atof(buff2);
-                if (Verbose) printf("\nDataTime[%d] = %f, DataValue[%d] = %f\n",i,DataTime[i],i,DataValue[i]);
+                if (Verbose) {
+                    printf("\nDataTime[%d] = %f, ",i,DataTime[i]);
+                    printf("DataValue[%d] = %f\n",i,DataValue[i]);
+                }
                 i++;
             } else {
                 DataTime[i] = atof(buff1);
                 DataValue[i] = atof(buff2);
-                if ((DataTime[i] > DataTime[i-1]) && (DataValue[i] >= DataValue[i-1])) i++;
+                if ((DataTime[i] > DataTime[i-1])
+                     && (DataValue[i] >= DataValue[i-1])) i++;
             }
         }
 
         NDataLines = i;
 
         fclose(fcalfile);
-        printf("Enter temperature at which calibration data was obtained (in deg C): ");
+        printf("Enter temperature at which calibration data ");
+        printf("were obtained (in deg C): ");
         read_string(buff,sizeof(buff));
         printf("%s \n",buff);
         DataMeasuredAtTemperature = atof(buff);
     }
 
-    /* Have enough informatino to calculate upper bound on number of cycles */
+    /* Have enough information to calculate upper bound on number of cycles */
 
     if (TimeCalibrationMethod == BETAFACTOR) {
         b_estimate = Beta * exp((1000.0 * E_act/8.314)*((1.0/(Temp_0 + 273.15)) - (1.0/298.15)));
@@ -2861,7 +2884,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     if (Crackwidth == 0) Cracktime = End_time + 100.0;
     if (CustomImageTime != NULL) {
         OutTimefreq = End_time + 1.0;
-        printf("\nSetting DOH frequency for outputting microstructure = %f\n",OutTimefreq);
+        printf("\nSetting DOH frequency for outputting ");
+        printf("microstructure = %f\n",OutTimefreq);
         fflush(stdout);
     }
 
@@ -2874,7 +2898,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     TimeHistory = fvector((long)Ncyc);
     if (!TimeHistory) {
         freeallmem();
-        bailout("disrealnew","Could not allocate memory for TimeHistory array");
+        bailout("disrealnew",
+                "Could not allocate memory for TimeHistory array");
         exit(1);
     }
     TimeHistory[0] = 0.0;
@@ -2882,14 +2907,16 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     Molarvcsh = fvector((long)Ncyc);
     if (!Molarvcsh) {
         freeallmem();
-        bailout("disrealnew","Could not allocate memory for Molarvcsh array");
+        bailout("disrealnew",
+                "Could not allocate memory for Molarvcsh array");
         exit(1);
     }
 
     Watercsh = fvector((long)Ncyc);
     if (!Watercsh) {
         freeallmem();
-        bailout("disrealnew","Could not allocate memory for Watercsh array");
+        bailout("disrealnew",
+                "Could not allocate memory for Watercsh array");
         exit(1);
     }
 
@@ -3725,7 +3752,8 @@ int initialize_output_files(void)
         printf("\n\ndfileroot is: %s\n\n",dfileroot);
     }
 
-    sprintf(Datafilename,"%s%s.data",Outputdir,dfileroot);
+    /* sprintf(Datafilename,"%s%s.data",Outputdir,dfileroot); */
+    sprintf(Datafilename,"%s%s.csv",Outputdir,dfileroot);
     sprintf(Imageindexname,"%simage_index.txt",Outputdir);
 
     sprintf(Moviename,"%s%s.mov",Outputdir,dfileroot);
@@ -3998,14 +4026,18 @@ int chckedge(int phase, int xck, int yck, int zck)
         y2 += checkbc(y2,Ysyssize);
         z2 += checkbc(z2,Zsyssize);
 
-        if (phase != K2SO4 && phase != NA2SO4) {
-            if (Mic[x2][y2][z2] == POROSITY || Mic[x2][y2][z2] == CRACKP) edgeback = 1;
-        } else {
-            if (Mic[x2][y2][z2] == POROSITY
+        if (Mic[x2][y2][z2] == POROSITY
                 || Mic[x2][y2][z2] == CRACKP
                 || Mic[x2][y2][z2] == CSH
                 || Mic[x2][y2][z2] == POZZCSH
-                || Mic[x2][y2][z2] == SLAGCSH) edgeback = 1;
+                || Mic[x2][y2][z2] == SLAGCSH) {
+            edgeback = 1;
+        } 
+        /* JWB: Added this block as a trial to prevent adjacent
+         * particles from blocking each other's dissolution
+         */
+        else if (Micpart[xck][yck][zck] != Micpart[x2][y2][z2]) {
+            edgeback = 1;
         }
     }
 
@@ -4229,12 +4261,8 @@ void passone(int low, int high, int cycid, int cshexflag)
                     }
                 }
 
-                /*
-                if (phid != NPHASES + 10)
-                */
-
                 /***
-                *    Uncomment above and comment below to identify
+                *    Currently do NOT identify
                 *    SURFACE pixels of K2SO4 and NA2SO4
                 ***/
 
