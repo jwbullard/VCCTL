@@ -1,0 +1,174 @@
+# Makefile for Windows running MinGW
+
+HYDIFILES= \
+	disrealnew.h \
+	properties.c \
+	burn3d.c \
+	burnset.c \
+	parthyd.c \
+	hydrealnew.c \
+	pHpred.c
+
+HYDCFILES = \
+	disrealnew.c
+
+CFILES = \
+	apstats.c \
+	concelas.c \
+	aggvrml.c \
+	chlorattack3d.c \
+	distfapart.c \
+	distfarand.c \
+	distrib3d.c \
+	elastic.c \
+	genaggpack.c \
+ 	genmic.c \
+	hydmovie.c \
+	image100.c \
+	leach3d.c \
+	measagg.c \
+	oneimage.c \
+	perc3d.c \
+	poredist3d.c \
+	poredist3d-Hg.c \
+	rand3d.c \
+	sinter3d.c \
+	stat3d.c \
+	totsurf.c \
+        transport.c \
+	sulfattack3d.c \
+	vcctl2thames.c \
+	thames2vcctl.c
+
+OBJFILES= ${CFILES:.c=.o} ${HYDCFILES:.c=.o}
+
+EXECS= ${CFILES:.c=.exe}
+HYDEXEC= ${HYDCFILES:.c=.exe}
+
+BINDIR= ../../bin
+
+MATHLIB = -lm
+PNGLIB = -lpng
+ZLIB = -lz
+VCCTLLIBDIR= ../../lib
+OTHER_LIBDIR= /usr/local/lib
+VCCTLLIBNAME= libvcctl.a
+VCCTLLIB= -lvcctl
+
+VCCTLINCDIR= ../../include
+OTHER_INCDIR= /usr/local/include
+VCCTLINC= vcctl.h
+
+# For gcc
+CC= gcc
+# For ANSI compilers
+#CC= cc
+
+CFLAGS= -c -Wall -O2 -I"${VCCTLINCDIR}" -I"${OTHER_INCDIR}"
+CLINKFLAGS= -L"${OTHER_LIBDIR}" -L"${VCCTLLIBDIR}" ${VCCTLLIB} ${MATHLIB} ${PNGLIB} ${ZLIB}
+
+RM= rm -f
+CP= cp
+#--- You shouldn't have to edit anything else. ---
+
+all:	$(EXECS) $(HYDEXEC)
+
+%.o:	%.c
+	$(CC) $(CFLAGS) $<
+
+#${EXECS}:	$$@.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+#	$(CC) -o $@ $@.o ${CLINKFLAGS}
+#
+#${HYDEXEC}:	$$@.o ${HYDIFILES} ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+#	$(CC) -o $@ $@.o ${CLINKFLAGS}
+
+apstats.exe:	apstats.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ apstats.o ${CLINKFLAGS}
+
+concelas.exe:	concelas.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ concelas.o ${CLINKFLAGS}
+
+aggvrml.exe:	aggvrml.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ aggvrml.o ${CLINKFLAGS}
+
+chlorattack3d.exe:	chlorattack3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ chlorattack3d.o ${CLINKFLAGS}
+
+disrealnew.exe:	disrealnew.o ${HYDIFILES} ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ disrealnew.o ${CLINKFLAGS}
+
+distfapart.exe:	distfapart.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ distfapart.o ${CLINKFLAGS}
+
+distfarand.exe:	distfarand.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ distfarand.o ${CLINKFLAGS}
+
+distrib3d.exe:	distrib3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ distrib3d.o ${CLINKFLAGS}
+
+elastic.exe:	elastic.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ elastic.o ${CLINKFLAGS}
+
+genaggpack.exe:	genaggpack.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ genaggpack.o ${CLINKFLAGS}
+
+genmic.exe:	genmic.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ genmic.o ${CLINKFLAGS}
+
+hydmovie.exe:	hydmovie.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ hydmovie.o ${CLINKFLAGS}
+
+image100.exe:	image100.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ image100.o ${CLINKFLAGS}
+
+leach3d.exe:	leach3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ leach3d.o ${CLINKFLAGS}
+
+measagg.exe:	measagg.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ measagg.o ${CLINKFLAGS}
+
+oneimage.exe:	oneimage.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ oneimage.o ${CLINKFLAGS}
+
+perc3d.exe:	perc3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ perc3d.o ${CLINKFLAGS}
+
+poredist3d.exe:	poredist3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ poredist3d.o ${CLINKFLAGS}
+
+poredist3d-Hg.exe:	poredist3d-Hg.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ poredist3d-Hg.o ${CLINKFLAGS}
+
+rand3d.exe:	rand3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ rand3d.o ${CLINKFLAGS}
+
+sinter3d.exe:	sinter3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ sinter3d.o ${CLINKFLAGS}
+
+stat3d.exe:	stat3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ stat3d.o ${CLINKFLAGS}
+
+totsurf.exe:	totsurf.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ totsurf.o ${CLINKFLAGS}
+
+transport.exe:	transport.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ transport.o ${CLINKFLAGS}
+
+sulfattack3d.exe:	sulfattack3d.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ sulfattack3d.o ${CLINKFLAGS}
+
+vcctl2thames.exe:	vcctl2thames.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ vcctl2thames.o ${CLINKFLAGS}
+
+thames2vcctl.exe:	thames2vcctl.o ${VCCTLLIBDIR}/${VCCTLLIBNAME} ${VCCTLINCDIR}/${VCCTLINC}
+	$(CC) -o $@ thames2vcctl.o ${CLINKFLAGS}
+
+install:
+	mkdir $(BINDIR)
+	${CP} *.exe ${BINDIR}/.
+
+clean:
+	${RM} ${OBJFILES} ${EXECS} ${HYDEXEC} ${BINDIR}/${EXECS} ${BINDIR}/${HYDEXEC}
+
+cleanobj:
+	${RM} ${OBJFILES}
