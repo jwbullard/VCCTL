@@ -8,12 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/backend/thames2vcctlcorr.c" "CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o" "gcc" "CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o.d"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/backend/thames2vcctlcorr.c" "CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o" "gcc" "CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o.d"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/backend/vcctllib/CMakeFiles/vcctl.dir/DependInfo.cmake"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/backend/vcctllib/CMakeFiles/vcctl.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

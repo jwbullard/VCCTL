@@ -116,17 +116,17 @@ fcomplex RCmul(float x, fcomplex a) {
  *
  *	Array is of the form y[nrl,nrh][ncl,nch]
  *
- *	Arguments: long int nrl,nrh,ncl,nch
+ *	Arguments: int nrl,nrh,ncl,nch
  *	Returns:	Pointer to first element of array
  *
  *	Calls: No other routines
  *	Called by:  main
  *
  ******************************************************/
-fcomplex **complexmatrix(long nrl, long nrh, long ncl, long nch) {
-  long i;
-  long nrow = nrh - nrl + 1;
-  long ncol = nch - ncl + 1;
+fcomplex **complexmatrix(int nrl, int nrh, int ncl, int nch) {
+  int i;
+  int nrow = nrh - nrl + 1;
+  int ncol = nch - ncl + 1;
   fcomplex **m;
 
   m = NULL;
@@ -164,8 +164,8 @@ fcomplex **complexmatrix(long nrl, long nrh, long ncl, long nch) {
  *	numbers (type fcomplex in Numerical Recipes complex.c
  *
  *	Arguments:	Pointer to pointer to fcomplex type (the matrix)
- *				beginning and ending row indices (long nrl, long
- *nrh) beginning and ending column indices (long ncl, long nch)
+ *				beginning and ending row indices (int nrl, int
+ *nrh) beginning and ending column indices (int ncl, int nch)
  *
  * 	Returns:	Nothing
  *
@@ -173,7 +173,7 @@ fcomplex **complexmatrix(long nrl, long nrh, long ncl, long nch) {
  *	Called by:	createvrml main routine
  *
  ***/
-void free_complexmatrix(fcomplex **m, long nrl, long nrh, long ncl, long nch) {
+void free_complexmatrix(fcomplex **m, int nrl, int nrh, int ncl, int nch) {
   free((char *)(m[nrl] + ncl - 1));
   free((char *)(m + nrl - 1));
   return;

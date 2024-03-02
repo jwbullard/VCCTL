@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/thames2vcctlcorr.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/thames2vcctlcorr.dir/progress.make
 include CMakeFiles/thames2vcctlcorr.dir/flags.make
 
 CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o: CMakeFiles/thames2vcctlcorr.dir/flags.make
-CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/thames2vcctlcorr.c
+CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/thames2vcctlcorr.c
 CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o: CMakeFiles/thames2vcctlcorr.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o -MF CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o.d -o CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/thames2vcctlcorr.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o -MF CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o.d -o CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/thames2vcctlcorr.c
 
 CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/thames2vcctlcorr.c > CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/thames2vcctlcorr.c > CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.i
 
 CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/thames2vcctlcorr.c -o CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/thames2vcctlcorr.c -o CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.s
 
 # Object files for target thames2vcctlcorr
 thames2vcctlcorr_OBJECTS = \
@@ -93,11 +93,11 @@ thames2vcctlcorr_EXTERNAL_OBJECTS =
 thames2vcctlcorr: CMakeFiles/thames2vcctlcorr.dir/backend/thames2vcctlcorr.c.o
 thames2vcctlcorr: CMakeFiles/thames2vcctlcorr.dir/build.make
 thames2vcctlcorr: backend/vcctllib/libvcctl.a
-thames2vcctlcorr: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-thames2vcctlcorr: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-thames2vcctlcorr: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+thames2vcctlcorr: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+thames2vcctlcorr: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+thames2vcctlcorr: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 thames2vcctlcorr: CMakeFiles/thames2vcctlcorr.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable thames2vcctlcorr"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable thames2vcctlcorr"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/thames2vcctlcorr.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/thames2vcctlcorr.dir/clean:
 .PHONY : CMakeFiles/thames2vcctlcorr.dir/clean
 
 CMakeFiles/thames2vcctlcorr.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/thames2vcctlcorr.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/thames2vcctlcorr.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/thames2vcctlcorr.dir/depend
 

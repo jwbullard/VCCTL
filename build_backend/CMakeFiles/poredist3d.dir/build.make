@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/poredist3d.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/poredist3d.dir/progress.make
 include CMakeFiles/poredist3d.dir/flags.make
 
 CMakeFiles/poredist3d.dir/backend/poredist3d.c.o: CMakeFiles/poredist3d.dir/flags.make
-CMakeFiles/poredist3d.dir/backend/poredist3d.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/poredist3d.c
+CMakeFiles/poredist3d.dir/backend/poredist3d.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/poredist3d.c
 CMakeFiles/poredist3d.dir/backend/poredist3d.c.o: CMakeFiles/poredist3d.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/poredist3d.dir/backend/poredist3d.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/poredist3d.dir/backend/poredist3d.c.o -MF CMakeFiles/poredist3d.dir/backend/poredist3d.c.o.d -o CMakeFiles/poredist3d.dir/backend/poredist3d.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/poredist3d.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/poredist3d.dir/backend/poredist3d.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/poredist3d.dir/backend/poredist3d.c.o -MF CMakeFiles/poredist3d.dir/backend/poredist3d.c.o.d -o CMakeFiles/poredist3d.dir/backend/poredist3d.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/poredist3d.c
 
 CMakeFiles/poredist3d.dir/backend/poredist3d.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/poredist3d.dir/backend/poredist3d.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/poredist3d.c > CMakeFiles/poredist3d.dir/backend/poredist3d.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/poredist3d.c > CMakeFiles/poredist3d.dir/backend/poredist3d.c.i
 
 CMakeFiles/poredist3d.dir/backend/poredist3d.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/poredist3d.dir/backend/poredist3d.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/poredist3d.c -o CMakeFiles/poredist3d.dir/backend/poredist3d.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/poredist3d.c -o CMakeFiles/poredist3d.dir/backend/poredist3d.c.s
 
 # Object files for target poredist3d
 poredist3d_OBJECTS = \
@@ -93,11 +93,11 @@ poredist3d_EXTERNAL_OBJECTS =
 poredist3d: CMakeFiles/poredist3d.dir/backend/poredist3d.c.o
 poredist3d: CMakeFiles/poredist3d.dir/build.make
 poredist3d: backend/vcctllib/libvcctl.a
-poredist3d: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-poredist3d: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-poredist3d: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+poredist3d: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+poredist3d: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+poredist3d: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 poredist3d: CMakeFiles/poredist3d.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable poredist3d"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable poredist3d"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/poredist3d.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/poredist3d.dir/clean:
 .PHONY : CMakeFiles/poredist3d.dir/clean
 
 CMakeFiles/poredist3d.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/poredist3d.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/poredist3d.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/poredist3d.dir/depend
 

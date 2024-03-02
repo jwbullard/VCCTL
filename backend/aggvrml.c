@@ -15,10 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 // #include <malloc.h>
-#ifndef VCCTL_H
-#define VCCTL_H
 #include "include/vcctl.h"
-#endif
 
 #define NNN 20
 

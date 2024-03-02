@@ -57,10 +57,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,14 +132,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/backend/vcctllib//CMakeFiles/progress.marks
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles 0
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/backend/vcctllib//CMakeFiles/progress.marks
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/clean
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/clean
 .PHONY : clean
 
 # The main clean target
@@ -148,22 +148,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/preinstall
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/preinstall
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 backend/vcctllib/CMakeFiles/vcctl.dir/rule:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/CMakeFiles/vcctl.dir/rule
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 backend/vcctllib/CMakeFiles/vcctl.dir/rule
 .PHONY : backend/vcctllib/CMakeFiles/vcctl.dir/rule
 
 # Convenience name for target.
@@ -172,7 +172,7 @@ vcctl: backend/vcctllib/CMakeFiles/vcctl.dir/rule
 
 # fast build rule for target.
 vcctl/fast:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/build
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/build
 .PHONY : vcctl/fast
 
 breakflocs.o: breakflocs.c.o
@@ -180,7 +180,7 @@ breakflocs.o: breakflocs.c.o
 
 # target to build an object file
 breakflocs.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.o
 .PHONY : breakflocs.c.o
 
 breakflocs.i: breakflocs.c.i
@@ -188,7 +188,7 @@ breakflocs.i: breakflocs.c.i
 
 # target to preprocess a source file
 breakflocs.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.i
 .PHONY : breakflocs.c.i
 
 breakflocs.s: breakflocs.c.s
@@ -196,7 +196,7 @@ breakflocs.s: breakflocs.c.s
 
 # target to generate assembly for a file
 breakflocs.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/breakflocs.c.s
 .PHONY : breakflocs.c.s
 
 calcporedist3d.o: calcporedist3d.c.o
@@ -204,7 +204,7 @@ calcporedist3d.o: calcporedist3d.c.o
 
 # target to build an object file
 calcporedist3d.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.o
 .PHONY : calcporedist3d.c.o
 
 calcporedist3d.i: calcporedist3d.c.i
@@ -212,7 +212,7 @@ calcporedist3d.i: calcporedist3d.c.i
 
 # target to preprocess a source file
 calcporedist3d.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.i
 .PHONY : calcporedist3d.c.i
 
 calcporedist3d.s: calcporedist3d.c.s
@@ -220,7 +220,7 @@ calcporedist3d.s: calcporedist3d.c.s
 
 # target to generate assembly for a file
 calcporedist3d.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/calcporedist3d.c.s
 .PHONY : calcporedist3d.c.s
 
 checkbc.o: checkbc.c.o
@@ -228,7 +228,7 @@ checkbc.o: checkbc.c.o
 
 # target to build an object file
 checkbc.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.o
 .PHONY : checkbc.c.o
 
 checkbc.i: checkbc.c.i
@@ -236,7 +236,7 @@ checkbc.i: checkbc.c.i
 
 # target to preprocess a source file
 checkbc.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.i
 .PHONY : checkbc.c.i
 
 checkbc.s: checkbc.c.s
@@ -244,7 +244,7 @@ checkbc.s: checkbc.c.s
 
 # target to generate assembly for a file
 checkbc.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/checkbc.c.s
 .PHONY : checkbc.c.s
 
 complex.o: complex.c.o
@@ -252,7 +252,7 @@ complex.o: complex.c.o
 
 # target to build an object file
 complex.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.o
 .PHONY : complex.c.o
 
 complex.i: complex.c.i
@@ -260,7 +260,7 @@ complex.i: complex.c.i
 
 # target to preprocess a source file
 complex.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.i
 .PHONY : complex.c.i
 
 complex.s: complex.c.s
@@ -268,7 +268,7 @@ complex.s: complex.c.s
 
 # target to generate assembly for a file
 complex.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/complex.c.s
 .PHONY : complex.c.s
 
 convert_id.o: convert_id.c.o
@@ -276,7 +276,7 @@ convert_id.o: convert_id.c.o
 
 # target to build an object file
 convert_id.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.o
 .PHONY : convert_id.c.o
 
 convert_id.i: convert_id.c.i
@@ -284,7 +284,7 @@ convert_id.i: convert_id.c.i
 
 # target to preprocess a source file
 convert_id.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.i
 .PHONY : convert_id.c.i
 
 convert_id.s: convert_id.c.s
@@ -292,7 +292,7 @@ convert_id.s: convert_id.c.s
 
 # target to generate assembly for a file
 convert_id.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/convert_id.c.s
 .PHONY : convert_id.c.s
 
 diam2vol.o: diam2vol.c.o
@@ -300,7 +300,7 @@ diam2vol.o: diam2vol.c.o
 
 # target to build an object file
 diam2vol.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.o
 .PHONY : diam2vol.c.o
 
 diam2vol.i: diam2vol.c.i
@@ -308,7 +308,7 @@ diam2vol.i: diam2vol.c.i
 
 # target to preprocess a source file
 diam2vol.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.i
 .PHONY : diam2vol.c.i
 
 diam2vol.s: diam2vol.c.s
@@ -316,7 +316,7 @@ diam2vol.s: diam2vol.c.s
 
 # target to generate assembly for a file
 diam2vol.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/diam2vol.c.s
 .PHONY : diam2vol.c.s
 
 filehandler.o: filehandler.c.o
@@ -324,7 +324,7 @@ filehandler.o: filehandler.c.o
 
 # target to build an object file
 filehandler.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.o
 .PHONY : filehandler.c.o
 
 filehandler.i: filehandler.c.i
@@ -332,7 +332,7 @@ filehandler.i: filehandler.c.i
 
 # target to preprocess a source file
 filehandler.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.i
 .PHONY : filehandler.c.i
 
 filehandler.s: filehandler.c.s
@@ -340,7 +340,7 @@ filehandler.s: filehandler.c.s
 
 # target to generate assembly for a file
 filehandler.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/filehandler.c.s
 .PHONY : filehandler.c.s
 
 fread_string.o: fread_string.c.o
@@ -348,7 +348,7 @@ fread_string.o: fread_string.c.o
 
 # target to build an object file
 fread_string.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.o
 .PHONY : fread_string.c.o
 
 fread_string.i: fread_string.c.i
@@ -356,7 +356,7 @@ fread_string.i: fread_string.c.i
 
 # target to preprocess a source file
 fread_string.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.i
 .PHONY : fread_string.c.i
 
 fread_string.s: fread_string.c.s
@@ -364,7 +364,7 @@ fread_string.s: fread_string.c.s
 
 # target to generate assembly for a file
 fread_string.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/fread_string.c.s
 .PHONY : fread_string.c.s
 
 gtime.o: gtime.c.o
@@ -372,7 +372,7 @@ gtime.o: gtime.c.o
 
 # target to build an object file
 gtime.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.o
 .PHONY : gtime.c.o
 
 gtime.i: gtime.c.i
@@ -380,7 +380,7 @@ gtime.i: gtime.c.i
 
 # target to preprocess a source file
 gtime.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.i
 .PHONY : gtime.c.i
 
 gtime.s: gtime.c.s
@@ -388,7 +388,7 @@ gtime.s: gtime.c.s
 
 # target to generate assembly for a file
 gtime.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/gtime.c.s
 .PHONY : gtime.c.s
 
 id2phasename.o: id2phasename.c.o
@@ -396,7 +396,7 @@ id2phasename.o: id2phasename.c.o
 
 # target to build an object file
 id2phasename.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.o
 .PHONY : id2phasename.c.o
 
 id2phasename.i: id2phasename.c.i
@@ -404,7 +404,7 @@ id2phasename.i: id2phasename.c.i
 
 # target to preprocess a source file
 id2phasename.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.i
 .PHONY : id2phasename.c.i
 
 id2phasename.s: id2phasename.c.s
@@ -412,7 +412,7 @@ id2phasename.s: id2phasename.c.s
 
 # target to generate assembly for a file
 id2phasename.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/id2phasename.c.s
 .PHONY : id2phasename.c.s
 
 imageutil.o: imageutil.c.o
@@ -420,7 +420,7 @@ imageutil.o: imageutil.c.o
 
 # target to build an object file
 imageutil.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.o
 .PHONY : imageutil.c.o
 
 imageutil.i: imageutil.c.i
@@ -428,7 +428,7 @@ imageutil.i: imageutil.c.i
 
 # target to preprocess a source file
 imageutil.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.i
 .PHONY : imageutil.c.i
 
 imageutil.s: imageutil.c.s
@@ -436,7 +436,7 @@ imageutil.s: imageutil.c.s
 
 # target to generate assembly for a file
 imageutil.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/imageutil.c.s
 .PHONY : imageutil.c.s
 
 mediansize.o: mediansize.c.o
@@ -444,7 +444,7 @@ mediansize.o: mediansize.c.o
 
 # target to build an object file
 mediansize.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.o
 .PHONY : mediansize.c.o
 
 mediansize.i: mediansize.c.i
@@ -452,7 +452,7 @@ mediansize.i: mediansize.c.i
 
 # target to preprocess a source file
 mediansize.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.i
 .PHONY : mediansize.c.i
 
 mediansize.s: mediansize.c.s
@@ -460,7 +460,7 @@ mediansize.s: mediansize.c.s
 
 # target to generate assembly for a file
 mediansize.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/mediansize.c.s
 .PHONY : mediansize.c.s
 
 memutil.o: memutil.c.o
@@ -468,7 +468,7 @@ memutil.o: memutil.c.o
 
 # target to build an object file
 memutil.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.o
 .PHONY : memutil.c.o
 
 memutil.i: memutil.c.i
@@ -476,7 +476,7 @@ memutil.i: memutil.c.i
 
 # target to preprocess a source file
 memutil.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.i
 .PHONY : memutil.c.i
 
 memutil.s: memutil.c.s
@@ -484,7 +484,7 @@ memutil.s: memutil.c.s
 
 # target to generate assembly for a file
 memutil.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/memutil.c.s
 .PHONY : memutil.c.s
 
 messages.o: messages.c.o
@@ -492,7 +492,7 @@ messages.o: messages.c.o
 
 # target to build an object file
 messages.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.o
 .PHONY : messages.c.o
 
 messages.i: messages.c.i
@@ -500,7 +500,7 @@ messages.i: messages.c.i
 
 # target to preprocess a source file
 messages.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.i
 .PHONY : messages.c.i
 
 messages.s: messages.c.s
@@ -508,7 +508,7 @@ messages.s: messages.c.s
 
 # target to generate assembly for a file
 messages.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/messages.c.s
 .PHONY : messages.c.s
 
 probe_imgheader.o: probe_imgheader.c.o
@@ -516,7 +516,7 @@ probe_imgheader.o: probe_imgheader.c.o
 
 # target to build an object file
 probe_imgheader.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.o
 .PHONY : probe_imgheader.c.o
 
 probe_imgheader.i: probe_imgheader.c.i
@@ -524,7 +524,7 @@ probe_imgheader.i: probe_imgheader.c.i
 
 # target to preprocess a source file
 probe_imgheader.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.i
 .PHONY : probe_imgheader.c.i
 
 probe_imgheader.s: probe_imgheader.c.s
@@ -532,7 +532,7 @@ probe_imgheader.s: probe_imgheader.c.s
 
 # target to generate assembly for a file
 probe_imgheader.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/probe_imgheader.c.s
 .PHONY : probe_imgheader.c.s
 
 ran1.o: ran1.c.o
@@ -540,7 +540,7 @@ ran1.o: ran1.c.o
 
 # target to build an object file
 ran1.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.o
 .PHONY : ran1.c.o
 
 ran1.i: ran1.c.i
@@ -548,7 +548,7 @@ ran1.i: ran1.c.i
 
 # target to preprocess a source file
 ran1.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.i
 .PHONY : ran1.c.i
 
 ran1.s: ran1.c.s
@@ -556,7 +556,7 @@ ran1.s: ran1.c.s
 
 # target to generate assembly for a file
 ran1.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/ran1.c.s
 .PHONY : ran1.c.s
 
 read_imgheader.o: read_imgheader.c.o
@@ -564,7 +564,7 @@ read_imgheader.o: read_imgheader.c.o
 
 # target to build an object file
 read_imgheader.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.o
 .PHONY : read_imgheader.c.o
 
 read_imgheader.i: read_imgheader.c.i
@@ -572,7 +572,7 @@ read_imgheader.i: read_imgheader.c.i
 
 # target to preprocess a source file
 read_imgheader.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.i
 .PHONY : read_imgheader.c.i
 
 read_imgheader.s: read_imgheader.c.s
@@ -580,7 +580,7 @@ read_imgheader.s: read_imgheader.c.s
 
 # target to generate assembly for a file
 read_imgheader.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_imgheader.c.s
 .PHONY : read_imgheader.c.s
 
 read_string.o: read_string.c.o
@@ -588,7 +588,7 @@ read_string.o: read_string.c.o
 
 # target to build an object file
 read_string.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.o
 .PHONY : read_string.c.o
 
 read_string.i: read_string.c.i
@@ -596,7 +596,7 @@ read_string.i: read_string.c.i
 
 # target to preprocess a source file
 read_string.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.i
 .PHONY : read_string.c.i
 
 read_string.s: read_string.c.s
@@ -604,7 +604,7 @@ read_string.s: read_string.c.s
 
 # target to generate assembly for a file
 read_string.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/read_string.c.s
 .PHONY : read_string.c.s
 
 skip_imgheader.o: skip_imgheader.c.o
@@ -612,7 +612,7 @@ skip_imgheader.o: skip_imgheader.c.o
 
 # target to build an object file
 skip_imgheader.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.o
 .PHONY : skip_imgheader.c.o
 
 skip_imgheader.i: skip_imgheader.c.i
@@ -620,7 +620,7 @@ skip_imgheader.i: skip_imgheader.c.i
 
 # target to preprocess a source file
 skip_imgheader.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.i
 .PHONY : skip_imgheader.c.i
 
 skip_imgheader.s: skip_imgheader.c.s
@@ -628,7 +628,7 @@ skip_imgheader.s: skip_imgheader.c.s
 
 # target to generate assembly for a file
 skip_imgheader.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/skip_imgheader.c.s
 .PHONY : skip_imgheader.c.s
 
 write_imgheader.o: write_imgheader.c.o
@@ -636,7 +636,7 @@ write_imgheader.o: write_imgheader.c.o
 
 # target to build an object file
 write_imgheader.c.o:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.o
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.o
 .PHONY : write_imgheader.c.o
 
 write_imgheader.i: write_imgheader.c.i
@@ -644,7 +644,7 @@ write_imgheader.i: write_imgheader.c.i
 
 # target to preprocess a source file
 write_imgheader.c.i:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.i
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.i
 .PHONY : write_imgheader.c.i
 
 write_imgheader.s: write_imgheader.c.s
@@ -652,7 +652,7 @@ write_imgheader.s: write_imgheader.c.s
 
 # target to generate assembly for a file
 write_imgheader.c.s:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.s
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(MAKE) $(MAKESILENT) -f backend/vcctllib/CMakeFiles/vcctl.dir/build.make backend/vcctllib/CMakeFiles/vcctl.dir/write_imgheader.c.s
 .PHONY : write_imgheader.c.s
 
 # Help Target
@@ -739,6 +739,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

@@ -6,14 +6,11 @@
  * GIF image files
  *
  ******************************************************/
+#include "include/vcctl.h"
 #include <png.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef VCCTL_H
-#define VCCTL_H
-#include "include/vcctl.h"
-#endif
 
 /***
  *	Global variables

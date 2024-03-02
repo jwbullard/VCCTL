@@ -30,7 +30,7 @@ fcomplex Cdiv(fcomplex a, fcomplex b);
 float Cabs(fcomplex z);
 fcomplex Csqrt(fcomplex z);
 fcomplex RCmul(float x, fcomplex a);
-fcomplex **complexmatrix(long nrl, long nrh, long ncl, long nch);
-void free_complexmatrix(fcomplex **m, long nrl, long nrh, long ncl, long nch);
+fcomplex **complexmatrix(int nrl, int nrh, int ncl, int nch);
+void free_complexmatrix(fcomplex **m, int nrl, int nrh, int ncl, int nch);
 
 #endif

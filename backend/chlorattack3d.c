@@ -30,14 +30,11 @@
  * (i.e. no binding/reaction)
  *
  *******************************************************/
+#include "include/vcctl.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef VCCTL_H
-#define VCCTL_H
-#include "include/vcctl.h"
-#endif
 
 #define MOLEFACTOR                                                             \
   1.0E12 /* cubic micrometers per                                              \
@@ -104,7 +101,7 @@ void extphase(int phtomake, int xcur, int ycur, int zcur);
 void allmem(void);
 void freeallmem(void);
 
-#include "properties.c"
+#include "include/properties.h"
 
 int main(void) {
   int ix, iy, iz, seed1, nlen;

@@ -7,8 +7,8 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/CMakeLists.txt"
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/backend/vcctllib/CMakeLists.txt"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/CMakeLists.txt"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/backend/vcctllib/CMakeLists.txt"
   "CMakeFiles/3.24.4/CMakeCCompiler.cmake"
   "CMakeFiles/3.24.4/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.24.4/CMakeSystem.cmake"

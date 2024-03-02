@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/perc3d-leach.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/perc3d-leach.dir/progress.make
 include CMakeFiles/perc3d-leach.dir/flags.make
 
 CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o: CMakeFiles/perc3d-leach.dir/flags.make
-CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/perc3d-leach.c
+CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/perc3d-leach.c
 CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o: CMakeFiles/perc3d-leach.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o -MF CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o.d -o CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/perc3d-leach.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o -MF CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o.d -o CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/perc3d-leach.c
 
 CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/perc3d-leach.c > CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/perc3d-leach.c > CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.i
 
 CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/perc3d-leach.c -o CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/perc3d-leach.c -o CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.s
 
 # Object files for target perc3d-leach
 perc3d__leach_OBJECTS = \
@@ -93,11 +93,11 @@ perc3d__leach_EXTERNAL_OBJECTS =
 perc3d-leach: CMakeFiles/perc3d-leach.dir/backend/perc3d-leach.c.o
 perc3d-leach: CMakeFiles/perc3d-leach.dir/build.make
 perc3d-leach: backend/vcctllib/libvcctl.a
-perc3d-leach: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-perc3d-leach: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-perc3d-leach: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+perc3d-leach: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+perc3d-leach: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+perc3d-leach: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 perc3d-leach: CMakeFiles/perc3d-leach.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable perc3d-leach"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable perc3d-leach"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/perc3d-leach.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/perc3d-leach.dir/clean:
 .PHONY : CMakeFiles/perc3d-leach.dir/clean
 
 CMakeFiles/perc3d-leach.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/perc3d-leach.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/perc3d-leach.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/perc3d-leach.dir/depend
 

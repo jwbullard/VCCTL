@@ -27,13 +27,10 @@
  *				E-mail: bullard@nist.gov
  *
  *******************************************************/
+#include "include/vcctl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef VCCTL_H
-#define VCCTL_H
-#include "include/vcctl.h"
-#endif
 
 #define BINDER 0
 #define AGG 1

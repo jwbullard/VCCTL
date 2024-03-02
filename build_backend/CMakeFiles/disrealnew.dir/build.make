@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/disrealnew.dir/depend.make
@@ -70,130 +70,34 @@ include CMakeFiles/disrealnew.dir/progress.make
 include CMakeFiles/disrealnew.dir/flags.make
 
 CMakeFiles/disrealnew.dir/backend/disrealnew.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/disrealnew.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/disrealnew.c
+CMakeFiles/disrealnew.dir/backend/disrealnew.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/disrealnew.c
 CMakeFiles/disrealnew.dir/backend/disrealnew.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/disrealnew.dir/backend/disrealnew.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/disrealnew.c.o -MF CMakeFiles/disrealnew.dir/backend/disrealnew.c.o.d -o CMakeFiles/disrealnew.dir/backend/disrealnew.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/disrealnew.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/disrealnew.dir/backend/disrealnew.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/disrealnew.c.o -MF CMakeFiles/disrealnew.dir/backend/disrealnew.c.o.d -o CMakeFiles/disrealnew.dir/backend/disrealnew.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/disrealnew.c
 
 CMakeFiles/disrealnew.dir/backend/disrealnew.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/disrealnew.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/disrealnew.c > CMakeFiles/disrealnew.dir/backend/disrealnew.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/disrealnew.c > CMakeFiles/disrealnew.dir/backend/disrealnew.c.i
 
 CMakeFiles/disrealnew.dir/backend/disrealnew.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/disrealnew.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/disrealnew.c -o CMakeFiles/disrealnew.dir/backend/disrealnew.c.s
-
-CMakeFiles/disrealnew.dir/backend/properties.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/properties.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/properties.c
-CMakeFiles/disrealnew.dir/backend/properties.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/disrealnew.dir/backend/properties.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/properties.c.o -MF CMakeFiles/disrealnew.dir/backend/properties.c.o.d -o CMakeFiles/disrealnew.dir/backend/properties.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/properties.c
-
-CMakeFiles/disrealnew.dir/backend/properties.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/properties.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/properties.c > CMakeFiles/disrealnew.dir/backend/properties.c.i
-
-CMakeFiles/disrealnew.dir/backend/properties.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/properties.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/properties.c -o CMakeFiles/disrealnew.dir/backend/properties.c.s
-
-CMakeFiles/disrealnew.dir/backend/burn3d.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/burn3d.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burn3d.c
-CMakeFiles/disrealnew.dir/backend/burn3d.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/disrealnew.dir/backend/burn3d.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/burn3d.c.o -MF CMakeFiles/disrealnew.dir/backend/burn3d.c.o.d -o CMakeFiles/disrealnew.dir/backend/burn3d.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burn3d.c
-
-CMakeFiles/disrealnew.dir/backend/burn3d.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/burn3d.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burn3d.c > CMakeFiles/disrealnew.dir/backend/burn3d.c.i
-
-CMakeFiles/disrealnew.dir/backend/burn3d.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/burn3d.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burn3d.c -o CMakeFiles/disrealnew.dir/backend/burn3d.c.s
-
-CMakeFiles/disrealnew.dir/backend/burnset.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/burnset.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burnset.c
-CMakeFiles/disrealnew.dir/backend/burnset.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/disrealnew.dir/backend/burnset.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/burnset.c.o -MF CMakeFiles/disrealnew.dir/backend/burnset.c.o.d -o CMakeFiles/disrealnew.dir/backend/burnset.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burnset.c
-
-CMakeFiles/disrealnew.dir/backend/burnset.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/burnset.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burnset.c > CMakeFiles/disrealnew.dir/backend/burnset.c.i
-
-CMakeFiles/disrealnew.dir/backend/burnset.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/burnset.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/burnset.c -o CMakeFiles/disrealnew.dir/backend/burnset.c.s
-
-CMakeFiles/disrealnew.dir/backend/parthyd.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/parthyd.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/parthyd.c
-CMakeFiles/disrealnew.dir/backend/parthyd.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/disrealnew.dir/backend/parthyd.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/parthyd.c.o -MF CMakeFiles/disrealnew.dir/backend/parthyd.c.o.d -o CMakeFiles/disrealnew.dir/backend/parthyd.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/parthyd.c
-
-CMakeFiles/disrealnew.dir/backend/parthyd.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/parthyd.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/parthyd.c > CMakeFiles/disrealnew.dir/backend/parthyd.c.i
-
-CMakeFiles/disrealnew.dir/backend/parthyd.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/parthyd.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/parthyd.c -o CMakeFiles/disrealnew.dir/backend/parthyd.c.s
-
-CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/hydrealnew.c
-CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o -MF CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o.d -o CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/hydrealnew.c
-
-CMakeFiles/disrealnew.dir/backend/hydrealnew.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/hydrealnew.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/hydrealnew.c > CMakeFiles/disrealnew.dir/backend/hydrealnew.c.i
-
-CMakeFiles/disrealnew.dir/backend/hydrealnew.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/hydrealnew.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/hydrealnew.c -o CMakeFiles/disrealnew.dir/backend/hydrealnew.c.s
-
-CMakeFiles/disrealnew.dir/backend/pHpred.c.o: CMakeFiles/disrealnew.dir/flags.make
-CMakeFiles/disrealnew.dir/backend/pHpred.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/pHpred.c
-CMakeFiles/disrealnew.dir/backend/pHpred.c.o: CMakeFiles/disrealnew.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/disrealnew.dir/backend/pHpred.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/disrealnew.dir/backend/pHpred.c.o -MF CMakeFiles/disrealnew.dir/backend/pHpred.c.o.d -o CMakeFiles/disrealnew.dir/backend/pHpred.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/pHpred.c
-
-CMakeFiles/disrealnew.dir/backend/pHpred.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/disrealnew.dir/backend/pHpred.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/pHpred.c > CMakeFiles/disrealnew.dir/backend/pHpred.c.i
-
-CMakeFiles/disrealnew.dir/backend/pHpred.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/disrealnew.dir/backend/pHpred.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/pHpred.c -o CMakeFiles/disrealnew.dir/backend/pHpred.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/disrealnew.c -o CMakeFiles/disrealnew.dir/backend/disrealnew.c.s
 
 # Object files for target disrealnew
 disrealnew_OBJECTS = \
-"CMakeFiles/disrealnew.dir/backend/disrealnew.c.o" \
-"CMakeFiles/disrealnew.dir/backend/properties.c.o" \
-"CMakeFiles/disrealnew.dir/backend/burn3d.c.o" \
-"CMakeFiles/disrealnew.dir/backend/burnset.c.o" \
-"CMakeFiles/disrealnew.dir/backend/parthyd.c.o" \
-"CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o" \
-"CMakeFiles/disrealnew.dir/backend/pHpred.c.o"
+"CMakeFiles/disrealnew.dir/backend/disrealnew.c.o"
 
 # External object files for target disrealnew
 disrealnew_EXTERNAL_OBJECTS =
 
 disrealnew: CMakeFiles/disrealnew.dir/backend/disrealnew.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/properties.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/burn3d.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/burnset.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/parthyd.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o
-disrealnew: CMakeFiles/disrealnew.dir/backend/pHpred.c.o
 disrealnew: CMakeFiles/disrealnew.dir/build.make
 disrealnew: backend/vcctllib/libvcctl.a
-disrealnew: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-disrealnew: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-disrealnew: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+disrealnew: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+disrealnew: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+disrealnew: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 disrealnew: CMakeFiles/disrealnew.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable disrealnew"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable disrealnew"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/disrealnew.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -205,6 +109,6 @@ CMakeFiles/disrealnew.dir/clean:
 .PHONY : CMakeFiles/disrealnew.dir/clean
 
 CMakeFiles/disrealnew.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/disrealnew.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/disrealnew.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/disrealnew.dir/depend
 

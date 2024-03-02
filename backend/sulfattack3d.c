@@ -101,7 +101,7 @@ void removech(int xcur, int ycur, int zcur);
 void allmem(void);
 void freeallmem(void);
 
-#include "properties.c"
+#include "include/properties.h"
 
 int main(void) {
   int ix, iy, iz, seed1, nlen;

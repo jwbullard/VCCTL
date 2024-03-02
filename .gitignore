@@ -9,20 +9,32 @@ derby.log
 *.lck
 
 # Ignore the contents of the usr folder but not the folder itself
-/usr/*
+usr/*
+
+# Ignore contents of the backend_build folder
+backend_build/*
+
+# Ignore contents of the include folder
+include/*
+
+# Ignore contents of the lib folder
+lib/*
 
 # Ignore all object files
-cfiles/lib/*.o
-cfiles/pub/*.o
-cfiles/pub/tools/cement-analysis/*.o
+backend/vcctllib/*.o
+backend/*.o
 
 # Ignore any library files
-cfiles/lib/*.a
-cfiles/pub/*.a
-cfiles/pub/tools/cement-analysis/*.a
+backend/*.a
+backend/vcctllib/*.a
+
+backend/zlib-1.3.1/build/*
+backend/libpng/build/*
 
 # Ignore any swap files
 *.swp
+
+bin/*
 
 # Ignore compiled executables for Mac or Linux
 aggvrml

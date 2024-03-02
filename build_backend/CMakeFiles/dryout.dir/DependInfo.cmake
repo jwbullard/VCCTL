@@ -8,12 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/backend/dryout.c" "CMakeFiles/dryout.dir/backend/dryout.c.o" "gcc" "CMakeFiles/dryout.dir/backend/dryout.c.o.d"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/backend/dryout.c" "CMakeFiles/dryout.dir/backend/dryout.c.o" "gcc" "CMakeFiles/dryout.dir/backend/dryout.c.o.d"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/backend/vcctllib/CMakeFiles/vcctl.dir/DependInfo.cmake"
+  "/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/backend/vcctllib/CMakeFiles/vcctl.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

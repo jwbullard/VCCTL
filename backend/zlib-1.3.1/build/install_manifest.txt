@@ -1,8 +1,0 @@
-/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.1.3.1.dylib
-/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.1.dylib
-/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
-/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.a
-/Users/jwbullard/Software/MyProjects/git/VCCTL/include/zconf.h
-/Users/jwbullard/Software/MyProjects/git/VCCTL/include/zlib.h
-/Users/jwbullard/Software/MyProjects/git/VCCTL/share/man/man3/zlib.3
-/Users/jwbullard/Software/MyProjects/git/VCCTL/share/pkgconfig/zlib.pc

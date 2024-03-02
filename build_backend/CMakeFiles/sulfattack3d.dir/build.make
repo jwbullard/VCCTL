@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/sulfattack3d.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/sulfattack3d.dir/progress.make
 include CMakeFiles/sulfattack3d.dir/flags.make
 
 CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o: CMakeFiles/sulfattack3d.dir/flags.make
-CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/sulfattack3d.c
+CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/sulfattack3d.c
 CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o: CMakeFiles/sulfattack3d.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o -MF CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o.d -o CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/sulfattack3d.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o -MF CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o.d -o CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/sulfattack3d.c
 
 CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/sulfattack3d.c > CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/sulfattack3d.c > CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.i
 
 CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/sulfattack3d.c -o CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/sulfattack3d.c -o CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.s
 
 # Object files for target sulfattack3d
 sulfattack3d_OBJECTS = \
@@ -93,11 +93,11 @@ sulfattack3d_EXTERNAL_OBJECTS =
 sulfattack3d: CMakeFiles/sulfattack3d.dir/backend/sulfattack3d.c.o
 sulfattack3d: CMakeFiles/sulfattack3d.dir/build.make
 sulfattack3d: backend/vcctllib/libvcctl.a
-sulfattack3d: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-sulfattack3d: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-sulfattack3d: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+sulfattack3d: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+sulfattack3d: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+sulfattack3d: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 sulfattack3d: CMakeFiles/sulfattack3d.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable sulfattack3d"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable sulfattack3d"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/sulfattack3d.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/sulfattack3d.dir/clean:
 .PHONY : CMakeFiles/sulfattack3d.dir/clean
 
 CMakeFiles/sulfattack3d.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/sulfattack3d.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/sulfattack3d.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/sulfattack3d.dir/depend
 

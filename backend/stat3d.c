@@ -38,7 +38,7 @@
  ***/
 float Version;
 
-#include "properties.c"
+#include "include/properties.h"
 
 int main(void) {
   int ***mic;

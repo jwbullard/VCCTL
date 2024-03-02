@@ -1,4 +1,4 @@
-# Install script for directory: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/vcctllib
+# Install script for directory: /Users/jwbullard/Software/MyProjects/VCCTL/backend/vcctllib
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,22 +34,22 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/Library/Developer/CommandLineTools/usr/bin/objdump")
+  set(CMAKE_OBJDUMP "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/objdump")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libvcctl.a")
+   "/Users/jwbullard/Software/MyProjects/VCCTL/lib/libvcctl.a")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-  file(INSTALL DESTINATION "/Users/jwbullard/Software/MyProjects/git/VCCTL/lib" TYPE STATIC_LIBRARY FILES "/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/backend/vcctllib/libvcctl.a")
-  if(EXISTS "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libvcctl.a" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libvcctl.a")
-    execute_process(COMMAND "/Library/Developer/CommandLineTools/usr/bin/ranlib" "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libvcctl.a")
+  file(INSTALL DESTINATION "/Users/jwbullard/Software/MyProjects/VCCTL/lib" TYPE STATIC_LIBRARY FILES "/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/backend/vcctllib/libvcctl.a")
+  if(EXISTS "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/VCCTL/lib/libvcctl.a" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/VCCTL/lib/libvcctl.a")
+    execute_process(COMMAND "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib" "$ENV{DESTDIR}/Users/jwbullard/Software/MyProjects/VCCTL/lib/libvcctl.a")
   endif()
 endif()
 

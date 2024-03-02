@@ -5,13 +5,10 @@
  * Reads a 3D VCCTL image file and dries it to a prescribed
  * degree of saturation if possible.
  ******************************************************/
+#include "include/vcctl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef VCCTL_H
-#define VCCTL_H
-#include "include/vcctl.h"
-#endif
 
 /* System size (in pixels) and resolution (in microns) */
 

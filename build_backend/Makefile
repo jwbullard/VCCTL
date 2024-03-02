@@ -57,10 +57,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles /Users/jwbullard/Software/MyProjects/VCCTL/build_backend//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -560,54 +560,6 @@ backend/apstats.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/apstats.dir/build.make CMakeFiles/apstats.dir/backend/apstats.c.s
 .PHONY : backend/apstats.c.s
 
-backend/burn3d.o: backend/burn3d.c.o
-.PHONY : backend/burn3d.o
-
-# target to build an object file
-backend/burn3d.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burn3d.c.o
-.PHONY : backend/burn3d.c.o
-
-backend/burn3d.i: backend/burn3d.c.i
-.PHONY : backend/burn3d.i
-
-# target to preprocess a source file
-backend/burn3d.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burn3d.c.i
-.PHONY : backend/burn3d.c.i
-
-backend/burn3d.s: backend/burn3d.c.s
-.PHONY : backend/burn3d.s
-
-# target to generate assembly for a file
-backend/burn3d.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burn3d.c.s
-.PHONY : backend/burn3d.c.s
-
-backend/burnset.o: backend/burnset.c.o
-.PHONY : backend/burnset.o
-
-# target to build an object file
-backend/burnset.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burnset.c.o
-.PHONY : backend/burnset.c.o
-
-backend/burnset.i: backend/burnset.c.i
-.PHONY : backend/burnset.i
-
-# target to preprocess a source file
-backend/burnset.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burnset.c.i
-.PHONY : backend/burnset.c.i
-
-backend/burnset.s: backend/burnset.c.s
-.PHONY : backend/burnset.s
-
-# target to generate assembly for a file
-backend/burnset.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/burnset.c.s
-.PHONY : backend/burnset.c.s
-
 backend/chlorattack3d.o: backend/chlorattack3d.c.o
 .PHONY : backend/chlorattack3d.o
 
@@ -824,30 +776,6 @@ backend/hydmovie.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/hydmovie.dir/build.make CMakeFiles/hydmovie.dir/backend/hydmovie.c.s
 .PHONY : backend/hydmovie.c.s
 
-backend/hydrealnew.o: backend/hydrealnew.c.o
-.PHONY : backend/hydrealnew.o
-
-# target to build an object file
-backend/hydrealnew.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/hydrealnew.c.o
-.PHONY : backend/hydrealnew.c.o
-
-backend/hydrealnew.i: backend/hydrealnew.c.i
-.PHONY : backend/hydrealnew.i
-
-# target to preprocess a source file
-backend/hydrealnew.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/hydrealnew.c.i
-.PHONY : backend/hydrealnew.c.i
-
-backend/hydrealnew.s: backend/hydrealnew.c.s
-.PHONY : backend/hydrealnew.s
-
-# target to generate assembly for a file
-backend/hydrealnew.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/hydrealnew.c.s
-.PHONY : backend/hydrealnew.c.s
-
 backend/image100.o: backend/image100.c.o
 .PHONY : backend/image100.o
 
@@ -968,54 +896,6 @@ backend/onepimage.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/onepimage.dir/build.make CMakeFiles/onepimage.dir/backend/onepimage.c.s
 .PHONY : backend/onepimage.c.s
 
-backend/pHpred.o: backend/pHpred.c.o
-.PHONY : backend/pHpred.o
-
-# target to build an object file
-backend/pHpred.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/pHpred.c.o
-.PHONY : backend/pHpred.c.o
-
-backend/pHpred.i: backend/pHpred.c.i
-.PHONY : backend/pHpred.i
-
-# target to preprocess a source file
-backend/pHpred.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/pHpred.c.i
-.PHONY : backend/pHpred.c.i
-
-backend/pHpred.s: backend/pHpred.c.s
-.PHONY : backend/pHpred.s
-
-# target to generate assembly for a file
-backend/pHpred.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/pHpred.c.s
-.PHONY : backend/pHpred.c.s
-
-backend/parthyd.o: backend/parthyd.c.o
-.PHONY : backend/parthyd.o
-
-# target to build an object file
-backend/parthyd.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/parthyd.c.o
-.PHONY : backend/parthyd.c.o
-
-backend/parthyd.i: backend/parthyd.c.i
-.PHONY : backend/parthyd.i
-
-# target to preprocess a source file
-backend/parthyd.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/parthyd.c.i
-.PHONY : backend/parthyd.c.i
-
-backend/parthyd.s: backend/parthyd.c.s
-.PHONY : backend/parthyd.s
-
-# target to generate assembly for a file
-backend/parthyd.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/parthyd.c.s
-.PHONY : backend/parthyd.c.s
-
 backend/perc3d-leach.o: backend/perc3d-leach.c.o
 .PHONY : backend/perc3d-leach.o
 
@@ -1087,30 +967,6 @@ backend/poredist3d.s: backend/poredist3d.c.s
 backend/poredist3d.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/poredist3d.dir/build.make CMakeFiles/poredist3d.dir/backend/poredist3d.c.s
 .PHONY : backend/poredist3d.c.s
-
-backend/properties.o: backend/properties.c.o
-.PHONY : backend/properties.o
-
-# target to build an object file
-backend/properties.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/properties.c.o
-.PHONY : backend/properties.c.o
-
-backend/properties.i: backend/properties.c.i
-.PHONY : backend/properties.i
-
-# target to preprocess a source file
-backend/properties.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/properties.c.i
-.PHONY : backend/properties.c.i
-
-backend/properties.s: backend/properties.c.s
-.PHONY : backend/properties.s
-
-# target to generate assembly for a file
-backend/properties.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/disrealnew.dir/build.make CMakeFiles/disrealnew.dir/backend/properties.c.s
-.PHONY : backend/properties.c.s
 
 backend/rand3d.o: backend/rand3d.c.o
 .PHONY : backend/rand3d.o
@@ -1325,12 +1181,6 @@ help:
 	@echo "... backend/apstats.o"
 	@echo "... backend/apstats.i"
 	@echo "... backend/apstats.s"
-	@echo "... backend/burn3d.o"
-	@echo "... backend/burn3d.i"
-	@echo "... backend/burn3d.s"
-	@echo "... backend/burnset.o"
-	@echo "... backend/burnset.i"
-	@echo "... backend/burnset.s"
 	@echo "... backend/chlorattack3d.o"
 	@echo "... backend/chlorattack3d.i"
 	@echo "... backend/chlorattack3d.s"
@@ -1358,9 +1208,6 @@ help:
 	@echo "... backend/hydmovie.o"
 	@echo "... backend/hydmovie.i"
 	@echo "... backend/hydmovie.s"
-	@echo "... backend/hydrealnew.o"
-	@echo "... backend/hydrealnew.i"
-	@echo "... backend/hydrealnew.s"
 	@echo "... backend/image100.o"
 	@echo "... backend/image100.i"
 	@echo "... backend/image100.s"
@@ -1376,12 +1223,6 @@ help:
 	@echo "... backend/onepimage.o"
 	@echo "... backend/onepimage.i"
 	@echo "... backend/onepimage.s"
-	@echo "... backend/pHpred.o"
-	@echo "... backend/pHpred.i"
-	@echo "... backend/pHpred.s"
-	@echo "... backend/parthyd.o"
-	@echo "... backend/parthyd.i"
-	@echo "... backend/parthyd.s"
 	@echo "... backend/perc3d-leach.o"
 	@echo "... backend/perc3d-leach.i"
 	@echo "... backend/perc3d-leach.s"
@@ -1391,9 +1232,6 @@ help:
 	@echo "... backend/poredist3d.o"
 	@echo "... backend/poredist3d.i"
 	@echo "... backend/poredist3d.s"
-	@echo "... backend/properties.o"
-	@echo "... backend/properties.i"
-	@echo "... backend/properties.s"
 	@echo "... backend/rand3d.o"
 	@echo "... backend/rand3d.i"
 	@echo "... backend/rand3d.s"

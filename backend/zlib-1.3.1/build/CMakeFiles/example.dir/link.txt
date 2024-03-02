@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/gcc  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/example.dir/test/example.c.o -o example  -Wl,-rpath,/Users/jwbullard/Software/MyProjects/git/VCCTL/backend/zlib-1.3.1/build libz.1.3.1.dylib 

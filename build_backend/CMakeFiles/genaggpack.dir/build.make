@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/genaggpack.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/genaggpack.dir/progress.make
 include CMakeFiles/genaggpack.dir/flags.make
 
 CMakeFiles/genaggpack.dir/backend/genaggpack.c.o: CMakeFiles/genaggpack.dir/flags.make
-CMakeFiles/genaggpack.dir/backend/genaggpack.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/genaggpack.c
+CMakeFiles/genaggpack.dir/backend/genaggpack.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/genaggpack.c
 CMakeFiles/genaggpack.dir/backend/genaggpack.c.o: CMakeFiles/genaggpack.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/genaggpack.dir/backend/genaggpack.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/genaggpack.dir/backend/genaggpack.c.o -MF CMakeFiles/genaggpack.dir/backend/genaggpack.c.o.d -o CMakeFiles/genaggpack.dir/backend/genaggpack.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/genaggpack.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/genaggpack.dir/backend/genaggpack.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/genaggpack.dir/backend/genaggpack.c.o -MF CMakeFiles/genaggpack.dir/backend/genaggpack.c.o.d -o CMakeFiles/genaggpack.dir/backend/genaggpack.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/genaggpack.c
 
 CMakeFiles/genaggpack.dir/backend/genaggpack.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/genaggpack.dir/backend/genaggpack.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/genaggpack.c > CMakeFiles/genaggpack.dir/backend/genaggpack.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/genaggpack.c > CMakeFiles/genaggpack.dir/backend/genaggpack.c.i
 
 CMakeFiles/genaggpack.dir/backend/genaggpack.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/genaggpack.dir/backend/genaggpack.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/genaggpack.c -o CMakeFiles/genaggpack.dir/backend/genaggpack.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/genaggpack.c -o CMakeFiles/genaggpack.dir/backend/genaggpack.c.s
 
 # Object files for target genaggpack
 genaggpack_OBJECTS = \
@@ -93,11 +93,11 @@ genaggpack_EXTERNAL_OBJECTS =
 genaggpack: CMakeFiles/genaggpack.dir/backend/genaggpack.c.o
 genaggpack: CMakeFiles/genaggpack.dir/build.make
 genaggpack: backend/vcctllib/libvcctl.a
-genaggpack: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-genaggpack: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-genaggpack: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+genaggpack: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+genaggpack: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+genaggpack: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 genaggpack: CMakeFiles/genaggpack.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable genaggpack"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable genaggpack"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/genaggpack.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/genaggpack.dir/clean:
 .PHONY : CMakeFiles/genaggpack.dir/clean
 
 CMakeFiles/genaggpack.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/genaggpack.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/genaggpack.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/genaggpack.dir/depend
 

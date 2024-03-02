@@ -69,14 +69,11 @@
 /* Manual available at NISTIR 6269 from NTIS or at:                         */
 /*           http://ciks.cbt.nist.gov/~garbocz/manual/man.html              */
 
+#include "include/vcctl.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef VCCTL_H
-#define VCCTL_H
-#include "include/vcctl.h"
-#endif
 
 /* (USER) Change these dimensions - e.g., NX, NY, and NZ                    */
 #define NX DEFAULTSYSTEMSIZE

@@ -53,10 +53,10 @@ RM = /opt/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL
+CMAKE_SOURCE_DIR = /Users/jwbullard/Software/MyProjects/VCCTL
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend
+CMAKE_BINARY_DIR = /Users/jwbullard/Software/MyProjects/VCCTL/build_backend
 
 # Include any dependencies generated for this target.
 include CMakeFiles/distfarand.dir/depend.make
@@ -70,18 +70,18 @@ include CMakeFiles/distfarand.dir/progress.make
 include CMakeFiles/distfarand.dir/flags.make
 
 CMakeFiles/distfarand.dir/backend/distfarand.c.o: CMakeFiles/distfarand.dir/flags.make
-CMakeFiles/distfarand.dir/backend/distfarand.c.o: /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/distfarand.c
+CMakeFiles/distfarand.dir/backend/distfarand.c.o: /Users/jwbullard/Software/MyProjects/VCCTL/backend/distfarand.c
 CMakeFiles/distfarand.dir/backend/distfarand.c.o: CMakeFiles/distfarand.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/distfarand.dir/backend/distfarand.c.o"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/distfarand.dir/backend/distfarand.c.o -MF CMakeFiles/distfarand.dir/backend/distfarand.c.o.d -o CMakeFiles/distfarand.dir/backend/distfarand.c.o -c /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/distfarand.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/distfarand.dir/backend/distfarand.c.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/distfarand.dir/backend/distfarand.c.o -MF CMakeFiles/distfarand.dir/backend/distfarand.c.o.d -o CMakeFiles/distfarand.dir/backend/distfarand.c.o -c /Users/jwbullard/Software/MyProjects/VCCTL/backend/distfarand.c
 
 CMakeFiles/distfarand.dir/backend/distfarand.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/distfarand.dir/backend/distfarand.c.i"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/distfarand.c > CMakeFiles/distfarand.dir/backend/distfarand.c.i
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/jwbullard/Software/MyProjects/VCCTL/backend/distfarand.c > CMakeFiles/distfarand.dir/backend/distfarand.c.i
 
 CMakeFiles/distfarand.dir/backend/distfarand.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/distfarand.dir/backend/distfarand.c.s"
-	/Library/Developer/CommandLineTools/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/git/VCCTL/backend/distfarand.c -o CMakeFiles/distfarand.dir/backend/distfarand.c.s
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/jwbullard/Software/MyProjects/VCCTL/backend/distfarand.c -o CMakeFiles/distfarand.dir/backend/distfarand.c.s
 
 # Object files for target distfarand
 distfarand_OBJECTS = \
@@ -93,11 +93,11 @@ distfarand_EXTERNAL_OBJECTS =
 distfarand: CMakeFiles/distfarand.dir/backend/distfarand.c.o
 distfarand: CMakeFiles/distfarand.dir/build.make
 distfarand: backend/vcctllib/libvcctl.a
-distfarand: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libpng.a
-distfarand: /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
-distfarand: /Users/jwbullard/Software/MyProjects/git/VCCTL/lib/libz.dylib
+distfarand: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libpng.a
+distfarand: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libm.tbd
+distfarand: /Users/jwbullard/Software/MyProjects/VCCTL/lib/libz.dylib
 distfarand: CMakeFiles/distfarand.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable distfarand"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable distfarand"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/distfarand.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/distfarand.dir/clean:
 .PHONY : CMakeFiles/distfarand.dir/clean
 
 CMakeFiles/distfarand.dir/depend:
-	cd /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/git/VCCTL/build_backend/CMakeFiles/distfarand.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/jwbullard/Software/MyProjects/VCCTL/build_backend && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend /Users/jwbullard/Software/MyProjects/VCCTL/build_backend/CMakeFiles/distfarand.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/distfarand.dir/depend
 

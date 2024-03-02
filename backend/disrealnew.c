@@ -84,10 +84,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifndef VCCTL_H
-#define VCCTL_H
 #include "include/vcctl.h"
-#endif
 #include "disrealnew.h"
 
 /***
@@ -123,12 +120,12 @@ void freeallmem(void);
 /***
 *    Supplementary programs
 ***/
-#include "properties.c"        /* Physical properties of the phases */
-#include "burn3d.c"            /* percolation of porosity assessment */
-#include "burnset.c"        /* set point assessment */
-#include "parthyd.c"        /* particle hydration assessment */
-#include "hydrealnew.c"        /* hydration execution */
-#include "pHpred.c"            /* pore solution pH prediction */
+#include "include/properties.h"        /* Physical properties of the phases */
+#include "include/burn3d.h"            /* percolation of porosity assessment */
+#include "include/burnset.h"        /* set point assessment */
+#include "include/parthyd.h"        /* particle hydration assessment */
+#include "include/hydrealnew.h"        /* hydration execution */
+#include "include/pHpred.h"            /* pore solution pH prediction */
 
 int main(int argc, char *argv[])
 {
