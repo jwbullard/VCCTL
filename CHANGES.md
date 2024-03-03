@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 03 15:28:548 2024 | Small changes to INSTALL.md for help with Windows compiling |
 | Mar 03 14:36:50 2024 | Changed default view for aggregate packings |
 | Mar 02 22:30:41 2024 | Removed long ints from backend |
 | Mar 02 15:51:01 2024 | Reorganized backend structure |
