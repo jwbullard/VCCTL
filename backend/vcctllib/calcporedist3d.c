@@ -35,15 +35,15 @@
  ***/
 
 int maketemp(int size, int *xsph, int *ysph, int *zsph);
-int pix2x(long int pid, int xsize, int ysize);
-int pix2y(long int pid, int xsize, int ysize);
-int pix2z(long int pid, int xsize, int ysize);
+int pix2x(int pid, int xsize, int ysize);
+int pix2y(int pid, int xsize, int ysize);
+int pix2z(int pid, int xsize, int ysize);
 
 int calcporedist3d(char *name) {
   register int i1, i2, i3;
   int iout, oiout, status;
   char instring[MAXSTRING];
-  long int syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+  int syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
   int xsize = DEFAULTSYSTEMSIZE;
   int ysize = DEFAULTSYSTEMSIZE;
   int zsize = DEFAULTSYSTEMSIZE;
@@ -53,7 +53,7 @@ int calcporedist3d(char *name) {
   float resmag = 1.0;
   int iresmag = 1;
   char filename[MAXSTRING];
-  long int i, *pores, *ndiam, porecnt, index, ns, maxsph, nsph;
+  int i, *pores, *ndiam, porecnt, index, ns, maxsph, nsph;
   int ix, iy, iz, max_allowed_diam, mindim, nd, failed, nrad;
   int xc, yc, zc;
   int ***tmic, ***mic;
@@ -87,7 +87,7 @@ int calcporedist3d(char *name) {
    *    Define the number of histogram bins
    ***/
 
-  syspix = (long int)(xsize * ysize * zsize);
+  syspix = xsize * ysize * zsize;
   sizemag =
       pow(((float)syspix) / (pow(((float)DEFAULTSYSTEMSIZE), 3.0)), (1. / 3.));
   isizemag = (int)(sizemag + 0.5);
@@ -99,7 +99,7 @@ int calcporedist3d(char *name) {
    ***/
 
   mic = NULL;
-  mic = ibox((long)(xsize + 1), (long)(ysize + 1), (long)(zsize + 1));
+  mic = ibox(xsize + 1, ysize + 1, zsize + 1);
 
   if (!mic) {
     bailout("calcporedist3d", "Memory allocation failure");
@@ -128,7 +128,7 @@ int calcporedist3d(char *name) {
 
   tmic = NULL;
 
-  tmic = ibox((long)(xsize + 1), (long)(ysize + 1), (long)(zsize + 1));
+  tmic = ibox(xsize + 1, ysize + 1, zsize + 1);
   if (!tmic) {
     warning("calcporedist3d", "Could not allocate required memory for "
                               "temporary microstructure image");
@@ -160,7 +160,7 @@ int calcporedist3d(char *name) {
 
   /* Allocate memory for ndiam vector */
   ndiam = NULL;
-  ndiam = livector((long int)(max_allowed_diam + 1));
+  ndiam = ivector(max_allowed_diam + 1);
   if (!ndiam) {
     warning("calcporedist3d", "Could not allocate required memory");
     free_ibox(tmic, xsize + 1, ysize + 1);
@@ -178,7 +178,7 @@ int calcporedist3d(char *name) {
   xsph = ivector(maxsph);
   if (!xsph) {
     warning("calcporedist3d", "Could not allocate required memory");
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, xsize + 1, ysize + 1);
     free_ibox(mic, xsize + 1, ysize + 1);
     return (1);
@@ -189,7 +189,7 @@ int calcporedist3d(char *name) {
   if (!ysph) {
     warning("calcporedist3d", "Could not allocate required memory");
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, xsize + 1, ysize + 1);
     free_ibox(mic, xsize + 1, ysize + 1);
     return (1);
@@ -201,7 +201,7 @@ int calcporedist3d(char *name) {
     warning("calcporedist3d", "Could not allocate required memory");
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, xsize + 1, ysize + 1);
     free_ibox(mic, xsize + 1, ysize + 1);
     return (1);
@@ -210,14 +210,14 @@ int calcporedist3d(char *name) {
   /* Allocate memory for porosity locator vector */
 
   pores = NULL;
-  pores = livector(porecnt);
+  pores = ivector(porecnt);
   if (!pores) {
     warning("poredist3d", "Could not allocate required memory");
     fflush(stdout);
     free_ivector(zsph);
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, xsize + 1, ysize + 1);
     free_ibox(mic, xsize + 1, ysize + 1);
     return (1);
@@ -295,7 +295,7 @@ int calcporedist3d(char *name) {
     free_ivector(zsph);
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, xsize + 1, ysize + 1);
     free_ibox(mic, xsize + 1, ysize + 1);
     return (1);
@@ -304,17 +304,17 @@ int calcporedist3d(char *name) {
   fprintf(outfile, "Total pore volume = %f um^3", ((float)porecnt));
   fprintf(outfile, "\n\nDiameter_(um)\tNumber\tFraction");
   for (i = 1; i <= max_allowed_diam; i += 2) {
-    fprintf(outfile, "\n%f\t%ld\t%f", ((float)i), ndiam[i],
+    fprintf(outfile, "\n%f\t%d\t%f", ((float)i), ndiam[i],
             (((float)ndiam[i]) / ((float)porecnt)));
   }
 
   fclose(outfile);
 
-  free_livector(pores);
+  free_ivector(pores);
   free_ivector(zsph);
   free_ivector(ysph);
   free_ivector(xsph);
-  free_livector(ndiam);
+  free_ivector(ndiam);
   free_ibox(tmic, xsize + 1, ysize + 1);
   free_ibox(mic, xsize + 1, ysize + 1);
 
@@ -381,14 +381,14 @@ int maketemp(int size, int *xsph, int *ysph, int *zsph) {
 *
 *    Convert pixel id number to x coordinate
 *
-*    Arguments:    long int pixel id number
+*    Arguments:    int pixel id number
                    int xsize,ysize are the x,y dimensions of the system
 *    Returns:      int x coordinate
 *
 *    Calls:        no other routines
 *    Called by:    calcporedist3d
 ***/
-int pix2x(long int pid, int xsize, int ysize) {
+int pix2x(int pid, int xsize, int ysize) {
   int x, y, z;
   z = pid / (xsize * ysize);
   y = (pid - (z * xsize * ysize)) / xsize;
@@ -401,14 +401,14 @@ int pix2x(long int pid, int xsize, int ysize) {
 *
 *    Convert pixel id number to y coordinate
 *
-*    Arguments:    long int pixel id number
+*    Arguments:    int pixel id number
                    int xsize,ysize are the x,y dimensions of the system
 *    Returns:      int x coordinate
 *
 *    Calls:        no other routines
 *    Called by:    calcporedist3d
 ***/
-int pix2y(long int pid, int xsize, int ysize) {
+int pix2y(int pid, int xsize, int ysize) {
   int y, z;
   z = pid / (xsize * ysize);
   y = (pid - (z * xsize * ysize)) / xsize;
@@ -420,14 +420,14 @@ int pix2y(long int pid, int xsize, int ysize) {
 *
 *    Convert pixel id number to z coordinate
 *
-*    Arguments:    long int pixel id number
+*    Arguments:    int pixel id number
                    int xsize,ysize are the x,y dimensions of the system
 *    Returns:      int x coordinate
 *
 *    Calls:        no other routines
 *    Called by:    calcporedist3d
 ***/
-int pix2z(long int pid, int xsize, int ysize) {
+int pix2z(int pid, int xsize, int ysize) {
   int z = pid / (xsize * ysize);
   return (z);
 }

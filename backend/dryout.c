@@ -15,7 +15,7 @@
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 float Res = DEFAULTRESOLUTION;
 
 /* Number of types of pixels and solid pixels*/
@@ -53,14 +53,14 @@ const float Gelporefrac = 0.38;
 /***
  *	Function declarations
  ***/
-void removewater(long int ndesire, long int *spc, long int *dpc);
+void removewater(int ndesire, int *spc, int *dpc);
 int countbox(int boxsize, int qx, int qy, int qz);
 
 int main(void) {
   register int i, j, k;
   int ovalin, valout;
-  long int cshcount, aggcount, satporecount, dryporecount, totporecount;
-  long int numtoremove, target_satporecount;
+  int cshcount, aggcount, satporecount, dryporecount, totporecount;
+  int numtoremove, target_satporecount;
   float target_deg_sat, cur_deg_sat, min_deg_sat, target_satcap;
   float vfcsh, satcap, drycap, gelporosity;
   char filein[MAXSTRING], fileout[MAXSTRING], instring[MAXSTRING];
@@ -103,7 +103,7 @@ int main(void) {
   printf("\n\tres = %f\n", Res);
   fflush(stdout);
 
-  Mic = ibox((long)Xsyssize, (long)Ysyssize, (long)Zsyssize);
+  Mic = ibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Mic) {
     fclose(infile);
     bailout("dryout", "Could not allocate memory for Mic");
@@ -189,7 +189,7 @@ int main(void) {
       (int)((target_satcap *
              ((float)((Xsyssize * Ysyssize * Zsyssize) - aggcount))) +
             0.5);
-  numtoremove = (long int)(satporecount - target_satporecount);
+  numtoremove = satporecount - target_satporecount;
 
   removewater(numtoremove, &satporecount, &dryporecount);
 
@@ -250,8 +250,8 @@ int main(void) {
  *    Calls:        countbox
  *    Called by:    main
  ***/
-void removewater(long int ndesire, long int *spc, long int *dpc) {
-  long int idesire;
+void removewater(int ndesire, int *spc, int *dpc) {
+  int idesire;
   int px, py, pz, placed, cntpore, cntmax;
   Togo *headtogo, *tailtogo, *newtogo, *lasttogo, *onetogo;
 

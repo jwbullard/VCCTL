@@ -26,18 +26,18 @@ int main(void) {
   char filein[MAXSTRING], fileout[MAXSTRING], instring[MAXSTRING];
   FILE *infile, *outfile;
 
-  red = ivector((long int)NPHASES);
+  red = ivector(NPHASES);
   if (!red) {
     bailout("image100", "Could not allocate memory for red vector");
     exit(1);
   }
-  green = ivector((long int)NPHASES);
+  green = ivector(NPHASES);
   if (!green) {
     bailout("image100", "Could not allocate memory for red vector");
     free_ivector(red);
     exit(1);
   }
-  blue = ivector((long int)NPHASES);
+  blue = ivector(NPHASES);
   if (!blue) {
     bailout("image100", "Could not allocate memory for red vector");
     free_ivector(green);
@@ -162,7 +162,7 @@ int main(void) {
    *    Allocate memory for image array
    ***/
 
-  image = irect((long)(dx * iscale), (long)(dy * iscale));
+  image = irect(dx * iscale, dy * iscale);
   if (!image) {
     fclose(infile);
     free_ivector(blue);
@@ -179,11 +179,11 @@ int main(void) {
    *    Allocate memory for dshade array
    ***/
 
-  dshade = drect((long)(dx * iscale), (long)(dy * iscale));
+  dshade = drect(dx * iscale, dy * iscale);
   if (!dshade) {
     fclose(infile);
     bailout("oneimage", "Could not allocate memory for image array");
-    free_irect(image, (long int)(dx * iscale));
+    free_irect(image, dx * iscale);
     free_ivector(blue);
     free_ivector(green);
     free_ivector(red);
@@ -198,13 +198,13 @@ int main(void) {
    ***/
 
   mic = NULL;
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
   if (!mic) {
     fclose(infile);
     bailout("oneimage", "Could not allocate memory for mic");
     if (dshade)
-      free_drect(dshade, (long int)(dx * iscale));
-    free_irect(image, (long int)(dx * iscale));
+      free_drect(dshade, dx * iscale);
+    free_irect(image, dx * iscale);
     free_ivector(blue);
     free_ivector(green);
     free_ivector(red);
@@ -374,8 +374,8 @@ int main(void) {
    ***/
 
   free_ibox(mic, xsyssize, ysyssize);
-  free_drect(dshade, (long int)(dx * iscale));
-  free_irect(image, (long int)(dx * iscale));
+  free_drect(dshade, dx * iscale);
+  free_irect(image, dx * iscale);
   free_ivector(blue);
   free_ivector(green);
   free_ivector(red);

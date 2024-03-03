@@ -30,7 +30,7 @@ int breakflocs(FILE *pfile, short int *p, short int *part, short int *in,
   int status = 0;
   int nxy, i, j, k, ijk, n, inval, oinval, nsw, done;
   int i1, j1, k1, ipp, px, py, pz;
-  long int m, m1, m2, mm, npartmin, npartmax, taggednpartmax;
+  int m, m1, m2, mm, npartmin, npartmax, taggednpartmax;
   float pres, pver;
   float tiny = 1.0e-4;
   char buff[MAXSTRING];
@@ -117,8 +117,8 @@ int breakflocs(FILE *pfile, short int *p, short int *part, short int *in,
     }
   }
 
-  printf("\nMinimum particle label = %ld\n", npartmin);
-  printf("Maximum particle label = %ld\n", npartmax);
+  printf("\nMinimum particle label = %d\n", npartmin);
+  printf("Maximum particle label = %d\n", npartmax);
   fflush(stdout);
   taggednpartmax = npartmax;
 
@@ -163,8 +163,8 @@ int breakflocs(FILE *pfile, short int *p, short int *part, short int *in,
    ***/
 
   printf("\nTagged all one-pixel particles now:\n");
-  printf("\tMinimum particle label = %ld\n", npartmin);
-  printf("\tMaximum particle label = %ld\n", npartmax);
+  printf("\tMinimum particle label = %d\n", npartmin);
+  printf("\tMaximum particle label = %d\n", npartmax);
   fflush(stdout);
 
   nsw = 0; /* Number of particles switched off */

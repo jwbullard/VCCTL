@@ -55,7 +55,7 @@ int *Seed;
  *	resolution (micrometers per pixel)
  ***/
 
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
@@ -79,10 +79,10 @@ int Verbose = 0;
 void checkargs(int argc, char *argv[]);
 int maketemp(int size, int *xsph, int *ysph, int *zsph);
 int poredist(void);
-long int xyz2pix(int xpos, int ypos, int zpos);
-int pix2x(long int pid);
-int pix2y(long int pid);
-int pix2z(long int pid);
+int xyz2pix(int xpos, int ypos, int zpos);
+int pix2x(int pid);
+int pix2y(int pid);
+int pix2z(int pid);
 void readmic(void);
 
 int main(int argc, char *argv[]) {
@@ -189,13 +189,13 @@ int maketemp(int size, int *xsph, int *ysph, int *zsph) {
  *	Convert x,y,z coordinates to pixel number
  *
  * 	Arguments:	int xpos, int ypos, int zpos coordinates
- * 	Returns:	long int pixel id number
+ * 	Returns:	int pixel id number
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-long int xyz2pix(int xpos, int ypos, int zpos) {
-  long int ns = (Xsyssize * Ysyssize * zpos) + (Xsyssize * ypos) + xpos;
+int xyz2pix(int xpos, int ypos, int zpos) {
+  int ns = (Xsyssize * Ysyssize * zpos) + (Xsyssize * ypos) + xpos;
   return (ns);
 }
 
@@ -204,13 +204,13 @@ long int xyz2pix(int xpos, int ypos, int zpos) {
  *
  *	Convert pixel id number to x coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2x(long int pid) {
+int pix2x(int pid) {
   int x, y, z;
   z = pid / (Xsyssize * Ysyssize);
   y = (pid - (z * Xsyssize * Ysyssize)) / Xsyssize;
@@ -223,13 +223,13 @@ int pix2x(long int pid) {
  *
  *	Convert pixel id number to y coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2y(long int pid) {
+int pix2y(int pid) {
   int y, z;
   z = pid / (Xsyssize * Ysyssize);
   y = (pid - (z * Xsyssize * Ysyssize)) / Xsyssize;
@@ -241,13 +241,13 @@ int pix2y(long int pid) {
  *
  *	Convert pixel id number to z coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2z(long int pid) {
+int pix2z(int pid) {
   int z = pid / (Xsyssize * Ysyssize);
   return (z);
 }
@@ -265,7 +265,7 @@ int pix2z(long int pid) {
  *	Called by:	main program
  ***/
 int poredist(void) {
-  long int i, *pores, *ndiam, porecnt, index, ns, maxsph, nsph;
+  int i, *pores, *ndiam, porecnt, index, ns, maxsph, nsph;
   int ix, iy, iz, max_allowed_diam, mindim, nd, failed, nrad;
   int xc, yc, zc;
   int ***tmic;
@@ -280,7 +280,7 @@ int poredist(void) {
   xsph = NULL;
   ysph = NULL;
   zsph = NULL;
-  tmic = ibox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
+  tmic = ibox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
   if (!tmic) {
     warning("poredist3d", "Could not allocate required memory for temporary "
                           "microstructure image");
@@ -303,7 +303,7 @@ int poredist(void) {
   }
 
   if (Verbose) {
-    printf("\nScanned microstructure:  total pore count = %ld", porecnt);
+    printf("\nScanned microstructure:  total pore count = %d", porecnt);
     fflush(stdout);
   }
 
@@ -326,7 +326,7 @@ int poredist(void) {
   }
 
   /* Allocate memory for ndiam vector */
-  ndiam = livector((long int)(max_allowed_diam + 1));
+  ndiam = ivector(max_allowed_diam + 1);
   if (!ndiam) {
     warning("poredist3d", "Could not allocate required memory");
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
@@ -339,7 +339,7 @@ int poredist(void) {
   maxsph = diam2vol((float)max_allowed_diam);
 
   if (Verbose) {
-    printf("\nMaximum number allowed template elements will be %ld", maxsph);
+    printf("\nMaximum number allowed template elements will be %d", maxsph);
     fflush(stdout);
   }
 
@@ -347,7 +347,7 @@ int poredist(void) {
   xsph = ivector(maxsph);
   if (!xsph) {
     warning("poredist3d", "Could not allocate required memory");
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -355,7 +355,7 @@ int poredist(void) {
   if (!ysph) {
     warning("poredist3d", "Could not allocate required memory");
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -364,7 +364,7 @@ int poredist(void) {
     warning("poredist3d", "Could not allocate required memory");
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -376,14 +376,14 @@ int poredist(void) {
 
   /* Allocate memory for porosity locator vector */
 
-  pores = livector(porecnt);
+  pores = ivector(porecnt);
   if (!pores) {
     warning("poredist3d", "Could not allocate required memory");
     fflush(stdout);
     free_ivector(zsph);
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -406,7 +406,7 @@ int poredist(void) {
   }
 
   if (Verbose) {
-    printf("\nIndex = %ld", index);
+    printf("\nIndex = %d", index);
     fflush(stdout);
   }
 
@@ -427,7 +427,7 @@ int poredist(void) {
     nrad = nd / 2;
     nsph = maketemp(nrad, xsph, ysph, zsph);
     if (Verbose) {
-      printf("\n\tDiam = %d, Nsph = %ld", nd, nsph);
+      printf("\n\tDiam = %d, Nsph = %d", nd, nsph);
       fflush(stdout);
     }
 
@@ -480,7 +480,7 @@ int poredist(void) {
     free_ivector(zsph);
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(ndiam);
+    free_ivector(ndiam);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -493,10 +493,10 @@ int poredist(void) {
     fflush(stdout);
   }
   for (i = 1; i <= max_allowed_diam; i += 2) {
-    fprintf(outfile, "\n%f\t%ld\t%f", ((float)i), ndiam[i],
+    fprintf(outfile, "\n%f\t%d\t%f", ((float)i), ndiam[i],
             (((float)ndiam[i]) / ((float)porecnt)));
     if (Verbose) {
-      printf("\n%f\t%ld\t%f", ((float)i), ndiam[i],
+      printf("\n%f\t%d\t%f", ((float)i), ndiam[i],
              (((float)ndiam[i]) / ((float)porecnt)));
       fflush(stdout);
     }
@@ -504,11 +504,11 @@ int poredist(void) {
 
   fclose(outfile);
 
-  free_livector(pores);
+  free_ivector(pores);
   free_ivector(zsph);
   free_ivector(ysph);
   free_ivector(xsph);
-  free_livector(ndiam);
+  free_ivector(ndiam);
   free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
 
   return (0);
@@ -563,7 +563,7 @@ void readmic(void) {
    *	Define the number of histogram bins
    ***/
 
-  Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+  Syspix = Xsyssize * Ysyssize * Zsyssize;
   Sizemag =
       pow(((float)Syspix) / (pow(((float)DEFAULTSYSTEMSIZE), 3.0)), (1. / 3.));
   Isizemag = (int)(Sizemag + 0.5);
@@ -574,7 +574,7 @@ void readmic(void) {
    *	Allocate memory for all global variables
    ***/
 
-  Mic = ibox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
+  Mic = ibox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
 
   if (!Mic) {
     bailout("poredist3d", "Memory allocation failure");

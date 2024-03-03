@@ -75,12 +75,12 @@ static double currx, curry, currz, sigma[NPHMAX][4];
 static double pcurr[NPHMAX][4];
 static double a[NPHMAX], be[NPHMAX][NPHMAX][4];
 int *pix;
-long int *list;
-long int Nsites;
+int *list;
+int Nsites;
 double gtest, ex, ey, ez;
 int nx, ny, nz, nx1, nx2, ny1, ny2, nz1, nz2, L22, ns2, nphase, ntot;
 int npoints, ic = 0;
-long int fxyz;
+int fxyz;
 FILE *outfile, *resultsfile, *pcfile;
 char Outfolder[MAXSTRING], Resultsfilename[MAXSTRING];
 char Filesep;
@@ -127,7 +127,7 @@ void freeallmem(void) {
   if (!pix)
     free_ivector(pix);
   if (!list)
-    free_livector(list);
+    free_ivector(list);
   if (!gx)
     free_dvector(gx);
   if (!gy)
@@ -151,7 +151,7 @@ void freeallmem(void) {
 void ppixel(int *nagg1) {
   FILE *infile;
   int i, j, k, valin, intvalin, ovalin, i1, j1, k1, foundagg;
-  long int m, m1, temp1, temp0, smallersize;
+  int m, m1, temp1, temp0, smallersize;
   char instring[MAXSTRING];
 
   printf("\nInside ppixel function.\n");
@@ -322,13 +322,13 @@ void ppixel(int *nagg1) {
 
   for (m = 1; m <= ns2; m++) {
     if (pix[m] < 1) {
-      fprintf(outfile, "Phase label in pix < 1 --- error at %ld \n", m);
+      fprintf(outfile, "Phase label in pix < 1 --- error at %d \n", m);
       fflush(outfile);
       exit(1);
     } else if (pix[m] > nphase) {
       fprintf(outfile,
-              "Phase label in pix[%ld] = %d > nphase ( = %d)  --- error at "
-              "line %ld \n",
+              "Phase label in pix[%d] = %d > nphase ( = %d)  --- error at "
+              "line %d \n",
               m, pix[m], nphase, m);
       fflush(outfile);
       exit(1);
@@ -339,9 +339,9 @@ void ppixel(int *nagg1) {
 /*  Subroutine that determines the correct bond conductances that are used
   to compute multiplication by the matrix A */
 
-void bond() {
+void bond(void) {
   int i, j, k;
-  long int m, m1, temp0, temp1, temp2;
+  int m, m1, temp0, temp1, temp2;
 
   /*  Set values of conductor for phase(i,m)--phase(j,m) interface,
    store in array be(i,j,m), m=1,2,3. If either phase i or j
@@ -426,8 +426,8 @@ void bond() {
 }
 
 /* The matrix product subroutine */
-void prod() {
-  long int i, temp0, temp1, m;
+void prod(void) {
+  int i, temp0, temp1, m;
   int j, k;
 
   /*  Perform basic matrix multiplication, results in incorrect information at
@@ -475,8 +475,8 @@ void prod() {
 }
 
 /* The 2nd matrix product subroutine */
-void prod1() {
-  long int i, temp0, temp1, m;
+void prod1(void) {
+  int i, temp0, temp1, m;
   int j, k;
 
   /*  Perform basic matrix multiplication, results in incorrect information at
@@ -526,7 +526,7 @@ void prod1() {
 /*  Subroutine to compute the total current in the x, y, and z directions */
 void current(int doitz, int ilast) {
   int i, j, k;
-  long int m, temp0, temp1;
+  int m, temp0, temp1;
   double cur1, cur2, cur3;
   double ocurrx, ocurry, ocurrz;
   double ncurry, ncurrz;
@@ -635,10 +635,9 @@ void current(int doitz, int ilast) {
 
 /*  Subroutine that performs the conjugate gradient solution routine to
   find the correct set of nodal voltages */
-void dembx(ndlist, doitz) long int ndlist;
-{
+void dembx(int ndlist, int doitz) {
   double gg, hAh, lambda, gglast, gamma;
-  long int i, m, k, ncgsteps, icc;
+  int i, m, k, ncgsteps, icc;
 
   /*  Note:  voltage gradients are maintained because in the conjugate gradient
     relaxation algorithm, the voltage vector is only modified by adding a
@@ -713,7 +712,7 @@ void dembx(ndlist, doitz) long int ndlist;
       } /* end of 2nd if gg gt gtest loop */
       ic = icc;
       if ((icc % 30) == 0) {
-        fprintf(outfile, "After %ld cycles \n", icc);
+        fprintf(outfile, "After %d cycles \n", icc);
         fprintf(outfile, "gg = %lf\n", gg);
         current(doitz, 0);
         fprintf(outfile, "currx = %lf\n", currx);
@@ -723,14 +722,14 @@ void dembx(ndlist, doitz) long int ndlist;
       }
     } /* end of ncgsteps loop */
     if (gg >= gtest) {
-      fprintf(outfile, "\nNO CONVERGENCE: %ld steps\n", ncgsteps);
+      fprintf(outfile, "\nNO CONVERGENCE: %d steps\n", ncgsteps);
     }
   } /* end of if gg gt gtest loop */
 }
 
-int main() {
+int main(void) {
   int i, j, k, micro, phasein, phasemax, doitz, oval, nagg1;
-  long int m, nlist = 0, temp1, temp0;
+  int m, nlist = 0, temp1, temp0;
   char phasename[MAXSTRING];
   double ety, etz, sigmax, xj, layersigma;
   double sigma0, sigma1, sigma2, avesigma, formfact;
@@ -816,7 +815,7 @@ int main() {
   printf("\nDone scanning image for system characteristics...");
   fflush(stdout);
 
-  Nsites = (long)((Xsyssize + 2) * (Ysyssize + 2) * (Zsyssize + 2));
+  Nsites = (Xsyssize + 2) * (Ysyssize + 2) * (Zsyssize + 2);
 
   pix = NULL;
   list = NULL;
@@ -830,7 +829,7 @@ int main() {
   Lsigma = NULL;
 
   pix = ivector(Nsites);
-  list = livector(Nsites);
+  list = ivector(Nsites);
   gx = dvector(Nsites);
   gy = dvector(Nsites);
   gz = dvector(Nsites);
@@ -1004,7 +1003,7 @@ int main() {
   printf("\nSuccessfully opened phase information file...");
   fflush(stdout);
 
-  fprintf(outfile, "Image %s is (%d,%d,%d)  No. of real sites %ld \n\n", filein,
+  fprintf(outfile, "Image %s is (%d,%d,%d)  No. of real sites %d \n\n", filein,
           nx, ny, nz, fxyz);
   fprintf(outfile, "POROSITY: sigma = %f\n", sigma[(POROSITY) + 1][1]);
   fprintf(outfile, "CSH: sigma = %f\n", sigma[(CSH) + 1][1]);
@@ -1889,7 +1888,7 @@ int getGausspoints(void) {
 
   if (Xg)
     free_dvector(Xg);
-  Xg = dvector((long)(Ng + 1));
+  Xg = dvector(Ng + 1);
   if (!Xg) {
     printf("\nERROR: Could not allocate memory for x quadrature points.");
     printf("  Exiting.");
@@ -1899,7 +1898,7 @@ int getGausspoints(void) {
 
   if (Wg)
     free_dvector(Wg);
-  Wg = dvector((long)(Ng + 1));
+  Wg = dvector(Ng + 1);
   if (!Wg) {
     printf("\nERROR: Could not allocate memory for w quadrature points.");
     printf("  Exiting.");
@@ -1910,7 +1909,7 @@ int getGausspoints(void) {
 
   /* Allocate memory for the local x and w vectors */
 
-  x = dvector((long)(Ng + 1));
+  x = dvector(Ng + 1);
   if (!x) {
     printf("\nERROR: Could not allocate memory for theta quadrature points.");
     printf("  Exiting.");
@@ -1920,7 +1919,7 @@ int getGausspoints(void) {
     return (1);
   }
 
-  w = dvector((long)(Ng + 1));
+  w = dvector(Ng + 1);
   if (!w) {
     printf("\nERROR: Could not allocate memory for phi quadrature points.");
     printf("  Exiting.");

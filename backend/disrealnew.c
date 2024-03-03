@@ -102,13 +102,13 @@ void performreactivation(int pid, float fracreact, int finalreact);
 int chckedge(int phase, int xck, int yck, int zck);
 void resetcrackpores(void);
 void passone(int low, int high, int cycid, int cshexflag);
-long int countphase(int phid);
+int countphase(int phid);
 int loccsh(int xcur, int ycur, int zcur, int sourcepore);
 int countbox(int boxsize, int qx, int qy, int qz);
-void makeinert(long int ndesire);
+void makeinert(int ndesire);
 void extslagcsh(int xpres, int ypres, int zpres);
 void dissolve(int cycle);
-void addrand(int randid, long int nneed, int onepixfloc);
+void addrand(int randid, int nneed, int onepixfloc);
 void addcrack();
 void addseeds(int phid, float prob);
 void calcT(double mass);
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     int ntimes,valin,nmovstep;    
     int cycflag,ix,iy,iz;
     int pixtmp,i,j,k;
-    long int customentry;
+    int customentry;
     float pnucch,pscalech,pnuchg,pscalehg,pnucfh3,pscalefh3;
     float psfact,betfact,pnucgyp,pscalegyp;
     float thtimelo,thtimehi,thtemplo,thtemphi;
@@ -412,11 +412,11 @@ int main(int argc, char *argv[])
         }
 
         if (Verbose) {
-            printf("Number dissolved this pass- %ld ",Nmade);
-            printf("total diffusing- %ld \n",Ngoing);
+            printf("Number dissolved this pass- %d ",Nmade);
+            printf("total diffusing- %d \n",Ngoing);
 
             if (Icyc == 1) {
-                printf("Ncsbar is %ld   Netbar is %ld \n",Ncsbar,Netbar);
+                printf("Ncsbar is %d   Netbar is %d \n",Ncsbar,Netbar);
             }
             fflush(stdout);
         }
@@ -891,7 +891,7 @@ int main(int argc, char *argv[])
             ***/
 
             Syspix = Xsyssize * Ysyssize * Zsyssize;
-            if (Verbose) printf("\n\tSyspix changes from %ld to %ld",Syspix_orig,Syspix);
+            if (Verbose) printf("\n\tSyspix changes from %d to %d",Syspix_orig,Syspix);
             Sizemag = ((float)Syspix)/(pow(((double)(DEFAULTSYSTEMSIZE)),3.0));
             if (Verbose) printf("\n\tSizemag changes from %f to %f",Sizemag_orig,Sizemag);
             Isizemag = (int)(Sizemag + 0.5);
@@ -1417,7 +1417,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     int nlen,phtodo,valin,ovalin,dphase,deactphase;
     int ix,iy,iz,x,y;
     int newx,newy,newz;
-    long int nadd;
+    int nadd;
     char ch,imgfile[MAXSTRING],pimgfile[MAXSTRING];
     char buff[MAXSTRING],prmname[MAXSTRING],custcycfile[MAXSTRING];
     char name[MAXSTRING],answer[MAXSTRING],calfilename[MAXSTRING];
@@ -1432,37 +1432,37 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     ***/
 
     if (Verbose) printf("\tAllocating Disprob ...");
-    Disprob = fvector((long)(NSPHASES + 1));
+    Disprob = fvector(NSPHASES + 1);
     if (!Disprob) {
         bailout("disrealnew","Could not allocate memory for Disprob");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Disbase ...");
-    Disbase = fvector((long)(NSPHASES + 1));
+    Disbase = fvector(NSPHASES + 1);
     if (!Disbase) {
         bailout("disrealnew","Could not allocate memory for Disbase");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Discoeff ...");
-    Discoeff = fvector((long)(NSPHASES + 1));
+    Discoeff = fvector(NSPHASES + 1);
     if (!Discoeff) {
         bailout("disrealnew","Could not allocate memory for Discoeff");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Soluble ...");
-    Soluble = ivector((long)(NSPHASES + 1));
+    Soluble = ivector(NSPHASES + 1);
     if (!Soluble) {
         bailout("disrealnew","Could not allocate memory for Soluble");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Creates ...");
-    Creates = ivector((long)(NSPHASES + 1));
+    Creates = ivector(NSPHASES + 1);
     if (!Creates) {
         bailout("disrealnew","Could not allocate memory for Creates");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Onepixelbias ...");
-    Onepixelbias = fvector((long)(NSPHASES + 1));
+    Onepixelbias = fvector(NSPHASES + 1);
     if (!Onepixelbias) {
         bailout("disrealnew","Could not allocate memory for Onepixelbias");
         return(1);
@@ -1474,49 +1474,49 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     ***/
 
     if (Verbose) printf("  done\n\tAllocating Startflag ...");
-    Startflag = ivector((long)(NSPHASES + 1));
+    Startflag = ivector(NSPHASES + 1);
     if (!Startflag) {
         bailout("disrealnew","Could not allocate memory for Startflag");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Stopflag ...");
-    Stopflag = ivector((long)(NSPHASES + 1));
+    Stopflag = ivector(NSPHASES + 1);
     if (!Stopflag) {
         bailout("disrealnew","Could not allocate memory for Stopflag");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Deactphaselist ...");
-    Deactphaselist = ivector((long)(NSPHASES + 1));
+    Deactphaselist = ivector(NSPHASES + 1);
     if (!Deactphaselist) {
         bailout("disrealnew","Could not allocate memory for Deactphaselist");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Deactfrac ...");
-    Deactfrac = fvector((long)(NSPHASES + 1));
+    Deactfrac = fvector(NSPHASES + 1);
     if (!Deactfrac) {
         bailout("disrealnew","Could not allocate memory for Deactfrac");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Reactfrac ...");
-    Reactfrac = fvector((long)(NSPHASES + 1));
+    Reactfrac = fvector(NSPHASES + 1);
     if (!Reactfrac) {
         bailout("disrealnew","Could not allocate memory for Reactfrac");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Deactinit ...");
-    Deactinit = fvector((long)(NSPHASES + 1));
+    Deactinit = fvector(NSPHASES + 1);
     if (!Deactinit) {
         bailout("disrealnew","Could not allocate memory for Deactinit");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Deactends ...");
-    Deactends = fvector((long)(NSPHASES + 1));
+    Deactends = fvector(NSPHASES + 1);
     if (!Deactends) {
         bailout("disrealnew","Could not allocate memory for Deactends");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating Deactterm ...");
-    Deactterm = fvector((long)(NSPHASES + 1));
+    Deactterm = fvector(NSPHASES + 1);
     if (!Deactterm) {
         bailout("disrealnew","Could not allocate memory for Deactterm");
         return(1);
@@ -1528,13 +1528,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     ***/
 
     if (Verbose) printf("  done\n\tAllocating PHsulfcoeff ...");
-    PHsulfcoeff = fvector((long)(NSPHASES + 1));
+    PHsulfcoeff = fvector(NSPHASES + 1);
     if (!Deactterm) {
         bailout("disrealnew","Could not allocate memory for Deactterm");
         return(1);
     }
     if (Verbose) printf(" done\n\tAllocating PHfactor ...");
-    PHfactor = fvector((long)(NSPHASES + 1));
+    PHfactor = fvector(NSPHASES + 1);
     if (!Deactterm) {
         bailout("disrealnew","Could not allocate memory for Deactterm");
         return(1);
@@ -2438,7 +2438,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     ***/
 
     if (Verbose) printf("\tAllocating Mic with dimensions %d %d %d...",Xsyssize,Ysyssize,Zsyssize);
-    Mic = cbox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
+    Mic = cbox(Xsyssize,Ysyssize,Zsyssize);
     if (!Mic) {
         freeallmem();
         fclose(fimgfile);
@@ -2447,7 +2447,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     }
     if (Verbose) printf(" done\n\tAllocating Micorig ...");
 
-    Micorig = cbox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
+    Micorig = cbox(Xsyssize,Ysyssize,Zsyssize);
     if (!Micorig) {
         freeallmem();
         fclose(fimgfile);
@@ -2456,7 +2456,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     }
     if (Verbose) printf(" done\n\tAllocating Micpart ...");
 
-    Micpart = sibox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
+    Micpart = sibox(Xsyssize,Ysyssize,Zsyssize);
     if (!Micpart) {
         freeallmem();
         fclose(fimgfile);
@@ -2465,7 +2465,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     }
     if (Verbose) printf(" done\n\tAllocating Cshage ...");
 
-    Cshage = sibox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
+    Cshage = sibox(Xsyssize,Ysyssize,Zsyssize);
     if (!Cshage) {
         freeallmem();
         fclose(fimgfile);
@@ -2474,7 +2474,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     }
     if (Verbose) printf(" done\n\tAllocating Deactivated ...");
 
-    Deactivated = sibox((long)Xsyssize,(long)Ysyssize,(long)Zsyssize);
+    Deactivated = sibox(Xsyssize,Ysyssize,Zsyssize);
     if (!Deactivated) {
         fclose(fimgfile);
         freeallmem();
@@ -2624,8 +2624,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     printf("Enter number of one pixel particles to add (-1 to quit) \n");
     fflush(stdout);
     read_string(instring,sizeof(instring));
-    nadd = (long int)(atoi(instring));
-    printf("%ld\n",nadd);
+    nadd = atoi(instring);
+    printf("%d\n",nadd);
 
     while (nadd >= 0) {
 
@@ -2693,8 +2693,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         printf("Enter number of one pixel particles ");
         printf("to add (-1 to quit) \n");
         read_string(instring,sizeof(instring));
-        nadd = (long int)(atoi(instring));
-        printf("%ld\n",nadd);
+        nadd = atoi(instring);
+        printf("%d\n",nadd);
     }
 
     fflush(stdout);
@@ -2813,7 +2813,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
          * and DataValue vectors.
          ***/
 
-        DataTime = fvector((long int)(NDataLines));
+        DataTime = fvector(NDataLines);
         if (!DataTime) {
             freeallmem();
             fclose(fcalfile);
@@ -2822,7 +2822,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
             return(1);
         }
 
-        DataValue = fvector((long int)(NDataLines));
+        DataValue = fvector(NDataLines);
         if (!DataValue) {
             freeallmem();
             fclose(fcalfile);
@@ -2895,7 +2895,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     *    and water content of CSH
     ***/
 
-    TimeHistory = fvector((long)Ncyc);
+    TimeHistory = fvector(Ncyc);
     if (!TimeHistory) {
         freeallmem();
         bailout("disrealnew",
@@ -2904,7 +2904,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
     }
     TimeHistory[0] = 0.0;
 
-    Molarvcsh = fvector((long)Ncyc);
+    Molarvcsh = fvector(Ncyc);
     if (!Molarvcsh) {
         freeallmem();
         bailout("disrealnew",
@@ -2912,7 +2912,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg,
         exit(1);
     }
 
-    Watercsh = fvector((long)Ncyc);
+    Watercsh = fvector(Ncyc);
     if (!Watercsh) {
         freeallmem();
         bailout("disrealnew",
@@ -4118,15 +4118,15 @@ void resetcrackpores(void)
 *
 *     Arguments:    int phid (phase id to check)
 *
-*     Returns:    long int number of voxels of that phase
+*     Returns:    int number of voxels of that phase
 *
 *    Calls:        nothing
 *    Called by:    main
 ***/
-long int countphase(int phid)
+int countphase(int phid)
 {
     register int xid,yid,zid;
-    long int cntphase = 0;
+    int cntphase = 0;
 
     /* Scan the entire 3-D microstructure */
 
@@ -4456,9 +4456,9 @@ int countbox(int boxsize, int qx, int qy, int qz)
 *    Calls:        countbox
 *    Called by:    dissolve
 ***/
-void makeinert(long int ndesire)
+void makeinert(int ndesire)
 {
-    long int idesire;
+    int idesire;
     int px,py,pz,placed,cntpore,cntmax;
     struct Togo *headtogo,*tailtogo,*newtogo,*lasttogo,*onetogo;
 
@@ -4608,7 +4608,7 @@ void extslagcsh(int xpres, int ypres, int zpres)
     int check,sump,xchr,ychr,zchr,fchr,i1,action,numnear;
     int maxtries = 100;
     int maxxtries = 5000;
-    long int tries;
+    int tries;
 
     /***
     *    First try 6 neighboring locations until
@@ -4712,15 +4712,15 @@ void extslagcsh(int xpres, int ypres, int zpres)
 void dissolve(int cycle)
 {
     int gct=0;
-    long int nc3aext,ncshext,nchext,ngypext,nanhext;
-    long int nsum5,nsum4,nsum3,nsum2,nhemext,nsum6,nsum7,nsum8,nc4aext,nso4ext,vcement;
-    long int nkspix,nnaspix,totks,totnas,skipnodes;
+    int nc3aext,ncshext,nchext,ngypext,nanhext;
+    int nsum5,nsum4,nsum3,nsum2,nhemext,nsum6,nsum7,nsum8,nc4aext,nso4ext,vcement;
+    int nkspix,nnaspix,totks,totnas,skipnodes;
     int pixdeact,phid,phnew,plnew,cread;
     int i,k,x,y,xl,yl,zl,curx,cury,curz,xc,yc,plok;
     int zc,cycnew,sollime,sourcepore;
-    long int placed,cshrand,maxsulfate,maxallowed;
-    long int ctest,ncshgo,nsurf,suminit;
-    long int xext,nhgd,npchext,nslagc3a=0;
+    int placed,cshrand,maxsulfate,maxallowed;
+    int ctest,ncshgo,nsurf,suminit;
+    int xext,nhgd,npchext,nslagc3a=0;
     float na2omintotmass,k2omintotmass,mwna2so4,mwna2o,mwk2so4,mwk2o;
     float plfh3,savechgone,sulfavemolarv,mk2so4,mna2so4;
     float dfact,dfact1,molesdh2o,h2oinit,heat4,fhemext,fc4aext;
@@ -5630,7 +5630,7 @@ void dissolve(int cycle)
     *
     ***/
 
-    Water_left = (long int)((h2oinit - Molesh2o) * Molarv[POROSITY] + 0.5);
+    Water_left = (h2oinit - Molesh2o) * Molarv[POROSITY] + 0.5;
     Water_left += Count[CRACKP];
     Countkeep = Count[POROSITY] + Count[CRACKP];
     Heatsum += ((h2oinit - Molesh2o - molesdh2o) * Heatf[POROSITY]);
@@ -5926,7 +5926,7 @@ void dissolve(int cycle)
     *    and adjust based on availability of pozzolan
     ***/
 
-    if (Verbose) printf("Count[DIFFCH] = %ld, Chcrit = %f, Disbase[CH] = %f\n", Count[DIFFCH],Chcrit,Disbase[CH]);
+    if (Verbose) printf("Count[DIFFCH] = %d, Chcrit = %f, Disbase[CH] = %f\n", Count[DIFFCH],Chcrit,Disbase[CH]);
     if (Verbose) printf("CH dissolution probability changes from %f ",Disprob[CH]);
     Disprob[CH] *= ((A0_CHSOL - (A1_CHSOL * Temp_cur_b))
                 / (A0_CHSOL - (A1_CHSOL * 25.0)));
@@ -6091,7 +6091,7 @@ void dissolve(int cycle)
         printf("\n    tdisfact = %f and Cs_acc = %f",tdisfact,Cs_acc);
         printf("\n    Psfume = %f",Psfume);
         printf("\n    fact = %f",fact);
-        printf("\n        Count[CSH] = %ld",Count[CSH]);
+        printf("\n        Count[CSH] = %d",Count[CSH]);
         printf(" Tfractw04 = %f",Tfractw04);
         printf(" Cshscale = %f",Cshscale);
         printf("\n        Surffract = %f",Surffract);
@@ -6425,7 +6425,7 @@ void dissolve(int cycle)
         printf("Silicate and aluminate probabilities: ");
         printf("%f %f ",Disprob[C3S],Disprob[C2S]);
         printf("%f %f %f %f %f\n",Disprob[C3A],Disprob[OC3A],Disprob[C4AF],Disprob[GYPSUM],Disprob[HEMIHYD]);
-        printf("Cs_acc is %f and Ca_acc is %f Sulf_cur is %ld Sulf_conc is %f\n",Cs_acc,Ca_acc,Sulf_cur,Sulf_conc);
+        printf("Cs_acc is %f and Ca_acc is %f Sulf_cur is %d Sulf_conc is %f\n",Cs_acc,Ca_acc,Sulf_cur,Sulf_conc);
         printf("Pfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 is %f\n",Pfract,Totfract,Tfractw05,Pfractw05);
     }
 
@@ -6561,7 +6561,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nEntering Main dissolve loop, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nEntering Main dissolve loop, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     fflush(stdout);
     */
 
@@ -7002,7 +7002,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nLeaving Main dissolve loop, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nLeaving Main dissolve loop, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     fflush(stdout);
     */
 
@@ -7043,12 +7043,12 @@ void dissolve(int cycle)
     
     /*
     if (Verbose) {
-          printf("\n***Ksulfinit = %ld Count[K2SO4] = %ld",Ksulfinit,Count[K2SO4]);
+          printf("\n***Ksulfinit = %d Count[K2SO4] = %d",Ksulfinit,Count[K2SO4]);
         printf("\n***Releasedk = %f Totpotassium = %f",Releasedk,Totpotassium);
-        printf("\n***nkspix = %ld",nkspix);
-        printf("\n***Nasulfinit = %ld Count[NA2SO4] = %ld",Nasulfinit,Count[NA2SO4]);
+        printf("\n***nkspix = %d",nkspix);
+        printf("\n***Nasulfinit = %d Count[NA2SO4] = %d",Nasulfinit,Count[NA2SO4]);
         printf("\n***Releasedna = %f Totsodium = %f",Releasedna,Totsodium);
-        printf("\n***nnaspix = %ld",nnaspix);
+        printf("\n***nnaspix = %d",nnaspix);
         fflush(stdout);
     }
     */
@@ -7110,7 +7110,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nEntering loop for ksulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nEntering loop for ksulf list, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7187,7 +7187,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nEntering loop for nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nEntering loop for nasulf list, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     if (nnaspix < Count[NA2SO4] && nnaspix > 0) {
@@ -7254,7 +7254,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nLeaving loop for nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nLeaving loop for nasulf list, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7262,7 +7262,7 @@ void dissolve(int cycle)
     ***/
 
     /*
-    if (Verbose) printf("\ntotks = %ld",totks);
+    if (Verbose) printf("\ntotks = %d",totks);
     */
     while (nkspix > 0 && totks > 0) {
         skipnodes = (int)((float)totks * ran1(Seed));
@@ -7369,7 +7369,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished processing ksulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished processing ksulf list, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7389,7 +7389,7 @@ void dissolve(int cycle)
     }
 
     /*
-    if (Verbose) printf("\nFinished processing ksulf ants, step 2, in dissolve...\nnnaspix = %ld, totnas = %ld\n",nnaspix,totnas);
+    if (Verbose) printf("\nFinished processing ksulf ants, step 2, in dissolve...\nnnaspix = %d, totnas = %d\n",nnaspix,totnas);
     */
 
     while (nnaspix > 0 && totnas > 0) {
@@ -7498,7 +7498,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished processing nasulf list, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished processing nasulf list, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     /***
@@ -7529,14 +7529,14 @@ void dissolve(int cycle)
     }
 
     if (Verbose) {
-        printf("\nFinished resetting nasulf ids, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+        printf("\nFinished resetting nasulf ids, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
         printf("\nEligible gypsum count = %d\n",gct);
     }
     */
 
-    if ((ncshgo != 0) && (Verbose == 1)) printf("CSH dissolved is %ld \n",ncshgo);
+    if ((ncshgo != 0) && (Verbose == 1)) printf("CSH dissolved is %d \n",ncshgo);
 
-    if ((npchext > 0) && (Verbose == 1)) printf("Extra CH required is %ld at cycle %d \n",npchext,cycle);
+    if ((npchext > 0) && (Verbose == 1)) printf("Extra CH required is %d at cycle %d \n",npchext,cycle);
 
     /***
     *    Now add in the extra diffusing species for dissolution
@@ -7546,7 +7546,7 @@ void dissolve(int cycle)
     ***/
 
     ncshext = cshrand;
-    if ((cshrand != 0) && (Verbose == 1)) printf("cshrand is %ld \n",cshrand);
+    if ((cshrand != 0) && (Verbose == 1)) printf("cshrand is %d \n",cshrand);
 
     /***
     *    Extra diffusing CH, Gypsum, C3A, and SO4 are added at totally random
@@ -7558,7 +7558,7 @@ void dissolve(int cycle)
                 + (0.2584 * (double)Discount[C4AF])
                 + (0.954 * (double)Discount[FREELIME]);
 
-    nchext = (long int)fchext;
+    nchext = fchext;
     if (fchext > (double)nchext) {
         pdis = ran1(Seed);
         if ((fchext - (double)nchext) > pdis) nchext++;
@@ -7596,14 +7596,14 @@ void dissolve(int cycle)
 
     fc3aext = (double)Discount[C3A] + (double)Discount[OC3A];
     fc3aext += (0.5917 * (double)Discount[C3AH6]);
-    nc3aext = (long int)(fc3aext + nslagc3a);
+    nc3aext = fc3aext + nslagc3a;
     if (fc3aext > (double)nc3aext) {
         pdis=ran1(Seed);
         if ((fc3aext - (double)nc3aext) > pdis) nc3aext++;
     }
 
     fc4aext = 0.696 * (double)Discount[C4AF];
-    nc4aext = (long int)fc4aext;
+    nc4aext = fc4aext;
     if (fc4aext > (double)nc4aext) {
         pdis = ran1(Seed);
         if ((fc4aext - (double)nc4aext) > pdis) nc4aext++;
@@ -7626,7 +7626,7 @@ void dissolve(int cycle)
     /*    fanhext = 1.423 * (float)Discount[ANHYDRITE]; */
 
     fanhext = (double)Discount[ANHYDRITE];
-    nanhext = (long int)fanhext;
+    nanhext = fanhext;
     if (fanhext > (double)nanhext) {
         pdis = ran1(Seed);
         if ((fanhext - (double)nanhext) > pdis) nanhext++;
@@ -7646,7 +7646,7 @@ void dissolve(int cycle)
 
     fhemext = (double)Discount[HEMIHYD];
 
-    nhemext = (long int)fhemext;
+    nhemext = fhemext;
     if (fhemext > (double)nhemext) {
         pdis=ran1(Seed);
         if ((fhemext - (double)nhemext) > pdis) nhemext++;
@@ -7663,7 +7663,7 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nGetting ready to add DIFFSO4, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nGetting ready to add DIFFSO4, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     nso4ext = (Discount[K2SO4] + Discount[NA2SO4]);
@@ -7759,11 +7759,11 @@ void dissolve(int cycle)
         }
     }
 
-    if (Verbose) printf("\nFinished adding DIFFSO4, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
+    if (Verbose) printf("\nFinished adding DIFFSO4, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
     */
 
     if (Verbose) {
-        printf("Dissolved- %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld\n",
+        printf("Dissolved- %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
         Count[DIFFCSH],Count[DIFFCH],Count[DIFFGYP],Count[DIFFC3A],
         Count[DIFFFH3],Count[DIFFETTR],Count[DIFFAS],
         Count[DIFFCAS2],Count[DIFFCACL2],Count[DIFFCACO3],
@@ -7803,8 +7803,8 @@ void dissolve(int cycle)
     }
 
     if (Verbose) {
-        printf("\nEnd of dissolve cycle, Count[DIFFSO4] = %ld, Count[NA2SO4] = %ld ...\n",Count[DIFFSO4],Count[NA2SO4]);
-        printf("C3AH6 dissolved- %ld with prob. of %f \n",nhgd,Disprob[C3AH6]);
+        printf("\nEnd of dissolve cycle, Count[DIFFSO4] = %d, Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+        printf("C3AH6 dissolved- %d with prob. of %f \n",nhgd,Disprob[C3AH6]);
     }
     */
 }
@@ -7816,7 +7816,7 @@ void dissolve(int cycle)
 *     locations in the microstructure
 *
 *     Arguments:    int phase id
-*                 long int number to place
+*                 int number to place
 *                 int flocculate (1) or not (0)
 *
 *     Returns:    nothing
@@ -7824,10 +7824,10 @@ void dissolve(int cycle)
 *    Calls:        no other routines
 *    Called by:    main program
 ***/
-void addrand(int randid, long int nneed, int onepixfloc)
+void addrand(int randid, int nneed, int onepixfloc)
 {
     int success,ix,iy,iz,inc,dim,dir,newsite,oldval;
-    long int ic;
+    int ic;
     float pc3a;
 
     /***
@@ -8309,8 +8309,8 @@ void measuresurf(void)
 
     Surffract=(float)Scntcement/(float)Scnttotal;
     if (Verbose) {
-        printf("Cement surface count is %ld \n",Scntcement);
-        printf("Total surface count is %ld \n",Scnttotal);
+        printf("Cement surface count is %d \n",Scntcement);
+        printf("Total surface count is %d \n",Scnttotal);
         printf("Surface fraction is %f \n",Surffract);
         fflush(stdout);
     }

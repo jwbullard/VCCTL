@@ -43,7 +43,7 @@ int main(void) {
   int ***mic;
   int valin, ovalin, ix, iy, iz, ix1, iy1, iz1, k, syssize, flag;
   int xsyssize, ysyssize, zsyssize;
-  long int totalvol, surface, surfpix;
+  int totalvol, surface, surfpix;
   double totalmass;
   float res;
   char filen[MAXSTRING], fileout[MAXSTRING], buff[MAXSTRING];
@@ -125,7 +125,7 @@ int main(void) {
    *	Dynamically allocate the memory for mic array
    ***/
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
 
   /* Read in image and accumulate volume totals */
 
@@ -227,9 +227,9 @@ int main(void) {
    *	area fraction calculation
    ***/
 
-  printf("Total volume of solids is: %8ld\n", totalvol);
-  printf("Total surface area of solids is: %8ld\n", surface);
-  printf("Number of surface pixels: %8ld\n", surfpix);
+  printf("Total volume of solids is: %8d\n", totalvol);
+  printf("Total surface area of solids is: %8d\n", surface);
+  printf("Number of surface pixels: %8d\n", surfpix);
 
   free_ibox(mic, xsyssize, ysyssize);
 

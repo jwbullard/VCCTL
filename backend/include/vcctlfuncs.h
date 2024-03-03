@@ -26,7 +26,7 @@ int calcporedist3d(char *name);
 void cemcolors(int *r, int *g, int *b, int gray);
 int checkbc(int pos, int size);
 int convert_id(int curid, float version);
-long int diam2vol(float diameter);
+int diam2vol(float diameter);
 void id2phasename(int curid, char *phasename);
 FILE *filehandler(char *prog, char *filename, char *tocheck);
 void fread_string(FILE *fpin, char *chstr);
@@ -85,7 +85,7 @@ int probe_imgheader(char *name, float *ver, int *xsize, int *ysize, int *zsize,
 double ran1(int *idum);
 int read_imgheader(FILE *fpin, float *ver, int *xsize, int *ysize, int *zsize,
                    float *res);
-void read_string(char *chstr, long unsigned int size);
+void read_string(char *chstr, unsigned int size);
 void skip_imgheader(FILE *fpin);
 int write_imgheader(FILE *fpout, int xsize, int ysize, int zsize, float res);
 pixel_t *pixel_at(bitmap_t *bitmap, int x, int y);

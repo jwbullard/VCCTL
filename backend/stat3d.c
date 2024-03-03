@@ -45,8 +45,8 @@ int main(void) {
   int phaselist[NPHASES], flag;
   int valin, ovalin, ix, iy, iz, ix1, iy1, iz1, k, kk, syssize;
   int xsyssize, ysyssize, zsyssize;
-  long int voltot, surftot, totalvol;
-  long int volume[NPHASES], surface[NPHASES], surfpix[NPHASES];
+  int voltot, surftot, totalvol;
+  int volume[NPHASES], surface[NPHASES], surfpix[NPHASES];
   double mass[NPHASES], totmass, totalmass;
   float res;
   char filen[MAXSTRING], fileout[MAXSTRING], buff[MAXSTRING];
@@ -184,7 +184,7 @@ int main(void) {
    *	Dynamically allocate the memory for mic array
    ***/
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
 
   /* Read in image and accumulate volume totals */
 
@@ -343,10 +343,10 @@ int main(void) {
   k = POROSITY;
 
   id2phasename(k, phasename);
-  printf("%s\t%8ld", phasename, volume[POROSITY]);
-  printf("\t%8ld      \n", surface[POROSITY]);
-  fprintf(statfile, "%s\t%8ld", phasename, volume[POROSITY]);
-  fprintf(statfile, "\t%8ld      \n", surface[POROSITY]);
+  printf("%s\t%8d", phasename, volume[POROSITY]);
+  printf("\t%8d      \n", surface[POROSITY]);
+  fprintf(statfile, "%s\t%8d", phasename, volume[POROSITY]);
+  fprintf(statfile, "\t%8d      \n", surface[POROSITY]);
 
   /***
    *	Print extra information about clinker phases
@@ -354,18 +354,18 @@ int main(void) {
 
   for (k = C3S; k <= NA2SO4; k++) {
     id2phasename(k, phasename);
-    printf("%s\t%8ld\t%8ld", phasename, volume[k], surface[k]);
+    printf("%s\t%8d\t%8d", phasename, volume[k], surface[k]);
     printf("\t%.5f", (double)volume[k] / (double)voltot);
     printf("\t%.5f", (double)surface[k] / (double)surftot);
     printf("\t%.5f\n", (double)mass[k] / (double)totmass);
-    fprintf(statfile, "%s\t%8ld\t%8ld", phasename, volume[k], surface[k]);
+    fprintf(statfile, "%s\t%8d\t%8d", phasename, volume[k], surface[k]);
     fprintf(statfile, "\t%.5f", (double)volume[k] / (double)voltot);
     fprintf(statfile, "\t%.5f", (double)surface[k] / (double)surftot);
     fprintf(statfile, "\t%.5f\n", (double)mass[k] / (double)totmass);
   }
 
-  printf("TOTAL\t%8ld\t%8ld\n\n", voltot, surftot);
-  fprintf(statfile, "TOTAL\t%8ld\t%8ld", voltot, surftot);
+  printf("TOTAL\t%8d\t%8d\n\n", voltot, surftot);
+  fprintf(statfile, "TOTAL\t%8d\t%8d", voltot, surftot);
   fprintf(statfile, "\t%.5f", (double)voltot / (double)totalvol);
   fprintf(statfile, "\t\t%.5f\n\n", (double)totmass / (double)totalmass);
 
@@ -378,10 +378,10 @@ int main(void) {
   for (k = 1; phaselist[k] >= 0; k++) {
     kk = phaselist[k];
     id2phasename(kk, phasename);
-    printf("\n%s\t%8ld\t%8ld", phasename, volume[kk], surface[kk]);
+    printf("\n%s\t%8d\t%8d", phasename, volume[kk], surface[kk]);
     printf("\t%.5f", (double)volume[kk] / (double)totalvol);
     printf("\t%.5f\n", (double)mass[kk] / (double)totalmass);
-    fprintf(statfile, "\n%s\t%8ld\t%8ld", phasename, volume[kk], surface[kk]);
+    fprintf(statfile, "\n%s\t%8d\t%8d", phasename, volume[kk], surface[kk]);
     fprintf(statfile, "\t%.5f", (double)volume[kk] / (double)totalvol);
     fprintf(statfile, "\t%.5f\n", (double)mass[kk] / (double)totalmass);
   }

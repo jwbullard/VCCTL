@@ -45,8 +45,8 @@ int main(void) {
   int ***mic;
   int valin, ovalin, ix, iy, iz, ix1, iy1, iz1, k, syssize, flag;
   int xsyssize, ysyssize, zsyssize;
-  long int voltot, surftot, totalvol;
-  long int volume[3], surface[3], surfpix[3];
+  int voltot, surftot, totalvol;
+  int volume[3], surface[3], surfpix[3];
   float res;
   char filen[MAXSTRING], fileout[MAXSTRING], buff[MAXSTRING];
   char instring[MAXSTRING];
@@ -123,7 +123,7 @@ int main(void) {
    *	Dynamically allocate the memory for mic array
    ***/
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
 
   /* Read in image and accumulate volume totals */
 
@@ -235,16 +235,16 @@ int main(void) {
    ***/
 
   for (k = BINDER; k <= ITZ; k++) {
-    printf("  %d    %8ld     %8ld", k, volume[k], surface[k]);
+    printf("  %d    %8d     %8d", k, volume[k], surface[k]);
     printf("     %.5f", (double)volume[k] / (double)voltot);
     printf("   %.5f\n", (double)surface[k] / (double)surftot);
-    fprintf(statfile, "  %d    %8ld     %8ld", k, volume[k], surface[k]);
+    fprintf(statfile, "  %d    %8d     %8d", k, volume[k], surface[k]);
     fprintf(statfile, "     %.5f", (double)volume[k] / (double)voltot);
     fprintf(statfile, "   %.5f\n", (double)surface[k] / (double)surftot);
   }
 
-  printf("Total  %8ld     %8ld\n", voltot, surftot);
-  fprintf(statfile, "Total  %8ld     %8ld\n", voltot, surftot);
+  printf("Total  %8d     %8d\n", voltot, surftot);
+  fprintf(statfile, "Total  %8d     %8d\n", voltot, surftot);
 
   fclose(statfile);
 

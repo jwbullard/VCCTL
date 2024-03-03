@@ -35,14 +35,14 @@
 
 int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
   static int BURNT;
-  static long int SIZE2D;
+  static int SIZE2D;
   int ***xformMic;
   int i, inew, j, k, x1, y1, z1, igood, jnew, icur, bflag;
   int *nmatx, *nmaty, *nmatz, *nnewx, *nnewy, *nnewz;
   int mult1, mult2, xm, ym, zm;
   int dir, ival, dimensions[3];
   int xl, xh, j1, k1, px, py, pz, qx, qy, qz, xcn, ycn, zcn;
-  long int ntop, nthrough, ncur, nnew, ntot;
+  int ntop, nthrough, ncur, nnew, ntot;
   float alpha_burn = 0.0;
   double mass_burn = 0.0;
 
@@ -68,7 +68,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     }
   }
 
-  SIZE2D = (long int)(5 * dimensions[0] * dimensions[1]);
+  SIZE2D = (5 * dimensions[0] * dimensions[1]);
 
   if (d1 == 1 && d2 == 0 && d3 == 0) {
     dir = 0;
@@ -418,8 +418,8 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     } else {
       printf("Phase ID = %d \n", npix1);
     }
-    printf("Number accessible from first surface = %ld \n", ntop);
-    printf("Number contained in through pathways= %ld \n", nthrough);
+    printf("Number accessible from first surface = %d \n", ntop);
+    printf("Number contained in through pathways= %d \n", nthrough);
     fflush(stdout);
   }
 

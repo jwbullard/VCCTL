@@ -54,7 +54,7 @@ float Res = DEFAULTRESOLUTION;
 /* VCCTL software version used to create input file */
 float Version;
 
-long int Npores = 0, Ntot = 0, Nperc = 0, Nburnt = 0;
+int Npores = 0, Ntot = 0, Nperc = 0, Nburnt = 0;
 float Tot_porosity;
 
 int burn3d(int npix, int d1, int d2, int d3);
@@ -108,7 +108,7 @@ int main(void) {
      *	Allocate memory for Mic array
      ***/
 
-    Mic = sibox((long)Xsyssize, (long)Ysyssize, (long)Zsyssize);
+    Mic = sibox(Xsyssize, Ysyssize, Zsyssize);
     if (!Mic) {
       fclose(infile);
       fclose(micfile);
@@ -201,7 +201,7 @@ int burn3d(int npix, int d1, int d2, int d3) {
   int *nmatx, *nmaty, *nmatz, *nnewx, *nnewy, *nnewz;
   int mult1, mult2, npix1, npix2, npix3;
   int xl, xh, px, py, pz, qx, qy, qz, xcn, ycn, zcn;
-  long int ntop, nthrough, ncur, nnew, nphc;
+  int ntop, nthrough, ncur, nnew, nphc;
 
   npix1 = npix;
   npix2 = npix;
@@ -579,8 +579,8 @@ int burn3d(int npix, int d1, int d2, int d3) {
 
   /*
   printf("Phase ID = %d \n",npix);
-  printf("Number accessible from first surface = %ld \n",ntop);
-  printf("Number contained in through pathways= %ld \n",nthrough);
+  printf("Number accessible from first surface = %d \n",ntop);
+  printf("Number contained in through pathways= %d \n",nthrough);
   fflush(stdout);
   */
 

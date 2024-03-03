@@ -55,7 +55,7 @@
  *	System size is Xsyssize,Ysyssize,Zsyssize
  *	Resolution is Res
  ***/
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize, Ysyssize, Zsyssize;
 int Isizemag = 1;
 float Res = DEFAULTRESOLUTION;
@@ -80,7 +80,7 @@ int *Gypsumorig, *Friedelorig, *Nrafmc, *Afmcorig, *Ccorig;
 int *Straingyp, *Strainbrucite, *Strainettr;
 int *Strainfriedel;
 double *Density, *Nrgel;
-long int *Nrcap;
+int *Nrcap;
 double *Clreacted, *Clchemisorb, Clreactmax;
 float Layer_volume;
 
@@ -90,13 +90,13 @@ float Version;
 /* coordinates of diffusing species in (Xnew,Ynew,Znew) */
 short int *Xnew, *Ynew, *Znew;
 
-long int Nantsurf, Ntotdiff = 0;
+int Nantsurf, Ntotdiff = 0;
 double Molesperpixel[MS + 1], Cfre, Cbound;
 
 /***
  *	Function declarations
  ***/
-void remsurf(long int nrem);
+void remsurf(int nrem);
 void extphase(int phtomake, int xcur, int ycur, int zcur);
 void allmem(void);
 void freeallmem(void);
@@ -107,8 +107,8 @@ int main(void) {
   int ix, iy, iz, seed1, nlen;
   int i, antx, anty, antz, ich, inval, oinval;
   int cxn, cyn, czn, phid, sel1, numadd, initdepth;
-  long int ia, ncyc, icyc, iant, nleft, norg, nadd;
-  long int chinit = 0, afminit = 0, c3ah6init = 0, ettrinit = 0, ettrc4init = 0;
+  int ia, ncyc, icyc, iant, nleft, norg, nadd;
+  int chinit = 0, afminit = 0, c3ah6init = 0, ettrinit = 0, ettrc4init = 0;
   float prand, preact, ptest, alpha, beta, chlorconc;
   double volume_available;
   char filein[MAXSTRING], fileout[MAXSTRING];
@@ -213,8 +213,8 @@ int main(void) {
 
   printf("Enter number of steps (cycles) to execute \n");
   read_string(instring, sizeof(instring));
-  ncyc = (long int)(atoi(instring));
-  printf("Cycles requested: %ld \n", ncyc);
+  ncyc = atoi(instring);
+  printf("Cycles requested: %d \n", ncyc);
 
   /***
    *	Determine system size and resolution
@@ -250,7 +250,7 @@ int main(void) {
 
   chlorconc = (chlorconc / 0.743102) * Res * Res * Res;
 
-  Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+  Syspix = (Xsyssize * Ysyssize * Zsyssize);
   Sizemag = (float)((double)Syspix / pow((double)DEFAULTSYSTEMSIZE, 3.0));
   Isizemag = (int)(Sizemag + 0.5);
 
@@ -400,11 +400,11 @@ int main(void) {
   fclose(micfile);
 
   printf("Initial counts for CH, AFM, C3AH6 and ettringite(2) are ");
-  printf("%ld, %ld, %ld, ", chinit, afminit, c3ah6init);
-  printf("%ld, and %ld.\n", ettrinit, ettrc4init);
+  printf("%d, %d, %d, ", chinit, afminit, c3ah6init);
+  printf("%d, and %d.\n", ettrinit, ettrc4init);
   fflush(stdout);
 
-  printf("Ntotdiff is %ld \n", Ntotdiff);
+  printf("Ntotdiff is %d \n", Ntotdiff);
 
   printf("Cycle Layer Diffusing Bound \n");
 
@@ -420,11 +420,11 @@ int main(void) {
   for (iz = 1; iz <= initdepth; iz++) {
     nleft = (int)Layer_volume;
     volume_available = ((double)(Nrcap[iz])) + Nrgel[iz];
-    numadd = (long int)(chlorconc * volume_available);
+    numadd = (chlorconc * volume_available);
 
     nadd =
         numadd -
-        (long)Ndiff[iz]; /* number ants left to add
+        Ndiff[iz]; /* number ants left to add
                                                                 to this layer */
     while (nadd > 0 && nleft > 0) {
       prand = ran1(Seed);
@@ -475,11 +475,11 @@ int main(void) {
    *	throughout the simulation
    ***/
 
-  Nantsurf = (long int)(chlorconc * Layer_volume);
+  Nantsurf = (chlorconc * Layer_volume);
 
   for (icyc = 1; icyc <= ncyc; icyc++) {
     nleft = 0;
-    nadd = Nantsurf - (long)Ndiff[0];
+    nadd = Nantsurf - Ndiff[0];
     if (nadd > 0) {
 
       /* Add some ants to the top surface at random locations... */
@@ -511,7 +511,7 @@ int main(void) {
     /* ... or remove them, if necessary */
 
     if (nadd < 0) {
-      remsurf((long)Ndiff[0] - Nantsurf);
+      remsurf(Ndiff[0] - Nantsurf);
     }
 
     norg = Ntotdiff;
@@ -835,7 +835,7 @@ int main(void) {
   }
 
   for (i = 0; i < Zsyssize + 2; i++) {
-    fprintf(plotfile, "%ld %d %d %d ", icyc, i, Ndiff[i], Nrettr[i]);
+    fprintf(plotfile, "%d %d %d %d ", icyc, i, Ndiff[i], Nrettr[i]);
     fprintf(plotfile, "%d %d %d ", Nrettrc4af[i], Nrafm[i], Nrc3ah6[i]);
     fprintf(plotfile, "%d %d ", Friedelcount[i], Gypsumcount[i]);
     fprintf(plotfile, "%d %d ", Ettrorig[i], Ettrc4aforig[i]);
@@ -843,7 +843,7 @@ int main(void) {
     fprintf(plotfile, "%d %d ", Friedelorig[i], Gypsumorig[i]);
     fprintf(plotfile, "%d %d ", Straingyp[i], Strainfriedel[i]);
     fprintf(plotfile, "%d %d ", Afmcorig[i], Ccorig[i]);
-    fprintf(plotfile, "%d %ld ", Nrafmc[i], Nrcap[i]);
+    fprintf(plotfile, "%d %d ", Nrafmc[i], Nrcap[i]);
     fprintf(plotfile, "%f %f ", Nrgel[i], Density[i] * MOLEFACTOR);
     fprintf(plotfile, "%f ", Clreacted[i] * MOLEFACTOR);
     fprintf(plotfile, "%f\n", Clchemisorb[i] * MOLEFACTOR);
@@ -886,8 +886,8 @@ int main(void) {
  *	Arguments:	Long integer
  *	Returns:	Void
  ***/
-void remsurf(long int nrem) {
-  long int ngone, nrleft, il, nkeep;
+void remsurf(int nrem) {
+  int ngone, nrleft, il, nkeep;
   char buff[MAXSTRING];
 
   nkeep = Ntotdiff;
@@ -914,8 +914,8 @@ void remsurf(long int nrem) {
     }
   }
 
-  if (Nantsurf < (long)Ndiff[0]) {
-    sprintf(buff, "Nantsurf = %ld Ndiff[0] = %d", Nantsurf, Ndiff[0]);
+  if (Nantsurf < Ndiff[0]) {
+    sprintf(buff, "Nantsurf = %d Ndiff[0] = %d", Nantsurf, Ndiff[0]);
     freeallmem();
     bailout("chlorattack3d", buff);
     exit(1);
@@ -933,7 +933,7 @@ void remsurf(long int nrem) {
  ***/
 void extphase(int phtomake, int xcur, int ycur, int zcur) {
   int xtry, ytry, ztry, xi, yi, found;
-  long int tries = 0;
+  int tries = 0;
 
   /* Try immediate neighborhod on same level */
 
@@ -1142,36 +1142,36 @@ void extphase(int phtomake, int xcur, int ycur, int zcur) {
  *
  ***/
 void allmem(void) {
-  Mic = sibox((long)Xsyssize + 2, (long)Ysyssize + 2, (long)Zsyssize + 2);
-  React = sibox((long)Xsyssize + 2, (long)Ysyssize + 2, (long)Zsyssize + 2);
-  Ndiff = ivector((long)Zsyssize + 2);
-  Nrettr = ivector((long)Zsyssize + 2);
-  Nrettrc4af = ivector((long)Zsyssize + 2);
-  Nrafm = ivector((long)Zsyssize + 2);
-  Nrc3ah6 = ivector((long)Zsyssize + 2);
-  Afmorig = ivector((long)Zsyssize + 2);
-  Ettrorig = ivector((long)Zsyssize + 2);
-  Gypsumorig = ivector((long)Zsyssize + 2);
-  C3ah6orig = ivector((long)Zsyssize + 2);
-  Ettrc4aforig = ivector((long)Zsyssize + 2);
-  Nrafmc = ivector((long)Zsyssize + 2);
-  Afmcorig = ivector((long)Zsyssize + 2);
-  Ccorig = ivector((long)Zsyssize + 2);
-  Nrcap = livector((long)Zsyssize + 2);
-  Nrgel = dvector((long)Zsyssize + 2);
-  Straingyp = ivector((long)Zsyssize + 2);
-  Strainbrucite = ivector((long)Zsyssize + 2);
-  Strainettr = ivector((long)Zsyssize + 2);
-  Gypsumcount = ivector((long)Zsyssize + 2);
-  Friedelcount = ivector((long)Zsyssize + 2);
-  Friedelorig = ivector((long)Zsyssize + 2);
-  Strainfriedel = ivector((long)Zsyssize + 2);
-  Density = dvector((long)Zsyssize + 2);
-  Clreacted = dvector((long)Zsyssize + 2);
-  Clchemisorb = dvector((long)Zsyssize + 2);
-  Xnew = sivector((long)(NUMANTS * Isizemag));
-  Ynew = sivector((long)(NUMANTS * Isizemag));
-  Znew = sivector((long)(NUMANTS * Isizemag));
+  Mic = sibox(Xsyssize + 2, Ysyssize + 2, Zsyssize + 2);
+  React = sibox(Xsyssize + 2, Ysyssize + 2, Zsyssize + 2);
+  Ndiff = ivector(Zsyssize + 2);
+  Nrettr = ivector(Zsyssize + 2);
+  Nrettrc4af = ivector(Zsyssize + 2);
+  Nrafm = ivector(Zsyssize + 2);
+  Nrc3ah6 = ivector(Zsyssize + 2);
+  Afmorig = ivector(Zsyssize + 2);
+  Ettrorig = ivector(Zsyssize + 2);
+  Gypsumorig = ivector(Zsyssize + 2);
+  C3ah6orig = ivector(Zsyssize + 2);
+  Ettrc4aforig = ivector(Zsyssize + 2);
+  Nrafmc = ivector(Zsyssize + 2);
+  Afmcorig = ivector(Zsyssize + 2);
+  Ccorig = ivector(Zsyssize + 2);
+  Nrcap = ivector(Zsyssize + 2);
+  Nrgel = dvector(Zsyssize + 2);
+  Straingyp = ivector(Zsyssize + 2);
+  Strainbrucite = ivector(Zsyssize + 2);
+  Strainettr = ivector(Zsyssize + 2);
+  Gypsumcount = ivector(Zsyssize + 2);
+  Friedelcount = ivector(Zsyssize + 2);
+  Friedelorig = ivector(Zsyssize + 2);
+  Strainfriedel = ivector(Zsyssize + 2);
+  Density = dvector(Zsyssize + 2);
+  Clreacted = dvector(Zsyssize + 2);
+  Clchemisorb = dvector(Zsyssize + 2);
+  Xnew = sivector(NUMANTS * Isizemag);
+  Ynew = sivector(NUMANTS * Isizemag);
+  Znew = sivector(NUMANTS * Isizemag);
   if (!Znew || !Ynew || !Xnew || !Clchemisorb || !Clreacted || !Density ||
       !Strainfriedel || !Friedelcount || !Gypsumcount || !Strainettr ||
       !Strainbrucite || !Straingyp || !Nrgel || !Nrcap || !Ccorig ||
@@ -1233,7 +1233,7 @@ void freeallmem(void) {
   if (Ccorig)
     free_ivector(Ccorig);
   if (Nrcap)
-    free_livector(Nrcap);
+    free_ivector(Nrcap);
   if (Nrgel)
     free_dvector(Nrgel);
   if (Straingyp)

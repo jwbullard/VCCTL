@@ -36,18 +36,18 @@ int main(void) {
   green = NULL;
   blue = NULL;
 
-  red = ivector((long int)NPHASES);
+  red = ivector(NPHASES);
   if (!red) {
     bailout("hydmovie", "Could not allocate memory for red vector");
     return (1);
   }
-  green = ivector((long int)NPHASES);
+  green = ivector(NPHASES);
   if (!green) {
     bailout("hydmovie", "Could not allocate memory for green vector");
     free_ivector(red);
     return (1);
   }
-  blue = ivector((long int)NPHASES);
+  blue = ivector(NPHASES);
   if (!blue) {
     bailout("hydmovie", "Could not allocate memory for blue vector");
     free_ivector(green);
@@ -164,7 +164,7 @@ int main(void) {
   image.width = dxtot;
   image.height = dytot;
 
-  image.pixels = pixelvector((long)(dxtot * dytot));
+  image.pixels = pixelvector(dxtot * dytot);
   if (!image.pixels) {
     bailout("hydmovie", "Could not allocate memory for image pixels");
     free_ivector(blue);
@@ -173,7 +173,7 @@ int main(void) {
     return (1);
   }
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)nframes);
+  mic = ibox(xsyssize, ysyssize, nframes);
   if (!mic) {
     bailout("hydmovie", "Could not allocate memory for mic");
     free_pixelvector(image.pixels);

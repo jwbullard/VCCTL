@@ -21,8 +21,8 @@
 #include "../include/vcctl.h"
 #include <math.h>
 
-long int diam2vol(float diameter) {
-  long int count = 0;
+int diam2vol(float diameter) {
+  int count = 0;
   int i, j, k;
   int idiam, irad;
   float dist, ftmp, offset;

@@ -74,7 +74,7 @@ int main(void) {
    *	Allocate memory for mic array
    ***/
 
-  mic = sibox((long)Xsyssize, (long)Ysyssize, (long)Zsyssize);
+  mic = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!mic) {
     bailout("measagg", "Could not allocate memory for mic array");
     exit(1);

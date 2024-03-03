@@ -37,7 +37,7 @@
 int burnset(int d1, int d2, int d3) {
   int ***newmat, ***xformMic, ***xformMicpart;
   int *nnewx, *nnewy, *nnewz, *nmatx, *nmaty, *nmatz;
-  long int ntop, nthrough, icur, inew, ncur, nnew, ntot, count_solid, SIZESET;
+  int ntop, nthrough, icur, inew, ncur, nnew, ntot, count_solid, SIZESET;
   int i, j, k, setyet, dir, ival, dimensions[3];
   int xl, xh, j1, k1, px, py, pz, qx, qy, qz, xm, ym, zm;
   int xcn, ycn, zcn, x1, y1, z1, igood, jnew;
@@ -61,7 +61,7 @@ int burnset(int d1, int d2, int d3) {
     }
   }
 
-  SIZESET = (long int)(5 * dimensions[0] * dimensions[1]);
+  SIZESET = (5 * dimensions[0] * dimensions[1]);
 
   if (d1 == 1 && d2 == 0 && d3 == 0) {
     dir = 0;
@@ -441,9 +441,9 @@ int burnset(int d1, int d2, int d3) {
 
                   if (nnew >= SIZESET) {
                     printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %ld ", nnew);
+                    printf("\n\tSize of nnew %d ", nnew);
                     printf("must be less than ");
-                    printf("%ld\n", SIZESET);
+                    printf("%d\n", SIZESET);
                     fflush(stdout);
                   }
 
@@ -484,9 +484,9 @@ int burnset(int d1, int d2, int d3) {
 
                   if (nnew >= SIZESET) {
                     printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %ld ", nnew);
+                    printf("\n\tSize of nnew %d ", nnew);
                     printf("must be less than ");
-                    printf("%ld\n", SIZESET);
+                    printf("%d\n", SIZESET);
                     fflush(stdout);
                   }
 
@@ -540,9 +540,9 @@ int burnset(int d1, int d2, int d3) {
 
                   if (nnew >= SIZESET) {
                     printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %ld ", nnew);
+                    printf("\n\tSize of nnew %d ", nnew);
                     printf("must be less than ");
-                    printf("%ld\n", SIZESET);
+                    printf("%d\n", SIZESET);
                     fflush(stdout);
                   }
 
@@ -612,8 +612,8 @@ int burnset(int d1, int d2, int d3) {
 
   if (Verbose) {
     printf("Phase ID= Solid Phases \n");
-    printf("Number accessible from first surface = %ld \n", ntop);
-    printf("Number contained in through pathways= %ld \n", nthrough);
+    printf("Number accessible from first surface = %d \n", ntop);
+    printf("Number contained in through pathways= %d \n", nthrough);
     fflush(stdout);
   }
 
@@ -633,7 +633,7 @@ int burnset(int d1, int d2, int d3) {
   count_solid += Count[AMSIL] + Count[ASG] + Count[SLAG] + Count[CAS2];
 
   if (Verbose)
-    printf("Count solids = %ld\n", count_solid);
+    printf("Count solids = %d\n", count_solid);
   if (count_solid > 0) {
     Con_fracs[dir] = (float)nthrough / (float)count_solid;
     if (Verbose)

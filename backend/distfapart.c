@@ -42,9 +42,9 @@ int main(void) {
   int jx, jy, jz;
   int ix, iy, iz, valin, ovalin, valout, partin;
   int nseed, count, c1, phnew, mult;
-  long int totcnt, ascnt, cacl2cnt, amsilcnt, inertcnt;
-  long int anhcnt, cas2cnt, c3acnt;
-  long int markc3a, markas, markcacl2, markamsil, markinert, markanh, markcas2;
+  int totcnt, ascnt, cacl2cnt, amsilcnt, inertcnt;
+  int anhcnt, cas2cnt, c3acnt;
+  int markc3a, markas, markcacl2, markamsil, markinert, markanh, markcas2;
   float probasg, probcacl2, probsio2;
   float probc3a, prph, probcas2, probanh;
   float jver, jres;
@@ -96,8 +96,8 @@ int main(void) {
 
   printf("Enter total number of fly ash pixels \n");
   read_string(instring, sizeof(instring));
-  totcnt = (long int)(atoi(instring));
-  printf("%ld\n", totcnt);
+  totcnt = atoi(instring);
+  printf("%d\n", totcnt);
 
   /* Get user input for phase probabilities (volume fractions) */
 
@@ -128,15 +128,15 @@ int main(void) {
 
   /* Determine goal counts for each phase */
 
-  markas = (long)(probasg * (float)totcnt);
-  markamsil = (long)(probsio2 * (float)totcnt);
-  markcacl2 = (long)(probcacl2 * (float)totcnt);
-  markanh = (long)(probanh * (float)totcnt);
-  markcas2 = (long)(probcas2 * (float)totcnt);
-  markc3a = (long)(probc3a * (float)totcnt);
-  markinert = (long)((1.0 - probasg - probsio2 - probcacl2 - probanh -
-                      probcas2 - probc3a) *
-                     (float)totcnt);
+  markas = probasg * (float)totcnt;
+  markamsil = probsio2 * (float)totcnt;
+  markcacl2 = probcacl2 * (float)totcnt;
+  markanh = probanh * (float)totcnt;
+  markcas2 = probcas2 * (float)totcnt;
+  markc3a = probc3a * (float)totcnt;
+  markinert =
+      (1.0 - probasg - probsio2 - probcacl2 - probanh - probcas2 - probc3a) *
+      (float)totcnt;
 
   /***
    *	Convert probabilities to cumulative

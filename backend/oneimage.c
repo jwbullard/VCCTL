@@ -34,18 +34,18 @@ int main(void) {
   green = NULL;
   blue = NULL;
 
-  red = ivector((long int)NPHASES);
+  red = ivector(NPHASES);
   if (!red) {
     bailout("image100", "Could not allocate memory for red vector");
     exit(1);
   }
-  green = ivector((long int)NPHASES);
+  green = ivector(NPHASES);
   if (!green) {
     bailout("image100", "Could not allocate memory for red vector");
     free_ivector(red);
     exit(1);
   }
-  blue = ivector((long int)NPHASES);
+  blue = ivector(NPHASES);
   if (!blue) {
     bailout("image100", "Could not allocate memory for red vector");
     free_ivector(green);
@@ -161,7 +161,7 @@ int main(void) {
    *    Allocate memory for image pixels
    ***/
 
-  image.pixels = pixelvector((long)(dxtot * dytot));
+  image.pixels = pixelvector(dxtot * dytot);
   if (!image.pixels) {
     bailout("oneimage", "Could not allocate memory for image pixels");
     free_ivector(blue);
@@ -177,7 +177,7 @@ int main(void) {
    *    Allocate memory for dshade array if viewing depth is enabled
    ***/
 
-  dshade = drect((long)(dx * iscale), (long)(dy * iscale));
+  dshade = drect(dx * iscale, dy * iscale);
   if (!dshade) {
     fclose(infile);
     bailout("oneimage", "Could not allocate memory for image array");
@@ -195,12 +195,12 @@ int main(void) {
    *    Allocate memory for microstructure image
    ***/
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
   if (!mic) {
     fclose(infile);
     bailout("oneimage", "Could not allocate memory for mic");
     if (dshade)
-      free_drect(dshade, (long int)(dx * iscale));
+      free_drect(dshade, dx * iscale);
     free_pixelvector(image.pixels);
     free_ivector(blue);
     free_ivector(green);
@@ -370,7 +370,7 @@ int main(void) {
 
   free_ibox(mic, xsyssize, ysyssize);
   free_pixelvector(image.pixels);
-  free_drect(dshade, (long int)(dx * iscale));
+  free_drect(dshade, dx * iscale);
   free_ivector(blue);
   free_ivector(green);
   free_ivector(red);

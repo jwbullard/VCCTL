@@ -52,9 +52,7 @@
  * resolution
  *******************************************************/
 
-#define MAXSIZE                                                                \
-  400 /* maximum system size in                                                \
-                              pixels per dimension */
+#define MAXSIZE 400 /* maximum system size in pixels per dimension */
 #define DEFAULTSYSTEMSIZE 100
 
 #define LOWRES 1.00

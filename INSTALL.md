@@ -13,10 +13,12 @@ some modifications to work on a given platform.
 
 ## INSTALLING
 
-* `cd backend/zlib-1.3.1/build`
+* `cd backend/zlib-1.3.1`
+* `mkdir build; cd build`
 * `cmake -DCMAKE_INSTALL_PREFIX="../../.." ..`
 * `make install`
-* `cd ../../libpng/build`
+* `cd ../../libpng`
+* `mkdir build; cd build`
 * `cmake -DCMAKE_INSTALL_PREFIX="../../.." -DZLIB-ROOT="../../.." ..`
 * `make install`
 * `cd ../../../build_backend`

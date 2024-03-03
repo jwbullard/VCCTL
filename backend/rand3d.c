@@ -65,7 +65,7 @@
  ***/
 int *Seed;
 int Fsize = FILTERSIZE;
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
@@ -165,7 +165,7 @@ int main(void) {
    *	Also define the number of histogram bins
    ***/
 
-  Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+  Syspix = Xsyssize * Ysyssize * Zsyssize;
   Sizemag =
       pow(((float)Syspix) / (pow(((float)DEFAULTSYSTEMSIZE), 3.0)), (1. / 3.));
   Isizemag = (int)(Sizemag + 0.5);
@@ -176,15 +176,14 @@ int main(void) {
    *	Allocate memory for all global variables
    ***/
 
-  R = ivector((long)(2 * Fsize));
-  S = fvector((long)(2 * Fsize));
-  Xr = fvector((long)(2 * Fsize));
-  Filter = fcube((long)(Fsize + 1));
-  Mask = ibox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
-  Sum = fvector((long)(Hsize + 2));
-  Normm =
-      fbox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
-  Rres = fbox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
+  R = ivector(2 * Fsize);
+  S = fvector(2 * Fsize);
+  Xr = fvector(2 * Fsize);
+  Filter = fcube(Fsize + 1);
+  Mask = ibox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
+  Sum = fvector(Hsize + 2);
+  Normm = fbox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
+  Rres = fbox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
 
   if (!R || !S || !Xr || !Filter || !Mask || !Sum || !Normm || !Rres) {
 
@@ -289,7 +288,7 @@ int runrand3d(int phasein, int phaseout, char filecorr[MAXSTRING], float xpt,
   int done, step, ilo, ihi;
   int valin, pvalin, r1, r2, i1, i2, i3, j1, k1;
   int ido, iii, jjj, index;
-  long int xtot;
+  int xtot;
   float s2, ss, sdiff, xtmp, ytmp, slope, intercept, diff;
   float val2, t1, t2, x1, x2, u1, u2, xrad, resmax, resmin;
   float filval, radius, sect, sumtot, corr_res;

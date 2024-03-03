@@ -117,7 +117,7 @@ double strxxt, stryyt, strzzt, strxzt, stryzt, strxyt;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
-long int Syspix;
+int Syspix;
 float Res = DEFAULTRESOLUTION;
 /* VCCTL software version used to create input file */
 float Version;
@@ -195,7 +195,7 @@ void freeallmem(void) {
 void ppixel(int nphase, int *doitz, int *nagg1) {
   int nxy, nx, ny, nz, i, j, k, inval, oinval;
   int foundagg;
-  long int m, m1, m2, count;
+  int m, m1, m2, count;
   FILE *infile, *pinfile;
   char filein[MAXSTRING], pfilein[MAXSTRING], buff[MAXSTRING],
       instring[MAXSTRING];
@@ -264,7 +264,7 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
 
   Syspix = Xsyssize * Ysyssize * Zsyssize;
 
-  printf("\nSyspix = %ld", Syspix);
+  printf("\nSyspix = %d", Syspix);
   fflush(stdout);
 
   nx = Xsyssize;
@@ -377,7 +377,7 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   }
 
   fclose(infile);
-  printf(" done.  Count of C3S = %ld\n", count);
+  printf(" done.  Count of C3S = %d\n", count);
   fflush(stdout);
 
   count = 0;
@@ -386,7 +386,7 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
       count++;
   }
 
-  printf("Now using pix, Count of C3S = %ld\n", count);
+  printf("Now using pix, Count of C3S = %d\n", count);
   fflush(stdout);
 
   if (!foundagg)
@@ -417,7 +417,7 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
     if (pix[m] == C3S)
       count++;
   }
-  printf("After breakflocs, Count of C3S = %ld\n", count);
+  printf("After breakflocs, Count of C3S = %d\n", count);
   fflush(stdout);
 
   fpout = fopen("newcem.img", "w");
@@ -434,11 +434,9 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
 
 /*  Subroutine assig that counts volume fractions */
 
-void assig(ns, nphase) long int ns;
-int nphase;
-{
+void assig(int ns, int nphase) {
   int i;
-  long int m, count;
+  int m, count;
 
   /* Zero out the phase volume fractions */
   for (i = 0; i < nphase; i++) {
@@ -453,8 +451,8 @@ int nphase;
       count++;
   }
 
-  printf("\nNumber of %d pixels found is %f or %ld", C3S, prob[C3S], count);
-  printf("\nns = %ld, so vfrac[%d] = %f", ns, C3S, (prob[C3S] / ((double)ns)));
+  printf("\nNumber of %d pixels found is %f or %d", C3S, prob[C3S], count);
+  printf("\nns = %d, so vfrac[%d] = %f", ns, C3S, (prob[C3S] / ((double)ns)));
   fflush(stdout);
   /* Convert from phase count to volume fraction */
   for (i = 0; i < nphase; i++) {
@@ -468,10 +466,7 @@ int nphase;
  */
 /*  due to the periodic boundary conditions */
 
-void femat(nx, ny, nz, ns, nphase) int nx, ny, nz;
-long int ns;
-int nphase;
-{
+void femat(int nx, int ny, int nz, int ns, int nphase) {
 
   double dndx[8], dndy[8], dndz[8], cmu[6][6], ck[6][6], g[3][3][3];
   double es[6][8][3], delta[8][3], cumtot = 0.0;
@@ -479,7 +474,7 @@ int nphase;
   float x, y, z;
   int is[8], m, l, k, j, i, ijk, n1, n2, n3, n, mm, nn, ii, jj, ll, kk, i3, i8,
       m8, m4, nxy;
-  long int m3;
+  int m3;
 
   nxy = nx * ny;
 
@@ -959,11 +954,8 @@ int nphase;
 
 /*  Subroutine computes the total energy, utot, and the gradient, gb */
 
-double energy(nx, ny, nz, ns)
-int nx, ny, nz;
-long int ns;
-{
-  long int m;
+double energy(int nx, int ny, int nz, int ns) {
+  int m;
   int m3, j, n;
   double utot = 0.0;
 
@@ -1056,13 +1048,12 @@ long int ns;
 /*  Subroutine that computes the six average stresses and six  */
 /*  average strains. */
 
-void stress(int nx, int ny, int nz, long int ns, int doitz, int micro,
-            int ilast) {
+void stress(int nx, int ny, int nz, int ns, int doitz, int micro, int ilast) {
 
   double uu[8][3];
   double dndx[8], dndy[8], dndz[8], es[6][8][3];
   int nxy, nyz, n1, n2, n3, k, j, i, mm, n8, n;
-  long int m;
+  int m;
   double str11, str12, str13, str22, str23, str33;
   double s11, s12, s13, s22, s23, s33;
 
@@ -1402,15 +1393,11 @@ void stress(int nx, int ny, int nz, long int ns, int doitz, int micro,
   }
 }
 
-long int dembx(ns, ldemb, kkk)
-long int ns;
-int ldemb, kkk;
-
-{
+int dembx(int ns, int ldemb, int kkk) {
   double lambda, gamma, hAh, gglast, Ahtemp;
-  long int Lstep;
+  int Lstep;
   int m3, ijk, j, n;
-  long int m;
+  int m;
 
   /*
   printf("In dembx now, ldemb = %d gg = %lf gtest = %lf...\n",ldemb,gg,gtest);
@@ -1764,7 +1751,7 @@ int main(void) {
   int m3, i, j, k, n, nx, ny, nz, nphase, ijk, nxy, i1, j1, k1, npoints, kmax,
       ldemb;
   int kkk, micro, doitz, nagg1, oval;
-  long int m, ns, m1, ltot = 0, Lstep, count;
+  int m, ns, m1, ltot = 0, Lstep, count;
   double utot, x, y, z;
   double bulk, shear, young, pois, save;
   float kk, xj, sum = 0.0;
@@ -2157,7 +2144,7 @@ int main(void) {
   /*  per pixel of gb is less than sqrt(abc).  */
   gtest = (1.e-7) * (double)ns;
 
-  printf("%d %d %d %ld\n", nx, ny, nz, ns);
+  printf("%d %d %d %d\n", nx, ny, nz, ns);
   fflush(stdout);
 
   /*  Construct the neighbor table, ib(m,n) */
@@ -2246,7 +2233,7 @@ int main(void) {
     if (pix[i] == C3S)
       count++;
   }
-  printf("\nBefore assig, Count C3S = %ld", count);
+  printf("\nBefore assig, Count C3S = %d", count);
   fflush(stdout);
 
   assig(ns, nphase);
@@ -2424,7 +2411,7 @@ if (doitz) {
       /*  relaxation process is coming along. */
       utot = energy(nx, ny, nz, ns);
       printf("Energy = %lf gg= %lf gtest = %lf\n", utot, gg, gtest);
-      printf("Number of conjugate steps = %ld\n", ltot);
+      printf("Number of conjugate steps = %d\n", ltot);
       fflush(stdout);
       /*  If relaxation process is not finished, continue */
       if (gg > gtest) {

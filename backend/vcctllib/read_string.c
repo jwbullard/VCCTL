@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <string.h>
 
-void read_string(char *chstr, long unsigned int size) {
-  long unsigned int i = 0;
+void read_string(char *chstr, unsigned int size) {
+  unsigned int i = 0;
   if (fgets(chstr, size, stdin)) {
     char *newline = strchr(chstr, '\n'); /* check for trailing newline */
     if (newline) {

@@ -85,7 +85,7 @@ double fac(int j);
 
 int main(void) {
   int i, j, ii, jj, number, num, resval;
-  long n, m;
+  int n, m;
   float aa1, aa2;
   double a1, a2, xx, yy, zz, zmax, theta, phi;
   fcomplex rad;
@@ -137,7 +137,7 @@ int main(void) {
 
   /*	Allocate memory for the complex a and Y arrays */
 
-  Y = complexmatrix((long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+  Y = complexmatrix(0, Nnn, -Nnn, Nnn);
   if (Y != NULL) {
     printf("Success with Y\n");
     fflush(stdout);
@@ -147,7 +147,7 @@ int main(void) {
     exit(1);
   }
 
-  a = complexmatrix((long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+  a = complexmatrix(0, Nnn, -Nnn, Nnn);
 
   if (a != NULL) {
     printf("Success with a\n");
@@ -155,14 +155,14 @@ int main(void) {
   } else {
     printf("Failure with a\n");
     fflush(stdout);
-    free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
     exit(1);
   }
 
   infile = filehandler("aggvrml", shcname, "READ");
   if (!infile) {
-    free_complexmatrix(a, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-    free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    free_complexmatrix(a, 0, Nnn, -Nnn, Nnn);
+    free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
     exit(1);
   }
 
@@ -186,8 +186,8 @@ int main(void) {
 
   vrmlfile = filehandler("aggvrml", vrmlname, "WRITE");
   if (!vrmlfile) {
-    free_complexmatrix(a, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-    free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    free_complexmatrix(a, 0, Nnn, -Nnn, Nnn);
+    free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
     exit(1);
   }
 
@@ -312,8 +312,8 @@ int main(void) {
   fprintf(vrmlfile, "}\n");
 
   fclose(vrmlfile);
-  free_complexmatrix(a, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-  free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+  free_complexmatrix(a, 0, Nnn, -Nnn, Nnn);
+  free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
 
   return (0);
 }

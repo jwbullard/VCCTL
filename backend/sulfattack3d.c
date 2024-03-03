@@ -53,7 +53,7 @@
  * 	Xsyssize,Ysyssize,Zsyssize is the system size
  * 	Res is the system resolution
  ***/
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
@@ -73,12 +73,12 @@ float Version;
 
 int *Seed;
 short int ***Mic, ***React;
-long int *Ndiff, *Nrch, *Nrafm, *Nrc3ah6;
-long int *Afmorig, *Noch, *Ettrorig, *Bruciteorig;
-long int *Gypsumorig, *C3ah6orig, *Ettrc4aforig;
-long int *Chorig, *Nrafmc, *Afmcorig, *Ccorig;
+int *Ndiff, *Nrch, *Nrafm, *Nrc3ah6;
+int *Afmorig, *Noch, *Ettrorig, *Bruciteorig;
+int *Gypsumorig, *C3ah6orig, *Ettrc4aforig;
+int *Chorig, *Nrafmc, *Afmcorig, *Ccorig;
 double *Nrgel;
-long int *Nrcap;
+int *Nrcap;
 float *Strainbrucite, *Strainettr, *Strainafm, *Straingyp;
 float Layer_volume;
 
@@ -87,14 +87,14 @@ float Layer_volume;
  ***/
 
 short int *Xnew, *Ynew, *Znew;
-long int Nantsurf, Ntotdiff = 0;
+int Nantsurf, Ntotdiff = 0;
 double Molesperpixel[MS + 1];
 
 /***
  *	Function declarations
  ***/
 
-void remsurf(long int nrem);
+void remsurf(int nrem);
 void extphase(int phtomake, int xcur, int ycur, int zcur);
 int distchreac(int ztodo);
 void removech(int xcur, int ycur, int zcur);
@@ -107,8 +107,8 @@ int main(void) {
   int ix, iy, iz, seed1, nlen;
   int i, antx, anty, antz, ich, inval, oinval;
   int cxn, cyn, czn, phid, initdepth, outfreq;
-  long int ia, ncyc, icyc, iant, nleft, norg, nadd, numadd;
-  long int chinit = 0, afminit = 0, c3ah6init = 0, ettrinit = 0, ettrc4init = 0;
+  int ia, ncyc, icyc, iant, nleft, norg, nadd, numadd;
+  int chinit = 0, afminit = 0, c3ah6init = 0, ettrinit = 0, ettrc4init = 0;
   float prand, preact, ptest, sulfconc = 0.0;
   double volume_available;
   char filein[MAXSTRING], fileout[MAXSTRING], buff[MAXSTRING];
@@ -191,7 +191,7 @@ int main(void) {
   printf("Enter number of cycles to execute \n");
   read_string(instring, sizeof(instring));
   ncyc = atoi(instring);
-  printf("Number of cycles: %ld\n", ncyc);
+  printf("Number of cycles: %d\n", ncyc);
   printf("Output full microstructure once every? (cycles) \n");
   read_string(instring, sizeof(instring));
   outfreq = atoi(instring);
@@ -224,7 +224,7 @@ int main(void) {
 
   sulfconc = (sulfconc / 0.334892) * Res * Res * Res;
 
-  Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+  Syspix = Xsyssize * Ysyssize * Zsyssize;
   Sizemag = ((float)Syspix) / (pow(((double)DEFAULTSYSTEMSIZE), 3.0));
   Isizemag = (int)(Sizemag + 0.5);
 
@@ -369,12 +369,12 @@ int main(void) {
   }
 
   fclose(micfile);
-  printf("Initial counts for CH, AFM, C3AH6 and ettringite(2) are %ld, %ld, "
-         "%ld, %ld, and %ld.\n",
+  printf("Initial counts for CH, AFM, C3AH6 and ettringite(2) are %d, %d, "
+         "%d, %d, and %d.\n",
          chinit, afminit, c3ah6init, ettrinit, ettrc4init);
   fflush(stdout);
 
-  printf("Ntotdiff is %ld \n", Ntotdiff);
+  printf("Ntotdiff is %d \n", Ntotdiff);
   printf("Cycle Layer Diffusing Bound \n");
   Ntotdiff = 0;
 
@@ -388,11 +388,11 @@ int main(void) {
   for (iz = 1; iz <= initdepth; iz++) {
     nleft = (int)Layer_volume;
     volume_available = ((double)Nrcap[iz] + Nrgel[iz]);
-    numadd = (long int)(sulfconc * volume_available);
+    numadd = sulfconc * volume_available;
 
     nadd =
         numadd -
-        (long)Ndiff[iz]; /* number ants left to add
+        Ndiff[iz]; /* number ants left to add
                                                                 to this layer */
     while (nadd > 0 && nleft > 0) {
       prand = ran1(Seed);
@@ -442,11 +442,11 @@ int main(void) {
    *	throughout the simulation
    ***/
 
-  Nantsurf = (long int)(sulfconc * Layer_volume);
+  Nantsurf = sulfconc * Layer_volume;
 
   for (icyc = 1; icyc <= ncyc; icyc++) {
     nleft = 0;
-    nadd = Nantsurf - (long)Ndiff[0]; /* number ants left to add */
+    nadd = Nantsurf - Ndiff[0]; /* number ants left to add */
     if (nadd > 0) {
       for (ia = 0; ia < nadd; ia++) {
         prand = ran1(Seed);
@@ -470,7 +470,7 @@ int main(void) {
     /* Or remove them, if necessary */
 
     if (nadd < 0) {
-      remsurf((long)Ndiff[0] - Nantsurf);
+      remsurf(Ndiff[0] - Nantsurf);
     }
 
     norg = Ntotdiff;
@@ -712,7 +712,7 @@ int main(void) {
     if (icyc > 0 && (icyc % outfreq == 0)) {
 
       strcpy(buff, fileout);
-      sprintf(strsuff, ".%ld-%ld", icyc, ncyc);
+      sprintf(strsuff, ".%d-%d", icyc, ncyc);
       strcat(buff, strsuff);
       newmic = filehandler("sulfattack3d", buff, "WRITE");
       if (!newmic) {
@@ -761,15 +761,15 @@ int main(void) {
   }
 
   for (i = 0; i < Zsyssize + 2; i++) {
-    fprintf(plotfile, "%ld %d %ld %ld ", icyc, i, Ndiff[i], Nrch[i]);
-    fprintf(plotfile, "%ld %ld %ld ", Nrafm[i], Nrc3ah6[i], Nrcap[i]);
+    fprintf(plotfile, "%d %d %d %d ", icyc, i, Ndiff[i], Nrch[i]);
+    fprintf(plotfile, "%d %d %d ", Nrafm[i], Nrc3ah6[i], Nrcap[i]);
     fprintf(plotfile, "%f %f ", Nrgel[i], Straingyp[i]);
     fprintf(plotfile, "%f %f ", Strainbrucite[i], Strainettr[i]);
-    fprintf(plotfile, "%f %ld %ld ", Strainafm[i], Chorig[i], Ettrorig[i]);
-    fprintf(plotfile, "%ld %ld ", Ettrc4aforig[i], Afmorig[i]);
-    fprintf(plotfile, "%ld %ld ", Gypsumorig[i], Bruciteorig[i]);
-    fprintf(plotfile, "%ld %ld %ld ", C3ah6orig[i], Noch[i], Afmcorig[i]);
-    fprintf(plotfile, "%ld %ld\n", Ccorig[i], Nrafmc[i]);
+    fprintf(plotfile, "%f %d %d ", Strainafm[i], Chorig[i], Ettrorig[i]);
+    fprintf(plotfile, "%d %d ", Ettrc4aforig[i], Afmorig[i]);
+    fprintf(plotfile, "%d %d ", Gypsumorig[i], Bruciteorig[i]);
+    fprintf(plotfile, "%d %d %d ", C3ah6orig[i], Noch[i], Afmcorig[i]);
+    fprintf(plotfile, "%d %d\n", Ccorig[i], Nrafmc[i]);
   }
   fclose(plotfile);
 
@@ -811,11 +811,11 @@ int main(void) {
  *	Routine to remove diffusing ants from top layer to
  *	maintain proper concentration
  *
- *	Arguments:	Long integer
+ *	Arguments:	int nrem
  *	Returns:	Void
  ***/
-void remsurf(long int nrem) {
-  long int ngone, nrleft, il, nkeep;
+void remsurf(int nrem) {
+  int ngone, nrleft, il, nkeep;
   char buff[MAXSTRING];
 
   nkeep = Ntotdiff;
@@ -842,8 +842,8 @@ void remsurf(long int nrem) {
     }
   }
 
-  if (Nantsurf < (long)Ndiff[0]) {
-    sprintf(buff, "Nantsurf = %ld Ndiff[0] = %ld", Nantsurf, Ndiff[0]);
+  if (Nantsurf < Ndiff[0]) {
+    sprintf(buff, "Nantsurf = %d Ndiff[0] = %d", Nantsurf, Ndiff[0]);
     freeallmem();
     bailout("sulfattack3d", buff);
     exit(1);
@@ -861,7 +861,7 @@ void remsurf(long int nrem) {
  ***/
 void extphase(int phtomake, int xcur, int ycur, int zcur) {
   int xtry, ytry, ztry, xi, yi, found;
-  long int tries = 0;
+  int tries = 0;
 
   /* Try immediate neighborhod on same level */
 
@@ -1137,7 +1137,7 @@ int distchreac(int ztodo) {
  ***/
 void removech(int xcur, int ycur, int zcur) {
   int xtry, ytry, ztry, xi, yi, found, remflag;
-  long int tries = 0;
+  int tries = 0;
 
   /* Try immediate neighborhod on same level */
 
@@ -1316,33 +1316,32 @@ void removech(int xcur, int ycur, int zcur) {
  *
  ***/
 void allmem(void) {
-  Mic = sibox((long)(Xsyssize + 2), (long)(Ysyssize + 2), (long)(Zsyssize + 2));
-  React =
-      sibox((long)(Xsyssize + 2), (long)(Ysyssize + 2), (long)(Zsyssize + 2));
-  Ndiff = livector((long)(Zsyssize + 2));
-  Nrch = livector((long)(Zsyssize + 2));
-  Nrafm = livector((long)(Zsyssize + 2));
-  Nrc3ah6 = livector((long)(Zsyssize + 2));
-  Afmorig = livector((long)(Zsyssize + 2));
-  Noch = livector((long)(Zsyssize + 2));
-  Ettrorig = livector((long)(Zsyssize + 2));
-  Bruciteorig = livector((long)(Zsyssize + 2));
-  Gypsumorig = livector((long)(Zsyssize + 2));
-  C3ah6orig = livector((long)(Zsyssize + 2));
-  Ettrc4aforig = livector((long)(Zsyssize + 2));
-  Chorig = livector((long)(Zsyssize + 2));
-  Nrafmc = livector((long)(Zsyssize + 2));
-  Afmcorig = livector((long)(Zsyssize + 2));
-  Ccorig = livector((long)(Zsyssize + 2));
-  Nrcap = livector((long)(Zsyssize + 2));
-  Nrgel = dvector((long)(Zsyssize + 2));
-  Straingyp = fvector((long)(Zsyssize + 2));
-  Strainbrucite = fvector((long)(Zsyssize + 2));
-  Strainettr = fvector((long)(Zsyssize + 2));
-  Strainafm = fvector((long)(Zsyssize + 2));
-  Xnew = sivector((long)(NUMANTS * Isizemag));
-  Ynew = sivector((long)(NUMANTS * Isizemag));
-  Znew = sivector((long)(NUMANTS * Isizemag));
+  Mic = sibox(Xsyssize + 2, Ysyssize + 2, Zsyssize + 2);
+  React = sibox(Xsyssize + 2, Ysyssize + 2, Zsyssize + 2);
+  Ndiff = ivector(Zsyssize + 2);
+  Nrch = ivector(Zsyssize + 2);
+  Nrafm = ivector(Zsyssize + 2);
+  Nrc3ah6 = ivector(Zsyssize + 2);
+  Afmorig = ivector(Zsyssize + 2);
+  Noch = ivector(Zsyssize + 2);
+  Ettrorig = ivector(Zsyssize + 2);
+  Bruciteorig = ivector(Zsyssize + 2);
+  Gypsumorig = ivector(Zsyssize + 2);
+  C3ah6orig = ivector(Zsyssize + 2);
+  Ettrc4aforig = ivector(Zsyssize + 2);
+  Chorig = ivector(Zsyssize + 2);
+  Nrafmc = ivector(Zsyssize + 2);
+  Afmcorig = ivector(Zsyssize + 2);
+  Ccorig = ivector(Zsyssize + 2);
+  Nrcap = ivector(Zsyssize + 2);
+  Nrgel = dvector(Zsyssize + 2);
+  Straingyp = fvector(Zsyssize + 2);
+  Strainbrucite = fvector(Zsyssize + 2);
+  Strainettr = fvector(Zsyssize + 2);
+  Strainafm = fvector(Zsyssize + 2);
+  Xnew = sivector(NUMANTS * Isizemag);
+  Ynew = sivector(NUMANTS * Isizemag);
+  Znew = sivector(NUMANTS * Isizemag);
 
   if (!Mic || !React || !Ndiff || !Nrch || !Nrafm || !Nrc3ah6 || !Afmorig ||
       !Noch || !Ettrorig || !Bruciteorig || !Gypsumorig || !C3ah6orig ||
@@ -1381,37 +1380,37 @@ void freeallmem(void) {
   if (React)
     free_sibox(React, Xsyssize + 2, Ysyssize + 2);
   if (Ndiff)
-    free_livector(Ndiff);
+    free_ivector(Ndiff);
   if (Nrch)
-    free_livector(Nrch);
+    free_ivector(Nrch);
   if (Nrafm)
-    free_livector(Nrafm);
+    free_ivector(Nrafm);
   if (Nrc3ah6)
-    free_livector(Nrc3ah6);
+    free_ivector(Nrc3ah6);
   if (Afmorig)
-    free_livector(Afmorig);
+    free_ivector(Afmorig);
   if (Noch)
-    free_livector(Noch);
+    free_ivector(Noch);
   if (Ettrorig)
-    free_livector(Ettrorig);
+    free_ivector(Ettrorig);
   if (Bruciteorig)
-    free_livector(Bruciteorig);
+    free_ivector(Bruciteorig);
   if (Gypsumorig)
-    free_livector(Gypsumorig);
+    free_ivector(Gypsumorig);
   if (C3ah6orig)
-    free_livector(C3ah6orig);
+    free_ivector(C3ah6orig);
   if (Ettrc4aforig)
-    free_livector(Ettrc4aforig);
+    free_ivector(Ettrc4aforig);
   if (Chorig)
-    free_livector(Chorig);
+    free_ivector(Chorig);
   if (Nrafmc)
-    free_livector(Nrafmc);
+    free_ivector(Nrafmc);
   if (Afmcorig)
-    free_livector(Afmcorig);
+    free_ivector(Afmcorig);
   if (Ccorig)
-    free_livector(Ccorig);
+    free_ivector(Ccorig);
   if (Nrcap)
-    free_livector(Nrcap);
+    free_ivector(Nrcap);
   if (Nrgel)
     free_dvector(Nrgel);
   if (Straingyp)

@@ -100,7 +100,7 @@ int main(void) {
    *	called Mic
    ***/
 
-  Mic = ibox((long)Xsyssize, (long)Ysyssize, (long)Zsyssize);
+  Mic = ibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Mic) {
     fclose(infile);
     bailout("leach3d", "Could not allocate memory for Mic array");

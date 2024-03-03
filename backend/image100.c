@@ -37,18 +37,18 @@ int main(void) {
   blue = NULL;
   ndeep = NULL;
 
-  red = ivector((long int)NPHASES);
+  red = ivector(NPHASES);
   if (!red) {
     bailout("image100", "Could not allocate memory for red vector");
     return (1);
   }
-  green = ivector((long int)NPHASES);
+  green = ivector(NPHASES);
   if (!green) {
     bailout("image100", "Could not allocate memory for green vector");
     free_ivector(red);
     return (1);
   }
-  blue = ivector((long int)NPHASES);
+  blue = ivector(NPHASES);
   if (!blue) {
     bailout("image100", "Could not allocate memory for blue vector");
     free_ivector(green);
@@ -137,7 +137,7 @@ int main(void) {
    *	Assume a rectangular image
    ****/
 
-  mic = ibox((long)xsyssize, (long)ysyssize, (long)zsyssize);
+  mic = ibox(xsyssize, ysyssize, zsyssize);
   if (!mic) {
     bailout("image100", "Could not allocate memory for mic");
     free_ivector(blue);
@@ -183,7 +183,7 @@ int main(void) {
    *	Allocate memory for mic, image, and ndeep arrays
    ***/
 
-  image = irect((long)dxtot, (long)dytot);
+  image = irect(dxtot, dytot);
   if (!image) {
     bailout("image100", "Could not allocate memory for image");
     free_ibox(mic, xsyssize, ysyssize);
@@ -193,7 +193,7 @@ int main(void) {
     return (1);
   }
 
-  ndeep = drect((long)dxtot, (long)dytot);
+  ndeep = drect(dxtot, dytot);
   if (!ndeep) {
     bailout("image100", "Could not allocate memory for ndeep");
     free_ibox(mic, xsyssize, ysyssize);

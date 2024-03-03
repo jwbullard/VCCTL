@@ -117,18 +117,18 @@ int createpgms(void) {
 
   /* Allocate memory for red, green, and blue vectors */
 
-  red = ivector((long int)NPHASES);
+  red = ivector(NPHASES);
   if (!red) {
     bailout("packvrml", "Could not allocate memory for red vector");
     exit(1);
   }
-  green = ivector((long int)NPHASES);
+  green = ivector(NPHASES);
   if (!green) {
     bailout("packvrml", "Could not allocate memory for green vector");
     free_ivector(red);
     exit(1);
   }
-  blue = ivector((long int)NPHASES);
+  blue = ivector(NPHASES);
   if (!blue) {
     bailout("packvrml", "Could not allocate memory for green vector");
     free_ivector(green);
@@ -219,7 +219,7 @@ int createpgms(void) {
 
   /*	Allocate memory for the microstructure image */
 
-  pix = ibox((long)xsize, (long)ysize, (long)zsize);
+  pix = ibox(xsize, ysize, zsize);
   if (!pix) {
     bailout("aggpackvrml", "Memory allocation failure");
     fflush(stdout);

@@ -54,7 +54,7 @@ int *Seed;
  *	resolution (micrometers per pixel)
  ***/
 
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
@@ -77,10 +77,10 @@ int Verbose = 0;
 void checkargs(int argc, char *argv[]);
 int maketemp(int size, int *xsph, int *ysph, int *zsph);
 int poredist(char *filename);
-long int xyz2pix(int xpos, int ypos, int zpos);
-int pix2x(long int pid);
-int pix2y(long int pid);
-int pix2z(long int pid);
+int xyz2pix(int xpos, int ypos, int zpos);
+int pix2x(int pid);
+int pix2y(int pid);
+int pix2z(int pid);
 void readmic(char *filen);
 
 int main(int argc, char *argv[]) {
@@ -187,13 +187,13 @@ int maketemp(int size, int *xsph, int *ysph, int *zsph) {
  *	Convert x,y,z coordinates to pixel number
  *
  * 	Arguments:	int xpos, int ypos, int zpos coordinates
- * 	Returns:	long int pixel id number
+ * 	Returns:	int pixel id number
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-long int xyz2pix(int xpos, int ypos, int zpos) {
-  long int ns = (Xsyssize * Ysyssize * zpos) + (Xsyssize * ypos) + xpos;
+int xyz2pix(int xpos, int ypos, int zpos) {
+  int ns = (Xsyssize * Ysyssize * zpos) + (Xsyssize * ypos) + xpos;
   return (ns);
 }
 
@@ -202,13 +202,13 @@ long int xyz2pix(int xpos, int ypos, int zpos) {
  *
  *	Convert pixel id number to x coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2x(long int pid) {
+int pix2x(int pid) {
   int x, y, z;
   z = pid / (Xsyssize * Ysyssize);
   y = (pid - (z * Xsyssize * Ysyssize)) / Xsyssize;
@@ -221,13 +221,13 @@ int pix2x(long int pid) {
  *
  *	Convert pixel id number to y coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2y(long int pid) {
+int pix2y(int pid) {
   int y, z;
   z = pid / (Xsyssize * Ysyssize);
   y = (pid - (z * Xsyssize * Ysyssize)) / Xsyssize;
@@ -239,13 +239,13 @@ int pix2y(long int pid) {
  *
  *	Convert pixel id number to z coordinate
  *
- * 	Arguments:	long int pixel id number
+ * 	Arguments:	int pixel id number
  * 	Returns:	int x coordinate
  *
  *	Calls:		no other routines
  *	Called by:	readmic
  ***/
-int pix2z(long int pid) {
+int pix2z(int pid) {
   int z = pid / (Xsyssize * Ysyssize);
   return (z);
 }
@@ -262,7 +262,7 @@ int pix2z(long int pid) {
  *	Called by:	main program
  ***/
 int poredist(char *filename) {
-  long int i, *nrad, porecnt, maxsph, nsph, l, ntot, nact, naccessible;
+  int i, *nrad, porecnt, maxsph, nsph, l, ntot, nact, naccessible;
   int ix, iy, iz, max_allowed_rad, mindim, nr, failed;
   int xl, yl, zl, diam;
   int ***tmic;
@@ -289,7 +289,7 @@ int poredist(char *filename) {
 
   /* Allocate memory for temporary microstructure image */
 
-  tmic = ibox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
+  tmic = ibox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
   if (!tmic) {
     warning("poredist3d", "Could not allocate required memory for temporary "
                           "microstructure image");
@@ -313,7 +313,7 @@ int poredist(char *filename) {
   }
 
   if (Verbose) {
-    printf("\nScanned microstructure:  total pore count = %ld", porecnt);
+    printf("\nScanned microstructure:  total pore count = %d", porecnt);
     fflush(stdout);
   }
 
@@ -336,7 +336,7 @@ int poredist(char *filename) {
   }
 
   /* Allocate memory for nrad vector */
-  nrad = livector((long int)(max_allowed_rad + 1));
+  nrad = ivector(max_allowed_rad + 1);
   if (!nrad) {
     warning("poredist3d", "Could not allocate required memory");
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
@@ -347,7 +347,7 @@ int poredist(char *filename) {
   maxsph = diam2vol((float)(2 * max_allowed_rad + 1));
 
   if (Verbose) {
-    printf("\nMaximum number allowed template elements will be %ld", maxsph);
+    printf("\nMaximum number allowed template elements will be %d", maxsph);
     fflush(stdout);
   }
 
@@ -355,7 +355,7 @@ int poredist(char *filename) {
   xsph = ivector(maxsph);
   if (!xsph) {
     warning("poredist3d", "Could not allocate required memory");
-    free_livector(nrad);
+    free_ivector(nrad);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -363,7 +363,7 @@ int poredist(char *filename) {
   if (!ysph) {
     warning("poredist3d", "Could not allocate required memory");
     free_ivector(xsph);
-    free_livector(nrad);
+    free_ivector(nrad);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -372,7 +372,7 @@ int poredist(char *filename) {
     warning("poredist3d", "Could not allocate required memory");
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(nrad);
+    free_ivector(nrad);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -398,7 +398,7 @@ int poredist(char *filename) {
 
     nsph = maketemp(nr, xsph, ysph, zsph);
     if (Verbose) {
-      printf("\n\tRadius = %d, Nsph = %ld", nr, nsph);
+      printf("\n\tRadius = %d, Nsph = %d", nr, nsph);
       fflush(stdout);
     }
 
@@ -566,7 +566,7 @@ int poredist(char *filename) {
     nrad[nr] = ntot;
     naccessible += ntot;
     if (Verbose) {
-      printf("\nRadius is %d and nrad[%d] = %ld", nr, nr, ntot);
+      printf("\nRadius is %d and nrad[%d] = %d", nr, nr, ntot);
       fflush(stdout);
     }
   }
@@ -584,7 +584,7 @@ int poredist(char *filename) {
     free_ivector(zsph);
     free_ivector(ysph);
     free_ivector(xsph);
-    free_livector(nrad);
+    free_ivector(nrad);
     free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
     return (1);
   }
@@ -600,10 +600,10 @@ int poredist(char *filename) {
   }
   for (i = 0; i <= max_allowed_rad; i++) {
     diam = 2 * i + 1;
-    fprintf(outfile, "\n%f\t%ld\t%f", ((float)diam), nrad[i],
+    fprintf(outfile, "\n%f\t%d\t%f", ((float)diam), nrad[i],
             (((float)nrad[i]) / ((float)naccessible)));
     if (Verbose) {
-      printf("\n%f\t%ld\t%f", ((float)diam), nrad[i],
+      printf("\n%f\t%d\t%f", ((float)diam), nrad[i],
              (((float)nrad[i]) / ((float)naccessible)));
       fflush(stdout);
     }
@@ -614,7 +614,7 @@ int poredist(char *filename) {
   free_ivector(zsph);
   free_ivector(ysph);
   free_ivector(xsph);
-  free_livector(nrad);
+  free_ivector(nrad);
   free_ibox(tmic, Xsyssize + 1, Ysyssize + 1);
 
   return (0);
@@ -669,7 +669,7 @@ void readmic(char *filen) {
    *	Define the number of histogram bins
    ***/
 
-  Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+  Syspix = Xsyssize * Ysyssize * Zsyssize;
   Sizemag =
       pow(((float)Syspix) / (pow(((float)DEFAULTSYSTEMSIZE), 3.0)), (1. / 3.));
   Isizemag = (int)(Sizemag + 0.5);
@@ -680,7 +680,7 @@ void readmic(char *filen) {
    *	Allocate memory for all global variables
    ***/
 
-  Mic = ibox((long)(Xsyssize + 1), (long)(Ysyssize + 1), (long)(Zsyssize + 1));
+  Mic = ibox(Xsyssize + 1, Ysyssize + 1, Zsyssize + 1);
 
   if (!Mic) {
     bailout("poredist3d", "Memory allocation failure");

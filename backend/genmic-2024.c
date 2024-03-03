@@ -229,8 +229,8 @@ Int3d Cement,Cemreal,Bbox;
 *    System size (pixels per edge), number of
 *    particles, and size of aggregate
 ***/
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
-long int Binderpix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
+int Binderpix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
 int Xsyssize = DEFAULTSYSTEMSIZE;
 int Ysyssize = DEFAULTSYSTEMSIZE;
 int Zsyssize = DEFAULTSYSTEMSIZE;
@@ -242,7 +242,7 @@ float Maxadjustxsize = 1.25;
 int Isizemag = 1;
 float Sizemag = 1.0;
 int Npart,Aggsize;
-long int Npartc,Burnt,Maxburning;
+int Npartc,Burnt,Maxburning;
 int Allocated = 0;
 int Shape = 0;
 
@@ -259,7 +259,7 @@ const int Draw = 1;
 /***
 * Number of one-pixel particles of each phase
 ***/
-long int Onepixnum[NPHASES];
+int Onepixnum[NPHASES];
 
 /***
 *    Volume fraction and surface area fractions for distrib3d
@@ -285,8 +285,8 @@ int NumberOfFlocs;
 *    Parameters to aid in obtaining correct
 *    sulfate content
 ***/
-long int N_sulfate=0,Target_sulfate=0,N_total=0,N_target=0,Target_total=0,Volpart[NUMSIZES];
-long int N_anhydrite=0,Target_anhydrite=0,N_hemi=0,Target_hemi=0,Target_total_lt15=0;
+int N_sulfate=0,Target_sulfate=0,N_total=0,N_target=0,Target_total=0,Volpart[NUMSIZES];
+int N_anhydrite=0,Target_anhydrite=0,N_hemi=0,Target_hemi=0,Target_total_lt15=0;
 
 /* Probability of gypsum particle instead of cement */
 float Probgyp;
@@ -297,7 +297,7 @@ float Probhem,Probanh;
 /* Mixture proportions are global because they are shared by addagg() and create() */
 float Vol_frac[NPHASES];
 float Dinput[NPHASES][NUMSIZES];
-long int Size_classes[NPHASES];
+int Size_classes[NPHASES];
 float Pdf[NPHASES][NUMSIZES];
 
 /* Pointer to a 1D list of pointers to particle structures */
@@ -350,10 +350,10 @@ struct lineitem {
 
 int Tradius;
 unsigned short int ***Curvature;
-long int Volume[MAXNUMPHASES],Surface[MAXNUMPHASES];
+int Volume[MAXNUMPHASES],Surface[MAXNUMPHASES];
 static int Nsph,Xsph[MAXSPH],Ysph[MAXSPH],Zsph[MAXSPH];
-long int *Nsolid,*Nair;
-long int *Sum;
+int *Nsolid,*Nair;
+int *Sum;
 float ***Normm,***Rres;
 
 /***
@@ -387,7 +387,7 @@ FILE *Fprog;
 int getsystemsize(void);
 int checksphere(int xin, int yin, int zin, int diam, int wflg,
     int phasein,int phase2);
-int genparticles(int numgen, long int *numeach,
+int genparticles(int numgen, int *numeach,
     float *sizeeach, int *pheach);
 int checkpart(int xin, int yin, int zin, int nxp, int nyp, int nzp,
     int volume, int phasein, int phase2, int wflg);
@@ -405,7 +405,7 @@ void connect(void);
 int distrib3d(void);
 int distfa(int fadchoice);
 int addonepixels(void);
-void addrand(int randid, long int nneed, int onepixfloc, int assignpartnum);
+void addrand(int randid, int nneed, int onepixfloc, int assignpartnum);
 void outmic(void);
 struct particle *particlevector(int size);
 void free_particlevector(struct particle *ps);
@@ -428,9 +428,9 @@ float rhcalc(int phin);
 int countem(int xp, int yp, int zp, int phin);
 void sysinit(int ph1, int ph2);
 void sysscan(int ph1, int ph2);
-int procsol(long int nsearch);
-int procair (long int nsearch);
-int movepix(long int ntomove, int ph1, int ph2);
+int procsol(int nsearch);
+int procair (int nsearch);
+int movepix(int ntomove, int ph1, int ph2);
 void sinter3d(int ph1id, int ph2id, float rhtarget);
 void stat3d(void);
 int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
@@ -706,9 +706,9 @@ int getsystemsize(void)
         exit(1);
     }
 
-    Npartc = (long)(NPARTC);
-    Burnt = (long)(BURNT);
-    Maxburning = (long)(MAXBURNING);
+    Npartc = (int)(NPARTC);
+    Burnt = (int)(BURNT);
+    Maxburning = (int)(MAXBURNING);
 
     /***
     *    Now dynamically allocate the memory for the Particle
@@ -716,14 +716,14 @@ int getsystemsize(void)
     *    arrays
     ***/
 
-    Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
+    Syspix = (Xsyssize * Ysyssize * Zsyssize);
     Binderpix = Syspix;
     Sizemag = ((float)Syspix) / (pow(((double)DEFAULTSYSTEMSIZE),3.0));
     Isizemag = (int)(Sizemag + 0.5);
     if (Isizemag > 1) {
-        Npartc = (long)(NPARTC * Isizemag);
-        Burnt = (long)(BURNT * Isizemag);
-        Maxburning = (long)(MAXBURNING * Isizemag);
+        Npartc = (int)(NPARTC * Isizemag);
+        Burnt = (int)(BURNT * Isizemag);
+        Maxburning = (int)(MAXBURNING * Isizemag);
     }
 
     Particle = NULL;
@@ -1548,7 +1548,7 @@ void striplayer(int nxp, int nyp, int nzp)
 *
 *     Arguments:
 *        int numgen is number of different size spheres to place
-*        long int numeach holds the number of each size class
+*        int numeach holds the number of each size class
 *        float sizeeach holds the radius of each size class
 *        int pheach holds the phase of each size class
 *        int shape is 0 if sphere or 1 if real shapes
@@ -1558,7 +1558,7 @@ void striplayer(int nxp, int nyp, int nzp)
 *    Calls:        makesph, ran1
 *    Called by:    create
 ***/
-int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
+int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach)
 {
     int m,n,i,j,k,ii,jj,x,y,z,ig,tries,na,foundpart;
     int phnow,nofit,n1,nxp,nyp,nzp,nnxp,nnyp,nnzp,partc,extpix,pcount[10];
@@ -1566,7 +1566,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
     int klow,khigh,mp,pixfrac,numlines,numitems,toobig;
     int absdiff,oldabsdiff,diam,darg,numpix,shapetype,dispdist;
     int cx,cy,cz;
-    long int jg,numpartplaced,vol;
+    int jg,numpartplaced,vol;
     float rx,ry,rz,testgyp,typegyp,frad,aa1,aa2;
     float vol1,ratio[10],saveratio,volume,volumecalc,v1;
     float maxrx,maxry,maxrz;
@@ -1595,7 +1595,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
         dispdist = Dispdist;
         phnow = pheach[ig];        /* phase for this class */
-        printf("Going to place %ld particles of phase %d, radius %f\n",numeach[ig],phnow,sizeeach[ig]);
+        printf("Going to place %d particles of phase %d, radius %f\n",numeach[ig],phnow,sizeeach[ig]);
 
         if (Phase_shape[phnow].shapetype == SPHERES || sizeeach[ig] < 1.0) {
             shapetype = SPHERES;
@@ -1635,8 +1635,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         darg = diam + (2 * dispdist);
                         nofit = checksphere(x,y,z,darg,Check,Npart+1,0);
                         if ((tries > MAXTRIES) && (dispdist > 0)) {
-                            printf("\nAble to place %ld particles ",jg);
-                            printf("out of %ld needed before reducing dispersion distance ",numeach[ig]);
+                            printf("\nAble to place %d particles ",jg);
+                            printf("out of %d needed before reducing dispersion distance ",numeach[ig]);
                             tries = 0;
                             dispdist--;
                             printf("to %d\n",dispdist);
@@ -1645,8 +1645,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         if (tries > MAXTRIES) {
                             printf("Could not place sphere %d\n",Npart);
                             printf("\tafter %d random attempts\n\n",MAXTRIES);
-                            printf("\nTotal number spheres desired in this bin was %ld",numeach[ig]);
-                            printf("\nActual number _placed  in this bin was %ld",jg);
+                            printf("\nTotal number spheres desired in this bin was %d",numeach[ig]);
+                            printf("\nActual number _placed  in this bin was %d",jg);
                             printf("\nWas working on bin %d out of %d\n",ig,numgen);
 
                             warning("genmic","Could not place a sphere");
@@ -1662,8 +1662,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         printf("Too many spheres being generated \n");
                         printf("\tUser needs to increase value of NPARTC\n");
                         printf("\tat top of C-code\n\n");
-                        printf("\nTotal number spheres desired in this bin was %ld",numeach[ig]);
-                        printf("\nActual number _placed  in this bin was %ld",jg);
+                        printf("\nTotal number spheres desired in this bin was %d",numeach[ig]);
+                        printf("\nActual number _placed  in this bin was %d",jg);
                         printf("\nWas working on bin %d out of %d\n",ig,numgen);
                         warning("genmic","Too many spheres");
                         fflush(stdout);
@@ -1860,11 +1860,11 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                 numpartplaced = 0;
 
-                if (Verbose) printf("Entering main loop for size class %d, need %ld of them...",ig,numeach[ig]);
+                if (Verbose) printf("Entering main loop for size class %d, need %d of them...",ig,numeach[ig]);
                 fflush(stdout);
                 for (jg = 0; jg < numeach[ig]; jg++) {
 
-                    if (Verbose) printf("\n\t%ld of %ld",jg,numeach[ig]);
+                    if (Verbose) printf("\n\t%d of %d",jg,numeach[ig]);
                     fflush(stdout);
 
                     foundpart = 1;
@@ -1913,8 +1913,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                     exit(1);
                                 }
 
-                                if (Verbose) printf("Opened %s ; size = %ld\n",line[n1].name,vol);
-                                printf("Using particle shape %s; size = %ld\n",line[n1].name,vol);
+                                if (Verbose) printf("Opened %s ; size = %d\n",line[n1].name,vol);
+                                printf("Using particle shape %s; size = %d\n",line[n1].name,vol);
                                 fflush(stdout);
 
                                 /***
@@ -2130,7 +2130,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                                 #ifdef DEBUG
                                 printf("\nna = %d",na);
-                                printf("\ntarget volume = %ld",vol);
+                                printf("\ntarget volume = %d",vol);
                                 printf("\ncomputed volume = %f",vol1);
                                 printf("\nratio = %f",ratio[na]);
                                 fflush(stdout);
@@ -2173,7 +2173,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                 }
                                 #ifdef DEBUG
                                 printf("\nAfter image function, nominal particle ");
-                                printf("size %ld, actual %ld",vol,partc);
+                                printf("size %d, actual %d",vol,partc);
                                 fflush(stdout);
                                 #endif
                                 saveratio = ratio[na];
@@ -2280,7 +2280,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         printf("\nAbout to go into checkpart...");
                         printf("\n\tx = %d y = %d z = %d",x,y,z);
                         printf("\n\tnnxp = %d nnyp = %d nnzp = %d",nnxp,nnyp,nnzp);
-                        printf("\n\tvol = %ld",vol);
+                        printf("\n\tvol = %d",vol);
                         fflush(stdout);
                         #endif
 
@@ -2295,8 +2295,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         if (tries > MAXTRIES) {
                             printf("Could not place particle %d\n",Npart);
                             printf("\tafter %d random attempts\n\n",MAXTRIES);
-                            printf("\nTotal number spheres desired in this bin was %ld",numeach[ig]);
-                            printf("\nActual number _placed  in this bin was %ld",jg);
+                            printf("\nTotal number spheres desired in this bin was %d",numeach[ig]);
+                            printf("\nActual number _placed  in this bin was %d",jg);
                             printf("\nWas working on bin %d out of %d\n",ig,numgen);
                             warning("genmic","Could not place a particle");
                             fflush(stdout);
@@ -2315,8 +2315,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                         printf("Too many particles being generated \n");
                         printf("\tUser needs to increase value of NPARTC\n");
                         printf("\tat top of C-code\n\n");
-                        printf("\nNumber real-shape particles desired in this bin was %ld",numeach[ig]);
-                        printf("\nActual number _placed  in this bin was %ld",jg);
+                        printf("\nNumber real-shape particles desired in this bin was %d",numeach[ig]);
+                        printf("\nActual number _placed  in this bin was %d",jg);
                         printf("\nWas working on bin %d out of %d\n",ig,numgen);
                         warning("genmic","Too many particles");
                         fflush(stdout);
@@ -2373,7 +2373,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                             printf("\nAbout to place a C3S particle...");
                             printf("\n\tx = %d y = %d z = %d",x,y,z);
                             printf("\n\tnnxp = %d nnyp = %d nnzp = %d",nnxp,nnyp,nnzp);
-                            printf("\n\tvol = %ld",vol);
+                            printf("\n\tvol = %d",vol);
                             fflush(stdout);
                             #endif
                             nump = checkpart(x,y,z,nnxp,nnyp,nnzp,vol,Npart+1,C3S,Place);
@@ -2398,7 +2398,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                                 printf("\nAbout to place a GYPSUM particle...");
                                 printf("\n\tx = %d y = %d z = %d",x,y,z);
                                 printf("\n\tnnxp = %d nnyp = %d nnzp = %d",nnxp,nnyp,nnzp);
-                                printf("\n\tvol = %ld",vol);
+                                printf("\n\tvol = %d",vol);
                                 fflush(stdout);
                                 #endif
                                 nump = checkpart(x,y,z,nnxp,nnyp,nnzp,vol,Npart+1,ANHYDRITE,Place);
@@ -2425,7 +2425,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
                             }
                         }
     
-                        if (Verbose) printf("\nN_total = %ld and N_target = %ld",N_total,N_target);
+                        if (Verbose) printf("\nN_total = %d and N_target = %d",N_total,N_target);
 
                     } else {
 
@@ -2467,8 +2467,8 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 
                 }
                 if (Verbose) {
-                    printf("\nNumber real-shape particles desired in this bin was %ld",numeach[ig]);
-                    printf("\nNumber real-shape particles _placed  in this bin was %ld\n",numpartplaced);
+                    printf("\nNumber real-shape particles desired in this bin was %d",numeach[ig]);
+                    printf("\nNumber real-shape particles _placed  in this bin was %d\n",numpartplaced);
                 }
 
                 break;
@@ -2514,11 +2514,11 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
 void create(void)
 {
     int i,j,k,numsize,phase[NUMSIZES],phase_id,num_phases_to_add,nplaced;
-    long int num[NUMSIZES],target_phase_vox;
-    long int extra_pixels,target_vox_i,linval;
-    long int delta_particles,total_phase_vox;
+    int num[NUMSIZES],target_phase_vox;
+    int extra_pixels,target_vox_i,linval;
+    int delta_particles,total_phase_vox;
     int ip,inval,shapevar;
-    long int numparts[NPHASES][NUMSIZES];
+    int numparts[NPHASES][NUMSIZES];
     float frad[NUMSIZES],tval,val1,val2,binder_vfrac,water_vfrac;
     float diam[NUMSIZES];
     float *xgvec,*wgvec;
@@ -2601,9 +2601,9 @@ void create(void)
         *    for the Bbox array (only needed for real shapes)
         ***/
 
-        A = complexmatrix((long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-        AA = complexmatrix((long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-        Y = complexmatrix((long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+        A = complexmatrix(0, Nnn, -Nnn, Nnn);
+        AA = complexmatrix(0, Nnn, -Nnn, Nnn);
+        Y = complexmatrix(0, Nnn, -Nnn, Nnn);
         Int3darray(&Bbox,BoxXsize,BoxYsize,BoxZsize);
 
         if (!A || !Y || (Bbox.val == NULL)) {
@@ -2636,13 +2636,13 @@ void create(void)
 
         /* Allocate memory for Gaussian quadrature points */
 
-        xgvec = fvector((long)(Ntheta + 1));
+        xgvec = fvector(Ntheta + 1);
         if (!xgvec) {
             freegenmic();
             bailout("genmic","Could not allocate memory for xgvec");
             exit(1);
         }
-        wgvec = fvector((long)(Nphi + 1));
+        wgvec = fvector(Nphi + 1);
         if (!wgvec) {
             freegenmic();
             bailout("genmic","Could not allocate memory for wgvec");
@@ -2708,8 +2708,8 @@ void create(void)
         /* Convert to total VOLUME basis, binder + water system */
         Vol_frac[phase_id] *= binder_vfrac;
 
-        target_phase_vox = (long int)((Vol_frac[phase_id] * (float)Binderpix) + 0.5);
-        printf("Will need to enter %ld pixels of this phase...\n",target_phase_vox);
+        target_phase_vox = ((Vol_frac[phase_id] * (float)Binderpix) + 0.5);
+        printf("Will need to enter %d pixels of this phase...\n",target_phase_vox);
         printf("Enter number of size classes for this phase (max is %d): ",NUMSIZES);
         read_string(instring,sizeof(instring));
         Size_classes[phase_id] = atoi(instring);
@@ -2719,7 +2719,7 @@ void create(void)
             bailout("genmic","Bad value for number of size classes");
             exit(1);
         }
-        printf("\n%ld\n",Size_classes[phase_id]);
+        printf("\n%d\n",Size_classes[phase_id]);
         for (j = 0; j < Size_classes[phase_id]; j++) {
             printf("Enter diameter of size class %d in micrometers (integer values only): ",j);
             read_string(instring,sizeof(instring));
@@ -2771,13 +2771,13 @@ void create(void)
 
             /* Allocate memory for Gaussian quadrature points */
 
-            Phase_shape[phase_id].xg = fvector((long)(Ntheta + 1));
+            Phase_shape[phase_id].xg = fvector(Ntheta + 1);
             if (!Phase_shape[phase_id].xg) {
                 freegenmic();
                 bailout("genmic","Could not allocate memory for xg");
                 exit(1);
             }
-            Phase_shape[phase_id].wg = fvector((long)(Nphi + 1));
+            Phase_shape[phase_id].wg = fvector(Nphi + 1);
             if (!Phase_shape[phase_id].wg) {
                 freegenmic();
                 bailout("genmic","Could not allocate memory for wg");
@@ -2825,25 +2825,25 @@ void create(void)
             Volpart[i] = diam2vol(Dinput[phase_id][i]);
             numparts[phase_id][i] = (int)(((float)(target_phase_vox) * Pdf[phase_id][i]/(float)(Volpart[i])) + 0.5);
             total_phase_vox += numparts[phase_id][i] * Volpart[i];
-            printf("Number of particles of diameter %f = %ld\n",Dinput[phase_id][i],numparts[phase_id][i]);
-            printf("Volume of each particle of diameter %f = %ld\n",Dinput[phase_id][i],Volpart[i]);
+            printf("Number of particles of diameter %f = %d\n",Dinput[phase_id][i],numparts[phase_id][i]);
+            printf("Volume of each particle of diameter %f = %d\n",Dinput[phase_id][i],Volpart[i]);
         }
-        printf("Total pixels based on PDF is %ld\n",total_phase_vox);
+        printf("Total pixels based on PDF is %d\n",total_phase_vox);
         printf("Making adjustments of particle numbers now...\n");
 
 
         extra_pixels = 0;
         for (i = 0; i < Size_classes[phase_id] - 1; i++) {
             target_vox_i = (int)(((float)(target_phase_vox) * Pdf[phase_id][i]) + 0.5);
-            printf("Target pixels in size class %d = %ld\n",i,target_vox_i);
+            printf("Target pixels in size class %d = %d\n",i,target_vox_i);
             extra_pixels += (target_vox_i - (numparts[phase_id][i] * Volpart[i]));
-            printf("Extra pixels (cumulative) = %ld\n",extra_pixels);
+            printf("Extra pixels (cumulative) = %d\n",extra_pixels);
             if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
-                delta_particles = (long int)((float)(extra_pixels)/(float)(Volpart[i]));
+                delta_particles = (float)(extra_pixels)/(float)(Volpart[i]);
                 numparts[phase_id][i] += delta_particles;
                 total_phase_vox += (delta_particles * Volpart[i]);
                 extra_pixels -= (delta_particles * Volpart[i]);
-                printf("Reduced number of particles in size class %d by %ld\n",i,delta_particles);
+                printf("Reduced number of particles in size class %d by %d\n",i,delta_particles);
             }
         }
 
@@ -2867,14 +2867,14 @@ void create(void)
         }
 
         printf("\n***************************************************************\n");
-        printf("    Targeted %ld vox of phase %d, and will be adding %ld vox\n",
+        printf("    Targeted %d vox of phase %d, and will be adding %d vox\n",
                 target_phase_vox,phase_id,total_phase_vox);
         printf("\n***************************************************************\n");
 
         target_vox_i = 0;
         for (i = 0; i < Size_classes[phase_id]; i++) {
             target_vox_i = (float)(Volpart[i] * numparts[phase_id][i]);
-            printf("    Size class %2d, diam = %2d, target pdf = %.4f, target_vox_i = %ld\n",
+            printf("    Size class %2d, diam = %2d, target pdf = %.4f, target_vox_i = %d\n",
                     i, (int)(Dinput[phase_id][i]),Pdf[phase_id][i],target_vox_i);
         }
         printf("\n***************************************************************\n");
@@ -2888,9 +2888,9 @@ void create(void)
 
     if (Size_classes[INERTAGG] > 0) {
         Vol_frac[INERTAGG] *= binder_vfrac;  /* Converts to total VOLUME basis, binder + water system */
-        target_phase_vox = (long int)((Vol_frac[INERTAGG] * (float)Binderpix) + 0.5);
-        printf("Will need to enter %ld pixels of INERT AGGREGATE to binder...\n",target_phase_vox);
-        printf("Number of size classes for INERTAGG phase is %ld\n",Size_classes[INERTAGG]);
+        target_phase_vox = (Vol_frac[INERTAGG] * (float)Binderpix) + 0.5;
+        printf("Will need to enter %d pixels of INERT AGGREGATE to binder...\n",target_phase_vox);
+        printf("Number of size classes for INERTAGG phase is %d\n",Size_classes[INERTAGG]);
         fflush(stdout);
 
         if (Shape == REALSHAPE) {
@@ -2907,13 +2907,13 @@ void create(void)
 
             /* Allocate memory for Gaussian quadrature points */
 
-            Phase_shape[INERTAGG].xg = fvector((long)(Ntheta + 1));
+            Phase_shape[INERTAGG].xg = fvector(Ntheta + 1);
             if (!Phase_shape[INERTAGG].xg) {
                 freegenmic();
                 bailout("genmic","Could not allocate memory for xg");
                 exit(1);
             }
-            Phase_shape[INERTAGG].wg = fvector((long)(Nphi + 1));
+            Phase_shape[INERTAGG].wg = fvector(Nphi + 1);
             if (!Phase_shape[INERTAGG].wg) {
                 freegenmic();
                 bailout("genmic","Could not allocate memory for wg");
@@ -2964,25 +2964,25 @@ void create(void)
             Volpart[i] = diam2vol(Dinput[INERTAGG][i]);
             numparts[INERTAGG][i] = (int)(((float)(target_phase_vox) * Pdf[INERTAGG][i]/(float)(Volpart[i])) + 0.5);
             total_phase_vox += numparts[INERTAGG][i] * Volpart[i];
-            printf("Number of particles of diameter %f = %ld\n",Dinput[INERTAGG][i],numparts[INERTAGG][i]);
-            printf("Volume of each particle of diameter %f = %ld\n",Dinput[INERTAGG][i],Volpart[i]);
+            printf("Number of particles of diameter %f = %d\n",Dinput[INERTAGG][i],numparts[INERTAGG][i]);
+            printf("Volume of each particle of diameter %f = %d\n",Dinput[INERTAGG][i],Volpart[i]);
         }
-        printf("Total pixels based on PDF is %ld\n",total_phase_vox);
+        printf("Total pixels based on PDF is %d\n",total_phase_vox);
         printf("Making adjustments of particle numbers now...\n");
 
 
         extra_pixels = 0;
         for (i = 0; i < Size_classes[INERTAGG] - 1; i++) {
             target_vox_i = (int)(((float)(target_phase_vox) * Pdf[INERTAGG][i]) + 0.5);
-            printf("Target pixels in size class %d = %ld\n",i,target_vox_i);
+            printf("Target pixels in size class %d = %d\n",i,target_vox_i);
             extra_pixels += (target_vox_i - (numparts[INERTAGG][i] * Volpart[i]));
-            printf("Extra pixels (cumulative) = %ld\n",extra_pixels);
+            printf("Extra pixels (cumulative) = %d\n",extra_pixels);
             if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
-                delta_particles = (long int)((float)(extra_pixels)/(float)(Volpart[i]));
+                delta_particles = (float)(extra_pixels)/(float)(Volpart[i]);
                 numparts[INERTAGG][i] += delta_particles;
                 total_phase_vox += (delta_particles * Volpart[i]);
                 extra_pixels -= (delta_particles * Volpart[i]);
-                printf("Reduced number of particles in size class %d by %ld\n",i,delta_particles);
+                printf("Reduced number of particles in size class %d by %d\n",i,delta_particles);
             }
         }
 
@@ -3020,7 +3020,7 @@ void create(void)
                     numsize++;
                 } else {
                     Onepixnum[i] = numparts[i][j];
-                    if (Verbose) printf("\nOne-pix particles of phase %d = %ld",i,Onepixnum[i]);
+                    if (Verbose) printf("\nOne-pix particles of phase %d = %d",i,Onepixnum[i]);
                 }
             }
         }
@@ -3115,7 +3115,7 @@ void create(void)
             if (Verbose) {
                printf("Adding particles of effective diameter %d\n",(int)diam[ip]);
                 printf("Phase of these particles is %d \n",phase[ip]);
-                printf("Calculated number of these particles is %ld\n",num[ip]);
+                printf("Calculated number of these particles is %d\n",num[ip]);
                 fflush(stdout);
             }
             Volpart[ip] = diam2vol(diam[ip]);
@@ -3130,18 +3130,18 @@ void create(void)
 
         }
 
-        Target_sulfate = (long int)((double)Target_total * Probgyp);
-        Target_anhydrite = (long int)((double)Target_total * Probgyp * Probanh);
-        Target_hemi = (long int)((double)Target_total * Probgyp * Probhem);
+        Target_sulfate = (double)Target_total * Probgyp;
+        Target_anhydrite = (double)Target_total * Probgyp * Probanh;
+        Target_hemi = (double)Target_total * Probgyp * Probhem;
 
                 /* Modify probability of calcium sulfate so that all calcium sulfates
                     are placed at diameters less than 15 micrometers */
 
         if (Target_total_lt15 > 0) Probgyp = (Target_sulfate/Target_total_lt15);
         if (Verbose) {
-               printf("\nTarget_sulfate = %ld",Target_sulfate);
-            printf("\nTarget_anhydrite = %ld",Target_anhydrite);
-            printf("\nTarget_hemi = %ld",Target_hemi);
+               printf("\nTarget_sulfate = %d",Target_sulfate);
+            printf("\nTarget_anhydrite = %d",Target_anhydrite);
+            printf("\nTarget_hemi = %d",Target_hemi);
             fflush(stdout);
            }
 
@@ -3177,9 +3177,9 @@ void create(void)
 
 
     free_Int3darray(&Bbox);
-    if (Y) free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-    if (AA) free_complexmatrix(AA, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
-    if (A) free_complexmatrix(A, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    if (Y) free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
+    if (AA) free_complexmatrix(AA, 0, Nnn, -Nnn, Nnn);
+    if (A) free_complexmatrix(A, 0, Nnn, -Nnn, Nnn);
     if (xgvec) free_fvector(xgvec);
     if (wgvec) free_fvector(wgvec);
 
@@ -3490,8 +3490,8 @@ void makefloc(void)
 ***/
 void measure(void)
 {
-    long int npor,nc2s,ngyp,ncem,nagg,nsfume,ninert,nfreelime;
-    long int nflyash,nanh,nhem,ncaco3,nslag;
+    int npor,nc2s,ngyp,ncem,nagg,nsfume,ninert,nfreelime;
+    int nflyash,nanh,nhem,ncaco3,nslag;
     int i,j,k,valph;
 
     /* Counters for the various phase fractions */
@@ -3561,18 +3561,18 @@ void measure(void)
 
     if (Verbose) {
         printf("\nPhase counts are: \n");
-        printf("\tPorosity = %ld \n",npor);
-        printf("\tCement = %ld \n",ncem);
-        printf("\tC2S = %ld \n",nc2s);
-        printf("\tGypsum = %ld \n",ngyp);
-        printf("\tAnhydrite = %ld \n",nanh);
-        printf("\tHemihydrate = %ld \n",nhem);
-        printf("\tSilica fume = %ld \n",nsfume);
-        printf("\tInert = %ld \n",ninert);
-        printf("\tSlag = %ld \n",nslag);
-        printf("\tCaCO3 = %ld \n",ncaco3);
-        printf("\tFly Ash = %ld \n",nflyash);
-        printf("\tAggregate = %ld \n",nagg);
+        printf("\tPorosity = %d \n",npor);
+        printf("\tCement = %d \n",ncem);
+        printf("\tC2S = %d \n",nc2s);
+        printf("\tGypsum = %d \n",ngyp);
+        printf("\tAnhydrite = %d \n",nanh);
+        printf("\tHemihydrate = %d \n",nhem);
+        printf("\tSilica fume = %d \n",nsfume);
+        printf("\tInert = %d \n",ninert);
+        printf("\tSlag = %d \n",nslag);
+        printf("\tCaCO3 = %d \n",ncaco3);
+        printf("\tFly Ash = %d \n",nflyash);
+        printf("\tAggregate = %d \n",nagg);
     }
 
     return;
@@ -3679,7 +3679,7 @@ void measagg(void)
 void connect(void)
 {
     register int i,j,k;
-    long int inew,ntop,nthrough,ncur,nnew,ntot;
+    int inew,ntop,nthrough,ncur,nnew,ntot;
     int *nmatx,*nmaty,*nmatz,*nnewx,*nnewy,*nnewz;
     int xcn,ycn,zcn,npix,x1,y1,z1,igood;
     int jnew,icur;
@@ -3862,8 +3862,8 @@ void connect(void)
     }
 
     printf("Phase ID= %d \n",npix);
-    printf("Number accessible from top= %ld \n",ntop);
-    printf("Number contained in through pathways= %ld \n",nthrough);
+    printf("Number accessible from top= %d \n",ntop);
+    printf("Number contained in through pathways= %d \n",nthrough);
 
     /***
     *    Return the burnt sites to their original
@@ -4381,7 +4381,7 @@ int distrib3d(void)
 {
     int nskip[6]; /* number of lines to skip as header in corr. files */
     register int i,j,k;
-    long int fileSizeInBytes = 0;
+    int fileSizeInBytes = 0;
     int alumval,alum2;
     int alumdo=1,k2so4do=1;
     float volin,rhtest,eps,corr_res,sumarea,sumvol;
@@ -5205,7 +5205,7 @@ int maketemp(int size)
 ***/
 void phcount(void)
 {
-    long int npore,nsolid[MAXNUMPHASES];
+    int npore,nsolid[MAXNUMPHASES];
     int ix,iy,iz;
 
     npore = 0;
@@ -5229,8 +5229,8 @@ void phcount(void)
         }
     }
 
-    printf("Pores are: %ld \n",npore);
-    printf("Solids are: %ld %ld %ld %ld %ld %ld\n",nsolid[1],nsolid[2],
+    printf("Pores are: %d \n",npore);
+    printf("Solids are: %d %d %d %d %d %d\n",nsolid[1],nsolid[2],
         nsolid[3],nsolid[4],nsolid[5],nsolid[6]);
 }
 
@@ -5300,7 +5300,7 @@ int surfpix(int xin, int yin, int zin)
 float rhcalc(int phin)
 {
     int ix,iy,iz;
-    long int porc,surfc;
+    int porc,surfc;
     float rhval;
 
     porc = surfc = 0;
@@ -5322,8 +5322,8 @@ float rhcalc(int phin)
 
     rhval = (float)(porc * 6.0 / (4.0 * (float)surfc));
     if (Verbose) {
-        printf("Phase area count is %ld \n",porc);
-        printf("Phase surface count is %ld \n",surfc);
+        printf("Phase area count is %d \n",porc);
+        printf("Phase surface count is %d \n",surfc);
         printf("Hydraulic radius is %f \n",rhval);
     }
 
@@ -5535,10 +5535,10 @@ void sysscan(int ph1, int ph2)
 *    Called by:    movepix
 *
 ***/
-int procsol(long int nsearch)
+int procsol(int nsearch)
 {
     int valfound,i,stop;
-    long int nsofar;
+    int nsofar;
 
     /* search histogram from top down until cumulative count */
     /* exceeds nsearch */
@@ -5574,10 +5574,10 @@ int procsol(long int nsearch)
 *    Called by:    movepix
 *
 ***/
-int procair(long int nsearch)
+int procair(int nsearch)
 {
     int valfound,i,stop;
-    long int nsofar;
+    int nsofar;
 
     /* search histogram from top down until cumulative count */
     /* exceeds nsearch */
@@ -5616,12 +5616,12 @@ int procair(long int nsearch)
 *    Called by:    runsint
 *
 ***/
-int movepix(long int ntomove, int ph1, int ph2)
+int movepix(int ntomove, int ph1, int ph2)
 {
     register int xp,yp,zp;
     int count1,count2,ntot,countc,i;
     int cmin,cmax,cfg,alldone;
-    long int nsolc,nairc,nsum,nsolm,nairm,nst1,nst2,next1,next2;
+    int nsolc,nairc,nsum,nsolm,nairm,nst1,nst2,next1,next2;
     float pck,plsol,plair;
 
     if (Verbose) printf("\nIn Movepix now...");
@@ -5854,7 +5854,7 @@ int movepix(long int ntomove, int ph1, int ph2)
 void sinter3d(int ph1id, int ph2id, float rhtarget)
 {
     int natonce,i,j,rflag,equilibrated;
-    long int curvsum1,curvsum2,pixsum1,pixsum2;
+    int curvsum1,curvsum2,pixsum1,pixsum2;
     float rhnow,avecurv1,avecurv2;
     
     /***
@@ -5962,7 +5962,7 @@ void sinter3d(int ph1id, int ph2id, float rhtarget)
 void stat3d(void)
 {
     int valin,ix,iy,iz,ix1,iy1,iz1,k;
-    long int voltot,surftot;
+    int voltot,surftot;
 
     for (ix = POROSITY; ix <= MAXNUMPHASES - 8; ix++) {
         Volume[ix] = Surface[ix] = 0;
@@ -6046,15 +6046,15 @@ void stat3d(void)
         surftot = Surface[C3S] + Surface[C2S] + Surface[C3A] + Surface[C4AF] + Surface[K2SO4] + Surface[NA2SO4];
         voltot = Volume[C3S] + Volume[C2S] + Volume[C3A] + Volume[C4AF] + Volume[K2SO4] + Volume[NA2SO4];
 
-        printf("  %d    %8ld     %8ld  \n",POROSITY,Volume[POROSITY],
+        printf("  %d    %8d     %8d  \n",POROSITY,Volume[POROSITY],
             Surface[POROSITY]);
 
         for (k = C3S; k <= NA2SO4; k++) {
-            printf("  %d    %8ld     %8ld     %.5f   %.5f\n",k,Volume[k],Surface[k],
+            printf("  %d    %8d     %8d     %.5f   %.5f\n",k,Volume[k],Surface[k],
             (double)Volume[k]/(double)voltot,(double)Surface[k]/(double)surftot);
         }
 
-        printf("Total  %8ld     %8ld\n\n\n",voltot,surftot);
+        printf("Total  %8d     %8d\n\n\n",voltot,surftot);
     }
 
     return;
@@ -6092,7 +6092,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
     float s2,ss,sdiff,xtmp,ytmp,slope,intercept,diff;
     float val2,t1,t2,x1,x2,u1,xrad,resmax,resmin;
     float filval,radius,sect,sumtot,vcrit;
-    long int xtot;
+    int xtot;
     char buff[MAXSTRING],instring[MAXSTRING];
     FILE *corrfile;
 
@@ -6350,7 +6350,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
     done = 0;
 
     if (Verbose) {
-        printf("\n\tDone thresholding first pass.\n\tVolin = %f, xtot = %ld",xpt,xtot);
+        printf("\n\tDone thresholding first pass.\n\tVolin = %f, xtot = %d",xpt,xtot);
         printf("\n\tResmin = %f  Resmax = %f",resmin,resmax);
     }
     
@@ -6406,8 +6406,8 @@ int addonepixels(void)
 {
     register int i,j,k;
     int phtodo,onepixfloc,pheach,assignpartnum,numsizes,nplaced;
-    long int nadd,totclinkpix,totfapix,tot[NPHASES],target[NPHASES];
-    long int nleft,tottarget,numeach;
+    int nadd,totclinkpix,totfapix,tot[NPHASES],target[NPHASES];
+    int nleft,tottarget,numeach;
     float sizeeach;
 
     /***
@@ -6438,7 +6438,7 @@ int addonepixels(void)
         onepixfloc = 0;
 
         nadd = Onepixnum[phtodo];
-        printf("\nAdding %ld of phase %d",nadd,phtodo);
+        printf("\nAdding %d of phase %d",nadd,phtodo);
 
         if (nadd > 0) {
 
@@ -6489,7 +6489,7 @@ int addonepixels(void)
                     nleft = nadd;
                     tottarget = 0;
                     for (i = C3S; i <= NA2SO4; i++) {
-                        target[i] = (long int)((Volf[i]*nadd)+0.5);
+                        target[i] = (Volf[i]*nadd)+0.5;
                         /*
                         target[i] = (int)((Volf[i]*(float)totclinkpix)
                                        - (float)tot[i] + 0.5);
@@ -6517,7 +6517,7 @@ int addonepixels(void)
                     for (i = C3S; (i <= NA2SO4) && (nleft > 0); i++) {
         
                         if (Verbose) {
-                            printf("\t%ld pixels of ",target[i]);
+                            printf("\t%d pixels of ",target[i]);
                             switch(i) {
                                 case C3S:
                                     printf("C3S\n");
@@ -6550,9 +6550,9 @@ int addonepixels(void)
                             pheach = i;
                             nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
                             if (nplaced < numeach) {
-                                numeach -= ((long int)(nplaced));
+                                numeach -= (nplaced);
                                 printf("\nCould not add all one-pixel particles dispersed.");
-                                printf("\nAdding %ld extra random locations to make up...",numeach);
+                                printf("\nAdding %d extra random locations to make up...",numeach);
                                 addrand(i,numeach,onepixfloc,assignpartnum);
                             }
                         } else {
@@ -6695,10 +6695,10 @@ int addonepixels(void)
                         tottarget += target[j];
                     }
 
-                    if (Verbose) printf("\nAdding %ld fly ash pixels now...\n",tottarget);
+                    if (Verbose) printf("\nAdding %d fly ash pixels now...\n",tottarget);
                     for (i = 0; (i < 6) && (nleft > 0); i++) {
 
-                        if (Verbose) printf("\t%ld pixels of ",target[i]);
+                        if (Verbose) printf("\t%d pixels of ",target[i]);
                         switch(i) {
                             case 0:
                                 if (Verbose) printf("ASG\n");
@@ -6735,9 +6735,9 @@ int addonepixels(void)
                             pheach = j;
                             nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
                             if (nplaced < numeach) {
-                                numeach -= ((long int)(nplaced));
+                                numeach -= (nplaced);
                                 printf("\nCould not add all one-pixel particles dispersed.");
-                                printf("\nAdding %ld extra random locations to make up...",numeach);
+                                printf("\nAdding %d extra random locations to make up...",numeach);
                                 addrand(j,numeach,onepixfloc,assignpartnum);
                             }
                         } else {
@@ -6755,9 +6755,9 @@ int addonepixels(void)
                         pheach = phtodo;
                         nplaced = genparticles(numsizes,&numeach,&sizeeach,&pheach);
                         if (nplaced < numeach) {
-                            numeach -= ((long int)(nplaced));
+                            numeach -= (nplaced);
                             printf("\nCould not add all one-pixel particles dispersed.");
-                            printf("\nAdding %ld extra random locations to make up...",numeach);
+                            printf("\nAdding %d extra random locations to make up...",numeach);
                             addrand(phtodo,numeach,0,assignpartnum);
                         }
                     } else {
@@ -6780,7 +6780,7 @@ int addonepixels(void)
 *     locations in the microstructure
 *
 *     Arguments:    int phase id
-*                 long int number to place
+*                 int number to place
 *                 int flocculate (1) or not (0)
 *                 int whether or not to assign a particle number
 *
@@ -6789,7 +6789,7 @@ int addonepixels(void)
 *    Calls:        no other routines
 *    Called by:    main program
 ***/
-void addrand(int randid, long int nneed, int onepixfloc, int assignpartnum)
+void addrand(int randid, int nneed, int onepixfloc, int assignpartnum)
 {
     int inc,ic,success,ix,iy,iz,dim,dir,newsite,oldval;
 
@@ -6960,7 +6960,7 @@ void freegenmic(void)
         }
         fflush(stdout);
     }
-    if (Y) free_complexmatrix(Y, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    if (Y) free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
 
     if (Verbose) {
         if (A) {
@@ -6970,7 +6970,7 @@ void freegenmic(void)
         }
         fflush(stdout);
     }
-    if (A) free_complexmatrix(A, (long)0, (long)Nnn, (long)(-Nnn), (long)(Nnn));
+    if (A) free_complexmatrix(A, 0, Nnn, -Nnn, Nnn);
 
     if (Verbose) {
         printf("\nDone freeing all the memory I know about");
@@ -7002,10 +7002,10 @@ void freedistrib3d(void)
     if (!S) free_fvector(S);
     if (!Xr) free_fvector(Xr);
     if (!Filter) free_fcube(Filter,Fsize+1);
-    if (!Nsolid) free_livector(Nsolid);
-    if (!Nair) free_livector(Nair);
+    if (!Nsolid) free_ivector(Nsolid);
+    if (!Nair) free_ivector(Nair);
     if (!Curvature) free_usibox(Curvature,Xsyssize+1,Ysyssize+1);
-    if (!Sum) free_livector(Sum);
+    if (!Sum) free_ivector(Sum);
     if (!Normm) free_fbox(Normm,Xsyssize+1,Ysyssize+1);
     if (!Rres) free_fbox(Rres,Xsyssize+1,Ysyssize+1);
 
@@ -7039,16 +7039,16 @@ void allmem(void)
     Normm = NULL;
     Rres = NULL;
 
-    R = ivector((long)(2 * Fsize));
-    S = fvector((long)(2 * Fsize));
-    Xr = fvector((long)(2 * Fsize));
-    Filter = fcube((long)(Fsize + 1));
-    Nsolid = livector((long)Hsize_s);
-    Nair = livector((long)Hsize_s);
-    Curvature = usibox((long)(Xsyssize + 1),(long)(Ysyssize + 1),(long)(Zsyssize + 1));
-    Sum = livector((long)(Hsize_r + 2));
-    Normm = fbox((long)(Xsyssize + 1),(long)(Ysyssize + 1),(long)(Zsyssize + 1));
-    Rres = fbox((long)(Xsyssize + 1),(long)(Ysyssize + 1),(long)(Zsyssize + 1));
+    R = ivector(2 * Fsize);
+    S = fvector(2 * Fsize);
+    Xr = fvector(2 * Fsize);
+    Filter = fcube(Fsize + 1);
+    Nsolid = ivector(Hsize_s);
+    Nair = ivector(Hsize_s);
+    Curvature = usibox(Xsyssize + 1,Ysyssize + 1,Zsyssize + 1);
+    Sum = ivector(Hsize_r + 2));
+    Normm = fbox(Xsyssize + 1,Ysyssize + 1,Zsyssize + 1);
+    Rres = fbox(Xsyssize + 1,Ysyssize + 1,Zsyssize + 1);
 
     if (!R || !S || !Xr || !Filter || !Nsolid || !Nair
         || !Curvature || !Sum || !Normm || !Rres) {
@@ -7076,11 +7076,11 @@ int distfa(int fadchoice)
     int *phase,*partid;
     int ix,iy,iz,valin,valout,partin;
     int count,c1,phnew,mult;
-    long int totcnt,ascnt,cacl2cnt,quartzcnt,inertcnt;
-    long int anhcnt,cas2cnt,c3acnt;
-    long int ca2scnt,c2ascnt,k6a2scnt;
-    long int markc3a,markas,markcacl2,markamsil,markquartz,markanh,markcas2;
-    long int markca2s,markc2as,markk6a2s;
+    int totcnt,ascnt,cacl2cnt,quartzcnt,inertcnt;
+    int anhcnt,cas2cnt,c3acnt;
+    int ca2scnt,c2ascnt,k6a2scnt;
+    int markc3a,markas,markcacl2,markamsil,markquartz,markanh,markcas2;
+    int markca2s,markc2as,markk6a2s,markinert;
     float probasg,probcacl2,probsio2;
     float probca2s,probc2as,probk6a2s;
     float probc3a,prph,probcas2,probanh;
@@ -7174,14 +7174,14 @@ int distfa(int fadchoice)
 
     /* Determine goal counts for each phase */
 
-    markas = (long)(probasg*(float)totcnt);
-    markamsil = (long)(probsio2*(float)totcnt);
-    markcacl2 = (long)(probcacl2*(float)totcnt);
-    markanh = (long)(probanh*(float)totcnt);
-    markcas2 = (long)(probcas2*(float)totcnt);
-    markc3a = (long)(probc3a*(float)totcnt);
-    markinert = (long)((1.0-probasg-probsio2-probcacl2-probanh-
-        probcas2-probc3a)*(float)totcnt);
+    markas = probasg*(float)totcnt;
+    markamsil = probsio2*(float)totcnt;
+    markcacl2 = probcacl2*(float)totcnt;
+    markanh = probanh*(float)totcnt;
+    markcas2 = probcas2*(float)totcnt;
+    markc3a = probc3a*(float)totcnt;
+    markinert = (1.0-probasg-probsio2-probcacl2-probanh-
+        probcas2-probc3a)*(float)totcnt;
 
     /***
     *    Convert probabilities to cumulative
