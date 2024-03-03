@@ -3082,8 +3082,10 @@ void outmic(void) {
         valout = Agg[ix][iy][iz];
         fprintf(partfile, "%d\n", valout);
         valout = Aggreal[ix][iy][iz];
+        /*
         if ((transparent != 1) && valout == POROSITY)
           valout = C3A;
+        */
         fprintf(outfile, "%d\n", valout);
       }
     }
