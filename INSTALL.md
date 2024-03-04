@@ -37,15 +37,17 @@ If all goes well, the executables will be located in the folder `WORKDIR/build_b
 
 * `cd backend/zlib-1.3.1`
 * `mkdir build; cd build`
-* `cmake -DCMAKE_INSTALL_PREFIX="../../.." ..`
-* `make install`
+* `cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="../../.."`
+* `mingw32-make.exe`
+* `mingw32-make.exe install`
 * `cd ../../libpng`
 * `mkdir build; cd build`
-* `cmake -DCMAKE_INSTALL_PREFIX="../../.." -DZLIB-ROOT="../../.." ..`
-* `make install`
+* `cmake .. -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX="../../.." -DZLIB-ROOT="../../.."`
+* `mingw32-make.exe`
+* `mingw32-make.exe install`
 * `cd ../../../build_backend`
-* `cmake ..`
-* `make`
+* `cmake .. -G "MinGW Makefiles"`
+* `mingw32-make.exe`
 
 If all goes well, the executables will be located in the folder `WORKDIR/build_backend`
 
