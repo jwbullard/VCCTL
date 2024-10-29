@@ -1,8 +1,8 @@
-prefix=/Users/jwbullard/Software/MyProjects/VCCTL
-exec_prefix=/Users/jwbullard/Software/MyProjects/VCCTL
-libdir=/Users/jwbullard/Software/MyProjects/VCCTL/lib
-sharedlibdir=/Users/jwbullard/Software/MyProjects/VCCTL/lib
-includedir=/Users/jwbullard/Software/MyProjects/VCCTL/include
+prefix=/Users/jwbullard/Documents/Projects/Modeling/newVCCTL/VCCTL
+exec_prefix=/Users/jwbullard/Documents/Projects/Modeling/newVCCTL/VCCTL
+libdir=/Users/jwbullard/Documents/Projects/Modeling/newVCCTL/VCCTL/lib
+sharedlibdir=/Users/jwbullard/Documents/Projects/Modeling/newVCCTL/VCCTL/lib
+includedir=/Users/jwbullard/Documents/Projects/Modeling/newVCCTL/VCCTL/include
 
 Name: zlib
 Description: zlib compression library

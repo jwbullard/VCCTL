@@ -19,14 +19,14 @@ Using a terminal window (command line prompt), navigate to the folder containing
 
 * `cd backend/zlib-1.3.1`
 * `mkdir build; cd build`
-* `cmake -DCMAKE_INSTALL_PREFIX="../../.." ..`
+* `cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/g++ -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk -DCMAKE_INSTALL_PREFIX="../../.." ..`
 * `make install`
 * `cd ../../libpng`
 * `mkdir build; cd build`
-* `cmake -DCMAKE_INSTALL_PREFIX="../../.." -DZLIB-ROOT="../../.." ..`
+* `cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/g++ -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk -DCMAKE_INSTALL_PREFIX="../../.." -DZLIB-ROOT="../../.." ..`
 * `make install`
 * `cd ../../../build_backend`
-* `cmake ..`
+* `cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_OSX_SYSROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk ..`
 * `make`
 
 If all goes well, the executables will be located in the folder `WORKDIR/build_backend`

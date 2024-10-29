@@ -12,7 +12,7 @@ derby.log
 usr/*
 
 # Ignore contents of the backend_build folder
-backend_build/*
+build_backend/*
 
 # Ignore contents of the include folder
 include/*
