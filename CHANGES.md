@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Oct 29 14:30 2024 | Changed libpng and zlib to submodules. |
 | Mar 04 10:38:07 2024 | Fixed instructions for Windows compiling with MinGW and Msys |
 | Mar 03 15:28:54 2024 | Small changes to INSTALL.md for help with Windows compiling |
 | Mar 03 14:36:50 2024 | Changed default view for aggregate packings |
