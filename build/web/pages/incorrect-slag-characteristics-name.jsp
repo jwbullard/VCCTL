@@ -1,1 +1,0 @@
-The name of the slag characteristics is incorrect.

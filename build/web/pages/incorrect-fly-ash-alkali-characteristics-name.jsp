@@ -1,1 +1,0 @@
-The name of the fly ash alkali characteristics is incorrect.
