@@ -1,0 +1,19 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=VCCTL
+GenericName=Virtual Cement Testing Laboratory
+Comment=Virtual Cement and Concrete Testing Laboratory - Desktop Application
+Exec=vcctl-gtk
+Icon=vcctl-gtk
+Terminal=false
+Categories=Science;Education;Engineering;
+Keywords=cement;concrete;materials;simulation;modeling;nist;
+StartupNotify=true
+StartupWMClass=vcctl-gtk
+MimeType=application/x-vcctl-project;
+Actions=about;
+
+[Desktop Action about]
+Name=About VCCTL
+Exec=vcctl-gtk --about
