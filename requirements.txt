@@ -1,0 +1,24 @@
+# Core GUI and Database
+PyGObject>=3.42.0        # GTK3 bindings for Python
+SQLAlchemy>=2.0.0        # ORM for database operations
+alembic>=1.12.0          # Database migrations
+
+# Data Processing and Validation
+pandas>=2.0.0            # Data manipulation and analysis
+numpy>=1.24.0            # Numerical computing
+pydantic>=2.0.0          # Data validation and settings management
+
+# Configuration and Utilities
+PyYAML>=6.0              # YAML configuration files
+Pillow>=10.0.0           # Image processing
+matplotlib>=3.7.0        # Plotting and visualization
+
+# Development and Testing
+pytest>=7.4.0           # Testing framework
+pytest-cov>=4.1.0       # Test coverage
+black>=23.7.0           # Code formatting
+flake8>=6.0.0           # Code linting
+mypy>=1.5.0             # Type checking
+
+# Optional GUI enhancements
+cairo-cffi>=1.6.0       # Cairo graphics integration (optional)
