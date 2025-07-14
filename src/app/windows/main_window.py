@@ -754,6 +754,10 @@ Services:"""
             status_type: Type of status (info, warning, error, success)
             timeout: Auto-clear timeout in seconds (0 = no timeout)
         """
+        # Check if status bar is initialized
+        if not hasattr(self, 'status_bar') or self.status_bar is None:
+            return
+            
         # Clear previous message
         self.status_bar.pop(self.status_context_id)
         self.status_bar.push(self.status_context_id, message)
@@ -1025,7 +1029,7 @@ This GTK3 desktop application provides an intuitive interface for:
         # Placeholder for results tab
         placeholder = Gtk.Label()
         placeholder.set_markup("""
-<span size="large"><b>Results & Visualization</b></span>
+<span size="large"><b>Results &amp; Visualization</b></span>
 
 This tab will contain the results analysis interface.
 

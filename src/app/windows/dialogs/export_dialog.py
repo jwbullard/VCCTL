@@ -71,7 +71,10 @@ class ExportDialog(Gtk.Dialog):
         """Create dialog UI."""
         content_area = self.get_content_area()
         content_area.set_spacing(12)
-        content_area.set_margin(12)
+        content_area.set_margin_top(12)
+        content_area.set_margin_bottom(12)
+        content_area.set_margin_left(12)
+        content_area.set_margin_right(12)
         
         # Main container
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -97,7 +100,10 @@ class ExportDialog(Gtk.Dialog):
         parent.pack_start(frame, False, False, 0)
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.set_margin(12)
+        vbox.set_margin_top(12)
+        vbox.set_margin_bottom(12)
+        vbox.set_margin_left(12)
+        vbox.set_margin_right(12)
         frame.add(vbox)
         
         # Format checkboxes
@@ -153,7 +159,10 @@ class ExportDialog(Gtk.Dialog):
         parent.pack_start(frame, False, False, 0)
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.set_margin(12)
+        vbox.set_margin_top(12)
+        vbox.set_margin_bottom(12)
+        vbox.set_margin_left(12)
+        vbox.set_margin_right(12)
         frame.add(vbox)
         
         # Template description
@@ -190,7 +199,10 @@ class ExportDialog(Gtk.Dialog):
         parent.pack_start(frame, False, False, 0)
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.set_margin(12)
+        vbox.set_margin_top(12)
+        vbox.set_margin_bottom(12)
+        vbox.set_margin_left(12)
+        vbox.set_margin_right(12)
         frame.add(vbox)
         
         # Directory chooser
@@ -226,7 +238,10 @@ class ExportDialog(Gtk.Dialog):
         parent.pack_start(frame, False, False, 0)
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.set_margin(12)
+        vbox.set_margin_top(12)
+        vbox.set_margin_bottom(12)
+        vbox.set_margin_left(12)
+        vbox.set_margin_right(12)
         frame.add(vbox)
         
         # Include plots

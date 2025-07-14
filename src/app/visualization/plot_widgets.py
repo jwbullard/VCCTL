@@ -106,7 +106,10 @@ class HydrationPlotWidget(CustomPlotWidget):
         frame.set_shadow_type(Gtk.ShadowType.IN)
         
         grid = Gtk.Grid()
-        grid.set_margin(6)
+        grid.set_margin_top(6)
+        grid.set_margin_bottom(6)
+        grid.set_margin_left(6)
+        grid.set_margin_right(6)
         grid.set_row_spacing(6)
         grid.set_column_spacing(12)
         
@@ -250,7 +253,10 @@ class ParticleSizeDistributionWidget(CustomPlotWidget):
         frame.set_shadow_type(Gtk.ShadowType.IN)
         
         grid = Gtk.Grid()
-        grid.set_margin(6)
+        grid.set_margin_top(6)
+        grid.set_margin_bottom(6)
+        grid.set_margin_left(6)
+        grid.set_margin_right(6)
         grid.set_row_spacing(6)
         grid.set_column_spacing(12)
         
@@ -274,7 +280,10 @@ class ParticleSizeDistributionWidget(CustomPlotWidget):
         # Statistics display
         stats_frame = Gtk.Frame(label="Statistics")
         stats_grid = Gtk.Grid()
-        stats_grid.set_margin(6)
+        stats_grid.set_margin_top(6)
+        stats_grid.set_margin_bottom(6)
+        stats_grid.set_margin_left(6)
+        stats_grid.set_margin_right(6)
         stats_grid.set_row_spacing(3)
         stats_grid.set_column_spacing(6)
         
@@ -436,7 +445,10 @@ class MicrostructurePlotWidget(CustomPlotWidget):
         frame.set_shadow_type(Gtk.ShadowType.IN)
         
         grid = Gtk.Grid()
-        grid.set_margin(6)
+        grid.set_margin_top(6)
+        grid.set_margin_bottom(6)
+        grid.set_margin_left(6)
+        grid.set_margin_right(6)
         grid.set_row_spacing(6)
         grid.set_column_spacing(12)
         

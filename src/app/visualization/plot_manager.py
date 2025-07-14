@@ -102,7 +102,7 @@ class PlotManager(GObject.Object):
         canvas.set_size_request(600, 400)
         
         # Create navigation toolbar
-        toolbar = NavigationToolbar(canvas, None)
+        toolbar = NavigationToolbar(canvas)
         
         # Create container widget
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)

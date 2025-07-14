@@ -89,7 +89,7 @@ class Microstructure3DViewer(Gtk.Box):
         self.canvas = FigureCanvas(self.figure)
         self.canvas.set_size_request(600, 600)
         
-        self.toolbar = NavigationToolbar(self.canvas, None)
+        self.toolbar = NavigationToolbar(self.canvas)
         
         # Create container
         self.plot_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
@@ -118,7 +118,10 @@ class Microstructure3DViewer(Gtk.Box):
         self.control_panel.set_shadow_type(Gtk.ShadowType.IN)
         
         grid = Gtk.Grid()
-        grid.set_margin(6)
+        grid.set_margin_top(6)
+        grid.set_margin_bottom(6)
+        grid.set_margin_left(6)
+        grid.set_margin_right(6)
         grid.set_row_spacing(6)
         grid.set_column_spacing(12)
         
@@ -163,7 +166,10 @@ class Microstructure3DViewer(Gtk.Box):
         # Cross-section controls
         cross_section_frame = Gtk.Frame(label="Cross-Sections")
         cross_grid = Gtk.Grid()
-        cross_grid.set_margin(6)
+        cross_grid.set_margin_top(6)
+        cross_grid.set_margin_bottom(6)
+        cross_grid.set_margin_left(6)
+        cross_grid.set_margin_right(6)
         cross_grid.set_row_spacing(3)
         cross_grid.set_column_spacing(6)
         
@@ -206,7 +212,10 @@ class Microstructure3DViewer(Gtk.Box):
         # Animation controls
         animation_frame = Gtk.Frame(label="Animation")
         anim_grid = Gtk.Grid()
-        anim_grid.set_margin(6)
+        anim_grid.set_margin_top(6)
+        anim_grid.set_margin_bottom(6)
+        anim_grid.set_margin_left(6)
+        anim_grid.set_margin_right(6)
         anim_grid.set_row_spacing(3)
         anim_grid.set_column_spacing(6)
         

@@ -695,6 +695,10 @@ class KeyboardManager(GObject.Object):
         """Handle show help shortcut."""
         self.logger.info("Show help shortcut activated")
     
+    def _on_show_shortcuts(self) -> None:
+        """Handle show shortcuts shortcut."""
+        self.show_shortcuts_dialog()
+    
     def _on_toggle_accessibility(self) -> None:
         """Handle toggle accessibility mode shortcut."""
         self.logger.info("Toggle accessibility mode shortcut activated")

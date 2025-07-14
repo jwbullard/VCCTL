@@ -3,9 +3,12 @@
 
 cd "$(dirname "$0")"
 
+# Remove anaconda from PATH first
+export PATH=$(echo "$PATH" | sed 's|/Users/jwbullard/anaconda3/bin:||g')
+
 # Source environment setup
 source setup_env.sh > /dev/null 2>&1
 
-# Launch VCCTL
+# Launch VCCTL with explicit Python path
 echo "🚀 Launching VCCTL Desktop Application..."
-python src/main.py "$@"
+/usr/bin/python3 src/main.py "$@"

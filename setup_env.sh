@@ -9,7 +9,13 @@ source vcctl-gtk-env/bin/activate
 # Set up GTK3 environment variables for macOS with Homebrew
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/opt/homebrew/share/pkgconfig"
 export GI_TYPELIB_PATH="/opt/homebrew/lib/girepository-1.0"
-export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+export DYLD_LIBRARY_PATH="/opt/homebrew/lib:/opt/homebrew/opt/pango/lib:/opt/homebrew/opt/glib/lib:/opt/homebrew/opt/cairo/lib:$DYLD_LIBRARY_PATH"
+
+# Remove anaconda from PATH to prevent conflicts
+export PATH=$(echo "$PATH" | sed 's|/Users/jwbullard/anaconda3/bin:||g')
+
+# Use system Python instead of anaconda
+export PYTHON_PATH="/usr/bin/python3"
 
 echo "Environment variables set:"
 echo "PKG_CONFIG_PATH: $PKG_CONFIG_PATH"

@@ -46,6 +46,7 @@ class ServiceContainer:
         
         self.logger = logging.getLogger('VCCTL.ServiceContainer')
         self.db_service = db_service or database_service
+        self.database_service = self.db_service  # Alias for compatibility
         
         # Initialize configuration and core services
         self._config_manager = None
