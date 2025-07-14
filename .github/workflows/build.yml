@@ -1,0 +1,285 @@
+name: Build and Package VCCTL
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PROJECT_NAME: vcctl-gtk
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgtk-3-dev \
+          libgirepository1.0-dev \
+          pkg-config \
+          gir1.2-gtk-3.0 \
+          python3-gi \
+          python3-gi-cairo
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v --cov=src --cov-report=xml
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  build-linux:
+    name: Build Linux AppImage
+    needs: test
+    runs-on: ubuntu-20.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgtk-3-dev \
+          libgirepository1.0-dev \
+          pkg-config \
+          gir1.2-gtk-3.0 \
+          python3-gi \
+          python3-gi-cairo \
+          libcairo2-dev \
+          libpango1.0-dev \
+          libgdk-pixbuf2.0-dev \
+          libffi-dev \
+          shared-mime-info
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller>=5.13.0
+    
+    - name: Build Linux AppImage
+      run: |
+        chmod +x scripts/build_linux.sh
+        scripts/build_linux.sh
+    
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-appimage
+        path: dist/VCCTL-x86_64.AppImage
+        retention-days: 30
+
+  build-windows:
+    name: Build Windows Installer
+    needs: test
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller>=5.13.0 pywin32 pywin32-ctypes
+    
+    - name: Install NSIS
+      run: |
+        choco install nsis -y
+        refreshenv
+    
+    - name: Build Windows Installer
+      run: |
+        scripts/build_windows.bat
+    
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-installer
+        path: |
+          dist/VCCTL-Setup-x64.exe
+          dist/VCCTL-Portable-x64.zip
+        retention-days: 30
+
+  build-macos:
+    name: Build macOS DMG
+    needs: test
+    runs-on: macos-12
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install system dependencies
+      run: |
+        brew install gtk+3 pygobject3 adwaita-icon-theme
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller>=5.13.0
+    
+    - name: Build macOS DMG
+      run: |
+        chmod +x scripts/build_macos.sh
+        scripts/build_macos.sh
+    
+    - name: Upload macOS artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-dmg
+        path: |
+          dist/VCCTL-macOS.dmg
+          dist/VCCTL-macOS.zip
+        retention-days: 30
+
+  create-release:
+    name: Create Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Create release notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        # VCCTL Release ${{ github.ref_name }}
+        
+        Virtual Cement and Concrete Testing Laboratory - Desktop Application
+        
+        ## Downloads
+        
+        ### Linux
+        - **VCCTL-x86_64.AppImage** - Portable AppImage for Linux systems
+        
+        ### Windows
+        - **VCCTL-Setup-x64.exe** - Windows installer with uninstaller
+        - **VCCTL-Portable-x64.zip** - Portable ZIP package
+        
+        ### macOS
+        - **VCCTL-macOS.dmg** - macOS DMG installer
+        - **VCCTL-macOS.zip** - Portable application bundle
+        
+        ## Installation Instructions
+        
+        ### Linux
+        1. Download VCCTL-x86_64.AppImage
+        2. Make it executable: `chmod +x VCCTL-x86_64.AppImage`
+        3. Run: `./VCCTL-x86_64.AppImage`
+        
+        ### Windows
+        1. Download and run VCCTL-Setup-x64.exe
+        2. Follow the installation wizard
+        3. Launch from Start Menu or Desktop shortcut
+        
+        ### macOS
+        1. Download and mount VCCTL-macOS.dmg
+        2. Drag VCCTL.app to Applications folder
+        3. Launch from Launchpad or Applications
+        
+        ## System Requirements
+        
+        - **Linux**: Ubuntu 18.04+ / CentOS 7+ / Fedora 30+
+        - **Windows**: Windows 10 (64-bit)
+        - **macOS**: macOS 10.14 (Mojave) or later
+        - **Memory**: 4 GB RAM (8 GB recommended)
+        - **Storage**: 2 GB available disk space
+        
+        ## What's New
+        
+        See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+        
+        EOF
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: VCCTL ${{ github.ref_name }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+        files: |
+          linux-appimage/VCCTL-x86_64.AppImage
+          windows-installer/VCCTL-Setup-x64.exe
+          windows-installer/VCCTL-Portable-x64.zip
+          macos-dmg/VCCTL-macOS.dmg
+          macos-dmg/VCCTL-macOS.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-packages:
+    name: Publish Python Packages
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build source and wheel distributions
+      run: |
+        python -m build
+    
+    - name: Check distributions
+      run: |
+        twine check dist/*
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip_existing: true

@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Float, LargeBinary
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -56,6 +56,16 @@ class Cement(Base):
     alkali_file = Column(String(64), nullable=True, default='lowalkali', 
                         doc="Alkali characteristics file reference")
     
+    # Phase composition (mass fractions)
+    c3s_mass_fraction = Column(Float, nullable=True, doc="C3S (Tricalcium Silicate) mass fraction")
+    c2s_mass_fraction = Column(Float, nullable=True, doc="C2S (Dicalcium Silicate) mass fraction")
+    c3a_mass_fraction = Column(Float, nullable=True, doc="C3A (Tricalcium Aluminate) mass fraction")
+    c4af_mass_fraction = Column(Float, nullable=True, doc="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    
+    # Physical properties
+    specific_gravity = Column(Float, nullable=True, default=3.15, doc="Specific gravity of cement")
+    description = Column(String(255), nullable=True, doc="Cement description")
+    
     def __repr__(self) -> str:
         """String representation of the cement."""
         return f"<Cement(name='{self.name}', psd='{self.psd}')>"
@@ -82,10 +92,32 @@ class Cement(Base):
     def has_phase_data(self) -> bool:
         """Check if cement has phase composition data."""
         return any([
-            self.c3s is not None,
-            self.c3a is not None,
-            self.c4f is not None
+            self.c3s_mass_fraction is not None,
+            self.c2s_mass_fraction is not None,
+            self.c3a_mass_fraction is not None,
+            self.c4af_mass_fraction is not None
         ])
+    
+    @property
+    def total_phase_fraction(self) -> Optional[float]:
+        """Calculate total phase fraction if all values are present."""
+        fractions = [
+            self.c3s_mass_fraction, 
+            self.c2s_mass_fraction, 
+            self.c3a_mass_fraction, 
+            self.c4af_mass_fraction
+        ]
+        valid_fractions = [f for f in fractions if f is not None]
+        if len(valid_fractions) >= 3:  # Require at least 3 phases
+            return sum(valid_fractions)
+        return None
+    
+    @property
+    def density(self) -> Optional[float]:
+        """Calculate density from specific gravity (assuming water density = 1000 kg/m³)."""
+        if self.specific_gravity is not None:
+            return self.specific_gravity * 1000  # kg/m³
+        return None
     
     @property
     def has_gypsum_data(self) -> bool:
@@ -121,6 +153,29 @@ class Cement(Base):
             return False
         
         return True
+    
+    def validate_phase_fractions(self) -> bool:
+        """Validate that phase fractions are reasonable (0-1 range and sum ≤ 1.0)."""
+        fractions = [
+            self.c3s_mass_fraction,
+            self.c2s_mass_fraction, 
+            self.c3a_mass_fraction,
+            self.c4af_mass_fraction
+        ]
+        valid_fractions = [f for f in fractions if f is not None]
+        
+        if not valid_fractions:
+            return True  # No fractions to validate
+        
+        # Check individual fractions are in valid range
+        if any(f < 0 or f > 1 for f in valid_fractions):
+            return False
+        
+        # Check total doesn't exceed 1.0 if we have significant data
+        if len(valid_fractions) >= 3 and sum(valid_fractions) > 1.0:
+            return False
+        
+        return True
 
 
 class CementCreate(BaseModel):
@@ -138,14 +193,31 @@ class CementCreate(BaseModel):
     alkali_file: Optional[str] = Field('lowalkali', max_length=64, 
                                      description="Alkali characteristics file reference")
     
-    @validator('name')
+    # Phase composition (mass fractions)
+    c3s_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C3S (Tricalcium Silicate) mass fraction")
+    c2s_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C2S (Dicalcium Silicate) mass fraction")
+    c3a_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C3A (Tricalcium Aluminate) mass fraction")
+    c4af_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                               description="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    
+    # Physical properties
+    specific_gravity: Optional[float] = Field(3.15, gt=0.0, le=5.0, 
+                                            description="Specific gravity of cement")
+    description: Optional[str] = Field(None, max_length=255, description="Cement description")
+    
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate cement name."""
         if not v or not v.strip():
             raise ValueError('Cement name cannot be empty')
         return v.strip()
     
-    @validator('dihyd', 'anhyd', 'hemihyd')
+    @field_validator('dihyd', 'anhyd', 'hemihyd')
+    @classmethod
     def validate_gypsum_fractions(cls, v):
         """Validate individual gypsum fractions."""
         if v is not None and (v < 0 or v > 1):
@@ -161,6 +233,22 @@ class CementCreate(BaseModel):
             raise ValueError('Total gypsum fractions cannot exceed 1.0')
         
         return True
+    
+    @model_validator(mode='after')
+    def validate_phase_fractions_total(self):
+        """Validate that total phase fractions don't exceed 1.0."""
+        fractions = [
+            self.c3s_mass_fraction,
+            self.c2s_mass_fraction,
+            self.c3a_mass_fraction,
+            self.c4af_mass_fraction
+        ]
+        valid_fractions = [f for f in fractions if f is not None]
+        
+        if len(valid_fractions) >= 3 and sum(valid_fractions) > 1.0:
+            raise ValueError('Total phase fractions cannot exceed 1.0 (100%)')
+        
+        return self
 
 
 class CementUpdate(BaseModel):
@@ -176,6 +264,21 @@ class CementUpdate(BaseModel):
     # Alkali characteristics
     alkali_file: Optional[str] = Field(None, max_length=64, 
                                      description="Alkali characteristics file reference")
+    
+    # Phase composition (mass fractions)
+    c3s_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C3S (Tricalcium Silicate) mass fraction")
+    c2s_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C2S (Dicalcium Silicate) mass fraction")
+    c3a_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                              description="C3A (Tricalcium Aluminate) mass fraction")
+    c4af_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                               description="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    
+    # Physical properties
+    specific_gravity: Optional[float] = Field(None, gt=0.0, le=5.0, 
+                                            description="Specific gravity of cement")
+    description: Optional[str] = Field(None, max_length=255, description="Cement description")
 
 
 class CementResponse(BaseModel):
@@ -187,9 +290,24 @@ class CementResponse(BaseModel):
     anhyd: Optional[float]
     hemihyd: Optional[float]
     alkali_file: Optional[str]
+    
+    # Phase composition
+    c3s_mass_fraction: Optional[float]
+    c2s_mass_fraction: Optional[float]
+    c3a_mass_fraction: Optional[float]
+    c4af_mass_fraction: Optional[float]
+    
+    # Physical properties
+    specific_gravity: Optional[float]
+    description: Optional[str]
+    
+    # Calculated properties
     has_phase_data: bool
     has_gypsum_data: bool
     total_gypsum_fraction: Optional[float]
+    total_phase_fraction: Optional[float]
+    density: Optional[float]
+    
     created_at: str
     updated_at: str
     

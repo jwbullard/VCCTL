@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, LargeBinary
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -146,14 +146,16 @@ class DbFileCreate(BaseModel):
     data_text: Optional[str] = Field(None, description="File data as text")
     info_text: Optional[str] = Field(None, description="Info data as text")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate file name."""
         if not v or not v.strip():
             raise ValueError('File name cannot be empty')
         return v.strip()
     
-    @validator('type')
+    @field_validator('type')
+    @classmethod
     def validate_type(cls, v):
         """Validate file type."""
         if v is not None:

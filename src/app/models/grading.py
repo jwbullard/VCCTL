@@ -9,7 +9,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 from typing import Optional, List, Dict
 import json
 from sqlalchemy import Column, String, Float, LargeBinary, Enum, event
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import enum
 
 from app.database.base import Base
@@ -188,14 +188,16 @@ class GradingCreate(BaseModel):
     grading_text: Optional[str] = Field(None, description="Grading data as text")
     max_diameter: Optional[float] = Field(None, gt=0.0, description="Maximum diameter (mm)")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate grading name."""
         if not v or not v.strip():
             raise ValueError('Grading name cannot be empty')
         return v.strip()
     
-    @validator('max_diameter')
+    @field_validator('max_diameter')
+    @classmethod
     def validate_max_diameter(cls, v):
         """Validate maximum diameter."""
         if v is not None and v <= 0:

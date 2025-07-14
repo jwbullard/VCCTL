@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Float
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -179,14 +179,16 @@ class SlagCreate(BaseModel):
     
     description: Optional[str] = Field(None, description="Slag description")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate slag name."""
         if not v or not v.strip():
             raise ValueError('Slag name cannot be empty')
         return v.strip()
     
-    @validator('specific_gravity')
+    @field_validator('specific_gravity')
+    @classmethod
     def validate_specific_gravity(cls, v):
         """Validate specific gravity."""
         if v is not None and v <= 0:

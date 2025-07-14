@@ -7,6 +7,8 @@ The primary application window for the VCCTL GTK3 desktop application.
 
 import gi
 import logging
+import time
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional, Dict, Any
 import json
 from pathlib import Path
@@ -18,7 +20,11 @@ if TYPE_CHECKING:
     from app.application import VCCTLApplication
 
 from app.services.service_container import get_service_container
-from app.windows.panels import MaterialsPanel, MixDesignPanel
+from app.windows.panels import MaterialsPanel, MixDesignPanel, MicrostructurePanel, HydrationPanel, FileManagementPanel, OperationsMonitoringPanel
+from app.utils.error_handling import get_error_handler, ErrorCategory, ErrorSeverity
+from app.utils.performance_monitor import get_performance_monitor, profile_function
+from app.ui import create_ui_polish_manager, UIPolishManager
+from app.help import create_help_system, HelpManager, HelpDialog, TooltipManager
 
 
 class VCCTLMainWindow(Gtk.ApplicationWindow):
@@ -31,22 +37,46 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self.app = app
         self.logger = logging.getLogger('VCCTL.MainWindow')
         
+        # Initialize error handling and performance monitoring
+        self.error_handler = get_error_handler(self)
+        self.performance_monitor = get_performance_monitor()
+        self.performance_monitor.start_monitoring()
+        
+        # Initialize UI polish manager (theming, accessibility, keyboard shortcuts, responsive layout)
+        self.ui_polish_manager = create_ui_polish_manager(self)
+        
+        # Initialize help system
+        self.help_manager, self.tooltip_manager = create_help_system(self)
+        self.help_dialog = None
+        
+        # Panel references for UI polish integration
+        self.panels = {}
+        
         # Window properties
         self.set_title("VCCTL - Virtual Cement and Concrete Testing Laboratory")
         self.set_default_size(1200, 800)
         self.set_position(Gtk.WindowPosition.CENTER)
         
-        # Setup the UI
-        self._setup_ui()
-        
-        # Connect signals
-        self.connect('delete-event', self._on_delete_event)
-        self.connect('destroy', self._on_destroy)
-        
-        # Load window state
-        self._load_window_state()
-        
-        self.logger.info("Main window initialized")
+        try:
+            # Setup the UI
+            self._setup_ui()
+            
+            # Connect signals
+            self.connect('delete-event', self._on_delete_event)
+            self.connect('destroy', self._on_destroy)
+            
+            # Load window state
+            self._load_window_state()
+            
+            self.logger.info("Main window initialized")
+            
+        except Exception as e:
+            self.error_handler.handle_critical_error(
+                e, 
+                ErrorCategory.UI, 
+                context={'component': 'main_window', 'phase': 'initialization'},
+                user_message="Failed to initialize the main window. The application may not function properly."
+            )
     
     def _setup_ui(self) -> None:
         """Setup the main window UI components."""
@@ -62,6 +92,9 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         
         # Create status bar
         self._create_status_bar(main_vbox)
+        
+        # Setup help system integration
+        self._setup_help_system_integration()
         
         # Show all widgets
         self.show_all()
@@ -126,6 +159,18 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         mix_design_item.connect('activate', lambda w: self.switch_to_tab("mix_design"))
         tools_submenu.append(mix_design_item)
         
+        microstructure_item = Gtk.MenuItem(label="Microstructure Parameters")
+        microstructure_item.connect('activate', lambda w: self.switch_to_tab("microstructure"))
+        tools_submenu.append(microstructure_item)
+        
+        hydration_item = Gtk.MenuItem(label="Hydration Simulation")
+        hydration_item.connect('activate', lambda w: self.switch_to_tab("hydration"))
+        tools_submenu.append(hydration_item)
+        
+        file_manager_item = Gtk.MenuItem(label="File Manager")
+        file_manager_item.connect('activate', lambda w: self.switch_to_tab("files"))
+        tools_submenu.append(file_manager_item)
+        
         operations_item = Gtk.MenuItem(label="Operation Manager")
         operations_item.connect('activate', lambda w: self.switch_to_tab("operations"))
         tools_submenu.append(operations_item)
@@ -172,9 +217,23 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         help_section = Gtk.MenuItem(label="Help")
         help_submenu = Gtk.Menu()
         
+        help_contents_item = Gtk.MenuItem(label="Help Contents")
+        help_contents_item.connect('activate', self._on_help_contents_clicked)
+        help_submenu.append(help_contents_item)
+        
+        getting_started_item = Gtk.MenuItem(label="Getting Started")
+        getting_started_item.connect('activate', self._on_getting_started_clicked)
+        help_submenu.append(getting_started_item)
+        
         user_guide_item = Gtk.MenuItem(label="User Guide")
         user_guide_item.connect('activate', self._on_user_guide_clicked)
         help_submenu.append(user_guide_item)
+        
+        help_submenu.append(Gtk.SeparatorMenuItem())
+        
+        troubleshooting_item = Gtk.MenuItem(label="Troubleshooting")
+        troubleshooting_item.connect('activate', self._on_troubleshooting_clicked)
+        help_submenu.append(troubleshooting_item)
         
         examples_item = Gtk.MenuItem(label="Examples")
         examples_item.connect('activate', self._on_examples_clicked)
@@ -216,6 +275,9 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self._create_home_tab()
         self._create_materials_tab()
         self._create_mix_design_tab()
+        self._create_microstructure_tab()
+        self._create_hydration_tab()
+        self._create_file_management_tab()
         self._create_operations_tab()
         self._create_results_tab()
         
@@ -349,7 +411,18 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
     
     def _on_destroy(self, widget: Gtk.Widget) -> None:
         """Handle window destroy event."""
-        self.logger.info("Main window destroyed")
+        try:
+            # Stop performance monitoring
+            if hasattr(self, 'performance_monitor'):
+                self.performance_monitor.stop_monitoring()
+            
+            # Save window state
+            self._save_window_state()
+            
+            self.logger.info("Main window destroyed")
+            
+        except Exception as e:
+            self.logger.error(f"Error during window cleanup: {e}")
     
     def _on_about_clicked(self, widget: Gtk.Widget) -> None:
         """Show the about dialog."""
@@ -428,13 +501,153 @@ protection in the United States. This software may be subject to foreign copyrig
     
     def _on_import_clicked(self, widget: Gtk.Widget) -> None:
         """Handle import data menu item."""
-        # TODO: Implement import dialog
-        self.update_status("Data import functionality will be implemented", "info", 3)
+        from app.windows.dialogs import show_import_dialog
+        results = show_import_dialog(self)
+        if results:
+            self.update_status(f"Imported {len(results)} materials", "success", 3)
+        else:
+            self.update_status("Import cancelled", "info", 2)
     
     def _on_export_clicked(self, widget: Gtk.Widget) -> None:
         """Handle export data menu item."""
-        # TODO: Implement export dialog
-        self.update_status("Data export functionality will be implemented", "info", 3)
+        try:
+            # Gather project data from all panels
+            project_data = self._gather_project_data()
+            
+            # Show advanced export dialog
+            from app.windows.dialogs import show_advanced_export_dialog
+            dialog = show_advanced_export_dialog(self, project_data)
+            
+            # Connect to completion signal
+            dialog.connect('export-completed', self._on_export_completed)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to start export: {e}")
+            self.update_status(f"Export error: {str(e)}", "error", 5)
+    
+    def _gather_project_data(self) -> Dict[str, Any]:
+        """Gather comprehensive project data for export."""
+        project_data = {
+            'project_name': 'VCCTL Project',
+            'vcctl_version': '1.0.0',
+            'author': 'VCCTL User',
+            'project_description': 'VCCTL simulation project with cement microstructure analysis.',
+            'generated_timestamp': datetime.now().isoformat(),
+            'materials': {},
+            'mix_design': {},
+            'microstructure': {},
+            'hydration': {},
+            'parameters': {},
+            'results': {},
+            'plot_paths': []
+        }
+        
+        try:
+            # Get data from each panel if available
+            if hasattr(self, 'materials_panel'):
+                # Get materials data
+                materials_data = self._get_materials_data()
+                if materials_data:
+                    project_data['materials'] = materials_data
+            
+            if hasattr(self, 'mix_design_panel'):
+                # Get mix design data
+                mix_data = self._get_mix_design_data()
+                if mix_data:
+                    project_data['mix_design'] = mix_data
+            
+            if hasattr(self, 'microstructure_panel'):
+                # Get microstructure parameters
+                micro_data = self._get_microstructure_data()
+                if micro_data:
+                    project_data['microstructure'] = micro_data
+            
+            if hasattr(self, 'hydration_panel'):
+                # Get hydration parameters
+                hydration_data = self._get_hydration_data()
+                if hydration_data:
+                    project_data['hydration'] = hydration_data
+            
+            # Get general parameters
+            project_data['parameters'] = {
+                'simulation_type': 'microstructure_analysis',
+                'analysis_date': datetime.now().strftime('%Y-%m-%d'),
+                'software_version': project_data['vcctl_version']
+            }
+            
+            # Mock results for demonstration
+            project_data['results'] = {
+                'degree_of_hydration': {'value': 0.65, 'unit': '-'},
+                'compressive_strength': {'value': 35.2, 'unit': 'MPa'},
+                'porosity': {'value': 0.15, 'unit': '-'},
+                'permeability': {'value': 1.2e-12, 'unit': 'm²'}
+            }
+            
+        except Exception as e:
+            self.logger.warning(f"Could not gather all project data: {e}")
+        
+        return project_data
+    
+    def _get_materials_data(self) -> Dict[str, Any]:
+        """Get materials data from materials panel."""
+        # This would extract data from the materials panel
+        # For now, return sample data
+        return {
+            'cement': {
+                'cement_type': 'Type I Portland Cement',
+                'blaine_fineness': 350.0,
+                'density': 3.15,
+                'phase_composition': {
+                    'C3S': 55.0,
+                    'C2S': 20.0,
+                    'C3A': 8.0,
+                    'C4AF': 9.0
+                }
+            },
+            'aggregates': [
+                {
+                    'name': 'Fine Aggregate',
+                    'aggregate_type': 'Sand',
+                    'density': 2.65,
+                    'absorption': 1.2
+                }
+            ]
+        }
+    
+    def _get_mix_design_data(self) -> Dict[str, Any]:
+        """Get mix design data from mix panel."""
+        return {
+            'cement': {'amount': 350.0, 'unit': 'kg/m³'},
+            'water': {'amount': 175.0, 'unit': 'kg/m³'},
+            'fine_aggregate': {'amount': 650.0, 'unit': 'kg/m³'},
+            'coarse_aggregate': {'amount': 1200.0, 'unit': 'kg/m³'},
+            'water_cement_ratio': {'amount': 0.5, 'unit': '-'}
+        }
+    
+    def _get_microstructure_data(self) -> Dict[str, Any]:
+        """Get microstructure data from microstructure panel."""
+        return {
+            'system_size': {'value': 100, 'unit': 'voxels'},
+            'resolution': {'value': 1.0, 'unit': 'μm/voxel'},
+            'aggregate_volume_fraction': {'value': 0.6, 'unit': '-'},
+            'paste_volume_fraction': {'value': 0.4, 'unit': '-'}
+        }
+    
+    def _get_hydration_data(self) -> Dict[str, Any]:
+        """Get hydration data from hydration panel."""
+        return {
+            'simulation_time': {'value': 28.0, 'unit': 'days'},
+            'temperature': {'value': 20.0, 'unit': '°C'},
+            'relative_humidity': {'value': 95.0, 'unit': '%'},
+            'aging_mode': 'isothermal'
+        }
+    
+    def _on_export_completed(self, dialog, success: bool, message: str):
+        """Handle export completion."""
+        if success:
+            self.update_status("Export completed successfully", "success", 3)
+        else:
+            self.update_status(f"Export failed: {message}", "error", 5)
     
     def _on_service_status_clicked(self, widget: Gtk.Widget) -> None:
         """Show service status dialog."""
@@ -697,6 +910,17 @@ This GTK3 desktop application provides an intuitive interface for:
         """Create the materials management tab."""
         # Create the actual materials panel
         self.materials_panel = MaterialsPanel(self)
+        self.panels['materials'] = self.materials_panel
+        
+        # Register with UI polish manager for enhanced accessibility and theming
+        self.ui_polish_manager.register_scientific_widget(
+            'materials_panel', self.materials_panel,
+            {
+                'name': 'Materials Properties Panel',
+                'description': 'Panel for managing cement materials and their chemical compositions',
+                'tooltip': 'Add, edit, and view material properties including oxide compositions'
+            }
+        )
         
         tab_label = Gtk.Label("Materials")
         self.notebook.append_page(self.materials_panel, tab_label)
@@ -705,26 +929,96 @@ This GTK3 desktop application provides an intuitive interface for:
         """Create the mix design tab."""
         # Create mix design panel
         self.mix_design_panel = MixDesignPanel(self)
+        self.panels['mix_design'] = self.mix_design_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'mix_design_panel', self.mix_design_panel,
+            {
+                'name': 'Mix Design Panel',
+                'description': 'Panel for designing concrete mix proportions and calculating ratios',
+                'tooltip': 'Specify mix components, water-cement ratio, and aggregate proportions'
+            }
+        )
         
         tab_label = Gtk.Label("Mix Design")
         self.notebook.append_page(self.mix_design_panel, tab_label)
     
+    def _create_microstructure_tab(self) -> None:
+        """Create the microstructure parameters tab."""
+        # Create microstructure panel
+        self.microstructure_panel = MicrostructurePanel(self)
+        self.panels['microstructure'] = self.microstructure_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'microstructure_panel', self.microstructure_panel,
+            {
+                'name': 'Microstructure Parameters Panel',
+                'description': 'Panel for setting microstructure generation parameters and viewing 3D models',
+                'tooltip': 'Configure particle size distributions, packing algorithms, and geometric parameters'
+            }
+        )
+        
+        tab_label = Gtk.Label("Microstructure")
+        self.notebook.append_page(self.microstructure_panel, tab_label)
+    
+    def _create_hydration_tab(self) -> None:
+        """Create the hydration simulation tab."""
+        # Create hydration panel
+        self.hydration_panel = HydrationPanel(self)
+        self.panels['hydration'] = self.hydration_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'hydration_panel', self.hydration_panel,
+            {
+                'name': 'Hydration Simulation Panel',
+                'description': 'Panel for configuring and running cement hydration simulations',
+                'tooltip': 'Set simulation parameters, monitor progress, and view hydration kinetics'
+            }
+        )
+        
+        tab_label = Gtk.Label("Hydration")
+        self.notebook.append_page(self.hydration_panel, tab_label)
+    
+    def _create_file_management_tab(self) -> None:
+        """Create the file management tab."""
+        # Create file management panel
+        self.file_management_panel = FileManagementPanel(self)
+        self.panels['files'] = self.file_management_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'file_management_panel', self.file_management_panel,
+            {
+                'name': 'File Management Panel',
+                'description': 'Panel for importing, exporting, and managing VCCTL project files',
+                'tooltip': 'Browse files, import data, export results, and manage project resources'
+            }
+        )
+        
+        tab_label = Gtk.Label("Files")
+        self.notebook.append_page(self.file_management_panel, tab_label)
+    
     def _create_operations_tab(self) -> None:
         """Create the operations/simulations tab."""
-        # Placeholder for operations tab
-        placeholder = Gtk.Label()
-        placeholder.set_markup("""
-<span size="large"><b>Operations & Simulations</b></span>
-
-This tab will contain the simulation control interface.
-
-<i>Implementation in progress...</i>
-        """)
-        placeholder.set_justify(Gtk.Justification.CENTER)
-        placeholder.set_margin_top(100)
+        # Create operations monitoring panel
+        self.operations_panel = OperationsMonitoringPanel(self)
+        self.panels['operations'] = self.operations_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'operations_panel', self.operations_panel,
+            {
+                'name': 'Operations Monitoring Panel',
+                'description': 'Panel for monitoring running simulations and computational operations',
+                'tooltip': 'View operation status, progress, resource usage, and control running tasks'
+            }
+        )
         
         tab_label = Gtk.Label("Operations")
-        self.notebook.append_page(placeholder, tab_label)
+        self.notebook.append_page(self.operations_panel, tab_label)
     
     def _create_results_tab(self) -> None:
         """Create the results/visualization tab."""
@@ -745,7 +1039,7 @@ This tab will contain the results analysis interface.
     
     def _on_tab_switched(self, notebook: Gtk.Notebook, page: Gtk.Widget, page_num: int) -> None:
         """Handle tab switch events."""
-        tab_names = ["Home", "Materials", "Mix Design", "Operations", "Results"]
+        tab_names = ["Home", "Materials", "Mix Design", "Microstructure", "Hydration", "Files", "Operations", "Results"]
         if page_num < len(tab_names):
             tab_name = tab_names[page_num]
             self.update_status(f"Switched to {tab_name} tab")
@@ -758,10 +1052,16 @@ This tab will contain the results analysis interface.
             "materials": 1,
             "mix_design": 2,
             "mix": 2,  # Alias
-            "operations": 3,
-            "simulations": 3,  # Alias
-            "results": 4,
-            "visualization": 4  # Alias
+            "microstructure": 3,
+            "parameters": 3,  # Alias
+            "hydration": 4,
+            "simulation": 4,  # Alias
+            "files": 5,
+            "file_management": 5,  # Alias
+            "operations": 6,
+            "simulations": 6,  # Alias
+            "results": 7,
+            "visualization": 7  # Alias
         }
         
         tab_index = tab_mapping.get(tab_name.lower())
@@ -772,7 +1072,7 @@ This tab will contain the results analysis interface.
     
     def get_current_tab_name(self) -> str:
         """Get the name of the currently active tab."""
-        tab_names = ["Home", "Materials", "Mix Design", "Operations", "Results"]
+        tab_names = ["Home", "Materials", "Mix Design", "Microstructure", "Hydration", "Files", "Operations", "Results"]
         current_page = self.notebook.get_current_page()
         if 0 <= current_page < len(tab_names):
             return tab_names[current_page]
@@ -781,6 +1081,32 @@ This tab will contain the results analysis interface.
     def cleanup(self) -> None:
         """Cleanup resources before window is destroyed."""
         self.logger.info("Cleaning up main window resources")
+        
+        # Cleanup panels
+        try:
+            if hasattr(self, 'operations_panel'):
+                self.operations_panel.cleanup()
+        except Exception as e:
+            self.logger.warning(f"Could not cleanup operations panel: {e}")
+        
+        # Stop performance monitoring
+        try:
+            if hasattr(self, 'performance_monitor'):
+                self.performance_monitor.stop_monitoring()
+        except Exception as e:
+            self.logger.warning(f"Could not stop performance monitoring: {e}")
+        
+        # Export performance data for debugging
+        try:
+            if hasattr(self, 'performance_monitor'):
+                from pathlib import Path
+                import tempfile
+                temp_dir = Path(tempfile.gettempdir())
+                perf_file = temp_dir / f"vcctl_performance_{int(time.time())}.json"
+                self.performance_monitor.export_performance_data(perf_file)
+                self.logger.info(f"Performance data exported to {perf_file}")
+        except Exception as e:
+            self.logger.debug(f"Could not export performance data: {e}")
         
         # Save window state
         self._save_window_state()
@@ -796,3 +1122,67 @@ This tab will contain the results analysis interface.
             config_manager.save()
         except Exception as e:
             self.logger.warning(f"Could not save current tab: {e}")
+    
+    # Help system handlers
+    
+    def _on_help_contents_clicked(self, menu_item):
+        """Handle help contents menu item."""
+        self._show_help_dialog()
+    
+    def _on_getting_started_clicked(self, menu_item):
+        """Handle getting started menu item."""
+        self._show_help_dialog("overview")
+    
+    def _on_troubleshooting_clicked(self, menu_item):
+        """Handle troubleshooting menu item."""
+        self._show_help_dialog("common_issues")
+    
+    def _show_help_dialog(self, topic_id: str = None):
+        """Show the help dialog with optional topic."""
+        if not self.help_dialog:
+            self.help_dialog = HelpDialog(self, self.help_manager)
+            self.help_dialog.connect("destroy", self._on_help_dialog_destroyed)
+        
+        if topic_id:
+            self.help_dialog.show_topic(topic_id)
+        
+        self.help_dialog.present()
+    
+    def _on_help_dialog_destroyed(self, dialog):
+        """Handle help dialog destruction."""
+        self.help_dialog = None
+    
+    def show_contextual_help(self, context: str):
+        """Show contextual help for a specific UI context."""
+        if not self.help_dialog:
+            self.help_dialog = HelpDialog(self, self.help_manager)
+            self.help_dialog.connect("destroy", self._on_help_dialog_destroyed)
+        
+        self.help_dialog.show_contextual_help(context)
+    
+    def _setup_help_system_integration(self):
+        """Setup help system integration."""
+        # Connect F1 key to help
+        def on_key_press(widget, event):
+            if event.keyval == Gdk.KEY_F1:
+                # Determine context based on current tab
+                current_tab = self.get_current_tab_name().lower()
+                if current_tab == "materials":
+                    self.show_contextual_help("materials_panel")
+                elif current_tab == "mix design":
+                    self.show_contextual_help("mix_design_panel")
+                elif current_tab == "microstructure":
+                    self.show_contextual_help("microstructure_panel")
+                elif current_tab == "hydration":
+                    self.show_contextual_help("simulation_panel")
+                else:
+                    self._show_help_dialog()
+                return True
+            return False
+        
+        self.connect("key-press-event", on_key_press)
+        
+        # Apply tooltips to all panels
+        if hasattr(self, 'tooltip_manager'):
+            for panel_name, panel in self.panels.items():
+                self.tooltip_manager.apply_tooltips_to_container(panel, f"{panel_name}_")

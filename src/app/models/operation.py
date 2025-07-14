@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any
 from datetime import datetime
 import json
 from sqlalchemy import Column, String, LargeBinary, DateTime, ForeignKey
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import enum
 
 from app.database.base import Base
@@ -202,7 +202,8 @@ class OperationCreate(BaseModel):
     notes: Optional[str] = Field(None, description="Operation notes")
     state_data: Optional[Dict[str, Any]] = Field(None, description="Operation state data")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate operation name."""
         if not v or not v.strip():

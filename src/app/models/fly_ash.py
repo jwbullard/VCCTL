@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Float, Integer, CheckConstraint
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -179,30 +179,32 @@ class FlyAshCreate(BaseModel):
     
     description: Optional[str] = Field(None, max_length=512, description="Fly ash description")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate fly ash name."""
         if not v or not v.strip():
             raise ValueError('Fly ash name cannot be empty')
         return v.strip()
     
-    @validator('specific_gravity')
+    @field_validator('specific_gravity')
+    @classmethod
     def validate_specific_gravity(cls, v):
         """Validate specific gravity."""
         if v is not None and v < 0:
             raise ValueError('Specific gravity cannot be negative')
         return v
     
-    @root_validator
-    def validate_phase_fractions_total(cls, values):
+    @model_validator(mode='after')
+    def validate_phase_fractions_total(self):
         """Validate that phase fractions don't exceed 100%."""
         fractions = [
-            values.get('aluminosilicate_glass_fraction'),
-            values.get('calcium_aluminum_disilicate_fraction'),
-            values.get('tricalcium_aluminate_fraction'),
-            values.get('calcium_chloride_fraction'),
-            values.get('silica_fraction'),
-            values.get('anhydrate_fraction')
+            self.aluminosilicate_glass_fraction,
+            self.calcium_aluminum_disilicate_fraction,
+            self.tricalcium_aluminate_fraction,
+            self.calcium_chloride_fraction,
+            self.silica_fraction,
+            self.anhydrate_fraction
         ]
         
         valid_fractions = [f for f in fractions if f is not None]
@@ -210,7 +212,7 @@ class FlyAshCreate(BaseModel):
         if len(valid_fractions) >= 3 and sum(valid_fractions) > 1.0:
             raise ValueError('Total phase fractions cannot exceed 1.0 (100%)')
         
-        return values
+        return self
 
 
 class FlyAshUpdate(BaseModel):

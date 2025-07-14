@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Numeric, Index, Enum
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import enum
 
 from app.database.base import Base
@@ -156,25 +156,25 @@ class AggregateSieveCreate(BaseModel):
     max_millimeters: Optional[float] = Field(None, ge=0.0, description="Maximum size (mm)")
     type: Optional[SieveType] = Field(None, description="Sieve type (COARSE or FINE)")
     
-    @validator('label')
+    @field_validator('label')
+    @classmethod
     def validate_label(cls, v):
         """Validate sieve label."""
         if not v or not v.strip():
             raise ValueError('Sieve label cannot be empty')
         return v.strip()
     
-    @validator('max_millimeters')
-    def validate_max_size(cls, v, values):
+    @model_validator(mode='after')
+    def validate_max_size(self):
         """Validate maximum size."""
-        if v is not None:
-            min_size = values.get('min_millimeters')
-            if min_size is not None and v <= min_size:
+        if self.max_millimeters is not None:
+            if self.min_millimeters is not None and self.max_millimeters <= self.min_millimeters:
                 raise ValueError('Maximum size must be greater than minimum size')
             
-            if v > 150.0:
+            if self.max_millimeters > 150.0:
                 raise ValueError('Maximum size is unreasonably large for concrete aggregates')
         
-        return v
+        return self
 
 
 class AggregateSieveUpdate(BaseModel):

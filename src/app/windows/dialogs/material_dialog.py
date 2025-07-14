@@ -19,7 +19,12 @@ if TYPE_CHECKING:
 from app.services.service_container import get_service_container
 
 
-class MaterialDialogBase(Gtk.Dialog, ABC):
+# Create a compatible metaclass that inherits from both GTK and ABC metaclasses
+class MaterialDialogMeta(type(Gtk.Dialog), type(ABC)):
+    pass
+
+
+class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     """Base class for material dialogs."""
     
     def __init__(self, parent: 'VCCTLMainWindow', material_type: str, material_data: Optional[Dict[str, Any]] = None):
@@ -1319,9 +1324,17 @@ class CementDialog(MaterialDialogBase):
             'final_set_time': self.final_set_spin.get_value()
         }
         
-        # Add phase composition
+        # Add phase composition (convert to model field names)
+        phase_mapping = {
+            'c3s': 'c3s_mass_fraction',
+            'c2s': 'c2s_mass_fraction', 
+            'c3a': 'c3a_mass_fraction',
+            'c4af': 'c4af_mass_fraction'
+        }
         for phase_key, spin in self.phase_spins.items():
-            data[phase_key] = spin.get_value()
+            model_field = phase_mapping.get(phase_key, phase_key)
+            # Convert percentage to fraction (0-1 range)
+            data[model_field] = spin.get_value() / 100.0
         
         # Add PSD data
         psd_mode = self.psd_mode_combo.get_active_id()

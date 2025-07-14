@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Float, Integer, LargeBinary, Index
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -129,14 +129,16 @@ class AggregateCreate(BaseModel):
     shear_modulus: Optional[float] = Field(None, ge=0.0, description="Shear modulus (GPa)")
     conductivity: Optional[float] = Field(0.0, ge=0.0, description="Thermal conductivity")
     
-    @validator('display_name')
+    @field_validator('display_name')
+    @classmethod
     def validate_display_name(cls, v):
         """Validate aggregate display name."""
         if not v or not v.strip():
             raise ValueError('Aggregate display name cannot be empty')
         return v.strip()
     
-    @validator('type')
+    @field_validator('type')
+    @classmethod
     def validate_type(cls, v):
         """Validate aggregate type."""
         if v is not None and v not in [1, 2]:

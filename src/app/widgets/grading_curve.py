@@ -560,3 +560,265 @@ class GradingCurveWidget(Gtk.Box):
                 parameters['Cc'] = (parameters['D30'] ** 2) / (parameters['D10'] * parameters['D60'])
         
         return parameters
+    
+    def fit_curve(self, fitting_type: str) -> Dict[str, Any]:
+        """Fit a mathematical curve to the grading data."""
+        if not self.grading_data or len(self.grading_data) < 3:
+            return {}
+        
+        try:
+            if fitting_type == "rosin_rammler":
+                return self._fit_rosin_rammler()
+            elif fitting_type == "gates_gaudin":
+                return self._fit_gates_gaudin()
+            elif fitting_type == "polynomial":
+                return self._fit_polynomial()
+            else:
+                return {}
+        
+        except Exception as e:
+            self.logger.error(f"Curve fitting failed: {e}")
+            return {}
+    
+    def _fit_rosin_rammler(self) -> Dict[str, Any]:
+        """Fit Rosin-Rammler distribution: R = exp(-(x/x_c)^n)"""
+        try:
+            import numpy as np
+            from scipy.optimize import curve_fit
+            
+            # Extract data
+            sizes = np.array([size for size, _ in self.grading_data])
+            retained = np.array([100 - percent for _, percent in self.grading_data])
+            
+            # Remove zero values for log fitting
+            mask = retained > 0
+            sizes = sizes[mask]
+            retained = retained[mask]
+            
+            if len(sizes) < 3:
+                return {}
+            
+            # Rosin-Rammler function
+            def rosin_rammler(x, x_c, n):
+                return 100 * (1 - np.exp(-(x / x_c) ** n))
+            
+            # Initial guess
+            x_c_guess = np.median(sizes)
+            n_guess = 1.0
+            
+            # Fit curve
+            popt, pcov = curve_fit(rosin_rammler, sizes, 100 - retained, 
+                                 p0=[x_c_guess, n_guess], maxfev=2000)
+            
+            x_c, n = popt
+            
+            # Generate fitted curve
+            size_range = np.logspace(np.log10(min(sizes)), np.log10(max(sizes)), 50)
+            fitted_percent = rosin_rammler(size_range, x_c, n)
+            
+            # Update grading data with fitted curve
+            fitted_data = [(size, percent) for size, percent in zip(size_range, fitted_percent)]
+            self.set_grading_data(fitted_data)
+            
+            return {
+                'type': 'rosin_rammler',
+                'parameters': {'x_c': x_c, 'n': n},
+                'r_squared': self._calculate_r_squared(sizes, 100 - retained, 
+                                                     rosin_rammler(sizes, x_c, n))
+            }
+            
+        except ImportError:
+            self.logger.warning("NumPy/SciPy not available for curve fitting")
+            return {}
+        except Exception as e:
+            self.logger.error(f"Rosin-Rammler fitting failed: {e}")
+            return {}
+    
+    def _fit_gates_gaudin(self) -> Dict[str, Any]:
+        """Fit Gates-Gaudin-Schumann distribution: P = (x/k)^m"""
+        try:
+            import numpy as np
+            from scipy.optimize import curve_fit
+            
+            # Extract data
+            sizes = np.array([size for size, _ in self.grading_data])
+            percent_passing = np.array([percent for _, percent in self.grading_data])
+            
+            # Remove zero values
+            mask = (sizes > 0) & (percent_passing > 0) & (percent_passing < 100)
+            sizes = sizes[mask]
+            percent_passing = percent_passing[mask]
+            
+            if len(sizes) < 3:
+                return {}
+            
+            # Gates-Gaudin-Schumann function
+            def gates_gaudin(x, k, m):
+                return 100 * (x / k) ** m
+            
+            # Initial guess
+            k_guess = max(sizes)
+            m_guess = 0.5
+            
+            # Fit curve
+            popt, pcov = curve_fit(gates_gaudin, sizes, percent_passing, 
+                                 p0=[k_guess, m_guess], maxfev=2000)
+            
+            k, m = popt
+            
+            # Generate fitted curve
+            size_range = np.linspace(min(sizes), max(sizes), 50)
+            fitted_percent = np.clip(gates_gaudin(size_range, k, m), 0, 100)
+            
+            # Update grading data with fitted curve
+            fitted_data = [(size, percent) for size, percent in zip(size_range, fitted_percent)]
+            self.set_grading_data(fitted_data)
+            
+            return {
+                'type': 'gates_gaudin',
+                'parameters': {'k': k, 'm': m},
+                'r_squared': self._calculate_r_squared(sizes, percent_passing, 
+                                                     gates_gaudin(sizes, k, m))
+            }
+            
+        except ImportError:
+            self.logger.warning("NumPy/SciPy not available for curve fitting")
+            return {}
+        except Exception as e:
+            self.logger.error(f"Gates-Gaudin fitting failed: {e}")
+            return {}
+    
+    def _fit_polynomial(self, degree: int = 3) -> Dict[str, Any]:
+        """Fit polynomial curve to grading data."""
+        try:
+            import numpy as np
+            
+            # Extract data
+            sizes = np.array([math.log10(size) for size, _ in self.grading_data if size > 0])
+            percent_passing = np.array([percent for size, percent in self.grading_data if size > 0])
+            
+            if len(sizes) < degree + 1:
+                return {}
+            
+            # Fit polynomial
+            coeffs = np.polyfit(sizes, percent_passing, degree)
+            
+            # Generate fitted curve
+            size_range = np.logspace(np.min(sizes), np.max(sizes), 50)
+            log_size_range = np.log10(size_range)
+            fitted_percent = np.polyval(coeffs, log_size_range)
+            fitted_percent = np.clip(fitted_percent, 0, 100)
+            
+            # Update grading data with fitted curve
+            fitted_data = [(size, percent) for size, percent in zip(size_range, fitted_percent)]
+            self.set_grading_data(fitted_data)
+            
+            # Calculate R-squared
+            predicted = np.polyval(coeffs, sizes)
+            r_squared = self._calculate_r_squared(percent_passing, predicted, predicted)
+            
+            return {
+                'type': 'polynomial',
+                'parameters': {'coefficients': coeffs.tolist(), 'degree': degree},
+                'r_squared': r_squared
+            }
+            
+        except ImportError:
+            self.logger.warning("NumPy not available for polynomial fitting")
+            return {}
+        except Exception as e:
+            self.logger.error(f"Polynomial fitting failed: {e}")
+            return {}
+    
+    def _calculate_r_squared(self, y_actual, y_predicted, y_fitted) -> float:
+        """Calculate R-squared value for curve fit."""
+        try:
+            import numpy as np
+            
+            y_actual = np.array(y_actual)
+            y_fitted = np.array(y_fitted)
+            
+            # Calculate R-squared
+            ss_res = np.sum((y_actual - y_fitted) ** 2)
+            ss_tot = np.sum((y_actual - np.mean(y_actual)) ** 2)
+            
+            if ss_tot == 0:
+                return 1.0
+            
+            r_squared = 1 - (ss_res / ss_tot)
+            return float(np.clip(r_squared, 0, 1))
+            
+        except Exception:
+            return 0.0
+    
+    def blend_gradings(self, component_gradings: List[Tuple[List[Tuple[float, float]], float]]) -> List[Tuple[float, float]]:
+        """Blend multiple grading curves with specified proportions."""
+        try:
+            if not component_gradings:
+                return []
+            
+            # Get all unique sieve sizes
+            all_sizes = set()
+            for grading, _ in component_gradings:
+                for size, _ in grading:
+                    all_sizes.add(size)
+            
+            # Sort sizes in descending order
+            sorted_sizes = sorted(all_sizes, reverse=True)
+            
+            # Calculate blended grading
+            blended_grading = []
+            
+            for target_size in sorted_sizes:
+                total_weighted_passing = 0.0
+                total_weight = 0.0
+                
+                for grading, proportion in component_gradings:
+                    if proportion <= 0:
+                        continue
+                    
+                    # Interpolate percent passing at target size
+                    percent_passing = self._interpolate_percent_passing(grading, target_size)
+                    
+                    total_weighted_passing += percent_passing * proportion
+                    total_weight += proportion
+                
+                if total_weight > 0:
+                    blended_percent = total_weighted_passing / total_weight
+                    blended_grading.append((target_size, blended_percent))
+            
+            return blended_grading
+            
+        except Exception as e:
+            self.logger.error(f"Grading blending failed: {e}")
+            return []
+    
+    def _interpolate_percent_passing(self, grading: List[Tuple[float, float]], target_size: float) -> float:
+        """Interpolate percent passing at a target sieve size."""
+        if not grading:
+            return 0.0
+        
+        # Sort grading by size (descending)
+        sorted_grading = sorted(grading, key=lambda x: x[0], reverse=True)
+        
+        # Check if target size is outside the range
+        if target_size >= sorted_grading[0][0]:
+            return sorted_grading[0][1]  # Largest size
+        
+        if target_size <= sorted_grading[-1][0]:
+            return sorted_grading[-1][1]  # Smallest size
+        
+        # Find adjacent points for interpolation
+        for i in range(len(sorted_grading) - 1):
+            size1, percent1 = sorted_grading[i]
+            size2, percent2 = sorted_grading[i + 1]
+            
+            if size2 <= target_size <= size1:
+                # Linear interpolation
+                if size1 != size2:
+                    ratio = (target_size - size2) / (size1 - size2)
+                    return percent2 + ratio * (percent1 - percent2)
+                else:
+                    return percent1
+        
+        return 0.0

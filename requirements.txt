@@ -20,5 +20,11 @@ black>=23.7.0           # Code formatting
 flake8>=6.0.0           # Code linting
 mypy>=1.5.0             # Type checking
 
+# Export and Reporting
+reportlab>=4.0.0         # PDF report generation
+openpyxl>=3.1.0         # Excel file operations
+xlsxwriter>=3.1.0       # Advanced Excel formatting
+lxml>=4.9.0             # XML processing
+
 # Optional GUI enhancements
 cairo-cffi>=1.6.0       # Cairo graphics integration (optional)

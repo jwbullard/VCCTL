@@ -16,10 +16,12 @@ from app.services.inert_filler_service import InertFillerService
 from app.services.mix_service import MixService
 from app.services.aggregate_service import AggregateService
 from app.services.microstructure_service import MicrostructureService
+from app.services.hydration_service import HydrationService
 from app.services.grading_service import GradingService
 from app.services.directories_service import DirectoriesService
 from app.services.file_operations_service import FileOperationsService
 from app.services.operation_service import OperationService
+from app.services.export_service import ExportService
 from app.config.config_manager import ConfigManager
 
 
@@ -49,6 +51,7 @@ class ServiceContainer:
         self._config_manager = None
         self._directories_service = None
         self._file_operations_service = None
+        self._export_service = None
         self._operation_service = None
         
         # Initialize business logic services
@@ -59,6 +62,7 @@ class ServiceContainer:
         self._mix_service = None
         self._aggregate_service = None
         self._microstructure_service = None
+        self._hydration_service = None
         self._grading_service = None
         
         self._initialized = True
@@ -87,6 +91,14 @@ class ServiceContainer:
             self._file_operations_service = FileOperationsService(self.directories_service)
             self.logger.debug("File operations service created")
         return self._file_operations_service
+    
+    @property
+    def export_service(self) -> ExportService:
+        """Get export service instance."""
+        if self._export_service is None:
+            self._export_service = ExportService(self.file_operations_service)
+            self.logger.debug("Export service created")
+        return self._export_service
     
     @property
     def operation_service(self) -> OperationService:
@@ -157,6 +169,14 @@ class ServiceContainer:
         return self._microstructure_service
     
     @property
+    def hydration_service(self) -> HydrationService:
+        """Get hydration service instance."""
+        if self._hydration_service is None:
+            self._hydration_service = HydrationService(self.db_service)
+            self.logger.debug("Hydration service created")
+        return self._hydration_service
+    
+    @property
     def grading_service(self) -> GradingService:
         """Get grading service instance."""
         if self._grading_service is None:
@@ -170,6 +190,7 @@ class ServiceContainer:
             'config_manager': self.config_manager,
             'directories': self.directories_service,
             'file_operations': self.file_operations_service,
+            'export': self.export_service,
             'operation': self.operation_service,
             'cement': self.cement_service,
             'fly_ash': self.fly_ash_service,
@@ -268,6 +289,7 @@ class ServiceContainer:
         self._config_manager = None
         self._directories_service = None
         self._file_operations_service = None
+        self._export_service = None
         self._operation_service = None
         self._cement_service = None
         self._fly_ash_service = None

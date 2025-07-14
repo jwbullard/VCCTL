@@ -1,0 +1,46 @@
+name: "Material Analyzer"
+version: "1.0.0"
+description: "Plugin for analyzing material properties and generating reports"
+author: "VCCTL Team"
+main_class: "MaterialAnalyzerPlugin"
+module_name: "plugin"
+min_vcctl_version: "1.0.0"
+dependencies: []
+python_dependencies: ["numpy", "matplotlib", "scipy"]
+enabled: true
+
+properties:
+  analysis_types:
+    - particle_size_distribution
+    - chemical_composition
+    - phase_analysis
+  default_analysis: particle_size_distribution
+  generate_plots: true
+  save_reports: true
+
+ui_components:
+  menu_items:
+    - path: "Tools/Material Analysis..."
+      callback: "show_analysis_dialog"
+  panels:
+    - id: "material_analysis"
+      title: "Material Analysis"
+      widget_class: "MaterialAnalysisPanel"
+
+operation_handlers:
+  analyze_material: "handle_material_analysis"
+  generate_report: "handle_report_generation"
+
+configuration_schema:
+  type: object
+  properties:
+    analysis_types:
+      type: array
+      items:
+        type: string
+    default_analysis:
+      type: string
+    generate_plots:
+      type: boolean
+    save_reports:
+      type: boolean

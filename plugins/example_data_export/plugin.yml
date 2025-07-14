@@ -1,0 +1,44 @@
+name: "Data Export Plugin"
+version: "1.0.0"
+description: "Example plugin that demonstrates data export functionality"
+author: "VCCTL Team"
+main_class: "DataExportPlugin"
+module_name: "plugin"
+min_vcctl_version: "1.0.0"
+dependencies: []
+python_dependencies: ["pandas", "openpyxl"]
+enabled: true
+
+properties:
+  export_formats:
+    - csv
+    - xlsx
+    - json
+  default_format: csv
+  include_metadata: true
+
+ui_components:
+  menu_items:
+    - path: "File/Export/Advanced Export..."
+      callback: "show_export_dialog"
+  toolbar_buttons:
+    - id: "export_data"
+      label: "Export"
+      icon: "document-save"
+      callback: "quick_export"
+
+operation_handlers:
+  export_data: "handle_export_operation"
+
+configuration_schema:
+  type: object
+  properties:
+    export_formats:
+      type: array
+      items:
+        type: string
+    default_format:
+      type: string
+      enum: ["csv", "xlsx", "json"]
+    include_metadata:
+      type: boolean

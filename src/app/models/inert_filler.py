@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional
 from sqlalchemy import Column, String, Float, CheckConstraint
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -83,14 +83,16 @@ class InertFillerCreate(BaseModel):
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate inert filler name."""
         if not v or not v.strip():
             raise ValueError('Inert filler name cannot be empty')
         return v.strip()
     
-    @validator('specific_gravity')
+    @field_validator('specific_gravity')
+    @classmethod
     def validate_specific_gravity(cls, v):
         """Validate specific gravity is reasonable for fillers."""
         if v <= 0:
@@ -99,7 +101,8 @@ class InertFillerCreate(BaseModel):
             raise ValueError('Specific gravity should be between 1.0 and 10.0 for mineral fillers')
         return v
     
-    @validator('psd')
+    @field_validator('psd')
+    @classmethod
     def validate_psd(cls, v):
         """Validate PSD reference."""
         if not v or not v.strip():
@@ -117,7 +120,8 @@ class InertFillerUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
     
-    @validator('specific_gravity')
+    @field_validator('specific_gravity')
+    @classmethod
     def validate_specific_gravity(cls, v):
         """Validate specific gravity."""
         if v is not None and (v <= 0 or v > 10.0):

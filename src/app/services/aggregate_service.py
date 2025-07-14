@@ -217,8 +217,8 @@ class AggregateService(BaseService[Aggregate, AggregateCreate, AggregateUpdate])
             raise ValidationError("Aggregate name is required")
         
         # Validate type
-        if aggregate.type not in [0, 1]:  # 0=FINE, 1=COARSE
-            raise ValidationError("Aggregate type must be 0 (FINE) or 1 (COARSE)")
+        if aggregate.type not in [1, 2]:  # 1=COARSE, 2=FINE
+            raise ValidationError("Aggregate type must be 1 (COARSE) or 2 (FINE)")
         
         # Validate specific gravity
         if aggregate.specific_gravity is not None:

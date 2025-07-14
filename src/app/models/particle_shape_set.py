@@ -8,7 +8,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional, List
 from sqlalchemy import Column, String
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
 
@@ -56,7 +56,8 @@ class ParticleShapeSetCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Particle shape set name (unique)")
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         """Validate particle shape set name."""
         if not v or not v.strip():
