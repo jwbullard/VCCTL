@@ -208,7 +208,7 @@ class ExportService(BaseService):
         project_info = [
             ['Project Name:', project_name],
             ['Generated:', datetime.now().strftime('%Y-%m-%d %H:%M:%S')],
-            ['VCCTL Version:', data.get('vcctl_version', '1.0.0')],
+            ['VCCTL Version:', data.get('vcctl_version', '10.0.0')],
             ['Author:', data.get('author', 'VCCTL User')]
         ]
         
@@ -571,7 +571,7 @@ class ExportService(BaseService):
         info_items = [
             ('Project Name:', data.get('project_name', 'N/A')),
             ('Generated:', datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-            ('VCCTL Version:', data.get('vcctl_version', '1.0.0')),
+            ('VCCTL Version:', data.get('vcctl_version', '10.0.0')),
             ('Author:', data.get('author', 'VCCTL User'))
         ]
         
@@ -807,7 +807,7 @@ class ExportService(BaseService):
             # Add metadata
             metadata = ET.SubElement(root, 'metadata')
             ET.SubElement(metadata, 'generated').text = datetime.now().isoformat()
-            ET.SubElement(metadata, 'vcctl_version').text = data.get('vcctl_version', '1.0.0')
+            ET.SubElement(metadata, 'vcctl_version').text = data.get('vcctl_version', '10.0.0')
             
             # Convert data to XML
             self._dict_to_xml(data, root)

@@ -389,7 +389,7 @@ class ConfigManager:
                 'metadata': {
                     'export_timestamp': str(Path().cwd()),
                     'platform': platform.system(),
-                    'vcctl_version': '1.0.0'  # Would come from app info
+                    'vcctl_version': '10.0.0'  # Would come from app info
                 }
             }
             

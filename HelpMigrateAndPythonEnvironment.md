@@ -195,3 +195,67 @@
 
   # If you need help
   python migrate_data.py --help
+
+
+# DB Migration Issues help from Claude
+
+ Quick Reference for When You Return
+
+  Current Status:
+
+  - ✅ VCCTL GTK3 application is working and launching
+  - ✅ Migration completed successfully (2 cements, 2 fly ash, 2 slag, etc.)
+  - ❌ Issue: Materials tab shows empty despite successful migration
+
+  Environment Setup (when you return):
+
+  # Activate your clean environment
+  source vcctl-clean-env/bin/activate
+
+  # Launch VCCTL
+  python src/main.py
+
+  Next Troubleshooting Steps:
+
+  Run these commands to diagnose the database/UI disconnect:
+
+  # 1. Check migration status
+  python migrate_data.py status
+
+  # 2. Test database directly
+  python -c "
+  import sys
+  sys.path.insert(0, 'src')
+  from app.database.service import database_service
+  from app.models.cement import Cement
+
+  db_service = database_service
+  db_service.initialize_database()
+
+  with db_service.get_session() as session:
+      cement_count = session.query(Cement).count()
+      print(f'Cement count: {cement_count}')
+  "
+
+  # 3. Check database path
+  python -c "
+  import sys
+  sys.path.insert(0, 'src')
+  from app.database.config import get_database_config
+  config = get_database_config()
+  print(f'Database path: {config.database_path}')
+  "
+
+  What We've Accomplished:
+
+  - Fixed all GTK3/Python environment issues
+  - Successfully migrated from H2 to SQLite
+  - VCCTL desktop app launches with all tabs working
+
+  What's Left:
+
+  - Troubleshoot why UI can't see the migrated data
+  - Verify database connection paths match
+  - Get materials showing in the Materials tab
+
+  Save this message and when you return, just run those diagnostic commands first. That will tell us exactly where the disconnect is between the successful migration and the empty UI.

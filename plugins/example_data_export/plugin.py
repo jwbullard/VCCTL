@@ -30,7 +30,7 @@ class DataExportPlugin(PluginInterface):
         return "Data Export Plugin"
     
     def get_version(self) -> str:
-        return "1.0.0"
+        return "10.0.0"
     
     def get_description(self) -> str:
         return "Example plugin that demonstrates data export functionality"
@@ -68,7 +68,7 @@ class DataExportPlugin(PluginInterface):
     def is_compatible(self, vcctl_version: str) -> bool:
         """Check if plugin is compatible with VCCTL version"""
         # Simple version check - in real implementation, use proper version parsing
-        return vcctl_version >= "1.0.0"
+        return vcctl_version >= "10.0.0"
     
     def get_metadata(self) -> Dict[str, Any]:
         """Return additional plugin metadata"""

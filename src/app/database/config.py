@@ -79,3 +79,8 @@ class DatabaseConfig:
 
 # Default configuration instance
 default_config = DatabaseConfig()
+
+
+def get_database_config() -> DatabaseConfig:
+    """Get the default database configuration instance."""
+    return default_config

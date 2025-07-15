@@ -10,15 +10,15 @@ from pathlib import Path
 
 # Application metadata
 APP_NAME = "VCCTL"
-APP_ID = "gov.nist.vcctl.gtk"
-APP_VERSION = "1.0.0"
+APP_ID = "edu.tamu.vcctl.gtk"
+APP_VERSION = "10.0.0"
 APP_TITLE = "Virtual Cement and Concrete Testing Laboratory"
 APP_DESCRIPTION = "Desktop application for cement and concrete materials modeling"
-APP_WEBSITE = "https://vcctl.nist.gov/"
+APP_WEBSITE = "https://github.com/jwbullard/VCCTL-GTK"
 
 # Organization info
-ORG_NAME = "NIST Building and Fire Research Laboratory"
-ORG_WEBSITE = "https://www.nist.gov/el/building-and-fire-research-laboratory-bfrl"
+ORG_NAME = "Texas A&M University"
+ORG_WEBSITE = "https://www.tamu.edu/"
 
 # Application paths
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -41,19 +41,33 @@ ICON_PATHS = {
 
 # Application authors and contributors
 AUTHORS = [
-    "NIST Building and Fire Research Laboratory",
+    "Texas A&M University",
+    "Jeffrey W. Bullard",
     "VCCTL Development Team"
 ]
 
 # License information
-LICENSE_TEXT = """
-This software was developed by NIST employees and is not subject to copyright 
-protection in the United States. This software may be subject to foreign copyright.
+LICENSE_TEXT = """MIT License
 
-The identification of certain commercial equipment, instruments, or materials does 
-not imply recommendation or endorsement by NIST, nor does it imply that the materials 
-or equipment identified are necessarily the best available for the purpose.
-"""
+Copyright (c) 2024 Texas A&M University
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE."""
 
 def get_resource_path(resource_name: str) -> Path:
     """Get the full path to a resource file."""

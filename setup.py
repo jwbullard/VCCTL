@@ -17,13 +17,13 @@ with open(os.path.join(this_directory, 'requirements.txt'), encoding='utf-8') as
 
 setup(
     name="vcctl-gtk",
-    version="1.0.0",
-    author="NIST Building and Fire Research Laboratory",
-    author_email="vcctl@nist.gov",
+    version="10.0.0",
+    author="Texas A&M University",
+    author_email="jeff.bullard@tamu.edu",
     description="Virtual Cement and Concrete Testing Laboratory - GTK3 Desktop Application",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/nist/vcctl-gtk",
+    url="https://github.com/jwbullard/VCCTL-GTK",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[

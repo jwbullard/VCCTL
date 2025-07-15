@@ -24,14 +24,14 @@ class VCCTLApplication(Gtk.Application):
     def __init__(self):
         """Initialize the VCCTL application."""
         super().__init__(
-            application_id='gov.nist.vcctl.gtk',
+            application_id='edu.tamu.vcctl.gtk',
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE
         )
         
         # Application metadata
         self.app_name = "VCCTL"
         self.app_title = "Virtual Cement and Concrete Testing Laboratory"
-        self.app_version = "1.0.0"
+        self.app_version = "10.0.0"
         self.app_description = "Desktop application for cement and concrete materials modeling"
         
         # Main window reference

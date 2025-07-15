@@ -324,11 +324,11 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
         status_container.pack_start(separator, False, False, 5)
         
-        # NIST attribution
-        nist_label = Gtk.Label(label="NIST BFRL")
-        nist_label.set_margin_right(10)
-        nist_label.set_tooltip_text("National Institute of Standards and Technology\nBuilding and Fire Research Laboratory")
-        status_container.pack_end(nist_label, False, False, 0)
+        # University attribution
+        university_label = Gtk.Label(label="Texas A&M University")
+        university_label.set_margin_right(10)
+        university_label.set_tooltip_text("Texas A&M University\nVCCTL Development Team")
+        status_container.pack_end(university_label, False, False, 0)
         
         # Version info
         version_label = Gtk.Label(label=f"v{self.app.app_version}")
@@ -423,33 +423,6 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
             
         except Exception as e:
             self.logger.error(f"Error during window cleanup: {e}")
-    
-    def _on_about_clicked(self, widget: Gtk.Widget) -> None:
-        """Show the about dialog."""
-        about_dialog = Gtk.AboutDialog()
-        about_dialog.set_transient_for(self)
-        about_dialog.set_modal(True)
-        
-        about_dialog.set_program_name("VCCTL")
-        about_dialog.set_version(self.app.app_version)
-        about_dialog.set_comments("Virtual Cement and Concrete Testing Laboratory")
-        about_dialog.set_website("https://vcctl.nist.gov/")
-        about_dialog.set_website_label("VCCTL Website")
-        
-        about_dialog.set_copyright("NIST Building and Fire Research Laboratory")
-        about_dialog.set_license_type(Gtk.License.CUSTOM)
-        about_dialog.set_license("""
-This software was developed by NIST employees and is not subject to copyright 
-protection in the United States. This software may be subject to foreign copyright.
-        """)
-        
-        about_dialog.set_authors([
-            "NIST Building and Fire Research Laboratory",
-            "VCCTL Development Team"
-        ])
-        
-        about_dialog.run()
-        about_dialog.destroy()
     
     def _on_preferences_clicked(self, widget: Gtk.Widget) -> None:
         """Show the preferences dialog."""
@@ -691,13 +664,16 @@ Services:"""
     
     def _on_user_guide_clicked(self, widget: Gtk.Widget) -> None:
         """Open user guide."""
-        # TODO: Open user guide in browser or help viewer
-        self.update_status("User guide will be available online", "info", 3)
+        self._show_help_dialog("interface")
     
     def _on_examples_clicked(self, widget: Gtk.Widget) -> None:
         """Show examples dialog."""
         # TODO: Implement examples browser
         self.update_status("Examples browser will be implemented", "info", 3)
+    
+    def _on_about_clicked(self, widget: Gtk.Widget) -> None:
+        """Show about dialog."""
+        self._show_about_dialog()
     
     def _on_quit_clicked(self, widget: Gtk.Widget) -> None:
         """Handle quit menu item."""
@@ -830,7 +806,7 @@ Services:"""
         # Description
         desc_label = Gtk.Label()
         desc_label.set_markup("""
-Developed by NIST's Building and Fire Research Laboratory,
+Developed by Texas A&amp;M University,
 VCCTL is a comprehensive toolkit for cement and concrete materials modeling.
 
 This GTK3 desktop application provides an intuitive interface for:
@@ -1150,6 +1126,7 @@ This tab will contain the results analysis interface.
         if topic_id:
             self.help_dialog.show_topic(topic_id)
         
+        self.help_dialog.show_all()
         self.help_dialog.present()
     
     def _on_help_dialog_destroyed(self, dialog):
@@ -1163,6 +1140,65 @@ This tab will contain the results analysis interface.
             self.help_dialog.connect("destroy", self._on_help_dialog_destroyed)
         
         self.help_dialog.show_contextual_help(context)
+        self.help_dialog.show_all()
+        self.help_dialog.present()
+    
+    def _show_about_dialog(self):
+        """Show the about dialog."""
+        # Create a fresh AboutDialog instance
+        about_dialog = Gtk.AboutDialog()
+        about_dialog.set_transient_for(self)
+        about_dialog.set_modal(True)
+        about_dialog.set_destroy_with_parent(True)
+        
+        # Set basic program info
+        about_dialog.set_program_name("VCCTL")
+        about_dialog.set_version("10.0.0")
+        about_dialog.set_comments("Virtual Cement and Concrete Testing Laboratory")
+        about_dialog.set_website("https://github.com/jwbullard/VCCTL-GTK")
+        about_dialog.set_website_label("VCCTL GitHub Repository")
+        
+        # Set authors using escaped text to prevent markup interpretation
+        authors_list = [
+            "Texas A&amp;M University",  # Escape the ampersand
+            "Jeffrey W. Bullard",
+            "Development Team"
+        ]
+        about_dialog.set_authors(authors_list)
+        
+        # Set copyright with escaped ampersand
+        about_dialog.set_copyright("© 2024 Texas A&amp;M University")
+        
+        # Set license with escaped ampersands
+        license_text = """MIT License
+
+Copyright (c) 2024 Texas A&amp;M University
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE."""
+        
+        about_dialog.set_license(license_text)
+        about_dialog.set_wrap_license(True)
+        
+        # Show and run the dialog
+        about_dialog.show_all()
+        response = about_dialog.run()
+        about_dialog.destroy()
     
     def _setup_help_system_integration(self):
         """Setup help system integration."""

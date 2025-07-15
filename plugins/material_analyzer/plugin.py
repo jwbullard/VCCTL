@@ -32,7 +32,7 @@ class MaterialAnalyzerPlugin(PluginInterface):
         return "Material Analyzer"
     
     def get_version(self) -> str:
-        return "1.0.0"
+        return "10.0.0"
     
     def get_description(self) -> str:
         return "Plugin for analyzing material properties and generating reports"
@@ -69,7 +69,7 @@ class MaterialAnalyzerPlugin(PluginInterface):
     
     def is_compatible(self, vcctl_version: str) -> bool:
         """Check if plugin is compatible with VCCTL version"""
-        return vcctl_version >= "1.0.0"
+        return vcctl_version >= "10.0.0"
     
     def get_metadata(self) -> Dict[str, Any]:
         """Return additional plugin metadata"""

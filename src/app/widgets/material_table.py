@@ -53,7 +53,6 @@ class MaterialTable(Gtk.Box):
         
         # Table state
         self.materials_data = []
-        self.filtered_data = []
         self.selected_materials = set()
         self.sort_column = MaterialTableColumn.NAME
         self.sort_ascending = True
@@ -409,12 +408,12 @@ class MaterialTable(Gtk.Box):
                 cements = cement_service.get_all()
                 for cement in cements:
                     materials.append({
-                        'id': cement.id,
+                        'id': cement.name,  # Use name as ID since it's the primary key
                         'name': cement.name,
                         'type': 'cement',
                         'specific_gravity': cement.specific_gravity,
-                        'created_date': cement.created_date.strftime('%Y-%m-%d') if cement.created_date else '',
-                        'modified_date': cement.modified_date.strftime('%Y-%m-%d') if cement.modified_date else '',
+                        'created_date': cement.created_at.strftime('%Y-%m-%d') if cement.created_at else '',
+                        'modified_date': cement.updated_at.strftime('%Y-%m-%d') if cement.updated_at else '',
                         'description': cement.description or '',
                         'data': cement
                     })
@@ -427,13 +426,13 @@ class MaterialTable(Gtk.Box):
                 aggregates = aggregate_service.get_all()
                 for aggregate in aggregates:
                     materials.append({
-                        'id': aggregate.id,
+                        'id': aggregate.display_name,  # Use display_name as ID since it's the primary key
                         'name': aggregate.name,
                         'type': 'aggregate',
                         'specific_gravity': aggregate.specific_gravity,
-                        'created_date': aggregate.created_date.strftime('%Y-%m-%d') if aggregate.created_date else '',
-                        'modified_date': aggregate.modified_date.strftime('%Y-%m-%d') if aggregate.modified_date else '',
-                        'description': aggregate.description or '',
+                        'created_date': aggregate.created_at.strftime('%Y-%m-%d') if aggregate.created_at else '',
+                        'modified_date': aggregate.updated_at.strftime('%Y-%m-%d') if aggregate.updated_at else '',
+                        'description': getattr(aggregate, 'description', '') or '',
                         'data': aggregate
                     })
             except Exception as e:
@@ -465,8 +464,8 @@ class MaterialTable(Gtk.Box):
     
     def _update_pagination(self) -> None:
         """Update pagination controls."""
-        # Calculate pagination info
-        self.total_items = len(self.filtered_data) if hasattr(self, 'filtered_data') else len(self.materials_data)
+        # Calculate pagination info - count visible rows in filter model
+        self.total_items = len(self.filter_model) if self.filter_model else len(self.materials_data)
         total_pages = max(1, (self.total_items + self.items_per_page - 1) // self.items_per_page)
         
         # Update page spinner
