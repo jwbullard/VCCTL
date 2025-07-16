@@ -1,0 +1,549 @@
+<html lang="en">
+<title>Release Notes for Apache Derby 10.16.1.1</title>
+<body>
+<h1>
+<a name="Release Notes for Apache Derby 10.16.1.1"></a>Release Notes for Apache Derby 10.16.1.1</h1>
+<div>
+<p>These notes describe the difference between Apache Derby release 10.16.1.1 and the preceding release 10.15.2.0.</p>
+</div>
+<ul>
+<li>
+<a href="#Overview">Overview</a>
+</li>
+<li>
+<a href="#New Features">New Features</a>
+</li>
+<li>
+<a href="#Bug Fixes">Bug Fixes</a>
+</li>
+<li>
+<a href="#Issues">Issues</a>
+</li>
+<li>
+<a href="#Build Environment">Build Environment</a>
+</li>
+<li>
+<a href="#Verifying Releases">Verifying Releases</a>
+</li>
+</ul>
+<h2>
+<a name="Overview"></a>Overview</h2>
+<div>
+
+
+<p>
+The most up to date information about Derby releases can be found on the
+<a href="https://db.apache.org/derby/derby_downloads.html">Derby download page</a>.
+</p>
+
+
+<p>
+Apache Derby is a pure Java relational database engine using standard SQL and
+JDBC as its APIs. More information about Derby can be found on the
+<a href="https://db.apache.org/derby/">Apache web site</a>.
+Derby functionality includes:
+</p>
+
+
+<ul>
+
+<li>Embedded engine with JDBC drivers</li>
+
+<li>Network Server</li>
+
+<li>Network client JDBC drivers</li>
+
+<li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
+
+</ul>
+
+
+<p>
+The 10.16 release family supports the following Java and JDBC versions:
+</p>
+
+<ul>
+  
+<li>Java SE 17 and higher with JDBC 4.2.</li>
+
+</ul>
+
+</div>
+<h2>
+<a name="New Features"></a>New Features</h2>
+<div>
+
+
+<p>
+This is a feature release. The following significant change has been made:
+</p>
+
+
+<ul>
+
+
+<li>
+<b>SecurityManager deprecated</b> - Derby no longer supports the Java SecurityManager. This is because the Open JDK team deprecated the SecurityManager and marked it for removal. This deprecation happened under the aegis of
+<a href="https://openjdk.java.net/jeps/411">JEP 411</a>.
+</li>
+
+
+</ul>
+
+
+<p>
+New users should consult the
+<a href="https://db.apache.org/derby/manuals/index.html#docs_10.16">10.16 documentation</a>,
+especially the
+<a href="https://db.apache.org/derby/docs/10.16/getstart/index.html">Getting Started With Derby</a> guide.
+</p>
+
+
+<p>
+Existing users who want to run Derby with a SecurityManager must NOT upgrade to version 10.16.
+Instead, those users must continue to use older versions of Derby. Please see the
+<a href="https://db.apache.org/derby/derby_downloads.html">Derby download page</a>
+in order to understand how Derby and Java versions correspond.
+</p>
+
+
+</div>
+<h2>
+<a name="Bug Fixes"></a>Bug Fixes</h2>
+<div>
+<p>The following issues are addressed by Derby release 10.16.1.1. These issues are not addressed in the preceding 10.15.2.0 release.</p>
+<table border="2">
+<tr>
+<th>
+<div style="width:110px;">Issue Id</div>
+</th><th>Description</th>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7040">DERBY-7040</a></td><td>Add dependency stanzas to maven poms</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7137">DERBY-7137</a></td><td>Compile 10.16 into Java 17 byte code so that it won't run on earlier platforms</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7125">DERBY-7125</a></td><td>Dead link in BUILDING.html</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7031">DERBY-7031</a></td><td>Errors running upgrade tests from 10.15.1.0 release candidate to 10.16 trunk</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7124">DERBY-7124</a></td><td>Errors seen while running the junit-all target</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7053">DERBY-7053</a></td><td>Further top build.xml streamlining</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7050">DERBY-7050</a></td><td>In build.xml of derby root there's a vestigial target (+ patch)</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7087">DERBY-7087</a></td><td>Make it possible to build and run tests cleanly on Java 15</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7110">DERBY-7110</a></td><td>Make it possible to build and test Derby cleanly with OpenJDK 17</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7126">DERBY-7126</a></td><td>Make it possible to build and test Derby cleanly with OpenJDK 18</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7088">DERBY-7088</a></td><td>Make it possible to build and test Derby using JDK 16</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7046">DERBY-7046</a></td><td>NoClassDefFoundError on 'java -jar derbynet.jar'</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7138">DERBY-7138</a></td><td>Remove references to the Java Security Manager</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7052">DERBY-7052</a></td><td>Reordering and (mildly) reorganizing build.xml Ant targets around buildsource</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7057">DERBY-7057</a></td><td>Unreferenced failing target in main build</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7038">DERBY-7038</a></td><td>Upgrade ant version and re-write javadoc build targets to use improved &lt;javadoc&gt;task</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-7041">DERBY-7041</a></td><td>null pointer exception when creating view based on other views</td>
+</tr>
+</table>
+</div>
+<h2>
+<a name="Issues"></a>Issues</h2>
+<div>
+<ul>
+<li>
+<a href="#Note for DERBY-7137"><span>Note for DERBY-7137: 
+Derby 10.16 compiles into Java 17 byte code.
+</span></a>
+</li>
+<li>
+<a href="#Note for DERBY-7138"><span>Note for DERBY-7138: 
+As part of JEP 411, the Open JDK team deprecated the SecurityManager and marked it for future removal. In response, Derby release 10.16 removes support for the SecurityManager.
+</span></a>
+</li>
+</ul>
+<p>Compared with the previous release (10.15.2.0), Derby release 10.16.1.1 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<hr>
+<h3>
+<a name="Note for DERBY-7137"></a>Note for DERBY-7137</h3>
+<div>
+
+<!-- 
+  Release note for DERBY-7137
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Derby 10.16 compiles into Java 17 byte code.
+</p>
+
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+Derby 10.16 will not run on Java 16 or earlier JVMs.
+</p>
+
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+Derby 10.16 no longer supports the Java SecurityManager
+(see <a href="https://issues.apache.org/jira/browse/DERBY-7138">DERBY-7138</a>)
+due to its deprecation by Java 17
+(see <a href="https://openjdk.java.net/jeps/411">JEP 411</a>).
+Java 17 and Derby 10.16 must not be used by applications which install a SecurityManager.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Applications must not use the SecurityManager if they run with Derby 10.16 on Java 17 or later JVMs.
+Applications which need a SecurityManager must use earlier versions of Derby and the JVM.
+See the
+<a href="https://db.apache.org/derby/derby_downloads.html">Derby download page</a>
+for the correspondence between Derby and JVM versions.
+</p>
+
+
+
+</div>
+<hr>
+<h3>
+<a name="Note for DERBY-7138"></a>Note for DERBY-7138</h3>
+<div>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
+  issue. It serves as the title for the issue in the Issues section of
+  the full Release Notes.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+As part of JEP 411, the Open JDK team deprecated the SecurityManager and marked it for future removal. In response, Derby release 10.16 removes support for the SecurityManager.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+Previous Derby releases let database administrators install a Java SecurityManager. This, in turn, let applications customize access to security-sensitive objects such as files, network sockets, system properties, and class loaders. In previous Derby releases, the Derby network server installed a SecurityManager with default permissions if the administrator forgot to provide a customized security policy.
+</p>
+
+
+<p>
+Recently, Open JDK 17 deprecated the SecurityManager and marked it for future removal. Open JDK 17 also began writing warnings to the console when applications called SecurityManager-related methods.
+</p>
+
+
+<p>
+Open JDK 18 goes even further. Open JDK 18 forces users to set <i>-Djava.security.manager=allow</i> when booting an application which installs a SecurityManager. Furthermore, the meaning of that property has changed since Open JDK 11. In Open JDK 11, <i>java.security.manager</i> was the name of a user-written SecurityManager class. The property is now a directive which is required for applications which want to run a SecurityManager.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Derby 10.16 removes support for the deprecated SecurityManager. The Derby 10.16 network server no longer installs a SecurityManager with a default policy file. Derby 10.16 will fail to run under the SecurityManager.
+</p>
+
+
+<p>
+Applications which need to run under a SecurityManager should use an earlier version of Derby, such as 10.15.
+Those applications will see warnings and will need to set <i>-Djava.security.manager=allow</i> when running on JVMs from Open JDK 17 upward.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+The Open JDK team has deprecated the SecurityManager because it is too expensive to maintain. The Open JDK team feels that files and sockets can be protected better by running applications inside operating system containers.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+  Derby-powered applications should not rely on the SecurityManager and should no longer expect the Derby network server to install a SecurityManager with a default policy. Instead, applications should remove their own support for the SecurityManager.
+</p>
+
+
+<p>
+The following table suggests defenses against several threats. Some threats have no defenses now. Applications must wait until the Open JDK team builds or recommends replacement defenses for the protections deprecated by JEP 411.
+</p>
+
+  
+<table border="1">
+    
+<tbody>
+      
+<tr>
+        
+<th>Operation</th>
+        <th>Threat</th>
+        <th>Mitigation</th>
+      
+</tr>
+
+      
+<tr>
+        
+<td>File access</td>
+        <td>
+<ul>
+<li>Privacy</li>
+<li>Data corruption</li>
+<li>Loading of malware</li>
+</ul>
+</td>
+        <td>Containerize application</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Network access</td>
+        <td>Loading of malware</td>
+        <td>Containerize application</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Access to Derby internals</td>
+        <td>
+<ul>
+<li>Privacy</li>
+<li>Data corruption</li>
+<li>Loading of malware</li>
+</ul>
+</td>
+        <td>Run Derby from the module path</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Engine and server shutdown</td>
+        <td>Denial of service</td>
+        <td>Use authorization to restrict logins</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Creation of class loaders</td>
+        <td>Loading of malware</td>
+        <td>-</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>De-registration of JDBC driver</td>
+        <td>Denial of service</td>
+        <td>-</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Reading and setting system properties</td>
+        <td>
+<ul>
+<li>Privacy</li>
+<li>Denial of service</li>
+</ul>
+</td>
+        <td>-</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>JMX monitoring of engine and server</td>
+        <td>Harmless</td>
+        <td>-</td>
+      
+</tr>
+
+      
+<tr>
+        
+<td>Re-loading of security policy</td>
+        <td>N/A</td>
+        <td>-</td>
+      
+</tr>
+
+    
+</tbody>
+  
+</table>
+
+
+</div>
+</div>
+<h2>
+<a name="Build Environment"></a>Build Environment</h2>
+<div>
+<p>Derby release 10.16.1.1 was built using the following environment:</p>
+<ul>
+<li>
+<b>Branch</b> - Source code came from the 10.16 branch.</li>
+<li>
+<b>Machine</b> - Mac OSX 11.2.3.</li>
+<li>
+<b>Ant</b> - Apache Ant(TM) version 1.10.6 compiled on May 2 2019.</li>
+<li>
+<b>Compiler</b> - All classes were compiled by the javac from OpenJDK 64-Bit Server VM (build 17+35-2724, mixed mode, sharing).</li>
+</ul>
+</div>
+<h2>
+<a name="Verifying Releases"></a>Verifying Releases</h2>
+<div>
+
+
+<p>It is essential that you verify the integrity of the downloaded
+files using the PGP and SHA-512 signatures.  SHA-512 verification ensures the
+file was not corrupted during the download process.  PGP verification
+ensures that the file came from a certain person.</p>
+
+
+<p>The PGP signatures can be verified using
+<a href="https://www.pgpi.org/">PGP</a> or
+<a href="https://www.gnupg.org/">GPG</a>.
+First download the Apache Derby
+<a href="https://www.apache.org/dist/db/derby/KEYS">KEYS</a>
+as well as the <code>asc</code> signature file for the particular
+distribution. It is important that you get these files from the ultimate
+trusted source - the main ASF distribution site, rather than from a mirror.
+Then verify the signatures using ...</p>
+
+
+<pre>
+% pgpk -a KEYS
+% pgpv db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% pgp -ka KEYS
+% pgp db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% gpg --import KEYS
+% gpg --verify db-derby-X.Y.tar.gz.asc
+
+</pre>
+
+
+<p>To verify the SHA-512 checksums on the files, you need to use a
+platform-specific program. On Mac OSX, this program is called
+<code>shasum</code>, on Linux it is called <code>sha512sum</code>,
+and on Windows it is called <code>CertUtil</code>.</p>
+
+
+<p>We strongly recommend that you verify your downloads with both PGP and SHA-512.</p>
+
+
+
+</div>
+</body>
+</html>
