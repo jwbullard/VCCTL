@@ -7,7 +7,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, LargeBinary
+from sqlalchemy import Column, String, Float, LargeBinary, Text, Integer
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -23,11 +23,11 @@ class Cement(Base):
     
     __tablename__ = 'cement'
     
-    # Override base model id with string primary key
-    id = None
+    # Primary key - auto-incrementing integer ID
+    id = Column(Integer, primary_key=True, autoincrement=True)
     
-    # Primary key - cement name (unique identifier)
-    name = Column(String(64), primary_key=True, nullable=False, unique=True)
+    # Cement name - unique but not primary key
+    name = Column(String(64), nullable=False, unique=True)
     
     # Particle size distribution reference
     psd = Column(String(64), nullable=True)
@@ -52,6 +52,11 @@ class Cement(Base):
     anhyd = Column(Float, nullable=True, doc="Anhydrite gypsum mass fraction")
     hemihyd = Column(Float, nullable=True, doc="Hemihydrate gypsum mass fraction")
     
+    # Gypsum fractions (volume fractions)
+    dihyd_volume_fraction = Column(Float, nullable=True, doc="Dihydrate gypsum volume fraction")
+    anhyd_volume_fraction = Column(Float, nullable=True, doc="Anhydrite gypsum volume fraction")
+    hemihyd_volume_fraction = Column(Float, nullable=True, doc="Hemihydrate gypsum volume fraction")
+    
     # Alkali characteristics
     alkali_file = Column(String(64), nullable=True, default='lowalkali', 
                         doc="Alkali characteristics file reference")
@@ -61,10 +66,47 @@ class Cement(Base):
     c2s_mass_fraction = Column(Float, nullable=True, doc="C2S (Dicalcium Silicate) mass fraction")
     c3a_mass_fraction = Column(Float, nullable=True, doc="C3A (Tricalcium Aluminate) mass fraction")
     c4af_mass_fraction = Column(Float, nullable=True, doc="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    k2so4_mass_fraction = Column(Float, nullable=True, doc="K2SO4 (Potassium Sulfate) mass fraction")
+    na2so4_mass_fraction = Column(Float, nullable=True, doc="Na2SO4 (Sodium Sulfate) mass fraction")
+    
+    # Phase composition (volume fractions)
+    c3s_volume_fraction = Column(Float, nullable=True, doc="C3S (Tricalcium Silicate) volume fraction")
+    c2s_volume_fraction = Column(Float, nullable=True, doc="C2S (Dicalcium Silicate) volume fraction")
+    c3a_volume_fraction = Column(Float, nullable=True, doc="C3A (Tricalcium Aluminate) volume fraction")
+    c4af_volume_fraction = Column(Float, nullable=True, doc="C4AF (Tetracalcium Aluminoferrite) volume fraction")
+    k2so4_volume_fraction = Column(Float, nullable=True, doc="K2SO4 (Potassium Sulfate) volume fraction")
+    na2so4_volume_fraction = Column(Float, nullable=True, doc="Na2SO4 (Sodium Sulfate) volume fraction")
+    
+    # Phase composition (surface area fractions)
+    c3s_surface_fraction = Column(Float, nullable=True, doc="C3S (Tricalcium Silicate) surface area fraction")
+    c2s_surface_fraction = Column(Float, nullable=True, doc="C2S (Dicalcium Silicate) surface area fraction")
+    c3a_surface_fraction = Column(Float, nullable=True, doc="C3A (Tricalcium Aluminate) surface area fraction")
+    c4af_surface_fraction = Column(Float, nullable=True, doc="C4AF (Tetracalcium Aluminoferrite) surface area fraction")
+    k2so4_surface_fraction = Column(Float, nullable=True, doc="K2SO4 (Potassium Sulfate) surface area fraction")
+    na2so4_surface_fraction = Column(Float, nullable=True, doc="Na2SO4 (Sodium Sulfate) surface area fraction")
     
     # Physical properties
     specific_gravity = Column(Float, nullable=True, default=3.15, doc="Specific gravity of cement")
-    description = Column(String(255), nullable=True, doc="Cement description")
+    description = Column(Text, nullable=True, doc="Cement description")
+    
+    # Setting times (minutes)
+    initial_set_time = Column(Float, nullable=True, doc="Initial setting time (minutes)")
+    final_set_time = Column(Float, nullable=True, doc="Final setting time (minutes)")
+    
+    # Fineness properties
+    blaine_fineness = Column(Float, nullable=True, doc="Blaine fineness (m²/kg)")
+    
+    # PSD parameters
+    psd_mode = Column(String(64), nullable=True, doc="PSD mode (rosin_rammler, fuller, custom)")
+    psd_d50 = Column(Float, nullable=True, doc="PSD D50 parameter (µm)")
+    psd_n = Column(Float, nullable=True, doc="PSD n parameter")
+    psd_dmax = Column(Float, nullable=True, doc="PSD Dmax parameter (µm)")
+    psd_exponent = Column(Float, nullable=True, doc="PSD exponent parameter")
+    psd_custom_points = Column(String(1000), nullable=True, doc="Custom PSD points (JSON)")
+    
+    # Additional UI fields
+    source = Column(String(255), nullable=True, doc="Material source")
+    notes = Column(String(1000), nullable=True, doc="Additional notes")
     
     def __repr__(self) -> str:
         """String representation of the cement."""
@@ -184,10 +226,15 @@ class CementCreate(BaseModel):
     name: str = Field(..., max_length=64, description="Cement name (unique identifier)")
     psd: Optional[str] = Field(None, max_length=64, description="Particle size distribution reference")
     
-    # Gypsum fractions
+    # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
     anhyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Anhydrite gypsum mass fraction")
     hemihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Hemihydrate gypsum mass fraction")
+    
+    # Gypsum fractions (volume fractions)
+    dihyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum volume fraction")
+    anhyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Anhydrite gypsum volume fraction")
+    hemihyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Hemihydrate gypsum volume fraction")
     
     # Alkali characteristics
     alkali_file: Optional[str] = Field('lowalkali', max_length=64, 
@@ -202,11 +249,62 @@ class CementCreate(BaseModel):
                                               description="C3A (Tricalcium Aluminate) mass fraction")
     c4af_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
                                                description="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    k2so4_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="K2SO4 (Potassium Sulfate) mass fraction")
+    na2so4_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="Na2SO4 (Sodium Sulfate) mass fraction")
+    
+    # Phase composition (volume fractions)
+    c3s_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C3S (Tricalcium Silicate) volume fraction")
+    c2s_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C2S (Dicalcium Silicate) volume fraction")
+    c3a_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C3A (Tricalcium Aluminate) volume fraction")
+    c4af_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C4AF (Tetracalcium Aluminoferrite) volume fraction")
+    k2so4_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                  description="K2SO4 (Potassium Sulfate) volume fraction")
+    na2so4_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                   description="Na2SO4 (Sodium Sulfate) volume fraction")
+    
+    # Phase composition (surface area fractions)
+    c3s_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C3S (Tricalcium Silicate) surface area fraction")
+    c2s_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C2S (Dicalcium Silicate) surface area fraction")
+    c3a_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C3A (Tricalcium Aluminate) surface area fraction")
+    c4af_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                  description="C4AF (Tetracalcium Aluminoferrite) surface area fraction")
+    k2so4_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                   description="K2SO4 (Potassium Sulfate) surface area fraction")
+    na2so4_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                    description="Na2SO4 (Sodium Sulfate) surface area fraction")
     
     # Physical properties
     specific_gravity: Optional[float] = Field(3.15, gt=0.0, le=5.0, 
                                             description="Specific gravity of cement")
-    description: Optional[str] = Field(None, max_length=255, description="Cement description")
+    description: Optional[str] = Field(None, description="Cement description")
+    
+    # Setting times (minutes)
+    initial_set_time: Optional[float] = Field(None, ge=0.0, description="Initial setting time (minutes)")
+    final_set_time: Optional[float] = Field(None, ge=0.0, description="Final setting time (minutes)")
+    
+    # Fineness properties
+    blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
+    
+    # PSD parameters
+    psd_mode: Optional[str] = Field(None, max_length=64, description="PSD mode (rosin_rammler, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (µm)")
+    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
+    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
+    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, max_length=1000, description="Custom PSD points (JSON)")
+    
+    # Additional UI fields
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     
     @field_validator('name')
     @classmethod
@@ -254,12 +352,18 @@ class CementCreate(BaseModel):
 class CementUpdate(BaseModel):
     """Pydantic model for updating cement instances."""
     
+    name: Optional[str] = Field(None, max_length=64, description="Cement name (unique identifier)")
     psd: Optional[str] = Field(None, max_length=64, description="Particle size distribution reference")
     
-    # Gypsum fractions
+    # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
     anhyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Anhydrite gypsum mass fraction")
     hemihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Hemihydrate gypsum mass fraction")
+    
+    # Gypsum fractions (volume fractions)
+    dihyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum volume fraction")
+    anhyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Anhydrite gypsum volume fraction")
+    hemihyd_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, description="Hemihydrate gypsum volume fraction")
     
     # Alkali characteristics
     alkali_file: Optional[str] = Field(None, max_length=64, 
@@ -274,11 +378,62 @@ class CementUpdate(BaseModel):
                                               description="C3A (Tricalcium Aluminate) mass fraction")
     c4af_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
                                                description="C4AF (Tetracalcium Aluminoferrite) mass fraction")
+    k2so4_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="K2SO4 (Potassium Sulfate) mass fraction")
+    na2so4_mass_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="Na2SO4 (Sodium Sulfate) mass fraction")
+    
+    # Phase composition (volume fractions)
+    c3s_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C3S (Tricalcium Silicate) volume fraction")
+    c2s_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C2S (Dicalcium Silicate) volume fraction")
+    c3a_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                description="C3A (Tricalcium Aluminate) volume fraction")
+    c4af_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C4AF (Tetracalcium Aluminoferrite) volume fraction")
+    k2so4_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                  description="K2SO4 (Potassium Sulfate) volume fraction")
+    na2so4_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                   description="Na2SO4 (Sodium Sulfate) volume fraction")
+    
+    # Phase composition (surface area fractions)
+    c3s_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C3S (Tricalcium Silicate) surface area fraction")
+    c2s_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C2S (Dicalcium Silicate) surface area fraction")
+    c3a_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                 description="C3A (Tricalcium Aluminate) surface area fraction")
+    c4af_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                  description="C4AF (Tetracalcium Aluminoferrite) surface area fraction")
+    k2so4_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                   description="K2SO4 (Potassium Sulfate) surface area fraction")
+    na2so4_surface_fraction: Optional[float] = Field(None, ge=0.0, le=1.0, 
+                                                    description="Na2SO4 (Sodium Sulfate) surface area fraction")
     
     # Physical properties
     specific_gravity: Optional[float] = Field(None, gt=0.0, le=5.0, 
                                             description="Specific gravity of cement")
-    description: Optional[str] = Field(None, max_length=255, description="Cement description")
+    description: Optional[str] = Field(None, description="Cement description")
+    
+    # Setting times (minutes)
+    initial_set_time: Optional[float] = Field(None, ge=0.0, description="Initial setting time (minutes)")
+    final_set_time: Optional[float] = Field(None, ge=0.0, description="Final setting time (minutes)")
+    
+    # Fineness properties
+    blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
+    
+    # PSD parameters
+    psd_mode: Optional[str] = Field(None, max_length=64, description="PSD mode (rosin_rammler, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (µm)")
+    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
+    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
+    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, max_length=1000, description="Custom PSD points (JSON)")
+    
+    # Additional fields for UI
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
 
 
 class CementResponse(BaseModel):

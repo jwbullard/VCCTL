@@ -143,7 +143,7 @@ class MixDesignPanel(Gtk.Box):
         content_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
         
         # Left side: Mix composition
-        left_frame = Gtk.Frame(label="Mix Composition")
+        left_frame = Gtk.Frame(label="Cement Paste Components")
         left_frame.set_size_request(600, -1)
         self._create_composition_section(left_frame)
         content_paned.pack1(left_frame, True, False)
@@ -157,12 +157,28 @@ class MixDesignPanel(Gtk.Box):
         self.pack_start(content_paned, True, True, 0)
     
     def _create_composition_section(self, parent: Gtk.Frame) -> None:
-        """Create the mix composition section."""
+        """Create the mix composition section with separate Powder, Water, and Air sections."""
         comp_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         comp_box.set_margin_top(10)
         comp_box.set_margin_bottom(10)
         comp_box.set_margin_left(10)
         comp_box.set_margin_right(10)
+        
+        # Create three separate sections
+        self._create_powder_section(comp_box)
+        self._create_water_section(comp_box)
+        self._create_air_section(comp_box)
+        
+        parent.add(comp_box)
+    
+    def _create_powder_section(self, parent: Gtk.Box) -> None:
+        """Create the powder components section."""
+        powder_frame = Gtk.Frame(label="Powder Components")
+        powder_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        powder_box.set_margin_top(10)
+        powder_box.set_margin_bottom(10)
+        powder_box.set_margin_left(10)
+        powder_box.set_margin_right(10)
         
         # Component table header
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -179,26 +195,30 @@ class MixDesignPanel(Gtk.Box):
         normalize_button.connect('clicked', self._on_normalize_clicked)
         header_box.pack_start(normalize_button, False, False, 0)
         
-        comp_box.pack_start(header_box, False, False, 0)
+        powder_box.pack_start(header_box, False, False, 0)
         
         # Scrolled window for components
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        scrolled.set_size_request(-1, 300)
+        scrolled.set_size_request(-1, 200)
         
         # Components list container
         self.components_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         scrolled.add(self.components_box)
         
-        comp_box.pack_start(scrolled, True, True, 0)
+        powder_box.pack_start(scrolled, True, True, 0)
         
-        # Water and air content section
-        water_air_frame = Gtk.Frame(label="Water & Air Content")
-        water_air_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        water_air_box.set_margin_top(10)
-        water_air_box.set_margin_bottom(10)
-        water_air_box.set_margin_left(10)
-        water_air_box.set_margin_right(10)
+        powder_frame.add(powder_box)
+        parent.pack_start(powder_frame, True, True, 0)
+    
+    def _create_water_section(self, parent: Gtk.Box) -> None:
+        """Create the water content section."""
+        water_frame = Gtk.Frame(label="Water Content")
+        water_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        water_box.set_margin_top(10)
+        water_box.set_margin_bottom(10)
+        water_box.set_margin_left(10)
+        water_box.set_margin_right(10)
         
         # Water content controls
         water_grid = Gtk.Grid()
@@ -208,39 +228,61 @@ class MixDesignPanel(Gtk.Box):
         # Water-binder ratio
         wb_label = Gtk.Label("W/B Ratio:")
         wb_label.set_halign(Gtk.Align.END)
+        wb_label.set_tooltip_text("Water/Binder ratio (Water mass / Powder mass)")
         water_grid.attach(wb_label, 0, 0, 1, 1)
         
         self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
         self.wb_ratio_spin.set_value(0.40)
         self.wb_ratio_spin.set_digits(3)
+        self.wb_ratio_spin.set_tooltip_text("Enter W/B ratio to calculate water mass")
         water_grid.attach(self.wb_ratio_spin, 1, 0, 1, 1)
         
         # Water content
-        water_label = Gtk.Label("Water Content:")
+        water_label = Gtk.Label("Water Mass (kg):")
         water_label.set_halign(Gtk.Align.END)
+        water_label.set_tooltip_text("Water mass in kg (Binder = Paste = Powder + Water)")
         water_grid.attach(water_label, 0, 1, 1, 1)
         
-        self.water_content_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.001)
-        self.water_content_spin.set_value(0.150)
+        self.water_content_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.001)
+        self.water_content_spin.set_value(150.0)
         self.water_content_spin.set_digits(3)
+        self.water_content_spin.set_editable(True)  # Make it editable for user input
+        self.water_content_spin.set_tooltip_text("Enter water mass to calculate W/B ratio")
         water_grid.attach(self.water_content_spin, 1, 1, 1, 1)
         
+        water_box.pack_start(water_grid, False, False, 0)
+        water_frame.add(water_box)
+        
+        parent.pack_start(water_frame, False, False, 0)
+    
+    def _create_air_section(self, parent: Gtk.Box) -> None:
+        """Create the air content section."""
+        air_frame = Gtk.Frame(label="Air Content")
+        air_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        air_box.set_margin_top(10)
+        air_box.set_margin_bottom(10)
+        air_box.set_margin_left(10)
+        air_box.set_margin_right(10)
+        
+        # Air content controls
+        air_grid = Gtk.Grid()
+        air_grid.set_row_spacing(5)
+        air_grid.set_column_spacing(10)
+        
         # Air content
-        air_label = Gtk.Label("Air Content (%):")
+        air_label = Gtk.Label("Air Volume Fraction:")
         air_label.set_halign(Gtk.Align.END)
-        water_grid.attach(air_label, 0, 2, 1, 1)
+        air_grid.attach(air_label, 0, 0, 1, 1)
         
-        self.air_content_spin = Gtk.SpinButton.new_with_range(0.0, 15.0, 0.1)
-        self.air_content_spin.set_value(2.0)
-        self.air_content_spin.set_digits(1)
-        water_grid.attach(self.air_content_spin, 1, 2, 1, 1)
+        self.air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.15, 0.001)
+        self.air_content_spin.set_value(0.02)
+        self.air_content_spin.set_digits(3)
+        air_grid.attach(self.air_content_spin, 1, 0, 1, 1)
         
-        water_air_box.pack_start(water_grid, False, False, 0)
-        water_air_frame.add(water_air_box)
+        air_box.pack_start(air_grid, False, False, 0)
+        air_frame.add(air_box)
         
-        comp_box.pack_start(water_air_frame, False, False, 0)
-        
-        parent.add(comp_box)
+        parent.pack_start(air_frame, False, False, 0)
     
     def _create_properties_section(self, parent: Gtk.Frame) -> None:
         """Create the mix properties and calculations section."""
@@ -296,12 +338,12 @@ class MixDesignPanel(Gtk.Box):
     def _create_property_labels(self) -> None:
         """Create property display labels."""
         properties = [
-            ("Total Binder:", "total_binder"),
-            ("SCM Replacement:", "scm_replacement"),
-            ("Total Aggregate:", "total_aggregate"),
-            ("Avg. Specific Gravity:", "avg_sg"),
-            ("Void Ratio:", "void_ratio"),
-            ("Paste Content:", "paste_content")
+            ("Powder SG:", "powder_sg"),
+            ("Powder Volume:", "powder_volume"),
+            ("Water Volume:", "water_volume"),
+            ("Paste Volume:", "paste_volume"),
+            ("Air Volume:", "air_volume"),
+            ("Total Aggregate:", "total_aggregate")
         ]
         
         self.property_labels = {}
@@ -409,15 +451,15 @@ class MixDesignPanel(Gtk.Box):
         name_combo.set_size_request(150, -1)
         row_box.pack_start(name_combo, False, False, 0)
         
-        # Mass fraction spin button
-        mass_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.001)
-        mass_spin.set_digits(3)
+        # Mass (kg) spin button
+        mass_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.1)
+        mass_spin.set_digits(1)
         mass_spin.set_size_request(80, -1)
         row_box.pack_start(mass_spin, False, False, 0)
         
-        # Percentage label
-        percent_label = Gtk.Label("%")
-        row_box.pack_start(percent_label, False, False, 0)
+        # kg label
+        kg_label = Gtk.Label("kg")
+        row_box.pack_start(kg_label, False, False, 0)
         
         # Specific gravity display
         sg_label = Gtk.Label("2.650")
@@ -517,29 +559,8 @@ class MixDesignPanel(Gtk.Box):
             self._trigger_calculation()
     
     def _on_normalize_clicked(self, button) -> None:
-        """Handle normalize button click."""
-        try:
-            # Calculate total mass fraction
-            total_mass = sum(row['mass_spin'].get_value() for row in self.component_rows)
-            
-            if total_mass == 0:
-                self.main_window.update_status("No components to normalize", "warning", 3)
-                return
-            
-            # Normalize each component
-            for row in self.component_rows:
-                current_value = row['mass_spin'].get_value()
-                normalized_value = current_value / total_mass
-                row['mass_spin'].set_value(normalized_value)
-            
-            self.main_window.update_status("Components normalized successfully", "success", 3)
-            
-            if self.auto_calculate_enabled:
-                self._trigger_calculation()
-        
-        except Exception as e:
-            self.logger.error(f"Failed to normalize components: {e}")
-            self.main_window.update_status(f"Normalization failed: {e}", "error", 3)
+        """Handle normalize button click - not applicable for absolute masses."""
+        self.main_window.update_status("Normalization not applicable for absolute masses (kg)", "info", 3)
     
     def _on_component_type_changed(self, combo, row_data) -> None:
         """Handle component type change."""
@@ -561,8 +582,11 @@ class MixDesignPanel(Gtk.Box):
             self._trigger_calculation()
     
     def _on_component_mass_changed(self, spin, row_data) -> None:
-        """Handle component mass fraction change."""
+        """Handle component mass change."""
         if self.auto_calculate_enabled:
+            # When powder mass changes, recalculate water content from W/B ratio
+            # (This maintains the W/B ratio while adjusting water to match new powder mass)
+            self._calculate_water_content_from_wb_ratio()
             self._trigger_calculation()
     
     def _on_grading_button_clicked(self, button, row_data) -> None:
@@ -648,51 +672,118 @@ class MixDesignPanel(Gtk.Box):
             row_data['sg_label'].set_text("—")
     
     def _calculate_water_content_from_wb_ratio(self) -> None:
-        """Calculate water content from W/B ratio."""
+        """Calculate water mass (kg) from W/B ratio (water mass / powder mass)."""
         try:
             wb_ratio = self.wb_ratio_spin.get_value()
             
-            # Calculate total binder fraction
-            total_binder = self._calculate_total_binder_fraction()
+            # Calculate total powder mass in kg
+            total_powder_mass = self._calculate_total_powder_mass()
             
-            if total_binder > 0:
-                water_content = wb_ratio * total_binder
-                self.water_content_spin.set_value(water_content)
+            if total_powder_mass > 0:
+                water_mass = wb_ratio * total_powder_mass
+                # Block signal to prevent infinite loop
+                self.water_content_spin.handler_block_by_func(self._on_water_content_changed)
+                self.water_content_spin.set_value(water_mass)
+                self.water_content_spin.handler_unblock_by_func(self._on_water_content_changed)
         
         except Exception as e:
             self.logger.warning(f"Failed to calculate water content: {e}")
     
     def _calculate_wb_ratio_from_water_content(self) -> None:
-        """Calculate W/B ratio from water content."""
+        """Calculate W/B ratio from water mass (kg) (water mass / powder mass)."""
         try:
-            water_content = self.water_content_spin.get_value()
+            water_mass = self.water_content_spin.get_value()
             
-            # Calculate total binder fraction
-            total_binder = self._calculate_total_binder_fraction()
+            # Calculate total powder mass in kg
+            total_powder_mass = self._calculate_total_powder_mass()
             
-            if total_binder > 0:
-                wb_ratio = water_content / total_binder
+            if total_powder_mass > 0:
+                wb_ratio = water_mass / total_powder_mass
+                # Block signal to prevent infinite loop
+                self.wb_ratio_spin.handler_block_by_func(self._on_wb_ratio_changed)
                 self.wb_ratio_spin.set_value(wb_ratio)
+                self.wb_ratio_spin.handler_unblock_by_func(self._on_wb_ratio_changed)
         
         except Exception as e:
             self.logger.warning(f"Failed to calculate W/B ratio: {e}")
     
-    def _calculate_total_binder_fraction(self) -> float:
-        """Calculate total binder mass fraction."""
-        binder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG}
-        total_binder = 0.0
+    def _calculate_total_powder_mass(self) -> float:
+        """Calculate total powder mass in kg (cement, fly ash, slag, inert filler)."""
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        total_powder = 0.0
         
         for row in self.component_rows:
             type_str = row['type_combo'].get_active_id()
             if type_str:
                 try:
                     material_type = MaterialType(type_str)
-                    if material_type in binder_types:
-                        total_binder += row['mass_spin'].get_value()
+                    if material_type in powder_types:
+                        total_powder += row['mass_spin'].get_value()
                 except ValueError:
                     continue
         
-        return total_binder
+        return total_powder
+    
+    def _calculate_total_paste_mass(self) -> float:
+        """Calculate total paste mass in kg (powder + water). Paste = Binder."""
+        powder_mass = self._calculate_total_powder_mass()
+        water_mass = self.water_content_spin.get_value()
+        return powder_mass + water_mass
+    
+    def _calculate_total_binder_mass(self) -> float:
+        """Calculate total binder mass in kg (powder + water). Binder = Paste."""
+        return self._calculate_total_paste_mass()
+    
+    def _calculate_powder_specific_gravity(self) -> float:
+        """Calculate mass-weighted average specific gravity of all powder components."""
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        total_weighted_sg = 0.0
+        total_powder_mass = 0.0
+        
+        for row in self.component_rows:
+            type_str = row['type_combo'].get_active_id()
+            if type_str:
+                try:
+                    material_type = MaterialType(type_str)
+                    if material_type in powder_types:
+                        mass_kg = row['mass_spin'].get_value()
+                        sg_text = row['sg_label'].get_text()
+                        
+                        if mass_kg > 0 and sg_text != "—":
+                            sg = float(sg_text)
+                            total_weighted_sg += mass_kg * sg
+                            total_powder_mass += mass_kg
+                except (ValueError, TypeError):
+                    continue
+        
+        if total_powder_mass > 0:
+            return total_weighted_sg / total_powder_mass
+        else:
+            return 3.15  # Default cement specific gravity
+    
+    def _calculate_volumes_from_masses(self) -> Dict[str, float]:
+        """Convert masses to volumes using specific gravities."""
+        # Water specific gravity is 1.0
+        water_sg = 1.0
+        
+        # Calculate powder specific gravity (mass-weighted average)
+        powder_sg = self._calculate_powder_specific_gravity()
+        
+        # Get masses
+        powder_mass = self._calculate_total_powder_mass()
+        water_mass = self.water_content_spin.get_value()
+        
+        # Calculate volumes (Volume = Mass / Specific Gravity)
+        powder_volume = powder_mass / powder_sg if powder_sg > 0 else 0.0
+        water_volume = water_mass / water_sg
+        
+        return {
+            'powder_volume': powder_volume,
+            'water_volume': water_volume,
+            'paste_volume': powder_volume + water_volume,
+            'powder_sg': powder_sg,
+            'water_sg': water_sg
+        }
     
     def _trigger_calculation(self) -> None:
         """Trigger calculation after a short delay."""
@@ -754,14 +845,26 @@ class MixDesignPanel(Gtk.Box):
             
             # Create components
             components = []
+            total_component_mass = 0.0
+            
+            # Calculate total mass of components only (excluding water)
+            for row in self.component_rows:
+                mass_kg = row['mass_spin'].get_value()
+                if mass_kg > 0:
+                    total_component_mass += mass_kg
+            
+            # Create components with mass fractions (relative to total component mass)
             for row in self.component_rows:
                 type_str = row['type_combo'].get_active_id()
                 name = row['name_combo'].get_active_id()
-                mass_fraction = row['mass_spin'].get_value()
+                mass_kg = row['mass_spin'].get_value()
                 
-                if type_str and name and mass_fraction > 0:
+                if type_str and name and mass_kg > 0 and total_component_mass > 0:
                     material_type = MaterialType(type_str)
                     sg = self.mix_service._get_material_specific_gravity(name, material_type)
+                    
+                    # Convert kg to mass fraction (relative to component mass, not including water)
+                    mass_fraction = mass_kg / total_component_mass
                     
                     component = MixComponent(
                         material_name=name,
@@ -775,12 +878,16 @@ class MixDesignPanel(Gtk.Box):
                 return None
             
             # Create mix design
+            # Convert water mass to water fraction (relative to component mass)
+            water_mass = self.water_content_spin.get_value()
+            water_fraction = water_mass / total_component_mass if total_component_mass > 0 else 0.0
+            
             mix_design = MixDesign(
                 name=mix_name,
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
-                total_water_content=self.water_content_spin.get_value(),
-                air_content=self.air_content_spin.get_value() / 100.0  # Convert percentage
+                total_water_content=water_fraction,
+                air_content=self.air_content_spin.get_value()  # Already a volume fraction
             )
             
             return mix_design
@@ -792,17 +899,28 @@ class MixDesignPanel(Gtk.Box):
     def _update_properties_display(self, properties: Dict[str, Any]) -> None:
         """Update the properties display with calculated values."""
         try:
-            # Update property labels
-            self.property_labels['total_binder'].set_text(f"{properties.get('total_binder_fraction', 0):.1%}")
-            self.property_labels['scm_replacement'].set_text(f"{properties.get('scm_replacement_ratio', 0):.1%}")
+            # Update property labels with volume information
+            self.property_labels['powder_sg'].set_text(f"{properties.get('powder_specific_gravity', 0):.3f}")
+            self.property_labels['powder_volume'].set_text(f"{properties.get('powder_volume_fraction', 0):.1%}")
+            self.property_labels['water_volume'].set_text(f"{properties.get('water_volume_fraction', 0):.1%}")
+            self.property_labels['paste_volume'].set_text(f"{properties.get('paste_volume_fraction', 0):.1%}")
+            self.property_labels['air_volume'].set_text(f"{properties.get('air_volume_fraction', 0):.1%}")
             self.property_labels['total_aggregate'].set_text(f"{properties.get('total_aggregate_fraction', 0):.1%}")
-            self.property_labels['avg_sg'].set_text(f"{properties.get('weighted_average_specific_gravity', 0):.3f}")
-            self.property_labels['void_ratio'].set_text(f"{properties.get('void_ratio', 0):.3f}")
             
-            # Calculate paste content (binder + water)
-            paste_content = properties.get('total_binder_fraction', 0) + properties.get('water_binder_ratio', 0) * properties.get('total_binder_fraction', 0)
-            self.property_labels['paste_content'].set_text(f"{paste_content:.1%}")
-            
+            # Also update volume calculations from UI inputs directly
+            volume_data = self._calculate_volumes_from_masses()
+            if volume_data:
+                # Display additional volume information in status
+                powder_vol = volume_data['powder_volume']
+                water_vol = volume_data['water_volume']
+                paste_vol = volume_data['paste_volume']
+                powder_sg = volume_data['powder_sg']
+                
+                self.status_label.set_markup(
+                    f'<span size="small">Volumes: Powder={powder_vol:.1f}, Water={water_vol:.1f}, '
+                    f'Paste={paste_vol:.1f} | Powder SG={powder_sg:.3f}</span>'
+                )
+                
         except Exception as e:
             self.logger.warning(f"Failed to update properties display: {e}")
     
@@ -853,8 +971,8 @@ class MixDesignPanel(Gtk.Box):
         
         # Reset water and air values
         self.wb_ratio_spin.set_value(0.40)
-        self.water_content_spin.set_value(0.150)
-        self.air_content_spin.set_value(2.0)
+        self.water_content_spin.set_value(150.0)  # 150 kg default
+        self.air_content_spin.set_value(0.02)  # 2% volume fraction
         
         # Clear properties and validation
         for label in self.property_labels.values():

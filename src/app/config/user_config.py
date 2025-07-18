@@ -85,21 +85,10 @@ class UserConfig:
     
     @staticmethod
     def _get_default_app_directory() -> Path:
-        """Get default application directory based on platform."""
-        system = platform.system().lower()
-        
-        if system == "darwin":  # macOS
-            return Path.home() / "Library" / "Preferences" / "VCCTL"
-        elif system == "windows":
-            # Use APPDATA on Windows
-            import os
-            appdata = os.environ.get('APPDATA', str(Path.home() / "AppData" / "Roaming"))
-            return Path(appdata) / "VCCTL"
-        else:  # Linux and other Unix-like systems
-            # Use XDG data directory or fallback to ~/.local/share
-            import os
-            xdg_data = os.environ.get('XDG_DATA_HOME', str(Path.home() / ".local" / "share"))
-            return Path(xdg_data) / "vcctl"
+        """Get default application directory as current working directory."""
+        # Use current working directory as the default app directory
+        # This makes the application portable and relative to where it's run from
+        return Path.cwd()
     
     @staticmethod
     def _get_default_thread_count() -> int:

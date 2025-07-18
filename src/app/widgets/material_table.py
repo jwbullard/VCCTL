@@ -217,7 +217,7 @@ class MaterialTable(Gtk.Box):
             ("Specific Gravity", MaterialTableColumn.SPECIFIC_GRAVITY, 120, True),
             ("Created", MaterialTableColumn.CREATED_DATE, 120, True),
             ("Modified", MaterialTableColumn.MODIFIED_DATE, 120, True),
-            ("Description", MaterialTableColumn.DESCRIPTION, 250, True)
+            ("Description", MaterialTableColumn.DESCRIPTION, 250, False)  # Hidden
         ]
         
         self.columns = {}
@@ -628,7 +628,18 @@ class MaterialTable(Gtk.Box):
             tree_iter = model.get_iter(path)
             material_data = model.get_value(tree_iter, 6)  # material data column
             if material_data:
-                self.selected_materials.add(material_data.id)
+                # Use the correct identifier based on material type
+                if hasattr(material_data, '__tablename__'):
+                    if material_data.__tablename__ == 'cement':
+                        material_id = material_data.name
+                    elif material_data.__tablename__ == 'aggregate':
+                        material_id = material_data.display_name
+                    else:
+                        material_id = getattr(material_data, 'id', material_data.name)
+                else:
+                    material_id = getattr(material_data, 'name', getattr(material_data, 'display_name', None))
+                
+                self.selected_materials.add(material_id)
         
         self._update_status()
         
@@ -710,8 +721,27 @@ class MaterialTable(Gtk.Box):
     
     def _on_context_duplicate(self, item) -> None:
         """Handle context menu duplicate action."""
-        # TODO: Implement material duplication
-        self.main_window.update_status("Material duplication will be implemented", "info", 3)
+        selection = self.tree_view.get_selection()
+        model, tree_paths = selection.get_selected_rows()
+        
+        if tree_paths:
+            tree_iter = model.get_iter(tree_paths[0])
+            material_data = model.get_value(tree_iter, 6)
+            if material_data:
+                # Use the parent's duplicate functionality
+                try:
+                    parent_panel = self.get_parent()
+                    while parent_panel and not hasattr(parent_panel, '_duplicate_material'):
+                        parent_panel = parent_panel.get_parent()
+                    
+                    if parent_panel and hasattr(parent_panel, '_duplicate_material'):
+                        material_type = parent_panel._get_material_type(material_data)
+                        parent_panel._duplicate_material(material_data, material_type)
+                    else:
+                        self.main_window.update_status("Could not access duplication functionality", "error", 3)
+                except Exception as e:
+                    self.logger.error(f"Error duplicating material: {e}")
+                    self.main_window.update_status(f"Error duplicating material: {e}", "error", 5)
     
     def _on_context_delete(self, item) -> None:
         """Handle context menu delete action."""
@@ -722,7 +752,18 @@ class MaterialTable(Gtk.Box):
             tree_iter = model.get_iter(tree_paths[0])
             material_data = model.get_value(tree_iter, 6)
             if material_data:
-                self.selected_materials = {material_data.id}
+                # Use the correct identifier based on material type
+                if hasattr(material_data, '__tablename__'):
+                    if material_data.__tablename__ == 'cement':
+                        material_id = material_data.name
+                    elif material_data.__tablename__ == 'aggregate':
+                        material_id = material_data.display_name
+                    else:
+                        material_id = getattr(material_data, 'id', material_data.name)
+                else:
+                    material_id = getattr(material_data, 'name', getattr(material_data, 'display_name', None))
+                
+                self.selected_materials = {material_id}
                 self._on_bulk_delete_clicked(None)
     
     def _on_context_export(self, item) -> None:
@@ -734,7 +775,18 @@ class MaterialTable(Gtk.Box):
             tree_iter = model.get_iter(tree_paths[0])
             material_data = model.get_value(tree_iter, 6)
             if material_data:
-                self.selected_materials = {material_data.id}
+                # Use the correct identifier based on material type
+                if hasattr(material_data, '__tablename__'):
+                    if material_data.__tablename__ == 'cement':
+                        material_id = material_data.name
+                    elif material_data.__tablename__ == 'aggregate':
+                        material_id = material_data.display_name
+                    else:
+                        material_id = getattr(material_data, 'id', material_data.name)
+                else:
+                    material_id = getattr(material_data, 'name', getattr(material_data, 'display_name', None))
+                
+                self.selected_materials = {material_id}
                 self._on_bulk_export_clicked(None)
     
     def _delete_selected_materials(self) -> None:
@@ -746,7 +798,15 @@ class MaterialTable(Gtk.Box):
                 # Find the material in our data
                 material_data = None
                 for material in self.materials_data:
-                    if material['data'].id == material_id:
+                    data_obj = material['data']
+                    # Check the correct identifier based on material type
+                    if material['type'] == 'cement' and getattr(data_obj, 'name', None) == material_id:
+                        material_data = material
+                        break
+                    elif material['type'] == 'aggregate' and getattr(data_obj, 'display_name', None) == material_id:
+                        material_data = material
+                        break
+                    elif getattr(data_obj, 'id', None) == material_id:
                         material_data = material
                         break
                 

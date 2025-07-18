@@ -60,21 +60,10 @@ class ConfigManager:
         self._load_configurations()
     
     def _get_platform_config_dir(self) -> Path:
-        """Get platform-specific configuration directory."""
-        system = platform.system().lower()
-        
-        if system == "darwin":  # macOS
-            config_dir = Path.home() / "Library" / "Preferences" / "VCCTL"
-        elif system == "windows":
-            # Use APPDATA on Windows
-            appdata = os.environ.get('APPDATA', str(Path.home() / "AppData" / "Roaming"))
-            config_dir = Path(appdata) / "VCCTL"
-        else:  # Linux and other Unix-like systems
-            # Use XDG config directory or fallback to ~/.config
-            xdg_config = os.environ.get('XDG_CONFIG_HOME', str(Path.home() / ".config"))
-            config_dir = Path(xdg_config) / "vcctl"
-        
-        return config_dir
+        """Get configuration directory relative to application directory."""
+        # Use a config subdirectory relative to the current working directory
+        # This makes the application portable and self-contained
+        return Path.cwd() / "config"
     
     def _load_configurations(self) -> None:
         """Load all configuration sections."""

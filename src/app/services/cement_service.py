@@ -34,7 +34,8 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
         """Get all cement materials."""
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(Cement).order_by(Cement.name).all()
+                # Order by id (new primary key) instead of name
+                return session.query(Cement).order_by(Cement.id).all()
         except Exception as e:
             self.logger.error(f"Failed to get all cements: {e}")
             raise ServiceError(f"Failed to retrieve cements: {e}")
@@ -84,13 +85,13 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
             self.logger.error(f"Failed to create cement: {e}")
             raise ServiceError(f"Failed to create cement: {e}")
     
-    def update(self, name: str, cement_data: CementUpdate) -> Cement:
+    def update(self, cement_id: int, cement_data: CementUpdate) -> Cement:
         """Update an existing cement material."""
         try:
             with self.db_service.get_session() as session:
-                cement = session.query(Cement).filter_by(name=name).first()
+                cement = session.query(Cement).filter_by(id=cement_id).first()
                 if not cement:
-                    raise NotFoundError(f"Cement '{name}' not found")
+                    raise NotFoundError(f"Cement with ID '{cement_id}' not found")
                 
                 # Update fields
                 update_dict = cement_data.dict(exclude_unset=True)
@@ -111,7 +112,7 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
             self.logger.error(f"Database integrity error updating cement: {e}")
             raise ServiceError(f"Cement update failed: invalid data")
         except Exception as e:
-            self.logger.error(f"Failed to update cement {name}: {e}")
+            self.logger.error(f"Failed to update cement {cement_id}: {e}")
             raise ServiceError(f"Failed to update cement: {e}")
     
     def delete(self, name: str) -> bool:

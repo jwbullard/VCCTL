@@ -58,13 +58,15 @@ class MixDesign:
     water_binder_ratio: float = 0.0
     total_water_content: float = 0.0
     air_content: float = 0.0
+    water_volume_fraction: float = 0.0
+    air_volume_fraction: float = 0.0
     
     def __post_init__(self):
         """Validate mix design data after initialization."""
         if self.water_binder_ratio < 0 or self.water_binder_ratio > 2.0:
             raise ValueError("Water-binder ratio must be between 0 and 2.0")
         if self.air_content < 0 or self.air_content > 0.15:
-            raise ValueError("Air content must be between 0 and 15%")
+            raise ValueError("Air content must be between 0 and 0.15 (volume fraction)")
 
 
 class MixService:
@@ -185,41 +187,48 @@ class MixService:
     def _calculate_volume_fractions(self, mix_design: MixDesign) -> None:
         """Calculate volume fractions from mass fractions and specific gravities."""
         try:
-            # Calculate volume for each component
+            # Calculate volume for each component (Volume = Mass / Specific Gravity)
             for component in mix_design.components:
                 if component.specific_gravity > 0:
-                    # Volume = mass / (specific_gravity * density_of_water)
-                    # For relative calculations, we can ignore water density
                     component.volume_fraction = component.mass_fraction / component.specific_gravity
                 else:
                     component.volume_fraction = 0.0
             
-            # Normalize volume fractions to sum to 1.0 (excluding water and air)
-            total_volume = sum(comp.volume_fraction for comp in mix_design.components)
+            # Calculate water volume (water SG = 1.0)
+            water_volume_fraction = mix_design.total_water_content / 1.0
             
-            if total_volume > 0:
+            # Calculate total absolute volume (powder + water + air)
+            total_solid_volume = sum(comp.volume_fraction for comp in mix_design.components) + water_volume_fraction
+            total_volume_with_air = total_solid_volume + mix_design.air_content
+            
+            # Normalize all volume fractions relative to total concrete volume
+            if total_volume_with_air > 0:
                 for component in mix_design.components:
-                    component.volume_fraction = component.volume_fraction / total_volume
+                    component.volume_fraction = component.volume_fraction / total_volume_with_air
+                
+                # Store additional volume information in mix design
+                mix_design.water_volume_fraction = water_volume_fraction / total_volume_with_air
+                mix_design.air_volume_fraction = mix_design.air_content / total_volume_with_air
             
         except Exception as e:
             self.logger.error(f"Failed to calculate volume fractions: {e}")
             raise ServiceError(f"Volume fraction calculation failed: {e}")
     
     def calculate_water_binder_ratio(self, mix_design: MixDesign) -> float:
-        """Calculate water-binder ratio for a mix design."""
+        """Calculate water-binder ratio for a mix design (water mass / powder mass)."""
         try:
-            # Calculate total binder mass fraction
-            binder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG}
-            total_binder_fraction = sum(
+            # Calculate total powder mass fraction (cement, fly ash, slag, inert filler)
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in binder_types
+                if comp.material_type in powder_types
             )
             
-            if total_binder_fraction == 0:
-                raise ValidationError("No binder materials found in mix")
+            if total_powder_fraction == 0:
+                raise ValidationError("No powder materials found in mix")
             
-            # Calculate water-binder ratio
-            water_binder_ratio = mix_design.total_water_content / total_binder_fraction
+            # Calculate water-binder ratio (water mass / powder mass)
+            water_binder_ratio = mix_design.total_water_content / total_powder_fraction
             
             mix_design.water_binder_ratio = water_binder_ratio
             return water_binder_ratio
@@ -250,19 +259,22 @@ class MixService:
             elif mix_design.water_binder_ratio > 0.65:
                 validation_result['warnings'].append("High water-binder ratio may reduce strength and durability")
             
-            # Check air content
+            # Check air content (volume fraction)
             if mix_design.air_content > 0.10:
-                validation_result['warnings'].append("High air content (>10%) may significantly reduce strength")
+                validation_result['warnings'].append("High air content (>10% volume fraction) may significantly reduce strength")
             
-            # Check binder content
-            binder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG}
-            total_binder = sum(
+            # Check powder content
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            total_powder = sum(
                 comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in binder_types
+                if comp.material_type in powder_types
             )
             
-            if total_binder < 0.10:
-                validation_result['errors'].append("Insufficient binder content (<10%)")
+            # Check binder content (powder + water)
+            total_binder = total_powder + mix_design.total_water_content
+            
+            if total_powder < 0.10:
+                validation_result['errors'].append("Insufficient powder content (<10%)")
                 validation_result['is_valid'] = False
             elif total_binder > 0.50:
                 validation_result['warnings'].append("Very high binder content (>50%) may be uneconomical")
@@ -306,31 +318,57 @@ class MixService:
         try:
             properties = {}
             
-            # Calculate weighted average specific gravity
+            # Calculate weighted average specific gravity for all components
             total_weighted_sg = sum(
                 comp.mass_fraction * comp.specific_gravity 
                 for comp in mix_design.components
             )
             properties['weighted_average_specific_gravity'] = total_weighted_sg
             
-            # Calculate binder composition
-            binder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG}
-            total_binder_mass = sum(
-                comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in binder_types
-            )
+            # Calculate powder-specific properties
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_components = [comp for comp in mix_design.components if comp.material_type in powder_types]
             
+            # Calculate mass-weighted average specific gravity of powder components
+            if powder_components:
+                total_powder_mass_fraction = sum(comp.mass_fraction for comp in powder_components)
+                powder_weighted_sg = sum(
+                    comp.mass_fraction * comp.specific_gravity for comp in powder_components
+                ) / total_powder_mass_fraction if total_powder_mass_fraction > 0 else 3.15
+                properties['powder_specific_gravity'] = powder_weighted_sg
+            else:
+                properties['powder_specific_gravity'] = 3.15
+            
+            # Calculate volume fractions (this also sets water_volume_fraction and air_volume_fraction)
+            self._calculate_volume_fractions(mix_design)
+            
+            # Add volume properties
+            properties['water_volume_fraction'] = getattr(mix_design, 'water_volume_fraction', 0.0)
+            properties['air_volume_fraction'] = getattr(mix_design, 'air_volume_fraction', 0.0)
+            
+            # Calculate total volume fractions for different phases
+            powder_volume_fraction = sum(comp.volume_fraction for comp in powder_components)
+            properties['powder_volume_fraction'] = powder_volume_fraction
+            properties['paste_volume_fraction'] = powder_volume_fraction + properties['water_volume_fraction']
+            
+            # Calculate powder mass composition
+            total_powder_mass = sum(comp.mass_fraction for comp in powder_components)
+            
+            # Calculate binder composition (powder + water)
+            total_binder_mass = total_powder_mass + mix_design.total_water_content
+            
+            properties['total_powder_fraction'] = total_powder_mass
             properties['total_binder_fraction'] = total_binder_mass
             properties['water_binder_ratio'] = mix_design.water_binder_ratio
             
-            # Calculate SCM replacement ratio
+            # Calculate SCM replacement ratio (SCM mass / total powder mass)
             scm_mass = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in {MaterialType.FLY_ASH, MaterialType.SLAG}
             )
             
-            if total_binder_mass > 0:
-                properties['scm_replacement_ratio'] = scm_mass / total_binder_mass
+            if total_powder_mass > 0:
+                properties['scm_replacement_ratio'] = scm_mass / total_powder_mass
             else:
                 properties['scm_replacement_ratio'] = 0.0
             
@@ -353,20 +391,20 @@ class MixService:
             raise ServiceError(f"Mix properties calculation failed: {e}")
     
     def optimize_water_content(self, mix_design: MixDesign, target_w_b_ratio: float) -> float:
-        """Optimize water content to achieve target water-binder ratio."""
+        """Optimize water content to achieve target water-binder ratio (water mass / powder mass)."""
         try:
-            # Calculate total binder mass fraction
-            binder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG}
-            total_binder_fraction = sum(
+            # Calculate total powder mass fraction
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in binder_types
+                if comp.material_type in powder_types
             )
             
-            if total_binder_fraction == 0:
-                raise ValidationError("No binder materials found in mix")
+            if total_powder_fraction == 0:
+                raise ValidationError("No powder materials found in mix")
             
-            # Calculate required water content
-            required_water_content = target_w_b_ratio * total_binder_fraction
+            # Calculate required water content (water mass / powder mass = target ratio)
+            required_water_content = target_w_b_ratio * total_powder_fraction
             
             # Update mix design
             mix_design.total_water_content = required_water_content

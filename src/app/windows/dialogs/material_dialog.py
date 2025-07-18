@@ -123,6 +123,14 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         self.name_entry.set_placeholder_text("Enter material name...")
         self.name_entry.set_hexpand(True)
         
+        # Enable name editing for cement materials (now uses integer ID as primary key)
+        # Only disable for aggregates which still use display_name as primary key
+        if self.is_edit_mode and self.material_type == 'aggregate':
+            self.name_entry.set_sensitive(False)
+            self.name_entry.set_tooltip_text("Aggregate display name cannot be changed (it's the primary key)")
+        elif self.is_edit_mode:
+            self.name_entry.set_tooltip_text("You can rename this material")
+        
         id_grid.attach(name_label, 0, 0, 1, 1)
         id_grid.attach(self.name_entry, 1, 0, 2, 1)
         
@@ -342,12 +350,20 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             return
         
         try:
-            # Load basic fields
-            self.name_entry.set_text(self.material_data.get('name', ''))
+            # Load basic fields - handle different primary key fields
+            if self.material_type == 'aggregate':
+                # Aggregates use display_name as primary key
+                name = self.material_data.get('display_name', '')
+            else:
+                # Most materials use name as primary key
+                name = self.material_data.get('name', '')
+            self.name_entry.set_text(name)
             
             description = self.material_data.get('description', '')
             if description:
-                self.description_buffer.set_text(description)
+                # Decode hex-encoded description if needed
+                decoded_description = self._decode_description_if_hex(description)
+                self.description_buffer.set_text(decoded_description)
             
             source = self.material_data.get('source', '')
             if source:
@@ -363,6 +379,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             # Load material-specific data
             self._load_material_specific_data()
             
+            # Trigger validation after loading data
+            self._validate_all()
+            
         except Exception as e:
             self.logger.error(f"Failed to load material data: {e}")
     
@@ -373,10 +392,11 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def _on_field_changed(self, widget) -> None:
         """Handle field change events."""
-        # Clear previous validation for this field
-        field_name = getattr(widget, 'field_name', None)
-        if field_name and field_name in self.validation_errors:
-            del self.validation_errors[field_name]
+        # Clear previous validation errors for this field
+        if widget == self.name_entry:
+            self.validation_errors.pop('name', None)
+        elif widget == self.specific_gravity_spin:
+            self.validation_errors.pop('specific_gravity', None)
         
         # Validate the field
         self._validate_field(widget)
@@ -398,6 +418,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         """Validate the name field."""
         name = self.name_entry.get_text().strip()
         
+        # Always clear name validation errors first
+        self.validation_errors.pop('name', None)
+        
         if not name:
             self.validation_errors['name'] = "Material name is required"
         elif len(name) < 2:
@@ -406,13 +429,24 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             self.validation_errors['name'] = "Material name cannot exceed 100 characters"
         else:
             # Check for duplicate names (if not in edit mode or name changed)
-            if not self.is_edit_mode or name != self.material_data.get('name', ''):
+            if self.material_type == 'aggregate':
+                original_name = self.material_data.get('display_name', '') if self.material_data else ''
+            else:
+                original_name = self.material_data.get('name', '') if self.material_data else ''
+            
+            if not self.is_edit_mode or name != original_name:
                 if self._check_name_exists(name):
                     self.validation_errors['name'] = f"A {self.material_type} named '{name}' already exists"
+                # If name doesn't exist, error was already cleared above
+            # If same name as original, error was already cleared above
     
     def _validate_specific_gravity(self) -> None:
         """Validate the specific gravity field."""
         sg = self.specific_gravity_spin.get_value()
+        
+        # Always clear specific gravity validation errors and warnings first
+        self.validation_errors.pop('specific_gravity', None)
+        self.validation_warnings.pop('specific_gravity', None)
         
         if sg <= 0:
             self.validation_errors['specific_gravity'] = "Specific gravity must be positive"
@@ -420,6 +454,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             self.validation_warnings['specific_gravity'] = "Specific gravity less than 1.0 is unusual"
         elif sg > 5.0:
             self.validation_warnings['specific_gravity'] = "Specific gravity greater than 5.0 is unusual"
+        # If sg is valid (1.0 <= sg <= 5.0), errors and warnings were already cleared above
     
     @abstractmethod
     def _validate_material_specific_field(self, widget) -> None:
@@ -431,8 +466,20 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         try:
             service = self._get_material_service()
             if service:
-                existing = service.get_by_name(name)
-                return existing is not None
+                if self.material_type == 'aggregate':
+                    # For aggregates, check by display_name (primary key)
+                    with service.db_service.get_read_only_session() as session:
+                        existing = session.query(service.model).filter_by(display_name=name).first()
+                        return existing is not None
+                else:
+                    # For cement materials, check by name
+                    existing = service.get_by_name(name)
+                    if existing is not None:
+                        # If in edit mode, ignore if it's the same material being edited
+                        if self.is_edit_mode and existing.id == self.material_data.get('id'):
+                            return False
+                        return True
+                    return False
         except Exception as e:
             self.logger.warning(f"Could not check for existing material name: {e}")
         return False
@@ -518,19 +565,84 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         notes_end = self.notes_buffer.get_end_iter()
         notes = self.notes_buffer.get_text(notes_start, notes_end, False)
         
-        data = {
-            'name': self.name_entry.get_text().strip(),
-            'description': description.strip() if description.strip() else None,
-            'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
-            'specific_gravity': self.specific_gravity_spin.get_value(),
-            'notes': notes.strip() if notes.strip() else None
-        }
+        name = self.name_entry.get_text().strip()
         
-        # Add material-specific data
+        # Collect ALL form data for both create and edit modes
+        # The main difference is how we handle the primary key field
+        if self.material_type == 'aggregate':
+            if self.is_edit_mode:
+                # For aggregate updates, don't include display_name (it's the primary key)
+                data = {
+                    'name': name,
+                    'specific_gravity': self.specific_gravity_spin.get_value(),
+                    'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'notes': notes.strip() if notes.strip() else None
+                }
+            else:
+                # For new aggregates, include both name and display_name
+                data = {
+                    'display_name': name,
+                    'name': name,  # Also set name field for aggregates
+                    'description': description.strip() if description.strip() else None,
+                    'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'specific_gravity': self.specific_gravity_spin.get_value(),
+                    'notes': notes.strip() if notes.strip() else None
+                }
+        else:
+            # For cement materials
+            if self.is_edit_mode:
+                # For cement updates, include name (now editable since using integer ID primary key)
+                data = {
+                    'name': name,
+                    'description': description.strip() if description.strip() else None,
+                    'specific_gravity': self.specific_gravity_spin.get_value(),
+                    'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'notes': notes.strip() if notes.strip() else None
+                }
+            else:
+                # For new materials, include name
+                data = {
+                    'name': name,
+                    'description': description.strip() if description.strip() else None,
+                    'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'specific_gravity': self.specific_gravity_spin.get_value(),
+                    'notes': notes.strip() if notes.strip() else None
+                }
+        
+        # Add material-specific data (phase fractions, Blaine fineness, etc.)
         material_data = self._collect_material_specific_data()
         data.update(material_data)
         
         return data
+    
+    def _decode_description_if_hex(self, description: str) -> str:
+        """Decode description from hex if it appears to be hex-encoded."""
+        try:
+            if not description or not description.strip():
+                return ""
+            
+            desc_clean = description.strip()
+            
+            # Remove any whitespace for hex validation
+            hex_only = ''.join(desc_clean.split())
+            
+            # Check if it looks like hex (even length, only hex characters)
+            if (len(hex_only) % 2 == 0 and 
+                len(hex_only) > 10 and  # Must be reasonably long
+                all(c in '0123456789abcdefABCDEF' for c in hex_only)):
+                
+                try:
+                    import binascii
+                    decoded_bytes = binascii.unhexlify(hex_only)
+                    decoded_text = decoded_bytes.decode('utf-8', errors='ignore')
+                    # Keep the original line breaks for proper formatting
+                    return decoded_text if decoded_text else description
+                except Exception:
+                    return description
+            
+            return description
+        except Exception:
+            return description or ""
     
     @abstractmethod
     def _collect_material_specific_data(self) -> Dict[str, Any]:
@@ -553,14 +665,39 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 raise Exception(f"No service available for {self.material_type}")
             
             if self.is_edit_mode:
-                # Update existing material
-                material_id = self.material_data['id']
-                updated_material = service.update(material_id, data)
-                self.logger.info(f"Updated {self.material_type}: {updated_material.name}")
+                # Update existing material using correct primary key
+                if self.material_type == 'aggregate':
+                    # For aggregates, use display_name as the primary key
+                    material_id = self.material_data['display_name']
+                else:
+                    # For cement materials, use integer ID as the primary key
+                    material_id = self.material_data['id']
+                
+                # Convert data to appropriate model format
+                if self.material_type == 'cement':
+                    from app.models.cement import CementUpdate
+                    update_data = CementUpdate(**data)
+                elif self.material_type == 'aggregate':
+                    from app.models.aggregate import AggregateUpdate
+                    update_data = AggregateUpdate(**data)
+                else:
+                    update_data = data
+                
+                updated_material = service.update(material_id, update_data)
+                self.logger.info(f"Updated {self.material_type}: {getattr(updated_material, 'name', getattr(updated_material, 'display_name', 'unknown'))}")
             else:
                 # Create new material
-                created_material = service.create(data)
-                self.logger.info(f"Created {self.material_type}: {created_material.name}")
+                if self.material_type == 'cement':
+                    from app.models.cement import CementCreate
+                    create_data = CementCreate(**data)
+                elif self.material_type == 'aggregate':
+                    from app.models.aggregate import AggregateCreate
+                    create_data = AggregateCreate(**data)
+                else:
+                    create_data = data
+                
+                created_material = service.create(create_data)
+                self.logger.info(f"Created {self.material_type}: {getattr(created_material, 'name', getattr(created_material, 'display_name', 'unknown'))}")
             
             # Show success message
             action = "updated" if self.is_edit_mode else "created"
@@ -582,18 +719,36 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         if response_id == Gtk.ResponseType.OK:
             # Try to save
             if self._save_material():
-                # Close dialog on successful save
-                self.destroy()
-            # Stay open if save failed
-        else:
-            # Cancel or close
-            self.destroy()
+                # Don't destroy here - let the dialog.run() return naturally
+                # This allows the caller to receive the OK response and refresh the UI
+                return
+            else:
+                # Prevent dialog from closing by stopping the response
+                self.stop_emission_by_name('response')
 
 
 class CementDialog(MaterialDialogBase):
     """Dialog for cement materials."""
     
+    # Phase specific gravities (g/cm³)
+    PHASE_SPECIFIC_GRAVITIES = {
+        'c3s': 3.15,     # Tricalcium silicate
+        'c2s': 3.28,     # Dicalcium silicate
+        'c3a': 3.04,     # Tricalcium aluminate
+        'c4af': 3.73,    # Tetracalcium aluminoferrite
+        'k2so4': 2.66,   # Potassium sulfate
+        'na2so4': 2.68   # Sodium sulfate
+    }
+    
+    # Gypsum component specific gravities (g/cm³)
+    GYPSUM_SPECIFIC_GRAVITIES = {
+        'dihyd': 2.32,   # Dihydrate (CaSO4·2H2O)
+        'hemihyd': 2.74, # Hemihydrate (CaSO4·0.5H2O)
+        'anhyd': 2.61    # Anhydrite (CaSO4)
+    }
+    
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        self._updating_fractions = False  # Flag to prevent recursive updates
         super().__init__(parent, "cement", material_data)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
@@ -630,34 +785,89 @@ class CementDialog(MaterialDialogBase):
         comp_grid.set_row_spacing(10)
         comp_grid.set_column_spacing(15)
         
-        # Phase composition with enhanced layout
+        # Header row
+        comp_label = Gtk.Label("Phase")
+        comp_label.set_halign(Gtk.Align.CENTER)
+        comp_label.get_style_context().add_class("form-label")
+        comp_label.set_markup("<b>Phase</b>")
+        
+        mass_header = Gtk.Label("Mass %")
+        mass_header.set_halign(Gtk.Align.CENTER)
+        mass_header.get_style_context().add_class("form-label")
+        mass_header.set_markup("<b>Mass %</b>")
+        
+        volume_header = Gtk.Label("Volume %")
+        volume_header.set_halign(Gtk.Align.CENTER)
+        volume_header.get_style_context().add_class("form-label")
+        volume_header.set_markup("<b>Volume %</b>")
+        
+        surface_header = Gtk.Label("Surface %")
+        surface_header.set_halign(Gtk.Align.CENTER)
+        surface_header.get_style_context().add_class("form-label")
+        surface_header.set_markup("<b>Surface %</b>")
+        
+        comp_grid.attach(comp_label, 0, 0, 1, 1)
+        comp_grid.attach(mass_header, 1, 0, 1, 1)
+        comp_grid.attach(volume_header, 2, 0, 1, 1)
+        comp_grid.attach(surface_header, 3, 0, 1, 1)
+        
+        # Phase composition with 3 columns
         phases = [
             ("C₃S:", "c3s", 50.0, "Tricalcium silicate - main binding phase"),
             ("C₂S:", "c2s", 25.0, "Dicalcium silicate - slow hydrating phase"),
             ("C₃A:", "c3a", 8.0, "Tricalcium aluminate - rapid hydrating"),
-            ("C₄AF:", "c4af", 10.0, "Tetracalcium aluminoferrite - moderate hydrating")
+            ("C₄AF:", "c4af", 10.0, "Tetracalcium aluminoferrite - moderate hydrating"),
+            ("K₂SO₄:", "k2so4", 0.0, "Potassium sulfate"),
+            ("Na₂SO₄:", "na2so4", 0.0, "Sodium sulfate")
         ]
         
         self.phase_spins = {}
         for i, (label_text, phase_key, default_value, tooltip) in enumerate(phases):
+            row = i + 1  # Offset by 1 for header row
+            
+            # Phase label
             label = Gtk.Label(label_text)
             label.set_halign(Gtk.Align.END)
             label.get_style_context().add_class("form-label")
             label.set_tooltip_text(tooltip)
             
-            spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
-            spin.set_digits(1)
-            spin.set_value(default_value)
-            spin.set_tooltip_text(tooltip)
+            # Mass fraction spin button
+            mass_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+            mass_spin.set_digits(1)
+            mass_spin.set_value(default_value)
+            mass_spin.set_tooltip_text(f"{tooltip} - Mass fraction")
             
-            unit_label = Gtk.Label("%")
-            unit_label.get_style_context().add_class("dim-label")
+            # Volume fraction spin button (enabled for user input)
+            volume_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+            volume_spin.set_digits(1)
+            volume_spin.set_value(0.0)
+            volume_spin.set_tooltip_text(f"{tooltip} - Volume fraction")
             
-            comp_grid.attach(label, 0, i, 1, 1)
-            comp_grid.attach(spin, 1, i, 1, 1)
-            comp_grid.attach(unit_label, 2, i, 1, 1)
+            # Surface area spin button (enabled for user input)
+            surface_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+            surface_spin.set_digits(1)
+            surface_spin.set_value(0.0)
+            surface_spin.set_tooltip_text(f"{tooltip} - Surface area fraction")
             
-            self.phase_spins[phase_key] = spin
+            comp_grid.attach(label, 0, row, 1, 1)
+            comp_grid.attach(mass_spin, 1, row, 1, 1)
+            comp_grid.attach(volume_spin, 2, row, 1, 1)
+            comp_grid.attach(surface_spin, 3, row, 1, 1)
+            
+            # Store references to all spin buttons
+            self.phase_spins[phase_key] = mass_spin
+            # Store volume and surface spin buttons
+            if not hasattr(self, 'phase_volume_spins'):
+                self.phase_volume_spins = {}
+            if not hasattr(self, 'phase_surface_spins'):
+                self.phase_surface_spins = {}
+            self.phase_volume_spins[phase_key] = volume_spin
+            self.phase_surface_spins[phase_key] = surface_spin
+            
+            # Connect signal handlers for bidirectional updates
+            mass_spin.connect('value-changed', self._on_mass_fraction_changed, phase_key)
+            volume_spin.connect('value-changed', self._on_volume_fraction_changed, phase_key)
+            surface_spin.connect('value-changed', self._on_surface_fraction_changed, phase_key)
         
         # Add sum display
         sum_label = Gtk.Label("Total:")
@@ -672,9 +882,91 @@ class CementDialog(MaterialDialogBase):
         sum_unit_label = Gtk.Label("%")
         sum_unit_label.get_style_context().add_class("dim-label")
         
-        comp_grid.attach(sum_label, 0, len(phases), 1, 1)
-        comp_grid.attach(self.sum_display, 1, len(phases), 1, 1)
-        comp_grid.attach(sum_unit_label, 2, len(phases), 1, 1)
+        # Add total row with proper offset (header + phases + 1 for spacing)
+        total_row = len(phases) + 1 + 1  # phases + 1 for header + 1 for spacing
+        comp_grid.attach(sum_label, 0, total_row, 1, 1)
+        comp_grid.attach(self.sum_display, 1, total_row, 1, 1)
+        comp_grid.attach(sum_unit_label, 2, total_row, 1, 1)
+        
+        # Add gypsum mass fractions after total row
+        gypsum_row = total_row + 2  # Skip one row for spacing
+        
+        # Dihydrate gypsum (DIHYD)
+        dihyd_label = Gtk.Label("Dihydrate Gypsum:")
+        dihyd_label.set_halign(Gtk.Align.END)
+        dihyd_label.get_style_context().add_class("form-label")
+        
+        self.dihyd_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.dihyd_spin.set_value(0.0)
+        self.dihyd_spin.set_digits(3)
+        
+        self.dihyd_volume_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.dihyd_volume_spin.set_value(0.0)
+        self.dihyd_volume_spin.set_digits(3)
+        
+        dihyd_mass_unit_label = Gtk.Label("% mass")
+        dihyd_mass_unit_label.get_style_context().add_class("dim-label")
+        
+        dihyd_vol_unit_label = Gtk.Label("% vol")
+        dihyd_vol_unit_label.get_style_context().add_class("dim-label")
+        
+        comp_grid.attach(dihyd_label, 0, gypsum_row, 1, 1)
+        comp_grid.attach(self.dihyd_spin, 1, gypsum_row, 1, 1)
+        comp_grid.attach(self.dihyd_volume_spin, 2, gypsum_row, 1, 1)
+        comp_grid.attach(dihyd_mass_unit_label, 3, gypsum_row, 1, 1)
+        comp_grid.attach(dihyd_vol_unit_label, 4, gypsum_row, 1, 1)
+        gypsum_row += 1
+        
+        # Hemihydrate gypsum (HEMIHYD)
+        hemihyd_label = Gtk.Label("Hemihydrate Gypsum:")
+        hemihyd_label.set_halign(Gtk.Align.END)
+        hemihyd_label.get_style_context().add_class("form-label")
+        
+        self.hemihyd_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.hemihyd_spin.set_value(0.0)
+        self.hemihyd_spin.set_digits(3)
+        
+        self.hemihyd_volume_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.hemihyd_volume_spin.set_value(0.0)
+        self.hemihyd_volume_spin.set_digits(3)
+        
+        hemihyd_mass_unit_label = Gtk.Label("% mass")
+        hemihyd_mass_unit_label.get_style_context().add_class("dim-label")
+        
+        hemihyd_vol_unit_label = Gtk.Label("% vol")
+        hemihyd_vol_unit_label.get_style_context().add_class("dim-label")
+        
+        comp_grid.attach(hemihyd_label, 0, gypsum_row, 1, 1)
+        comp_grid.attach(self.hemihyd_spin, 1, gypsum_row, 1, 1)
+        comp_grid.attach(self.hemihyd_volume_spin, 2, gypsum_row, 1, 1)
+        comp_grid.attach(hemihyd_mass_unit_label, 3, gypsum_row, 1, 1)
+        comp_grid.attach(hemihyd_vol_unit_label, 4, gypsum_row, 1, 1)
+        gypsum_row += 1
+        
+        # Anhydrite gypsum (ANHYD)
+        anhyd_label = Gtk.Label("Anhydrite Gypsum:")
+        anhyd_label.set_halign(Gtk.Align.END)
+        anhyd_label.get_style_context().add_class("form-label")
+        
+        self.anhyd_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.anhyd_spin.set_value(0.0)
+        self.anhyd_spin.set_digits(3)
+        
+        self.anhyd_volume_spin = Gtk.SpinButton.new_with_range(0, 100, 0.1)
+        self.anhyd_volume_spin.set_value(0.0)
+        self.anhyd_volume_spin.set_digits(3)
+        
+        anhyd_mass_unit_label = Gtk.Label("% mass")
+        anhyd_mass_unit_label.get_style_context().add_class("dim-label")
+        
+        anhyd_vol_unit_label = Gtk.Label("% vol")
+        anhyd_vol_unit_label.get_style_context().add_class("dim-label")
+        
+        comp_grid.attach(anhyd_label, 0, gypsum_row, 1, 1)
+        comp_grid.attach(self.anhyd_spin, 1, gypsum_row, 1, 1)
+        comp_grid.attach(self.anhyd_volume_spin, 2, gypsum_row, 1, 1)
+        comp_grid.attach(anhyd_mass_unit_label, 3, gypsum_row, 1, 1)
+        comp_grid.attach(anhyd_vol_unit_label, 4, gypsum_row, 1, 1)
         
         comp_frame.add(comp_grid)
         container.pack_start(comp_frame, False, False, 0)
@@ -1166,6 +1458,19 @@ class CementDialog(MaterialDialogBase):
         """Connect cement-specific signals."""
         for spin in self.phase_spins.values():
             spin.connect('value-changed', self._on_field_changed)
+        for spin in self.phase_volume_spins.values():
+            spin.connect('value-changed', self._on_field_changed)
+        for spin in self.phase_surface_spins.values():
+            spin.connect('value-changed', self._on_field_changed)
+        
+        # Connect gypsum mass and volume fraction signals for bidirectional conversion
+        self.dihyd_spin.connect('value-changed', self._on_gypsum_mass_changed, 'dihyd')
+        self.hemihyd_spin.connect('value-changed', self._on_gypsum_mass_changed, 'hemihyd')
+        self.anhyd_spin.connect('value-changed', self._on_gypsum_mass_changed, 'anhyd')
+        
+        self.dihyd_volume_spin.connect('value-changed', self._on_gypsum_volume_changed, 'dihyd')
+        self.hemihyd_volume_spin.connect('value-changed', self._on_gypsum_volume_changed, 'hemihyd')
+        self.anhyd_volume_spin.connect('value-changed', self._on_gypsum_volume_changed, 'anhyd')
     
     def _load_material_specific_data(self) -> None:
         """Load cement-specific data."""
@@ -1178,10 +1483,74 @@ class CementDialog(MaterialDialogBase):
         blaine = self.material_data.get('blaine_fineness', 350)
         self.blaine_spin.set_value(float(blaine))
         
+        # Load gypsum mass fractions (convert from fraction to percentage)
+        dihyd = self.material_data.get('dihyd', 0.0)
+        self.dihyd_spin.set_value(float(dihyd) * 100.0 if dihyd else 0.0)
+        
+        hemihyd = self.material_data.get('hemihyd', 0.0)
+        self.hemihyd_spin.set_value(float(hemihyd) * 100.0 if hemihyd else 0.0)
+        
+        anhyd = self.material_data.get('anhyd', 0.0)
+        self.anhyd_spin.set_value(float(anhyd) * 100.0 if anhyd else 0.0)
+        
+        # Load gypsum volume fractions (convert from fraction to percentage)
+        dihyd_vol = self.material_data.get('dihyd_volume_fraction', 0.0)
+        self.dihyd_volume_spin.set_value(float(dihyd_vol) * 100.0 if dihyd_vol else 0.0)
+        
+        hemihyd_vol = self.material_data.get('hemihyd_volume_fraction', 0.0)
+        self.hemihyd_volume_spin.set_value(float(hemihyd_vol) * 100.0 if hemihyd_vol else 0.0)
+        
+        anhyd_vol = self.material_data.get('anhyd_volume_fraction', 0.0)
+        self.anhyd_volume_spin.set_value(float(anhyd_vol) * 100.0 if anhyd_vol else 0.0)
+        
         # Load phase composition
+        phase_mapping = {
+            'c3s': 'c3s_mass_fraction',
+            'c2s': 'c2s_mass_fraction',
+            'c3a': 'c3a_mass_fraction',
+            'c4af': 'c4af_mass_fraction',
+            'k2so4': 'k2so4_mass_fraction',
+            'na2so4': 'na2so4_mass_fraction'
+        }
+        volume_mapping = {
+            'c3s': 'c3s_volume_fraction',
+            'c2s': 'c2s_volume_fraction',
+            'c3a': 'c3a_volume_fraction',
+            'c4af': 'c4af_volume_fraction',
+            'k2so4': 'k2so4_volume_fraction',
+            'na2so4': 'na2so4_volume_fraction'
+        }
+        surface_mapping = {
+            'c3s': 'c3s_surface_fraction',
+            'c2s': 'c2s_surface_fraction',
+            'c3a': 'c3a_surface_fraction',
+            'c4af': 'c4af_surface_fraction',
+            'k2so4': 'k2so4_surface_fraction',
+            'na2so4': 'na2so4_surface_fraction'
+        }
+        
+        # Mass fractions
         for phase_key, spin in self.phase_spins.items():
-            value = self.material_data.get(phase_key, 0.0)
-            spin.set_value(float(value))
+            # Convert phase key to database field name
+            db_field = phase_mapping.get(phase_key, phase_key)
+            value = self.material_data.get(db_field, 0.0)
+            # Convert fraction (0-1) to percentage (0-100) for display
+            percentage_value = float(value) * 100.0 if value else 0.0
+            spin.set_value(percentage_value)
+        
+        # Volume fractions
+        for phase_key, spin in self.phase_volume_spins.items():
+            db_field = volume_mapping.get(phase_key, phase_key)
+            value = self.material_data.get(db_field, 0.0)
+            percentage_value = float(value) * 100.0 if value else 0.0
+            spin.set_value(percentage_value)
+        
+        # Surface fractions
+        for phase_key, spin in self.phase_surface_spins.items():
+            db_field = surface_mapping.get(phase_key, phase_key)
+            value = self.material_data.get(db_field, 0.0)
+            percentage_value = float(value) * 100.0 if value else 0.0
+            spin.set_value(percentage_value)
         
         # Load setting times
         initial_set = self.material_data.get('initial_set_time', 120)
@@ -1248,11 +1617,18 @@ class CementDialog(MaterialDialogBase):
             # Too far from 100 - red/error
             self.sum_display.set_markup(f'<span color="red"><b>{total:.1f}</b></span>')
         
-        # Validation messages
-        if abs(total - 100.0) > 0.1:
-            self.validation_errors['phases'] = f"Phase composition must sum to 100% (currently {total:.1f}%)"
-        elif abs(total - 100.0) > 0.01:
-            self.validation_warnings['phases'] = f"Phase composition sums to {total:.1f}% (should be exactly 100%)"
+        # Validation messages - be more lenient with phase composition
+        if total == 0.0:
+            # No phase data entered - this is acceptable
+            self.validation_errors.pop('phases', None)
+            self.validation_warnings.pop('phases', None)
+        elif abs(total - 100.0) > 5.0:
+            # Only error if very far from 100%
+            self.validation_errors['phases'] = f"Phase composition sum ({total:.1f}%) is very different from 100%"
+        elif abs(total - 100.0) > 1.0:
+            # Warning if moderately off
+            self.validation_errors.pop('phases', None)  # Clear any errors
+            self.validation_warnings['phases'] = f"Phase composition sums to {total:.1f}% (typically close to 100%)"
         else:
             # Clear any existing phase validation errors/warnings
             self.validation_errors.pop('phases', None)
@@ -1321,7 +1697,15 @@ class CementDialog(MaterialDialogBase):
         data = {
             'blaine_fineness': self.blaine_spin.get_value(),
             'initial_set_time': self.initial_set_spin.get_value(),
-            'final_set_time': self.final_set_spin.get_value()
+            'final_set_time': self.final_set_spin.get_value(),
+            # Gypsum mass fractions (convert from percentage to fraction)
+            'dihyd': self.dihyd_spin.get_value() / 100.0,
+            'hemihyd': self.hemihyd_spin.get_value() / 100.0,
+            'anhyd': self.anhyd_spin.get_value() / 100.0,
+            # Gypsum volume fractions (convert from percentage to fraction)
+            'dihyd_volume_fraction': self.dihyd_volume_spin.get_value() / 100.0,
+            'hemihyd_volume_fraction': self.hemihyd_volume_spin.get_value() / 100.0,
+            'anhyd_volume_fraction': self.anhyd_volume_spin.get_value() / 100.0
         }
         
         # Add phase composition (convert to model field names)
@@ -1329,10 +1713,42 @@ class CementDialog(MaterialDialogBase):
             'c3s': 'c3s_mass_fraction',
             'c2s': 'c2s_mass_fraction', 
             'c3a': 'c3a_mass_fraction',
-            'c4af': 'c4af_mass_fraction'
+            'c4af': 'c4af_mass_fraction',
+            'k2so4': 'k2so4_mass_fraction',
+            'na2so4': 'na2so4_mass_fraction'
         }
+        volume_mapping = {
+            'c3s': 'c3s_volume_fraction',
+            'c2s': 'c2s_volume_fraction', 
+            'c3a': 'c3a_volume_fraction',
+            'c4af': 'c4af_volume_fraction',
+            'k2so4': 'k2so4_volume_fraction',
+            'na2so4': 'na2so4_volume_fraction'
+        }
+        surface_mapping = {
+            'c3s': 'c3s_surface_fraction',
+            'c2s': 'c2s_surface_fraction', 
+            'c3a': 'c3a_surface_fraction',
+            'c4af': 'c4af_surface_fraction',
+            'k2so4': 'k2so4_surface_fraction',
+            'na2so4': 'na2so4_surface_fraction'
+        }
+        
+        # Mass fractions
         for phase_key, spin in self.phase_spins.items():
             model_field = phase_mapping.get(phase_key, phase_key)
+            # Convert percentage to fraction (0-1 range)
+            data[model_field] = spin.get_value() / 100.0
+        
+        # Volume fractions
+        for phase_key, spin in self.phase_volume_spins.items():
+            model_field = volume_mapping.get(phase_key, phase_key)
+            # Convert percentage to fraction (0-1 range)
+            data[model_field] = spin.get_value() / 100.0
+        
+        # Surface fractions
+        for phase_key, spin in self.phase_surface_spins.items():
+            model_field = surface_mapping.get(phase_key, phase_key)
             # Convert percentage to fraction (0-1 range)
             data[model_field] = spin.get_value() / 100.0
         
@@ -1347,13 +1763,245 @@ class CementDialog(MaterialDialogBase):
             data['psd_dmax'] = self.dmax_spin.get_value()
             data['psd_exponent'] = self.exp_spin.get_value()
         elif psd_mode == "custom":
-            # Collect custom PSD points
+            # Collect custom PSD points and convert to JSON string
             psd_points = []
             for row in self.psd_store:
                 psd_points.append({'size': row[0], 'cumulative': row[1]})
-            data['psd_custom_points'] = psd_points
+            import json
+            data['psd_custom_points'] = json.dumps(psd_points) if psd_points else None
         
         return data
+    
+    def _on_mass_fraction_changed(self, mass_spin: Gtk.SpinButton, phase_key: str) -> None:
+        """Handle mass fraction changes and update volume fraction."""
+        if self._updating_fractions:
+            return
+        
+        self._updating_fractions = True
+        try:
+            # Get the current mass fraction (as percentage)
+            mass_percent = mass_spin.get_value()
+            mass_fraction = mass_percent / 100.0
+            
+            # Get specific gravity for this phase
+            sg = self.PHASE_SPECIFIC_GRAVITIES.get(phase_key, 1.0)
+            
+            # Calculate volume fraction from mass fraction
+            # volume_fraction = mass_fraction / specific_gravity
+            # But we need to normalize considering other phases
+            
+            # Get all current mass fractions to calculate total weighted volume
+            total_weighted_volume = 0.0
+            all_mass_fractions = {}
+            
+            for pk, spin in self.phase_spins.items():
+                if pk == phase_key:
+                    all_mass_fractions[pk] = mass_fraction
+                else:
+                    all_mass_fractions[pk] = spin.get_value() / 100.0
+                
+                if all_mass_fractions[pk] > 0:
+                    phase_sg = self.PHASE_SPECIFIC_GRAVITIES.get(pk, 1.0)
+                    total_weighted_volume += all_mass_fractions[pk] / phase_sg
+            
+            # Calculate volume fraction for the current phase
+            volume_spin = self.phase_volume_spins.get(phase_key)
+            if volume_spin:
+                if abs(mass_fraction) < 1e-10:  # Use tolerance for floating-point comparison
+                    # If mass fraction is zero, volume fraction must also be zero
+                    volume_spin.set_value(0.0)
+                elif total_weighted_volume > 0:
+                    volume_fraction = (mass_fraction / sg) / total_weighted_volume
+                    volume_percent = volume_fraction * 100.0
+                    volume_spin.set_value(volume_percent)
+            
+            # Enforce constraint: if mass fraction is zero, surface fraction must be zero
+            surface_spin = self.phase_surface_spins.get(phase_key)
+            if surface_spin:
+                if abs(mass_fraction) < 1e-10:  # Use tolerance for floating-point comparison
+                    # Set surface fraction to zero first
+                    surface_spin.set_value(0.0)
+                    # Then normalize remaining surface fractions to 100%
+                    self._normalize_surface_fractions(exclude_phase=phase_key)
+                else:
+                    # When mass fraction changes to non-zero, normalize surface fractions
+                    self._normalize_surface_fractions(exclude_phase=None)
+        
+        finally:
+            self._updating_fractions = False
+    
+    def _on_volume_fraction_changed(self, volume_spin: Gtk.SpinButton, phase_key: str) -> None:
+        """Handle volume fraction changes and update mass fraction."""
+        if self._updating_fractions:
+            return
+        
+        self._updating_fractions = True
+        try:
+            # Get the current volume fraction (as percentage)
+            volume_percent = volume_spin.get_value()
+            volume_fraction = volume_percent / 100.0
+            
+            # Get specific gravity for this phase
+            sg = self.PHASE_SPECIFIC_GRAVITIES.get(phase_key, 1.0)
+            
+            # Get all current volume fractions to calculate total weighted mass
+            total_weighted_mass = 0.0
+            all_volume_fractions = {}
+            
+            for pk, spin in self.phase_volume_spins.items():
+                if pk == phase_key:
+                    all_volume_fractions[pk] = volume_fraction
+                else:
+                    all_volume_fractions[pk] = spin.get_value() / 100.0
+                
+                if all_volume_fractions[pk] > 0:
+                    phase_sg = self.PHASE_SPECIFIC_GRAVITIES.get(pk, 1.0)
+                    total_weighted_mass += all_volume_fractions[pk] * phase_sg
+            
+            # Calculate mass fraction for the current phase
+            mass_spin = self.phase_spins.get(phase_key)
+            if mass_spin:
+                if abs(volume_fraction) < 1e-10:  # Use tolerance for floating-point comparison
+                    # If volume fraction is zero, mass fraction must also be zero
+                    mass_spin.set_value(0.0)
+                elif total_weighted_mass > 0:
+                    mass_fraction = (volume_fraction * sg) / total_weighted_mass
+                    mass_percent = mass_fraction * 100.0
+                    mass_spin.set_value(mass_percent)
+            
+            # Normalize surface fractions when volume fraction changes
+            surface_spin = self.phase_surface_spins.get(phase_key)
+            if surface_spin:
+                if abs(volume_fraction) < 1e-10:  # Use tolerance for floating-point comparison
+                    # Set surface fraction to zero first
+                    surface_spin.set_value(0.0)
+                    # Then normalize remaining surface fractions to 100%
+                    self._normalize_surface_fractions(exclude_phase=phase_key)
+                else:
+                    # When volume fraction changes to non-zero, normalize surface fractions
+                    self._normalize_surface_fractions(exclude_phase=None)
+        
+        finally:
+            self._updating_fractions = False
+    
+    def _on_surface_fraction_changed(self, surface_spin: Gtk.SpinButton, phase_key: str) -> None:
+        """Handle surface fraction changes and normalize to 100%."""
+        if self._updating_fractions:
+            return
+        
+        self._updating_fractions = True
+        try:
+            # Get current surface fraction
+            current_surface_percent = surface_spin.get_value()
+            
+            # Check constraint: if mass fraction is zero, surface fraction must be zero
+            mass_spin = self.phase_spins.get(phase_key)
+            if mass_spin and mass_spin.get_value() == 0:
+                surface_spin.set_value(0.0)
+                current_surface_percent = 0.0
+            
+            # Normalize all surface fractions to 100%
+            self._normalize_surface_fractions(exclude_phase=phase_key)
+        
+        finally:
+            self._updating_fractions = False
+    
+    def _normalize_surface_fractions(self, exclude_phase: Optional[str] = None) -> None:
+        """Normalize surface fractions to sum to 100%."""
+        # Get all current surface fractions
+        surface_values = {}
+        total_surface = 0.0
+        
+        for phase_key, spin in self.phase_surface_spins.items():
+            value = spin.get_value()
+            surface_values[phase_key] = value
+            total_surface += value
+        
+        # Only normalize if we have non-zero values and they don't already sum to 100%
+        if total_surface > 0 and abs(total_surface - 100.0) > 0.01:  # Small tolerance for floating point
+            # Calculate normalization factor
+            normalization_factor = 100.0 / total_surface
+            
+            # Temporarily block signals to prevent cascade updates
+            was_updating = self._updating_fractions
+            self._updating_fractions = True
+            
+            try:
+                # Apply normalization to all phases
+                for phase_key, spin in self.phase_surface_spins.items():
+                    if phase_key != exclude_phase:  # Don't normalize the phase that was just changed
+                        old_value = surface_values[phase_key]
+                        normalized_value = old_value * normalization_factor
+                        spin.set_value(normalized_value)
+            finally:
+                # Restore the original updating state
+                self._updating_fractions = was_updating
+    
+    def _on_gypsum_mass_changed(self, mass_spin: Gtk.SpinButton, gypsum_type: str) -> None:
+        """Handle gypsum mass fraction changes and update volume fraction."""
+        if self._updating_fractions:
+            return
+        
+        self._updating_fractions = True
+        try:
+            # Get the current mass fraction (as percentage)
+            mass_percent = mass_spin.get_value()
+            mass_fraction = mass_percent / 100.0
+            
+            # Get specific gravity for this gypsum component
+            sg_gypsum = self.GYPSUM_SPECIFIC_GRAVITIES.get(gypsum_type, 1.0)
+            
+            # Get cement bulk specific gravity
+            cement_bulk_sg = self.specific_gravity_spin.get_value()
+            
+            # Calculate volume fraction using the correct formula:
+            # volume_fraction = (mass_fraction / component_SG) * cement_bulk_SG
+            volume_fraction = (mass_fraction / sg_gypsum) * cement_bulk_sg
+            volume_percent = volume_fraction * 100.0
+            
+            # Update the corresponding volume spin button
+            if gypsum_type == 'dihyd':
+                self.dihyd_volume_spin.set_value(volume_percent)
+            elif gypsum_type == 'hemihyd':
+                self.hemihyd_volume_spin.set_value(volume_percent)
+            elif gypsum_type == 'anhyd':
+                self.anhyd_volume_spin.set_value(volume_percent)
+        
+        finally:
+            self._updating_fractions = False
+    
+    def _on_gypsum_volume_changed(self, volume_spin: Gtk.SpinButton, gypsum_type: str) -> None:
+        """Handle gypsum volume fraction changes and update mass fraction."""
+        if self._updating_fractions:
+            return
+        
+        self._updating_fractions = True
+        try:
+            # Get the current volume fraction (as percentage)
+            volume_percent = volume_spin.get_value()
+            volume_fraction = volume_percent / 100.0
+            
+            # Get specific gravity for this gypsum component
+            sg_gypsum = self.GYPSUM_SPECIFIC_GRAVITIES.get(gypsum_type, 1.0)
+            
+            # Get cement bulk specific gravity
+            cement_bulk_sg = self.specific_gravity_spin.get_value()
+            
+            # Calculate mass fraction using the inverse formula:
+            # mass_fraction = (volume_fraction / cement_bulk_SG) * component_SG
+            mass_fraction = (volume_fraction / cement_bulk_sg) * sg_gypsum
+            mass_percent = mass_fraction * 100.0
+            
+            # Update the corresponding mass spin button
+            if gypsum_type == 'dihyd':
+                self.dihyd_spin.set_value(mass_percent)
+            elif gypsum_type == 'hemihyd':
+                self.hemihyd_spin.set_value(mass_percent)
+            elif gypsum_type == 'anhyd':
+                self.anhyd_spin.set_value(mass_percent)
+        
+        finally:
+            self._updating_fractions = False
 
 
 # Additional material dialog classes would be implemented similarly

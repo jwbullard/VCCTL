@@ -55,6 +55,10 @@ class Aggregate(Base):
     inf = Column(LargeBinary, nullable=True, doc="Information data")
     shape_stats = Column(LargeBinary, nullable=True, doc="Shape statistics data")
     
+    # Additional UI fields
+    source = Column(String(255), nullable=True, doc="Material source")
+    notes = Column(String(1000), nullable=True, doc="Additional notes")
+    
     # Define table indexes
     __table_args__ = (
         Index('aggregate_name_index', 'name'),
@@ -129,6 +133,10 @@ class AggregateCreate(BaseModel):
     shear_modulus: Optional[float] = Field(None, ge=0.0, description="Shear modulus (GPa)")
     conductivity: Optional[float] = Field(0.0, ge=0.0, description="Thermal conductivity")
     
+    # Additional UI fields
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    
     @field_validator('display_name')
     @classmethod
     def validate_display_name(cls, v):
@@ -155,6 +163,10 @@ class AggregateUpdate(BaseModel):
     bulk_modulus: Optional[float] = Field(None, ge=0.0, description="Bulk modulus (GPa)")
     shear_modulus: Optional[float] = Field(None, ge=0.0, description="Shear modulus (GPa)")
     conductivity: Optional[float] = Field(None, ge=0.0, description="Thermal conductivity")
+    
+    # Additional fields for UI
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
 
 
 class AggregateResponse(BaseModel):
