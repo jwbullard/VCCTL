@@ -57,6 +57,8 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         # Load data if editing
         if self.is_edit_mode:
             self._load_material_data()
+            # Check immutable status AFTER all UI is set up
+            self._check_and_handle_immutable()
         
         self.logger.debug(f"Material dialog initialized for {material_type}")
     
@@ -553,6 +555,160 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         """Validate all material-specific fields."""
         pass
     
+    def _check_and_handle_immutable(self) -> None:
+        """Check if cement is immutable and handle UI accordingly."""
+        if not self.material_data or self.material_type != 'cement':
+            return
+            
+        is_immutable = self.material_data.get('immutable', False)
+        
+        if is_immutable:
+            self._disable_all_inputs()
+            self._show_immutable_message()
+            self._replace_save_with_duplicate_button()
+        else:
+            self._enable_all_inputs()
+            self._hide_immutable_message()
+    
+    def _disable_all_inputs(self) -> None:
+        """Disable all input fields for immutable cements."""
+        # Disable basic fields
+        self.name_entry.set_sensitive(False)
+        self.source_entry.set_sensitive(False)
+        self.specific_gravity_spin.set_sensitive(False)
+        
+        # Disable text views
+        self.description_textview.set_sensitive(False)
+        self.notes_textview.set_sensitive(False)
+        
+        # Disable all spin buttons in phase composition
+        if hasattr(self, 'phase_spins'):
+            for spin in self.phase_spins.values():
+                spin.set_sensitive(False)
+        
+        if hasattr(self, 'phase_volume_spins'):
+            for spin in self.phase_volume_spins.values():
+                spin.set_sensitive(False)
+                
+        if hasattr(self, 'phase_surface_spins'):
+            for spin in self.phase_surface_spins.values():
+                spin.set_sensitive(False)
+        
+        # Disable gypsum fields
+        if hasattr(self, 'dihyd_spin'):
+            self.dihyd_spin.set_sensitive(False)
+        if hasattr(self, 'hemihyd_spin'):
+            self.hemihyd_spin.set_sensitive(False)
+        if hasattr(self, 'anhyd_spin'):
+            self.anhyd_spin.set_sensitive(False)
+        if hasattr(self, 'dihyd_volume_spin'):
+            self.dihyd_volume_spin.set_sensitive(False)
+        if hasattr(self, 'hemihyd_volume_spin'):
+            self.hemihyd_volume_spin.set_sensitive(False)
+        if hasattr(self, 'anhyd_volume_spin'):
+            self.anhyd_volume_spin.set_sensitive(False)
+        
+        # Disable PSD fields
+        if hasattr(self, 'psd_mode_combo'):
+            self.psd_mode_combo.set_sensitive(False)
+        if hasattr(self, 'psd_tree'):
+            self.psd_tree.set_sensitive(False)
+        
+        # Disable all PSD parameter spins
+        psd_spins = ['psd_d50_spin', 'psd_n_spin', 'psd_dmax_spin', 'psd_exponent_spin']
+        for spin_name in psd_spins:
+            if hasattr(self, spin_name):
+                getattr(self, spin_name).set_sensitive(False)
+    
+    def _enable_all_inputs(self) -> None:
+        """Enable all input fields for mutable cements."""
+        # Enable basic fields
+        self.name_entry.set_sensitive(True)
+        self.source_entry.set_sensitive(True)
+        self.specific_gravity_spin.set_sensitive(True)
+        
+        # Enable text views
+        self.description_textview.set_sensitive(True)
+        self.notes_textview.set_sensitive(True)
+        
+        # Enable all spin buttons in phase composition
+        if hasattr(self, 'phase_spins'):
+            for spin in self.phase_spins.values():
+                spin.set_sensitive(True)
+        
+        if hasattr(self, 'phase_volume_spins'):
+            for spin in self.phase_volume_spins.values():
+                spin.set_sensitive(True)
+                
+        if hasattr(self, 'phase_surface_spins'):
+            for spin in self.phase_surface_spins.values():
+                spin.set_sensitive(True)
+        
+        # Enable gypsum fields
+        if hasattr(self, 'dihyd_spin'):
+            self.dihyd_spin.set_sensitive(True)
+        if hasattr(self, 'hemihyd_spin'):
+            self.hemihyd_spin.set_sensitive(True)
+        if hasattr(self, 'anhyd_spin'):
+            self.anhyd_spin.set_sensitive(True)
+        if hasattr(self, 'dihyd_volume_spin'):
+            self.dihyd_volume_spin.set_sensitive(True)
+        if hasattr(self, 'hemihyd_volume_spin'):
+            self.hemihyd_volume_spin.set_sensitive(True)
+        if hasattr(self, 'anhyd_volume_spin'):
+            self.anhyd_volume_spin.set_sensitive(True)
+        
+        # Enable PSD fields
+        if hasattr(self, 'psd_mode_combo'):
+            self.psd_mode_combo.set_sensitive(True)
+        if hasattr(self, 'psd_tree'):
+            self.psd_tree.set_sensitive(True)
+        
+        # Enable all PSD parameter spins
+        psd_spins = ['psd_d50_spin', 'psd_n_spin', 'psd_dmax_spin', 'psd_exponent_spin']
+        for spin_name in psd_spins:
+            if hasattr(self, spin_name):
+                getattr(self, spin_name).set_sensitive(True)
+    
+    def _show_immutable_message(self) -> None:
+        """Show message that cement is read-only."""
+        if not hasattr(self, 'immutable_message_bar'):
+            # Create info bar
+            self.immutable_message_bar = Gtk.InfoBar()
+            self.immutable_message_bar.set_message_type(Gtk.MessageType.INFO)
+            
+            # Add message
+            message_label = Gtk.Label()
+            message_label.set_markup('<b>This is an original database cement.</b> Duplicate this cement to make changes.')
+            message_label.set_halign(Gtk.Align.START)
+            
+            content_area = self.immutable_message_bar.get_content_area()
+            content_area.add(message_label)
+            
+            # Insert at top of dialog content
+            content_box = self.get_content_area()
+            content_box.pack_start(self.immutable_message_bar, False, False, 0)
+            content_box.reorder_child(self.immutable_message_bar, 0)
+            
+        self.immutable_message_bar.show_all()
+    
+    def _hide_immutable_message(self) -> None:
+        """Hide the immutable message bar."""
+        if hasattr(self, 'immutable_message_bar'):
+            self.immutable_message_bar.hide()
+    
+    def _replace_save_with_duplicate_button(self) -> None:
+        """Replace Save button with Duplicate to Edit button."""
+        self.save_button.hide()
+        
+        if not hasattr(self, 'duplicate_button'):
+            # Create duplicate button
+            self.duplicate_button = self.add_button('Duplicate to Edit', Gtk.ResponseType.APPLY)
+            self.duplicate_button.get_style_context().add_class('suggested-action')
+            
+        self.duplicate_button.show()
+        self.set_default_response(Gtk.ResponseType.APPLY)
+    
     def _collect_form_data(self) -> Dict[str, Any]:
         """Collect all form data into a dictionary."""
         # Get text from description buffer
@@ -714,6 +870,94 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             
             return False
     
+    def _duplicate_material(self) -> bool:
+        """Duplicate the current immutable material as a mutable copy."""
+        if not self.material_data or self.material_type != 'cement':
+            return False
+            
+        try:
+            # Create a copy of current material data
+            original_name = self.material_data.get('name', 'cement')
+            new_name = f"{original_name}_copy"
+            
+            # Check if the name already exists and find a unique name
+            counter = 1
+            final_name = new_name
+            
+            # Get cement service for checking duplicates
+            cement_service = self.service_container.get_cement_service()
+            while cement_service.get_by_name(final_name):
+                counter += 1
+                final_name = f"{new_name}_{counter}"
+            
+            # Collect all current form data (including PSD data)
+            duplicate_data = self._collect_form_data()
+            
+            # Override key fields for the duplicate
+            duplicate_data['name'] = final_name
+            duplicate_data['immutable'] = False  # New copy is mutable
+            
+            # Remove the ID field if present (for new cement)
+            if 'id' in duplicate_data:
+                del duplicate_data['id']
+            
+            # Create the duplicate cement
+            from app.models.cement import CementCreate
+            
+            # Create new cement
+            create_data = CementCreate(**duplicate_data)
+            new_cement = cement_service.create(create_data)
+            
+            # Show success message with option to edit
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text="Cement Duplicated Successfully"
+            )
+            dialog.format_secondary_text(
+                f"Created '{final_name}' as a mutable copy.\\n\\n"
+                "Would you like to open the new cement for editing?"
+            )
+            
+            response = dialog.run()
+            dialog.destroy()
+            
+            if response == Gtk.ResponseType.YES:
+                # Open new dialog for editing the duplicate
+                from app.windows.dialogs.material_dialog import CementDialog
+                
+                edit_dialog = CementDialog(
+                    self.parent_window,
+                    new_cement.to_dict()
+                )
+                
+                edit_response = edit_dialog.run()
+                edit_dialog.destroy()
+                
+                # If user saved the new cement, refresh the original caller
+                if edit_response == Gtk.ResponseType.OK:
+                    # Emit signal to refresh materials list if possible
+                    pass
+            
+            return True
+            
+        except Exception as e:
+            # Show error message
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Duplicating Cement"
+            )
+            dialog.format_secondary_text(f"Failed to duplicate cement: {str(e)}")
+            dialog.run()
+            dialog.destroy()
+            
+        return False
+    
     def _on_response(self, widget: Gtk.Dialog, response_id: int) -> None:
         """Handle dialog response."""
         if response_id == Gtk.ResponseType.OK:
@@ -724,6 +968,14 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 return
             else:
                 # Prevent dialog from closing by stopping the response
+                self.stop_emission_by_name('response')
+        elif response_id == Gtk.ResponseType.APPLY:
+            # Handle duplicate button click
+            if self._duplicate_material():
+                # Close dialog after successful duplication
+                return
+            else:
+                # Prevent dialog from closing if duplication failed
                 self.stop_emission_by_name('response')
 
 
@@ -751,6 +1003,51 @@ class CementDialog(MaterialDialogBase):
         self._updating_fractions = False  # Flag to prevent recursive updates
         super().__init__(parent, "cement", material_data)
     
+    def _create_properties_tab(self) -> None:
+        """Override to create separate Chemical and Physical properties tabs for cement."""
+        # Create Chemical Properties tab
+        self._create_chemical_properties_tab()
+        
+        # Create Physical Properties tab  
+        self._create_physical_properties_tab()
+    
+    def _create_chemical_properties_tab(self) -> None:
+        """Create the chemical properties tab."""
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        # Chemical properties container
+        chem_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        chem_box.set_margin_top(20)
+        chem_box.set_margin_bottom(20)
+        chem_box.set_margin_left(20)
+        chem_box.set_margin_right(20)
+        
+        # Add chemical composition sections
+        self._add_chemical_composition_section(chem_box)
+        
+        scrolled.add(chem_box)
+        self.notebook.append_page(scrolled, Gtk.Label("Chemical Properties"))
+    
+    def _create_physical_properties_tab(self) -> None:
+        """Create the physical properties tab."""
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        # Physical properties container
+        phys_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        phys_box.set_margin_top(20)
+        phys_box.set_margin_bottom(20)
+        phys_box.set_margin_left(20)
+        phys_box.set_margin_right(20)
+        
+        # Add physical property sections
+        self._add_physical_properties_section(phys_box)
+        self._add_psd_section(phys_box)
+        
+        scrolled.add(phys_box)
+        self.notebook.append_page(scrolled, Gtk.Label("Physical Properties"))
+    
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
         """Add cement-specific fields."""
         row = start_row
@@ -773,8 +1070,8 @@ class CementDialog(MaterialDialogBase):
         
         return row
     
-    def _add_property_sections(self, container: Gtk.Box) -> None:
-        """Add cement-specific property sections."""
+    def _add_chemical_composition_section(self, container: Gtk.Box) -> None:
+        """Add chemical composition section with phase fractions and gypsum components."""
         # Chemical composition section
         comp_frame = Gtk.Frame(label="Chemical Composition (%)")
         comp_grid = Gtk.Grid()
@@ -832,20 +1129,20 @@ class CementDialog(MaterialDialogBase):
             label.set_tooltip_text(tooltip)
             
             # Mass fraction spin button
-            mass_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
-            mass_spin.set_digits(1)
+            mass_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.01)
+            mass_spin.set_digits(2)
             mass_spin.set_value(default_value)
             mass_spin.set_tooltip_text(f"{tooltip} - Mass fraction")
             
             # Volume fraction spin button (enabled for user input)
-            volume_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
-            volume_spin.set_digits(1)
+            volume_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.01)
+            volume_spin.set_digits(2)
             volume_spin.set_value(0.0)
             volume_spin.set_tooltip_text(f"{tooltip} - Volume fraction")
             
             # Surface area spin button (enabled for user input)
-            surface_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
-            surface_spin.set_digits(1)
+            surface_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.01)
+            surface_spin.set_digits(2)
             surface_spin.set_value(0.0)
             surface_spin.set_tooltip_text(f"{tooltip} - Surface area fraction")
             
@@ -971,22 +1268,22 @@ class CementDialog(MaterialDialogBase):
         comp_frame.add(comp_grid)
         container.pack_start(comp_frame, False, False, 0)
         
-        # Physical properties section
-        self._add_physical_properties_section(container)
-        
-        # Particle size distribution section
-        self._add_psd_section(container)
-        
     def _add_physical_properties_section(self, container: Gtk.Box) -> None:
-        """Add physical properties calculation section."""
+        """Add physical properties section including setting times and calculations."""
+        # Physical properties frame
         phys_frame = Gtk.Frame(label="Physical Properties")
-        phys_grid = Gtk.Grid()
-        phys_grid.set_margin_top(10)
-        phys_grid.set_margin_bottom(10)
-        phys_grid.set_margin_left(15)
-        phys_grid.set_margin_right(15)
-        phys_grid.set_row_spacing(10)
-        phys_grid.set_column_spacing(15)
+        phys_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        phys_box.set_margin_top(10)
+        phys_box.set_margin_bottom(10)
+        phys_box.set_margin_left(15)
+        phys_box.set_margin_right(15)
+        
+        # Setting times section removed per user request
+        
+        # Calculated properties section
+        calc_grid = Gtk.Grid()
+        calc_grid.set_row_spacing(10)
+        calc_grid.set_column_spacing(15)
         
         # Density calculation display
         density_label = Gtk.Label("Calculated Density:")
@@ -1000,27 +1297,15 @@ class CementDialog(MaterialDialogBase):
         density_unit_label = Gtk.Label("g/cm³")
         density_unit_label.get_style_context().add_class("dim-label")
         
-        phys_grid.attach(density_label, 0, 0, 1, 1)
-        phys_grid.attach(self.density_display, 1, 0, 1, 1)
-        phys_grid.attach(density_unit_label, 2, 0, 1, 1)
+        calc_grid.attach(density_label, 0, 0, 1, 1)
+        calc_grid.attach(self.density_display, 1, 0, 1, 1)
+        calc_grid.attach(density_unit_label, 2, 0, 1, 1)
         
-        # Heat of hydration estimate
-        heat_label = Gtk.Label("Heat of Hydration:")
-        heat_label.set_halign(Gtk.Align.END)
-        heat_label.get_style_context().add_class("form-label")
+        # Heat of hydration removed per user request
         
-        self.heat_display = Gtk.Label("380")
-        self.heat_display.set_halign(Gtk.Align.START)
-        self.heat_display.get_style_context().add_class("calculated-value")
+        phys_box.pack_start(calc_grid, False, False, 0)
         
-        heat_unit_label = Gtk.Label("J/g")
-        heat_unit_label.get_style_context().add_class("dim-label")
-        
-        phys_grid.attach(heat_label, 0, 1, 1, 1)
-        phys_grid.attach(self.heat_display, 1, 1, 1, 1)
-        phys_grid.attach(heat_unit_label, 2, 1, 1, 1)
-        
-        phys_frame.add(phys_grid)
+        phys_frame.add(phys_box)
         container.pack_start(phys_frame, False, False, 0)
         
     def _add_psd_section(self, container: Gtk.Box) -> None:
@@ -1157,68 +1442,77 @@ class CementDialog(MaterialDialogBase):
         """Create custom PSD points tab."""
         custom_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         
-        # Description
-        desc_label = Gtk.Label()
-        desc_label.set_markup('<i>Define custom particle size distribution points</i>')
-        desc_label.set_halign(Gtk.Align.START)
-        custom_box.pack_start(desc_label, False, False, 0)
+        # Description with data source info
+        self.psd_desc_label = Gtk.Label()
+        self.psd_desc_label.set_markup('<i>Particle size distribution data</i>')
+        self.psd_desc_label.set_halign(Gtk.Align.START)
+        custom_box.pack_start(self.psd_desc_label, False, False, 0)
+        
+        # Summary information
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.get_style_context().add_class('dim-label')
+        custom_box.pack_start(self.psd_summary_label, False, False, 0)
         
         # Scrolled window for points table
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scrolled.set_size_request(-1, 150)
         
-        # Create list store for PSD points (Size μm, Cumulative %)
-        self.psd_store = Gtk.ListStore(float, float)  # size, cumulative_percent
+        # Create list store for PSD points (Size μm, Mass Fraction)
+        self.psd_store = Gtk.ListStore(float, float)  # diameter_um, mass_fraction
         
-        # Add some default points
-        default_points = [
-            (1.0, 5.0),
-            (5.0, 20.0),
-            (10.0, 40.0),
-            (20.0, 65.0),
-            (50.0, 90.0),
-            (100.0, 99.0)
-        ]
-        
-        for size, percent in default_points:
-            self.psd_store.append([size, percent])
+        # Data will be loaded from database in _load_psd_data()
         
         # Create tree view
         self.psd_tree = Gtk.TreeView(model=self.psd_store)
         self.psd_tree.set_reorderable(True)
         
-        # Size column
+        # Size column (editable)
         size_renderer = Gtk.CellRendererText()
-        size_renderer.set_property("editable", True)
-        size_renderer.connect("edited", self._on_psd_size_edited)
-        size_column = Gtk.TreeViewColumn("Size (μm)", size_renderer, text=0)
+        size_renderer.set_property('editable', True)
+        size_renderer.connect('edited', self._on_psd_size_edited)
+        size_column = Gtk.TreeViewColumn("Diameter (μm)", size_renderer, text=0)
         size_column.set_resizable(True)
+        size_column.set_cell_data_func(size_renderer, self._format_diameter_cell, None)
         self.psd_tree.append_column(size_column)
         
-        # Cumulative % column
-        percent_renderer = Gtk.CellRendererText()
-        percent_renderer.set_property("editable", True)
-        percent_renderer.connect("edited", self._on_psd_percent_edited)
-        percent_column = Gtk.TreeViewColumn("Cumulative %", percent_renderer, text=1)
-        percent_column.set_resizable(True)
-        self.psd_tree.append_column(percent_column)
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property('editable', True)
+        fraction_renderer.connect('edited', self._on_psd_percent_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_resizable(True)
+        fraction_column.set_cell_data_func(fraction_renderer, self._format_fraction_cell, None)
+        self.psd_tree.append_column(fraction_column)
         
         scrolled.add(self.psd_tree)
         custom_box.pack_start(scrolled, True, True, 0)
         
-        # Buttons for add/remove points
-        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        # Button row for add/remove/save
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        button_box.set_halign(Gtk.Align.START)
         
-        add_button = Gtk.Button(label="Add Point")
+        # Add point button
+        add_button = Gtk.Button.new_with_label("Add Point")
         add_button.connect('clicked', self._on_add_psd_point)
         button_box.pack_start(add_button, False, False, 0)
         
-        remove_button = Gtk.Button(label="Remove Point")
+        # Remove point button
+        remove_button = Gtk.Button.new_with_label("Remove Point")
         remove_button.connect('clicked', self._on_remove_psd_point)
         button_box.pack_start(remove_button, False, False, 0)
         
+        # Note: PSD data is now saved with the main Save button
+        
         custom_box.pack_start(button_box, False, False, 0)
+        
+        # Note about data source
+        note_label = Gtk.Label()
+        note_label.set_markup('<i><small>Experimental data - click in table cells to edit values</small></i>')
+        note_label.set_halign(Gtk.Align.START)
+        note_label.get_style_context().add_class('dim-label')
+        custom_box.pack_start(note_label, False, False, 0)
         
         self.psd_notebook.append_page(custom_box, Gtk.Label("Custom"))
         
@@ -1232,6 +1526,78 @@ class CementDialog(MaterialDialogBase):
         elif mode == "custom":
             self.psd_notebook.set_current_page(2)
             
+    def _format_diameter_cell(self, column, cell, model, tree_iter, data):
+        """Format diameter cell with 3 decimal places."""
+        diameter = model[tree_iter][0]
+        cell.set_property('text', f'{diameter:.3f}')
+    
+    def _format_fraction_cell(self, column, cell, model, tree_iter, data):
+        """Format mass fraction cell with scientific notation."""
+        fraction = model[tree_iter][1]
+        if fraction < 0.001:
+            cell.set_property('text', f'{fraction:.2e}')
+        else:
+            cell.set_property('text', f'{fraction:.6f}')
+    
+    def _load_psd_data(self, set_mode=True) -> None:
+        """Load PSD data from material data into the tree view."""
+        if not self.material_data:
+            return
+            
+        # Clear existing data
+        self.psd_store.clear()
+        
+        # Check if we have custom PSD points
+        psd_points_json = self.material_data.get('psd_custom_points')
+        
+        if psd_points_json:
+            try:
+                import json
+                psd_points = json.loads(psd_points_json)
+                
+                # Add points to store
+                for diameter, mass_fraction in psd_points:
+                    self.psd_store.append([float(diameter), float(mass_fraction)])
+                
+                # Update summary label
+                total_mass = sum(point[1] for point in psd_points)
+                
+                # Check if labels exist before setting
+                if hasattr(self, 'psd_summary_label'):
+                    self.psd_summary_label.set_markup(
+                        f'<small>{len(psd_points)} data points, Total mass fraction: {total_mass:.6f}</small>'
+                    )
+                
+                # Update description
+                if hasattr(self, 'psd_desc_label'):
+                    self.psd_desc_label.set_markup(
+                        '<i>Experimental particle size distribution data</i>'
+                    )
+                
+                # Only set mode to custom if requested (when auto-detecting)
+                if set_mode and hasattr(self, 'psd_mode_combo'):
+                    self.psd_mode_combo.set_active_id('custom')
+                
+            except (json.JSONDecodeError, ValueError, TypeError) as e:
+                print(f'Error loading PSD data: {e}')
+                self._load_default_psd_data()
+        else:
+            if set_mode:
+                self._load_default_psd_data()
+    
+    def _load_default_psd_data(self) -> None:
+        """Load default PSD data when no experimental data is available."""
+        # Update labels for no data case
+        self.psd_summary_label.set_markup(
+            '<small>No experimental PSD data available</small>'
+        )
+        self.psd_desc_label.set_markup(
+            '<i>No particle size distribution data found</i>'
+        )
+        
+        # Set mode to Rosin-Rammler as default
+        self.psd_mode_combo.set_active_id('rosin_rammler')
+            
     def _on_psd_size_edited(self, renderer, path, new_text):
         """Handle editing of PSD size value."""
         try:
@@ -1242,17 +1608,20 @@ class CementDialog(MaterialDialogBase):
             pass
             
     def _on_psd_percent_edited(self, renderer, path, new_text):
-        """Handle editing of PSD cumulative percent value."""
+        """Handle editing of PSD mass fraction value."""
         try:
             value = float(new_text)
-            if 0 <= value <= 100:
+            if 0 <= value <= 1.0:  # Mass fractions should be 0-1
                 self.psd_store[path][1] = value
+                self._update_psd_summary()
         except ValueError:
             pass
             
     def _on_add_psd_point(self, button):
         """Add a new PSD point."""
-        self.psd_store.append([10.0, 50.0])
+        # Add a reasonable default point (10 μm, small mass fraction)
+        self.psd_store.append([10.0, 0.001])
+        self._update_psd_summary()
         
     def _on_remove_psd_point(self, button):
         """Remove selected PSD point."""
@@ -1260,6 +1629,94 @@ class CementDialog(MaterialDialogBase):
         model, treeiter = selection.get_selected()
         if treeiter:
             model.remove(treeiter)
+            self._update_psd_summary()
+    
+    def _update_psd_summary(self):
+        """Update the PSD summary label with current data."""
+        if not hasattr(self, 'psd_summary_label'):
+            return
+            
+        # Count points and calculate total mass fraction
+        num_points = len(self.psd_store)
+        total_mass = 0.0
+        
+        for row in self.psd_store:
+            total_mass += row[1]  # Mass fraction is column 1
+        
+        # Update summary
+        self.psd_summary_label.set_markup(
+            f'<small>{num_points} data points, Total mass fraction: {total_mass:.6f}</small>'
+        )
+        
+        # Update description
+        if hasattr(self, 'psd_desc_label'):
+            if num_points > 0:
+                self.psd_desc_label.set_markup(
+                    '<i>Particle size distribution data (edited)</i>'
+                )
+            else:
+                self.psd_desc_label.set_markup(
+                    '<i>No particle size distribution data</i>'
+                )
+    
+    def _on_save_psd_data(self, button):
+        """Save edited PSD data to the database."""
+        if not self.material_data or not hasattr(self, 'psd_store'):
+            return
+            
+        try:
+            # Extract data from store
+            psd_points = []
+            for row in self.psd_store:
+                diameter = float(row[0])
+                mass_fraction = float(row[1])
+                psd_points.append([diameter, mass_fraction])
+            
+            # Convert to JSON
+            import json
+            psd_json = json.dumps(psd_points)
+            
+            # Update material data
+            self.material_data['psd_custom_points'] = psd_json
+            self.material_data['psd_mode'] = 'custom'
+            
+            # Save to database if we have cement service and ID
+            if hasattr(self, 'cement_service') and 'id' in self.material_data:
+                from app.models.cement import CementUpdate
+                
+                update_data = CementUpdate(
+                    psd_custom_points=psd_json,
+                    psd_mode='custom'
+                )
+                
+                self.cement_service.update(self.material_data['id'], update_data)
+                
+                # Show success message
+                dialog = Gtk.MessageDialog(
+                    transient_for=self.get_toplevel(),
+                    flags=0,
+                    message_type=Gtk.MessageType.INFO,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="PSD Data Saved"
+                )
+                dialog.format_secondary_text(
+                    f"Successfully saved {len(psd_points)} PSD data points to the database."
+                )
+                dialog.run()
+                dialog.destroy()
+                
+        except Exception as e:
+            # Show error message
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Saving PSD Data"
+            )
+            dialog.format_secondary_text(f"Failed to save PSD data: {str(e)}")
+            dialog.run()
+            dialog.destroy()
     
     def _add_advanced_sections(self, container: Gtk.Box) -> None:
         """Add cement-specific advanced sections."""
@@ -1360,51 +1817,9 @@ class CementDialog(MaterialDialogBase):
         
     def _add_additional_properties_section(self, container: Gtk.Box) -> None:
         """Add additional cement properties section."""
-        props_frame = Gtk.Frame(label="Additional Properties")
-        props_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        props_box.set_margin_top(10)
-        props_box.set_margin_bottom(10)
-        props_box.set_margin_left(15)
-        props_box.set_margin_right(15)
-        
-        # Setting time inputs
-        setting_grid = Gtk.Grid()
-        setting_grid.set_row_spacing(10)
-        setting_grid.set_column_spacing(15)
-        
-        # Initial setting time
-        initial_label = Gtk.Label("Initial Set:")
-        initial_label.set_halign(Gtk.Align.END)
-        initial_label.get_style_context().add_class("form-label")
-        
-        self.initial_set_spin = Gtk.SpinButton.new_with_range(30, 600, 5)
-        self.initial_set_spin.set_value(120)  # Default 2 hours
-        
-        initial_unit = Gtk.Label("minutes")
-        initial_unit.get_style_context().add_class("dim-label")
-        
-        setting_grid.attach(initial_label, 0, 0, 1, 1)
-        setting_grid.attach(self.initial_set_spin, 1, 0, 1, 1)
-        setting_grid.attach(initial_unit, 2, 0, 1, 1)
-        
-        # Final setting time
-        final_label = Gtk.Label("Final Set:")
-        final_label.set_halign(Gtk.Align.END)
-        final_label.get_style_context().add_class("form-label")
-        
-        self.final_set_spin = Gtk.SpinButton.new_with_range(60, 1440, 10)
-        self.final_set_spin.set_value(360)  # Default 6 hours
-        
-        final_unit = Gtk.Label("minutes")
-        final_unit.get_style_context().add_class("dim-label")
-        
-        setting_grid.attach(final_label, 0, 1, 1, 1)
-        setting_grid.attach(self.final_set_spin, 1, 1, 1, 1)
-        setting_grid.attach(final_unit, 2, 1, 1, 1)
-        
-        props_box.pack_start(setting_grid, False, False, 0)
-        props_frame.add(props_box)
-        container.pack_start(props_frame, False, False, 0)
+        # Note: Setting times moved to Physical Properties tab
+        # This section can be used for future additional properties if needed
+        pass
         
     def _on_load_template_clicked(self, button: Gtk.Button) -> None:
         """Handle load template button click."""
@@ -1552,14 +1967,8 @@ class CementDialog(MaterialDialogBase):
             percentage_value = float(value) * 100.0 if value else 0.0
             spin.set_value(percentage_value)
         
-        # Load setting times
-        initial_set = self.material_data.get('initial_set_time', 120)
-        self.initial_set_spin.set_value(float(initial_set))
+        # Setting times loading removed per user request
         
-        final_set = self.material_data.get('final_set_time', 360)
-        self.final_set_spin.set_value(float(final_set))
-        
-        # Load PSD data
         psd_mode = self.material_data.get('psd_mode', 'rosin_rammler')
         
         # Set PSD mode
@@ -1577,13 +1986,8 @@ class CementDialog(MaterialDialogBase):
             self.exp_spin.set_value(float(exp))
         elif psd_mode == "custom":
             self.psd_mode_combo.set_active_id("custom")
-            custom_points = self.material_data.get('psd_custom_points', [])
-            if custom_points:
-                # Clear existing points
-                self.psd_store.clear()
-                # Load custom points
-                for point in custom_points:
-                    self.psd_store.append([point['size'], point['cumulative']])
+            # Load actual PSD data using our new method (don't override mode)
+            self._load_psd_data(set_mode=False)
         
         # Update calculations after loading data
         self._update_calculations()
@@ -1604,18 +2008,18 @@ class CementDialog(MaterialDialogBase):
         total = sum(spin.get_value() for spin in self.phase_spins.values())
         
         # Update sum display
-        self.sum_display.set_text(f"{total:.1f}")
+        self.sum_display.set_text(f"{total:.2f}")
         
         # Color coding for sum display
         if abs(total - 100.0) <= 0.01:
             # Perfect sum - green
-            self.sum_display.set_markup(f'<span color="green"><b>{total:.1f}</b></span>')
+            self.sum_display.set_markup(f'<span color="green"><b>{total:.2f}</b></span>')
         elif abs(total - 100.0) <= 0.1:
             # Close to 100 - orange/warning
-            self.sum_display.set_markup(f'<span color="orange"><b>{total:.1f}</b></span>')
+            self.sum_display.set_markup(f'<span color="orange"><b>{total:.2f}</b></span>')
         else:
             # Too far from 100 - red/error
-            self.sum_display.set_markup(f'<span color="red"><b>{total:.1f}</b></span>')
+            self.sum_display.set_markup(f'<span color="red"><b>{total:.2f}</b></span>')
         
         # Validation messages - be more lenient with phase composition
         if total == 0.0:
@@ -1624,11 +2028,11 @@ class CementDialog(MaterialDialogBase):
             self.validation_warnings.pop('phases', None)
         elif abs(total - 100.0) > 5.0:
             # Only error if very far from 100%
-            self.validation_errors['phases'] = f"Phase composition sum ({total:.1f}%) is very different from 100%"
+            self.validation_errors['phases'] = f"Phase composition sum ({total:.2f}%) is very different from 100%"
         elif abs(total - 100.0) > 1.0:
             # Warning if moderately off
             self.validation_errors.pop('phases', None)  # Clear any errors
-            self.validation_warnings['phases'] = f"Phase composition sums to {total:.1f}% (typically close to 100%)"
+            self.validation_warnings['phases'] = f"Phase composition sums to {total:.2f}% (typically close to 100%)"
         else:
             # Clear any existing phase validation errors/warnings
             self.validation_errors.pop('phases', None)
@@ -1666,38 +2070,17 @@ class CementDialog(MaterialDialogBase):
             else:
                 self.density_display.set_text("—")
             
-            # Calculate estimated heat of hydration
-            # Typical values: C3S=500, C2S=260, C3A=1340, C4AF=420 J/g
-            heat_values = {
-                'c3s': 500,
-                'c2s': 260,
-                'c3a': 1340,
-                'c4af': 420
-            }
-            
-            if total_phases > 0:
-                calculated_heat = (
-                    c3s * heat_values['c3s'] +
-                    c2s * heat_values['c2s'] +
-                    c3a * heat_values['c3a'] +
-                    c4af * heat_values['c4af']
-                ) / total_phases
-                
-                self.heat_display.set_text(f"{calculated_heat:.0f}")
-            else:
-                self.heat_display.set_text("—")
+            # Heat of hydration calculation removed per user request
                 
         except Exception as e:
             self.logger.warning(f"Error updating calculations: {e}")
             self.density_display.set_text("Error")
-            self.heat_display.set_text("Error")
     
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect cement-specific data."""
         data = {
             'blaine_fineness': self.blaine_spin.get_value(),
-            'initial_set_time': self.initial_set_spin.get_value(),
-            'final_set_time': self.final_set_spin.get_value(),
+            # Setting times removed per user request
             # Gypsum mass fractions (convert from percentage to fraction)
             'dihyd': self.dihyd_spin.get_value() / 100.0,
             'hemihyd': self.hemihyd_spin.get_value() / 100.0,
@@ -1766,7 +2149,17 @@ class CementDialog(MaterialDialogBase):
             # Collect custom PSD points and convert to JSON string
             psd_points = []
             for row in self.psd_store:
-                psd_points.append({'size': row[0], 'cumulative': row[1]})
+                # Use [diameter, mass_fraction] format to match imported data
+                psd_points.append([float(row[0]), float(row[1])])
+            
+            # Normalize mass fractions to sum to 1.0 before saving
+            if psd_points:
+                total_mass = sum(point[1] for point in psd_points)
+                if total_mass > 0:
+                    # Normalize each mass fraction
+                    for point in psd_points:
+                        point[1] = point[1] / total_mass
+            
             import json
             data['psd_custom_points'] = json.dumps(psd_points) if psd_points else None
         

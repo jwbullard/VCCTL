@@ -7,7 +7,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, LargeBinary, Text, Integer
+from sqlalchemy import Column, String, Float, LargeBinary, Text, Integer, Boolean
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -89,9 +89,7 @@ class Cement(Base):
     specific_gravity = Column(Float, nullable=True, default=3.15, doc="Specific gravity of cement")
     description = Column(Text, nullable=True, doc="Cement description")
     
-    # Setting times (minutes)
-    initial_set_time = Column(Float, nullable=True, doc="Initial setting time (minutes)")
-    final_set_time = Column(Float, nullable=True, doc="Final setting time (minutes)")
+    # Setting times removed per user request
     
     # Fineness properties
     blaine_fineness = Column(Float, nullable=True, doc="Blaine fineness (m²/kg)")
@@ -102,11 +100,12 @@ class Cement(Base):
     psd_n = Column(Float, nullable=True, doc="PSD n parameter")
     psd_dmax = Column(Float, nullable=True, doc="PSD Dmax parameter (µm)")
     psd_exponent = Column(Float, nullable=True, doc="PSD exponent parameter")
-    psd_custom_points = Column(String(1000), nullable=True, doc="Custom PSD points (JSON)")
+    psd_custom_points = Column(Text, nullable=True, doc="Custom PSD points (JSON)")
     
     # Additional UI fields
     source = Column(String(255), nullable=True, doc="Material source")
     notes = Column(String(1000), nullable=True, doc="Additional notes")
+    immutable = Column(Boolean, nullable=False, default=False, doc="Whether this cement is read-only (original database cement)")
     
     def __repr__(self) -> str:
         """String representation of the cement."""
@@ -287,9 +286,7 @@ class CementCreate(BaseModel):
                                             description="Specific gravity of cement")
     description: Optional[str] = Field(None, description="Cement description")
     
-    # Setting times (minutes)
-    initial_set_time: Optional[float] = Field(None, ge=0.0, description="Initial setting time (minutes)")
-    final_set_time: Optional[float] = Field(None, ge=0.0, description="Final setting time (minutes)")
+    # Setting times removed per user request
     
     # Fineness properties
     blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
@@ -300,11 +297,12 @@ class CementCreate(BaseModel):
     psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
     psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
     psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
-    psd_custom_points: Optional[str] = Field(None, max_length=1000, description="Custom PSD points (JSON)")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
     
     # Additional UI fields
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    immutable: Optional[bool] = Field(False, description="Whether this cement is read-only (original database cement)")
     
     @field_validator('name')
     @classmethod
@@ -416,9 +414,7 @@ class CementUpdate(BaseModel):
                                             description="Specific gravity of cement")
     description: Optional[str] = Field(None, description="Cement description")
     
-    # Setting times (minutes)
-    initial_set_time: Optional[float] = Field(None, ge=0.0, description="Initial setting time (minutes)")
-    final_set_time: Optional[float] = Field(None, ge=0.0, description="Final setting time (minutes)")
+    # Setting times removed per user request
     
     # Fineness properties
     blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
@@ -429,11 +425,12 @@ class CementUpdate(BaseModel):
     psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
     psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
     psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
-    psd_custom_points: Optional[str] = Field(None, max_length=1000, description="Custom PSD points (JSON)")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
     
     # Additional fields for UI
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    immutable: Optional[bool] = Field(None, description="Whether this cement is read-only (original database cement)")
 
 
 class CementResponse(BaseModel):

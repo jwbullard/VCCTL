@@ -8,6 +8,7 @@ Converted from Java Spring service to Python.
 
 import logging
 import math
+import os
 from typing import List, Optional, Dict, Any, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -126,14 +127,136 @@ class MicrostructureService:
         # Default phase properties
         self.default_phase_properties = self._initialize_default_phases()
         
-        # Supported shape sets
-        self.shape_sets = {
-            "sphere": "Spherical particles",
-            "ellipsoid": "Ellipsoidal particles", 
-            "irregular": "Irregular particles",
-            "angular": "Angular particles"
-        }
+        # Supported shape sets - load from particle_shape_set directory
+        self.shape_sets = self._load_particle_shape_sets()
+        
+        # Supported aggregate shapes - load from aggregate directory
+        self.aggregate_shapes = self._load_aggregate_shapes()
+        
+        # Base path for particle shape set data
+        self.particle_shape_base_path = os.path.join(os.getcwd(), "particle_shape_set")
+        
+        # Base path for aggregate shape data
+        self.aggregate_shape_base_path = os.path.join(os.getcwd(), "aggregate")
     
+    def _load_particle_shape_sets(self) -> Dict[str, str]:
+        """Load available particle shape sets from particle_shape_set directory."""
+        shape_sets = {}
+        
+        # Always include spherical - it's mathematical, doesn't need files
+        shape_sets["sphere"] = "Spherical particles"
+        
+        # Dynamically discover all directories in particle_shape_set
+        particle_shape_path = os.path.join(os.getcwd(), "particle_shape_set")
+        if os.path.exists(particle_shape_path):
+            try:
+                for item in os.listdir(particle_shape_path):
+                    item_path = os.path.join(particle_shape_path, item)
+                    if os.path.isdir(item_path):
+                        # Use the folder name as both ID and description
+                        shape_sets[item] = f"{item.title()} particles"
+                        self.logger.info(f"Found particle shape set: {item}")
+            except Exception as e:
+                self.logger.error(f"Failed to scan particle_shape_set directory: {e}")
+        
+        return shape_sets
+    
+    def get_particle_shape_set_path(self, shape_set_name: str) -> Optional[str]:
+        """Get the full path to a particle shape set directory."""
+        if shape_set_name not in self.shape_sets:
+            return None
+        
+        # Sphere is mathematical and doesn't need file paths
+        if shape_set_name == "sphere":
+            return None
+            
+        shape_path = os.path.join(self.particle_shape_base_path, shape_set_name)
+        if os.path.exists(shape_path) and os.path.isdir(shape_path):
+            return shape_path
+        
+        return None
+    
+    def get_particle_shape_files(self, shape_set_name: str) -> List[str]:
+        """Get list of particle shape data files for a given shape set."""
+        shape_path = self.get_particle_shape_set_path(shape_set_name)
+        if not shape_path:
+            return []
+        
+        try:
+            files = []
+            for filename in os.listdir(shape_path):
+                if filename.endswith('.dat'):
+                    files.append(os.path.join(shape_path, filename))
+            return sorted(files)
+        except Exception as e:
+            self.logger.error(f"Failed to read particle shape files for {shape_set_name}: {e}")
+            return []
+    
+    def is_mathematical_shape_set(self, shape_set_name: str) -> bool:
+        """Check if a shape set is mathematical (doesn't require data files)."""
+        return shape_set_name == "sphere"
+    
+    def _load_aggregate_shapes(self) -> Dict[str, str]:
+        """Load available aggregate shapes from aggregate directory."""
+        aggregate_shapes = {}
+        
+        # Always include spherical - it's mathematical, doesn't need files
+        aggregate_shapes["sphere"] = "Spherical particles"
+        
+        # Dynamically discover all directories in aggregate
+        aggregate_path = os.path.join(os.getcwd(), "aggregate")
+        if os.path.exists(aggregate_path):
+            try:
+                for item in os.listdir(aggregate_path):
+                    item_path = os.path.join(aggregate_path, item)
+                    if os.path.isdir(item_path):
+                        # Use the folder name as both ID and description
+                        aggregate_shapes[item] = f"{item.title()} aggregate"
+                        self.logger.info(f"Found aggregate shape: {item}")
+            except Exception as e:
+                self.logger.error(f"Failed to scan aggregate directory: {e}")
+        
+        return aggregate_shapes
+    
+    def get_aggregate_shape_path(self, shape_name: str) -> Optional[str]:
+        """Get the full path to an aggregate shape directory."""
+        if shape_name not in self.aggregate_shapes:
+            return None
+        
+        # Sphere is mathematical and doesn't need file paths
+        if shape_name == "sphere":
+            return None
+            
+        shape_path = os.path.join(self.aggregate_shape_base_path, shape_name)
+        if os.path.exists(shape_path) and os.path.isdir(shape_path):
+            return shape_path
+        
+        return None
+    
+    def get_aggregate_shape_files(self, shape_name: str) -> List[str]:
+        """Get list of aggregate shape data files for a given shape."""
+        shape_path = self.get_aggregate_shape_path(shape_name)
+        if not shape_path:
+            return []
+        
+        try:
+            files = []
+            for filename in os.listdir(shape_path):
+                if filename.endswith('.dat'):
+                    files.append(os.path.join(shape_path, filename))
+            return sorted(files)
+        except Exception as e:
+            self.logger.error(f"Failed to read aggregate shape files for {shape_name}: {e}")
+            return []
+    
+    def is_mathematical_aggregate_shape(self, shape_name: str) -> bool:
+        """Check if an aggregate shape is mathematical (doesn't require data files)."""
+        return shape_name == "sphere"
+    
+    def get_supported_aggregate_shapes(self) -> Dict[str, str]:
+        """Get list of supported aggregate shapes."""
+        return self.aggregate_shapes.copy()
+
     def _initialize_default_phases(self) -> Dict[PhaseType, PhaseProperties]:
         """Initialize default phase properties."""
         return {

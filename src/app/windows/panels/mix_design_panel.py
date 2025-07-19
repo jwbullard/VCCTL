@@ -8,6 +8,10 @@ water-binder ratio optimization, and real-time validation.
 
 import gi
 import logging
+import random
+import os
+import json
+import numpy as np
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
 
@@ -19,6 +23,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.services.mix_service import MixService, MaterialType, MixComponent, MixDesign
+from app.services.microstructure_service import MicrostructureParams, PhaseType
 from app.widgets import GradingCurveWidget
 
 
@@ -33,6 +38,7 @@ class MixDesignPanel(Gtk.Box):
         self.logger = logging.getLogger('VCCTL.MixDesignPanel')
         self.service_container = get_service_container()
         self.mix_service = MixService(self.service_container.database_service)
+        self.microstructure_service = self.service_container.microstructure_service
         
         # Panel state
         self.current_mix = None
@@ -140,21 +146,54 @@ class MixDesignPanel(Gtk.Box):
     
     def _create_content_area(self) -> None:
         """Create the main content area."""
-        content_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        # Create scrolled window for all content
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_hexpand(True)
+        scrolled.set_vexpand(True)
         
-        # Left side: Mix composition
+        # Main content layout with three columns
+        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
+        main_box.set_margin_top(15)
+        main_box.set_margin_bottom(15)
+        main_box.set_margin_left(15)
+        main_box.set_margin_right(15)
+        
+        # Left column: Mix composition (existing)
+        left_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        left_column.set_size_request(450, -1)
+        
         left_frame = Gtk.Frame(label="Cement Paste Components")
-        left_frame.set_size_request(600, -1)
         self._create_composition_section(left_frame)
-        content_paned.pack1(left_frame, True, False)
+        left_column.pack_start(left_frame, False, False, 0)
         
-        # Right side: Calculations and properties
+        # Add microstructure parameters to left column
+        self._create_system_parameters_section(left_column)
+        self._create_composition_parameters_section(left_column)
+        
+        # Middle column: Particle and advanced parameters
+        middle_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        middle_column.set_size_request(400, -1)
+        
+        self._create_particle_shape_section(middle_column)
+        self._create_flocculation_section(middle_column)
+        self._create_advanced_section(middle_column)
+        
+        # Right column: Properties and calculations
+        right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        right_column.set_size_request(400, -1)
+        
         right_frame = Gtk.Frame(label="Mix Properties & Calculations")
-        right_frame.set_size_request(400, -1)
         self._create_properties_section(right_frame)
-        content_paned.pack2(right_frame, False, False)
+        right_column.pack_start(right_frame, False, False, 0)
         
-        self.pack_start(content_paned, True, True, 0)
+        # Pack columns
+        main_box.pack_start(left_column, False, False, 0)
+        main_box.pack_start(middle_column, False, False, 0)
+        main_box.pack_start(right_column, False, False, 0)
+        
+        scrolled.add(main_box)
+        self.pack_start(scrolled, True, True, 0)
     
     def _create_composition_section(self, parent: Gtk.Frame) -> None:
         """Create the mix composition section with separate Powder, Water, and Air sections."""
@@ -377,11 +416,12 @@ class MixDesignPanel(Gtk.Box):
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         button_box.get_style_context().add_class("linked")
         
-        self.calculate_button = Gtk.Button(label="Calculate")
-        calc_icon = Gtk.Image.new_from_icon_name("accessories-calculator-symbolic", Gtk.IconSize.BUTTON)
-        self.calculate_button.set_image(calc_icon)
-        self.calculate_button.set_always_show_image(True)
-        button_box.pack_start(self.calculate_button, False, False, 0)
+        self.create_mix_button = Gtk.Button(label="Create Mix")
+        create_icon = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON)
+        self.create_mix_button.set_image(create_icon)
+        self.create_mix_button.set_always_show_image(True)
+        self.create_mix_button.get_style_context().add_class("suggested-action")
+        button_box.pack_start(self.create_mix_button, False, False, 0)
         
         self.validate_button = Gtk.Button(label="Validate")
         validate_icon = Gtk.Image.new_from_icon_name("dialog-information-symbolic", Gtk.IconSize.BUTTON)
@@ -428,9 +468,15 @@ class MixDesignPanel(Gtk.Box):
         self.air_content_spin.connect('value-changed', self._on_parameter_changed)
         
         # Action buttons
-        self.calculate_button.connect('clicked', self._on_calculate_clicked)
+        self.create_mix_button.connect('clicked', self._on_create_mix_clicked)
         self.validate_button.connect('clicked', self._on_validate_clicked)
         self.export_button.connect('clicked', self._on_export_clicked)
+        
+        # Microstructure parameter signals
+        self.system_size_spin.connect('value-changed', self._on_system_size_changed)
+        self.resolution_spin.connect('value-changed', self._on_resolution_changed)
+        self.flocculation_check.connect('toggled', self._on_flocculation_toggled)
+        self.generate_seed_button.connect('clicked', self._on_generate_seed_clicked)
     
     def _create_component_row(self) -> Gtk.Box:
         """Create a new component row widget."""
@@ -636,9 +682,9 @@ class MixDesignPanel(Gtk.Box):
         # TODO: Implement mix saving
         self.main_window.update_status("Mix saving will be implemented", "info", 3)
     
-    def _on_calculate_clicked(self, button) -> None:
-        """Handle calculate button click."""
-        self._perform_calculations()
+    def _on_create_mix_clicked(self, button) -> None:
+        """Handle create mix button click."""
+        self._create_microstructure_input_file()
     
     def _on_validate_clicked(self, button) -> None:
         """Handle validate button click."""
@@ -1044,3 +1090,658 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to show grading dialog: {e}")
             self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
+    
+    def _create_microstructure_input_file(self) -> None:
+        """Create microstructure input file after validation."""
+        try:
+            # Step 1: Validate mix design
+            mix_design = self._create_mix_design_from_ui()
+            if not mix_design:
+                self.main_window.update_status("Unable to create mix design - please check inputs", "error", 5)
+                return
+            
+            # Validate the mix design
+            validation_result = self.mix_service.validate_mix_design(mix_design)
+            if not validation_result['is_valid']:
+                # Show validation errors
+                error_msg = "Mix validation failed:\n" + "\n".join(validation_result['errors'])
+                dialog = Gtk.MessageDialog(
+                    transient_for=self.main_window,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Mix Design Validation Failed"
+                )
+                dialog.format_secondary_text(error_msg)
+                dialog.run()
+                dialog.destroy()
+                return
+            
+            # Step 2: Get microstructure parameters
+            microstructure_params = self._get_microstructure_parameters()
+            
+            # Step 3: Generate input file
+            input_file_content = self._generate_genmic_input_file(mix_design, microstructure_params)
+            
+            # Step 4: Save input file
+            self._save_input_file(input_file_content, mix_design.name)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create microstructure input file: {e}")
+            self.main_window.update_status(f"Error creating input file: {e}", "error", 5)
+    
+    def _get_microstructure_parameters(self) -> Dict[str, Any]:
+        """Get microstructure parameters from UI."""
+        return {
+            'system_size': int(self.system_size_spin.get_value()),
+            'resolution': self.resolution_spin.get_value(),
+            'water_binder_ratio': self.wb_ratio_spin.get_value(),
+            'aggregate_volume_fraction': self.agg_volume_spin.get_value(),
+            'air_content': self.micro_air_content_spin.get_value(),
+            'cement_shape_set': self.cement_shape_combo.get_active_id() or "sphere",
+            'aggregate_shape_set': self.agg_shape_combo.get_active_id() or "sphere",
+            'flocculation_enabled': self.flocculation_check.get_active(),
+            'flocculation_degree': self.flocculation_spin.get_value(),
+            'random_seed': int(self.random_seed_spin.get_value())
+        }
+    
+    def _get_material_psd_data(self, material_name: str, material_type: MaterialType) -> List[Tuple[float, float]]:
+        """Get PSD data for a material and convert to standard 0.25-75 μm range."""
+        try:
+            with self.service_container.database_service.get_read_only_session() as session:
+                # Get material data
+                if material_type == MaterialType.CEMENT:
+                    from app.models.cement import Cement
+                    material = session.query(Cement).filter_by(name=material_name).first()
+                elif material_type == MaterialType.FLY_ASH:
+                    from app.models.fly_ash import FlyAsh
+                    material = session.query(FlyAsh).filter_by(name=material_name).first()
+                elif material_type == MaterialType.SLAG:
+                    from app.models.slag import Slag
+                    material = session.query(Slag).filter_by(name=material_name).first()
+                elif material_type == MaterialType.INERT_FILLER:
+                    from app.models.inert_filler import InertFiller
+                    material = session.query(InertFiller).filter_by(name=material_name).first()
+                else:
+                    return self._generate_default_psd()
+                
+                if not material:
+                    self.logger.warning(f"Material {material_name} not found, using default PSD")
+                    return self._generate_default_psd()
+                
+                # Check PSD mode and convert accordingly
+                if hasattr(material, 'psd_mode') and material.psd_mode:
+                    if material.psd_mode == 'custom' and material.psd_custom_points:
+                        # Parse custom points and convert to standard range
+                        custom_points = json.loads(material.psd_custom_points)
+                        return self._convert_custom_psd_to_standard_range(custom_points)
+                    
+                    elif material.psd_mode == 'rosin_rammler':
+                        # Convert Rosin-Rammler parameters to custom points
+                        return self._convert_rosin_rammler_to_points(
+                            material.psd_d50, material.psd_n, material.psd_dmax
+                        )
+                    
+                    elif material.psd_mode == 'log_normal':
+                        # Convert log-normal parameters to custom points
+                        return self._convert_log_normal_to_points(
+                            material.psd_d50, material.psd_n
+                        )
+                
+                # Fallback to default PSD
+                self.logger.warning(f"No PSD data found for {material_name}, using default")
+                return self._generate_default_psd()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get PSD data for {material_name}: {e}")
+            return self._generate_default_psd()
+    
+    def _convert_custom_psd_to_standard_range(self, custom_points: List[List[float]]) -> List[Tuple[float, float]]:
+        """Convert custom PSD points to standard 0.25-75 μm range."""
+        try:
+            # Extract diameters and mass fractions
+            diameters = np.array([point[0] for point in custom_points])
+            mass_fractions = np.array([point[1] for point in custom_points])
+            
+            # Filter to 0.25-75 μm range
+            mask = (diameters >= 0.25) & (diameters <= 75.0)
+            
+            if not np.any(mask):
+                self.logger.warning("No PSD data in 0.25-75 μm range, using default")
+                return self._generate_default_psd()
+            
+            filtered_diameters = diameters[mask]
+            filtered_fractions = mass_fractions[mask]
+            
+            # Normalize mass fractions to sum to 1.0
+            if np.sum(filtered_fractions) > 0:
+                filtered_fractions = filtered_fractions / np.sum(filtered_fractions)
+            
+            # Create standard discrete points
+            return [(float(d), float(f)) for d, f in zip(filtered_diameters, filtered_fractions)]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to convert custom PSD: {e}")
+            return self._generate_default_psd()
+    
+    def _convert_rosin_rammler_to_points(self, d50: float, n: float, dmax: float = None) -> List[Tuple[float, float]]:
+        """Convert Rosin-Rammler parameters to discrete points in 0.25-75 μm range."""
+        try:
+            if not d50 or not n:
+                return self._generate_default_psd()
+            
+            # Create diameter range from 0.25 to 75 μm (or dmax if smaller)
+            max_diameter = min(75.0, dmax if dmax else 75.0)
+            diameters = np.logspace(np.log10(0.25), np.log10(max_diameter), 30)
+            
+            # Rosin-Rammler cumulative distribution: R = 1 - exp(-(d/d50)^n)
+            # where d50 is the characteristic diameter
+            cumulative = 1 - np.exp(-((diameters / d50) ** n))
+            
+            # Convert cumulative to differential (mass fractions)
+            mass_fractions = np.diff(np.concatenate([[0], cumulative]))
+            
+            # Ensure we have the right number of points
+            if len(mass_fractions) < len(diameters):
+                mass_fractions = np.append(mass_fractions, 0)
+            
+            # Normalize to sum to 1.0
+            mass_fractions = mass_fractions / np.sum(mass_fractions)
+            
+            return [(float(d), float(f)) for d, f in zip(diameters, mass_fractions)]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to convert Rosin-Rammler PSD: {e}")
+            return self._generate_default_psd()
+    
+    def _convert_log_normal_to_points(self, d50: float, sigma: float) -> List[Tuple[float, float]]:
+        """Convert log-normal parameters to discrete points in 0.25-75 μm range."""
+        try:
+            if not d50 or not sigma:
+                return self._generate_default_psd()
+            
+            # Create diameter range from 0.25 to 75 μm
+            diameters = np.logspace(np.log10(0.25), np.log10(75.0), 30)
+            
+            # Log-normal probability density function
+            from scipy.stats import lognorm
+            
+            # Convert d50 to scale parameter (median)
+            s = sigma  # shape parameter
+            scale = d50  # scale parameter
+            
+            # Calculate probability density and convert to mass fractions
+            pdf_values = lognorm.pdf(diameters, s=s, scale=scale)
+            
+            # Normalize to get mass fractions
+            mass_fractions = pdf_values / np.sum(pdf_values)
+            
+            return [(float(d), float(f)) for d, f in zip(diameters, mass_fractions)]
+            
+        except Exception as e:
+            self.logger.error(f"Failed to convert log-normal PSD: {e}")
+            return self._generate_default_psd()
+    
+    def _generate_default_psd(self) -> List[Tuple[float, float]]:
+        """Generate a default PSD for cement (typical Portland cement)."""
+        # Typical cement PSD with log-normal-like distribution
+        diameters = [0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 45.0, 63.0]
+        mass_fractions = [0.05, 0.15, 0.25, 0.25, 0.15, 0.08, 0.04, 0.02, 0.01]
+        
+        return list(zip(diameters, mass_fractions))
+
+    def _generate_genmic_input_file(self, mix_design: MixDesign, params: Dict[str, Any]) -> str:
+        """Generate input file content for genmic.c program."""
+        lines = []
+        
+        # Random seed (negative integer)
+        lines.append(f"{params['random_seed']}")
+        
+        # Menu choice 2: SPECSIZE (set system size)
+        lines.append("2")
+        
+        # System dimensions (cubic system)
+        system_size = params['system_size']
+        lines.append(f"{system_size}")  # X size
+        lines.append(f"{system_size}")  # Y size  
+        lines.append(f"{system_size}")  # Z size
+        
+        # Image size (same as system size)
+        lines.append(f"{system_size}")
+        
+        # Resolution (micrometers per voxel)
+        lines.append(f"{params['resolution']}")
+        
+        # Add particles for each cement component
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        
+        for component in mix_design.components:
+            if component.material_type in powder_types:
+                # Menu choice 3: ADDPART (add particles)
+                lines.append("3")
+                
+                # Phase ID mapping based on material type
+                phase_id = self._get_phase_id_for_material(component.material_type, component.material_name)
+                lines.append(f"{phase_id}")
+                
+                # Volume fraction (convert from mass fraction using specific gravity)
+                volume_fraction = component.volume_fraction
+                lines.append(f"{volume_fraction:.6f}")
+                
+                # Shape set selection
+                shape_set = params['cement_shape_set']
+                if shape_set == "sphere":
+                    lines.append("1")  # Mathematical spherical
+                else:
+                    # File-based shape set
+                    lines.append("2")
+                    # Path to shape set directory
+                    shape_path = os.path.join(os.getcwd(), "particle_shape_set", shape_set)
+                    lines.append(shape_path)
+                
+                # Add PSD data for this component
+                psd_data = self._get_material_psd_data(component.material_name, component.material_type)
+                
+                # Number of size classes
+                lines.append(f"{len(psd_data)}")
+                
+                # Add each size class (diameter and volume fraction)
+                for diameter, mass_fraction in psd_data:
+                    # Diameter in micrometers (rounded to integer as required by genmic)
+                    lines.append(f"{int(round(diameter))}")
+                    # Volume fraction for this size class
+                    lines.append(f"{mass_fraction:.6f}")
+        
+        # Add aggregate if present
+        aggregate_components = [comp for comp in mix_design.components 
+                             if comp.material_type == MaterialType.AGGREGATE]
+        
+        if aggregate_components and params['aggregate_volume_fraction'] > 0:
+            for agg_component in aggregate_components:
+                # Menu choice 3: ADDPART
+                lines.append("3")
+                
+                # Aggregate phase ID (typically INERTAGG = 13)
+                lines.append("13")
+                
+                # Aggregate volume fraction
+                lines.append(f"{params['aggregate_volume_fraction']:.6f}")
+                
+                # Aggregate shape set
+                agg_shape = params['aggregate_shape_set']
+                if agg_shape == "sphere":
+                    lines.append("1")  # Mathematical spherical
+                else:
+                    # File-based aggregate shape set
+                    lines.append("2")
+                    agg_path = os.path.join(os.getcwd(), "aggregate", agg_shape)
+                    lines.append(agg_path)
+        
+        # Add porosity/water if needed
+        if params['air_content'] > 0:
+            # Menu choice 3: ADDPART for porosity
+            lines.append("3")
+            lines.append("0")  # POROSITY phase ID
+            lines.append(f"{params['air_content']:.6f}")
+            lines.append("1")  # Spherical for air/pores
+        
+        # Flocculation settings if enabled
+        if params['flocculation_enabled']:
+            # Menu choice for flocculation (would need to check genmic.c for exact option)
+            lines.append("4")  # Assuming menu option 4 for flocculation
+            lines.append(f"{params['flocculation_degree']:.3f}")
+        
+        # Menu choice 8: WRITEFAB (write microstructure file)
+        lines.append("8")
+        
+        # Output filename
+        mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
+        output_filename = f"microstructure_{mix_name_safe}.img"
+        lines.append(output_filename)
+        
+        # Menu choice 0: Exit
+        lines.append("0")
+        
+        return "\n".join(lines) + "\n"
+    
+    def _get_phase_id_for_material(self, material_type: MaterialType, material_name: str) -> int:
+        """Get phase ID for material based on vcctl.h definitions."""
+        # Based on vcctl.h phase definitions
+        if material_type == MaterialType.CEMENT:
+            # Default to C3S for cement, but could be more sophisticated
+            # based on cement composition analysis
+            return 1  # C3S
+        elif material_type == MaterialType.FLY_ASH:
+            return 18  # FLYASH
+        elif material_type == MaterialType.SLAG:
+            return 12  # SLAG
+        elif material_type == MaterialType.INERT_FILLER:
+            return 11  # INERT
+        else:
+            return 1  # Default to C3S
+    
+    def _save_input_file(self, content: str, mix_name: str) -> None:
+        """Save input file content to disk."""
+        try:
+            # Create safe filename
+            mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
+            default_filename = f"genmic_input_{mix_name_safe}.txt"
+            
+            # Create file chooser dialog
+            dialog = Gtk.FileChooserDialog(
+                title="Save Microstructure Input File",
+                parent=self.main_window,
+                action=Gtk.FileChooserAction.SAVE
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_SAVE, Gtk.ResponseType.OK
+            )
+            
+            # Add file filter
+            filter_txt = Gtk.FileFilter()
+            filter_txt.set_name("Text files")
+            filter_txt.add_pattern("*.txt")
+            dialog.add_filter(filter_txt)
+            
+            filter_all = Gtk.FileFilter()
+            filter_all.set_name("All files")
+            filter_all.add_pattern("*")
+            dialog.add_filter(filter_all)
+            
+            dialog.set_current_name(default_filename)
+            
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                filename = dialog.get_filename()
+                
+                # Write file
+                with open(filename, 'w') as f:
+                    f.write(content)
+                
+                self.logger.info(f"Saved microstructure input file: {filename}")
+                self.main_window.update_status(f"Input file saved: {filename}", "success", 5)
+                
+                # Show info dialog with next steps
+                info_dialog = Gtk.MessageDialog(
+                    transient_for=self.main_window,
+                    message_type=Gtk.MessageType.INFO,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Input File Created Successfully"
+                )
+                info_dialog.format_secondary_text(
+                    f"Input file saved to:\n{filename}\n\n"
+                    f"To generate the 3D microstructure, run:\n"
+                    f"./backend/genmic < {filename}"
+                )
+                info_dialog.run()
+                info_dialog.destroy()
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save input file: {e}")
+            self.main_window.update_status(f"Error saving file: {e}", "error", 5)
+    
+    # =========================================================================
+    # Microstructure Parameter Sections (moved from MicrostructurePanel)
+    # =========================================================================
+    
+    def _create_system_parameters_section(self, parent: Gtk.Box) -> None:
+        """Create system parameters section."""
+        frame = Gtk.Frame(label="System Dimensions & Resolution")
+        frame.get_style_context().add_class("card")
+        
+        grid = Gtk.Grid()
+        grid.set_row_spacing(10)
+        grid.set_column_spacing(10)
+        grid.set_margin_top(15)
+        grid.set_margin_bottom(15)
+        grid.set_margin_left(15)
+        grid.set_margin_right(15)
+        
+        # System size
+        size_label = Gtk.Label("System Size (voxels):")
+        size_label.set_halign(Gtk.Align.START)
+        size_label.set_tooltip_text("Number of voxels per dimension (creates size³ total voxels)")
+        grid.attach(size_label, 0, 0, 1, 1)
+        
+        self.system_size_spin = Gtk.SpinButton.new_with_range(10, 1000, 1)
+        self.system_size_spin.set_value(100)
+        self.system_size_spin.set_tooltip_text("Larger systems are more representative but computationally expensive")
+        grid.attach(self.system_size_spin, 1, 0, 1, 1)
+        
+        # Resolution
+        resolution_label = Gtk.Label("Resolution (μm/voxel):")
+        resolution_label.set_halign(Gtk.Align.START)
+        resolution_label.set_tooltip_text("Physical size of each voxel in micrometers")
+        grid.attach(resolution_label, 0, 1, 1, 1)
+        
+        self.resolution_spin = Gtk.SpinButton.new_with_range(0.01, 100.0, 0.01)
+        self.resolution_spin.set_digits(2)
+        self.resolution_spin.set_value(1.0)
+        self.resolution_spin.set_tooltip_text("Finer resolution captures more detail but increases computation")
+        grid.attach(self.resolution_spin, 1, 1, 1, 1)
+        
+        # Calculated system size
+        calc_size_label = Gtk.Label("Physical Size (μm):")
+        calc_size_label.set_halign(Gtk.Align.START)
+        grid.attach(calc_size_label, 0, 2, 1, 1)
+        
+        self.calc_size_label = Gtk.Label("100.0")
+        self.calc_size_label.set_halign(Gtk.Align.START)
+        self.calc_size_label.get_style_context().add_class("monospace")
+        grid.attach(self.calc_size_label, 1, 2, 1, 1)
+        
+        # Total voxels
+        voxels_label = Gtk.Label("Total Voxels:")
+        voxels_label.set_halign(Gtk.Align.START)
+        grid.attach(voxels_label, 0, 3, 1, 1)
+        
+        self.total_voxels_label = Gtk.Label("1,000,000")
+        self.total_voxels_label.set_halign(Gtk.Align.START)
+        self.total_voxels_label.get_style_context().add_class("monospace")
+        grid.attach(self.total_voxels_label, 1, 3, 1, 1)
+        
+        frame.add(grid)
+        parent.pack_start(frame, False, False, 0)
+    
+    def _create_composition_parameters_section(self, parent: Gtk.Box) -> None:
+        """Create composition parameters section."""
+        frame = Gtk.Frame(label="Microstructure Composition")
+        frame.get_style_context().add_class("card")
+        
+        grid = Gtk.Grid()
+        grid.set_row_spacing(10)
+        grid.set_column_spacing(10)
+        grid.set_margin_top(15)
+        grid.set_margin_bottom(15)
+        grid.set_margin_left(15)
+        grid.set_margin_right(15)
+        
+        # Water-binder ratio
+        wb_label = Gtk.Label("Water/Binder Ratio:")
+        wb_label.set_halign(Gtk.Align.START)
+        wb_label.set_tooltip_text("Mass ratio of water to total binder")
+        grid.attach(wb_label, 0, 0, 1, 1)
+        
+        self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
+        self.wb_ratio_spin.set_digits(2)
+        self.wb_ratio_spin.set_value(0.4)
+        grid.attach(self.wb_ratio_spin, 1, 0, 1, 1)
+        
+        # Aggregate volume fraction
+        agg_label = Gtk.Label("Aggregate Volume Fraction:")
+        agg_label.set_halign(Gtk.Align.START)
+        agg_label.set_tooltip_text("Volume fraction of aggregate in total solid volume")
+        grid.attach(agg_label, 0, 1, 1, 1)
+        
+        self.agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.agg_volume_spin.set_digits(2)
+        self.agg_volume_spin.set_value(0.7)
+        grid.attach(self.agg_volume_spin, 1, 1, 1, 1)
+        
+        # Air content
+        air_label = Gtk.Label("Microstructure Air Content:")
+        air_label.set_halign(Gtk.Align.START)
+        air_label.set_tooltip_text("Volume fraction of entrained air")
+        grid.attach(air_label, 0, 2, 1, 1)
+        
+        self.micro_air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.2, 0.001)
+        self.micro_air_content_spin.set_digits(3)
+        self.micro_air_content_spin.set_value(0.05)
+        grid.attach(self.micro_air_content_spin, 1, 2, 1, 1)
+        
+        frame.add(grid)
+        parent.pack_start(frame, False, False, 0)
+    
+    def _create_particle_shape_section(self, parent: Gtk.Box) -> None:
+        """Create particle shape parameters section."""
+        frame = Gtk.Frame(label="Particle Shape Sets")
+        frame.get_style_context().add_class("card")
+        
+        grid = Gtk.Grid()
+        grid.set_row_spacing(10)
+        grid.set_column_spacing(10)
+        grid.set_margin_top(15)
+        grid.set_margin_bottom(15)
+        grid.set_margin_left(15)
+        grid.set_margin_right(15)
+        
+        # Cement shape set
+        cement_label = Gtk.Label("Cement Shape Set:")
+        cement_label.set_halign(Gtk.Align.START)
+        cement_label.set_tooltip_text("Particle shape model for cement grains")
+        grid.attach(cement_label, 0, 0, 1, 1)
+        
+        self.cement_shape_combo = Gtk.ComboBoxText()
+        shape_sets = self.microstructure_service.get_supported_shape_sets()
+        for shape_id, shape_desc in shape_sets.items():
+            self.cement_shape_combo.append(shape_id, shape_desc)
+        self.cement_shape_combo.set_active(0)
+        grid.attach(self.cement_shape_combo, 1, 0, 1, 1)
+        
+        # Aggregate shape set
+        agg_shape_label = Gtk.Label("Aggregate Shape Set:")
+        agg_shape_label.set_halign(Gtk.Align.START)
+        agg_shape_label.set_tooltip_text("Particle shape model for aggregate particles")
+        grid.attach(agg_shape_label, 0, 1, 1, 1)
+        
+        self.agg_shape_combo = Gtk.ComboBoxText()
+        aggregate_shapes = self.microstructure_service.get_supported_aggregate_shapes()
+        for shape_id, shape_desc in aggregate_shapes.items():
+            self.agg_shape_combo.append(shape_id, shape_desc)
+        self.agg_shape_combo.set_active(0)
+        grid.attach(self.agg_shape_combo, 1, 1, 1, 1)
+        
+        frame.add(grid)
+        parent.pack_start(frame, False, False, 0)
+    
+    def _create_flocculation_section(self, parent: Gtk.Box) -> None:
+        """Create flocculation parameters section."""
+        frame = Gtk.Frame(label="Flocculation Parameters")
+        frame.get_style_context().add_class("card")
+        
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox.set_margin_top(15)
+        vbox.set_margin_bottom(15)
+        vbox.set_margin_left(15)
+        vbox.set_margin_right(15)
+        
+        # Enable flocculation checkbox
+        self.flocculation_check = Gtk.CheckButton(label="Enable Flocculation")
+        self.flocculation_check.set_tooltip_text("Enable cement particle flocculation modeling")
+        vbox.pack_start(self.flocculation_check, False, False, 0)
+        
+        # Flocculation degree
+        floc_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        floc_label = Gtk.Label("Flocculation Degree:")
+        floc_label.set_halign(Gtk.Align.START)
+        floc_label.set_tooltip_text("Degree of particle clustering (0.0 = none, 1.0 = maximum)")
+        floc_box.pack_start(floc_label, False, False, 0)
+        
+        self.flocculation_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.flocculation_spin.set_digits(2)
+        self.flocculation_spin.set_value(0.0)
+        self.flocculation_spin.set_sensitive(False)
+        floc_box.pack_start(self.flocculation_spin, False, False, 0)
+        
+        vbox.pack_start(floc_box, False, False, 0)
+        
+        frame.add(vbox)
+        parent.pack_start(frame, False, False, 0)
+    
+    def _create_advanced_section(self, parent: Gtk.Box) -> None:
+        """Create advanced parameters section."""
+        frame = Gtk.Frame(label="Advanced Parameters")
+        frame.get_style_context().add_class("card")
+        
+        grid = Gtk.Grid()
+        grid.set_row_spacing(10)
+        grid.set_column_spacing(10)
+        grid.set_margin_top(15)
+        grid.set_margin_bottom(15)
+        grid.set_margin_left(15)
+        grid.set_margin_right(15)
+        
+        # Random seed
+        seed_label = Gtk.Label("Random Seed:")
+        seed_label.set_halign(Gtk.Align.START)
+        seed_label.set_tooltip_text("Seed for random number generation (0 = random)")
+        grid.attach(seed_label, 0, 0, 1, 1)
+        
+        seed_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        self.random_seed_spin = Gtk.SpinButton.new_with_range(-2147483647, -1, 1)
+        self.random_seed_spin.set_value(-1)
+        seed_box.pack_start(self.random_seed_spin, True, True, 0)
+        
+        self.generate_seed_button = Gtk.Button(label="Generate")
+        self.generate_seed_button.set_tooltip_text("Generate new random seed")
+        seed_box.pack_start(self.generate_seed_button, False, False, 0)
+        
+        grid.attach(seed_box, 1, 0, 1, 1)
+        
+        frame.add(grid)
+        parent.pack_start(frame, False, False, 0)
+    
+    # =========================================================================
+    # Signal Handlers for Microstructure Parameters
+    # =========================================================================
+    
+    def _on_flocculation_toggled(self, checkbox: Gtk.CheckButton) -> None:
+        """Handle flocculation checkbox toggle."""
+        enabled = checkbox.get_active()
+        self.flocculation_spin.set_sensitive(enabled)
+        if not enabled:
+            self.flocculation_spin.set_value(0.0)
+    
+    def _on_generate_seed_clicked(self, button: Gtk.Button) -> None:
+        """Generate a new negative random seed."""
+        new_seed = random.randint(-2147483647, -1)
+        self.random_seed_spin.set_value(new_seed)
+    
+    def _on_system_size_changed(self, spin: Gtk.SpinButton) -> None:
+        """Handle system size change."""
+        self._update_calculated_values()
+    
+    def _on_resolution_changed(self, spin: Gtk.SpinButton) -> None:
+        """Handle resolution change."""
+        self._update_calculated_values()
+    
+    def _update_calculated_values(self) -> None:
+        """Update calculated physical size and total voxels."""
+        try:
+            system_size = int(self.system_size_spin.get_value())
+            resolution = self.resolution_spin.get_value()
+            
+            # Calculate physical size
+            physical_size = system_size * resolution
+            self.calc_size_label.set_text(f"{physical_size:.1f}")
+            
+            # Calculate total voxels
+            total_voxels = system_size ** 3
+            self.total_voxels_label.set_text(f"{total_voxels:,}")
+            
+        except Exception as e:
+            self.logger.error(f"Error updating calculated values: {e}")

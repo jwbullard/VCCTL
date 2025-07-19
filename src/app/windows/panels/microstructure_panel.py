@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Microstructure Parameters Panel for VCCTL
+Microstructure Preview Panel for VCCTL
 
-Provides interface for setting 3D microstructure generation parameters including
-system dimensions, resolution, particle shapes, and flocculation controls.
+Provides 3D microstructure visualization and preview functionality.
+Parameters are now configured in the Mix Design tool.
 """
 
 import gi
@@ -24,7 +24,7 @@ from app.visualization import create_visualization_manager, Microstructure3DView
 
 
 class MicrostructurePanel(Gtk.Box):
-    """Microstructure parameters panel with 3D generation controls."""
+    """Microstructure preview panel with 3D visualization controls."""
     
     def __init__(self, main_window: 'VCCTLMainWindow'):
         """Initialize the microstructure panel."""
@@ -76,42 +76,16 @@ class MicrostructurePanel(Gtk.Box):
         title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         
         title_label = Gtk.Label()
-        title_label.set_markup('<span size="large" weight="bold">Microstructure Parameters</span>')
+        title_label.set_markup('<span size="large" weight="bold">Microstructure Preview</span>')
         title_label.set_halign(Gtk.Align.START)
         title_box.pack_start(title_label, False, False, 0)
         
-        # Parameter preset controls
-        preset_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        preset_label = Gtk.Label("Preset:")
-        self.preset_combo = Gtk.ComboBoxText()
-        self.preset_combo.append("custom", "Custom")
-        self.preset_combo.append("coarse", "Coarse (Fast)")
-        self.preset_combo.append("medium", "Medium (Balanced)")
-        self.preset_combo.append("fine", "Fine (Detailed)")
-        self.preset_combo.append("ultra_fine", "Ultra-Fine (Research)")
-        self.preset_combo.set_active(0)
-        preset_box.pack_start(preset_label, False, False, 0)
-        preset_box.pack_start(self.preset_combo, False, False, 0)
-        
-        # Action buttons
-        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        
-        self.validate_button = Gtk.Button(label="Validate")
-        self.validate_button.set_tooltip_text("Validate parameters and estimate computation")
-        button_box.pack_start(self.validate_button, False, False, 0)
-        
-        self.reset_button = Gtk.Button(label="Reset")
-        self.reset_button.set_tooltip_text("Reset to default parameters")
-        button_box.pack_start(self.reset_button, False, False, 0)
-        
-        title_box.pack_end(button_box, False, False, 0)
-        title_box.pack_end(preset_box, False, False, 0)
         
         header_box.pack_start(title_box, False, False, 0)
         
         # Description
         desc_label = Gtk.Label()
-        desc_label.set_markup('<span size="small">Configure 3D microstructure generation parameters including system size, resolution, and particle characteristics.</span>')
+        desc_label.set_markup('<span size="small">Generate and visualize 3D microstructures using parameters configured in the Mix Design tool.</span>')
         desc_label.set_halign(Gtk.Align.START)
         desc_label.get_style_context().add_class("dim-label")
         header_box.pack_start(desc_label, False, False, 0)
@@ -123,259 +97,44 @@ class MicrostructurePanel(Gtk.Box):
         self.pack_start(separator, False, False, 0)
     
     def _create_content_area(self) -> None:
-        """Create the main content area with parameter controls."""
+        """Create the main content area with preview controls only."""
         # Create scrolled window
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scrolled.set_hexpand(True)
         scrolled.set_vexpand(True)
         
-        # Main content box
-        content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
+        # Main content box - centered single column
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         content_box.set_margin_top(15)
         content_box.set_margin_bottom(15)
         content_box.set_margin_left(15)
         content_box.set_margin_right(15)
         
-        # Left column: System parameters
-        left_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        left_column.set_size_request(400, -1)
+        # Info message about parameters being in Mix Design
+        info_frame = Gtk.Frame(label="Parameter Configuration")
+        info_frame.get_style_context().add_class("card")
         
-        self._create_system_parameters_section(left_column)
-        self._create_composition_parameters_section(left_column)
+        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        info_box.set_margin_top(15)
+        info_box.set_margin_bottom(15)
+        info_box.set_margin_left(15)
+        info_box.set_margin_right(15)
         
-        # Right column: Particle and flocculation parameters
-        right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        right_column.set_size_request(400, -1)
+        info_label = Gtk.Label()
+        info_label.set_markup('<span size="medium">Microstructure generation parameters are now configured in the <b>Mix Design</b> tool.\n\nUse this panel to preview and visualize the generated 3D microstructure.</span>')
+        info_label.set_line_wrap(True)
+        info_label.set_justify(Gtk.Justification.CENTER)
+        info_box.pack_start(info_label, False, False, 0)
         
-        self._create_particle_shape_section(right_column)
-        self._create_flocculation_section(right_column)
-        self._create_advanced_section(right_column)
-        self._create_preview_section(right_column)
+        info_frame.add(info_box)
+        content_box.pack_start(info_frame, False, False, 0)
         
-        content_box.pack_start(left_column, False, False, 0)
-        content_box.pack_start(right_column, False, False, 0)
+        # Preview section - now takes full width
+        self._create_preview_section(content_box)
         
         scrolled.add(content_box)
         self.pack_start(scrolled, True, True, 0)
-    
-    def _create_system_parameters_section(self, parent: Gtk.Box) -> None:
-        """Create system parameters section."""
-        frame = Gtk.Frame(label="System Dimensions & Resolution")
-        frame.get_style_context().add_class("card")
-        
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # System size
-        size_label = Gtk.Label("System Size (voxels):")
-        size_label.set_halign(Gtk.Align.START)
-        size_label.set_tooltip_text("Number of voxels per dimension (creates size³ total voxels)")
-        grid.attach(size_label, 0, 0, 1, 1)
-        
-        self.system_size_spin = Gtk.SpinButton.new_with_range(10, 1000, 1)
-        self.system_size_spin.set_value(100)
-        self.system_size_spin.set_tooltip_text("Larger systems are more representative but computationally expensive")
-        grid.attach(self.system_size_spin, 1, 0, 1, 1)
-        
-        # Resolution
-        resolution_label = Gtk.Label("Resolution (μm/voxel):")
-        resolution_label.set_halign(Gtk.Align.START)
-        resolution_label.set_tooltip_text("Physical size of each voxel in micrometers")
-        grid.attach(resolution_label, 0, 1, 1, 1)
-        
-        self.resolution_spin = Gtk.SpinButton.new_with_range(0.01, 100.0, 0.01)
-        self.resolution_spin.set_digits(2)
-        self.resolution_spin.set_value(1.0)
-        self.resolution_spin.set_tooltip_text("Finer resolution captures more detail but increases computation")
-        grid.attach(self.resolution_spin, 1, 1, 1, 1)
-        
-        # Calculated system size
-        calc_size_label = Gtk.Label("Physical Size (μm):")
-        calc_size_label.set_halign(Gtk.Align.START)
-        grid.attach(calc_size_label, 0, 2, 1, 1)
-        
-        self.calc_size_label = Gtk.Label("100.0")
-        self.calc_size_label.set_halign(Gtk.Align.START)
-        self.calc_size_label.get_style_context().add_class("monospace")
-        grid.attach(self.calc_size_label, 1, 2, 1, 1)
-        
-        # Total voxels
-        voxels_label = Gtk.Label("Total Voxels:")
-        voxels_label.set_halign(Gtk.Align.START)
-        grid.attach(voxels_label, 0, 3, 1, 1)
-        
-        self.total_voxels_label = Gtk.Label("1,000,000")
-        self.total_voxels_label.set_halign(Gtk.Align.START)
-        self.total_voxels_label.get_style_context().add_class("monospace")
-        grid.attach(self.total_voxels_label, 1, 3, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
-    
-    def _create_composition_parameters_section(self, parent: Gtk.Box) -> None:
-        """Create composition parameters section."""
-        frame = Gtk.Frame(label="Mix Composition")
-        frame.get_style_context().add_class("card")
-        
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # Water-binder ratio
-        wb_label = Gtk.Label("Water/Binder Ratio:")
-        wb_label.set_halign(Gtk.Align.START)
-        wb_label.set_tooltip_text("Mass ratio of water to total binder")
-        grid.attach(wb_label, 0, 0, 1, 1)
-        
-        self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
-        self.wb_ratio_spin.set_digits(2)
-        self.wb_ratio_spin.set_value(0.4)
-        grid.attach(self.wb_ratio_spin, 1, 0, 1, 1)
-        
-        # Aggregate volume fraction
-        agg_label = Gtk.Label("Aggregate Volume Fraction:")
-        agg_label.set_halign(Gtk.Align.START)
-        agg_label.set_tooltip_text("Volume fraction of aggregate in total solid volume")
-        grid.attach(agg_label, 0, 1, 1, 1)
-        
-        self.agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.agg_volume_spin.set_digits(2)
-        self.agg_volume_spin.set_value(0.7)
-        grid.attach(self.agg_volume_spin, 1, 1, 1, 1)
-        
-        # Air content
-        air_label = Gtk.Label("Air Content:")
-        air_label.set_halign(Gtk.Align.START)
-        air_label.set_tooltip_text("Volume fraction of entrained air")
-        grid.attach(air_label, 0, 2, 1, 1)
-        
-        self.air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.2, 0.001)
-        self.air_content_spin.set_digits(3)
-        self.air_content_spin.set_value(0.05)
-        grid.attach(self.air_content_spin, 1, 2, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
-    
-    def _create_particle_shape_section(self, parent: Gtk.Box) -> None:
-        """Create particle shape parameters section."""
-        frame = Gtk.Frame(label="Particle Shape Sets")
-        frame.get_style_context().add_class("card")
-        
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # Cement shape set
-        cement_label = Gtk.Label("Cement Shape Set:")
-        cement_label.set_halign(Gtk.Align.START)
-        cement_label.set_tooltip_text("Particle shape model for cement grains")
-        grid.attach(cement_label, 0, 0, 1, 1)
-        
-        self.cement_shape_combo = Gtk.ComboBoxText()
-        shape_sets = self.microstructure_service.get_supported_shape_sets()
-        for shape_id, shape_desc in shape_sets.items():
-            self.cement_shape_combo.append(shape_id, shape_desc)
-        self.cement_shape_combo.set_active(0)
-        grid.attach(self.cement_shape_combo, 1, 0, 1, 1)
-        
-        # Aggregate shape set
-        agg_shape_label = Gtk.Label("Aggregate Shape Set:")
-        agg_shape_label.set_halign(Gtk.Align.START)
-        agg_shape_label.set_tooltip_text("Particle shape model for aggregate particles")
-        grid.attach(agg_shape_label, 0, 1, 1, 1)
-        
-        self.agg_shape_combo = Gtk.ComboBoxText()
-        for shape_id, shape_desc in shape_sets.items():
-            self.agg_shape_combo.append(shape_id, shape_desc)
-        self.agg_shape_combo.set_active(0)
-        grid.attach(self.agg_shape_combo, 1, 1, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
-    
-    def _create_flocculation_section(self, parent: Gtk.Box) -> None:
-        """Create flocculation parameters section."""
-        frame = Gtk.Frame(label="Flocculation Parameters")
-        frame.get_style_context().add_class("card")
-        
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        vbox.set_margin_top(15)
-        vbox.set_margin_bottom(15)
-        vbox.set_margin_left(15)
-        vbox.set_margin_right(15)
-        
-        # Enable flocculation checkbox
-        self.flocculation_check = Gtk.CheckButton(label="Enable Flocculation")
-        self.flocculation_check.set_tooltip_text("Enable cement particle flocculation modeling")
-        vbox.pack_start(self.flocculation_check, False, False, 0)
-        
-        # Flocculation degree
-        floc_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        
-        floc_label = Gtk.Label("Flocculation Degree:")
-        floc_label.set_halign(Gtk.Align.START)
-        floc_label.set_tooltip_text("Degree of particle clustering (0.0 = none, 1.0 = maximum)")
-        floc_box.pack_start(floc_label, False, False, 0)
-        
-        self.flocculation_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.flocculation_spin.set_digits(2)
-        self.flocculation_spin.set_value(0.0)
-        self.flocculation_spin.set_sensitive(False)
-        floc_box.pack_start(self.flocculation_spin, False, False, 0)
-        
-        vbox.pack_start(floc_box, False, False, 0)
-        
-        frame.add(vbox)
-        parent.pack_start(frame, False, False, 0)
-    
-    def _create_advanced_section(self, parent: Gtk.Box) -> None:
-        """Create advanced parameters section."""
-        frame = Gtk.Frame(label="Advanced Parameters")
-        frame.get_style_context().add_class("card")
-        
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # Random seed
-        seed_label = Gtk.Label("Random Seed:")
-        seed_label.set_halign(Gtk.Align.START)
-        seed_label.set_tooltip_text("Seed for random number generation (0 = random)")
-        grid.attach(seed_label, 0, 0, 1, 1)
-        
-        seed_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        
-        self.random_seed_spin = Gtk.SpinButton.new_with_range(0, 2147483647, 1)
-        self.random_seed_spin.set_value(0)
-        seed_box.pack_start(self.random_seed_spin, True, True, 0)
-        
-        self.generate_seed_button = Gtk.Button(label="Generate")
-        self.generate_seed_button.set_tooltip_text("Generate new random seed")
-        seed_box.pack_start(self.generate_seed_button, False, False, 0)
-        
-        grid.attach(seed_box, 1, 0, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
     
     def _create_preview_section(self, parent: Gtk.Box) -> None:
         """Create microstructure preview section."""
@@ -468,32 +227,13 @@ class MicrostructurePanel(Gtk.Box):
     
     def _connect_signals(self) -> None:
         """Connect UI signals."""
-        # Parameter change signals
-        self.system_size_spin.connect('value-changed', self._on_parameter_changed)
-        self.resolution_spin.connect('value-changed', self._on_parameter_changed)
-        self.wb_ratio_spin.connect('value-changed', self._on_parameter_changed)
-        self.agg_volume_spin.connect('value-changed', self._on_parameter_changed)
-        self.air_content_spin.connect('value-changed', self._on_parameter_changed)
-        self.cement_shape_combo.connect('changed', self._on_parameter_changed)
-        self.agg_shape_combo.connect('changed', self._on_parameter_changed)
-        self.flocculation_check.connect('toggled', self._on_flocculation_toggled)
-        self.flocculation_spin.connect('value-changed', self._on_parameter_changed)
-        self.random_seed_spin.connect('value-changed', self._on_parameter_changed)
-        
-        # Control signals
-        self.preset_combo.connect('changed', self._on_preset_changed)
-        self.validate_button.connect('clicked', self._on_validate_clicked)
-        self.reset_button.connect('clicked', self._on_reset_clicked)
-        self.generate_seed_button.connect('clicked', self._on_generate_seed_clicked)
-        
-        # Preview signals
+        # Preview signals only - parameters are now in Mix Design
         self.preview_button.connect('clicked', self._on_preview_clicked)
         self.export_preview_button.connect('clicked', self._on_export_preview_clicked)
     
     def _load_default_parameters(self) -> None:
-        """Load default parameters."""
-        self._update_calculated_values()
-        self._update_status("Ready - configure parameters and click Validate")
+        """Load default parameters - simplified for preview-only mode."""
+        self._update_status("Ready - parameters configured in Mix Design tool")
     
     def _on_parameter_changed(self, widget) -> None:
         """Handle parameter change."""
@@ -557,27 +297,12 @@ class MicrostructurePanel(Gtk.Box):
             self._update_status(f"Validation error: {e}")
     
     def _on_reset_clicked(self, button) -> None:
-        """Handle reset button click."""
-        self.system_size_spin.set_value(100)
-        self.resolution_spin.set_value(1.0)
-        self.wb_ratio_spin.set_value(0.4)
-        self.agg_volume_spin.set_value(0.7)
-        self.air_content_spin.set_value(0.05)
-        self.cement_shape_combo.set_active(0)
-        self.agg_shape_combo.set_active(0)
-        self.flocculation_check.set_active(False)
-        self.flocculation_spin.set_value(0.0)
-        self.random_seed_spin.set_value(0)
-        self.preset_combo.set_active(2)  # Medium preset
-        
-        self._clear_validation()
-        self._update_status("Parameters reset to defaults")
+        """Handle reset button click - no longer used in preview-only mode."""
+        self._update_status("Parameters are configured in Mix Design tool")
     
     def _on_generate_seed_clicked(self, button) -> None:
-        """Handle generate seed button click."""
-        new_seed = random.randint(1, 2147483647)
-        self.random_seed_spin.set_value(new_seed)
-        self._update_status(f"Generated new random seed: {new_seed}")
+        """Handle generate seed button click - no longer used in preview-only mode."""
+        self._update_status("Random seed is configured in Mix Design tool")
     
     def _get_current_parameters(self) -> MicrostructureParams:
         """Get current parameter values from UI."""

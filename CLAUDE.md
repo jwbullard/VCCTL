@@ -1,6 +1,6 @@
 # VCCTL Project - Claude Context
 
-## Current Status: Materials Management Complete
+## Current Status: Particle Shape Integration and C Program Analysis Complete
 
 ### Major Accomplishments This Session
 
@@ -51,6 +51,28 @@
    - ✅ Fixed floating-point precision issue (1e-18 values treated as zero using 1e-10 tolerance)
    - ✅ Complete bidirectional consistency: zero mass ↔ zero volume ↔ zero surface
 
+8. **Gypsum Data Import and Processing** (Completed):
+   - ✅ Imported gypsum mass fractions from gypsumContents.csv for all 37 cements
+   - ✅ Calculated volume fractions using thermodynamic formula: volume_fraction = (mass_fraction / SG) × cement_bulk_SG
+   - ✅ Used correct specific gravities: DIHYD=2.32, HEMIHYD=2.74, ANHYD=2.61
+   - ✅ Implemented bidirectional conversion in Edit Materials dialog
+   - ✅ All gypsum components now have proper mass and volume fraction data
+
+9. **Phase Fraction Normalization** (Completed):
+   - ✅ Analyzed all 39 cements in database for phase fraction totals
+   - ✅ Normalized 1 cement (ma157) from 91.5% to 100% total phase fractions
+   - ✅ Recalculated volume fractions using thermodynamic relationships
+   - ✅ All 31 cements with phase data now have properly normalized fractions to 100%
+   - ✅ Database integrity maintained with accurate mass/volume fraction relationships
+
+10. **Properties Tab Split** (Completed):
+    - ✅ Split single "Properties" tab into "Chemical Properties" and "Physical Properties" tabs
+    - ✅ Chemical Properties: Phase fractions, gypsum components, composition data
+    - ✅ Physical Properties: Setting times, calculated properties, PSD parameters
+    - ✅ Improved user interface organization and workflow
+    - ✅ All existing functionality preserved including bidirectional conversions
+    - ✅ Setting times moved from Advanced tab to Physical Properties tab
+
 ### Previous Accomplishments
 - **Derby to SQLite Migration**: All material data successfully imported
 - **Mix Design Tool**: Split compositions, fixed calculations, bidirectional W/B ratios  
@@ -63,12 +85,168 @@
 - **Database**: SQLite with proper schema for all model fields
 - **Services**: Service layer pattern using ID-based operations
 
-### Resume Point:
-Materials Management tool is fully functional with all requested features implemented. The system now supports:
-- Three-column chemical composition display (mass %, volume %, surface %)
-- Cement material renaming with integer ID primary keys
-- Complete data preservation during duplication
-- Gypsum properties fields (DIHYD, HEMIHYD, ANHYD)
-- Human-readable description display from hex-encoded data
+### Latest Development Session (Current):
 
-**Status**: ✅ **All Materials Management features complete and working**
+**Git Repository**: https://github.com/jwbullard/VCCTL-GTK.git
+- Latest commit: `0cdd0c3` - "Add gypsum components bidirectional conversion and phase fraction normalization"
+- All work properly committed and pushed to GitHub
+
+**Recent Work Completed**:
+- ✅ Added gypsum mass fraction data to all 37 cements from CSV file
+- ✅ Implemented bidirectional mass/volume conversion for gypsum components
+- ✅ Normalized all cement phase fractions to exactly 100%
+- ✅ Split Properties tab into separate Chemical and Physical Properties tabs
+- ✅ Enhanced UI organization and user experience
+
+### Current Resume Point:
+The VCCTL-GTK application now has a comprehensive materials management system with:
+
+**Chemical Properties Management**:
+- Complete phase fraction data (C3S, C2S, C3A, C4AF, K2SO4, Na2SO4) normalized to 100%
+- Gypsum component data (dihydrate, hemihydrate, anhydrite) with mass and volume fractions
+- Real-time bidirectional conversion between mass and volume fractions
+- Thermodynamically accurate calculations using component-specific gravities
+
+**User Interface Enhancements**:
+- Organized Edit Materials dialog with separate Chemical/Physical Properties tabs
+- Three-column composition displays (mass %, volume %, surface %)
+- Improved workflow and property organization
+- Preserved all existing functionality while enhancing usability
+
+**Data Management**:
+- Complete Derby to SQLite migration with all experimental data
+- Integer ID primary keys for robust database operations
+- Comprehensive data validation and integrity checks
+- Efficient data processing workflows for bulk operations
+
+11. **Immutable Cement Protection System** (Completed):
+    - ✅ Added `immutable` Boolean field to cement database model and Pydantic schemas
+    - ✅ Marked all 36 existing cements as immutable in database to protect original data
+    - ✅ UI automatically detects immutable cements and disables all input fields
+    - ✅ Clear info bar message: "This is an original database cement. Duplicate this cement to make changes."
+    - ✅ Save button replaced with "Duplicate to Edit" button for immutable cements
+
+12. **Duplicate-to-Edit Workflow** (Completed):
+    - ✅ Smart auto-naming system (cement141_copy, cement141_copy_2, etc.)
+    - ✅ Complete data preservation including experimental PSD points during duplication
+    - ✅ New duplicated cements marked as `immutable = False` (fully editable)
+    - ✅ Option to immediately open duplicated cement for editing
+    - ✅ Handles all cement properties: phase fractions, gypsum data, PSD, descriptions
+
+13. **Enhanced PSD Data Editing** (Completed):
+    - ✅ Made PSD data tables fully editable (click cells to edit diameter and mass fraction)
+    - ✅ Add/Remove point buttons for complete control over PSD datasets
+    - ✅ Removed separate "Save PSD Data" button - now integrated with main Save operation
+    - ✅ PSD mass fractions automatically normalize to 1.0 on save (not during editing)
+    - ✅ Real-time summary updates showing data point count and total mass fraction
+
+14. **Bug Fixes and UI Polish** (Completed):
+    - ✅ Fixed UI component attribute errors (`description_view` → `description_textview`)
+    - ✅ Fixed timing issue: immutable check now happens after complete UI setup
+    - ✅ Fixed PSD data format consistency (`[diameter, mass_fraction]` format)
+    - ✅ Enhanced error handling for duplication and save operations
+
+15. **Particle Shape Set Integration** (Completed):
+    - ✅ Updated microstructure service to dynamically discover particle shape sets from `particle_shape_set/` directory
+    - ✅ Added cement-specific experimental shapes: cement140, cement141, cement152, ma165, box, ellipsoid, etc.
+    - ✅ Maintained spherical option as mathematical shape (no data files required)
+    - ✅ Added path construction methods for accessing particle shape data files
+    - ✅ Integrated all discovered shapes into Mix Design tool's Cement Shape Set menu
+
+16. **Aggregate Shape Set Integration** (Completed):
+    - ✅ Applied same dynamic discovery pattern to aggregate shapes from `aggregate/` directory
+    - ✅ Added experimental aggregate sets: AZ-coarse, Cubic, FDOT-57, GR-coarse, Ottawa-sand, etc.
+    - ✅ Separate aggregate shape management independent of cement shapes
+    - ✅ Both cement and aggregate shape menus now show all available experimental data
+
+17. **Random Seed Validation** (Completed):
+    - ✅ Updated Mix Design panel random seed to require non-zero negative integers (-2147483647 to -1)
+    - ✅ Modified SpinButton range and default value (-1) to match C program requirements
+    - ✅ Updated generate seed button to create random negative values
+    - ✅ Cleaned up obsolete random seed references in microstructure panel
+
+18. **C Program Input Format Analysis** (Completed):
+    - ✅ Analyzed `backend/genmic.c` and dependencies to understand input file format
+    - ✅ Identified complete menu-driven input sequence: seed → system size → particles → operations
+    - ✅ Mapped Mix Design parameters to C program inputs: materials → phase IDs + volume fractions
+    - ✅ Documented particle shape integration with shape database paths
+    - ✅ Ready to implement input file generator for microstructure creation
+
+19. **Complete Mix Design to Microstructure Workflow** (Completed):
+    - ✅ Renamed "Calculate" button to "Create Mix" with enhanced styling and icon
+    - ✅ Implemented comprehensive input file validation before generation
+    - ✅ Created complete genmic.c input file generator with proper formatting
+    - ✅ Added automatic PSD (Particle Size Distribution) conversion system
+    - ✅ Integrated Mix Design parameters with C program input requirements
+
+20. **Universal PSD Conversion System** (Completed):
+    - ✅ Automatic conversion of all PSD formats to discrete points (0.25-75 μm range)
+    - ✅ Rosin-Rammler parameter conversion: R = 1 - exp(-(d/d50)^n) → discrete points
+    - ✅ Log-normal distribution conversion to discrete points
+    - ✅ Custom experimental data filtering and normalization
+    - ✅ Default fallback PSD for materials without data
+    - ✅ Integer diameter conversion (as required by genmic.c)
+    - ✅ Normalized mass fractions (sum to 1.0)
+
+21. **Complete Input File Generation** (Completed):
+    - ✅ Menu-driven input sequence: SPECSIZE → ADDPART → WRITEFAB → Exit
+    - ✅ Automatic phase ID mapping (C3S=1, FLYASH=18, SLAG=12, etc.)
+    - ✅ Volume fraction calculations from mass fractions
+    - ✅ Particle shape set integration (mathematical + experimental)
+    - ✅ Complete PSD data inclusion for all powder components
+    - ✅ File save dialog with user guidance for next steps
+
+### Latest Development Session (July 19, 2025):
+
+**Git Repository**: https://github.com/jwbullard/VCCTL-GTK.git
+- Previous commit: `0cdd0c3` - "Add gypsum components bidirectional conversion and phase fraction normalization"
+- Ready for commit: Complete Mix Design to Microstructure generation workflow
+
+**Recent Work Completed**:
+- ✅ Complete input file generator for genmic.c program
+- ✅ Universal PSD conversion system (Rosin-Rammler, log-normal, custom → discrete points)
+- ✅ Enhanced Mix Design UI with "Create Mix" workflow
+- ✅ Full integration of experimental particle shape sets
+- ✅ Validation and error handling for all input generation steps
+
+### Current Resume Point:
+The VCCTL-GTK application now has a **complete workflow from Mix Design to 3D Microstructure generation**:
+
+**Complete Mix Design Workflow**:
+- Mix composition design with powder components, water, and air content
+- Real-time validation and property calculations
+- "Create Mix" button generates complete input files for C program
+- Automatic file save with user instructions for microstructure generation
+
+**Universal PSD Integration**:
+- Reads any PSD format from database (custom, Rosin-Rammler, log-normal)
+- Converts all formats to standardized 0.25-75 μm discrete points
+- Automatic normalization and integer diameter conversion
+- Works with cement140's 44-class experimental data and all other materials
+
+**C Program Integration**:
+- Complete genmic.c input file generation with proper formatting
+- Phase ID mapping for all material types
+- Particle shape set path construction
+- Volume fraction calculations and PSD data inclusion
+- Ready-to-run input files for 3D microstructure generation
+
+**User Workflow**:
+1. Design concrete mix in Mix Design tool
+2. Click "Create Mix" → automatic validation
+3. Save input file → get instructions to run `./backend/genmic < input_file.txt`
+4. Generate 3D microstructure (.img file)
+
+**Technical Implementation**:
+- GTK3 Python interface integrated with C microstructure backend
+- Complete database integration with experimental PSD and shape data
+- Thermodynamically accurate volume fraction calculations
+- Robust error handling and user guidance
+
+**Environment Setup**: 
+- **Important**: Always activate vcctl-clean-env virtual environment before starting work:
+  ```bash
+  source path/to/vcctl-clean-env/bin/activate
+  ```
+
+**Status**: ✅ **Complete Mix Design to 3D Microstructure Generation Workflow - Ready for Testing and Deployment**
