@@ -1116,13 +1116,16 @@ class MixDesignPanel(Gtk.Box):
                 dialog.destroy()
                 return
             
-            # Step 2: Get microstructure parameters
+            # Step 2: Create mix folder and generate correlation files
+            self._create_mix_folder_and_correlation_files(mix_design)
+            
+            # Step 3: Get microstructure parameters
             microstructure_params = self._get_microstructure_parameters()
             
-            # Step 3: Generate input file
+            # Step 4: Generate input file
             input_file_content = self._generate_genmic_input_file(mix_design, microstructure_params)
             
-            # Step 4: Save input file
+            # Step 5: Save input file
             self._save_input_file(input_file_content, mix_design.name)
             
         except Exception as e:
@@ -1289,6 +1292,209 @@ class MixDesignPanel(Gtk.Box):
         
         return list(zip(diameters, mass_fractions))
 
+    def _calculate_total_phases(self, mix_design: MixDesign) -> int:
+        """Calculate total number of phases to add to genmic.c."""
+        num_phases = 0
+        
+        for component in mix_design.components:
+            if component.material_type == MaterialType.CEMENT:
+                # Each cement has 4 phases: Clinker(1), Dihydrate(7), Hemihydrate(8), Anhydrite(9)
+                num_phases += 4
+            elif component.material_type == MaterialType.FLY_ASH:
+                # Fly ash has 1 phase: FLYASH(18)
+                num_phases += 1
+            elif component.material_type == MaterialType.SLAG:
+                # Slag has 1 phase: SLAG(12)
+                num_phases += 1
+            elif component.material_type == MaterialType.INERT_FILLER:
+                # Inert filler has 1 phase: INERT(11)
+                num_phases += 1
+            # Future: SILICA_FUME(10) and LIMESTONE(33) would each add 1
+        
+        return num_phases
+
+    def _calculate_binder_volume_fractions(self, mix_design: MixDesign, params: Dict[str, Any]) -> tuple[float, float]:
+        """Calculate binder solid and water volume fractions on total paste basis."""
+        try:
+            # Calculate total masses
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            
+            total_powder_mass = 0.0
+            total_powder_volume = 0.0
+            
+            for component in mix_design.components:
+                if component.material_type in powder_types:
+                    mass_kg = component.mass_kg
+                    sg = self.mix_service._get_material_specific_gravity(component.material_name, component.material_type)
+                    volume_m3 = mass_kg / (sg * 1000)  # Convert to m³
+                    
+                    total_powder_mass += mass_kg
+                    total_powder_volume += volume_m3
+            
+            # Calculate water mass and volume from W/B ratio
+            wb_ratio = params['water_binder_ratio']
+            water_mass = wb_ratio * total_powder_mass  # kg
+            water_volume = water_mass / 1000  # m³ (water SG = 1.0)
+            
+            # Calculate total paste volume
+            total_paste_volume = total_powder_volume + water_volume
+            
+            # Calculate volume fractions on total paste basis
+            binder_solid_vfrac = total_powder_volume / total_paste_volume
+            water_vfrac = water_volume / total_paste_volume
+            
+            # Verify they sum to 1.0
+            total = binder_solid_vfrac + water_vfrac
+            if abs(total - 1.0) > 0.001:
+                self.logger.warning(f"Binder volume fractions don't sum to 1.0: {total:.6f}")
+            
+            self.logger.info(f"Binder solid volume fraction: {binder_solid_vfrac:.6f}")
+            self.logger.info(f"Water volume fraction: {water_vfrac:.6f}")
+            
+            return binder_solid_vfrac, water_vfrac
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate binder volume fractions: {e}")
+            # Return default values
+            return 0.7, 0.3
+
+    def _calculate_cement_phase_fractions(self, cement_name: str, component) -> Dict[str, float]:
+        """Calculate volume fractions for cement constituent phases on binder solid basis."""
+        try:
+            with self.service_container.database_service.get_read_only_session() as session:
+                from app.models.cement import Cement
+                cement = session.query(Cement).filter_by(name=cement_name).first()
+                
+                if not cement:
+                    raise ValueError(f"Cement {cement_name} not found in database")
+                
+                # Get mass fractions from database
+                c3s_mf = cement.c3s_mass_fraction or 0.0
+                c2s_mf = cement.c2s_mass_fraction or 0.0
+                c3a_mf = cement.c3a_mass_fraction or 0.0
+                c4af_mf = cement.c4af_mass_fraction or 0.0
+                k2so4_mf = cement.k2so4_mass_fraction or 0.0
+                na2so4_mf = cement.na2so4_mass_fraction or 0.0
+                
+                dihyd_mf = cement.dihyd or 0.0
+                hemihyd_mf = cement.hemihyd or 0.0
+                anhyd_mf = cement.anhyd or 0.0
+                
+                # Calculate clinker mass fraction (all non-gypsum phases)
+                clinker_mf = c3s_mf + c2s_mf + c3a_mf + c4af_mf + k2so4_mf + na2so4_mf
+                
+                # Calculate component's fraction of total binder solids (by mass)
+                total_powder_mass = sum(comp.mass_kg for comp in component.mix_design.components 
+                                      if comp.material_type in {MaterialType.CEMENT, MaterialType.FLY_ASH, 
+                                                               MaterialType.SLAG, MaterialType.INERT_FILLER})
+                component_fraction = component.mass_kg / total_powder_mass
+                
+                # Calculate volume fractions on binder solid basis
+                # Each cement phase gets its share of this component's total contribution
+                clinker_vf = clinker_mf * component_fraction
+                dihydrate_vf = dihyd_mf * component_fraction
+                hemihydrate_vf = hemihyd_mf * component_fraction
+                anhydrite_vf = anhyd_mf * component_fraction
+                
+                return {
+                    'clinker': clinker_vf,
+                    'dihydrate': dihydrate_vf,
+                    'hemihydrate': hemihydrate_vf,
+                    'anhydrite': anhydrite_vf
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Failed to calculate cement phase fractions: {e}")
+            # Return default fractions
+            return {
+                'clinker': 0.8,
+                'dihydrate': 0.1, 
+                'hemihydrate': 0.05,
+                'anhydrite': 0.05
+            }
+
+    def _calculate_component_binder_solid_fraction(self, component, mix_design: MixDesign) -> float:
+        """Calculate component's volume fraction on binder solid basis."""
+        try:
+            # Calculate total powder mass
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            total_powder_mass = sum(comp.mass_kg for comp in mix_design.components 
+                                  if comp.material_type in powder_types)
+            
+            # Component's fraction of total binder solids
+            component_fraction = component.mass_kg / total_powder_mass
+            
+            return component_fraction
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate component binder solid fraction: {e}")
+            return 0.1  # Default fallback
+
+    def _create_mix_folder_and_correlation_files(self, mix_design: MixDesign) -> None:
+        """Create mix folder and generate correlation files for cement materials."""
+        try:
+            # Create safe folder name
+            mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
+            mix_folder_path = os.path.join(os.getcwd(), mix_name_safe)
+            
+            # Create mix folder if it doesn't exist
+            os.makedirs(mix_folder_path, exist_ok=True)
+            self.logger.info(f"Created mix folder: {mix_folder_path}")
+            
+            # Generate correlation files for each cement component
+            cement_components = [comp for comp in mix_design.components 
+                               if comp.material_type == MaterialType.CEMENT]
+            
+            if cement_components:
+                # For now, use the first cement (TODO: handle multiple cements)
+                cement_component = cement_components[0]
+                self._generate_correlation_files(cement_component.material_name, mix_folder_path, mix_name_safe)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to create mix folder and correlation files: {e}")
+            raise
+
+    def _generate_correlation_files(self, cement_name: str, mix_folder_path: str, mix_name_safe: str) -> None:
+        """Generate correlation files from cement database data."""
+        try:
+            with self.service_container.database_service.get_read_only_session() as session:
+                from app.models.cement import Cement
+                cement = session.query(Cement).filter_by(name=cement_name).first()
+                
+                if not cement:
+                    raise ValueError(f"Cement {cement_name} not found in database")
+                
+                # Define correlation file mappings
+                correlation_files = {
+                    'sil': cement.sil,
+                    'c3s': cement.c3s,
+                    'alu': cement.alu,
+                    'k2o': cement.k2o,
+                    'n2o': cement.n2o
+                }
+                
+                # Add c3a or c4f file depending on availability
+                if cement.c4f:
+                    correlation_files['c4f'] = cement.c4f
+                elif cement.c3a:
+                    correlation_files['c3a'] = cement.c3a
+                
+                # Write correlation files
+                for extension, binary_data in correlation_files.items():
+                    if binary_data:
+                        file_path = os.path.join(mix_folder_path, f"{mix_name_safe}.{extension}")
+                        with open(file_path, 'wb') as f:
+                            f.write(binary_data)
+                        self.logger.info(f"Generated correlation file: {file_path}")
+                    else:
+                        self.logger.warning(f"No data for {extension} correlation file in cement {cement_name}")
+                
+                self.main_window.update_status(f"Generated correlation files for cement {cement_name}", "success", 3)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to generate correlation files: {e}")
+            raise
+
     def _generate_genmic_input_file(self, mix_design: MixDesign, params: Dict[str, Any]) -> str:
         """Generate input file content for genmic.c program."""
         lines = []
@@ -1305,51 +1511,108 @@ class MixDesignPanel(Gtk.Box):
         lines.append(f"{system_size}")  # Y size  
         lines.append(f"{system_size}")  # Z size
         
-        # Image size (same as system size)
-        lines.append(f"{system_size}")
-        
         # Resolution (micrometers per voxel)
         lines.append(f"{params['resolution']}")
         
-        # Add particles for each cement component
+        # Menu choice 3: ADDPART (add particles)
+        lines.append("3")
+        
+        # Shape selection (0=SPHERES, 1=REALSHAPE, 2=MIXED)
+        shape_set = params['cement_shape_set']
+        if shape_set == "sphere":
+            lines.append("0")  # SPHERES - no additional inputs needed
+        else:
+            lines.append("1")  # REALSHAPE
+            # Parent directory path (with final separator)
+            parent_path = os.path.join(os.getcwd(), "particle_shape_set") + os.sep
+            lines.append(parent_path)
+            # Shape set name (no final separator)
+            lines.append(shape_set)
+        
+        # Calculate binder solid and water volume fractions
+        binder_solid_vfrac, water_vfrac = self._calculate_binder_volume_fractions(mix_design, params)
+        
+        # Binder SOLID volume fraction (on total paste basis)
+        lines.append(f"{binder_solid_vfrac:.6f}")
+        
+        # Binder WATER volume fraction (on total paste basis)  
+        lines.append(f"{water_vfrac:.6f}")
+        
+        # Calculate total number of phases to add
+        num_phases = self._calculate_total_phases(mix_design)
+        lines.append(f"{num_phases}")
+        
+        # Add phase data for each component
+        # TODO: This section will be completely rewritten to handle cement phases properly
+        # For now, keeping simplified structure to implement num_phases fix
         powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
         
         for component in mix_design.components:
             if component.material_type in powder_types:
-                # Menu choice 3: ADDPART (add particles)
-                lines.append("3")
-                
-                # Phase ID mapping based on material type
-                phase_id = self._get_phase_id_for_material(component.material_type, component.material_name)
-                lines.append(f"{phase_id}")
-                
-                # Volume fraction (convert from mass fraction using specific gravity)
-                volume_fraction = component.volume_fraction
-                lines.append(f"{volume_fraction:.6f}")
-                
-                # Shape set selection
-                shape_set = params['cement_shape_set']
-                if shape_set == "sphere":
-                    lines.append("1")  # Mathematical spherical
+                if component.material_type == MaterialType.CEMENT:
+                    # Break cement into 4 phases: Clinker, Dihydrate, Hemihydrate, Anhydrite
+                    cement_phases = self._calculate_cement_phase_fractions(component.material_name, component)
+                    psd_data = self._get_material_psd_data(component.material_name, component.material_type)
+                    
+                    # Phase ID 1: Clinker
+                    lines.append("1")
+                    lines.append(f"{cement_phases['clinker']:.6f}")
+                    lines.append(f"{len(psd_data)}")
+                    for diameter, mass_fraction in psd_data:
+                        lines.append(f"{int(round(diameter))}")
+                        lines.append(f"{mass_fraction:.6f}")
+                    
+                    # Phase ID 7: Dihydrate
+                    lines.append("7")
+                    lines.append(f"{cement_phases['dihydrate']:.6f}")
+                    lines.append(f"{len(psd_data)}")
+                    for diameter, mass_fraction in psd_data:
+                        lines.append(f"{int(round(diameter))}")
+                        lines.append(f"{mass_fraction:.6f}")
+                    
+                    # Phase ID 8: Hemihydrate
+                    lines.append("8")
+                    lines.append(f"{cement_phases['hemihydrate']:.6f}")
+                    lines.append(f"{len(psd_data)}")
+                    for diameter, mass_fraction in psd_data:
+                        lines.append(f"{int(round(diameter))}")
+                        lines.append(f"{mass_fraction:.6f}")
+                    
+                    # Phase ID 9: Anhydrite
+                    lines.append("9")
+                    lines.append(f"{cement_phases['anhydrite']:.6f}")
+                    lines.append(f"{len(psd_data)}")
+                    for diameter, mass_fraction in psd_data:
+                        lines.append(f"{int(round(diameter))}")
+                        lines.append(f"{mass_fraction:.6f}")
+                        
                 else:
-                    # File-based shape set
-                    lines.append("2")
-                    # Path to shape set directory
-                    shape_path = os.path.join(os.getcwd(), "particle_shape_set", shape_set)
-                    lines.append(shape_path)
-                
-                # Add PSD data for this component
-                psd_data = self._get_material_psd_data(component.material_name, component.material_type)
-                
-                # Number of size classes
-                lines.append(f"{len(psd_data)}")
-                
-                # Add each size class (diameter and volume fraction)
-                for diameter, mass_fraction in psd_data:
-                    # Diameter in micrometers (rounded to integer as required by genmic)
-                    lines.append(f"{int(round(diameter))}")
-                    # Volume fraction for this size class
-                    lines.append(f"{mass_fraction:.6f}")
+                    # Non-cement materials: fly ash, slag, inert filler
+                    phase_id = self._get_phase_id_for_material(component.material_type, component.material_name)
+                    lines.append(f"{phase_id}")
+                    
+                    # Calculate volume fraction on binder solid basis
+                    binder_solid_vfrac = self._calculate_component_binder_solid_fraction(component, mix_design)
+                    lines.append(f"{binder_solid_vfrac:.6f}")
+                    
+                    # Add PSD data for this component
+                    psd_data = self._get_material_psd_data(component.material_name, component.material_type)
+                    lines.append(f"{len(psd_data)}")
+                    
+                    # Add each size class (diameter and volume fraction)
+                    for diameter, mass_fraction in psd_data:
+                        lines.append(f"{int(round(diameter))}")
+                        lines.append(f"{mass_fraction:.6f}")
+        
+        # Dispersion factor (separation distance in pixels) for spheres (0-2)
+        # 0 = totally random placement, 1-2 = increasing separation
+        dispersion_factor = params.get('dispersion_factor', 0)  # Default to random placement
+        lines.append(f"{dispersion_factor}")
+        
+        # Probability for gypsum particles (0.0-1.0) on random particle basis
+        # Always 0.0 since we explicitly add gypsum phases (dihydrate, hemihydrate, anhydrite) separately
+        gypsum_probability = 0.0  # Obsolete mechanism - gypsum already added as separate phases
+        lines.append(f"{gypsum_probability:.6f}")
         
         # Add aggregate if present
         aggregate_components = [comp for comp in mix_design.components 
@@ -1390,16 +1653,40 @@ class MixDesignPanel(Gtk.Box):
             lines.append("4")  # Assuming menu option 4 for flocculation
             lines.append(f"{params['flocculation_degree']:.3f}")
         
-        # Menu choice 8: WRITEFAB (write microstructure file)
-        lines.append("8")
+        # Check if cement phases were added - if so, need special processing workflow
+        has_cement = any(comp.material_type == MaterialType.CEMENT 
+                        for comp in mix_design.components)
         
-        # Output filename
+        if has_cement:
+            # Menu choice 9: DISTRIB (distribute clinker phases)
+            lines.append("9")
+            
+            # Path/root name for cement correlation files
+            # TODO: This will be the path to the mix folder + root name
+            mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
+            correlation_path = f"{mix_name_safe}/{mix_name_safe}"
+            lines.append(correlation_path)
+            
+            # Menu choice 11: ONEPIX (add one-pixel particles)
+            lines.append("11")
+            
+            # Menu choice 5: MEASURE (measure global phase fractions)
+            lines.append("5")
+        
+        # Menu choice 10: OUTPUTMIC (output microstructure file)
+        lines.append("10")
+        
+        # Output filename for microstructure (full path to mix folder + mix name)
         mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-        output_filename = f"microstructure_{mix_name_safe}.img"
+        output_filename = f"{mix_name_safe}/{mix_name_safe}.img"
         lines.append(output_filename)
         
-        # Menu choice 0: Exit
-        lines.append("0")
+        # Output filename for particle IDs (full path to mix folder + mix name)
+        particle_filename = f"{mix_name_safe}/{mix_name_safe}.pimg"
+        lines.append(particle_filename)
+        
+        # Menu choice 1: Exit
+        lines.append("1")
         
         return "\n".join(lines) + "\n"
     
@@ -1426,6 +1713,13 @@ class MixDesignPanel(Gtk.Box):
             mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
             default_filename = f"genmic_input_{mix_name_safe}.txt"
             
+            # Set initial directory to mix folder if it exists
+            mix_folder_path = os.path.join(os.getcwd(), mix_name_safe)
+            if os.path.exists(mix_folder_path):
+                initial_path = os.path.join(mix_folder_path, default_filename)
+            else:
+                initial_path = default_filename
+            
             # Create file chooser dialog
             dialog = Gtk.FileChooserDialog(
                 title="Save Microstructure Input File",
@@ -1448,6 +1742,9 @@ class MixDesignPanel(Gtk.Box):
             filter_all.add_pattern("*")
             dialog.add_filter(filter_all)
             
+            # Set initial file path (directory + filename)
+            if os.path.exists(mix_folder_path):
+                dialog.set_current_folder(mix_folder_path)
             dialog.set_current_name(default_filename)
             
             response = dialog.run()
