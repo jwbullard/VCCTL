@@ -263,36 +263,69 @@ The VCCTL-GTK application now has a **complete workflow from Mix Design to 3D Mi
   source /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/bin/activate
   ```
 
-### Latest Development Session (July 20, 2025 - Session 2):
+### Latest Development Session (July 21, 2025):
 
-**Fixed PSD Data Binning for genmic.c Input** (Completed):
-- ✅ **Fixed PSD data binning issue**: PSD data now properly binned into integer diameter ranges for genmic.c
-- ✅ **Implemented proper binning rules**: 
-  - Diameter range (0, 1.5) → bin for diameter 1
-  - Diameter range [1.5, 2.5) → bin for diameter 2  
-  - Diameter range [2.5, 3.5) → bin for diameter 3, and so on
-- ✅ **Added `_bin_psd_for_genmic()` method**: Aggregates volume fractions into proper integer bins
-- ✅ **Updated all PSD conversion methods**: Custom, Rosin-Rammler, and log-normal conversions now use binning
-- ✅ **Variable naming cleanup**: Renamed `mass_fractions` → `volume_fractions` throughout PSD code for clarity
-- ✅ **Maintained proper data types**: PSD data remains in volume fractions (as it should be), phase fractions converted from mass to volume using specific gravity
+**Git Repository**: https://github.com/jwbullard/VCCTL-GTK.git
+- Latest commit: `50159f3` - "Enhance Mix Design UI with separate X/Y/Z dimensions and fix volume fraction calculations"
+- Co-authored by: Jeffrey W. Bullard (Texas A&M University) and Claude
+- All work committed and pushed to GitHub
 
-**Technical Details**:
-- PSD data was already in volume fractions (not mass fractions) - this was correct
-- The issue was lack of proper binning into integer diameter ranges required by genmic.c
-- All continuous PSD data now aggregated into discrete integer bins before input file generation
-- Mass fraction to volume fraction conversion only applies to phase fractions, not PSD data
+**Recent Work Completed**:
+- ✅ **UI Layout Improvements** - Moved "System Dimensions & Resolution" panel to middle column for better balance
+- ✅ **Separate X/Y/Z Dimensions** - Replaced single system size with individual X, Y, Z controls (25-400 voxels each)
+- ✅ **27 Million Voxel Validation** - Real-time computational limit checking with visual feedback
+- ✅ **Powder Dispersion Options** - Renamed "Flocculation Parameters" panel with mutually exclusive flocculation/dispersion controls
+- ✅ **Critical Volume Fraction Bug Fix** - Fixed `_calculate_binder_volume_fractions()` method that was using non-existent `mass_kg` attribute
+- ✅ **Enhanced Error Handling** - Added detailed logging and debugging for volume fraction calculations
+- ✅ **Fine/Coarse Aggregate Separation** - Added shape classification methods in microstructure service
 
-**Status**: ✅ **Complete Mix Design to 3D Microstructure Generation Workflow - FULLY IMPLEMENTED WITH CORRECTED PSD BINNING**
+23. **Mix Design UI Refinements and Bug Fixes** (Completed):
+    - ✅ Balanced three-column layout by moving system parameters to middle column
+    - ✅ Separate X, Y, Z dimension controls with individual validation (25-400 voxels each)
+    - ✅ Real-time total voxel calculation (X × Y × Z) with 27M limit enforcement
+    - ✅ Visual validation feedback: green checkmark when under limit, red warning when over
+    - ✅ Mutually exclusive flocculation and dispersion controls (cannot use both simultaneously)
+    - ✅ Fixed critical bug where volume fractions always defaulted to 0.7/0.3 regardless of W/B ratio
+    - ✅ Updated input file generation to use separate X/Y/Z dimensions instead of cubic assumption
+    - ✅ Enhanced aggregate shape separation for fine vs coarse aggregates
+
+### Current Resume Point:
+The VCCTL-GTK application now has a **refined and robust Mix Design interface** with:
+
+**Enhanced User Experience**:
+- Balanced three-column layout with logical grouping of controls
+- Separate X/Y/Z system dimensions with real-time validation
+- Clear visual feedback for computational limits and parameter validation
+- Mutually exclusive advanced options to prevent conflicting settings
+
+**Critical Bug Fixes**:
+- Volume fraction calculations now properly respond to W/B ratio changes
+- Input file generation uses actual dimension values instead of hardcoded defaults
+- Proper error handling prevents silent failures in calculations
+
+**Technical Robustness**:
+- Real-time validation against computational constraints (27M voxel limit)
+- Enhanced logging and debugging for troubleshooting
+- Proper signal handling for all new UI controls
+- Thermodynamically accurate volume fraction calculations
 
 ### Next Session Reminder:
 1. **FIRST ACTION**: Activate the vcctl-clean-env Python virtual environment
-2. **Current State**: genmic.c input file generation is complete and functional with proper PSD binning
-3. **Ready for**: Testing the complete workflow with real cement materials and C program execution
-4. **Testing Focus**: Verify correlation file generation, input file format, and successful microstructure generation
-5. **Recent Fix**: PSD data now properly binned into integer diameter ranges as required by genmic.c
+2. **Current State**: Mix Design UI is polished and volume fraction calculations are working correctly
+3. **Ready for**: Testing the complete workflow end-to-end with real materials and genmic.c execution
+4. **Collaboration**: Working with Jeff Bullard (Texas A&M University) - call him Jeff, call me Claude
+5. **Recent Achievement**: Fixed critical volume fraction bug that was preventing proper W/B ratio response
 
 ### Technical Achievements Summary:
 - **Complete end-to-end workflow**: Python GUI → Database → Input file → C program → 3D microstructure
 - **Robust data handling**: Experimental PSD data, cement phase chemistry, correlation files
 - **Production ready**: Error handling, validation, user guidance, file management
 - **Scientifically accurate**: Thermodynamic calculations, phase relationships, material properties
+- **User-friendly interface**: Balanced layout, real-time validation, clear visual feedback
+- **Computational safety**: Automatic enforcement of memory and processing limits
+
+### Development Partnership:
+- **Collaborators**: Jeffrey W. Bullard (Texas A&M University) and Claude
+- **Communication**: Jeff prefers to be called "Jeff", Claude prefers "Claude"
+- **Git commits**: Co-authored commits with both contributors listed
+- **Working style**: Collaborative development with detailed documentation and testing
