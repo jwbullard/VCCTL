@@ -167,15 +167,14 @@ class MixDesignPanel(Gtk.Box):
         self._create_composition_section(left_frame)
         left_column.pack_start(left_frame, False, False, 0)
         
-        # Add microstructure parameters to left column
-        self._create_system_parameters_section(left_column)
+        # Add mortar/concrete composition parameters to left column
         self._create_composition_parameters_section(left_column)
         
-        # Middle column: Particle and advanced parameters
+        # Middle column: System parameters and advanced options
         middle_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         middle_column.set_size_request(400, -1)
         
-        self._create_particle_shape_section(middle_column)
+        self._create_system_parameters_section(middle_column)
         self._create_flocculation_section(middle_column)
         self._create_advanced_section(middle_column)
         
@@ -203,10 +202,9 @@ class MixDesignPanel(Gtk.Box):
         comp_box.set_margin_left(10)
         comp_box.set_margin_right(10)
         
-        # Create three separate sections
+        # Create two separate sections  
         self._create_powder_section(comp_box)
         self._create_water_section(comp_box)
-        self._create_air_section(comp_box)
         
         parent.add(comp_box)
     
@@ -247,6 +245,26 @@ class MixDesignPanel(Gtk.Box):
         
         powder_box.pack_start(scrolled, True, True, 0)
         
+        # Particle shape set selection
+        shape_separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        powder_box.pack_start(shape_separator, False, False, 5)
+        
+        shape_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        shape_label = Gtk.Label("Particle Shape Set:")
+        shape_label.set_halign(Gtk.Align.START)
+        shape_label.set_tooltip_text("Particle shape model for powder materials")
+        shape_box.pack_start(shape_label, False, False, 0)
+        
+        self.cement_shape_combo = Gtk.ComboBoxText()
+        shape_sets = self.microstructure_service.get_supported_shape_sets()
+        for shape_id, shape_desc in shape_sets.items():
+            self.cement_shape_combo.append(shape_id, shape_desc)
+        self.cement_shape_combo.set_active(0)
+        shape_box.pack_start(self.cement_shape_combo, True, True, 0)
+        
+        powder_box.pack_start(shape_box, False, False, 0)
+        
         powder_frame.add(powder_box)
         parent.pack_start(powder_frame, True, True, 0)
     
@@ -271,8 +289,8 @@ class MixDesignPanel(Gtk.Box):
         water_grid.attach(wb_label, 0, 0, 1, 1)
         
         self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
-        self.wb_ratio_spin.set_value(0.40)
         self.wb_ratio_spin.set_digits(3)
+        self.wb_ratio_spin.set_value(0.40)
         self.wb_ratio_spin.set_tooltip_text("Enter W/B ratio to calculate water mass")
         water_grid.attach(self.wb_ratio_spin, 1, 0, 1, 1)
         
@@ -293,35 +311,6 @@ class MixDesignPanel(Gtk.Box):
         water_frame.add(water_box)
         
         parent.pack_start(water_frame, False, False, 0)
-    
-    def _create_air_section(self, parent: Gtk.Box) -> None:
-        """Create the air content section."""
-        air_frame = Gtk.Frame(label="Air Content")
-        air_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        air_box.set_margin_top(10)
-        air_box.set_margin_bottom(10)
-        air_box.set_margin_left(10)
-        air_box.set_margin_right(10)
-        
-        # Air content controls
-        air_grid = Gtk.Grid()
-        air_grid.set_row_spacing(5)
-        air_grid.set_column_spacing(10)
-        
-        # Air content
-        air_label = Gtk.Label("Air Volume Fraction:")
-        air_label.set_halign(Gtk.Align.END)
-        air_grid.attach(air_label, 0, 0, 1, 1)
-        
-        self.air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.15, 0.001)
-        self.air_content_spin.set_value(0.02)
-        self.air_content_spin.set_digits(3)
-        air_grid.attach(self.air_content_spin, 1, 0, 1, 1)
-        
-        air_box.pack_start(air_grid, False, False, 0)
-        air_frame.add(air_box)
-        
-        parent.pack_start(air_frame, False, False, 0)
     
     def _create_properties_section(self, parent: Gtk.Frame) -> None:
         """Create the mix properties and calculations section."""
@@ -445,6 +434,22 @@ class MixDesignPanel(Gtk.Box):
             for material_type in MaterialType:
                 self.material_lists[material_type] = self.mix_service.get_compatible_materials(material_type)
             
+            # Populate aggregate combo boxes
+            if MaterialType.AGGREGATE in self.material_lists:
+                # Fine aggregate combo
+                self.fine_agg_combo.remove_all()
+                self.fine_agg_combo.append("", "-- Select Fine Aggregate --")
+                for aggregate_name in self.material_lists[MaterialType.AGGREGATE]:
+                    self.fine_agg_combo.append(aggregate_name, aggregate_name)
+                self.fine_agg_combo.set_active(0)
+                
+                # Coarse aggregate combo
+                self.coarse_agg_combo.remove_all()
+                self.coarse_agg_combo.append("", "-- Select Coarse Aggregate --")
+                for aggregate_name in self.material_lists[MaterialType.AGGREGATE]:
+                    self.coarse_agg_combo.append(aggregate_name, aggregate_name)
+                self.coarse_agg_combo.set_active(0)
+            
             self.logger.info("Loaded material lists for mix design")
             
         except Exception as e:
@@ -462,10 +467,9 @@ class MixDesignPanel(Gtk.Box):
         self.load_button.connect('clicked', self._on_load_mix_clicked)
         self.save_button.connect('clicked', self._on_save_mix_clicked)
         
-        # Water and air controls
+        # Water controls
         self.wb_ratio_spin.connect('value-changed', self._on_wb_ratio_changed)
         self.water_content_spin.connect('value-changed', self._on_water_content_changed)
-        self.air_content_spin.connect('value-changed', self._on_parameter_changed)
         
         # Action buttons
         self.create_mix_button.connect('clicked', self._on_create_mix_clicked)
@@ -473,10 +477,29 @@ class MixDesignPanel(Gtk.Box):
         self.export_button.connect('clicked', self._on_export_clicked)
         
         # Microstructure parameter signals
-        self.system_size_spin.connect('value-changed', self._on_system_size_changed)
+        self.system_size_x_spin.connect('value-changed', self._on_system_size_changed)
+        self.system_size_y_spin.connect('value-changed', self._on_system_size_changed)
+        self.system_size_z_spin.connect('value-changed', self._on_system_size_changed)
         self.resolution_spin.connect('value-changed', self._on_resolution_changed)
         self.flocculation_check.connect('toggled', self._on_flocculation_toggled)
+        self.dispersion_factor_spin.connect('value-changed', self._on_parameter_changed)
         self.generate_seed_button.connect('clicked', self._on_generate_seed_clicked)
+        
+        # Aggregate controls
+        self.fine_agg_combo.connect('changed', self._on_fine_aggregate_changed)
+        self.fine_agg_grading_button.connect('clicked', self._on_fine_aggregate_grading_clicked)
+        self.coarse_agg_combo.connect('changed', self._on_coarse_aggregate_changed)
+        self.coarse_agg_grading_button.connect('clicked', self._on_coarse_aggregate_grading_clicked)
+        
+        # Shape set controls
+        self.cement_shape_combo.connect('changed', self._on_parameter_changed)
+        self.fine_agg_shape_combo.connect('changed', self._on_parameter_changed)
+        self.coarse_agg_shape_combo.connect('changed', self._on_parameter_changed)
+        
+        # Volume fraction controls
+        self.fine_agg_volume_spin.connect('value-changed', self._on_volume_fraction_changed)
+        self.coarse_agg_volume_spin.connect('value-changed', self._on_volume_fraction_changed)
+        self.micro_air_content_spin.connect('value-changed', self._on_volume_fraction_changed)
     
     def _create_component_row(self) -> Gtk.Box:
         """Create a new component row widget."""
@@ -484,11 +507,12 @@ class MixDesignPanel(Gtk.Box):
         row_box.set_margin_top(2)
         row_box.set_margin_bottom(2)
         
-        # Material type combo
+        # Material type combo (exclude aggregate - it's not a powder component)
         type_combo = Gtk.ComboBoxText()
         type_combo.set_size_request(120, -1)
         for material_type in MaterialType:
-            type_combo.append(material_type.value, material_type.value.replace("_", " ").title())
+            if material_type != MaterialType.AGGREGATE:  # Aggregate is not a powder component
+                type_combo.append(material_type.value, material_type.value.replace("_", " ").title())
         type_combo.set_active(0)
         row_box.pack_start(type_combo, False, False, 0)
         
@@ -629,6 +653,9 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_component_mass_changed(self, spin, row_data) -> None:
         """Handle component mass change."""
+        # Update volume fraction validation
+        self._calculate_total_volume_fractions()
+        
         if self.auto_calculate_enabled:
             # When powder mass changes, recalculate water content from W/B ratio
             # (This maintains the W/B ratio while adjusting water to match new powder mass)
@@ -659,12 +686,24 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_water_content_changed(self, spin) -> None:
         """Handle water content change."""
+        # Update volume fraction validation
+        self._calculate_total_volume_fractions()
+        
         if self.auto_calculate_enabled:
             self._calculate_wb_ratio_from_water_content()
             self._trigger_calculation()
     
     def _on_parameter_changed(self, widget) -> None:
         """Handle any parameter change."""
+        if self.auto_calculate_enabled:
+            self._trigger_calculation()
+    
+    def _on_volume_fraction_changed(self, widget) -> None:
+        """Handle volume fraction changes and update validation."""
+        # Update total volume fraction display
+        self._calculate_total_volume_fractions()
+        
+        # Trigger normal calculation if enabled
         if self.auto_calculate_enabled:
             self._trigger_calculation()
     
@@ -694,6 +733,130 @@ class MixDesignPanel(Gtk.Box):
         """Handle export button click."""
         # TODO: Implement mix export
         self.main_window.update_status("Mix export will be implemented", "info", 3)
+    
+    def _on_fine_aggregate_changed(self, combo) -> None:
+        """Handle fine aggregate selection change."""
+        try:
+            aggregate_name = combo.get_active_id()
+            
+            # Enable grading button only when aggregate is selected
+            has_aggregate = aggregate_name and aggregate_name != ""
+            self.fine_agg_grading_button.set_sensitive(has_aggregate)
+            
+            if self.auto_calculate_enabled:
+                self._trigger_calculation()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to handle fine aggregate change: {e}")
+    
+    def _on_coarse_aggregate_changed(self, combo) -> None:
+        """Handle coarse aggregate selection change."""
+        try:
+            aggregate_name = combo.get_active_id()
+            
+            # Enable grading button only when aggregate is selected
+            has_aggregate = aggregate_name and aggregate_name != ""
+            self.coarse_agg_grading_button.set_sensitive(has_aggregate)
+            
+            if self.auto_calculate_enabled:
+                self._trigger_calculation()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to handle coarse aggregate change: {e}")
+    
+    def _on_fine_aggregate_grading_clicked(self, button) -> None:
+        """Handle fine aggregate grading button click."""
+        try:
+            aggregate_name = self.fine_agg_combo.get_active_id()
+            if not aggregate_name or aggregate_name == "":
+                return
+            
+            # Show dedicated aggregate grading dialog
+            self._show_aggregate_grading_dialog(aggregate_name, "fine")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to show fine aggregate grading dialog: {e}")
+            self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
+    
+    def _on_coarse_aggregate_grading_clicked(self, button) -> None:
+        """Handle coarse aggregate grading button click."""
+        try:
+            aggregate_name = self.coarse_agg_combo.get_active_id()
+            if not aggregate_name or aggregate_name == "":
+                return
+            
+            # Show dedicated aggregate grading dialog
+            self._show_aggregate_grading_dialog(aggregate_name, "coarse")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to show coarse aggregate grading dialog: {e}")
+            self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
+    
+    def _show_aggregate_grading_dialog(self, aggregate_name: str, aggregate_type: str) -> None:
+        """Show grading curve dialog for aggregate."""
+        try:
+            # Create grading dialog
+            dialog = Gtk.Dialog(
+                title=f"Grading Curve - {aggregate_type.title()} Aggregate ({aggregate_name})",
+                transient_for=self.main_window,
+                flags=0
+            )
+            dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+            dialog.add_button("Apply", Gtk.ResponseType.OK)
+            dialog.set_default_response(Gtk.ResponseType.OK)
+            dialog.set_default_size(800, 600)
+            
+            # Create grading curve widget
+            grading_widget = GradingCurveWidget()
+            
+            # Get the appropriate grading data attribute name
+            grading_data_attr = f'_{aggregate_type}_aggregate_grading_data'
+            
+            # Load existing grading data if available
+            if hasattr(self, grading_data_attr):
+                grading_data = getattr(self, grading_data_attr)
+                if grading_data:
+                    grading_widget.set_grading_data(grading_data)
+            
+            # Add to dialog content area
+            content_area = dialog.get_content_area()
+            content_area.set_margin_top(10)
+            content_area.set_margin_bottom(10)
+            content_area.set_margin_left(10)
+            content_area.set_margin_right(10)
+            content_area.pack_start(grading_widget, True, True, 0)
+            
+            content_area.show_all()
+            
+            # Run dialog
+            response = dialog.run()
+            
+            if response == Gtk.ResponseType.OK:
+                # Save grading data
+                grading_data = grading_widget.get_grading_data()
+                setattr(self, grading_data_attr, grading_data)
+                
+                # Update the appropriate button tooltip
+                if aggregate_type == "fine":
+                    button = self.fine_agg_grading_button
+                else:
+                    button = self.coarse_agg_grading_button
+                
+                if grading_data:
+                    button.set_tooltip_text(f"Grading curve set ({len(grading_data)} points)")
+                else:
+                    button.set_tooltip_text(f"Edit {aggregate_type} aggregate grading curve")
+                
+                self.main_window.update_status(f"Grading curve updated for {aggregate_type} aggregate ({aggregate_name})", "success", 3)
+                
+                if self.auto_calculate_enabled:
+                    self._trigger_calculation()
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to show {aggregate_type} aggregate grading dialog: {e}")
+            self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
     
     # Helper methods
     def _update_component_specific_gravity(self, row_data: Dict[str, Any]) -> None:
@@ -735,6 +898,75 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.warning(f"Failed to calculate water content: {e}")
     
+    def _calculate_total_volume_fractions(self) -> None:
+        """Calculate and display total volume fractions, checking if they sum to 1.0."""
+        try:
+            # Get current values
+            fine_agg_vol = self.fine_agg_volume_spin.get_value()
+            coarse_agg_vol = self.coarse_agg_volume_spin.get_value()
+            air_vol = self.micro_air_content_spin.get_value()
+            
+            # Calculate powder and water volume fractions from mass values
+            powder_vol, water_vol = self._calculate_powder_and_water_volumes()
+            
+            # Calculate total
+            total = fine_agg_vol + coarse_agg_vol + air_vol + powder_vol + water_vol
+            
+            # Update display
+            self.total_volume_label.set_text(f"{total:.3f}")
+            
+            # Color code based on how close to 1.0
+            style_context = self.total_volume_label.get_style_context()
+            style_context.remove_class("error")
+            style_context.remove_class("warning")
+            style_context.remove_class("success")
+            
+            if abs(total - 1.0) < 0.001:  # Very close to 1.0
+                style_context.add_class("success")
+            elif abs(total - 1.0) < 0.05:  # Somewhat close
+                style_context.add_class("warning")
+            else:  # Far from 1.0
+                style_context.add_class("error")
+                
+        except Exception as e:
+            self.logger.warning(f"Failed to calculate total volume fractions: {e}")
+            self.total_volume_label.set_text("—")
+    
+    def _calculate_powder_and_water_volumes(self) -> Tuple[float, float]:
+        """Calculate powder and water volume fractions from current mass inputs."""
+        try:
+            # Get total powder mass
+            total_powder_mass = sum(row['mass_spin'].get_value() for row in self.component_rows)
+            water_mass = self.water_content_spin.get_value()
+            
+            if total_powder_mass <= 0 or water_mass <= 0:
+                return 0.0, 0.0
+            
+            # Calculate volume fractions (simplified calculation)
+            # This is a rough estimation for validation purposes
+            powder_sg = 3.0  # Average powder specific gravity
+            water_sg = 1.0
+            
+            powder_volume = total_powder_mass / powder_sg
+            water_volume = water_mass / water_sg
+            
+            # Normalize to get volume fractions (relative to total mass/volume basis)
+            total_mass = total_powder_mass + water_mass
+            total_volume = powder_volume + water_volume
+            
+            if total_volume <= 0:
+                return 0.0, 0.0
+            
+            # These are rough estimates for validation
+            powder_vol_fraction = powder_volume / (total_volume / 0.4)  # Assume ~40% paste volume
+            water_vol_fraction = water_volume / (total_volume / 0.4)
+            
+            return max(0.0, min(1.0, powder_vol_fraction)), max(0.0, min(1.0, water_vol_fraction))
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to calculate powder and water volumes: {e}")
+            return 0.0, 0.0
+
     def _calculate_wb_ratio_from_water_content(self) -> None:
         """Calculate W/B ratio from water mass (kg) (water mass / powder mass)."""
         try:
@@ -920,6 +1152,48 @@ class MixDesignPanel(Gtk.Box):
                     )
                     components.append(component)
             
+            # Add aggregate components from Microstructure Composition panel
+            fine_agg_volume_fraction = self.fine_agg_volume_spin.get_value()
+            coarse_agg_volume_fraction = self.coarse_agg_volume_spin.get_value()
+            
+            # Add fine aggregate if selected
+            fine_agg_name = self.fine_agg_combo.get_active_id()
+            if fine_agg_name and fine_agg_name != "" and fine_agg_volume_fraction > 0:
+                # Use default aggregate specific gravity
+                fine_agg_sg = 2.65  # Typical aggregate specific gravity
+                try:
+                    fine_agg_sg = self.mix_service._get_material_specific_gravity(fine_agg_name, MaterialType.AGGREGATE)
+                except:
+                    pass  # Use default if lookup fails
+                
+                # Convert volume fraction to mass fraction using specific gravity
+                fine_agg_component = MixComponent(
+                    material_name=fine_agg_name,
+                    material_type=MaterialType.AGGREGATE,
+                    mass_fraction=fine_agg_volume_fraction * fine_agg_sg,  # Volume to mass conversion
+                    specific_gravity=fine_agg_sg
+                )
+                components.append(fine_agg_component)
+            
+            # Add coarse aggregate if selected
+            coarse_agg_name = self.coarse_agg_combo.get_active_id()
+            if coarse_agg_name and coarse_agg_name != "" and coarse_agg_volume_fraction > 0:
+                # Use default aggregate specific gravity
+                coarse_agg_sg = 2.65  # Typical aggregate specific gravity
+                try:
+                    coarse_agg_sg = self.mix_service._get_material_specific_gravity(coarse_agg_name, MaterialType.AGGREGATE)
+                except:
+                    pass  # Use default if lookup fails
+                
+                # Convert volume fraction to mass fraction using specific gravity
+                coarse_agg_component = MixComponent(
+                    material_name=coarse_agg_name,
+                    material_type=MaterialType.AGGREGATE,
+                    mass_fraction=coarse_agg_volume_fraction * coarse_agg_sg,  # Volume to mass conversion
+                    specific_gravity=coarse_agg_sg
+                )
+                components.append(coarse_agg_component)
+            
             if not components:
                 return None
             
@@ -933,7 +1207,7 @@ class MixDesignPanel(Gtk.Box):
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
                 total_water_content=water_fraction,
-                air_content=self.air_content_spin.get_value()  # Already a volume fraction
+                air_content=self.micro_air_content_spin.get_value()  # Already a volume fraction
             )
             
             return mix_design
@@ -1018,7 +1292,13 @@ class MixDesignPanel(Gtk.Box):
         # Reset water and air values
         self.wb_ratio_spin.set_value(0.40)
         self.water_content_spin.set_value(150.0)  # 150 kg default
-        self.air_content_spin.set_value(0.02)  # 2% volume fraction
+        self.micro_air_content_spin.set_value(0.05)  # 5% volume fraction
+        
+        # Reset microstructure parameters
+        self.system_size_x_spin.set_value(100)
+        self.system_size_y_spin.set_value(100)
+        self.system_size_z_spin.set_value(100)
+        self.dispersion_factor_spin.set_value(0)  # Default to no dispersion
         
         # Clear properties and validation
         for label in self.property_labels.values():
@@ -1135,15 +1415,20 @@ class MixDesignPanel(Gtk.Box):
     def _get_microstructure_parameters(self) -> Dict[str, Any]:
         """Get microstructure parameters from UI."""
         return {
-            'system_size': int(self.system_size_spin.get_value()),
+            'system_size_x': int(self.system_size_x_spin.get_value()),
+            'system_size_y': int(self.system_size_y_spin.get_value()),
+            'system_size_z': int(self.system_size_z_spin.get_value()),
             'resolution': self.resolution_spin.get_value(),
             'water_binder_ratio': self.wb_ratio_spin.get_value(),
-            'aggregate_volume_fraction': self.agg_volume_spin.get_value(),
+            'fine_aggregate_volume_fraction': self.fine_agg_volume_spin.get_value(),
+            'coarse_aggregate_volume_fraction': self.coarse_agg_volume_spin.get_value(),
             'air_content': self.micro_air_content_spin.get_value(),
             'cement_shape_set': self.cement_shape_combo.get_active_id() or "sphere",
-            'aggregate_shape_set': self.agg_shape_combo.get_active_id() or "sphere",
+            'fine_aggregate_shape_set': self.fine_agg_shape_combo.get_active_id() or "sphere",
+            'coarse_aggregate_shape_set': self.coarse_agg_shape_combo.get_active_id() or "sphere",
             'flocculation_enabled': self.flocculation_check.get_active(),
             'flocculation_degree': self.flocculation_spin.get_value(),
+            'dispersion_factor': int(self.dispersion_factor_spin.get_value()),
             'random_seed': int(self.random_seed_spin.get_value())
         }
     
@@ -1199,11 +1484,11 @@ class MixDesignPanel(Gtk.Box):
             return self._generate_default_psd()
     
     def _convert_custom_psd_to_standard_range(self, custom_points: List[List[float]]) -> List[Tuple[float, float]]:
-        """Convert custom PSD points to standard 0.25-75 μm range."""
+        """Convert custom PSD points to standard 0.25-75 μm range and bin for genmic.c."""
         try:
-            # Extract diameters and mass fractions
+            # Extract diameters and volume fractions
             diameters = np.array([point[0] for point in custom_points])
-            mass_fractions = np.array([point[1] for point in custom_points])
+            volume_fractions = np.array([point[1] for point in custom_points])
             
             # Filter to 0.25-75 μm range
             mask = (diameters >= 0.25) & (diameters <= 75.0)
@@ -1213,21 +1498,22 @@ class MixDesignPanel(Gtk.Box):
                 return self._generate_default_psd()
             
             filtered_diameters = diameters[mask]
-            filtered_fractions = mass_fractions[mask]
+            filtered_fractions = volume_fractions[mask]
             
-            # Normalize mass fractions to sum to 1.0
+            # Normalize volume fractions to sum to 1.0
             if np.sum(filtered_fractions) > 0:
                 filtered_fractions = filtered_fractions / np.sum(filtered_fractions)
             
-            # Create standard discrete points
-            return [(float(d), float(f)) for d, f in zip(filtered_diameters, filtered_fractions)]
+            # Convert to discrete points and bin for genmic.c
+            discrete_points = [(float(d), float(f)) for d, f in zip(filtered_diameters, filtered_fractions)]
+            return self._bin_psd_for_genmic(discrete_points)
             
         except Exception as e:
             self.logger.error(f"Failed to convert custom PSD: {e}")
             return self._generate_default_psd()
     
     def _convert_rosin_rammler_to_points(self, d50: float, n: float, dmax: float = None) -> List[Tuple[float, float]]:
-        """Convert Rosin-Rammler parameters to discrete points in 0.25-75 μm range."""
+        """Convert Rosin-Rammler parameters to discrete points and bin for genmic.c."""
         try:
             if not d50 or not n:
                 return self._generate_default_psd()
@@ -1240,24 +1526,26 @@ class MixDesignPanel(Gtk.Box):
             # where d50 is the characteristic diameter
             cumulative = 1 - np.exp(-((diameters / d50) ** n))
             
-            # Convert cumulative to differential (mass fractions)
-            mass_fractions = np.diff(np.concatenate([[0], cumulative]))
+            # Convert cumulative to differential (volume fractions)
+            volume_fractions = np.diff(np.concatenate([[0], cumulative]))
             
             # Ensure we have the right number of points
-            if len(mass_fractions) < len(diameters):
-                mass_fractions = np.append(mass_fractions, 0)
+            if len(volume_fractions) < len(diameters):
+                volume_fractions = np.append(volume_fractions, 0)
             
             # Normalize to sum to 1.0
-            mass_fractions = mass_fractions / np.sum(mass_fractions)
+            volume_fractions = volume_fractions / np.sum(volume_fractions)
             
-            return [(float(d), float(f)) for d, f in zip(diameters, mass_fractions)]
+            # Convert to discrete points and bin for genmic.c
+            discrete_points = [(float(d), float(f)) for d, f in zip(diameters, volume_fractions)]
+            return self._bin_psd_for_genmic(discrete_points)
             
         except Exception as e:
             self.logger.error(f"Failed to convert Rosin-Rammler PSD: {e}")
             return self._generate_default_psd()
     
     def _convert_log_normal_to_points(self, d50: float, sigma: float) -> List[Tuple[float, float]]:
-        """Convert log-normal parameters to discrete points in 0.25-75 μm range."""
+        """Convert log-normal parameters to discrete points and bin for genmic.c."""
         try:
             if not d50 or not sigma:
                 return self._generate_default_psd()
@@ -1272,25 +1560,79 @@ class MixDesignPanel(Gtk.Box):
             s = sigma  # shape parameter
             scale = d50  # scale parameter
             
-            # Calculate probability density and convert to mass fractions
+            # Calculate probability density and convert to volume fractions
             pdf_values = lognorm.pdf(diameters, s=s, scale=scale)
             
-            # Normalize to get mass fractions
-            mass_fractions = pdf_values / np.sum(pdf_values)
+            # Normalize to get volume fractions
+            volume_fractions = pdf_values / np.sum(pdf_values)
             
-            return [(float(d), float(f)) for d, f in zip(diameters, mass_fractions)]
+            # Convert to discrete points and bin for genmic.c
+            discrete_points = [(float(d), float(f)) for d, f in zip(diameters, volume_fractions)]
+            return self._bin_psd_for_genmic(discrete_points)
             
         except Exception as e:
             self.logger.error(f"Failed to convert log-normal PSD: {e}")
             return self._generate_default_psd()
     
+    def _bin_psd_for_genmic(self, psd_data: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+        """Bin PSD data into integer diameter bins for genmic.c input.
+        
+        Binning rules:
+        - Diameter range (0, 1.5) goes into bin for diameter 1
+        - Diameter range [1.5, 2.5) goes into bin for diameter 2
+        - Diameter range [2.5, 3.5) goes into bin for diameter 3
+        - And so on...
+        """
+        try:
+            # Create bins for diameters 1 through 75
+            bin_fractions = {}
+            
+            for diameter, volume_fraction in psd_data:
+                # Determine which integer bin this diameter belongs to
+                if diameter < 1.5:
+                    bin_diameter = 1
+                else:
+                    bin_diameter = int(round(diameter))
+                    # Ensure we're within reasonable bounds
+                    if bin_diameter < 1:
+                        bin_diameter = 1
+                    elif bin_diameter > 75:
+                        bin_diameter = 75
+                
+                # Add volume fraction to the appropriate bin
+                if bin_diameter in bin_fractions:
+                    bin_fractions[bin_diameter] += volume_fraction
+                else:
+                    bin_fractions[bin_diameter] = volume_fraction
+            
+            # Convert to sorted list of tuples (diameter, volume_fraction)
+            binned_data = [(float(diameter), fraction) 
+                          for diameter, fraction in sorted(bin_fractions.items())]
+            
+            # Normalize to ensure sum equals 1.0
+            total_fraction = sum(fraction for _, fraction in binned_data)
+            if total_fraction > 0:
+                binned_data = [(diameter, fraction / total_fraction) 
+                              for diameter, fraction in binned_data]
+            
+            return binned_data
+            
+        except Exception as e:
+            self.logger.error(f"Failed to bin PSD data for genmic: {e}")
+            return self._generate_default_psd()
+
     def _generate_default_psd(self) -> List[Tuple[float, float]]:
         """Generate a default PSD for cement (typical Portland cement)."""
-        # Typical cement PSD with log-normal-like distribution
-        diameters = [0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 45.0, 63.0]
-        mass_fractions = [0.05, 0.15, 0.25, 0.25, 0.15, 0.08, 0.04, 0.02, 0.01]
+        # Typical cement PSD with log-normal-like distribution (already binned for genmic)
+        diameters = [1, 2, 4, 8, 16, 32, 45, 63]
+        volume_fractions = [0.05, 0.15, 0.25, 0.25, 0.15, 0.08, 0.04, 0.03]
         
-        return list(zip(diameters, mass_fractions))
+        # Ensure normalization
+        total = sum(volume_fractions)
+        if total > 0:
+            volume_fractions = [f / total for f in volume_fractions]
+        
+        return list(zip(diameters, volume_fractions))
 
     def _calculate_total_phases(self, mix_design: MixDesign) -> int:
         """Calculate total number of phases to add to genmic.c."""
@@ -1316,28 +1658,37 @@ class MixDesignPanel(Gtk.Box):
     def _calculate_binder_volume_fractions(self, mix_design: MixDesign, params: Dict[str, Any]) -> tuple[float, float]:
         """Calculate binder solid and water volume fractions on total paste basis."""
         try:
-            # Calculate total masses
+            # Calculate total powder mass and volume fractions
             powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
             
-            total_powder_mass = 0.0
+            total_powder_mass_fraction = 0.0
             total_powder_volume = 0.0
             
+            # Sum up all powder components using mass fractions
             for component in mix_design.components:
                 if component.material_type in powder_types:
-                    mass_kg = component.mass_kg
-                    sg = self.mix_service._get_material_specific_gravity(component.material_name, component.material_type)
-                    volume_m3 = mass_kg / (sg * 1000)  # Convert to m³
+                    mass_fraction = component.mass_fraction
+                    sg = component.specific_gravity
+                    if sg <= 0:
+                        sg = self.mix_service._get_material_specific_gravity(component.material_name, component.material_type)
                     
-                    total_powder_mass += mass_kg
-                    total_powder_volume += volume_m3
+                    # Calculate volume = mass / specific_gravity
+                    volume_fraction = mass_fraction / sg if sg > 0 else 0.0
+                    
+                    total_powder_mass_fraction += mass_fraction
+                    total_powder_volume += volume_fraction
             
             # Calculate water mass and volume from W/B ratio
             wb_ratio = params['water_binder_ratio']
-            water_mass = wb_ratio * total_powder_mass  # kg
-            water_volume = water_mass / 1000  # m³ (water SG = 1.0)
+            water_mass_fraction = wb_ratio * total_powder_mass_fraction
+            water_volume = water_mass_fraction / 1.0  # Water SG = 1.0
             
-            # Calculate total paste volume
+            # Calculate total paste volume (powder + water)
             total_paste_volume = total_powder_volume + water_volume
+            
+            if total_paste_volume <= 0:
+                self.logger.error("Total paste volume is zero or negative")
+                return 0.7, 0.3
             
             # Calculate volume fractions on total paste basis
             binder_solid_vfrac = total_powder_volume / total_paste_volume
@@ -1348,6 +1699,9 @@ class MixDesignPanel(Gtk.Box):
             if abs(total - 1.0) > 0.001:
                 self.logger.warning(f"Binder volume fractions don't sum to 1.0: {total:.6f}")
             
+            self.logger.info(f"W/B ratio: {wb_ratio:.3f}")
+            self.logger.info(f"Total powder mass fraction: {total_powder_mass_fraction:.6f}")
+            self.logger.info(f"Water mass fraction: {water_mass_fraction:.6f}")
             self.logger.info(f"Binder solid volume fraction: {binder_solid_vfrac:.6f}")
             self.logger.info(f"Water volume fraction: {water_vfrac:.6f}")
             
@@ -1355,6 +1709,8 @@ class MixDesignPanel(Gtk.Box):
             
         except Exception as e:
             self.logger.error(f"Failed to calculate binder volume fractions: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
             # Return default values
             return 0.7, 0.3
 
@@ -1505,11 +1861,10 @@ class MixDesignPanel(Gtk.Box):
         # Menu choice 2: SPECSIZE (set system size)
         lines.append("2")
         
-        # System dimensions (cubic system)
-        system_size = params['system_size']
-        lines.append(f"{system_size}")  # X size
-        lines.append(f"{system_size}")  # Y size  
-        lines.append(f"{system_size}")  # Z size
+        # System dimensions
+        lines.append(f"{params['system_size_x']}")  # X size
+        lines.append(f"{params['system_size_y']}")  # Y size  
+        lines.append(f"{params['system_size_z']}")  # Z size
         
         # Resolution (micrometers per voxel)
         lines.append(f"{params['resolution']}")
@@ -1558,33 +1913,33 @@ class MixDesignPanel(Gtk.Box):
                     lines.append("1")
                     lines.append(f"{cement_phases['clinker']:.6f}")
                     lines.append(f"{len(psd_data)}")
-                    for diameter, mass_fraction in psd_data:
+                    for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{mass_fraction:.6f}")
+                        lines.append(f"{volume_fraction:.6f}")
                     
                     # Phase ID 7: Dihydrate
                     lines.append("7")
                     lines.append(f"{cement_phases['dihydrate']:.6f}")
                     lines.append(f"{len(psd_data)}")
-                    for diameter, mass_fraction in psd_data:
+                    for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{mass_fraction:.6f}")
+                        lines.append(f"{volume_fraction:.6f}")
                     
                     # Phase ID 8: Hemihydrate
                     lines.append("8")
                     lines.append(f"{cement_phases['hemihydrate']:.6f}")
                     lines.append(f"{len(psd_data)}")
-                    for diameter, mass_fraction in psd_data:
+                    for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{mass_fraction:.6f}")
+                        lines.append(f"{volume_fraction:.6f}")
                     
                     # Phase ID 9: Anhydrite
                     lines.append("9")
                     lines.append(f"{cement_phases['anhydrite']:.6f}")
                     lines.append(f"{len(psd_data)}")
-                    for diameter, mass_fraction in psd_data:
+                    for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{mass_fraction:.6f}")
+                        lines.append(f"{volume_fraction:.6f}")
                         
                 else:
                     # Non-cement materials: fly ash, slag, inert filler
@@ -1600,9 +1955,9 @@ class MixDesignPanel(Gtk.Box):
                     lines.append(f"{len(psd_data)}")
                     
                     # Add each size class (diameter and volume fraction)
-                    for diameter, mass_fraction in psd_data:
+                    for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{mass_fraction:.6f}")
+                        lines.append(f"{volume_fraction:.6f}")
         
         # Dispersion factor (separation distance in pixels) for spheres (0-2)
         # 0 = totally random placement, 1-2 = increasing separation
@@ -1618,19 +1973,47 @@ class MixDesignPanel(Gtk.Box):
         aggregate_components = [comp for comp in mix_design.components 
                              if comp.material_type == MaterialType.AGGREGATE]
         
-        if aggregate_components and params['aggregate_volume_fraction'] > 0:
-            for agg_component in aggregate_components:
+        # Handle fine aggregate if present
+        fine_agg_components = [comp for comp in aggregate_components if 'fine' in comp.material_name.lower()]
+        if fine_agg_components and params['fine_aggregate_volume_fraction'] > 0:
+            for agg_component in fine_agg_components:
                 # Menu choice 3: ADDPART
                 lines.append("3")
                 
                 # Aggregate phase ID (typically INERTAGG = 13)
                 lines.append("13")
                 
-                # Aggregate volume fraction
-                lines.append(f"{params['aggregate_volume_fraction']:.6f}")
+                # Fine aggregate volume fraction
+                lines.append(f"{params['fine_aggregate_volume_fraction']:.6f}")
                 
-                # Aggregate shape set
-                agg_shape = params['aggregate_shape_set']
+                # Fine aggregate shape set
+                agg_shape = params['fine_aggregate_shape_set']
+                if agg_shape == "sphere":
+                    lines.append("0")  # Mathematical spheres
+                else:
+                    # Use shape file path
+                    shape_path = self.microstructure_service.get_aggregate_shape_path(agg_shape)
+                    if shape_path:
+                        lines.append(f"{shape_path}{os.sep}")
+                    else:
+                        lines.append("0")  # Fallback to spheres
+        
+        # Handle coarse aggregate if present
+        coarse_agg_components = [comp for comp in aggregate_components if 'coarse' in comp.material_name.lower() or 
+                               ('fine' not in comp.material_name.lower() and comp not in fine_agg_components)]
+        if coarse_agg_components and params['coarse_aggregate_volume_fraction'] > 0:
+            for agg_component in coarse_agg_components:
+                # Menu choice 3: ADDPART
+                lines.append("3")
+                
+                # Aggregate phase ID (typically INERTAGG = 13)
+                lines.append("13")
+                
+                # Coarse aggregate volume fraction
+                lines.append(f"{params['coarse_aggregate_volume_fraction']:.6f}")
+                
+                # Coarse aggregate shape set
+                agg_shape = params['coarse_aggregate_shape_set']
                 if agg_shape == "sphere":
                     lines.append("1")  # Mathematical spherical
                 else:
@@ -1796,55 +2179,84 @@ class MixDesignPanel(Gtk.Box):
         grid.set_margin_left(15)
         grid.set_margin_right(15)
         
-        # System size
-        size_label = Gtk.Label("System Size (voxels):")
-        size_label.set_halign(Gtk.Align.START)
-        size_label.set_tooltip_text("Number of voxels per dimension (creates size³ total voxels)")
-        grid.attach(size_label, 0, 0, 1, 1)
+        # System dimensions
+        # X dimension
+        x_label = Gtk.Label("X Dimension (voxels):")
+        x_label.set_halign(Gtk.Align.START)
+        x_label.set_tooltip_text("Number of voxels in X direction (25-400)")
+        grid.attach(x_label, 0, 0, 1, 1)
         
-        self.system_size_spin = Gtk.SpinButton.new_with_range(10, 1000, 1)
-        self.system_size_spin.set_value(100)
-        self.system_size_spin.set_tooltip_text("Larger systems are more representative but computationally expensive")
-        grid.attach(self.system_size_spin, 1, 0, 1, 1)
+        self.system_size_x_spin = Gtk.SpinButton.new_with_range(25, 400, 1)
+        self.system_size_x_spin.set_value(100)
+        self.system_size_x_spin.set_tooltip_text("X dimension: 25-400 voxels")
+        grid.attach(self.system_size_x_spin, 1, 0, 1, 1)
+        
+        # Y dimension
+        y_label = Gtk.Label("Y Dimension (voxels):")
+        y_label.set_halign(Gtk.Align.START)
+        y_label.set_tooltip_text("Number of voxels in Y direction (25-400)")
+        grid.attach(y_label, 0, 1, 1, 1)
+        
+        self.system_size_y_spin = Gtk.SpinButton.new_with_range(25, 400, 1)
+        self.system_size_y_spin.set_value(100)
+        self.system_size_y_spin.set_tooltip_text("Y dimension: 25-400 voxels")
+        grid.attach(self.system_size_y_spin, 1, 1, 1, 1)
+        
+        # Z dimension
+        z_label = Gtk.Label("Z Dimension (voxels):")
+        z_label.set_halign(Gtk.Align.START)
+        z_label.set_tooltip_text("Number of voxels in Z direction (25-400)")
+        grid.attach(z_label, 0, 2, 1, 1)
+        
+        self.system_size_z_spin = Gtk.SpinButton.new_with_range(25, 400, 1)
+        self.system_size_z_spin.set_value(100)
+        self.system_size_z_spin.set_tooltip_text("Z dimension: 25-400 voxels")
+        grid.attach(self.system_size_z_spin, 1, 2, 1, 1)
         
         # Resolution
         resolution_label = Gtk.Label("Resolution (μm/voxel):")
         resolution_label.set_halign(Gtk.Align.START)
         resolution_label.set_tooltip_text("Physical size of each voxel in micrometers")
-        grid.attach(resolution_label, 0, 1, 1, 1)
+        grid.attach(resolution_label, 0, 3, 1, 1)
         
         self.resolution_spin = Gtk.SpinButton.new_with_range(0.01, 100.0, 0.01)
         self.resolution_spin.set_digits(2)
         self.resolution_spin.set_value(1.0)
         self.resolution_spin.set_tooltip_text("Finer resolution captures more detail but increases computation")
-        grid.attach(self.resolution_spin, 1, 1, 1, 1)
+        grid.attach(self.resolution_spin, 1, 3, 1, 1)
         
         # Calculated system size
         calc_size_label = Gtk.Label("Physical Size (μm):")
         calc_size_label.set_halign(Gtk.Align.START)
-        grid.attach(calc_size_label, 0, 2, 1, 1)
+        grid.attach(calc_size_label, 0, 4, 1, 1)
         
-        self.calc_size_label = Gtk.Label("100.0")
+        self.calc_size_label = Gtk.Label("100.0 × 100.0 × 100.0")
         self.calc_size_label.set_halign(Gtk.Align.START)
         self.calc_size_label.get_style_context().add_class("monospace")
-        grid.attach(self.calc_size_label, 1, 2, 1, 1)
+        grid.attach(self.calc_size_label, 1, 4, 1, 1)
         
         # Total voxels
         voxels_label = Gtk.Label("Total Voxels:")
         voxels_label.set_halign(Gtk.Align.START)
-        grid.attach(voxels_label, 0, 3, 1, 1)
+        grid.attach(voxels_label, 0, 5, 1, 1)
         
         self.total_voxels_label = Gtk.Label("1,000,000")
         self.total_voxels_label.set_halign(Gtk.Align.START)
         self.total_voxels_label.get_style_context().add_class("monospace")
-        grid.attach(self.total_voxels_label, 1, 3, 1, 1)
+        grid.attach(self.total_voxels_label, 1, 5, 1, 1)
+        
+        # Validation status
+        self.voxel_validation_label = Gtk.Label("")
+        self.voxel_validation_label.set_halign(Gtk.Align.START)
+        self.voxel_validation_label.get_style_context().add_class("small-text")
+        grid.attach(self.voxel_validation_label, 0, 6, 2, 1)
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)
     
     def _create_composition_parameters_section(self, parent: Gtk.Box) -> None:
         """Create composition parameters section."""
-        frame = Gtk.Frame(label="Microstructure Composition")
+        frame = Gtk.Frame(label="Mortar/Concrete Options")
         frame.get_style_context().add_class("card")
         
         grid = Gtk.Grid()
@@ -1855,87 +2267,120 @@ class MixDesignPanel(Gtk.Box):
         grid.set_margin_left(15)
         grid.set_margin_right(15)
         
-        # Water-binder ratio
-        wb_label = Gtk.Label("Water/Binder Ratio:")
-        wb_label.set_halign(Gtk.Align.START)
-        wb_label.set_tooltip_text("Mass ratio of water to total binder")
-        grid.attach(wb_label, 0, 0, 1, 1)
+        # Fine aggregate volume fraction
+        fine_vol_label = Gtk.Label("Fine Aggregate Volume Fraction:")
+        fine_vol_label.set_halign(Gtk.Align.START)
+        fine_vol_label.set_tooltip_text("Volume fraction of fine aggregate in total concrete volume")
+        grid.attach(fine_vol_label, 0, 0, 1, 1)
         
-        self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
-        self.wb_ratio_spin.set_digits(2)
-        self.wb_ratio_spin.set_value(0.4)
-        grid.attach(self.wb_ratio_spin, 1, 0, 1, 1)
+        self.fine_agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.fine_agg_volume_spin.set_digits(3)
+        self.fine_agg_volume_spin.set_value(0.25)
+        grid.attach(self.fine_agg_volume_spin, 1, 0, 1, 1)
         
-        # Aggregate volume fraction
-        agg_label = Gtk.Label("Aggregate Volume Fraction:")
-        agg_label.set_halign(Gtk.Align.START)
-        agg_label.set_tooltip_text("Volume fraction of aggregate in total solid volume")
-        grid.attach(agg_label, 0, 1, 1, 1)
+        # Fine aggregate selection
+        fine_agg_label = Gtk.Label("Fine Aggregate:")
+        fine_agg_label.set_halign(Gtk.Align.START)
+        fine_agg_label.set_tooltip_text("Select fine aggregate material (sand)")
+        grid.attach(fine_agg_label, 0, 1, 1, 1)
         
-        self.agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.agg_volume_spin.set_digits(2)
-        self.agg_volume_spin.set_value(0.7)
-        grid.attach(self.agg_volume_spin, 1, 1, 1, 1)
+        self.fine_agg_combo = Gtk.ComboBoxText()
+        self.fine_agg_combo.set_size_request(150, -1)
+        self.fine_agg_combo.set_tooltip_text("Choose fine aggregate from database")
+        grid.attach(self.fine_agg_combo, 1, 1, 1, 1)
+        
+        # Fine aggregate grading button
+        self.fine_agg_grading_button = Gtk.Button("Grading...")
+        self.fine_agg_grading_button.set_size_request(80, -1)
+        self.fine_agg_grading_button.set_tooltip_text("Edit fine aggregate grading curve")
+        self.fine_agg_grading_button.set_sensitive(False)  # Enable when aggregate is selected
+        grid.attach(self.fine_agg_grading_button, 2, 1, 1, 1)
+        
+        # Fine aggregate shape set
+        fine_agg_shape_label = Gtk.Label("Fine Aggregate Shape Set:")
+        fine_agg_shape_label.set_halign(Gtk.Align.START)
+        fine_agg_shape_label.set_tooltip_text("Particle shape model for fine aggregate particles")
+        grid.attach(fine_agg_shape_label, 0, 2, 1, 1)
+        
+        self.fine_agg_shape_combo = Gtk.ComboBoxText()
+        fine_aggregate_shapes = self.microstructure_service.get_fine_aggregate_shapes()
+        for shape_id, shape_desc in fine_aggregate_shapes.items():
+            self.fine_agg_shape_combo.append(shape_id, shape_desc)
+        self.fine_agg_shape_combo.set_active(0)
+        grid.attach(self.fine_agg_shape_combo, 1, 2, 1, 1)
+        
+        # Coarse aggregate volume fraction
+        coarse_vol_label = Gtk.Label("Coarse Aggregate Volume Fraction:")
+        coarse_vol_label.set_halign(Gtk.Align.START)
+        coarse_vol_label.set_tooltip_text("Volume fraction of coarse aggregate in total concrete volume")
+        grid.attach(coarse_vol_label, 0, 3, 1, 1)
+        
+        self.coarse_agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.coarse_agg_volume_spin.set_digits(3)
+        self.coarse_agg_volume_spin.set_value(0.35)
+        grid.attach(self.coarse_agg_volume_spin, 1, 3, 1, 1)
+        
+        # Coarse aggregate selection
+        coarse_agg_label = Gtk.Label("Coarse Aggregate:")
+        coarse_agg_label.set_halign(Gtk.Align.START)
+        coarse_agg_label.set_tooltip_text("Select coarse aggregate material (gravel, crushed stone)")
+        grid.attach(coarse_agg_label, 0, 4, 1, 1)
+        
+        self.coarse_agg_combo = Gtk.ComboBoxText()
+        self.coarse_agg_combo.set_size_request(150, -1)
+        self.coarse_agg_combo.set_tooltip_text("Choose coarse aggregate from database")
+        grid.attach(self.coarse_agg_combo, 1, 4, 1, 1)
+        
+        # Coarse aggregate grading button
+        self.coarse_agg_grading_button = Gtk.Button("Grading...")
+        self.coarse_agg_grading_button.set_size_request(80, -1)
+        self.coarse_agg_grading_button.set_tooltip_text("Edit coarse aggregate grading curve")
+        self.coarse_agg_grading_button.set_sensitive(False)  # Enable when aggregate is selected
+        grid.attach(self.coarse_agg_grading_button, 2, 4, 1, 1)
+        
+        # Coarse aggregate shape set
+        coarse_agg_shape_label = Gtk.Label("Coarse Aggregate Shape Set:")
+        coarse_agg_shape_label.set_halign(Gtk.Align.START)
+        coarse_agg_shape_label.set_tooltip_text("Particle shape model for coarse aggregate particles")
+        grid.attach(coarse_agg_shape_label, 0, 5, 1, 1)
+        
+        self.coarse_agg_shape_combo = Gtk.ComboBoxText()
+        coarse_aggregate_shapes = self.microstructure_service.get_coarse_aggregate_shapes()
+        for shape_id, shape_desc in coarse_aggregate_shapes.items():
+            self.coarse_agg_shape_combo.append(shape_id, shape_desc)
+        self.coarse_agg_shape_combo.set_active(0)
+        grid.attach(self.coarse_agg_shape_combo, 1, 5, 1, 1)
         
         # Air content
-        air_label = Gtk.Label("Microstructure Air Content:")
+        air_label = Gtk.Label("Air Content:")
         air_label.set_halign(Gtk.Align.START)
-        air_label.set_tooltip_text("Volume fraction of entrained air")
-        grid.attach(air_label, 0, 2, 1, 1)
+        air_label.set_tooltip_text("Volume fraction of entrained air in mortar/concrete")
+        grid.attach(air_label, 0, 6, 1, 1)
         
         self.micro_air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.2, 0.001)
         self.micro_air_content_spin.set_digits(3)
         self.micro_air_content_spin.set_value(0.05)
-        grid.attach(self.micro_air_content_spin, 1, 2, 1, 1)
+        grid.attach(self.micro_air_content_spin, 1, 6, 1, 1)
+        
+        # Total volume fraction display
+        total_vol_label = Gtk.Label("Total Volume Fraction:")
+        total_vol_label.set_halign(Gtk.Align.START)
+        total_vol_label.set_tooltip_text("Sum of all volume fractions (must equal 1.0)")
+        total_vol_label.get_style_context().add_class("dim-label")
+        grid.attach(total_vol_label, 0, 7, 1, 1)
+        
+        self.total_volume_label = Gtk.Label("1.000")
+        self.total_volume_label.set_halign(Gtk.Align.START)
+        self.total_volume_label.get_style_context().add_class("monospace")
+        grid.attach(self.total_volume_label, 1, 7, 1, 1)
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)
     
-    def _create_particle_shape_section(self, parent: Gtk.Box) -> None:
-        """Create particle shape parameters section."""
-        frame = Gtk.Frame(label="Particle Shape Sets")
-        frame.get_style_context().add_class("card")
-        
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # Cement shape set
-        cement_label = Gtk.Label("Cement Shape Set:")
-        cement_label.set_halign(Gtk.Align.START)
-        cement_label.set_tooltip_text("Particle shape model for cement grains")
-        grid.attach(cement_label, 0, 0, 1, 1)
-        
-        self.cement_shape_combo = Gtk.ComboBoxText()
-        shape_sets = self.microstructure_service.get_supported_shape_sets()
-        for shape_id, shape_desc in shape_sets.items():
-            self.cement_shape_combo.append(shape_id, shape_desc)
-        self.cement_shape_combo.set_active(0)
-        grid.attach(self.cement_shape_combo, 1, 0, 1, 1)
-        
-        # Aggregate shape set
-        agg_shape_label = Gtk.Label("Aggregate Shape Set:")
-        agg_shape_label.set_halign(Gtk.Align.START)
-        agg_shape_label.set_tooltip_text("Particle shape model for aggregate particles")
-        grid.attach(agg_shape_label, 0, 1, 1, 1)
-        
-        self.agg_shape_combo = Gtk.ComboBoxText()
-        aggregate_shapes = self.microstructure_service.get_supported_aggregate_shapes()
-        for shape_id, shape_desc in aggregate_shapes.items():
-            self.agg_shape_combo.append(shape_id, shape_desc)
-        self.agg_shape_combo.set_active(0)
-        grid.attach(self.agg_shape_combo, 1, 1, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
     
     def _create_flocculation_section(self, parent: Gtk.Box) -> None:
         """Create flocculation parameters section."""
-        frame = Gtk.Frame(label="Flocculation Parameters")
+        frame = Gtk.Frame(label="Powder Dispersion Options")
         frame.get_style_context().add_class("card")
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -1964,6 +2409,22 @@ class MixDesignPanel(Gtk.Box):
         floc_box.pack_start(self.flocculation_spin, False, False, 0)
         
         vbox.pack_start(floc_box, False, False, 0)
+        
+        # Dispersion factor
+        disp_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        disp_label = Gtk.Label("Dispersion Factor:")
+        disp_label.set_halign(Gtk.Align.START)
+        disp_label.set_tooltip_text("Particle dispersion parameter (0, 1, or 2 pixels)")
+        disp_box.pack_start(disp_label, False, False, 0)
+        
+        self.dispersion_factor_spin = Gtk.SpinButton.new_with_range(0, 2, 1)
+        self.dispersion_factor_spin.set_digits(0)
+        self.dispersion_factor_spin.set_value(0)
+        self.dispersion_factor_spin.set_tooltip_text("Dispersion distance in pixels: 0=none, 1=adjacent, 2=near")
+        disp_box.pack_start(self.dispersion_factor_spin, False, False, 0)
+        
+        vbox.pack_start(disp_box, False, False, 0)
         
         frame.add(vbox)
         parent.pack_start(frame, False, False, 0)
@@ -2010,8 +2471,13 @@ class MixDesignPanel(Gtk.Box):
         """Handle flocculation checkbox toggle."""
         enabled = checkbox.get_active()
         self.flocculation_spin.set_sensitive(enabled)
+        # Flocculation and dispersion are mutually exclusive
+        self.dispersion_factor_spin.set_sensitive(not enabled)
         if not enabled:
             self.flocculation_spin.set_value(0.0)
+        else:
+            # If flocculation is enabled, reset dispersion to 0
+            self.dispersion_factor_spin.set_value(0)
     
     def _on_generate_seed_clicked(self, button: Gtk.Button) -> None:
         """Generate a new negative random seed."""
@@ -2029,16 +2495,32 @@ class MixDesignPanel(Gtk.Box):
     def _update_calculated_values(self) -> None:
         """Update calculated physical size and total voxels."""
         try:
-            system_size = int(self.system_size_spin.get_value())
+            x_size = int(self.system_size_x_spin.get_value())
+            y_size = int(self.system_size_y_spin.get_value())
+            z_size = int(self.system_size_z_spin.get_value())
             resolution = self.resolution_spin.get_value()
             
-            # Calculate physical size
-            physical_size = system_size * resolution
-            self.calc_size_label.set_text(f"{physical_size:.1f}")
+            # Calculate physical dimensions
+            x_physical = x_size * resolution
+            y_physical = y_size * resolution
+            z_physical = z_size * resolution
+            self.calc_size_label.set_text(f"{x_physical:.1f} × {y_physical:.1f} × {z_physical:.1f}")
             
             # Calculate total voxels
-            total_voxels = system_size ** 3
+            total_voxels = x_size * y_size * z_size
             self.total_voxels_label.set_text(f"{total_voxels:,}")
+            
+            # Validate against 27 million voxel limit
+            max_voxels = 27_000_000
+            if total_voxels > max_voxels:
+                self.voxel_validation_label.set_text(f"⚠️ Exceeds limit ({max_voxels:,} max)")
+                self.voxel_validation_label.get_style_context().add_class("error-text")
+                self.voxel_validation_label.get_style_context().remove_class("success-text")
+            else:
+                remaining = max_voxels - total_voxels
+                self.voxel_validation_label.set_text(f"✓ Within limit ({remaining:,} remaining)")
+                self.voxel_validation_label.get_style_context().add_class("success-text")
+                self.voxel_validation_label.get_style_context().remove_class("error-text")
             
         except Exception as e:
             self.logger.error(f"Error updating calculated values: {e}")

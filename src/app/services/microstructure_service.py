@@ -256,6 +256,46 @@ class MicrostructureService:
     def get_supported_aggregate_shapes(self) -> Dict[str, str]:
         """Get list of supported aggregate shapes."""
         return self.aggregate_shapes.copy()
+    
+    def get_fine_aggregate_shapes(self) -> Dict[str, str]:
+        """Get list of fine aggregate shapes (containing 'fine' in name or general shapes)."""
+        fine_shapes = {}
+        
+        # Always include sphere for fine aggregates
+        fine_shapes["sphere"] = "Spherical particles"
+        
+        # Include shapes with 'fine' in the name
+        for shape_id, shape_desc in self.aggregate_shapes.items():
+            if 'fine' in shape_id.lower():
+                fine_shapes[shape_id] = shape_desc
+        
+        # Include general shapes that don't specify fine/coarse
+        general_shapes = ['Ottawa-sand', 'SiamSand', 'Cubic', 'spheres']
+        for shape_id, shape_desc in self.aggregate_shapes.items():
+            if shape_id in general_shapes:
+                fine_shapes[shape_id] = shape_desc
+        
+        return fine_shapes
+    
+    def get_coarse_aggregate_shapes(self) -> Dict[str, str]:
+        """Get list of coarse aggregate shapes (containing 'coarse' in name or general shapes)."""
+        coarse_shapes = {}
+        
+        # Always include sphere for coarse aggregates
+        coarse_shapes["sphere"] = "Spherical particles"
+        
+        # Include shapes with 'coarse' in the name
+        for shape_id, shape_desc in self.aggregate_shapes.items():
+            if 'coarse' in shape_id.lower():
+                coarse_shapes[shape_id] = shape_desc
+        
+        # Include general shapes that don't specify fine/coarse
+        general_shapes = ['FDOT-57', 'Cubic', 'spheres', 'Slab']
+        for shape_id, shape_desc in self.aggregate_shapes.items():
+            if shape_id in general_shapes:
+                coarse_shapes[shape_id] = shape_desc
+        
+        return coarse_shapes
 
     def _initialize_default_phases(self) -> Dict[PhaseType, PhaseProperties]:
         """Initialize default phase properties."""
