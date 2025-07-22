@@ -1523,8 +1523,11 @@ class MaterialsPanel(Gtk.Box):
                 service.delete(material_data.name)
             elif material_type == 'aggregate':
                 service.delete(material_data.display_name)
+            elif material_type in ['limestone', 'silica_fume']:
+                # Limestone and silica fume services use name-based delete
+                service.delete(material_data.name)
             else:
-                # For all other material types, use the standard ID-based delete
+                # For other material types (fly_ash, slag, inert_filler), use ID-based delete
                 service.delete(material_data.id)
             
             # Refresh data
