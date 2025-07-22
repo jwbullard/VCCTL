@@ -301,7 +301,7 @@ class MixDesignPanel(Gtk.Box):
         water_grid.attach(water_label, 0, 1, 1, 1)
         
         self.water_content_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.001)
-        self.water_content_spin.set_value(150.0)
+        self.water_content_spin.set_value(0.40)  # Default to match W/B ratio
         self.water_content_spin.set_digits(3)
         self.water_content_spin.set_editable(True)  # Make it editable for user input
         self.water_content_spin.set_tooltip_text("Enter water mass to calculate W/B ratio")
@@ -524,6 +524,7 @@ class MixDesignPanel(Gtk.Box):
         # Mass (kg) spin button
         mass_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.1)
         mass_spin.set_digits(1)
+        mass_spin.set_value(1.0)  # Default to 1.0 kg
         mass_spin.set_size_request(80, -1)
         row_box.pack_start(mass_spin, False, False, 0)
         
@@ -1349,7 +1350,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Reset water and air values
         self.wb_ratio_spin.set_value(0.40)
-        self.water_content_spin.set_value(150.0)  # 150 kg default
+        self.water_content_spin.set_value(0.40)  # Default to match W/B ratio
         self.micro_air_content_spin.set_value(0.05)  # 5% volume fraction
         
         # Reset microstructure parameters
