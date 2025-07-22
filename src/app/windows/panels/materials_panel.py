@@ -169,6 +169,8 @@ class MaterialsPanel(Gtk.Box):
         self.type_combo.append("fly_ash", "Fly Ash")
         self.type_combo.append("slag", "Slag")
         self.type_combo.append("inert_filler", "Inert Filler")
+        self.type_combo.append("silica_fume", "Silica Fume")
+        self.type_combo.append("limestone", "Limestone")
         self.type_combo.set_active(0)
         type_box.pack_start(self.type_combo, False, False, 0)
         
@@ -420,6 +422,8 @@ class MaterialsPanel(Gtk.Box):
         type_combo.append("fly_ash", "Fly Ash")
         type_combo.append("slag", "Slag")
         type_combo.append("inert_filler", "Inert Filler")
+        type_combo.append("silica_fume", "Silica Fume")
+        type_combo.append("limestone", "Limestone")
         type_combo.set_active(0)
         content_area.pack_start(type_combo, False, False, 0)
         
@@ -1050,6 +1054,10 @@ class MaterialsPanel(Gtk.Box):
                 return 'slag'
             elif tablename == 'inert_filler':
                 return 'inert_filler'
+            elif tablename == 'silica_fume':
+                return 'silica_fume'
+            elif tablename == 'limestone':
+                return 'limestone'
         
         # Fallback: try to detect from class name
         class_name = material_data.__class__.__name__.lower()
@@ -1063,6 +1071,10 @@ class MaterialsPanel(Gtk.Box):
             return 'slag'
         elif 'filler' in class_name:
             return 'inert_filler'
+        elif 'silica_fume' in class_name or 'silicafume' in class_name:
+            return 'silica_fume'
+        elif 'limestone' in class_name:
+            return 'limestone'
         
         # Default fallback
         return 'cement'
@@ -1493,6 +1505,16 @@ class MaterialsPanel(Gtk.Box):
                 service = service_container.cement_service
             elif material_type == 'aggregate':
                 service = service_container.aggregate_service
+            elif material_type == 'fly_ash':
+                service = service_container.fly_ash_service
+            elif material_type == 'slag':
+                service = service_container.slag_service
+            elif material_type == 'inert_filler':
+                service = service_container.inert_filler_service
+            elif material_type == 'silica_fume':
+                service = service_container.silica_fume_service
+            elif material_type == 'limestone':
+                service = service_container.limestone_service
             else:
                 raise ValueError(f"Unsupported material type: {material_type}")
             
@@ -1502,6 +1524,7 @@ class MaterialsPanel(Gtk.Box):
             elif material_type == 'aggregate':
                 service.delete(material_data.display_name)
             else:
+                # For all other material types, use the standard ID-based delete
                 service.delete(material_data.id)
             
             # Refresh data
@@ -1509,6 +1532,10 @@ class MaterialsPanel(Gtk.Box):
             self._load_initial_data()
             self.details_revealer.set_reveal_child(False)
             self.selected_material = None
+            
+            # Refresh Mix Design panel material lists if it exists
+            if hasattr(self.main_window, 'mix_design_panel'):
+                self.main_window.mix_design_panel.refresh_material_lists()
             
             self.main_window.update_status(f"Material '{material_data.name}' deleted successfully", "success", 3)
             

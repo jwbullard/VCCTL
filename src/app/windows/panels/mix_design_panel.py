@@ -428,6 +428,13 @@ class MixDesignPanel(Gtk.Box):
         
         self.pack_start(actions_box, False, False, 0)
     
+    def refresh_material_lists(self) -> None:
+        """Refresh material lists and update all dropdowns."""
+        self._load_material_lists()
+        # Also refresh all existing component dropdowns
+        for row_data in self.component_rows:
+            self._update_material_names(row_data)
+    
     def _load_material_lists(self) -> None:
         """Load available materials for each type."""
         try:
