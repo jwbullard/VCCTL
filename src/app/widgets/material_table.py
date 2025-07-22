@@ -724,8 +724,12 @@ class MaterialTable(Gtk.Box):
                         material_id = material_data.name
                     elif material_data.__tablename__ == 'aggregate':
                         material_id = material_data.display_name
+                    elif material_data.__tablename__ in ['limestone', 'silica_fume']:
+                        # These materials have id=None, so use name
+                        material_id = material_data.name
                     else:
-                        material_id = getattr(material_data, 'id', material_data.name)
+                        # For other materials, use id if it's not None, otherwise use name
+                        material_id = material_data.id if material_data.id is not None else material_data.name
                 else:
                     material_id = getattr(material_data, 'name', getattr(material_data, 'display_name', None))
                 
