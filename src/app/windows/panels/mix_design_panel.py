@@ -496,9 +496,9 @@ class MixDesignPanel(Gtk.Box):
         self.fine_agg_shape_combo.connect('changed', self._on_parameter_changed)
         self.coarse_agg_shape_combo.connect('changed', self._on_parameter_changed)
         
-        # Volume fraction controls
-        self.fine_agg_volume_spin.connect('value-changed', self._on_volume_fraction_changed)
-        self.coarse_agg_volume_spin.connect('value-changed', self._on_volume_fraction_changed)
+        # Mass and volume fraction controls
+        self.fine_agg_mass_spin.connect('value-changed', self._on_mass_changed)
+        self.coarse_agg_mass_spin.connect('value-changed', self._on_mass_changed)
         self.micro_air_content_spin.connect('value-changed', self._on_volume_fraction_changed)
     
     def _create_component_row(self) -> Gtk.Box:
@@ -696,6 +696,15 @@ class MixDesignPanel(Gtk.Box):
     def _on_parameter_changed(self, widget) -> None:
         """Handle any parameter change."""
         if self.auto_calculate_enabled:
+            self._trigger_calculation()
+    
+    def _on_mass_changed(self, widget) -> None:
+        """Handle aggregate mass changes and update validation."""
+        # Update total volume fraction display
+        self._calculate_total_volume_fractions()
+        
+        # Trigger normal calculation if enabled
+        if hasattr(self, 'auto_calculate') and self.auto_calculate.get_active():
             self._trigger_calculation()
     
     def _on_volume_fraction_changed(self, widget) -> None:
@@ -901,26 +910,53 @@ class MixDesignPanel(Gtk.Box):
     def _calculate_total_volume_fractions(self) -> None:
         """Calculate and display total volume fractions, checking if they sum to 1.0."""
         try:
-            # Get current values
-            fine_agg_vol = self.fine_agg_volume_spin.get_value()
-            coarse_agg_vol = self.coarse_agg_volume_spin.get_value()
-            air_vol = self.micro_air_content_spin.get_value()
+            # Get current masses
+            fine_agg_mass = self.fine_agg_mass_spin.get_value()
+            coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
+            air_vol_fraction = self.micro_air_content_spin.get_value()  # This is already a volume fraction (0-1)
             
-            # Calculate paste volume fraction (remaining after aggregates and air)
-            paste_vol = 1.0 - fine_agg_vol - coarse_agg_vol - air_vol
+            # Get powder masses
+            total_powder_mass = 0.0
+            for row in self.component_rows:
+                mass_kg = row['mass_spin'].get_value()
+                if mass_kg > 0:
+                    total_powder_mass += mass_kg
             
-            # Calculate powder and water volume fractions on paste basis
-            powder_vol_paste, water_vol_paste = self._calculate_powder_and_water_volumes()
+            water_mass = self.water_mass_spin.get_value()
             
-            # Convert to total mix basis
-            powder_vol_total = powder_vol_paste * paste_vol if paste_vol > 0 else 0.0
-            water_vol_total = water_vol_paste * paste_vol if paste_vol > 0 else 0.0
+            # Convert masses to absolute volumes using specific gravities
+            powder_volume = total_powder_mass / 3.15  # Typical cement SG
+            water_volume = water_mass / 1.0  # Water SG = 1.0
+            fine_agg_volume = fine_agg_mass / 2.65 if fine_agg_mass > 0 else 0.0  # Assume SG=2.65
+            coarse_agg_volume = coarse_agg_mass / 2.65 if coarse_agg_mass > 0 else 0.0  # Assume SG=2.65
             
-            # Calculate total (should always equal 1.0 for valid mixes)
-            total = fine_agg_vol + coarse_agg_vol + air_vol + powder_vol_total + water_vol_total
+            # Calculate total solid volume
+            total_solid_volume = powder_volume + water_volume + fine_agg_volume + coarse_agg_volume
+            
+            # Air volume fraction represents fraction of TOTAL mix volume
+            # So if air = 0.05, then solids = 0.95 of total volume
+            # Therefore: total_volume = total_solid_volume / (1 - air_vol_fraction)
+            if air_vol_fraction < 1.0:
+                total_volume = total_solid_volume / (1.0 - air_vol_fraction)
+            else:
+                total_volume = total_solid_volume
+            
+            # Calculate volume fractions (normalized to 1.0)
+            if total_volume > 0:
+                powder_vol_fraction = powder_volume / total_volume
+                water_vol_fraction = water_volume / total_volume  
+                fine_agg_vol_fraction = fine_agg_volume / total_volume
+                coarse_agg_vol_fraction = coarse_agg_volume / total_volume
+                # Air volume fraction is already correct from input
+                air_vol_fraction_actual = air_vol_fraction
+            else:
+                powder_vol_fraction = water_vol_fraction = fine_agg_vol_fraction = coarse_agg_vol_fraction = air_vol_fraction_actual = 0.0
+            
+            # Total volume fraction (should be very close to 1.0)
+            total_vol_fraction = powder_vol_fraction + water_vol_fraction + fine_agg_vol_fraction + coarse_agg_vol_fraction + air_vol_fraction_actual
             
             # Update display
-            self.total_volume_label.set_text(f"{total:.3f}")
+            self.total_volume_label.set_text(f"{total_vol_fraction:.3f}")
             
             # Color code based on how close to 1.0
             style_context = self.total_volume_label.get_style_context()
@@ -928,9 +964,9 @@ class MixDesignPanel(Gtk.Box):
             style_context.remove_class("warning")
             style_context.remove_class("success")
             
-            if abs(total - 1.0) < 0.001:  # Very close to 1.0
+            if abs(total_vol_fraction - 1.0) < 0.001:  # Very close to 1.0
                 style_context.add_class("success")
-            elif abs(total - 1.0) < 0.05:  # Somewhat close
+            elif abs(total_vol_fraction - 1.0) < 0.05:  # Somewhat close
                 style_context.add_class("warning")
             else:  # Far from 1.0
                 style_context.add_class("error")
@@ -994,7 +1030,7 @@ class MixDesignPanel(Gtk.Box):
     
     def _calculate_total_powder_mass(self) -> float:
         """Calculate total powder mass in kg (cement, fly ash, slag, inert filler)."""
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         total_powder = 0.0
         
         for row in self.component_rows:
@@ -1021,7 +1057,7 @@ class MixDesignPanel(Gtk.Box):
     
     def _calculate_powder_specific_gravity(self) -> float:
         """Calculate mass-weighted average specific gravity of all powder components."""
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         total_weighted_sg = 0.0
         total_powder_mass = 0.0
         
@@ -1137,18 +1173,26 @@ class MixDesignPanel(Gtk.Box):
                 if mass_kg > 0:
                     total_component_mass += mass_kg
             
-            # Create components with mass fractions (relative to total component mass)
+            # Get aggregate masses first
+            fine_agg_mass = self.fine_agg_mass_spin.get_value()
+            coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
+            
+            # Calculate total mass including water and aggregates
+            water_mass = self.water_mass_spin.get_value()
+            total_mass_all = total_component_mass + water_mass + fine_agg_mass + coarse_agg_mass
+            
+            # Create components with mass fractions (relative to total mass including everything)
             for row in self.component_rows:
                 type_str = row['type_combo'].get_active_id()
                 name = row['name_combo'].get_active_id()
                 mass_kg = row['mass_spin'].get_value()
                 
-                if type_str and name and mass_kg > 0 and total_component_mass > 0:
+                if type_str and name and mass_kg > 0 and total_mass_all > 0:
                     material_type = MaterialType(type_str)
                     sg = self.mix_service._get_material_specific_gravity(name, material_type)
                     
-                    # Convert kg to mass fraction (relative to component mass, not including water)
-                    mass_fraction = mass_kg / total_component_mass
+                    # Convert kg to mass fraction (relative to total mass of everything)
+                    mass_fraction = mass_kg / total_mass_all
                     
                     component = MixComponent(
                         material_name=name,
@@ -1158,13 +1202,11 @@ class MixDesignPanel(Gtk.Box):
                     )
                     components.append(component)
             
-            # Add aggregate components from Microstructure Composition panel
-            fine_agg_volume_fraction = self.fine_agg_volume_spin.get_value()
-            coarse_agg_volume_fraction = self.coarse_agg_volume_spin.get_value()
+            # Aggregate masses already obtained above and included in total_mass_all
             
             # Add fine aggregate if selected
             fine_agg_name = self.fine_agg_combo.get_active_id()
-            if fine_agg_name and fine_agg_name != "" and fine_agg_volume_fraction > 0:
+            if fine_agg_name and fine_agg_name != "" and fine_agg_mass > 0:
                 # Use default aggregate specific gravity
                 fine_agg_sg = 2.65  # Typical aggregate specific gravity
                 try:
@@ -1172,18 +1214,20 @@ class MixDesignPanel(Gtk.Box):
                 except:
                     pass  # Use default if lookup fails
                 
-                # Convert volume fraction to mass fraction using specific gravity
+                # Calculate mass fraction (using total mass of all components)
+                mass_fraction = fine_agg_mass / total_mass_all if total_mass_all > 0 else 0.0
+                
                 fine_agg_component = MixComponent(
                     material_name=fine_agg_name,
                     material_type=MaterialType.AGGREGATE,
-                    mass_fraction=fine_agg_volume_fraction * fine_agg_sg,  # Volume to mass conversion
+                    mass_fraction=mass_fraction,
                     specific_gravity=fine_agg_sg
                 )
                 components.append(fine_agg_component)
             
             # Add coarse aggregate if selected
             coarse_agg_name = self.coarse_agg_combo.get_active_id()
-            if coarse_agg_name and coarse_agg_name != "" and coarse_agg_volume_fraction > 0:
+            if coarse_agg_name and coarse_agg_name != "" and coarse_agg_mass > 0:
                 # Use default aggregate specific gravity
                 coarse_agg_sg = 2.65  # Typical aggregate specific gravity
                 try:
@@ -1191,11 +1235,13 @@ class MixDesignPanel(Gtk.Box):
                 except:
                     pass  # Use default if lookup fails
                 
-                # Convert volume fraction to mass fraction using specific gravity
+                # Calculate mass fraction (using total mass of all components)
+                mass_fraction = coarse_agg_mass / total_mass_all if total_mass_all > 0 else 0.0
+                
                 coarse_agg_component = MixComponent(
                     material_name=coarse_agg_name,
                     material_type=MaterialType.AGGREGATE,
-                    mass_fraction=coarse_agg_volume_fraction * coarse_agg_sg,  # Volume to mass conversion
+                    mass_fraction=mass_fraction,
                     specific_gravity=coarse_agg_sg
                 )
                 components.append(coarse_agg_component)
@@ -1203,16 +1249,22 @@ class MixDesignPanel(Gtk.Box):
             if not components:
                 return None
             
-            # Create mix design
-            # Convert water mass to water fraction (relative to component mass)
-            water_mass = self.water_content_spin.get_value()
-            water_fraction = water_mass / total_component_mass if total_component_mass > 0 else 0.0
+            # Add water as a component to ensure mass fractions sum to 1.0
+            if water_mass > 0:
+                water_component = MixComponent(
+                    material_name="Water",
+                    material_type=MaterialType.AGGREGATE,  # Use aggregate type for water temporarily  
+                    mass_fraction=water_mass / total_mass_all if total_mass_all > 0 else 0.0,
+                    specific_gravity=1.0
+                )
+                components.append(water_component)
             
+            # Create mix design
             mix_design = MixDesign(
                 name=mix_name,
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
-                total_water_content=water_fraction,
+                total_water_content=water_mass / total_mass_all if total_mass_all > 0 else 0.0,  # Water fraction
                 air_content=self.micro_air_content_spin.get_value()  # Already a volume fraction
             )
             
@@ -1426,8 +1478,8 @@ class MixDesignPanel(Gtk.Box):
             'system_size_z': int(self.system_size_z_spin.get_value()),
             'resolution': self.resolution_spin.get_value(),
             'water_binder_ratio': self.wb_ratio_spin.get_value(),
-            'fine_aggregate_volume_fraction': self.fine_agg_volume_spin.get_value(),
-            'coarse_aggregate_volume_fraction': self.coarse_agg_volume_spin.get_value(),
+            'fine_aggregate_volume_fraction': self._calculate_aggregate_volume_fraction('fine'),
+            'coarse_aggregate_volume_fraction': self._calculate_aggregate_volume_fraction('coarse'),
             'air_content': self.micro_air_content_spin.get_value(),
             'cement_shape_set': self.cement_shape_combo.get_active_id() or "sphere",
             'fine_aggregate_shape_set': self.fine_agg_shape_combo.get_active_id() or "sphere",
@@ -1665,7 +1717,7 @@ class MixDesignPanel(Gtk.Box):
         """Calculate binder solid and water volume fractions on total paste basis."""
         try:
             # Calculate total powder mass and volume fractions
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             
             total_powder_mass_fraction = 0.0
             total_powder_volume = 0.0
@@ -1779,7 +1831,7 @@ class MixDesignPanel(Gtk.Box):
         """Calculate component's volume fraction on binder solid basis."""
         try:
             # Calculate total powder mass
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder_mass = sum(comp.mass_fraction for comp in mix_design.components 
                                   if comp.material_type in powder_types)
             
@@ -1791,6 +1843,66 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to calculate component binder solid fraction: {e}")
             return 0.1  # Default fallback
+    
+    def _calculate_aggregate_volume_fraction(self, aggregate_type: str) -> float:
+        """Convert aggregate mass to volume fraction for genmic.c input."""
+        try:
+            if aggregate_type == 'fine':
+                mass = self.fine_agg_mass_spin.get_value()
+                agg_name = self.fine_agg_combo.get_active_id()
+            elif aggregate_type == 'coarse':
+                mass = self.coarse_agg_mass_spin.get_value()
+                agg_name = self.coarse_agg_combo.get_active_id()
+            else:
+                return 0.0
+            
+            if mass <= 0 or not agg_name:
+                return 0.0
+            
+            # Get aggregate specific gravity
+            try:
+                sg = self.mix_service._get_material_specific_gravity(agg_name, MaterialType.AGGREGATE)
+            except:
+                sg = 2.65  # Default aggregate specific gravity
+            
+            # Calculate volume from mass and specific gravity
+            aggregate_volume = mass / sg
+            
+            # Calculate total mix volume for normalization
+            # Get all component masses
+            total_powder_mass = 0.0
+            for row in self.component_rows:
+                mass_kg = row['mass_spin'].get_value()
+                if mass_kg > 0:
+                    total_powder_mass += mass_kg
+            
+            water_mass = self.water_mass_spin.get_value()
+            fine_mass = self.fine_agg_mass_spin.get_value()
+            coarse_mass = self.coarse_agg_mass_spin.get_value()
+            
+            # Calculate total volume (using correct air volume fraction handling)
+            powder_volume = total_powder_mass / 3.15  # Typical cement SG
+            water_volume = water_mass / 1.0  # Water SG = 1.0
+            fine_volume = fine_mass / 2.65  # Typical aggregate SG
+            coarse_volume = coarse_mass / 2.65  # Typical aggregate SG
+            air_vol_fraction = self.micro_air_content_spin.get_value()  # Already a volume fraction
+            
+            # Calculate solid volume, then total volume accounting for air
+            total_solid_volume = powder_volume + water_volume + fine_volume + coarse_volume
+            if air_vol_fraction < 1.0:
+                total_volume = total_solid_volume / (1.0 - air_vol_fraction)
+            else:
+                total_volume = total_solid_volume
+            
+            # Return volume fraction (fraction of total mix volume)
+            if total_volume > 0:
+                return aggregate_volume / total_volume
+            else:
+                return 0.0
+                
+        except Exception as e:
+            self.logger.error(f"Error calculating {aggregate_type} aggregate volume fraction: {e}")
+            return 0.0
 
     def _create_mix_folder_and_correlation_files(self, mix_design: MixDesign) -> None:
         """Create mix folder and generate correlation files for cement materials."""
@@ -1906,7 +2018,7 @@ class MixDesignPanel(Gtk.Box):
         # Add phase data for each component
         # TODO: This section will be completely rewritten to handle cement phases properly
         # For now, keeping simplified structure to implement num_phases fix
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         
         for component in mix_design.components:
             if component.material_type in powder_types:
@@ -2273,16 +2385,21 @@ class MixDesignPanel(Gtk.Box):
         grid.set_margin_left(15)
         grid.set_margin_right(15)
         
-        # Fine aggregate volume fraction
-        fine_vol_label = Gtk.Label("Fine Aggregate Volume Fraction:")
-        fine_vol_label.set_halign(Gtk.Align.START)
-        fine_vol_label.set_tooltip_text("Volume fraction of fine aggregate in total concrete volume")
-        grid.attach(fine_vol_label, 0, 0, 1, 1)
+        # Fine aggregate mass
+        fine_mass_label = Gtk.Label("Fine Aggregate Mass (kg):")
+        fine_mass_label.set_halign(Gtk.Align.START)
+        fine_mass_label.set_tooltip_text("Mass of fine aggregate in kg")
+        grid.attach(fine_mass_label, 0, 0, 1, 1)
         
-        self.fine_agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.fine_agg_volume_spin.set_digits(3)
-        self.fine_agg_volume_spin.set_value(0.25)
-        grid.attach(self.fine_agg_volume_spin, 1, 0, 1, 1)
+        self.fine_agg_mass_spin = Gtk.SpinButton.new_with_range(0.0, 10.0, 0.01)
+        self.fine_agg_mass_spin.set_digits(3)
+        self.fine_agg_mass_spin.set_value(1.5)
+        grid.attach(self.fine_agg_mass_spin, 1, 0, 1, 1)
+        
+        # Add kg label
+        fine_kg_label = Gtk.Label("kg")
+        fine_kg_label.set_halign(Gtk.Align.START)
+        grid.attach(fine_kg_label, 2, 0, 1, 1)
         
         # Fine aggregate selection
         fine_agg_label = Gtk.Label("Fine Aggregate:")
@@ -2315,16 +2432,21 @@ class MixDesignPanel(Gtk.Box):
         self.fine_agg_shape_combo.set_active(0)
         grid.attach(self.fine_agg_shape_combo, 1, 2, 1, 1)
         
-        # Coarse aggregate volume fraction
-        coarse_vol_label = Gtk.Label("Coarse Aggregate Volume Fraction:")
-        coarse_vol_label.set_halign(Gtk.Align.START)
-        coarse_vol_label.set_tooltip_text("Volume fraction of coarse aggregate in total concrete volume")
-        grid.attach(coarse_vol_label, 0, 3, 1, 1)
+        # Coarse aggregate mass
+        coarse_mass_label = Gtk.Label("Coarse Aggregate Mass (kg):")
+        coarse_mass_label.set_halign(Gtk.Align.START)
+        coarse_mass_label.set_tooltip_text("Mass of coarse aggregate in kg")
+        grid.attach(coarse_mass_label, 0, 3, 1, 1)
         
-        self.coarse_agg_volume_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.coarse_agg_volume_spin.set_digits(3)
-        self.coarse_agg_volume_spin.set_value(0.35)
-        grid.attach(self.coarse_agg_volume_spin, 1, 3, 1, 1)
+        self.coarse_agg_mass_spin = Gtk.SpinButton.new_with_range(0.0, 10.0, 0.01)
+        self.coarse_agg_mass_spin.set_digits(3)
+        self.coarse_agg_mass_spin.set_value(2.0)
+        grid.attach(self.coarse_agg_mass_spin, 1, 3, 1, 1)
+        
+        # Add kg label
+        coarse_kg_label = Gtk.Label("kg")
+        coarse_kg_label.set_halign(Gtk.Align.START)
+        grid.attach(coarse_kg_label, 2, 3, 1, 1)
         
         # Coarse aggregate selection
         coarse_agg_label = Gtk.Label("Coarse Aggregate:")
