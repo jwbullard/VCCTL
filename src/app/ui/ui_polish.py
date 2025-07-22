@@ -15,7 +15,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
 
 from .theme_manager import ThemeManager, get_theme_manager, ColorScheme
-from .keyboard_manager import KeyboardManager, create_keyboard_manager
+from .keyboard_manager import KeyboardManager, create_keyboard_manager, ShortcutCategory
 from .accessibility_manager import AccessibilityManager, create_accessibility_manager, AccessibilityLevel
 from .responsive_layout import ResponsiveLayoutManager, create_responsive_layout_manager, ScreenSize
 
@@ -129,25 +129,25 @@ class UIPolishManager(GObject.Object):
             # Quick access to data tables
             self.keyboard_manager.register_shortcut(
                 'sci_data_table', 't', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK,
-                self._show_data_table, "Show data table", self.keyboard_manager.ShortcutCategory.VIEW
+                self._show_data_table, "Show data table", ShortcutCategory.VIEW
             )
             
             # Export current view
             self.keyboard_manager.register_shortcut(
                 'sci_export_view', 'e', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK,
-                self._export_current_view, "Export current view", self.keyboard_manager.ShortcutCategory.FILE
+                self._export_current_view, "Export current view", ShortcutCategory.FILE
             )
             
             # Toggle scientific notation
             self.keyboard_manager.register_shortcut(
                 'sci_notation', 'n', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK,
-                self._toggle_scientific_notation, "Toggle scientific notation", self.keyboard_manager.ShortcutCategory.VIEW
+                self._toggle_scientific_notation, "Toggle scientific notation", ShortcutCategory.VIEW
             )
             
             # Quick calculation mode
             self.keyboard_manager.register_shortcut(
                 'sci_calculator', 'c', Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK,
-                self._open_calculator, "Open calculator", self.keyboard_manager.ShortcutCategory.OPERATION
+                self._open_calculator, "Open calculator", ShortcutCategory.OPERATION
             )
             
         except Exception as e:

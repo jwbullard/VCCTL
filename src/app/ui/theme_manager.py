@@ -164,10 +164,32 @@ class ThemeManager(GObject.Object):
         
         try:
             self.css_provider.load_from_data(css_content.encode('utf-8'))
+            self._apply_theme_classes()
             self.emit('theme-changed', self.current_scheme.value)
             self.logger.info(f"Applied theme: {self.current_scheme.value}")
         except Exception as e:
             self.logger.error(f"Failed to apply theme: {e}")
+    
+    def _apply_theme_classes(self) -> None:
+        """Apply appropriate CSS classes based on current theme."""
+        try:
+            # Get the default screen and window
+            screen = Gdk.Screen.get_default()
+            if screen:
+                # Find all toplevel windows and apply theme classes
+                for window in Gtk.Window.list_toplevels():
+                    if window and hasattr(window, 'get_style_context'):
+                        context = window.get_style_context()
+                        
+                        # Remove existing theme classes
+                        context.remove_class('high-contrast')
+                        
+                        # Apply current theme class
+                        if self.current_scheme == ColorScheme.HIGH_CONTRAST:
+                            context.add_class('high-contrast')
+                            
+        except Exception as e:
+            self.logger.debug(f"Could not apply theme classes: {e}")
     
     def _generate_css(self) -> str:
         """Generate CSS content for current theme."""
@@ -176,20 +198,11 @@ class ThemeManager(GObject.Object):
         css = f"""
         /* VCCTL Application Theme - {self.current_scheme.value.title()} */
         
-        /* Root variables */
-        :root {{
-            --primary-color: {colors['primary']};
-            --primary-light: {colors['primary_light']};
-            --primary-accent: {colors['primary_accent']};
-            --background-color: {colors['background']};
-            --surface-color: {colors['surface']};
-            --text-color: {colors['text_primary']};
-            --text-secondary: {colors['text_secondary']};
-            --border-color: {colors['border']};
-            --success-color: {colors['success']};
-            --warning-color: {colors['warning']};
-            --error-color: {colors['error']};
-            --info-color: {colors['info']};
+        /* Global base styling */
+        * {{
+            outline-style: solid;
+            outline-width: 1px;
+            outline-offset: -1px;
         }}
         
         /* Window styling */
@@ -202,7 +215,7 @@ class ThemeManager(GObject.Object):
         
         /* Header bar styling */
         headerbar {{
-            background: linear-gradient(to bottom, {colors['primary_light']}, {colors['primary']});
+            background: {colors['primary']};
             color: {colors['text_on_primary']};
             border-bottom: 1px solid {colors['border']};
             min-height: 46px;
@@ -217,7 +230,7 @@ class ThemeManager(GObject.Object):
         }}
         
         headerbar button:hover {{
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: {colors['primary_light']};
         }}
         
         /* Notebook (tab) styling */
@@ -253,7 +266,7 @@ class ThemeManager(GObject.Object):
         
         /* Button styling */
         button {{
-            background: linear-gradient(to bottom, {colors['surface']}, {colors['background']});
+            background: {colors['surface']};
             border: 1px solid {colors['border']};
             color: {colors['text_primary']};
             padding: {VCCTLSpacing.PADDING_SMALL}px {VCCTLSpacing.PADDING_NORMAL}px;
@@ -263,7 +276,7 @@ class ThemeManager(GObject.Object):
         }}
         
         button:hover {{
-            background: linear-gradient(to bottom, {colors['primary_light']}, {colors['primary_accent']});
+            background: {colors['primary_accent']};
             border-color: {colors['primary_accent']};
             color: {colors['text_on_primary']};
         }}
@@ -275,13 +288,13 @@ class ThemeManager(GObject.Object):
         }}
         
         button.suggested-action {{
-            background: linear-gradient(to bottom, {colors['primary_accent']}, {colors['primary']});
+            background: {colors['primary']};
             border-color: {colors['primary']};
             color: {colors['text_on_primary']};
         }}
         
         button.destructive-action {{
-            background: linear-gradient(to bottom, {colors['error']}, #a54247);
+            background: {colors['error']};
             border-color: {colors['error']};
             color: white;
         }}
@@ -298,7 +311,7 @@ class ThemeManager(GObject.Object):
         
         entry:focus {{
             border-color: {colors['primary_accent']};
-            box-shadow: 0 0 0 2px rgba(136, 192, 208, 0.2);
+            box-shadow: 0 0 0 2px {colors['primary_light']};
         }}
         
         entry:disabled {{
@@ -314,7 +327,7 @@ class ThemeManager(GObject.Object):
         }}
         
         treeview header {{
-            background: linear-gradient(to bottom, {colors['background']}, {colors['surface']});
+            background: {colors['background']};
             border-bottom: 1px solid {colors['border']};
             font-weight: {VCCTLFonts.FONT_WEIGHT_MEDIUM};
         }}
@@ -418,7 +431,7 @@ class ThemeManager(GObject.Object):
         }}
         
         progressbar progress {{
-            background: linear-gradient(to right, {colors['primary_accent']}, {colors['primary_light']});
+            background: {colors['primary_accent']};
             border-radius: {VCCTLSpacing.BORDER_RADIUS_SMALL}px;
         }}
         
@@ -484,8 +497,17 @@ class ThemeManager(GObject.Object):
             background-color: {colors['surface']};
         }}
         
-        .scientific-table treeview:nth-child(even) {{
+        .scientific-table treeview row:selected {{
+            background-color: {colors['primary']};
+            color: {colors['text_on_primary']};
+        }}
+        
+        .scientific-table treeview row:alternate {{
             background-color: {colors['background']};
+        }}
+        
+        .scientific-table treeview row {{
+            background-color: {colors['surface']};
         }}
         
         /* Material property styling */
@@ -534,19 +556,35 @@ class ThemeManager(GObject.Object):
             outline-offset: 2px;
         }}
         
-        /* High contrast mode adjustments */
-        @media (prefers-contrast: high) {{
-            * {{
-                border-width: 2px;
-            }}
-            
-            button {{
-                border-width: 2px;
-            }}
-            
-            entry {{
-                border-width: 2px;
-            }}
+        /* High contrast mode adjustments - applied via .high-contrast class */
+        .high-contrast button {{
+            border-width: 2px;
+            border-color: {colors['text_primary']};
+        }}
+        
+        .high-contrast entry {{
+            border-width: 2px;
+            border-color: {colors['text_primary']};
+        }}
+        
+        .high-contrast frame {{
+            border-width: 2px;
+            border-color: {colors['text_primary']};
+        }}
+        
+        .high-contrast treeview {{
+            border-width: 2px;
+        }}
+        
+        /* Enhanced focus indicators for accessibility */
+        button:focus {{
+            outline: 2px solid {colors['primary_accent']};
+            outline-offset: 2px;
+        }}
+        
+        entry:focus {{
+            outline: 2px solid {colors['primary_accent']};
+            outline-offset: 1px;
         }}
         """
         

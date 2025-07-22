@@ -262,11 +262,25 @@ class ConfigManager:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             
             with open(file_path, 'w', encoding='utf-8') as f:
-                yaml.dump(config, f, default_flow_style=False, indent=2, sort_keys=True)
+                # Convert Path objects to strings before saving
+                serializable_config = self._make_serializable(config)
+                # Use safe_dump to prevent Python object serialization
+                yaml.safe_dump(serializable_config, f, default_flow_style=False, indent=2, sort_keys=True)
                 
         except Exception as e:
             self.logger.error(f"Failed to save config file {file_path}: {e}")
             raise ConfigurationError(f"Failed to save configuration file: {e}")
+    
+    def _make_serializable(self, obj):
+        """Convert Path objects and other non-serializable objects to serializable forms."""
+        if isinstance(obj, Path):
+            return str(obj)
+        elif isinstance(obj, dict):
+            return {key: self._make_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, (list, tuple)):
+            return [self._make_serializable(item) for item in obj]
+        else:
+            return obj
     
     def reload_configuration(self) -> None:
         """Reload configuration from files."""

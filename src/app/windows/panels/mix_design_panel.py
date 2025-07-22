@@ -906,11 +906,18 @@ class MixDesignPanel(Gtk.Box):
             coarse_agg_vol = self.coarse_agg_volume_spin.get_value()
             air_vol = self.micro_air_content_spin.get_value()
             
-            # Calculate powder and water volume fractions from mass values
-            powder_vol, water_vol = self._calculate_powder_and_water_volumes()
+            # Calculate paste volume fraction (remaining after aggregates and air)
+            paste_vol = 1.0 - fine_agg_vol - coarse_agg_vol - air_vol
             
-            # Calculate total
-            total = fine_agg_vol + coarse_agg_vol + air_vol + powder_vol + water_vol
+            # Calculate powder and water volume fractions on paste basis
+            powder_vol_paste, water_vol_paste = self._calculate_powder_and_water_volumes()
+            
+            # Convert to total mix basis
+            powder_vol_total = powder_vol_paste * paste_vol if paste_vol > 0 else 0.0
+            water_vol_total = water_vol_paste * paste_vol if paste_vol > 0 else 0.0
+            
+            # Calculate total (should always equal 1.0 for valid mixes)
+            total = fine_agg_vol + coarse_agg_vol + air_vol + powder_vol_total + water_vol_total
             
             # Update display
             self.total_volume_label.set_text(f"{total:.3f}")
@@ -957,9 +964,9 @@ class MixDesignPanel(Gtk.Box):
             if total_volume <= 0:
                 return 0.0, 0.0
             
-            # These are rough estimates for validation
-            powder_vol_fraction = powder_volume / (total_volume / 0.4)  # Assume ~40% paste volume
-            water_vol_fraction = water_volume / (total_volume / 0.4)
+            # Calculate actual volume fractions on paste basis
+            powder_vol_fraction = powder_volume / total_volume
+            water_vol_fraction = water_volume / total_volume
             
             return max(0.0, min(1.0, powder_vol_fraction)), max(0.0, min(1.0, water_vol_fraction))
             
@@ -1065,9 +1072,8 @@ class MixDesignPanel(Gtk.Box):
     
     def _trigger_calculation(self) -> None:
         """Trigger calculation after a short delay."""
-        if self.validation_timer:
-            GObject.source_remove(self.validation_timer)
-        
+        # Simple approach: just set a new timer and let old ones expire naturally
+        # This avoids the GObject.source_remove warning entirely
         self.validation_timer = GObject.timeout_add(500, self._perform_calculations)
     
     def _perform_calculations(self) -> bool:
@@ -1714,7 +1720,7 @@ class MixDesignPanel(Gtk.Box):
             # Return default values
             return 0.7, 0.3
 
-    def _calculate_cement_phase_fractions(self, cement_name: str, component) -> Dict[str, float]:
+    def _calculate_cement_phase_fractions(self, cement_name: str, component, mix_design: MixDesign) -> Dict[str, float]:
         """Calculate volume fractions for cement constituent phases on binder solid basis."""
         try:
             with self.service_container.database_service.get_read_only_session() as session:
@@ -1740,10 +1746,10 @@ class MixDesignPanel(Gtk.Box):
                 clinker_mf = c3s_mf + c2s_mf + c3a_mf + c4af_mf + k2so4_mf + na2so4_mf
                 
                 # Calculate component's fraction of total binder solids (by mass)
-                total_powder_mass = sum(comp.mass_kg for comp in component.mix_design.components 
+                total_powder_mass = sum(comp.mass_fraction for comp in mix_design.components 
                                       if comp.material_type in {MaterialType.CEMENT, MaterialType.FLY_ASH, 
                                                                MaterialType.SLAG, MaterialType.INERT_FILLER})
-                component_fraction = component.mass_kg / total_powder_mass
+                component_fraction = component.mass_fraction / total_powder_mass
                 
                 # Calculate volume fractions on binder solid basis
                 # Each cement phase gets its share of this component's total contribution
@@ -1774,11 +1780,11 @@ class MixDesignPanel(Gtk.Box):
         try:
             # Calculate total powder mass
             powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
-            total_powder_mass = sum(comp.mass_kg for comp in mix_design.components 
+            total_powder_mass = sum(comp.mass_fraction for comp in mix_design.components 
                                   if comp.material_type in powder_types)
             
             # Component's fraction of total binder solids
-            component_fraction = component.mass_kg / total_powder_mass
+            component_fraction = component.mass_fraction / total_powder_mass
             
             return component_fraction
             
@@ -1906,7 +1912,7 @@ class MixDesignPanel(Gtk.Box):
             if component.material_type in powder_types:
                 if component.material_type == MaterialType.CEMENT:
                     # Break cement into 4 phases: Clinker, Dihydrate, Hemihydrate, Anhydrite
-                    cement_phases = self._calculate_cement_phase_fractions(component.material_name, component)
+                    cement_phases = self._calculate_cement_phase_fractions(component.material_name, component, mix_design)
                     psd_data = self._get_material_psd_data(component.material_name, component.material_type)
                     
                     # Phase ID 1: Clinker

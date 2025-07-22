@@ -60,7 +60,7 @@ class Microstructure3DViewer(Gtk.Box):
         self.current_view = 'isometric'
         self.show_axes = True
         self.show_colorbar = True
-        self.alpha_value = 0.8
+        self.alpha_value = 0.6  # More transparent for better visibility
         self.phase_colors = {}
         
         # Animation settings
@@ -352,8 +352,13 @@ class Microstructure3DViewer(Gtk.Box):
             z = np.arange(z_size) * dz * scale_factor
             
             # Render each phase separately
+            # Skip phase 0 (pores/air) to show internal solid structure clearly
             for phase_id, phase_name in self.phase_mapping.items():
                 if phase_id not in self.phase_colors:
+                    continue
+                
+                # Skip phase 0 (pores/air) for better internal visibility
+                if phase_id == 0:
                     continue
                 
                 # Create boolean mask for this phase
@@ -382,9 +387,12 @@ class Microstructure3DViewer(Gtk.Box):
             self.ax.set_ylim(0, y_size * dy * scale_factor)
             self.ax.set_zlim(0, z_size * dz * scale_factor)
             
-            # Add legend if there are multiple phases
+            # Add legend if there are multiple phases - positioned outside plot area
             if len(self.phase_mapping) > 1:
-                self.ax.legend()
+                self.ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8, frameon=True)
+            
+            # Adjust layout to accommodate legend
+            self.figure.tight_layout()
             
             # Refresh canvas
             self.canvas.draw()
@@ -408,8 +416,13 @@ class Microstructure3DViewer(Gtk.Box):
             self.ax.clear()
             
             # For voxel plots, we need boolean arrays for each phase
+            # Skip phase 0 (pores/air) to show internal solid structure clearly
             for phase_id, phase_name in self.phase_mapping.items():
                 if phase_id not in self.phase_colors:
+                    continue
+                
+                # Skip phase 0 (pores/air) for better internal visibility
+                if phase_id == 0:
                     continue
                 
                 # Create boolean mask for this phase

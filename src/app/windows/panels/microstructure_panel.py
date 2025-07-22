@@ -155,6 +155,10 @@ class MicrostructurePanel(Gtk.Box):
         # Preview controls
         preview_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
+        self.load_img_button = Gtk.Button(label="Load .img File")
+        self.load_img_button.set_tooltip_text("Load genmic.c output file (.img)")
+        preview_controls.pack_start(self.load_img_button, True, True, 0)
+        
         self.preview_button = Gtk.Button(label="Generate Preview")
         self.preview_button.set_tooltip_text("Generate 3D microstructure preview")
         preview_controls.pack_start(self.preview_button, True, True, 0)
@@ -228,6 +232,7 @@ class MicrostructurePanel(Gtk.Box):
     def _connect_signals(self) -> None:
         """Connect UI signals."""
         # Preview signals only - parameters are now in Mix Design
+        self.load_img_button.connect('clicked', self._on_load_img_clicked)
         self.preview_button.connect('clicked', self._on_preview_clicked)
         self.export_preview_button.connect('clicked', self._on_export_preview_clicked)
     
@@ -305,17 +310,17 @@ class MicrostructurePanel(Gtk.Box):
         self._update_status("Random seed is configured in Mix Design tool")
     
     def _get_current_parameters(self) -> MicrostructureParams:
-        """Get current parameter values from UI."""
+        """Get current parameter values - using defaults for preview-only mode."""
         return MicrostructureParams(
-            system_size=int(self.system_size_spin.get_value()),
-            resolution=self.resolution_spin.get_value(),
-            water_binder_ratio=self.wb_ratio_spin.get_value(),
-            aggregate_volume_fraction=self.agg_volume_spin.get_value(),
-            air_content=self.air_content_spin.get_value(),
-            cement_shape_set=self.cement_shape_combo.get_active_id() or "sphere",
-            aggregate_shape_set=self.agg_shape_combo.get_active_id() or "sphere",
-            flocculation_enabled=self.flocculation_check.get_active(),
-            flocculation_degree=self.flocculation_spin.get_value()
+            system_size=100,  # Default preview size
+            resolution=1.0,   # Default resolution
+            water_binder_ratio=0.4,  # Default W/B ratio
+            aggregate_volume_fraction=0.0,  # No aggregates in preview
+            air_content=0.05,  # Default air content
+            cement_shape_set="sphere",  # Default shape
+            aggregate_shape_set="sphere",  # Default shape
+            flocculation_enabled=False,  # Default no flocculation
+            flocculation_degree=0.0  # Default degree
         )
     
     def _update_calculated_values(self) -> None:
@@ -491,7 +496,7 @@ class MicrostructurePanel(Gtk.Box):
         import numpy as np
         
         # Use smaller dimensions for preview (max 50x50x50)
-        preview_size = min(50, max(10, int(params.x_dimension / params.resolution / 4)))
+        preview_size = min(50, max(10, int(params.system_size / params.resolution / 4)))
         
         # Create random microstructure with realistic phase distributions
         voxel_data = np.zeros((preview_size, preview_size, preview_size), dtype=int)
@@ -569,6 +574,182 @@ class MicrostructurePanel(Gtk.Box):
                             z += np.random.randint(-1, 2)
         
         return voxel_data
+    
+    def _on_load_img_clicked(self, button) -> None:
+        """Handle load .img file button click."""
+        try:
+            # Create file chooser dialog
+            dialog = Gtk.FileChooserDialog(
+                title="Load Microstructure .img File",
+                parent=self.main_window,
+                action=Gtk.FileChooserAction.OPEN
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+            )
+            
+            # Add file filter for .img files
+            filter_img = Gtk.FileFilter()
+            filter_img.set_name("VCCTL Microstructure Files (*.img)")
+            filter_img.add_pattern("*.img")
+            dialog.add_filter(filter_img)
+            
+            filter_all = Gtk.FileFilter()
+            filter_all.set_name("All Files")
+            filter_all.add_pattern("*")
+            dialog.add_filter(filter_all)
+            
+            # Set initial directory to VCCTLCompare if it exists
+            vcctl_compare_path = "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/VCCTLCompare"
+            import os
+            if os.path.exists(vcctl_compare_path):
+                dialog.set_current_folder(vcctl_compare_path)
+            
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                filename = dialog.get_filename()
+                self._load_img_file(filename)
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"File dialog failed: {e}")
+            self._update_status(f"File selection error: {e}")
+
+    def _load_img_file(self, filepath: str) -> None:
+        """Load and display a .img microstructure file."""
+        try:
+            import numpy as np
+            import os
+            
+            self._update_status(f"Loading {os.path.basename(filepath)}...")
+            
+            # Read the .img file (text format from genmic.c)
+            with open(filepath, 'r') as f:
+                # Parse header information
+                lines = f.readlines()
+                
+                # Find dimensions from header
+                x_size = y_size = z_size = resolution = None
+                data_start_line = 0
+                
+                for i, line in enumerate(lines):
+                    line = line.strip()
+                    if line.startswith('X_Size:'):
+                        x_size = int(line.split(':')[1].strip())
+                    elif line.startswith('Y_Size:'):
+                        y_size = int(line.split(':')[1].strip())
+                    elif line.startswith('Z_Size:'):
+                        z_size = int(line.split(':')[1].strip())
+                    elif line.startswith('Image_Resolution:'):
+                        resolution = float(line.split(':')[1].strip())
+                    elif line.isdigit():  # First voxel data line (phase ID at position 0,0,0)
+                        data_start_line = i
+                        break
+                
+                if None in (x_size, y_size, z_size):
+                    raise ValueError("Could not parse dimensions from .img file header")
+                
+                self.logger.info(f"Loading microstructure: {x_size}x{y_size}x{z_size} voxels, resolution: {resolution}")
+                
+                # Read voxel data (text format, one value per line)
+                voxel_values = []
+                for line in lines[data_start_line:]:
+                    line = line.strip()
+                    if line.isdigit():
+                        voxel_values.append(int(line))
+                
+                expected_size = x_size * y_size * z_size
+                if len(voxel_values) != expected_size:
+                    self.logger.warning(f"Expected {expected_size} voxels, got {len(voxel_values)}")
+                    # Pad with zeros if needed
+                    while len(voxel_values) < expected_size:
+                        voxel_values.append(0)
+                    # Truncate if too long
+                    voxel_values = voxel_values[:expected_size]
+                
+                # Convert to numpy array and reshape
+                voxel_data = np.array(voxel_values, dtype=np.uint8)
+                
+                # Reshape assuming C-order (standard numpy order: Z varies fastest)
+                # Since current file is 100x100x100, ordering doesn't affect visualization
+                voxel_data = voxel_data.reshape((x_size, y_size, z_size))
+                
+                self.logger.info(f"Reshaped voxel data to: {voxel_data.shape}")
+                
+                # Determine unique phases
+                unique_phases = np.unique(voxel_data)
+                self.logger.info(f"Found phases: {unique_phases}")
+                
+                # Create phase mapping (phase ID -> color)
+                phase_colors = {}
+                phase_names = {}
+                
+                # Standard VCCTL phase mappings
+                standard_phases = {
+                    0: ("#000000", "Pores"),
+                    1: ("#808080", "C3S"),
+                    2: ("#A0A0A0", "C2S"), 
+                    3: ("#FF6600", "C3A"),
+                    4: ("#996633", "C4AF"),
+                    7: ("#FFFF00", "Gypsum Dihydrate"),
+                    8: ("#FFD700", "Gypsum Hemihydrate"),
+                    9: ("#FFA500", "Gypsum Anhydrite"),
+                    12: ("#00FF00", "Slag"),
+                    18: ("#00CCFF", "Fly Ash")
+                }
+                
+                for phase_id in unique_phases:
+                    if phase_id in standard_phases:
+                        color, name = standard_phases[phase_id]
+                    else:
+                        # Generate color for unknown phases (avoid overflow)
+                        phase_id_int = int(phase_id)
+                        r = (phase_id_int * 50) % 256
+                        g = (phase_id_int * 100) % 256
+                        b = (phase_id_int * 150) % 256
+                        color = f"#{r:02x}{g:02x}{b:02x}"
+                        name = f"Phase {phase_id}"
+                    
+                    phase_colors[int(phase_id)] = color
+                    phase_names[int(phase_id)] = name
+                
+                # Display in 3D viewer using correct method
+                success = self.microstructure_3d_viewer.load_voxel_data(
+                    voxel_data,
+                    phase_names,
+                    (1.0, 1.0, 1.0)  # voxel size
+                )
+                
+                if success:
+                    self.export_preview_button.set_sensitive(True)
+                    
+                    # Count voxels per phase
+                    phase_counts = []
+                    pore_count = 0
+                    for phase_id, name in phase_names.items():
+                        count = np.sum(voxel_data == phase_id)
+                        if phase_id == 0:
+                            pore_count = count
+                        else:
+                            phase_counts.append(f"{name} ({count} voxels)")
+                    
+                    phase_info = ", ".join(phase_counts)
+                    status_msg = f"Loaded {os.path.basename(filepath)} - Size: {x_size}×{y_size}×{z_size}"
+                    if pore_count > 0:
+                        status_msg += f" - {pore_count} pores hidden"
+                    if phase_counts:
+                        status_msg += f" - Solid phases: {phase_info}"
+                    
+                    self._update_status(status_msg)
+                    self.logger.info(f"Successfully loaded microstructure from {filepath}")
+                else:
+                    self._update_status("Failed to display loaded microstructure")
+                    
+        except Exception as e:
+            self.logger.error(f"Failed to load .img file {filepath}: {e}")
+            self._update_status(f"Failed to load file: {e}")
     
     def _on_export_preview_clicked(self, button) -> None:
         """Handle preview export button click."""

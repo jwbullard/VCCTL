@@ -372,12 +372,17 @@ class MixService:
             else:
                 properties['scm_replacement_ratio'] = 0.0
             
-            # Calculate aggregate fractions
-            aggregate_mass = sum(
-                comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type == MaterialType.AGGREGATE
-            )
-            properties['total_aggregate_fraction'] = aggregate_mass
+            # Calculate aggregate volume fraction (which is what users expect to see)
+            aggregate_components = [comp for comp in mix_design.components if comp.material_type == MaterialType.AGGREGATE]
+            aggregate_volume_fraction = sum(comp.volume_fraction for comp in aggregate_components)
+            
+            # Debug logging
+            self.logger.debug(f"Found {len(aggregate_components)} aggregate components")
+            for comp in aggregate_components:
+                self.logger.debug(f"  {comp.material_name}: mass_fraction={comp.mass_fraction:.3f}, volume_fraction={comp.volume_fraction:.3f}, sg={comp.specific_gravity:.3f}")
+            self.logger.debug(f"Total aggregate volume fraction: {aggregate_volume_fraction:.3f}")
+            
+            properties['total_aggregate_fraction'] = aggregate_volume_fraction
             
             # Calculate void ratio (simplified)
             total_solid_volume = sum(comp.volume_fraction for comp in mix_design.components)
