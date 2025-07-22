@@ -704,7 +704,7 @@ class MixDesignPanel(Gtk.Box):
         self._calculate_total_volume_fractions()
         
         # Trigger normal calculation if enabled
-        if hasattr(self, 'auto_calculate') and self.auto_calculate.get_active():
+        if self.auto_calculate_enabled:
             self._trigger_calculation()
     
     def _on_volume_fraction_changed(self, widget) -> None:
