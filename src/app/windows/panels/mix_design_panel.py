@@ -922,7 +922,7 @@ class MixDesignPanel(Gtk.Box):
                 if mass_kg > 0:
                     total_powder_mass += mass_kg
             
-            water_mass = self.water_mass_spin.get_value()
+            water_mass = self.water_content_spin.get_value()
             
             # Convert masses to absolute volumes using specific gravities
             powder_volume = total_powder_mass / 3.15  # Typical cement SG
@@ -1178,7 +1178,7 @@ class MixDesignPanel(Gtk.Box):
             coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
             
             # Calculate total mass including water and aggregates
-            water_mass = self.water_mass_spin.get_value()
+            water_mass = self.water_content_spin.get_value()
             total_mass_all = total_component_mass + water_mass + fine_agg_mass + coarse_agg_mass
             
             # Create components with mass fractions (relative to total mass including everything)
@@ -1876,7 +1876,7 @@ class MixDesignPanel(Gtk.Box):
                 if mass_kg > 0:
                     total_powder_mass += mass_kg
             
-            water_mass = self.water_mass_spin.get_value()
+            water_mass = self.water_content_spin.get_value()
             fine_mass = self.fine_agg_mass_spin.get_value()
             coarse_mass = self.coarse_agg_mass_spin.get_value()
             
