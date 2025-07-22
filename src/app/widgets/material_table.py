@@ -420,6 +420,96 @@ class MaterialTable(Gtk.Box):
             except Exception as e:
                 self.logger.warning(f"Error loading cement materials: {e}")
             
+            # Load fly ash materials
+            try:
+                fly_ash_service = self.service_container.fly_ash_service
+                fly_ashes = fly_ash_service.get_all()
+                for fly_ash in fly_ashes:
+                    materials.append({
+                        'id': fly_ash.name,
+                        'name': fly_ash.name,
+                        'type': 'fly_ash',
+                        'specific_gravity': fly_ash.specific_gravity,
+                        'created_date': fly_ash.created_at.strftime('%Y-%m-%d') if fly_ash.created_at else '',
+                        'modified_date': fly_ash.updated_at.strftime('%Y-%m-%d') if fly_ash.updated_at else '',
+                        'description': fly_ash.description or '',
+                        'data': fly_ash
+                    })
+            except Exception as e:
+                self.logger.warning(f"Error loading fly ash materials: {e}")
+            
+            # Load slag materials
+            try:
+                slag_service = self.service_container.slag_service
+                slags = slag_service.get_all()
+                for slag in slags:
+                    materials.append({
+                        'id': slag.name,
+                        'name': slag.name,
+                        'type': 'slag',
+                        'specific_gravity': slag.specific_gravity,
+                        'created_date': slag.created_at.strftime('%Y-%m-%d') if slag.created_at else '',
+                        'modified_date': slag.updated_at.strftime('%Y-%m-%d') if slag.updated_at else '',
+                        'description': slag.description or '',
+                        'data': slag
+                    })
+            except Exception as e:
+                self.logger.warning(f"Error loading slag materials: {e}")
+            
+            # Load inert filler materials
+            try:
+                inert_filler_service = self.service_container.inert_filler_service
+                inert_fillers = inert_filler_service.get_all()
+                for inert_filler in inert_fillers:
+                    materials.append({
+                        'id': inert_filler.name,
+                        'name': inert_filler.name,
+                        'type': 'inert_filler',
+                        'specific_gravity': inert_filler.specific_gravity,
+                        'created_date': inert_filler.created_at.strftime('%Y-%m-%d') if inert_filler.created_at else '',
+                        'modified_date': inert_filler.updated_at.strftime('%Y-%m-%d') if inert_filler.updated_at else '',
+                        'description': inert_filler.description or '',
+                        'data': inert_filler
+                    })
+            except Exception as e:
+                self.logger.warning(f"Error loading inert filler materials: {e}")
+            
+            # Load silica fume materials
+            try:
+                silica_fume_service = self.service_container.silica_fume_service
+                silica_fumes = silica_fume_service.get_all()
+                for silica_fume in silica_fumes:
+                    materials.append({
+                        'id': silica_fume.name,
+                        'name': silica_fume.name,
+                        'type': 'silica_fume',
+                        'specific_gravity': silica_fume.specific_gravity,
+                        'created_date': silica_fume.created_at.strftime('%Y-%m-%d') if silica_fume.created_at else '',
+                        'modified_date': silica_fume.updated_at.strftime('%Y-%m-%d') if silica_fume.updated_at else '',
+                        'description': silica_fume.description or '',
+                        'data': silica_fume
+                    })
+            except Exception as e:
+                self.logger.warning(f"Error loading silica fume materials: {e}")
+            
+            # Load limestone materials
+            try:
+                limestone_service = self.service_container.limestone_service
+                limestones = limestone_service.get_all()
+                for limestone in limestones:
+                    materials.append({
+                        'id': limestone.name,
+                        'name': limestone.name,
+                        'type': 'limestone',
+                        'specific_gravity': limestone.specific_gravity,
+                        'created_date': limestone.created_at.strftime('%Y-%m-%d') if limestone.created_at else '',
+                        'modified_date': limestone.updated_at.strftime('%Y-%m-%d') if limestone.updated_at else '',
+                        'description': limestone.description or '',
+                        'data': limestone
+                    })
+            except Exception as e:
+                self.logger.warning(f"Error loading limestone materials: {e}")
+            
             # Load aggregate materials
             try:
                 aggregate_service = self.service_container.aggregate_service
@@ -806,6 +896,9 @@ class MaterialTable(Gtk.Box):
                     elif material['type'] == 'aggregate' and getattr(data_obj, 'display_name', None) == material_id:
                         material_data = material
                         break
+                    elif material['type'] in ['limestone', 'silica_fume'] and getattr(data_obj, 'name', None) == material_id:
+                        material_data = material
+                        break
                     elif getattr(data_obj, 'id', None) == material_id:
                         material_data = material
                         break
@@ -818,9 +911,20 @@ class MaterialTable(Gtk.Box):
                         service = self.service_container.cement_service
                     elif material_type == 'aggregate':
                         service = self.service_container.aggregate_service
+                    elif material_type == 'fly_ash':
+                        service = self.service_container.fly_ash_service
+                    elif material_type == 'slag':
+                        service = self.service_container.slag_service
+                    elif material_type == 'inert_filler':
+                        service = self.service_container.inert_filler_service
+                    elif material_type == 'silica_fume':
+                        service = self.service_container.silica_fume_service
+                    elif material_type == 'limestone':
+                        service = self.service_container.limestone_service
                     else:
                         continue
                     
+                    # Delete using the material_id (which is the correct identifier for each type)
                     service.delete(material_id)
                     deleted_count += 1
             
