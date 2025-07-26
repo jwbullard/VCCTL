@@ -29,6 +29,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def __init__(self, parent: 'VCCTLMainWindow', material_type: str, material_data: Optional[Dict[str, Any]] = None):
         """Initialize the material dialog."""
+        print(f"DEBUG: MaterialDialogBase.__init__ called with material_type='{material_type}', material_data={material_data}")
         self.material_type = material_type
         self.material_data = material_data
         self.is_edit_mode = material_data is not None
@@ -54,10 +55,11 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         self._setup_ui()
         self._connect_signals()
         
-        # Load data if editing
+        # Load data (for both editing and new materials)
+        self._load_material_data()
+        
+        # Check immutable status AFTER all UI is set up (only for edit mode)
         if self.is_edit_mode:
-            self._load_material_data()
-            # Check immutable status AFTER all UI is set up
             self._check_and_handle_immutable()
         
         self.logger.debug(f"Material dialog initialized for {material_type}")
@@ -273,7 +275,8 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         
         notes_scrolled = Gtk.ScrolledWindow()
         notes_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        notes_scrolled.set_size_request(-1, 120)
+        notes_scrolled.set_size_request(400, 120)  # Set minimum width to 400px
+        notes_scrolled.set_hexpand(True)  # Allow horizontal expansion
         
         self.notes_textview = Gtk.TextView()
         self.notes_textview.set_wrap_mode(Gtk.WrapMode.WORD)
@@ -348,7 +351,12 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def _load_material_data(self) -> None:
         """Load material data into form fields."""
+        print(f"DEBUG: _load_material_data called, material_data={self.material_data}")
         if not self.material_data:
+            # Even for new materials, call material-specific data loading
+            # to set up defaults
+            print("DEBUG: Calling _load_material_specific_data for new material")
+            self._load_material_specific_data()
             return
         
         try:
@@ -493,7 +501,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             'aggregate': self.service_container.aggregate_service,
             'fly_ash': self.service_container.fly_ash_service,
             'slag': self.service_container.slag_service,
-            'inert_filler': self.service_container.inert_filler_service
+            'inert_filler': self.service_container.inert_filler_service,
+            'silica_fume': self.service_container.silica_fume_service,
+            'limestone': self.service_container.limestone_service
         }
         return service_mapping.get(self.material_type)
     
@@ -825,6 +835,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 if self.material_type == 'aggregate':
                     # For aggregates, use display_name as the primary key
                     material_id = self.material_data['display_name']
+                elif self.material_type in ['inert_filler', 'limestone', 'silica_fume', 'fly_ash', 'slag']:
+                    # For materials with name-based primary keys, use name
+                    material_id = self.material_data['name']
                 else:
                     # For cement materials, use integer ID as the primary key
                     material_id = self.material_data['id']
@@ -836,6 +849,21 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 elif self.material_type == 'aggregate':
                     from app.models.aggregate import AggregateUpdate
                     update_data = AggregateUpdate(**data)
+                elif self.material_type == 'silica_fume':
+                    from app.models.silica_fume import SilicaFumeUpdate
+                    update_data = SilicaFumeUpdate(**data)
+                elif self.material_type == 'limestone':
+                    from app.models.limestone import LimestoneUpdate
+                    update_data = LimestoneUpdate(**data)
+                elif self.material_type == 'inert_filler':
+                    from app.models.inert_filler import InertFillerUpdate
+                    update_data = InertFillerUpdate(**data)
+                elif self.material_type == 'fly_ash':
+                    from app.models.fly_ash import FlyAshUpdate
+                    update_data = FlyAshUpdate(**data)
+                elif self.material_type == 'slag':
+                    from app.models.slag import SlagUpdate
+                    update_data = SlagUpdate(**data)
                 else:
                     update_data = data
                 
@@ -849,6 +877,21 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 elif self.material_type == 'aggregate':
                     from app.models.aggregate import AggregateCreate
                     create_data = AggregateCreate(**data)
+                elif self.material_type == 'silica_fume':
+                    from app.models.silica_fume import SilicaFumeCreate
+                    create_data = SilicaFumeCreate(**data)
+                elif self.material_type == 'limestone':
+                    from app.models.limestone import LimestoneCreate
+                    create_data = LimestoneCreate(**data)
+                elif self.material_type == 'inert_filler':
+                    from app.models.inert_filler import InertFillerCreate
+                    create_data = InertFillerCreate(**data)
+                elif self.material_type == 'fly_ash':
+                    from app.models.fly_ash import FlyAshCreate
+                    create_data = FlyAshCreate(**data)
+                elif self.material_type == 'slag':
+                    from app.models.slag import SlagCreate
+                    create_data = SlagCreate(**data)
                 else:
                     create_data = data
                 
@@ -858,6 +901,10 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             # Show success message
             action = "updated" if self.is_edit_mode else "created"
             self.parent_window.update_status(f"Material {action} successfully", "success", 3)
+            
+            # Refresh Mix Design panel material lists if it exists
+            if hasattr(self.parent_window, 'mix_design_panel'):
+                self.parent_window.mix_design_panel.refresh_material_lists()
             
             return True
             
@@ -1000,6 +1047,7 @@ class CementDialog(MaterialDialogBase):
     }
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        print(f"DEBUG: CementDialog.__init__ called with material_data={material_data}")
         self._updating_fractions = False  # Flag to prevent recursive updates
         super().__init__(parent, "cement", material_data)
     
@@ -1503,13 +1551,19 @@ class CementDialog(MaterialDialogBase):
         remove_button.connect('clicked', self._on_remove_psd_point)
         button_box.pack_start(remove_button, False, False, 0)
         
+        # Import CSV button
+        import_button = Gtk.Button.new_with_label("Import CSV")
+        import_button.connect('clicked', self._on_import_csv_psd)
+        import_button.set_tooltip_text("Import PSD data from CSV file (diameter_um, mass_fraction)")
+        button_box.pack_start(import_button, False, False, 0)
+        
         # Note: PSD data is now saved with the main Save button
         
         custom_box.pack_start(button_box, False, False, 0)
         
         # Note about data source
         note_label = Gtk.Label()
-        note_label.set_markup('<i><small>Experimental data - click in table cells to edit values</small></i>')
+        note_label.set_markup('<i><small>Experimental data - click in table cells to edit values or use "Import CSV" button</small></i>')
         note_label.set_halign(Gtk.Align.START)
         note_label.get_style_context().add_class('dim-label')
         custom_box.pack_start(note_label, False, False, 0)
@@ -1630,6 +1684,134 @@ class CementDialog(MaterialDialogBase):
         if treeiter:
             model.remove(treeiter)
             self._update_psd_summary()
+    
+    def _on_import_csv_psd(self, button):
+        """Import PSD data from CSV file."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data(self, filename):
+        """Load PSD data from CSV file."""
+        import csv
+        
+        # Clear existing data
+        self.psd_store.clear()
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            sample = file.read(1024)
+            file.seek(0)
+            
+            # Simple heuristic: if first line contains non-numeric data, skip it
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    # Support flexible column ordering
+                    # Try diameter, mass_fraction first
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Add points to store
+            for diameter, mass_fraction in loaded_points:
+                self.psd_store.append([diameter, mass_fraction])
+            
+            # Update summary and switch to custom tab
+            self._update_psd_summary()
+            
+            # Update description to indicate data source
+            self.psd_desc_label.set_markup(f'<i>Imported from: {filename.split("/")[-1]}</i>')
+            
+            # Switch to custom PSD mode to show the imported data
+            self.psd_mode_combo.set_active_id('custom')
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
     
     def _update_psd_summary(self):
         """Update the PSD summary label with current data."""
@@ -1889,10 +2071,16 @@ class CementDialog(MaterialDialogBase):
     
     def _load_material_specific_data(self) -> None:
         """Load cement-specific data."""
+        print(f"DEBUG: CementDialog._load_material_specific_data called, material_data = {self.material_data}")
         if not self.material_data:
-            # For new materials, update calculations with default values
+            print("DEBUG: No material_data, setting defaults for new cement")
+            # For new materials, set default phase fraction values
+            self._set_default_phase_fractions()
+            # Update calculations with default values
             self._update_calculations()
             return
+        else:
+            print("DEBUG: Loading existing cement material data")
         
         # Load Blaine fineness
         blaine = self.material_data.get('blaine_fineness', 350)
@@ -2002,6 +2190,105 @@ class CementDialog(MaterialDialogBase):
         """Validate all cement-specific fields."""
         self._validate_phase_composition()
         self._update_calculations()
+    
+    def _set_default_phase_fractions(self) -> None:
+        """Set default phase fraction values for new cement materials."""
+        # Debug: Check if widgets exist
+        print(f"DEBUG: Setting default phase fractions for new cement")
+        
+        # Temporarily block signal handlers to prevent recursive updates during setup
+        self._updating_fractions = True
+        
+        try:
+            # Set typical cement phase composition (percentages, normalized to 100%)
+            default_phases = {
+                'c3s': 58.51,    # Alite (55/94 * 100)
+                'c2s': 21.28,    # Belite (20/94 * 100)
+                'c3a': 8.51,     # Aluminate (8/94 * 100)
+                'c4af': 10.64,   # Ferrite (10/94 * 100)
+                'k2so4': 0.53,   # Potassium sulfate (0.5/94 * 100)
+                'na2so4': 0.53   # Sodium sulfate (0.5/94 * 100)
+            }
+            
+            # Set mass fractions first
+            for phase_key, percentage in default_phases.items():
+                if phase_key in self.phase_spins:
+                    print(f"DEBUG: Setting {phase_key} mass fraction to {percentage}%")
+                    self.phase_spins[phase_key].set_value(percentage)
+                    print(f"DEBUG: {phase_key} mass fraction after set: {self.phase_spins[phase_key].get_value()}%")
+                else:
+                    print(f"DEBUG: {phase_key} not found in phase_spins")
+            
+            # Calculate and set corresponding volume fractions using specific gravities
+            specific_gravities = {
+                'c3s': 3.15,
+                'c2s': 3.28, 
+                'c3a': 3.03,
+                'c4af': 3.73,
+                'k2so4': 2.66,
+                'na2so4': 2.68
+            }
+            
+            # Calculate total weighted volume for normalization
+            total_weighted_volume = sum(
+                (default_phases[phase] / 100.0) / specific_gravities[phase]
+                for phase in default_phases
+            )
+            
+            # Set volume fractions (normalized)
+            for phase_key, percentage in default_phases.items():
+                if phase_key in self.phase_volume_spins:
+                    mass_fraction = percentage / 100.0
+                    sg = specific_gravities[phase_key]
+                    volume_fraction = (mass_fraction / sg) / total_weighted_volume
+                    volume_percentage = volume_fraction * 100.0
+                    print(f"DEBUG: Setting {phase_key} volume fraction to {volume_percentage:.2f}%")
+                    self.phase_volume_spins[phase_key].set_value(volume_percentage)
+                    print(f"DEBUG: {phase_key} volume fraction after set: {self.phase_volume_spins[phase_key].get_value():.2f}%")
+                else:
+                    print(f"DEBUG: {phase_key} not found in phase_volume_spins")
+            
+            # Set default surface fractions (equal to volume fractions as starting point)  
+            for phase_key in default_phases:
+                if phase_key in self.phase_surface_spins:
+                    volume_percentage = self.phase_volume_spins[phase_key].get_value()
+                    self.phase_surface_spins[phase_key].set_value(volume_percentage)
+            
+            # Set default gypsum values (small amounts)
+            print(f"DEBUG: Setting gypsum mass fractions")
+            self.dihyd_spin.set_value(2.0)      # 2% dihydrate
+            print(f"DEBUG: dihyd mass after set: {self.dihyd_spin.get_value()}%")
+            self.hemihyd_spin.set_value(1.0)    # 1% hemihydrate  
+            print(f"DEBUG: hemihyd mass after set: {self.hemihyd_spin.get_value()}%")
+            self.anhyd_spin.set_value(0.5)      # 0.5% anhydrite
+            print(f"DEBUG: anhyd mass after set: {self.anhyd_spin.get_value()}%")
+            
+            # Calculate corresponding gypsum volume fractions
+            cement_bulk_sg = 3.15  # Typical cement specific gravity
+            gypsum_sgs = {'dihyd': 2.32, 'hemihyd': 2.74, 'anhyd': 2.61}
+            gypsum_masses = {'dihyd': 2.0, 'hemihyd': 1.0, 'anhyd': 0.5}
+            
+            for gypsum_type, mass_percent in gypsum_masses.items():
+                mass_fraction = mass_percent / 100.0
+                sg_gypsum = gypsum_sgs[gypsum_type]
+                volume_fraction = (mass_fraction / sg_gypsum) * cement_bulk_sg
+                volume_percent = volume_fraction * 100.0
+                
+                if gypsum_type == 'dihyd':
+                    self.dihyd_volume_spin.set_value(volume_percent)
+                elif gypsum_type == 'hemihyd':
+                    self.hemihyd_volume_spin.set_value(volume_percent)
+                elif gypsum_type == 'anhyd':
+                    self.anhyd_volume_spin.set_value(volume_percent)
+        
+        finally:
+            # Re-enable signal handlers
+            self._updating_fractions = False
+            print("DEBUG: Default values set, signal handlers re-enabled")
+            
+            # Force update all displays
+            self._validate_phase_composition()
+            self._update_calculations()
     
     def _validate_phase_composition(self) -> None:
         """Validate that phase composition adds up correctly."""
@@ -2442,6 +2729,7 @@ class FlyAshDialog(MaterialDialogBase):
     """Dialog for fly ash materials."""
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        self.psd_container = None
         super().__init__(parent, "fly_ash", material_data)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
@@ -2497,6 +2785,9 @@ class FlyAshDialog(MaterialDialogBase):
         
         # Classification section
         self._add_classification_section(container)
+        
+        # Particle size distribution section
+        self._add_psd_section(container)
         
     def _add_chemical_composition_section(self, container: Gtk.Box) -> None:
         """Add chemical composition section for fly ash."""
@@ -2729,15 +3020,26 @@ class FlyAshDialog(MaterialDialogBase):
         """Load fly ash-specific data."""
         if not self.material_data:
             self._update_alkali_calculations()
+            # For new materials, just update the summary to show log-normal mode
+            self._update_psd_summary_label()
             return
         
         # Load basic fields
         self.loi_spin.set_value(float(self.material_data.get('loi', 3.0)))
         self.fineness_spin.set_value(float(self.material_data.get('fineness_45um', 20.0)))
         
-        # Load oxide composition
+        # Load oxide composition - map database field names to UI keys
+        oxide_field_mapping = {
+            'sio2': 'sio2_content',
+            'cao': 'cao_content', 
+            'al2o3': 'al2o3_content',
+            'mgo': 'mgo_content',
+            'fe2o3': 'fe2o3_content',
+            'so3': 'so3_content'
+        }
         for oxide_key, spin in self.oxide_spins.items():
-            value = self.material_data.get(oxide_key, 0.0)
+            database_field = oxide_field_mapping.get(oxide_key, oxide_key)
+            value = self.material_data.get(database_field, 0.0)
             spin.set_value(float(value))
         
         # Load alkali values
@@ -2753,8 +3055,37 @@ class FlyAshDialog(MaterialDialogBase):
         pozz_activity = self.material_data.get('pozzolanic_activity', 'high')
         self.pozz_combo.set_active_id(pozz_activity)
         
-        # Update calculations
+        # Load custom PSD data if available
+        psd_custom_points = self.material_data.get('psd_custom_points')
+        if psd_custom_points:
+            try:
+                import json
+                psd_data = json.loads(psd_custom_points)
+                # Convert from dict format back to tuple format
+                self.imported_psd_data = [(point['diameter'], point['mass_fraction']) for point in psd_data]
+                # Create and show the editable table
+                self._create_psd_data_table()
+                # Update summary to show loaded data
+                self._update_psd_summary_label()
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                self.logger.warning(f"Could not load custom PSD data: {e}")
+                # Clear invalid data
+                self.material_data['psd_custom_points'] = None
+                # Update summary to show log-normal mode
+                self._update_psd_summary_label()
+        else:
+            # No existing PSD data, update summary to show log-normal mode
+            self._update_psd_summary_label()
+        
+        # Load PSD parameters
+        if hasattr(self, 'psd_median_spin'):
+            self.psd_median_spin.set_value(float(self.material_data.get('psd_median', 5.0)))
+        if hasattr(self, 'psd_stdev_spin'):
+            self.psd_stdev_spin.set_value(float(self.material_data.get('psd_stdev', 0.5)))
+        
+        # Update calculations and summary
         self._update_alkali_calculations()
+        self._update_psd_summary_label()
     
     def _validate_material_specific_field(self, widget) -> None:
         """Validate fly ash-specific fields."""
@@ -2803,21 +3134,383 @@ class FlyAshDialog(MaterialDialogBase):
     
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect fly ash-specific data."""
-        data = {
-            'loi': self.loi_spin.get_value(),
-            'fineness_45um': self.fineness_spin.get_value(),
-            'na2o': self.na2o_spin.get_value(),
-            'k2o': self.k2o_spin.get_value(),
-            'astm_class': self.astm_combo.get_active_id(),
-            'activity_index': self.activity_spin.get_value(),
-            'pozzolanic_activity': self.pozz_combo.get_active_id()
-        }
+        data = {}
         
-        # Add oxide composition
+        # NOTE: The following fields don't exist in the current FlyAsh model:
+        # loi, fineness_45um, na2o, k2o, astm_class, activity_index, pozzolanic_activity
+        # These would need to be added to the model if we want to save them
+        
+        # Add oxide composition - map UI keys to database field names
+        oxide_field_mapping = {
+            'sio2': 'sio2_content',
+            'cao': 'cao_content', 
+            'al2o3': 'al2o3_content',
+            'mgo': 'mgo_content',
+            'fe2o3': 'fe2o3_content',
+            'so3': 'so3_content'
+        }
         for oxide_key, spin in self.oxide_spins.items():
-            data[oxide_key] = spin.get_value()
+            database_field = oxide_field_mapping.get(oxide_key, oxide_key)
+            data[database_field] = spin.get_value()
+        
+        # Add PSD parameters if they exist (these do exist in the model)
+        if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+            data['psd_median'] = self.psd_median_spin.get_value()
+        if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+            data['psd_spread'] = self.psd_spread_spin.get_value()
+        
+        # Include imported PSD data if available (store as JSON)
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            import json
+            # Convert list of tuples to list of dicts for JSON storage
+            psd_points = [{"diameter": d, "mass_fraction": mf} for d, mf in self.imported_psd_data]
+            data['psd_custom_points'] = json.dumps(psd_points)
         
         return data
+    
+    def _add_psd_section(self, container: Gtk.Box) -> None:
+        """Add particle size distribution section."""
+        psd_frame = Gtk.Frame(label="Particle Size Distribution")
+        psd_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        psd_box.set_margin_top(10)
+        psd_box.set_margin_bottom(10)
+        psd_box.set_margin_left(15)
+        psd_box.set_margin_right(15)
+        
+        # PSD grid
+        psd_grid = Gtk.Grid()
+        psd_grid.set_row_spacing(10)
+        psd_grid.set_column_spacing(15)
+        
+        # Median particle size
+        median_label = Gtk.Label("Median Size (μm):")
+        median_label.set_halign(Gtk.Align.END)
+        median_label.get_style_context().add_class("form-label")
+        
+        self.psd_median_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
+        self.psd_median_spin.set_value(5.0)
+        self.psd_median_spin.set_digits(1)
+        
+        psd_grid.attach(median_label, 0, 0, 1, 1)
+        psd_grid.attach(self.psd_median_spin, 1, 0, 1, 1)
+        
+        # Size distribution spread
+        spread_label = Gtk.Label("Distribution Spread:")
+        spread_label.set_halign(Gtk.Align.END)
+        spread_label.get_style_context().add_class("form-label")
+        
+        self.psd_spread_spin = Gtk.SpinButton.new_with_range(1.1, 5.0, 0.1)
+        self.psd_spread_spin.set_value(2.0)
+        self.psd_spread_spin.set_digits(1)
+        
+        spread_info = Gtk.Image()
+        spread_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        spread_info.set_tooltip_text("Log-normal distribution parameter (sigma)")
+        
+        spread_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        spread_box.pack_start(self.psd_spread_spin, False, False, 0)
+        spread_box.pack_start(spread_info, False, False, 0)
+        
+        psd_grid.attach(spread_label, 0, 1, 1, 1)
+        psd_grid.attach(spread_box, 1, 1, 1, 1)
+        
+        # Add section header for log-normal parameters
+        lognormal_header = Gtk.Label()
+        lognormal_header.set_markup('<b>Option 1: Log-Normal Distribution Parameters</b>')
+        lognormal_header.set_halign(Gtk.Align.START)
+        lognormal_header.set_margin_top(5)
+        psd_box.pack_start(lognormal_header, False, False, 0)
+        
+        psd_box.pack_start(psd_grid, False, False, 0)
+        
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(15)
+        separator.set_margin_bottom(10)
+        psd_box.pack_start(separator, False, False, 0)
+        
+        # CSV Import section with header
+        csv_header = Gtk.Label()
+        csv_header.set_markup('<b>Option 2: Import Experimental Data</b>')
+        csv_header.set_halign(Gtk.Align.START)
+        psd_box.pack_start(csv_header, False, False, 0)
+        
+        csv_desc = Gtk.Label()
+        csv_desc.set_markup('<i>Upload a CSV file with experimental particle size measurements</i>')
+        csv_desc.set_halign(Gtk.Align.START)
+        csv_desc.get_style_context().add_class("dim-label")
+        csv_desc.set_margin_bottom(5)
+        psd_box.pack_start(csv_desc, False, False, 0)
+        
+        # CSV Import button
+        import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        import_box.set_halign(Gtk.Align.START)
+        
+        import_button = Gtk.Button.new_with_label("Import CSV Data")
+        import_button.connect('clicked', self._on_import_csv_psd_simple)
+        import_button.set_tooltip_text("Import experimental PSD data from CSV file (diameter_um, mass_fraction)")
+        import_box.pack_start(import_button, False, False, 0)
+        
+        psd_box.pack_start(import_box, False, False, 0)
+        
+        # PSD summary (will be updated dynamically)
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.set_margin_top(10)
+        psd_box.pack_start(self.psd_summary_label, False, False, 0)
+        
+        # Store reference to psd_box for table insertion
+        self.psd_container = psd_box
+        
+        psd_frame.add(psd_box)
+        container.pack_start(psd_frame, False, False, 0)
+    
+    def _update_psd_summary_label(self):
+        """Update the PSD summary label based on current data state."""
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            # Show CSV import status
+            self.psd_summary_label.set_markup(
+                f'<i><b>Using Option 2:</b> {len(self.imported_psd_data)} experimental data points imported - Click table cells to edit</i>'
+            )
+        else:
+            # Show log-normal status
+            self.psd_summary_label.set_markup(
+                '<i><b>Using Option 1:</b> Particle size distribution will be modeled as log-normal</i>'
+            )
+    
+    def _on_import_csv_psd_simple(self, button):
+        """Import PSD data from CSV file for simple material types."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data_simple(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data_simple(self, filename):
+        """Load PSD data from CSV file for simple material types."""
+        import csv
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Store the imported PSD data for later use
+            self.imported_psd_data = loaded_points
+            
+            # Create and show an editable table for the imported data
+            self._create_psd_data_table()
+            
+            # Update summary label to show imported data info
+            self._update_psd_summary_label()
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
+    
+    def _create_psd_data_table(self):
+        """Create an editable table to display and edit imported PSD data."""
+        if not hasattr(self, 'imported_psd_data') or not self.imported_psd_data:
+            return
+        
+        # If table already exists, remove it first
+        if hasattr(self, 'psd_table_box'):
+            self.psd_table_box.get_parent().remove(self.psd_table_box)
+        
+        # Create new table container
+        self.psd_table_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        
+        # Table label
+        table_label = Gtk.Label()
+        table_label.set_markup('<b>Imported PSD Data (Editable)</b>')
+        table_label.set_halign(Gtk.Align.START)
+        self.psd_table_box.pack_start(table_label, False, False, 0)
+        
+        # Scrolled window for the table
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_size_request(-1, 200)
+        
+        # Create list store for the data
+        self.psd_data_store = Gtk.ListStore(float, float)  # diameter, mass_fraction
+        
+        # Populate with imported data
+        for diameter, mass_fraction in self.imported_psd_data:
+            self.psd_data_store.append([diameter, mass_fraction])
+        
+        # Create tree view
+        tree_view = Gtk.TreeView(model=self.psd_data_store)
+        tree_view.set_reorderable(True)
+        
+        # Diameter column (editable)
+        diameter_renderer = Gtk.CellRendererText()
+        diameter_renderer.set_property('editable', True)
+        diameter_renderer.connect('edited', self._on_diameter_edited)
+        diameter_column = Gtk.TreeViewColumn("Diameter (μm)", diameter_renderer, text=0)
+        diameter_column.set_resizable(True)
+        tree_view.append_column(diameter_column)
+        
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property('editable', True)
+        fraction_renderer.connect('edited', self._on_fraction_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_resizable(True)
+        tree_view.append_column(fraction_column)
+        
+        scrolled_window.add(tree_view)
+        self.psd_table_box.pack_start(scrolled_window, True, True, 0)
+        
+        # Buttons for table operations
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        add_point_btn = Gtk.Button.new_with_label("Add Point")
+        add_point_btn.connect('clicked', self._on_add_psd_data_point)
+        button_box.pack_start(add_point_btn, False, False, 0)
+        
+        remove_point_btn = Gtk.Button.new_with_label("Remove Point")
+        remove_point_btn.connect('clicked', self._on_remove_psd_data_point, tree_view)
+        button_box.pack_start(remove_point_btn, False, False, 0)
+        
+        self.psd_table_box.pack_start(button_box, False, False, 0)
+        
+        # Insert the table box after the summary label
+        parent_box = self.psd_summary_label.get_parent()
+        children = parent_box.get_children()
+        summary_index = children.index(self.psd_summary_label)
+        parent_box.pack_start(self.psd_table_box, False, False, 0)
+        parent_box.reorder_child(self.psd_table_box, summary_index + 1)
+        
+        # Show all new widgets
+        self.psd_table_box.show_all()
+    
+    def _on_diameter_edited(self, renderer, path, new_text):
+        """Handle editing of diameter values in PSD table."""
+        try:
+            value = float(new_text)
+            if value > 0:
+                self.psd_data_store[path][0] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_fraction_edited(self, renderer, path, new_text):
+        """Handle editing of mass fraction values in PSD table."""
+        try:
+            value = float(new_text)
+            if 0 <= value <= 1.0:
+                self.psd_data_store[path][1] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_add_psd_data_point(self, button):
+        """Add a new point to the PSD data table."""
+        self.psd_data_store.append([1.0, 0.001])  # Default values
+        self._update_imported_psd_data()
+    
+    def _on_remove_psd_data_point(self, button, tree_view):
+        """Remove selected point from PSD data table."""
+        selection = tree_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        if tree_iter:
+            model.remove(tree_iter)
+            self._update_imported_psd_data()
+    
+    def _update_imported_psd_data(self):
+        """Update the imported_psd_data list from the table store."""
+        if hasattr(self, 'psd_data_store'):
+            self.imported_psd_data = []
+            for row in self.psd_data_store:
+                self.imported_psd_data.append((float(row[0]), float(row[1])))
+            
+            # Sort by diameter
+            self.imported_psd_data.sort(key=lambda x: x[0])
 
 
 class SlagDialog(MaterialDialogBase):
@@ -2825,15 +3518,16 @@ class SlagDialog(MaterialDialogBase):
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
         """Initialize the slag dialog."""
-        super().__init__(parent, 'slag', material_data)
-        
-        # Slag-specific UI components
+        # Initialize slag-specific UI components BEFORE calling parent constructor
         self.oxide_spins = {}
         self.cao_sio2_display = None
         self.mgo_al2o3_display = None
         self.activity_spin = None
         self.glass_content_spin = None
         self.reaction_params = {}
+        self.psd_container = None
+        
+        super().__init__(parent, 'slag', material_data)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
         """Add slag-specific fields to the basic info grid."""
@@ -2885,6 +3579,9 @@ class SlagDialog(MaterialDialogBase):
         
         # Reaction parameters section
         self._add_reaction_parameters_section(container)
+        
+        # Particle size distribution section
+        self._add_psd_section(container)
     
     def _add_chemical_composition_section(self, container: Gtk.Box) -> None:
         """Add chemical composition section for slag."""
@@ -2911,6 +3608,16 @@ class SlagDialog(MaterialDialogBase):
             ('so3', 'SO₃', 0.0, 3.0, '%')
         ]
         
+        # Default values that total 100% for new slag materials
+        default_values = {
+            'sio2': 35.0,
+            'cao': 40.0,
+            'al2o3': 12.0,
+            'mgo': 8.0,
+            'fe2o3': 1.0,
+            'so3': 4.0
+        }
+        
         for i, (key, formula, min_val, max_val, unit) in enumerate(oxides):
             row = i // 3
             col = (i % 3) * 3
@@ -2923,7 +3630,9 @@ class SlagDialog(MaterialDialogBase):
             
             # Spin button
             spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
-            spin.set_value((min_val + max_val) / 2)
+            # Use specific default values for new materials that total 100%
+            default_value = default_values.get(key, 0.0)
+            spin.set_value(default_value)
             spin.set_digits(2)
             self.oxide_spins[key] = spin
             comp_grid.attach(spin, col + 1, row, 1, 1)
@@ -3057,32 +3766,8 @@ class SlagDialog(MaterialDialogBase):
     
     def _add_advanced_sections(self, container: Gtk.Box) -> None:
         """Add slag-specific advanced sections."""
-        # Performance characteristics
-        perf_frame = Gtk.Frame(label="Performance Characteristics")
-        perf_grid = Gtk.Grid()
-        perf_grid.set_margin_top(10)
-        perf_grid.set_margin_bottom(10)
-        perf_grid.set_margin_left(15)
-        perf_grid.set_margin_right(15)
-        perf_grid.set_row_spacing(10)
-        perf_grid.set_column_spacing(15)
-        
-        # Durability factor
-        durability_label = Gtk.Label("Durability Factor:")
-        durability_label.set_halign(Gtk.Align.END)
-        durability_label.get_style_context().add_class("form-label")
-        
-        self.durability_combo = Gtk.ComboBoxText()
-        self.durability_combo.append("excellent", "Excellent")
-        self.durability_combo.append("good", "Good") 
-        self.durability_combo.append("fair", "Fair")
-        self.durability_combo.set_active(1)
-        
-        perf_grid.attach(durability_label, 0, 0, 1, 1)
-        perf_grid.attach(self.durability_combo, 1, 0, 1, 1)
-        
-        perf_frame.add(perf_grid)
-        container.pack_start(perf_frame, False, False, 0)
+        # No advanced sections currently needed for slag materials
+        pass
     
     def _connect_material_signals(self) -> None:
         """Connect slag-specific signals."""
@@ -3097,6 +3782,12 @@ class SlagDialog(MaterialDialogBase):
         # Connect reaction parameter fields
         for spin in self.reaction_params.values():
             spin.connect('value-changed', self._on_field_changed)
+        
+        # For new materials, initialize default calculations now that UI is fully set up
+        if not self.material_data:
+            self._update_ratio_calculations()
+            if hasattr(self, '_update_psd_summary_label'):
+                self._update_psd_summary_label()
     
     def _on_composition_changed(self, widget) -> None:
         """Handle composition field changes."""
@@ -3133,27 +3824,60 @@ class SlagDialog(MaterialDialogBase):
     def _load_material_specific_data(self) -> None:
         """Load slag-specific data."""
         if not self.material_data:
-            self._update_ratio_calculations()
+            # For new materials, skip initialization - UI may not be fully built yet
             return
         
         # Load basic fields
         self.glass_content_spin.set_value(float(self.material_data.get('glass_content', 95.0)))
         self.activity_spin.set_value(float(self.material_data.get('activity_index', 95.0)))
         
-        # Load oxide composition
+        # Load oxide composition - map database field names to UI keys
+        oxide_field_mapping = {
+            'sio2': 'sio2_content',
+            'cao': 'cao_content', 
+            'al2o3': 'al2o3_content',
+            'mgo': 'mgo_content',
+            'fe2o3': 'fe2o3_content',
+            'so3': 'so3_content'
+        }
         for oxide_key, spin in self.oxide_spins.items():
-            value = self.material_data.get(oxide_key, 0.0)
+            database_field = oxide_field_mapping.get(oxide_key, oxide_key)
+            value = self.material_data.get(database_field, 0.0)
             spin.set_value(float(value))
         
-        # Load reaction parameters
-        reaction_data = self.material_data.get('reaction_parameters', {})
+        # Load reaction parameters from flat fields
         for param_key, spin in self.reaction_params.items():
-            value = reaction_data.get(param_key, spin.get_value())
+            value = self.material_data.get(param_key, spin.get_value())
             spin.set_value(float(value))
         
-        # Load durability factor
-        durability = self.material_data.get('durability_factor', 'good')
-        self.durability_combo.set_active_id(durability)
+        
+        # Load PSD parameters
+        if hasattr(self, 'psd_median_spin'):
+            self.psd_median_spin.set_value(float(self.material_data.get('psd_median', 5.0)))
+        if hasattr(self, 'psd_spread_spin'):
+            self.psd_spread_spin.set_value(float(self.material_data.get('psd_spread', 2.0)))
+        
+        # Load custom PSD data if available
+        psd_custom_points = self.material_data.get('psd_custom_points')
+        if psd_custom_points:
+            try:
+                import json
+                psd_data = json.loads(psd_custom_points)
+                # Convert from dict format back to tuple format
+                self.imported_psd_data = [(point['diameter'], point['mass_fraction']) for point in psd_data]
+                # Create and show the editable table
+                self._create_psd_data_table()
+                # Update summary to show loaded data
+                self._update_psd_summary_label()
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                self.logger.warning(f"Could not load custom PSD data: {e}")
+                # Clear invalid data
+                self.material_data['psd_custom_points'] = None
+                # Update summary to show log-normal mode
+                self._update_psd_summary_label()
+        else:
+            # No existing PSD data, update summary to show log-normal mode
+            self._update_psd_summary_label()
         
         # Update calculations
         self._update_ratio_calculations()
@@ -3201,21 +3925,394 @@ class SlagDialog(MaterialDialogBase):
         """Collect slag-specific data."""
         data = {
             'glass_content': self.glass_content_spin.get_value(),
-            'activity_index': self.activity_spin.get_value(),
-            'durability_factor': self.durability_combo.get_active_id()
+            'activity_index': self.activity_spin.get_value()
         }
         
-        # Add oxide composition
+        # Add oxide composition - map UI keys to database field names
+        oxide_field_mapping = {
+            'sio2': 'sio2_content',
+            'cao': 'cao_content', 
+            'al2o3': 'al2o3_content',
+            'mgo': 'mgo_content',
+            'fe2o3': 'fe2o3_content',
+            'so3': 'so3_content'
+        }
         for oxide_key, spin in self.oxide_spins.items():
-            data[oxide_key] = spin.get_value()
+            database_field = oxide_field_mapping.get(oxide_key, oxide_key)
+            data[database_field] = spin.get_value()
         
-        # Add reaction parameters
-        reaction_params = {}
+        # Add reaction parameters as flat fields
         for param_key, spin in self.reaction_params.items():
-            reaction_params[param_key] = spin.get_value()
-        data['reaction_parameters'] = reaction_params
+            data[param_key] = spin.get_value()
+        
+        # Add PSD parameters if they exist
+        if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+            data['psd_median'] = self.psd_median_spin.get_value()
+        if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+            data['psd_spread'] = self.psd_spread_spin.get_value()
+        
+        # Include imported PSD data if available (store as JSON)
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            import json
+            # Convert list of tuples to list of dicts for JSON storage
+            psd_points = [{"diameter": d, "mass_fraction": mf} for d, mf in self.imported_psd_data]
+            data['psd_custom_points'] = json.dumps(psd_points)
         
         return data
+    
+    def _add_psd_section(self, container: Gtk.Box) -> None:
+        """Add particle size distribution section."""
+        psd_frame = Gtk.Frame(label="Particle Size Distribution")
+        psd_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        psd_box.set_margin_top(10)
+        psd_box.set_margin_bottom(10)
+        psd_box.set_margin_left(15)
+        psd_box.set_margin_right(15)
+        
+        # PSD grid
+        psd_grid = Gtk.Grid()
+        psd_grid.set_row_spacing(10)
+        psd_grid.set_column_spacing(15)
+        
+        # Median particle size
+        median_label = Gtk.Label("Median Size (μm):")
+        median_label.set_halign(Gtk.Align.END)
+        median_label.get_style_context().add_class("form-label")
+        
+        self.psd_median_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
+        self.psd_median_spin.set_value(5.0)
+        self.psd_median_spin.set_digits(1)
+        
+        psd_grid.attach(median_label, 0, 0, 1, 1)
+        psd_grid.attach(self.psd_median_spin, 1, 0, 1, 1)
+        
+        # Size distribution spread
+        spread_label = Gtk.Label("Distribution Spread:")
+        spread_label.set_halign(Gtk.Align.END)
+        spread_label.get_style_context().add_class("form-label")
+        
+        self.psd_spread_spin = Gtk.SpinButton.new_with_range(1.1, 5.0, 0.1)
+        self.psd_spread_spin.set_value(2.0)
+        self.psd_spread_spin.set_digits(1)
+        
+        spread_info = Gtk.Image()
+        spread_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        spread_info.set_tooltip_text("Log-normal distribution parameter (sigma)")
+        
+        spread_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        spread_box.pack_start(self.psd_spread_spin, False, False, 0)
+        spread_box.pack_start(spread_info, False, False, 0)
+        
+        psd_grid.attach(spread_label, 0, 1, 1, 1)
+        psd_grid.attach(spread_box, 1, 1, 1, 1)
+        
+        # Add section header for log-normal parameters
+        lognormal_header = Gtk.Label()
+        lognormal_header.set_markup('<b>Option 1: Log-Normal Distribution Parameters</b>')
+        lognormal_header.set_halign(Gtk.Align.START)
+        lognormal_header.set_margin_top(5)
+        psd_box.pack_start(lognormal_header, False, False, 0)
+        
+        psd_box.pack_start(psd_grid, False, False, 0)
+        
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(15)
+        separator.set_margin_bottom(10)
+        psd_box.pack_start(separator, False, False, 0)
+        
+        # CSV Import section with header
+        csv_header = Gtk.Label()
+        csv_header.set_markup('<b>Option 2: Import Experimental Data</b>')
+        csv_header.set_halign(Gtk.Align.START)
+        psd_box.pack_start(csv_header, False, False, 0)
+        
+        csv_desc = Gtk.Label()
+        csv_desc.set_markup('<i>Upload a CSV file with experimental particle size measurements</i>')
+        csv_desc.set_halign(Gtk.Align.START)
+        csv_desc.get_style_context().add_class("dim-label")
+        csv_desc.set_margin_bottom(5)
+        psd_box.pack_start(csv_desc, False, False, 0)
+        
+        # CSV Import button
+        import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        import_box.set_halign(Gtk.Align.START)
+        
+        import_button = Gtk.Button.new_with_label("Import CSV Data")
+        import_button.connect('clicked', self._on_import_csv_psd_simple)
+        import_button.set_tooltip_text("Import experimental PSD data from CSV file (diameter_um, mass_fraction)")
+        import_box.pack_start(import_button, False, False, 0)
+        
+        psd_box.pack_start(import_box, False, False, 0)
+        
+        # PSD summary (will be updated dynamically)
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.set_margin_top(10)
+        psd_box.pack_start(self.psd_summary_label, False, False, 0)
+        
+        # Store reference to psd_box for table insertion
+        self.psd_container = psd_box
+        
+        psd_frame.add(psd_box)
+        container.pack_start(psd_frame, False, False, 0)
+    
+    def _update_psd_summary_label(self):
+        """Update the PSD summary label based on current data state."""
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            # Show CSV import status
+            self.psd_summary_label.set_markup(
+                f'<i><b>Using Option 2:</b> {len(self.imported_psd_data)} experimental data points imported - Click table cells to edit</i>'
+            )
+        else:
+            # Show log-normal status
+            self.psd_summary_label.set_markup(
+                '<i><b>Using Option 1:</b> Particle size distribution will be modeled as log-normal</i>'
+            )
+    
+    def _on_import_csv_psd_simple(self, button):
+        """Import PSD data from CSV file for simple material types."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data_simple(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data_simple(self, filename):
+        """Load PSD data from CSV file for simple material types."""
+        import csv
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Store the imported PSD data for later use
+            self.imported_psd_data = loaded_points
+            
+            # Create and show an editable table for the imported data
+            self._create_psd_data_table()
+            
+            # Update summary label to show imported data info
+            self._update_psd_summary_label()
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
+    
+    def _create_psd_data_table(self):
+        """Create an editable table to display and edit imported PSD data."""
+        if not hasattr(self, 'imported_psd_data') or not self.imported_psd_data:
+            return
+        
+        # If table already exists, remove it first
+        if hasattr(self, 'psd_table_box'):
+            self.psd_table_box.get_parent().remove(self.psd_table_box)
+        
+        # Create new table container
+        self.psd_table_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        
+        # Table header
+        table_header = Gtk.Label()
+        table_header.set_markup('<b>Imported PSD Data Points</b>')
+        table_header.set_halign(Gtk.Align.START)
+        self.psd_table_box.pack_start(table_header, False, False, 0)
+        
+        # Create data store
+        self.psd_data_store = Gtk.ListStore(float, float)
+        for diameter, mass_fraction in self.imported_psd_data:
+            self.psd_data_store.append([diameter, mass_fraction])
+        
+        # Create tree view
+        tree_view = Gtk.TreeView(model=self.psd_data_store)
+        tree_view.set_size_request(-1, 200)
+        
+        # Diameter column (editable)
+        diameter_renderer = Gtk.CellRendererText()
+        diameter_renderer.set_property("editable", True)
+        diameter_renderer.connect("edited", self._on_diameter_edited)
+        diameter_column = Gtk.TreeViewColumn("Diameter (μm)", diameter_renderer, text=0)
+        diameter_column.set_min_width(120)
+        tree_view.append_column(diameter_column)
+        
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property("editable", True)
+        fraction_renderer.connect("edited", self._on_mass_fraction_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_min_width(120)
+        tree_view.append_column(fraction_column)
+        
+        # Scrolled window for table
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.add(tree_view)
+        self.psd_table_box.pack_start(scrolled, True, True, 0)
+        
+        # Button box for add/remove
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        add_button = Gtk.Button.new_with_label("Add Point")
+        add_button.connect('clicked', self._on_add_psd_point, tree_view)
+        button_box.pack_start(add_button, False, False, 0)
+        
+        remove_button = Gtk.Button.new_with_label("Remove Selected")
+        remove_button.connect('clicked', self._on_remove_psd_point, tree_view)
+        button_box.pack_start(remove_button, False, False, 0)
+        
+        self.psd_table_box.pack_start(button_box, False, False, 0)
+        
+        # Add the table directly to the PSD container if available
+        if hasattr(self, 'psd_container') and self.psd_container:
+            self.psd_container.pack_start(self.psd_table_box, False, False, 5)
+            self.psd_table_box.show_all()
+            return
+        
+        # Fallback: Find the parent container and add the table
+        for child in self.get_children():
+            if isinstance(child, Gtk.Notebook):
+                for i in range(child.get_n_pages()):
+                    page = child.get_nth_page(i)
+                    if isinstance(page, Gtk.ScrolledWindow):
+                        viewport = page.get_child()
+                        if isinstance(viewport, Gtk.Viewport):
+                            container = viewport.get_child()
+                            if isinstance(container, Gtk.Box):
+                                container.pack_start(self.psd_table_box, False, False, 5)
+                                self.psd_table_box.show_all()
+                                return
+    
+    def _on_diameter_edited(self, renderer, path, new_text):
+        """Handle diameter cell editing."""
+        try:
+            new_diameter = float(new_text)
+            if new_diameter > 0:
+                self.psd_data_store[path][0] = new_diameter
+                self._update_imported_psd_data()
+            else:
+                self.logger.warning("Diameter must be positive")
+        except ValueError:
+            self.logger.warning(f"Invalid diameter value: {new_text}")
+    
+    def _on_mass_fraction_edited(self, renderer, path, new_text):
+        """Handle mass fraction cell editing."""
+        try:
+            new_fraction = float(new_text)
+            if 0 <= new_fraction <= 1:
+                self.psd_data_store[path][1] = new_fraction
+                self._update_imported_psd_data()
+            else:
+                self.logger.warning("Mass fraction must be between 0 and 1")
+        except ValueError:
+            self.logger.warning(f"Invalid mass fraction value: {new_text}")
+    
+    def _on_add_psd_point(self, button, tree_view):
+        """Add new point to PSD data table."""
+        self.psd_data_store.append([1.0, 0.0])
+        self._update_imported_psd_data()
+    
+    def _on_remove_psd_point(self, button, tree_view):
+        """Remove selected point from PSD data table."""
+        selection = tree_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        if tree_iter:
+            model.remove(tree_iter)
+            self._update_imported_psd_data()
+    
+    def _update_imported_psd_data(self):
+        """Update the imported_psd_data list from the table store."""
+        if hasattr(self, 'psd_data_store'):
+            self.imported_psd_data = []
+            for row in self.psd_data_store:
+                self.imported_psd_data.append((float(row[0]), float(row[1])))
+            
+            # Sort by diameter
+            self.imported_psd_data.sort(key=lambda x: x[0])
 
 
 class InertFillerDialog(MaterialDialogBase):
@@ -3223,6 +4320,7 @@ class InertFillerDialog(MaterialDialogBase):
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
         """Initialize the inert filler dialog."""
+        self.psd_container = None
         super().__init__(parent, 'inert_filler', material_data)
         
         # Inert filler-specific UI components
@@ -3283,6 +4381,9 @@ class InertFillerDialog(MaterialDialogBase):
         
         # Particle size distribution section
         self._add_psd_section(container)
+        
+        # Connect signals after all widgets are created
+        self._connect_material_signals()
     
     def _add_physical_properties_section(self, container: Gtk.Box) -> None:
         """Add physical properties section for inert filler."""
@@ -3375,13 +4476,53 @@ class InertFillerDialog(MaterialDialogBase):
         psd_grid.attach(spread_label, 0, 1, 1, 1)
         psd_grid.attach(spread_box, 1, 1, 1, 1)
         
+        # Add section header for log-normal parameters
+        lognormal_header = Gtk.Label()
+        lognormal_header.set_markup('<b>Option 1: Log-Normal Distribution Parameters</b>')
+        lognormal_header.set_halign(Gtk.Align.START)
+        lognormal_header.set_margin_top(5)
+        psd_box.pack_start(lognormal_header, False, False, 0)
+        
         psd_box.pack_start(psd_grid, False, False, 0)
         
-        # PSD summary
-        summary_label = Gtk.Label()
-        summary_label.set_markup('<i>Particle size distribution will be modeled as log-normal</i>')
-        summary_label.set_halign(Gtk.Align.START)
-        psd_box.pack_start(summary_label, False, False, 0)
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(15)
+        separator.set_margin_bottom(10)
+        psd_box.pack_start(separator, False, False, 0)
+        
+        # CSV Import section with header
+        csv_header = Gtk.Label()
+        csv_header.set_markup('<b>Option 2: Import Experimental Data</b>')
+        csv_header.set_halign(Gtk.Align.START)
+        psd_box.pack_start(csv_header, False, False, 0)
+        
+        csv_desc = Gtk.Label()
+        csv_desc.set_markup('<i>Upload a CSV file with experimental particle size measurements</i>')
+        csv_desc.set_halign(Gtk.Align.START)
+        csv_desc.get_style_context().add_class("dim-label")
+        csv_desc.set_margin_bottom(5)
+        psd_box.pack_start(csv_desc, False, False, 0)
+        
+        # CSV Import button
+        import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        import_box.set_halign(Gtk.Align.START)
+        
+        import_button = Gtk.Button.new_with_label("Import CSV Data")
+        import_button.connect('clicked', self._on_import_csv_psd_simple)
+        import_button.set_tooltip_text("Import experimental PSD data from CSV file (diameter_um, mass_fraction)")
+        import_box.pack_start(import_button, False, False, 0)
+        
+        psd_box.pack_start(import_box, False, False, 0)
+        
+        # PSD summary (will be updated dynamically)
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.set_margin_top(10)
+        psd_box.pack_start(self.psd_summary_label, False, False, 0)
+        
+        # Store reference to psd_box for table insertion
+        self.psd_container = psd_box
         
         psd_frame.add(psd_box)
         container.pack_start(psd_frame, False, False, 0)
@@ -3417,19 +4558,34 @@ class InertFillerDialog(MaterialDialogBase):
     
     def _connect_material_signals(self) -> None:
         """Connect inert filler-specific signals."""
-        # Connect all spin buttons
-        self.specific_surface_spin.connect('value-changed', self._on_field_changed)
-        self.psd_median_spin.connect('value-changed', self._on_field_changed)
-        self.psd_spread_spin.connect('value-changed', self._on_field_changed)
-        self.absorption_spin.connect('value-changed', self._on_field_changed)
+        # Avoid duplicate signal connections
+        if hasattr(self, '_signals_connected') and self._signals_connected:
+            return
         
-        # Connect combo boxes
-        self.filler_type_combo.connect('changed', self._on_field_changed)
-        self.color_combo.connect('changed', self._on_field_changed)
+        # Connect spin buttons only if they exist
+        if hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
+            self.specific_surface_spin.connect('value-changed', self._on_field_changed)
+        if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+            self.psd_median_spin.connect('value-changed', self._on_field_changed)
+        if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+            self.psd_spread_spin.connect('value-changed', self._on_field_changed)
+        if hasattr(self, 'absorption_spin') and self.absorption_spin:
+            self.absorption_spin.connect('value-changed', self._on_field_changed)
+        
+        # Connect combo boxes only if they exist
+        if hasattr(self, 'filler_type_combo') and self.filler_type_combo:
+            self.filler_type_combo.connect('changed', self._on_field_changed)
+        if hasattr(self, 'color_combo') and self.color_combo:
+            self.color_combo.connect('changed', self._on_field_changed)
+        
+        # Mark signals as connected
+        self._signals_connected = True
     
     def _load_material_specific_data(self) -> None:
         """Load inert filler-specific data."""
         if not self.material_data:
+            # For new materials, just update the summary to show log-normal mode
+            self._update_psd_summary_label()
             return
         
         # Load basic fields
@@ -3450,6 +4606,28 @@ class InertFillerDialog(MaterialDialogBase):
         # Load reactivity
         reactivity = self.material_data.get('reactivity', 'inert')
         self.reactivity_combo.set_active_id(reactivity)
+        
+        # Load custom PSD data if available
+        psd_custom_points = self.material_data.get('psd_custom_points')
+        if psd_custom_points:
+            try:
+                import json
+                psd_data = json.loads(psd_custom_points)
+                # Convert from dict format back to tuple format
+                self.imported_psd_data = [(point['diameter'], point['mass_fraction']) for point in psd_data]
+                # Create and show the editable table
+                self._create_psd_data_table()
+                # Update summary to show loaded data
+                self._update_psd_summary_label()
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                self.logger.warning(f"Could not load custom PSD data: {e}")
+                # Clear invalid data
+                self.material_data['psd_custom_points'] = None
+                # Update summary to show log-normal mode
+                self._update_psd_summary_label()
+        else:
+            # No existing PSD data, update summary to show log-normal mode
+            self._update_psd_summary_label()
     
     def _validate_material_specific_field(self, widget) -> None:
         """Validate inert filler-specific fields."""
@@ -3462,41 +4640,1302 @@ class InertFillerDialog(MaterialDialogBase):
     def _validate_inert_filler_properties(self) -> None:
         """Validate inert filler properties."""
         try:
-            # Check PSD parameters
-            median = self.psd_median_spin.get_value()
-            spread = self.psd_spread_spin.get_value()
+            # Check PSD parameters only if widgets exist
+            if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+                median = self.psd_median_spin.get_value()
+                if median < 0.5:
+                    self.validation_warnings['psd_median'] = f"Very fine median size ({median:.1f} μm) may affect workability"
+                else:
+                    self.validation_warnings.pop('psd_median', None)
             
-            if median < 0.5:
-                self.validation_warnings['psd_median'] = f"Very fine median size ({median:.1f} μm) may affect workability"
-            else:
-                self.validation_warnings.pop('psd_median', None)
+            if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+                spread = self.psd_spread_spin.get_value()
+                if spread > 3.0:
+                    self.validation_warnings['psd_spread'] = f"Wide size distribution (spread={spread:.1f}) may affect packing"
+                else:
+                    self.validation_warnings.pop('psd_spread', None)
             
-            if spread > 3.0:
-                self.validation_warnings['psd_spread'] = f"Wide size distribution (spread={spread:.1f}) may affect packing"
-            else:
-                self.validation_warnings.pop('psd_spread', None)
-            
-            # Check specific surface
-            surface = self.specific_surface_spin.get_value()
-            if surface > 20.0:
-                self.validation_warnings['specific_surface'] = f"Very high specific surface ({surface:.1f} m²/g) may increase water demand"
-            else:
-                self.validation_warnings.pop('specific_surface', None)
+            # Check specific surface only if widget exists
+            if hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
+                surface = self.specific_surface_spin.get_value()
+                if surface > 20.0:
+                    self.validation_warnings['specific_surface'] = f"Very high specific surface ({surface:.1f} m²/g) may increase water demand"
+                else:
+                    self.validation_warnings.pop('specific_surface', None)
                 
         except Exception as e:
             self.logger.warning(f"Error validating inert filler properties: {e}")
     
+    def _on_import_csv_psd_simple(self, button):
+        """Import PSD data from CSV file for simple material types."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data_simple(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data_simple(self, filename):
+        """Load PSD data from CSV file for simple material types."""
+        import csv
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Store the imported PSD data for later use
+            self.imported_psd_data = loaded_points
+            
+            # Create and show an editable table for the imported data
+            self._create_psd_data_table()
+            
+            # Update summary label to show imported data info
+            self._update_psd_summary_label()
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
+    
+    def _update_psd_summary_label(self):
+        """Update the PSD summary label based on current data state."""
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            # Show CSV import status
+            self.psd_summary_label.set_markup(
+                f'<i><b>Using Option 2:</b> {len(self.imported_psd_data)} experimental data points imported - Click table cells to edit</i>'
+            )
+        else:
+            # Show log-normal status
+            self.psd_summary_label.set_markup(
+                '<i><b>Using Option 1:</b> Particle size distribution will be modeled as log-normal</i>'
+            )
+    
+    def _create_psd_data_table(self):
+        """Create an editable table to display and edit imported PSD data."""
+        if not hasattr(self, 'imported_psd_data') or not self.imported_psd_data:
+            return
+        
+        # If table already exists, remove it first
+        if hasattr(self, 'psd_table_box'):
+            self.psd_table_box.get_parent().remove(self.psd_table_box)
+        
+        # Create new table container
+        self.psd_table_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        
+        # Table label
+        table_label = Gtk.Label()
+        table_label.set_markup('<b>Imported PSD Data (Editable)</b>')
+        table_label.set_halign(Gtk.Align.START)
+        self.psd_table_box.pack_start(table_label, False, False, 0)
+        
+        # Scrolled window for the table
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_size_request(-1, 200)
+        
+        # Create list store for the data
+        self.psd_data_store = Gtk.ListStore(float, float)  # diameter, mass_fraction
+        
+        # Populate with imported data
+        for diameter, mass_fraction in self.imported_psd_data:
+            self.psd_data_store.append([diameter, mass_fraction])
+        
+        # Create tree view
+        tree_view = Gtk.TreeView(model=self.psd_data_store)
+        tree_view.set_reorderable(True)
+        
+        # Diameter column (editable)
+        diameter_renderer = Gtk.CellRendererText()
+        diameter_renderer.set_property('editable', True)
+        diameter_renderer.connect('edited', self._on_diameter_edited)
+        diameter_column = Gtk.TreeViewColumn("Diameter (μm)", diameter_renderer, text=0)
+        diameter_column.set_resizable(True)
+        tree_view.append_column(diameter_column)
+        
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property('editable', True)
+        fraction_renderer.connect('edited', self._on_fraction_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_resizable(True)
+        tree_view.append_column(fraction_column)
+        
+        scrolled_window.add(tree_view)
+        self.psd_table_box.pack_start(scrolled_window, True, True, 0)
+        
+        # Buttons for table operations
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        add_point_btn = Gtk.Button.new_with_label("Add Point")
+        add_point_btn.connect('clicked', self._on_add_psd_data_point)
+        button_box.pack_start(add_point_btn, False, False, 0)
+        
+        remove_point_btn = Gtk.Button.new_with_label("Remove Point")
+        remove_point_btn.connect('clicked', self._on_remove_psd_data_point, tree_view)
+        button_box.pack_start(remove_point_btn, False, False, 0)
+        
+        self.psd_table_box.pack_start(button_box, False, False, 0)
+        
+        # Insert the table box after the summary label
+        parent_box = self.psd_summary_label.get_parent()
+        children = parent_box.get_children()
+        summary_index = children.index(self.psd_summary_label)
+        parent_box.pack_start(self.psd_table_box, False, False, 0)
+        parent_box.reorder_child(self.psd_table_box, summary_index + 1)
+        
+        # Show all new widgets
+        self.psd_table_box.show_all()
+    
+    def _on_diameter_edited(self, renderer, path, new_text):
+        """Handle editing of diameter values in PSD table."""
+        try:
+            value = float(new_text)
+            if value > 0:
+                self.psd_data_store[path][0] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_fraction_edited(self, renderer, path, new_text):
+        """Handle editing of mass fraction values in PSD table."""
+        try:
+            value = float(new_text)
+            if 0 <= value <= 1.0:
+                self.psd_data_store[path][1] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_add_psd_data_point(self, button):
+        """Add a new point to the PSD data table."""
+        self.psd_data_store.append([1.0, 0.001])  # Default values
+        self._update_imported_psd_data()
+    
+    def _on_remove_psd_data_point(self, button, tree_view):
+        """Remove selected point from PSD data table."""
+        selection = tree_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        if tree_iter:
+            model.remove(tree_iter)
+            self._update_imported_psd_data()
+    
+    def _update_imported_psd_data(self):
+        """Update the imported_psd_data list from the table store."""
+        if hasattr(self, 'psd_data_store'):
+            self.imported_psd_data = []
+            for row in self.psd_data_store:
+                self.imported_psd_data.append((float(row[0]), float(row[1])))
+            
+            # Sort by diameter
+            self.imported_psd_data.sort(key=lambda x: x[0])
+    
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect inert filler-specific data."""
+        data = {}
+        
+        # NOTE: The InertFiller model only has these fields:
+        # name, specific_gravity, psd, psd_custom_points, description, source, notes
+        # UI fields like filler_type, specific_surface, water_absorption, psd_median, 
+        # psd_spread, color, reactivity don't exist in the model and would need to be added
+        
+        # Include imported PSD data if available (store as JSON)
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            import json
+            # Convert list of tuples to list of dicts for JSON storage
+            psd_points = [{"diameter": d, "mass_fraction": mf} for d, mf in self.imported_psd_data]
+            data['psd_custom_points'] = json.dumps(psd_points)
+        
+        return data
+
+
+class SilicaFumeDialog(MaterialDialogBase):
+    """Dialog for managing silica fume materials."""
+    
+    def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        """Initialize the silica fume dialog."""
+        self.psd_container = None
+        super().__init__(parent, 'silica_fume', material_data)
+        
+        # Silica fume-specific UI components (minimal since it's single phase)
+        self.silica_content_spin = None
+        self.surface_area_spin = None
+    
+    def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
+        """Add silica fume-specific fields to the basic info grid."""
+        row = start_row
+        
+        # Silica content (typically 85-98%)
+        silica_label = Gtk.Label("SiO2 Content (%):")
+        silica_label.set_halign(Gtk.Align.END)
+        silica_label.get_style_context().add_class("form-label")
+        silica_label.set_tooltip_text("Silicon dioxide content (typically 85-98%)")
+        
+        self.silica_content_spin = Gtk.SpinButton.new_with_range(80.0, 100.0, 0.1)
+        self.silica_content_spin.set_digits(1)
+        self.silica_content_spin.set_value(92.0)  # Typical value
+        self.silica_content_spin.set_tooltip_text("High-quality silica fume is typically >90% SiO2")
+        
+        grid.attach(silica_label, 0, row, 1, 1)
+        grid.attach(self.silica_content_spin, 1, row, 1, 1)
+        row += 1
+        
+        # Specific surface area (very high for silica fume)
+        surface_label = Gtk.Label("Surface Area (m²/kg):")
+        surface_label.set_halign(Gtk.Align.END)
+        surface_label.get_style_context().add_class("form-label")
+        surface_label.set_tooltip_text("Specific surface area (very high for silica fume)")
+        
+        self.surface_area_spin = Gtk.SpinButton.new_with_range(15000, 25000, 100)
+        self.surface_area_spin.set_digits(0)
+        self.surface_area_spin.set_value(20000)  # Typical value
+        self.surface_area_spin.set_tooltip_text("Silica fume typically has 15,000-25,000 m²/kg")
+        
+        grid.attach(surface_label, 0, row, 1, 1)
+        grid.attach(self.surface_area_spin, 1, row, 1, 1)
+        row += 1
+        
+        return row
+    
+    def _add_property_sections(self, container: Gtk.Container) -> None:
+        """Add silica fume-specific property sections."""
+        # Single phase section for silica fume
+        phase_frame = Gtk.Frame(label="Phase Properties")
+        phase_grid = Gtk.Grid()
+        phase_grid.set_row_spacing(10)
+        phase_grid.set_column_spacing(15)
+        phase_grid.set_margin_top(10)
+        phase_grid.set_margin_bottom(10)
+        phase_grid.set_margin_left(15)
+        phase_grid.set_margin_right(15)
+        
+        # Single phase fraction (always 1.0 for silica fume)
+        phase_label = Gtk.Label("Silica Fume Fraction:")
+        phase_label.set_halign(Gtk.Align.END)
+        phase_label.get_style_context().add_class("form-label")
+        
+        self.silica_fume_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.silica_fume_fraction_spin.set_digits(3)
+        self.silica_fume_fraction_spin.set_value(1.0)
+        self.silica_fume_fraction_spin.set_sensitive(False)  # Always 1.0
+        self.silica_fume_fraction_spin.set_tooltip_text("Silica fume is treated as a single phase (always 1.0)")
+        
+        phase_grid.attach(phase_label, 0, 0, 1, 1)
+        phase_grid.attach(self.silica_fume_fraction_spin, 1, 0, 1, 1)
+        
+        phase_frame.add(phase_grid)
+        container.pack_start(phase_frame, False, False, 0)
+        
+        # Particle size distribution section
+        self._add_psd_section(container)
+    
+    def _add_psd_section(self, container: Gtk.Box) -> None:
+        """Add particle size distribution section."""
+        psd_frame = Gtk.Frame(label="Particle Size Distribution")
+        psd_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        psd_box.set_margin_top(10)
+        psd_box.set_margin_bottom(10)
+        psd_box.set_margin_left(15)
+        psd_box.set_margin_right(15)
+        
+        # PSD grid
+        psd_grid = Gtk.Grid()
+        psd_grid.set_row_spacing(10)
+        psd_grid.set_column_spacing(15)
+        
+        # Median particle size
+        median_label = Gtk.Label("Median Size (μm):")
+        median_label.set_halign(Gtk.Align.END)
+        median_label.get_style_context().add_class("form-label")
+        
+        self.psd_median_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
+        self.psd_median_spin.set_value(5.0)
+        self.psd_median_spin.set_digits(1)
+        
+        psd_grid.attach(median_label, 0, 0, 1, 1)
+        psd_grid.attach(self.psd_median_spin, 1, 0, 1, 1)
+        
+        # Size distribution spread
+        spread_label = Gtk.Label("Distribution Spread:")
+        spread_label.set_halign(Gtk.Align.END)
+        spread_label.get_style_context().add_class("form-label")
+        
+        self.psd_spread_spin = Gtk.SpinButton.new_with_range(1.1, 5.0, 0.1)
+        self.psd_spread_spin.set_value(2.0)
+        self.psd_spread_spin.set_digits(1)
+        
+        spread_info = Gtk.Image()
+        spread_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        spread_info.set_tooltip_text("Log-normal distribution parameter (sigma)")
+        
+        spread_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        spread_box.pack_start(self.psd_spread_spin, False, False, 0)
+        spread_box.pack_start(spread_info, False, False, 0)
+        
+        psd_grid.attach(spread_label, 0, 1, 1, 1)
+        psd_grid.attach(spread_box, 1, 1, 1, 1)
+        
+        # Add section header for log-normal parameters
+        lognormal_header = Gtk.Label()
+        lognormal_header.set_markup('<b>Option 1: Log-Normal Distribution Parameters</b>')
+        lognormal_header.set_halign(Gtk.Align.START)
+        lognormal_header.set_margin_top(5)
+        psd_box.pack_start(lognormal_header, False, False, 0)
+        
+        psd_box.pack_start(psd_grid, False, False, 0)
+        
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(15)
+        separator.set_margin_bottom(10)
+        psd_box.pack_start(separator, False, False, 0)
+        
+        # CSV Import section with header
+        csv_header = Gtk.Label()
+        csv_header.set_markup('<b>Option 2: Import Experimental Data</b>')
+        csv_header.set_halign(Gtk.Align.START)
+        psd_box.pack_start(csv_header, False, False, 0)
+        
+        csv_desc = Gtk.Label()
+        csv_desc.set_markup('<i>Upload a CSV file with experimental particle size measurements</i>')
+        csv_desc.set_halign(Gtk.Align.START)
+        csv_desc.get_style_context().add_class("dim-label")
+        csv_desc.set_margin_bottom(5)
+        psd_box.pack_start(csv_desc, False, False, 0)
+        
+        # CSV Import button
+        import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        import_box.set_halign(Gtk.Align.START)
+        
+        import_button = Gtk.Button.new_with_label("Import CSV Data")
+        import_button.connect('clicked', self._on_import_csv_psd_simple)
+        import_button.set_tooltip_text("Import experimental PSD data from CSV file (diameter_um, mass_fraction)")
+        import_box.pack_start(import_button, False, False, 0)
+        
+        psd_box.pack_start(import_box, False, False, 0)
+        
+        # PSD summary (will be updated dynamically)
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.set_margin_top(10)
+        psd_box.pack_start(self.psd_summary_label, False, False, 0)
+        
+        # Store reference to psd_box for table insertion
+        self.psd_container = psd_box
+        
+        psd_frame.add(psd_box)
+        container.pack_start(psd_frame, False, False, 0)
+    
+    def _update_psd_summary_label(self):
+        """Update the PSD summary label based on current data state."""
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            # Show CSV import status
+            self.psd_summary_label.set_markup(
+                f'<i><b>Using Option 2:</b> {len(self.imported_psd_data)} experimental data points imported - Click table cells to edit</i>'
+            )
+        else:
+            # Show log-normal status
+            self.psd_summary_label.set_markup(
+                '<i><b>Using Option 1:</b> Particle size distribution will be modeled as log-normal</i>'
+            )
+    
+    def _on_import_csv_psd_simple(self, button):
+        """Import PSD data from CSV file for simple material types."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data_simple(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data_simple(self, filename):
+        """Load PSD data from CSV file for simple material types."""
+        import csv
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Store the imported PSD data for later use
+            self.imported_psd_data = loaded_points
+            
+            # Create and show an editable table for the imported data
+            self._create_psd_data_table()
+            
+            # Update summary label to show imported data info
+            self._update_psd_summary_label()
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
+    
+    def _create_psd_data_table(self):
+        """Create an editable table to display and edit imported PSD data."""
+        if not hasattr(self, 'imported_psd_data') or not self.imported_psd_data:
+            return
+        
+        # If table already exists, remove it first
+        if hasattr(self, 'psd_table_box'):
+            self.psd_table_box.get_parent().remove(self.psd_table_box)
+        
+        # Create new table container
+        self.psd_table_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        
+        # Table label
+        table_label = Gtk.Label()
+        table_label.set_markup('<b>Imported PSD Data (Editable)</b>')
+        table_label.set_halign(Gtk.Align.START)
+        self.psd_table_box.pack_start(table_label, False, False, 0)
+        
+        # Scrolled window for the table
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_size_request(-1, 200)
+        
+        # Create list store for the data
+        self.psd_data_store = Gtk.ListStore(float, float)  # diameter, mass_fraction
+        
+        # Populate with imported data
+        for diameter, mass_fraction in self.imported_psd_data:
+            self.psd_data_store.append([diameter, mass_fraction])
+        
+        # Create tree view
+        tree_view = Gtk.TreeView(model=self.psd_data_store)
+        tree_view.set_reorderable(True)
+        
+        # Diameter column (editable)
+        diameter_renderer = Gtk.CellRendererText()
+        diameter_renderer.set_property('editable', True)
+        diameter_renderer.connect('edited', self._on_diameter_edited)
+        diameter_column = Gtk.TreeViewColumn("Diameter (μm)", diameter_renderer, text=0)
+        diameter_column.set_resizable(True)
+        tree_view.append_column(diameter_column)
+        
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property('editable', True)
+        fraction_renderer.connect('edited', self._on_fraction_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_resizable(True)
+        tree_view.append_column(fraction_column)
+        
+        scrolled_window.add(tree_view)
+        self.psd_table_box.pack_start(scrolled_window, True, True, 0)
+        
+        # Buttons for table operations
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        add_point_btn = Gtk.Button.new_with_label("Add Point")
+        add_point_btn.connect('clicked', self._on_add_psd_data_point)
+        button_box.pack_start(add_point_btn, False, False, 0)
+        
+        remove_point_btn = Gtk.Button.new_with_label("Remove Point")
+        remove_point_btn.connect('clicked', self._on_remove_psd_data_point, tree_view)
+        button_box.pack_start(remove_point_btn, False, False, 0)
+        
+        self.psd_table_box.pack_start(button_box, False, False, 0)
+        
+        # Insert the table box after the summary label
+        parent_box = self.psd_summary_label.get_parent()
+        children = parent_box.get_children()
+        summary_index = children.index(self.psd_summary_label)
+        parent_box.pack_start(self.psd_table_box, False, False, 0)
+        parent_box.reorder_child(self.psd_table_box, summary_index + 1)
+        
+        # Show all new widgets
+        self.psd_table_box.show_all()
+    
+    def _on_diameter_edited(self, renderer, path, new_text):
+        """Handle editing of diameter values in PSD table."""
+        try:
+            value = float(new_text)
+            if value > 0:
+                self.psd_data_store[path][0] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_fraction_edited(self, renderer, path, new_text):
+        """Handle editing of mass fraction values in PSD table."""
+        try:
+            value = float(new_text)
+            if 0 <= value <= 1.0:
+                self.psd_data_store[path][1] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_add_psd_data_point(self, button):
+        """Add a new point to the PSD data table."""
+        self.psd_data_store.append([1.0, 0.001])  # Default values
+        self._update_imported_psd_data()
+    
+    def _on_remove_psd_data_point(self, button, tree_view):
+        """Remove selected point from PSD data table."""
+        selection = tree_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        if tree_iter:
+            model.remove(tree_iter)
+            self._update_imported_psd_data()
+    
+    def _update_imported_psd_data(self):
+        """Update the imported_psd_data list from the table store."""
+        if hasattr(self, 'psd_data_store'):
+            self.imported_psd_data = []
+            for row in self.psd_data_store:
+                self.imported_psd_data.append((float(row[0]), float(row[1])))
+            
+            # Sort by diameter
+            self.imported_psd_data.sort(key=lambda x: x[0])
+
+    
+    def _add_advanced_sections(self, container: Gtk.Box) -> None:
+        """Add silica fume-specific advanced sections."""
+        # Simple materials don't need advanced sections
+        pass
+    
+    def _connect_material_signals(self) -> None:
+        """Connect silica fume-specific signals."""
+        # Connect value change signals if needed
+        pass
+    
+    def _load_material_specific_data(self) -> None:
+        """Load silica fume-specific data into form fields."""
+        if not self.material_data:
+            # For new materials, just update the summary to show log-normal mode
+            self._update_psd_summary_label()
+            return
+        
+        # Load silica fume specific fields
+        if hasattr(self, 'silica_content_spin') and 'silica_content' in self.material_data:
+            self.silica_content_spin.set_value(self.material_data['silica_content'])
+        if hasattr(self, 'surface_area_spin') and 'surface_area' in self.material_data:
+            self.surface_area_spin.set_value(self.material_data['surface_area'])
+        
+        # Load PSD parameters
+        if hasattr(self, 'psd_median_spin'):
+            self.psd_median_spin.set_value(float(self.material_data.get('psd_median', 5.0)))
+        if hasattr(self, 'psd_spread_spin'):
+            self.psd_spread_spin.set_value(float(self.material_data.get('psd_spread', 2.0)))
+        
+        # Load custom PSD data if available
+        psd_custom_points = self.material_data.get('psd_custom_points')
+        if psd_custom_points:
+            try:
+                import json
+                psd_data = json.loads(psd_custom_points)
+                # Convert from dict format back to tuple format
+                self.imported_psd_data = [(point['diameter'], point['mass_fraction']) for point in psd_data]
+                # Create and show the editable table
+                self._create_psd_data_table()
+                # Update summary to show loaded data
+                self._update_psd_summary_label()
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                self.logger.warning(f"Could not load custom PSD data: {e}")
+                # Clear invalid data
+                self.material_data['psd_custom_points'] = None
+                # Update summary to show log-normal mode
+                self._update_psd_summary_label()
+        else:
+            # No existing PSD data, update summary to show log-normal mode
+            self._update_psd_summary_label()
+    
+    def _validate_material_specific_field(self, widget) -> None:
+        """Validate silica fume-specific fields."""
+        # Add specific validation if needed
+        pass
+    
+    def _validate_all_material_fields(self) -> None:
+        """Validate all silica fume-specific fields."""
+        # Add comprehensive validation if needed
+        pass
+    
+    def _collect_material_specific_data(self) -> Dict[str, Any]:
+        """Collect silica fume-specific form data."""
         data = {
-            'filler_type': self.filler_type_combo.get_active_id(),
-            'specific_surface': self.specific_surface_spin.get_value(),
-            'water_absorption': self.absorption_spin.get_value(),
-            'psd_median': self.psd_median_spin.get_value(),
-            'psd_spread': self.psd_spread_spin.get_value(),
-            'color': self.color_combo.get_active_id(),
-            'reactivity': self.reactivity_combo.get_active_id()
+            'silica_fume_fraction': 1.0,  # Always 1.0 for single phase
         }
+        if hasattr(self, 'silica_content_spin') and self.silica_content_spin:
+            data['silica_content'] = self.silica_content_spin.get_value()
+        if hasattr(self, 'surface_area_spin') and self.surface_area_spin:
+            data['surface_area'] = self.surface_area_spin.get_value()
+        
+        # Include PSD parameters
+        if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+            data['psd_median'] = self.psd_median_spin.get_value()
+        if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+            data['psd_spread'] = self.psd_spread_spin.get_value()
+        
+        # Include imported PSD data if available (store as JSON)
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            import json
+            # Convert list of tuples to list of dicts for JSON storage
+            psd_points = [{"diameter": d, "mass_fraction": mf} for d, mf in self.imported_psd_data]
+            data['psd_custom_points'] = json.dumps(psd_points)
+        
+        return data
+
+
+class LimestoneDialog(MaterialDialogBase):
+    """Dialog for managing limestone materials."""
+    
+    def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        """Initialize the limestone dialog."""
+        self.psd_container = None
+        super().__init__(parent, 'limestone', material_data)
+        
+        # Limestone-specific UI components (minimal since it's single phase)
+        self.caco3_content_spin = None
+    
+    def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
+        """Add limestone-specific fields to the basic info grid."""
+        row = start_row
+        
+        # CaCO3 content (typically 95-99%)
+        caco3_label = Gtk.Label("CaCO3 Content (%):")
+        caco3_label.set_halign(Gtk.Align.END)
+        caco3_label.get_style_context().add_class("form-label")
+        caco3_label.set_tooltip_text("Calcium carbonate content (typically 95-99%)")
+        
+        self.caco3_content_spin = Gtk.SpinButton.new_with_range(85.0, 100.0, 0.1)
+        self.caco3_content_spin.set_digits(1)
+        self.caco3_content_spin.set_value(97.0)  # Typical value
+        self.caco3_content_spin.set_tooltip_text("High-grade limestone is typically >95% CaCO3")
+        
+        grid.attach(caco3_label, 0, row, 1, 1)
+        grid.attach(self.caco3_content_spin, 1, row, 1, 1)
+        row += 1
+        
+        return row
+    
+    def _add_property_sections(self, container: Gtk.Container) -> None:
+        """Add limestone-specific property sections."""
+        # Single phase section for limestone
+        phase_frame = Gtk.Frame(label="Phase Properties")
+        phase_grid = Gtk.Grid()
+        phase_grid.set_row_spacing(10)
+        phase_grid.set_column_spacing(15)
+        phase_grid.set_margin_top(10)
+        phase_grid.set_margin_bottom(10)
+        phase_grid.set_margin_left(15)
+        phase_grid.set_margin_right(15)
+        
+        # Single phase fraction (always 1.0 for limestone)
+        phase_label = Gtk.Label("Limestone Fraction:")
+        phase_label.set_halign(Gtk.Align.END)
+        phase_label.get_style_context().add_class("form-label")
+        
+        self.limestone_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.limestone_fraction_spin.set_digits(3)
+        self.limestone_fraction_spin.set_value(1.0)
+        self.limestone_fraction_spin.set_sensitive(False)  # Always 1.0
+        self.limestone_fraction_spin.set_tooltip_text("Limestone is treated as a single phase (always 1.0)")
+        
+        phase_grid.attach(phase_label, 0, 0, 1, 1)
+        phase_grid.attach(self.limestone_fraction_spin, 1, 0, 1, 1)
+        
+        phase_frame.add(phase_grid)
+        container.pack_start(phase_frame, False, False, 0)
+        
+        # Particle size distribution section
+        self._add_psd_section(container)
+    
+    def _add_psd_section(self, container: Gtk.Box) -> None:
+        """Add particle size distribution section."""
+        psd_frame = Gtk.Frame(label="Particle Size Distribution")
+        psd_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        psd_box.set_margin_top(10)
+        psd_box.set_margin_bottom(10)
+        psd_box.set_margin_left(15)
+        psd_box.set_margin_right(15)
+        
+        # PSD grid
+        psd_grid = Gtk.Grid()
+        psd_grid.set_row_spacing(10)
+        psd_grid.set_column_spacing(15)
+        
+        # Median particle size
+        median_label = Gtk.Label("Median Size (μm):")
+        median_label.set_halign(Gtk.Align.END)
+        median_label.get_style_context().add_class("form-label")
+        
+        self.psd_median_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
+        self.psd_median_spin.set_value(5.0)
+        self.psd_median_spin.set_digits(1)
+        
+        psd_grid.attach(median_label, 0, 0, 1, 1)
+        psd_grid.attach(self.psd_median_spin, 1, 0, 1, 1)
+        
+        # Size distribution spread
+        spread_label = Gtk.Label("Distribution Spread:")
+        spread_label.set_halign(Gtk.Align.END)
+        spread_label.get_style_context().add_class("form-label")
+        
+        self.psd_spread_spin = Gtk.SpinButton.new_with_range(1.1, 5.0, 0.1)
+        self.psd_spread_spin.set_value(2.0)
+        self.psd_spread_spin.set_digits(1)
+        
+        spread_info = Gtk.Image()
+        spread_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        spread_info.set_tooltip_text("Log-normal distribution parameter (sigma)")
+        
+        spread_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        spread_box.pack_start(self.psd_spread_spin, False, False, 0)
+        spread_box.pack_start(spread_info, False, False, 0)
+        
+        psd_grid.attach(spread_label, 0, 1, 1, 1)
+        psd_grid.attach(spread_box, 1, 1, 1, 1)
+        
+        # Add section header for log-normal parameters
+        lognormal_header = Gtk.Label()
+        lognormal_header.set_markup('<b>Option 1: Log-Normal Distribution Parameters</b>')
+        lognormal_header.set_halign(Gtk.Align.START)
+        lognormal_header.set_margin_top(5)
+        psd_box.pack_start(lognormal_header, False, False, 0)
+        
+        psd_box.pack_start(psd_grid, False, False, 0)
+        
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        separator.set_margin_top(15)
+        separator.set_margin_bottom(10)
+        psd_box.pack_start(separator, False, False, 0)
+        
+        # CSV Import section with header
+        csv_header = Gtk.Label()
+        csv_header.set_markup('<b>Option 2: Import Experimental Data</b>')
+        csv_header.set_halign(Gtk.Align.START)
+        psd_box.pack_start(csv_header, False, False, 0)
+        
+        csv_desc = Gtk.Label()
+        csv_desc.set_markup('<i>Upload a CSV file with experimental particle size measurements</i>')
+        csv_desc.set_halign(Gtk.Align.START)
+        csv_desc.get_style_context().add_class("dim-label")
+        csv_desc.set_margin_bottom(5)
+        psd_box.pack_start(csv_desc, False, False, 0)
+        
+        # CSV Import button
+        import_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        import_box.set_halign(Gtk.Align.START)
+        
+        import_button = Gtk.Button.new_with_label("Import CSV Data")
+        import_button.connect('clicked', self._on_import_csv_psd_simple)
+        import_button.set_tooltip_text("Import experimental PSD data from CSV file (diameter_um, mass_fraction)")
+        import_box.pack_start(import_button, False, False, 0)
+        
+        psd_box.pack_start(import_box, False, False, 0)
+        
+        # PSD summary (will be updated dynamically)
+        self.psd_summary_label = Gtk.Label()
+        self.psd_summary_label.set_halign(Gtk.Align.START)
+        self.psd_summary_label.set_margin_top(10)
+        psd_box.pack_start(self.psd_summary_label, False, False, 0)
+        
+        # Store reference to psd_box for table insertion
+        self.psd_container = psd_box
+        
+        psd_frame.add(psd_box)
+        container.pack_start(psd_frame, False, False, 0)
+    
+    def _update_psd_summary_label(self):
+        """Update the PSD summary label based on current data state."""
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            # Show CSV import status
+            self.psd_summary_label.set_markup(
+                f'<i><b>Using Option 2:</b> {len(self.imported_psd_data)} experimental data points imported - Click table cells to edit</i>'
+            )
+        else:
+            # Show log-normal status
+            self.psd_summary_label.set_markup(
+                '<i><b>Using Option 1:</b> Particle size distribution will be modeled as log-normal</i>'
+            )
+    
+    def _on_import_csv_psd_simple(self, button):
+        """Import PSD data from CSV file for simple material types."""
+        dialog = Gtk.FileChooserDialog(
+            title="Import PSD Data from CSV",
+            parent=self,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        dialog.add_button(Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+        
+        # Add CSV file filter
+        csv_filter = Gtk.FileFilter()
+        csv_filter.set_name("CSV Files")
+        csv_filter.add_pattern("*.csv")
+        csv_filter.add_mime_type("text/csv")
+        dialog.add_filter(csv_filter)
+        
+        # Add all files filter
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All Files")
+        all_filter.add_pattern("*")
+        dialog.add_filter(all_filter)
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._load_csv_psd_data_simple(filename)
+            except Exception as e:
+                error_dialog = Gtk.MessageDialog(
+                    transient_for=self,
+                    flags=0,
+                    message_type=Gtk.MessageType.ERROR,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="Error importing CSV file"
+                )
+                error_dialog.format_secondary_text(f"Could not import PSD data: {e}")
+                error_dialog.run()
+                error_dialog.destroy()
+        
+        dialog.destroy()
+    
+    def _load_csv_psd_data_simple(self, filename):
+        """Load PSD data from CSV file for simple material types."""
+        import csv
+        
+        with open(filename, 'r', encoding='utf-8') as file:
+            # Try to detect if file has headers
+            first_line = file.readline().strip()
+            file.seek(0)
+            
+            has_header = False
+            try:
+                # Try to parse first line as numbers
+                parts = first_line.replace(',', ' ').split()
+                if len(parts) >= 2:
+                    float(parts[0])
+                    float(parts[1])
+            except (ValueError, IndexError):
+                has_header = True
+            
+            # Parse CSV data
+            reader = csv.reader(file)
+            if has_header:
+                next(reader)  # Skip header row
+            
+            loaded_points = []
+            for row_num, row in enumerate(reader, start=1):
+                if len(row) < 2:
+                    continue  # Skip incomplete rows
+                
+                try:
+                    diameter = float(row[0])
+                    mass_fraction = float(row[1])
+                    
+                    # Validate data ranges
+                    if diameter <= 0:
+                        self.logger.warning(f"Invalid diameter {diameter} on row {row_num}, skipping")
+                        continue
+                    
+                    if not (0 <= mass_fraction <= 1):
+                        # Try to handle percentage format (0-100%) by converting to fraction
+                        if 0 <= mass_fraction <= 100:
+                            mass_fraction = mass_fraction / 100.0
+                        else:
+                            self.logger.warning(f"Invalid mass fraction {mass_fraction} on row {row_num}, skipping")
+                            continue
+                    
+                    loaded_points.append((diameter, mass_fraction))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row}, error: {e}")
+                    continue
+            
+            if not loaded_points:
+                raise ValueError("No valid PSD data points found in CSV file")
+            
+            # Sort by diameter (ascending)
+            loaded_points.sort(key=lambda x: x[0])
+            
+            # Store the imported PSD data for later use
+            self.imported_psd_data = loaded_points
+            
+            # Create and show an editable table for the imported data
+            self._create_psd_data_table()
+            
+            # Update summary label to show imported data info
+            self._update_psd_summary_label()
+            
+            # Show success message
+            self.parent_window.update_status(f"Imported {len(loaded_points)} PSD data points from CSV", "success", 3)
+            
+            self.logger.info(f"Successfully imported {len(loaded_points)} PSD points from {filename}")
+    
+    def _create_psd_data_table(self):
+        """Create an editable table to display and edit imported PSD data."""
+        if not hasattr(self, 'imported_psd_data') or not self.imported_psd_data:
+            return
+        
+        # If table already exists, remove it first
+        if hasattr(self, 'psd_table_box'):
+            self.psd_table_box.get_parent().remove(self.psd_table_box)
+        
+        # Create new table container
+        self.psd_table_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        
+        # Table label
+        table_label = Gtk.Label()
+        table_label.set_markup('<b>Imported PSD Data (Editable)</b>')
+        table_label.set_halign(Gtk.Align.START)
+        self.psd_table_box.pack_start(table_label, False, False, 0)
+        
+        # Scrolled window for the table
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled_window.set_size_request(-1, 200)
+        
+        # Create list store for the data
+        self.psd_data_store = Gtk.ListStore(float, float)  # diameter, mass_fraction
+        
+        # Populate with imported data
+        for diameter, mass_fraction in self.imported_psd_data:
+            self.psd_data_store.append([diameter, mass_fraction])
+        
+        # Create tree view
+        tree_view = Gtk.TreeView(model=self.psd_data_store)
+        tree_view.set_reorderable(True)
+        
+        # Diameter column (editable)
+        diameter_renderer = Gtk.CellRendererText()
+        diameter_renderer.set_property('editable', True)
+        diameter_renderer.connect('edited', self._on_diameter_edited)
+        diameter_column = Gtk.TreeViewColumn("Diameter (μm)", diameter_renderer, text=0)
+        diameter_column.set_resizable(True)
+        tree_view.append_column(diameter_column)
+        
+        # Mass fraction column (editable)
+        fraction_renderer = Gtk.CellRendererText()
+        fraction_renderer.set_property('editable', True)
+        fraction_renderer.connect('edited', self._on_fraction_edited)
+        fraction_column = Gtk.TreeViewColumn("Mass Fraction", fraction_renderer, text=1)
+        fraction_column.set_resizable(True)
+        tree_view.append_column(fraction_column)
+        
+        scrolled_window.add(tree_view)
+        self.psd_table_box.pack_start(scrolled_window, True, True, 0)
+        
+        # Buttons for table operations
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        add_point_btn = Gtk.Button.new_with_label("Add Point")
+        add_point_btn.connect('clicked', self._on_add_psd_data_point)
+        button_box.pack_start(add_point_btn, False, False, 0)
+        
+        remove_point_btn = Gtk.Button.new_with_label("Remove Point")
+        remove_point_btn.connect('clicked', self._on_remove_psd_data_point, tree_view)
+        button_box.pack_start(remove_point_btn, False, False, 0)
+        
+        self.psd_table_box.pack_start(button_box, False, False, 0)
+        
+        # Insert the table box after the summary label
+        parent_box = self.psd_summary_label.get_parent()
+        children = parent_box.get_children()
+        summary_index = children.index(self.psd_summary_label)
+        parent_box.pack_start(self.psd_table_box, False, False, 0)
+        parent_box.reorder_child(self.psd_table_box, summary_index + 1)
+        
+        # Show all new widgets
+        self.psd_table_box.show_all()
+    
+    def _on_diameter_edited(self, renderer, path, new_text):
+        """Handle editing of diameter values in PSD table."""
+        try:
+            value = float(new_text)
+            if value > 0:
+                self.psd_data_store[path][0] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_fraction_edited(self, renderer, path, new_text):
+        """Handle editing of mass fraction values in PSD table."""
+        try:
+            value = float(new_text)
+            if 0 <= value <= 1.0:
+                self.psd_data_store[path][1] = value
+                self._update_imported_psd_data()
+        except ValueError:
+            pass
+    
+    def _on_add_psd_data_point(self, button):
+        """Add a new point to the PSD data table."""
+        self.psd_data_store.append([1.0, 0.001])  # Default values
+        self._update_imported_psd_data()
+    
+    def _on_remove_psd_data_point(self, button, tree_view):
+        """Remove selected point from PSD data table."""
+        selection = tree_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        if tree_iter:
+            model.remove(tree_iter)
+            self._update_imported_psd_data()
+    
+    def _update_imported_psd_data(self):
+        """Update the imported_psd_data list from the table store."""
+        if hasattr(self, 'psd_data_store'):
+            self.imported_psd_data = []
+            for row in self.psd_data_store:
+                self.imported_psd_data.append((float(row[0]), float(row[1])))
+            
+            # Sort by diameter
+            self.imported_psd_data.sort(key=lambda x: x[0])
+
+    
+    def _add_advanced_sections(self, container: Gtk.Box) -> None:
+        """Add limestone-specific advanced sections."""
+        # Simple materials don't need advanced sections
+        pass
+    
+    def _connect_material_signals(self) -> None:
+        """Connect limestone-specific signals."""
+        # Connect value change signals if needed
+        pass
+    
+    def _load_material_specific_data(self) -> None:
+        """Load limestone-specific data into form fields."""
+        if not self.material_data:
+            # For new materials, just update the summary to show log-normal mode
+            self._update_psd_summary_label()
+            return
+        
+        # Load limestone specific fields
+        if hasattr(self, 'caco3_content_spin') and 'caco3_content' in self.material_data:
+            self.caco3_content_spin.set_value(self.material_data['caco3_content'])
+        if hasattr(self, 'hardness_spin') and 'hardness' in self.material_data:
+            self.hardness_spin.set_value(self.material_data['hardness'])
+        
+        # Load PSD parameters
+        if hasattr(self, 'psd_median_spin'):
+            self.psd_median_spin.set_value(float(self.material_data.get('psd_median', 5.0)))
+        if hasattr(self, 'psd_spread_spin'):
+            self.psd_spread_spin.set_value(float(self.material_data.get('psd_spread', 2.0)))
+        
+        # Load custom PSD data if available
+        psd_custom_points = self.material_data.get('psd_custom_points')
+        if psd_custom_points:
+            try:
+                import json
+                psd_data = json.loads(psd_custom_points)
+                # Convert from dict format back to tuple format
+                self.imported_psd_data = [(point['diameter'], point['mass_fraction']) for point in psd_data]
+                # Create and show the editable table
+                self._create_psd_data_table()
+                # Update summary to show loaded data
+                self._update_psd_summary_label()
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                self.logger.warning(f"Could not load custom PSD data: {e}")
+                # Clear invalid data
+                self.material_data['psd_custom_points'] = None
+                # Update summary to show log-normal mode
+                self._update_psd_summary_label()
+        else:
+            # No existing PSD data, update summary to show log-normal mode
+            self._update_psd_summary_label()
+    
+    def _validate_material_specific_field(self, widget) -> None:
+        """Validate limestone-specific fields."""
+        # Add specific validation if needed
+        pass
+    
+    def _validate_all_material_fields(self) -> None:
+        """Validate all limestone-specific fields."""
+        # Add comprehensive validation if needed
+        pass
+    
+    def _collect_material_specific_data(self) -> Dict[str, Any]:
+        """Collect limestone-specific form data."""
+        data = {
+            'limestone_fraction': 1.0,  # Always 1.0 for single phase
+        }
+        if hasattr(self, 'caco3_content_spin') and self.caco3_content_spin:
+            data['caco3_content'] = self.caco3_content_spin.get_value()
+        if hasattr(self, 'hardness_spin') and self.hardness_spin:
+            data['hardness'] = self.hardness_spin.get_value()
+        
+        # Include PSD parameters
+        if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
+            data['psd_median'] = self.psd_median_spin.get_value()
+        if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
+            data['psd_spread'] = self.psd_spread_spin.get_value()
+        
+        # Include imported PSD data if available (store as JSON)
+        if hasattr(self, 'imported_psd_data') and self.imported_psd_data:
+            import json
+            # Convert list of tuples to list of dicts for JSON storage
+            psd_points = [{"diameter": d, "mass_fraction": mf} for d, mf in self.imported_psd_data]
+            data['psd_custom_points'] = json.dumps(psd_points)
         
         return data
 
@@ -3510,6 +5949,8 @@ def create_material_dialog(parent: 'VCCTLMainWindow', material_type: str, materi
         'fly_ash': FlyAshDialog,
         'slag': SlagDialog,
         'inert_filler': InertFillerDialog,
+        'silica_fume': SilicaFumeDialog,
+        'limestone': LimestoneDialog,
         # Add other material types as needed
     }
     
