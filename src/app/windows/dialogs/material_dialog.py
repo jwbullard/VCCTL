@@ -832,15 +832,21 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             
             if self.is_edit_mode:
                 # Update existing material using correct primary key
+                # Handle both dictionary and SQLAlchemy object formats
                 if self.material_type == 'aggregate':
                     # For aggregates, use display_name as the primary key
-                    material_id = self.material_data['display_name']
+                    material_id = self.material_data.get('display_name') if isinstance(self.material_data, dict) else getattr(self.material_data, 'display_name', None)
                 elif self.material_type in ['inert_filler', 'limestone', 'silica_fume', 'fly_ash', 'slag']:
                     # For materials with name-based primary keys, use name
-                    material_id = self.material_data['name']
+                    material_id = self.material_data.get('name') if isinstance(self.material_data, dict) else getattr(self.material_data, 'name', None)
                 else:
                     # For cement materials, use integer ID as the primary key
-                    material_id = self.material_data['id']
+                    material_id = self.material_data.get('id') if isinstance(self.material_data, dict) else getattr(self.material_data, 'id', None)
+                
+                if material_id is None:
+                    raise Exception(f"Could not determine material ID for {self.material_type} update")
+                
+                print(f"DEBUG: Using material_id='{material_id}' for {self.material_type} update")
                 
                 # Convert data to appropriate model format
                 if self.material_type == 'cement':
@@ -3052,8 +3058,15 @@ class FlyAshDialog(MaterialDialogBase):
         
         self.activity_spin.set_value(float(self.material_data.get('activity_index', 85.0)))
         
-        pozz_activity = self.material_data.get('pozzolanic_activity', 'high')
-        self.pozz_combo.set_active_id(pozz_activity)
+        # Convert numeric pozzolanic activity to qualitative value
+        pozz_numeric = self.material_data.get('pozzolanic_activity', 75.0)
+        if pozz_numeric >= 80:
+            pozz_qualitative = 'high'
+        elif pozz_numeric >= 70:
+            pozz_qualitative = 'moderate'
+        else:
+            pozz_qualitative = 'low'
+        self.pozz_combo.set_active_id(pozz_qualitative)
         
         # Load custom PSD data if available
         psd_custom_points = self.material_data.get('psd_custom_points')
@@ -3080,8 +3093,8 @@ class FlyAshDialog(MaterialDialogBase):
         # Load PSD parameters
         if hasattr(self, 'psd_median_spin'):
             self.psd_median_spin.set_value(float(self.material_data.get('psd_median', 5.0)))
-        if hasattr(self, 'psd_stdev_spin'):
-            self.psd_stdev_spin.set_value(float(self.material_data.get('psd_stdev', 0.5)))
+        if hasattr(self, 'psd_spread_spin'):
+            self.psd_spread_spin.set_value(float(self.material_data.get('psd_spread', 2.0)))
         
         # Update calculations and summary
         self._update_alkali_calculations()
@@ -3136,9 +3149,32 @@ class FlyAshDialog(MaterialDialogBase):
         """Collect fly ash-specific data."""
         data = {}
         
-        # NOTE: The following fields don't exist in the current FlyAsh model:
-        # loi, fineness_45um, na2o, k2o, astm_class, activity_index, pozzolanic_activity
-        # These would need to be added to the model if we want to save them
+        # Add physical properties
+        if hasattr(self, 'loi_spin') and self.loi_spin:
+            data['loi'] = self.loi_spin.get_value()
+        if hasattr(self, 'fineness_spin') and self.fineness_spin:
+            data['fineness_45um'] = self.fineness_spin.get_value()
+        
+        # Add alkali characteristics
+        if hasattr(self, 'na2o_spin') and self.na2o_spin:
+            data['na2o'] = self.na2o_spin.get_value()
+        if hasattr(self, 'k2o_spin') and self.k2o_spin:
+            data['k2o'] = self.k2o_spin.get_value()
+        # Na2O equivalent is calculated, not directly set
+        if hasattr(self, 'na2o_spin') and hasattr(self, 'k2o_spin'):
+            na2o_equiv = self.na2o_spin.get_value() + 0.658 * self.k2o_spin.get_value()
+            data['na2o_equivalent'] = na2o_equiv
+        
+        # Add classification data
+        if hasattr(self, 'astm_combo') and self.astm_combo:
+            data['astm_class'] = self.astm_combo.get_active_id()
+        if hasattr(self, 'activity_spin') and self.activity_spin:
+            data['activity_index'] = self.activity_spin.get_value()
+        if hasattr(self, 'pozz_combo') and self.pozz_combo:
+            # Convert qualitative pozzolanic activity to numeric value
+            pozz_activity = self.pozz_combo.get_active_id()
+            numeric_activity = {'high': 85.0, 'moderate': 75.0, 'low': 65.0}.get(pozz_activity, 75.0)
+            data['pozzolanic_activity'] = numeric_activity
         
         # Add oxide composition - map UI keys to database field names
         oxide_field_mapping = {
@@ -3153,7 +3189,7 @@ class FlyAshDialog(MaterialDialogBase):
             database_field = oxide_field_mapping.get(oxide_key, oxide_key)
             data[database_field] = spin.get_value()
         
-        # Add PSD parameters if they exist (these do exist in the model)
+        # Add PSD parameters (these now exist in the updated model)
         if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
             data['psd_median'] = self.psd_median_spin.get_value()
         if hasattr(self, 'psd_spread_spin') and self.psd_spread_spin:
@@ -5452,8 +5488,7 @@ class LimestoneDialog(MaterialDialogBase):
         self.psd_container = None
         super().__init__(parent, 'limestone', material_data)
         
-        # Limestone-specific UI components (minimal since it's single phase)
-        self.caco3_content_spin = None
+        # Limestone-specific UI components will be created in _add_material_specific_fields
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
         """Add limestone-specific fields to the basic info grid."""
@@ -5873,8 +5908,6 @@ class LimestoneDialog(MaterialDialogBase):
         # Load limestone specific fields
         if hasattr(self, 'caco3_content_spin') and 'caco3_content' in self.material_data:
             self.caco3_content_spin.set_value(self.material_data['caco3_content'])
-        if hasattr(self, 'hardness_spin') and 'hardness' in self.material_data:
-            self.hardness_spin.set_value(self.material_data['hardness'])
         
         # Load PSD parameters
         if hasattr(self, 'psd_median_spin'):
@@ -5921,8 +5954,6 @@ class LimestoneDialog(MaterialDialogBase):
         }
         if hasattr(self, 'caco3_content_spin') and self.caco3_content_spin:
             data['caco3_content'] = self.caco3_content_spin.get_value()
-        if hasattr(self, 'hardness_spin') and self.hardness_spin:
-            data['hardness'] = self.hardness_spin.get_value()
         
         # Include PSD parameters
         if hasattr(self, 'psd_median_spin') and self.psd_median_spin:
