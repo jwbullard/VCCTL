@@ -48,6 +48,10 @@ class SilicaFume(Base):
     silica_fume_fraction = Column(Float, nullable=True, default=1.0,
                                 doc="Silica fume phase mass fraction")
     
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    
     # Description and metadata
     description = Column(String(512), nullable=True,
                         doc="Silica fume description and notes")
@@ -114,6 +118,9 @@ class SilicaFumeCreate(BaseModel):
     silica_fume_fraction: Optional[float] = Field(1.0, ge=0.0, le=1.0,
                                                  description="Silica fume phase fraction")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Silica fume description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -149,6 +156,9 @@ class SilicaFumeUpdate(BaseModel):
     silica_fume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0,
                                                  description="Silica fume phase fraction")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Silica fume description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -162,6 +172,10 @@ class SilicaFumeResponse(BaseModel):
     psd: Optional[str]
     distribute_phases_by: Optional[int]
     silica_fume_fraction: Optional[float]
+    
+    # Reaction parameters
+    activation_energy: Optional[float]
+    
     description: Optional[str]
     source: Optional[str]
     notes: Optional[str]

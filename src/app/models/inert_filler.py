@@ -41,6 +41,10 @@ class InertFiller(Base):
     psd_custom_points = Column(Text, nullable=True, 
                               doc="Custom PSD points stored as JSON")
     
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    
     # Description and metadata
     description = Column(String(32700), nullable=True,
                         doc="Inert filler description and notes")
@@ -88,6 +92,10 @@ class InertFillerCreate(BaseModel):
                     description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, 
                                            description="Custom PSD points stored as JSON")
+    
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
@@ -129,6 +137,10 @@ class InertFillerUpdate(BaseModel):
                               description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, 
                                            description="Custom PSD points stored as JSON")
+    
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
@@ -149,6 +161,10 @@ class InertFillerResponse(BaseModel):
     name: str
     specific_gravity: float
     psd: str
+    
+    # Reaction parameters
+    activation_energy: Optional[float]
+    
     description: Optional[str]
     source: Optional[str]
     notes: Optional[str]

@@ -110,6 +110,10 @@ class FlyAsh(Base):
     pozzolanic_activity = Column(Float, nullable=True, default=75.0,
                                doc="Pozzolanic activity index percentage")
     
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    
     # Description and metadata
     description = Column(String(512), nullable=True,
                         doc="Fly ash description and notes")
@@ -267,6 +271,9 @@ class FlyAshCreate(BaseModel):
     activity_index: Optional[float] = Field(85.0, ge=0.0, le=150.0, description="Activity index percentage")
     pozzolanic_activity: Optional[float] = Field(75.0, ge=0.0, le=150.0, description="Pozzolanic activity index percentage")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Fly ash description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -362,6 +369,9 @@ class FlyAshUpdate(BaseModel):
     activity_index: Optional[float] = Field(None, ge=0.0, le=150.0, description="Activity index percentage")
     pozzolanic_activity: Optional[float] = Field(None, ge=0.0, le=150.0, description="Pozzolanic activity index percentage")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Fly ash description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -409,6 +419,9 @@ class FlyAshResponse(BaseModel):
     astm_class: Optional[str]
     activity_index: Optional[float]
     pozzolanic_activity: Optional[float]
+    
+    # Reaction parameters
+    activation_energy: Optional[float]
     
     description: Optional[str]
     source: Optional[str]

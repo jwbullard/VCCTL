@@ -62,6 +62,10 @@ class Limestone(Base):
     psd_spread = Column(Float, nullable=True, default=2.0,
                        doc="PSD distribution spread parameter for log-normal distribution")
     
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    
     # Description and metadata
     description = Column(String(512), nullable=True,
                         doc="Limestone description and notes")
@@ -140,6 +144,9 @@ class LimestoneCreate(BaseModel):
     psd_median: Optional[float] = Field(5.0, gt=0.0, description="Median particle size (μm)")
     psd_spread: Optional[float] = Field(2.0, gt=0.0, description="PSD distribution spread parameter")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Limestone description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -187,6 +194,9 @@ class LimestoneUpdate(BaseModel):
     psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
     psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Limestone description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -210,6 +220,9 @@ class LimestoneResponse(BaseModel):
     # PSD parameters
     psd_median: Optional[float]
     psd_spread: Optional[float]
+    
+    # Reaction parameters
+    activation_energy: Optional[float]
     
     description: Optional[str]
     source: Optional[str]

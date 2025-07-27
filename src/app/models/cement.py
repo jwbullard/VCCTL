@@ -102,6 +102,10 @@ class Cement(Base):
     psd_exponent = Column(Float, nullable=True, doc="PSD exponent parameter")
     psd_custom_points = Column(Text, nullable=True, doc="Custom PSD points (JSON)")
     
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    
     # Additional UI fields
     source = Column(String(255), nullable=True, doc="Material source")
     notes = Column(String(1000), nullable=True, doc="Additional notes")
@@ -299,6 +303,9 @@ class CementCreate(BaseModel):
     psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
     psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
+    
     # Additional UI fields
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -427,6 +434,9 @@ class CementUpdate(BaseModel):
     psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
     psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
     
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
+    
     # Additional fields for UI
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -452,6 +462,9 @@ class CementResponse(BaseModel):
     # Physical properties
     specific_gravity: Optional[float]
     description: Optional[str]
+    
+    # Reaction parameters  
+    activation_energy: Optional[float]
     
     # Calculated properties
     has_phase_data: bool

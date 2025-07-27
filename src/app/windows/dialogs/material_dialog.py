@@ -1355,6 +1355,27 @@ class CementDialog(MaterialDialogBase):
         calc_grid.attach(self.density_display, 1, 0, 1, 1)
         calc_grid.attach(density_unit_label, 2, 0, 1, 1)
         
+        # Activation energy
+        activation_label = Gtk.Label("Activation Energy:")
+        activation_label.set_halign(Gtk.Align.END)
+        activation_label.get_style_context().add_class("form-label")
+        
+        activation_spin = Gtk.SpinButton.new_with_range(1, 200000, 100)
+        activation_spin.set_value(54000)
+        activation_spin.set_digits(0)
+        
+        # Store in general physical properties instead of reaction_params for universal access
+        if not hasattr(self, 'physical_properties'):
+            self.physical_properties = {}
+        self.physical_properties['activation_energy'] = activation_spin
+        
+        activation_unit_label = Gtk.Label("J/mol")
+        activation_unit_label.get_style_context().add_class("dim-label")
+        
+        calc_grid.attach(activation_label, 0, 1, 1, 1)
+        calc_grid.attach(activation_spin, 1, 1, 1, 1)
+        calc_grid.attach(activation_unit_label, 2, 1, 1, 1)
+        
         # Heat of hydration removed per user request
         
         phys_box.pack_start(calc_grid, False, False, 0)
@@ -2386,6 +2407,10 @@ class CementDialog(MaterialDialogBase):
             psd_data = self.psd_widget.get_material_data_dict()
             data.update(psd_data)
         
+        # Add activation energy
+        if hasattr(self, 'physical_properties') and 'activation_energy' in self.physical_properties:
+            data['activation_energy'] = self.physical_properties['activation_energy'].get_value()
+        
         return data
     
     def _on_mass_fraction_changed(self, mass_spin: Gtk.SpinButton, phase_key: str) -> None:
@@ -2878,6 +2903,22 @@ class FlyAshDialog(MaterialDialogBase):
         class_grid.attach(self.activity_spin, 1, 1, 1, 1)
         class_grid.attach(activity_unit, 2, 1, 1, 1)
         
+        # Activation energy
+        activation_label = Gtk.Label("Activation Energy:")
+        activation_label.set_halign(Gtk.Align.END)
+        activation_label.get_style_context().add_class("form-label")
+        
+        self.activation_energy_spin = Gtk.SpinButton.new_with_range(1, 200000, 100)
+        self.activation_energy_spin.set_value(54000)
+        self.activation_energy_spin.set_digits(0)
+        
+        activation_unit = Gtk.Label("J/mol")
+        activation_unit.get_style_context().add_class("dim-label")
+        
+        class_grid.attach(activation_label, 0, 2, 1, 1)
+        class_grid.attach(self.activation_energy_spin, 1, 2, 1, 1)
+        class_grid.attach(activation_unit, 2, 2, 1, 1)
+        
         class_box.pack_start(class_grid, False, False, 0)
         
         # Automatic classification display
@@ -2988,6 +3029,9 @@ class FlyAshDialog(MaterialDialogBase):
         
         self.activity_spin.set_value(float(self.material_data.get('activity_index', 85.0)))
         
+        # Load activation energy
+        self.activation_energy_spin.set_value(float(self.material_data.get('activation_energy', 54000.0)))
+        
         # Convert numeric pozzolanic activity to qualitative value
         pozz_numeric = self.material_data.get('pozzolanic_activity', 75.0)
         if pozz_numeric >= 80:
@@ -3081,6 +3125,10 @@ class FlyAshDialog(MaterialDialogBase):
             pozz_activity = self.pozz_combo.get_active_id()
             numeric_activity = {'high': 85.0, 'moderate': 75.0, 'low': 65.0}.get(pozz_activity, 75.0)
             data['pozzolanic_activity'] = numeric_activity
+        
+        # Add activation energy
+        if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
+            data['activation_energy'] = self.activation_energy_spin.get_value()
         
         # Add oxide composition - map UI keys to database field names
         oxide_field_mapping = {
@@ -3332,7 +3380,7 @@ class SlagDialog(MaterialDialogBase):
         activation_label.set_halign(Gtk.Align.END)
         activation_label.get_style_context().add_class("form-label")
         
-        activation_spin = Gtk.SpinButton.new_with_range(40000, 80000, 100)
+        activation_spin = Gtk.SpinButton.new_with_range(1, 200000, 100)
         activation_spin.set_value(54000)
         activation_spin.set_digits(0)
         self.reaction_params['activation_energy'] = activation_spin
@@ -3844,6 +3892,22 @@ class LimestoneDialog(MaterialDialogBase):
         phase_grid.attach(phase_label, 0, 0, 1, 1)
         phase_grid.attach(self.limestone_fraction_spin, 1, 0, 1, 1)
         
+        # Activation energy
+        activation_label = Gtk.Label("Activation Energy:")
+        activation_label.set_halign(Gtk.Align.END)
+        activation_label.get_style_context().add_class("form-label")
+        
+        self.activation_energy_spin = Gtk.SpinButton.new_with_range(1, 200000, 100)
+        self.activation_energy_spin.set_value(54000)
+        self.activation_energy_spin.set_digits(0)
+        
+        activation_unit = Gtk.Label("J/mol")
+        activation_unit.get_style_context().add_class("dim-label")
+        
+        phase_grid.attach(activation_label, 0, 1, 1, 1)
+        phase_grid.attach(self.activation_energy_spin, 1, 1, 1, 1)
+        phase_grid.attach(activation_unit, 2, 1, 1, 1)
+        
         phase_frame.add(phase_grid)
         container.pack_start(phase_frame, False, False, 0)
         
@@ -3865,6 +3929,42 @@ class LimestoneDialog(MaterialDialogBase):
         """Handle PSD data changes from unified widget."""
         # Optional: validation or other updates
         pass
+    
+    def _load_material_specific_data(self) -> None:
+        """Load limestone-specific data."""
+        if not self.material_data:
+            return
+        
+        # Load CaCO3 content
+        if hasattr(self, 'caco3_content_spin') and self.caco3_content_spin:
+            self.caco3_content_spin.set_value(float(self.material_data.get('caco3_content', 97.0)))
+        
+        # Load activation energy
+        if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
+            self.activation_energy_spin.set_value(float(self.material_data.get('activation_energy', 54000.0)))
+        
+        # Load PSD data into unified widget
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            self.psd_widget.load_from_material_data(self.material_data)
+    
+    def _collect_material_specific_data(self) -> Dict[str, Any]:
+        """Collect limestone-specific data."""
+        data = {}
+        
+        # Add CaCO3 content
+        if hasattr(self, 'caco3_content_spin') and self.caco3_content_spin:
+            data['caco3_content'] = self.caco3_content_spin.get_value()
+        
+        # Add activation energy
+        if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
+            data['activation_energy'] = self.activation_energy_spin.get_value()
+        
+        # Add PSD data from unified widget
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            psd_data = self.psd_widget.get_material_data_dict()
+            data.update(psd_data)
+        
+        return data
 
 
 

@@ -804,6 +804,7 @@ class UnifiedPSDWidget(Gtk.Box):
             # Set UI state based on parameters
             if params.psd_type == PSDType.ROSIN_RAMMLER:
                 self.mode_combo.set_active_id("rosin_rammler")
+                self.parameter_stack.set_visible_child_name("rosin_rammler")
                 if params.d50:
                     self.rosin_rammler_widgets['d50'].set_value(params.d50)
                 if params.n:
@@ -813,6 +814,7 @@ class UnifiedPSDWidget(Gtk.Box):
             
             elif params.psd_type == PSDType.LOG_NORMAL:
                 self.mode_combo.set_active_id("log_normal")
+                self.parameter_stack.set_visible_child_name("log_normal")
                 if params.median:
                     self.log_normal_widgets['median'].set_value(params.median)
                 if params.sigma:
@@ -820,6 +822,7 @@ class UnifiedPSDWidget(Gtk.Box):
             
             elif params.psd_type == PSDType.FULLER_THOMPSON:
                 self.mode_combo.set_active_id("fuller")
+                self.parameter_stack.set_visible_child_name("fuller")
                 if params.exponent:
                     self.fuller_widgets['exponent'].set_value(params.exponent)
                 if params.dmax:
@@ -827,6 +830,7 @@ class UnifiedPSDWidget(Gtk.Box):
             
             elif params.psd_type == PSDType.CUSTOM and params.custom_points:
                 self.mode_combo.set_active_id("custom")
+                self.parameter_stack.set_visible_child_name("custom")
                 distribution = self.psd_service._process_custom_points(params.custom_points)
                 self._update_table_from_distribution(distribution)
                 self.current_distribution = distribution

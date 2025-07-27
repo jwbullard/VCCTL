@@ -232,7 +232,7 @@ class SlagCreate(BaseModel):
     so3_content: Optional[float] = Field(4.0, ge=0.0, le=100.0, description="SO3 content percentage")
     
     # Reaction parameters
-    activation_energy: Optional[float] = Field(54000.0, ge=40000.0, le=80000.0, description="Activation energy (J/mol)")
+    activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
     reactivity_factor: Optional[float] = Field(1.0, ge=0.1, le=2.0, description="Reactivity factor")
     rate_constant: Optional[float] = Field(1e-6, ge=1e-8, le=1e-4, description="Rate constant (1/s)")
     
@@ -300,7 +300,7 @@ class SlagUpdate(BaseModel):
     so3_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="SO3 content percentage")
     
     # Reaction parameters
-    activation_energy: Optional[float] = Field(None, ge=40000.0, le=80000.0, description="Activation energy (J/mol)")
+    activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
     reactivity_factor: Optional[float] = Field(None, ge=0.1, le=2.0, description="Reactivity factor")
     rate_constant: Optional[float] = Field(None, ge=1e-8, le=1e-4, description="Rate constant (1/s)")
     
