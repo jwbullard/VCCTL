@@ -7,7 +7,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float
+from sqlalchemy import Column, String, Float, Text
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -37,6 +37,53 @@ class Slag(Base):
     psd = Column(String(64), nullable=True, default='cement141',
                 doc="Particle size distribution reference")
     
+    psd_custom_points = Column(Text, nullable=True, 
+                              doc="Custom PSD points stored as JSON")
+    
+    # Complete PSD parameters (unified with cement model)
+    psd_mode = Column(String(64), nullable=True, default='log_normal',
+                     doc="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50 = Column(Float, nullable=True, default=15.0,
+                    doc="PSD D50 parameter (μm) for Rosin-Rammler")
+    psd_n = Column(Float, nullable=True, default=1.4,
+                  doc="PSD n parameter for Rosin-Rammler")
+    psd_dmax = Column(Float, nullable=True, default=75.0,
+                     doc="PSD Dmax parameter (μm)")
+    psd_median = Column(Float, nullable=True, default=15.0,
+                       doc="Median particle size (μm) for log-normal distribution")
+    psd_spread = Column(Float, nullable=True, default=1.4,
+                       doc="PSD distribution spread parameter for log-normal distribution")
+    psd_exponent = Column(Float, nullable=True, default=0.5,
+                         doc="PSD exponent parameter for Fuller-Thompson")
+    
+    # Basic slag properties
+    glass_content = Column(Float, nullable=True, default=95.0,
+                          doc="Glass content percentage")
+    activity_index = Column(Float, nullable=True, default=95.0,
+                           doc="Activity index percentage")
+    
+    # Chemical composition (oxide content) - typical GGBS composition totaling 100%
+    sio2_content = Column(Float, nullable=True, default=35.0,
+                         doc="SiO2 content percentage")
+    cao_content = Column(Float, nullable=True, default=40.0,
+                        doc="CaO content percentage")
+    al2o3_content = Column(Float, nullable=True, default=12.0,
+                          doc="Al2O3 content percentage")
+    mgo_content = Column(Float, nullable=True, default=8.0,
+                        doc="MgO content percentage")
+    fe2o3_content = Column(Float, nullable=True, default=1.0,
+                          doc="Fe2O3 content percentage")
+    so3_content = Column(Float, nullable=True, default=4.0,
+                        doc="SO3 content percentage")
+    
+    # Reaction parameters
+    activation_energy = Column(Float, nullable=True, default=54000.0,
+                              doc="Activation energy (J/mol)")
+    reactivity_factor = Column(Float, nullable=True, default=1.0,
+                              doc="Reactivity factor")
+    rate_constant = Column(Float, nullable=True, default=1e-6,
+                          doc="Rate constant (1/s)")
+    
     # Molecular and chemical properties
     molecular_mass = Column(Float, nullable=True,
                           doc="Molecular mass of slag")
@@ -59,9 +106,11 @@ class Slag(Base):
     hp_h2o_si_mol_ratio = Column(Float, nullable=True,
                                doc="Hydration product H2O/SiO2 molar ratio")
     
-    # Description
+    # Description and metadata
     description = Column(String, nullable=True,
                         doc="Slag description and notes")
+    source = Column(String(255), nullable=True, doc="Material source")
+    notes = Column(String(1000), nullable=True, doc="Additional notes")
     
     def __repr__(self) -> str:
         """String representation of the slag."""
@@ -158,6 +207,34 @@ class SlagCreate(BaseModel):
     specific_gravity: Optional[float] = Field(2.87, gt=0.0, description="Specific gravity")
     psd: Optional[str] = Field('cement141', max_length=64,
                               description="Particle size distribution reference")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
+    
+    # Complete PSD parameters (unified with cement model)
+    psd_mode: Optional[str] = Field('log_normal', max_length=64, 
+                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(15.0, gt=0.0, description="PSD D50 parameter (μm)")
+    psd_n: Optional[float] = Field(1.4, gt=0.0, description="PSD n parameter")
+    psd_dmax: Optional[float] = Field(75.0, gt=0.0, description="PSD Dmax parameter (μm)")
+    psd_median: Optional[float] = Field(15.0, gt=0.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(1.4, gt=0.0, description="PSD distribution spread parameter")
+    psd_exponent: Optional[float] = Field(0.5, gt=0.0, description="PSD exponent parameter")
+    
+    # Basic slag properties
+    glass_content: Optional[float] = Field(95.0, ge=85.0, le=100.0, description="Glass content percentage")
+    activity_index: Optional[float] = Field(95.0, ge=50.0, le=150.0, description="Activity index percentage")
+    
+    # Chemical composition (oxide content) - typical GGBS composition totaling 100%
+    sio2_content: Optional[float] = Field(35.0, ge=0.0, le=100.0, description="SiO2 content percentage")
+    cao_content: Optional[float] = Field(40.0, ge=0.0, le=100.0, description="CaO content percentage")
+    al2o3_content: Optional[float] = Field(12.0, ge=0.0, le=100.0, description="Al2O3 content percentage")
+    mgo_content: Optional[float] = Field(8.0, ge=0.0, le=100.0, description="MgO content percentage")
+    fe2o3_content: Optional[float] = Field(1.0, ge=0.0, le=100.0, description="Fe2O3 content percentage")
+    so3_content: Optional[float] = Field(4.0, ge=0.0, le=100.0, description="SO3 content percentage")
+    
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(54000.0, ge=40000.0, le=80000.0, description="Activation energy (J/mol)")
+    reactivity_factor: Optional[float] = Field(1.0, ge=0.1, le=2.0, description="Reactivity factor")
+    rate_constant: Optional[float] = Field(1e-6, ge=1e-8, le=1e-4, description="Rate constant (1/s)")
     
     # Molecular properties
     molecular_mass: Optional[float] = Field(None, gt=0.0, description="Molecular mass")
@@ -178,6 +255,8 @@ class SlagCreate(BaseModel):
                                                 description="HP H2O/SiO2 ratio")
     
     description: Optional[str] = Field(None, description="Slag description")
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     
     @field_validator('name')
     @classmethod
@@ -202,6 +281,28 @@ class SlagUpdate(BaseModel):
     specific_gravity: Optional[float] = Field(None, gt=0.0, description="Specific gravity")
     psd: Optional[str] = Field(None, max_length=64,
                               description="Particle size distribution reference")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
+    
+    # PSD parameters for log-normal distribution
+    psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
+    
+    # Basic slag properties
+    glass_content: Optional[float] = Field(None, ge=85.0, le=100.0, description="Glass content percentage")
+    activity_index: Optional[float] = Field(None, ge=50.0, le=150.0, description="Activity index percentage")
+    
+    # Chemical composition (oxide content)
+    sio2_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="SiO2 content percentage")
+    cao_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="CaO content percentage")
+    al2o3_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="Al2O3 content percentage")
+    mgo_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="MgO content percentage")
+    fe2o3_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="Fe2O3 content percentage")
+    so3_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="SO3 content percentage")
+    
+    # Reaction parameters
+    activation_energy: Optional[float] = Field(None, ge=40000.0, le=80000.0, description="Activation energy (J/mol)")
+    reactivity_factor: Optional[float] = Field(None, ge=0.1, le=2.0, description="Reactivity factor")
+    rate_constant: Optional[float] = Field(None, ge=1e-8, le=1e-4, description="Rate constant (1/s)")
     
     # Molecular properties
     molecular_mass: Optional[float] = Field(None, gt=0.0, description="Molecular mass")
@@ -222,6 +323,8 @@ class SlagUpdate(BaseModel):
                                                 description="HP H2O/SiO2 ratio")
     
     description: Optional[str] = Field(None, description="Slag description")
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
 
 
 class SlagResponse(BaseModel):
@@ -230,6 +333,28 @@ class SlagResponse(BaseModel):
     name: str
     specific_gravity: Optional[float]
     psd: Optional[str]
+    
+    # PSD parameters
+    psd_median: Optional[float]
+    psd_spread: Optional[float]
+    
+    # Basic slag properties
+    glass_content: Optional[float]
+    activity_index: Optional[float]
+    
+    # Chemical composition
+    sio2_content: Optional[float]
+    cao_content: Optional[float]
+    al2o3_content: Optional[float]
+    mgo_content: Optional[float]
+    fe2o3_content: Optional[float]
+    so3_content: Optional[float]
+    
+    # Reaction parameters
+    activation_energy: Optional[float]
+    reactivity_factor: Optional[float]
+    rate_constant: Optional[float]
+    
     molecular_mass: Optional[float]
     casi_mol_ratio: Optional[float]
     si_per_mole: Optional[float]
@@ -240,6 +365,8 @@ class SlagResponse(BaseModel):
     hp_casi_mol_ratio: Optional[float]
     hp_h2o_si_mol_ratio: Optional[float]
     description: Optional[str]
+    source: Optional[str]
+    notes: Optional[str]
     has_complete_molecular_data: bool
     has_complete_hp_data: bool
     has_reactivity_data: bool

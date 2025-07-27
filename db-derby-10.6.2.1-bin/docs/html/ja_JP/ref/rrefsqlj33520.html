@@ -1,0 +1,85 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="MINé–¢æ•°" />
+<meta content="MIN aggregate function" name="DC.subject" />
+<meta content="MIN aggregate function" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj29026.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefsqlj33520" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>MINé–¢æ•°</title>
+</head>
+<body id="rrefsqlj33520"><a name="rrefsqlj33520"><!-- --></a>
+
+
+<h1 class="topictitle1">MINé–¢æ•°</h1>
+
+
+<div>
+<div class="section"> <p>MINã?¯é›†ç´„é–¢æ•°ã?§ã€?å…¨è¡Œã?«æ¸¡ã‚‹å¼?ã?®æœ€å°?å€¤ã‚’æ±‚ã‚?ã?¾ã?™ã€‚
+(<a href="rrefsqlj33923.html#rrefsqlj33923">é›†ç´„ (é›†å?ˆé–¢æ•°)</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚)
+MINã?¯çµ„ã?¿è¾¼ã?¿ã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?«å¯¾ã?—ã?¦ã?®ã?¿é?©ç”¨å?¯èƒ½ã?§ã?™ã€‚(ã?“ã‚Œã?«ã?¯CHARã€?VARCHARã€?DATEã€?TIMEç­‰ã?Œå?«ã?¾ã‚Œã?¾ã?™ã€‚)</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4> <pre><strong>MIN ( [ DISTINCT | ALL ] <em>å¼?</em> )</strong></pre>
+ 
+<div class="p">
+DISTINCTã?¨ALLã?¨ã?„ã?†é™?å®šè©žã?«ã?¯ã€?é‡?è¤‡ã‚’å?–ã‚Šé™¤ã?„ã?Ÿã‚Šã€?é‡?è¤‡ã‚’æ®‹ã?™åƒ?ã??ã?Œã?‚ã‚Šã?¾ã?™ã€‚ã?—ã?‹ã?—ã?“ã‚Œã‚‰ã?®é™?å®šè©žã?¯MINå¼?ã?§ã?¯åŠ¹æžœã?Œã?‚ã‚Šã?¾ã?›ã‚“ã€‚
+<em><a href="rrefselectexpression.html#rrefselectexpression">é?¸æŠžå¼?</a></em>ã?«ã?¯é™?å®šè©žã?¯å”¯ä¸€ã?¤ã?—ã?‹æ›¸ã??ã?“ã?¨ã?Œã?§ã??ã?¾ã?›ã‚“ã€‚
+ä¾‹ã?ˆã?°æ¬¡ã?®å•?å?ˆã?›ã?¯è¨±ã?•ã‚Œã?¾ã?›ã‚“ã€‚<pre><strong>SELECT COUNT (DISTINCT flying_time), MIN (DISTINCT miles)
+FROM Flights</strong></pre>
+</div>
+ 
+<p>ã?“ã?®<em>å¼?</em>ã?«ã?¯è¤‡æ•°ã?®åˆ—ã?¸ã?®å?‚ç…§ã‚„å¼?ã‚’æ›¸ã??ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚ã?—ã?‹ã?—ã€?å‰¯å•?å?ˆã?›ã‚„ä»–ã?®é›†ç´„ã‚’æ›¸ã??ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚
+å¼?ã?¯çµ„è¾¼ã?¿ã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?¨ã?—ã?¦è©•ä¾¡ã?•ã‚Œã?ªã?‘ã‚Œã?°ã?ªã‚‰ã?šã€?å¾“ã?£ã?¦ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã?¶ã?ªã‚‰çµ„è¾¼ã?¿ã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?«è©•ä¾¡ã?•ã‚Œã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚(ä¾‹ã?ˆã?°ã€?<em>java.lang.Integer</em>ã‚„<em>int</em>ã‚’è¿”ã?™ãƒ¡ã‚½ãƒƒãƒ‰ã?§ã?‚ã‚‹ã?ªã‚‰ã€?INTEGERã?¨è©•ä¾¡ã?•ã‚Œã?¾ã?™ã€‚)ã‚‚ã?—å¼?ã?ŒNULLã?¨è©•ä¾¡ã?•ã‚Œã‚‹ã?®ã?§ã?‚ã‚Œã?°ã€?ã??ã?®å€¤ã?¯é›†ç´„ã?«ã?¦ç„¡è¦–ã?•ã‚Œã?¾ã?™ã€‚</p>
+ 
+<p>åž‹ã?«ã‚ˆã‚Šæœ€å°?å€¤ã‚’æ±ºã‚?ã‚‹è¦?å‰‡ã?¯ç•°ã?ªã‚Šã?¾ã?™ã€‚CHARã€?VARCHARã?§ã?¯ã€?MINã?®è©•ä¾¡çµ?æžœã?¯å€¤ã?®æœ«å°¾ã?«ã?‚ã‚‹ç©ºç™½æ–‡å­—æ•°ã?«å½±éŸ¿ã?•ã‚Œã?¾ã?™ã€‚
+ä¾‹ã?ˆã?°'z'ã?¨'z 'ã?Œåˆ—ã?«è¨˜éŒ²ã?•ã‚Œã?¦ã?„ã?Ÿã?¨ã?—ã?¦ã€?ã?©ã?¡ã‚‰ã?®å€¤ã?Œæœ€å°?å€¤ã?¨ã?—ã?¦è¿”ã?•ã‚Œã‚‹ã?‹ã‚’æ±ºã‚?ã‚‹æ–¹æ³•ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚ã?ªã?œã?ªã‚‰ã?°æ–‡å­—åˆ—ã?®æ¯”è¼ƒã?«ã?¦ç©ºç™½æ–‡å­—ã?¯ç„¡è¦–ã?•ã‚Œã‚‹ã?‹ã‚‰ã?§ã?™ã€‚</p>
+ 
+<p>çµ?æžœã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?¯å‡¦ç?†ã?™ã‚‹å¼?ã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?¨å?Œã?˜ã?§ã?™ã€‚(ã‚ªãƒ¼ãƒ?ãƒ¼ãƒ•ãƒ­ãƒ¼ã?™ã‚‹ã?“ã?¨ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚)</p>
+ </div>
+
+<div class="example"> <pre><strong><span>-- æœ‰åŠ¹ã?§ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚</span>
+SELECT DISTINCT flying_time, MIN(DISTINCT miles) from Flights
+<span>-- æœ‰åŠ¹ã?§ã?™ã€‚</span>
+SELECT COUNT(DISTINCT flying_time), MIN(DISTINCT miles) from Flights
+<span>-- æœ€ã‚‚è‹¥ã?„æ—¥ä»˜ã‚’æŽ¢ã?—ã?¾ã?™ã€‚</span>
+SELECT MIN (flight_date) FROM FlightAvailability;</strong></pre>
+ </div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefsqlj29026.html" title="">çµ„ã?¿è¾¼ã?¿é–¢æ•°</a></div>
+</div>
+</div>
+
+</body>
+</html>

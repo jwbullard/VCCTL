@@ -13,6 +13,8 @@ from app.services.cement_service import CementService
 from app.services.fly_ash_service import FlyAshService
 from app.services.slag_service import SlagService
 from app.services.inert_filler_service import InertFillerService
+from app.services.silica_fume_service import SilicaFumeService
+from app.services.limestone_service import LimestoneService
 from app.services.mix_service import MixService
 from app.services.aggregate_service import AggregateService
 from app.services.microstructure_service import MicrostructureService
@@ -60,6 +62,8 @@ class ServiceContainer:
         self._fly_ash_service = None
         self._slag_service = None
         self._inert_filler_service = None
+        self._silica_fume_service = None
+        self._limestone_service = None
         self._mix_service = None
         self._aggregate_service = None
         self._microstructure_service = None
@@ -146,6 +150,22 @@ class ServiceContainer:
         return self._inert_filler_service
     
     @property
+    def silica_fume_service(self) -> SilicaFumeService:
+        """Get silica fume service instance."""
+        if self._silica_fume_service is None:
+            self._silica_fume_service = SilicaFumeService(self.db_service)
+            self.logger.debug("Silica fume service created")
+        return self._silica_fume_service
+    
+    @property
+    def limestone_service(self) -> LimestoneService:
+        """Get limestone service instance."""
+        if self._limestone_service is None:
+            self._limestone_service = LimestoneService(self.db_service)
+            self.logger.debug("Limestone service created")
+        return self._limestone_service
+    
+    @property
     def mix_service(self) -> MixService:
         """Get mix service instance."""
         if self._mix_service is None:
@@ -197,6 +217,8 @@ class ServiceContainer:
             'fly_ash': self.fly_ash_service,
             'slag': self.slag_service,
             'inert_filler': self.inert_filler_service,
+            'silica_fume': self.silica_fume_service,
+            'limestone': self.limestone_service,
             'mix': self.mix_service,
             'aggregate': self.aggregate_service,
             'microstructure': self.microstructure_service,

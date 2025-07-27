@@ -16,6 +16,8 @@ from app.services.cement_service import CementService
 from app.services.fly_ash_service import FlyAshService
 from app.services.slag_service import SlagService
 from app.services.inert_filler_service import InertFillerService
+from app.services.silica_fume_service import SilicaFumeService
+from app.services.limestone_service import LimestoneService
 from app.services.mix_service import MixService, MaterialType, MixComponent, MixDesign
 from app.services.aggregate_service import AggregateService, AggregateType, SieveData, GradingCurve
 from app.services.microstructure_service import MicrostructureService, PhaseType, MicrostructureParams
@@ -35,6 +37,8 @@ __all__ = [
     'FlyAshService',
     'SlagService',
     'InertFillerService',
+    'SilicaFumeService',
+    'LimestoneService',
     'MixService',
     'MaterialType',
     'MixComponent',

@@ -1,0 +1,271 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="java.sql.Blobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?¨java.sql.Clobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?®å¯¾å¿œ" />
+<meta content="java.sql.Blob interface, java.sql.Clob interface, BLOB data type, CLOB data type" name="DC.subject" />
+<meta content="java.sql.Blob interface, java.sql.Clob interface, BLOB data type, CLOB data type" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc20377.html" />
+<meta scheme="URI" name="DC.Relation" content="crefjavbclobnot.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefjdbc96386" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>java.sql.Blobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?¨java.sql.Clobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?®å¯¾å¿œ</title>
+</head>
+<body id="rrefjdbc96386"><a name="rrefjdbc96386"><!-- --></a>
+
+
+<h1 class="topictitle1">java.sql.Blobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?¨java.sql.Clobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?®å¯¾å¿œ</h1>
+
+
+<div>
+<div class="section"><p>JDBC 2.0ã?§ã?¯<em>java.sql.Blob</em>ã?¯SQLã?®BLOB(binary large object)åž‹ã?«å¯¾å¿œã?—ã?¦ã€?<em>java.sql.Clob</em>ã?¯SQLã?®CLOB(character large object)åž‹ã?«å¯¾å¿œã?—ã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><p>java.sql.Blobã?¨java.sql.Clobã?¯æƒ…å ±(large object)å…¨ä½“ã?§ã?¯ã?ªã??ã€?ã??ã‚Œã?¸ã?®è«–ç?†çš„ã?ªãƒ?ã‚¤ãƒ³ã‚¿ã‚’è¡¨ã?—ã?¾ã?™ã€‚<span>Derby</span>ã?§ã?¯ä¸€æ™‚ã?«å”¯ä¸€ã?¤ã?®ãƒ‡ãƒ¼ã‚¿ãƒšãƒ¼ã‚¸ã? ã?‘ã?Œãƒ¡ãƒ¢ãƒªä¸Šã?§å‡¦ç?†ã?•ã‚Œã?¾ã?™ã€‚BLOBã?®æƒ…å ±ã?®æœ€åˆ?ã?®æ•°ãƒ?ã‚¤ãƒˆã‚’èª­ã?¿æ›¸ã??ã?™ã‚‹ã?®ã?«ã€?LOBå…¨ä½“ã?Œå‡¦ç?†ã?•ã‚Œã‚‹å¿…è¦?ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚</p>
+</div>
+
+<div class="section"><div class="p">ç?¾åœ¨ã?®<span>Derby</span>ã?«çµ„ã?¿è¾¼ã?¾ã‚Œã?Ÿåž‹ã?«ã?¯ã€?BLOBã?¨CLOBã?Œç”¨æ„?ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚
+ã?¾ã?Ÿ<span>Derby</span>ã?¯ã?“ã‚Œã‚‰ã?®ãƒ‡ãƒ¼ã‚¿åž‹ã?«å¯¾ã?—ã?¦ä»¥ä¸‹ã?®æ©Ÿèƒ½ã‚’æ??ä¾›ã?—ã?¾ã?™ã€‚
+<ul>
+<li><strong>BLOBã?®æ©Ÿèƒ½</strong> 
+<span>Derby</span>ã?§ã?¯<em>java.sql.Blob</em>ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?¨<em><a href="rrefjdbc99392.html#rrefjdbc99392">java.sql.PreparedStatementã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: JDBC2.0ã?§æ??ä¾›ã?•ã‚Œã‚‹ãƒ¡ã‚½ãƒƒãƒ‰</a></em>ã?Šã‚ˆã?³<em><a href="rrefjdbc77156.html#rrefjdbc77156">java.sql.ResultSet</a></em>ã?®BLOBã?«é–¢é€£ã?—ã?Ÿãƒ¡ã‚½ãƒƒãƒ‰ã?Œç”¨æ„?ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚
+<em>CallableStatement</em>ã?®<em>getBlob</em>ãƒ¡ã‚½ãƒƒãƒ‰ã?¯å®Ÿè£…ã?•ã‚Œã?¦ã?„ã?¾ã?›ã‚“ã€‚</li>
+
+<li><strong>CLOBã?®æ©Ÿèƒ½</strong> 
+<span>Derby</span>ã?§ã?¯java.sql.Clobã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?¨<em><a href="rrefjdbc99392.html#rrefjdbc99392">java.sql.PreparedStatementã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: JDBC2.0ã?§æ??ä¾›ã?•ã‚Œã‚‹ãƒ¡ã‚½ãƒƒãƒ‰</a></em>ã?¨<em><a href="rrefjdbc77156.html#rrefjdbc77156">java.sql.ResultSet</a></em>ã?®CLOBã?«é–¢é€£ã?—ã?Ÿãƒ¡ã‚½ãƒƒãƒ‰ã?Œç”¨æ„?ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚
+<em>CallableStatement</em>ã?®<em>getClob</em>ãƒ¡ã‚½ãƒƒãƒ‰ã?¯å®Ÿè£…ã?•ã‚Œã?¦ã?„ã?¾ã?›ã‚“ã€‚</li>
+
+</ul>
+</div>
+</div>
+
+
+<div class="section"><div class="p">java.sql.Blobã?¨java.sql.Clobã?®æ©Ÿèƒ½ã‚’ä½¿ã?†ã?«ã?¯ä»¥ä¸‹ã?®ã‚ˆã?†ã?«ã?—ã?¾ã?™ã€‚
+<ul>
+<li>æƒ…å ±ã‚’SQLã?®BLOBåž‹ã?§è¨˜éŒ²ã?—ã?¾ã?™ã€‚LONG VARCHAR FOR BIT DATAã€?BINARYã?Šã‚ˆã?³VARCHAR FOR BIT DATAåž‹ã?§ã‚‚å?¯èƒ½ã?§ã?™ã€‚</li>
+
+<li>æƒ…å ±ã‚’SQLã?®CLOBåž‹ã?§è¨˜éŒ²ã?—ã?¾ã?™ã€‚LONG VARCHARã€?CHARã?Šã‚ˆã?³VARCHARåž‹ã?§ã‚‚å?¯èƒ½ã?§ã?™ã€‚</li>
+
+<li><em>java.sql.ResultSet</em>ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?®<em>getBlob</em>ã?‚ã‚‹ã?„ã?¯<em>getClob</em>ãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ã?£ã?¦ã€?å?‚ç…§ã?•ã‚Œã‚‹æƒ…å ±ã‚’æ‰±ã?†<em>BLOB</em>ã‚„<em>CLOB</em>ã‚’å?–å¾—ã?—ã?¾ã?™ã€‚</li>
+
+<li>LOBã?®åˆ—ã?«å¯¾ã?—ã?¦é?™çš„ã?ªãƒ¡ã‚½ãƒƒãƒ‰ã‚’å‘¼ã?¶ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚</li>
+
+</ul>
+</div>
+</div>
+
+<div class="section"><p>åŠ ã?ˆã?¦æ–‡å­—åˆ—ã?¨BLOBã?®é–“ã?§åž‹å¤‰æ?›ã‚’è¡Œã?†ã?“ã?¨ã?¯æŽ¨å¥¨ã?•ã‚Œã?¾ã?›ã‚“ã€‚ã?ªã?œã?ªã‚‰åž‹å¤‰æ?›ã?¯ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ãƒ»ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?«ä¾?å­˜ã?™ã‚‹ã?‹ã‚‰ã?§ã?™ã€‚</p>
+</div>
+
+<div class="section"><p><span>Derby</span>ã?¯ãƒ¦ãƒ‹ã‚³ãƒ¼ãƒ‰æ–‡å­—åˆ—(1æ–‡å­—2ãƒ?ã‚¤ãƒˆ)ã‚’ä½¿ã?„ã?¾ã?™ã?Œã€?ä»–ã?®ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹è£½å“?ã?¯ASCIIæ–‡å­—(1æ–‡å­—ã?‚ã?Ÿã‚Š1ãƒ?ã‚¤ãƒˆ)ã‚’ä½¿ã?†ã?‹ã‚‚ã?—ã‚Œã?¾ã?›ã‚“ã€‚ä½¿ã‚?ã‚Œã‚‹æ–‡å­—ã‚³ãƒ¼ãƒ‰ã?®ç¨®é¡žã?«ã‚ˆã?£ã?¦ã?¯ä¸€æ–‡å­—ã?Œæ•°ãƒ?ã‚¤ãƒˆã‚’å¿…è¦?ã?¨ã?™ã‚‹ã?“ã?¨ã‚‚è€ƒã?ˆã‚‰ã‚Œã?¾ã?™ã€‚æ–‡å­—åˆ—ã‚’è¨˜éŒ²ã?™ã‚‹ç‚ºã?«ã€?<span>Derby</span>ã?§ã?¯ä»–ã‚ˆã‚Šå¤§ã??ã?ªBLOBã?®åž‹ã‚’å¿…è¦?ã?¨ã?™ã‚‹å ´å?ˆã?Œã?‚ã‚Šã?¾ã?™ã€‚
+æ–‡å­—åˆ—ã‚’è¨˜éŒ²ã?™ã‚‹å ´å?ˆã?¯CLOBåž‹ã‚’åˆ©ç”¨ã?™ã‚‹ã?¹ã??ã?§ã?™ã€‚</p>
+</div>
+
+<div class="section"><div class="p"><strong>BLOBã€?CLOBã€?(LOBåž‹)ã?®åˆ¶ç´„</strong>   <ul>
+<li>LOBåž‹ã?¯ç­‰å?·(=)ã‚„ä¸?ç­‰å?·(!=ã€? &lt;&gt;. ã?§æ¯”è¼ƒã?§ã??ã?¾ã?›ã‚“ã€‚</li>
+
+<li>LOBåž‹ã?§é †åº?ä»˜ã?‘ã‚‹ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚ã?¾ã?Ÿ&lt;ã€? &lt;=ã€? &gt;ã€? &gt;=ã?«ã‚ˆã‚‹æ¯”è¼ƒã‚‚ä¸?å?¯èƒ½ã?§ã?™ã€‚</li>
+
+<li>LOBåž‹ã?¸ã?®ç´¢å¼•ã‚„LOBåž‹ã?®ä¸»ã‚­ãƒ¼åˆ—ã?¯ä¸?å?¯èƒ½ã?§ã?™ã€‚</li>
+
+<li>LOBåž‹ã?«ã?¤ã?„ã?¦ã€?DISTINCTã€?GROUP BYã€?ORDER BYç¯€ã?¯åˆ©ç”¨ã?§ã??ã?¾ã?›ã‚“ã€‚</li>
+
+<li>ä»–ã?®åŸºæœ¬åž‹ã?¨é?•ã?„ã€?LOBåž‹ã?§ã?¯æš—é»™ã?®åž‹å¤‰æ?›ã‚’è¡Œã?ˆã?¾ã?›ã‚“ã€‚</li>
+
+</ul>
+</div>
+</div>
+
+<div class="section"><p><span>Derby</span>ã?§ã?¯ã€?<em>CallableStatement</em>ã?®setã?Šã‚ˆã?³getãƒ¡ã‚½ãƒƒãƒ‰ã‚’é™¤ã?„ã?Ÿã€?ä»¥ä¸‹ã?®JDBC 2.0ã?®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã?®ãƒ¡ã‚½ãƒƒãƒ‰ã?Œå®Ÿè£…ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><p><strong>æŽ¨å¥¨äº‹é …:</strong> <em>java.sql.Blob</em>ã?¨<em>java.sql.Clob</em>ã?®ç”Ÿå­˜æœŸé–“ã?¯ãƒˆãƒ©ãƒ³ã‚¶ã‚¯ã‚·ãƒ§ãƒ³ã?Œã‚³ãƒŸãƒƒãƒˆã?•ã‚Œã‚‹ã?¨ã??çµ‚äº†ã?™ã‚‹ã?®ã?§ã€?<em>java.sql.Blob</em>ã?Šã‚ˆã?³<em>java.sql.Clob</em>ã‚’åˆ©ç”¨ã?™ã‚‹ã?¨ã??ã?¯è‡ªå‹•ã‚³ãƒŸãƒƒãƒˆã‚’åˆ‡ã?£ã?¦ä¸‹ã?•ã?„ã€‚</p>
+</div>
+
+
+<div class="section"><div class="p"> 
+<div class="tablenoborder"><table summary="" cellspacing="0" cellpadding="4" width="100%" frame="border" border="1" rules="all"><caption>è¡¨ 1. æ??ä¾›ã?•ã‚Œã‚‹JDBC 2.0 java.sql.Blobã?®ãƒ¡ã‚½ãƒƒãƒ‰</caption>
+
+<thead align="left">
+<tr>
+<th align="left" valign="bottom" width="13%" id="N101FC">è¿”ã‚Šå€¤</th>
+
+<th align="left" valign="bottom" width="32%" id="N10205">ã‚·ã‚°ãƒ?ãƒ?ãƒ£</th>
+
+<th align="left" valign="bottom" width="55.00000000000001%" id="N1020E">å®Ÿè£…ã?®è¦šæ›¸</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+<tr>
+<td valign="top" width="13%" headers="N101FC "><em>InputStream</em></td>
+
+<td valign="top" width="32%" headers="N10205 "><em>getBinaryStream()</em></td>
+
+<td valign="top" width="55.00000000000001%" headers="N1020E ">&nbsp;</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="13%" headers="N101FC "><em>byte[]</em></td>
+
+<td valign="top" width="32%" headers="N10205 "><em>getBytes(long pos, int length)</em></td>
+
+<td valign="top" width="55.00000000000001%" headers="N1020E "><em>pos</em> &lt; 1ã? ã?£ã?Ÿã‚Šã€?<em>pos</em>ã?Œlengthã‚ˆã‚Šå¤§ã??ã?‹ã?£ã?Ÿã‚Šã€?<em>length</em> &lt;= 0ã?§ã?‚ã?£ã?Ÿå ´å?ˆã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="13%" headers="N101FC "><em>long</em></td>
+
+<td valign="top" width="32%" headers="N10205 "><em>length()</em></td>
+
+<td valign="top" width="55.00000000000001%" headers="N1020E ">&nbsp;</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="13%" headers="N101FC "><em>long</em></td>
+
+<td valign="top" width="32%" headers="N10205 "><em>position(byte[] pattern, long start)</em></td>
+
+<td valign="top" width="55.00000000000001%" headers="N1020E "><em>pattern</em> == nullã?§ã?‚ã?£ã?Ÿã‚Šã€?<em>start</em> &lt;
+1ã?§ã?‚ã?£ã?Ÿã‚Šã€?<em>pattern</em>ã?®é…?åˆ—é•·ã?Œ0ã?§ã?‚ã?£ã?Ÿå ´å?ˆã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="13%" headers="N101FC "><em>long</em></td>
+
+<td valign="top" width="32%" headers="N10205 "><em>position(Blob pattern, long start)</em></td>
+
+<td valign="top" width="55.00000000000001%" headers="N1020E "><em>pattern</em> == nullã? ã?£ã?Ÿã‚Šã€?<em>start</em> &lt;
+1ã? ã?£ã?Ÿã‚Šã€?<em>pattern</em>ã?®é•·ã?•ã?Œ0ã?§ã?‚ã?£ã?Ÿã‚Šã€?<em>pattern</em>ã?®æœ€åˆ?ã?®æ•°ãƒ?ã‚¤ãƒˆã‚’èª­ã‚€ã?¨ã??ä¾‹å¤–ã?Œèµ·ã??ã‚‹ã?¨ã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+</tbody>
+
+</table>
+</div>
+  
+<div class="tablenoborder"><table summary="" cellspacing="0" cellpadding="4" width="100%" frame="border" border="1" rules="all"><caption>è¡¨ 2. æ??ä¾›ã?•ã‚Œã‚‹JDBC 2.0 java.sql.Clob ã?®ãƒ¡ã‚½ãƒƒãƒ‰</caption>
+
+<thead align="left">
+<tr>
+<th align="left" valign="bottom" width="14.000000000000002%" id="N1033B">è¿”ã‚Šå€¤</th>
+
+<th align="left" valign="bottom" width="36%" id="N10344">ã‚·ã‚°ãƒ?ãƒ?ãƒ£</th>
+
+<th align="left" valign="bottom" width="50%" id="N1034D">å®Ÿè£…ä¸Šã?®è¦šæ›¸</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>InputStream</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>getAsciiStream()</em></td>
+
+<td valign="top" width="50%" headers="N1034D ">&nbsp;</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>Reader</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>getCharacterStream()</em></td>
+
+<td valign="top" width="50%" headers="N1034D ">&nbsp;</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>String</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>getSubString(long pos, int length)</em></td>
+
+<td valign="top" width="50%" headers="N1034D "><em>pos</em> &lt; 1ã? ã?£ã?Ÿã‚Šã€?<em>pos</em>ã?Œ<em> Clob</em>ã?®é•·ã?•ã‚ˆã‚Šå¤§ã??ã?‹ã?£ã?Ÿã‚Šã€?length &lt;= 0ã?§ã?‚ã?£ã?Ÿå ´å?ˆã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>long</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>length()</em></td>
+
+<td valign="top" width="50%" headers="N1034D ">&nbsp;</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>long</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>position(Clob searchstr, long start) </em></td>
+
+<td valign="top" width="50%" headers="N1034D "><em>searchStr</em> == nullã? ã?£ã?Ÿã‚Š<em>start</em> &lt;
+1ã? ã?£ã?Ÿã‚Šã€?<em>searchStr </em>ã?®é•·ã?•ã?Œ0ã? ã?£ã?Ÿã‚Šã€?<em>searchStr</em>ã?®æœ€åˆ?ã?®æ•°ãƒ?ã‚¤ãƒˆã‚’èª­ã‚€ã?¨ã??ä¾‹å¤–ã?Œèµ·ã??ã‚‹ã?¨ã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="14.000000000000002%" headers="N1033B "><em>long</em></td>
+
+<td valign="top" width="36%" headers="N10344 "><em>position(String searchstr, long start) </em></td>
+
+<td valign="top" width="50%" headers="N1034D "><em>searchStr</em> == nullã? ã?£ã?Ÿã‚Šã€?start &lt;
+1ã? ã?£ã?Ÿã‚Šã€?patternã?Œç©ºæ–‡å­—åˆ—ã?§ã?‚ã?£ã?Ÿå ´å?ˆã€?ä¾‹å¤–ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</td>
+
+</tr>
+
+</tbody>
+
+</table>
+</div>
+</div>
+</div>
+
+</div>
+
+<div>
+<ul class="ullinks">
+<li class="ulchildlink"><strong><a href="crefjavbclobnot.html">java.sql.Blobã?¨java.sql.Clobã?®å¯¾å¿œã?«é–¢ã?™ã‚‹ä½†ã?—æ›¸ã??</a></strong><br />
+</li>
+</ul>
+
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefjdbc20377.html" title="Derbyã?«ã?¦java.sql.Typesã?¯SQLãƒ‡ãƒ¼ã‚¿åž‹ã?«å¯¾å¿œä»˜ã?‘ã?•ã‚Œã?¾ã?™ã€‚">SQLåž‹ã?¨java.sql.Typesã?®å¯¾å¿œ</a></div>
+</div>
+</div>
+
+</body>
+</html>

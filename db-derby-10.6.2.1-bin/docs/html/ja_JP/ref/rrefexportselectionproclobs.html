@@ -1,0 +1,123 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??" />
+<meta name="abstract" content="SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILEæ‰‹ç¶šã??ã‚’ä½¿ã?£ã?¦ã€?ä¸»ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?¨ã€?åˆ¥ã?«ã?ªã?£ã?ŸLOBã?®æƒ…å ±ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«ã€?SELECTæ–‡ã?®çµ?æžœã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚" />
+<meta name="description" content="SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILEæ‰‹ç¶šã??ã‚’ä½¿ã?£ã?¦ã€?ä¸»ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?¨ã€?åˆ¥ã?«ã?ªã?£ã?ŸLOBã?®æƒ…å ±ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«ã€?SELECTæ–‡ã?®çµ?æžœã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚" />
+<meta content="system procedures, SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE, system procedures" name="DC.subject" />
+<meta content="system procedures, SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE, system procedures" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="crefsqlbuiltinsystemprocedures.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefexportselectionproclobs" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</title>
+</head>
+<body id="rrefexportselectionproclobs"><a name="rrefexportselectionproclobs"><!-- --></a>
+
+
+<h1 class="topictitle1">SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</h1>
+
+
+
+<div><p><samp class="codeph">SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE</samp>æ‰‹ç¶šã??ã‚’ä½¿ã?£ã?¦ã€?ä¸»ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?¨ã€?åˆ¥ã?«ã?ªã?£ã?ŸLOBã?®æƒ…å ±ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«ã€?SELECTæ–‡ã?®çµ?æžœã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚</p>
+
+<div class="section"><p>ã‚»ã‚­ãƒ¥ãƒªãƒ†ã‚£çš„ã?ªé…?æ…®ã?¨æ„?å›³ã?›ã?¬ãƒ•ã‚¡ã‚¤ãƒ«ã?®ç ´å£Šã‚’é?¿ã?‘ã‚‹ã?Ÿã‚?ã€?ã?“ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?§ã?¯æ—¢å­˜ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã?®æƒ…å ±ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?¯è¡Œã?„ã?¾ã?›ã‚“ã€‚ã?“ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?«ã?¯å­˜åœ¨ã?—ã?ªã?„ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æŒ‡å®šã?™ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚ã?“ã?®æ‰‹ç¶šã??ã‚’å®Ÿè¡Œã?™ã‚‹ã?¨ãƒ•ã‚¡ã‚¤ãƒ«ã?Œæ–°è¦?ã?§ä½œæˆ?ã?•ã‚Œã?¦ã€?ã??ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¸æƒ…å ±ã?Œã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?•ã‚Œã?¾ã?™ã€‚</p>
+
+<p>æƒ…å ±ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?¯ãƒ‡ãƒªãƒŸãƒˆãƒ•ã‚¡ã‚¤ãƒ«æ›¸å¼?ã?«ã‚ˆã‚Šè¡Œã‚?ã‚Œã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4><pre>SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE (
+    IN SELECTSTATEMENT VARCHAR(32672),
+    IN FILENAME VARCHAR(32672), 
+    IN COLUMNDELIMITER CHAR(1),
+    IN CHARACTERDELIMITER CHAR(1), 
+    IN CODESET VARCHAR(128)
+    IN LOBSFILENAME VARCHAR(32672) 
+    )</pre>
+ 
+<p>ã?“ã?®æ‰‹ç¶šã??ã‚’å®Ÿè¡Œã?™ã‚‹ã?¨ã€?ä¸»ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«ã€?æƒ…å ±ã?Œãƒ‡ãƒªãƒŸãƒˆã?•ã‚Œã?Ÿãƒ•ã‚¡ã‚¤ãƒ«æ›¸å¼?ã?§åˆ—ã?®æƒ…å ±ã?Œæ›¸ã??å‡ºã?•ã‚Œã?¾ã?™ã€‚</p>
+<dl>
+<dt class="dlterm">SELECTSTATEMENT</dt>
+
+<dd>ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹æƒ…å ±ã‚’è¿”ã?™å•?ã?„å?ˆã‚?ã?›ã‚’è¨˜è¿°ã?—ã?¾ã?™ã€‚
+NULLå€¤ã‚’æŒ‡å®šã?™ã‚‹ã?¨ã‚¨ãƒ©ãƒ¼ã?«ã?ªã‚Šã?¾ã?™ã€‚<span class="parmname">SELECTSTATEMENT</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯VARCHAR (32672)åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">FILENAME</dt>
+
+<dd>æƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹æ–°è¦?ãƒ•ã‚¡ã‚¤ãƒ«ã?®å??ç§°ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ãƒ‘ã‚¹ã?Œçœ?ç•¥ã?•ã‚Œã?Ÿå ´å?ˆã€?ç?¾åœ¨ã?®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã?Œç”¨ã?„ã‚‰ã‚Œã?¾ã?™ã€‚æ—¢å­˜ãƒ•ã‚¡ã‚¤ãƒ«ã?®å??å‰?ã?ŒæŒ‡å®šã?•ã‚Œã?Ÿå ´å?ˆã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?‹ã‚‰ã‚¨ãƒ©ãƒ¼ã?Œè¿”ã‚Šã?¾ã?™ã€‚ãƒ?ãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‚µãƒ¼ãƒ?ã‚’åˆ©ç”¨ã?—ã?¦ã?„ã‚‹å ´å?ˆã€?ã‚µãƒ¼ãƒ?ä¸Šã?®ãƒ•ã‚¡ã‚¤ãƒ«ä½?ç½®ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚NULLå€¤ã‚’å?–ã‚‹ã?¨ã‚¨ãƒ©ãƒ¼ã?«ã?ªã‚Šã?¾ã?™ã€‚<span class="parmname">FILENAME</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯VARCHAR (32672)åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">COLUMNDELIMITER</dt>
+
+<dd>åˆ—ã?®ãƒ‡ãƒªãƒŸã‚¿ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚æŒ‡å®šã?—ã?Ÿæ–‡å­—ã?¯åˆ—ã?®çµ‚ã‚?ã‚Šã‚’è¡¨ã?™ã‚³ãƒ³ãƒžã?®ä»£ã‚?ã‚Šã?«ä½¿ã‚?ã‚Œã?¾ã?™ã€‚
+NULLå€¤ã‚’æŒ‡å®šã?—ã?¦æ—¢å®šã?®ã‚³ãƒ³ãƒžã‚’ä½¿ã?†ã?“ã?¨ã‚‚ã?§ã??ã?¾ã?™ã€‚<span class="parmname">COLUMNDELIMITER</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯CHAR (1)ãƒ‡ãƒ¼ã‚¿åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">CHARACTERDELIMITER</dt>
+
+<dd>æ–‡å­—ã?®ãƒ‡ãƒªãƒŸã‚¿ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚æŒ‡å®šã?—ã?Ÿæ–‡å­—ã?¯æ–‡å­—åˆ—ã‚’å›²ã?†äºŒé‡?å¼•ç”¨ç¬¦ã?®ä»£ã‚?ã‚Šã?«ä½¿ã‚?ã‚Œã?¾ã?™ã€‚
+NULLå€¤ã‚’æŒ‡å®šã?—ã?¦æ—¢å®šã?®äºŒé‡?å¼•ç”¨ç¬¦ã‚’ä½¿ã?†ã?“ã?¨ã‚‚ã?§ã??ã?¾ã?™ã€‚<span class="parmname">CHARACTERDELIMITER</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯CHAR (1)ãƒ‡ãƒ¼ã‚¿åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">CODESET</dt>
+
+<dd>ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«æ›¸ã?‹ã‚Œã‚‹æƒ…å ±ã?®ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã?®å??ç§°ã?¯Javaã?§åˆ©ç”¨å?¯èƒ½ã?ªã‚­ãƒ£ãƒ©ã‚¯ã‚¿ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚»ãƒƒãƒˆã?®ã‚‚ã?®ã?§ã?‚ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚æƒ…å ±ã?¯ãƒ•ã‚¡ã‚¤ãƒ«ã?«å‡ºåŠ›ã?•ã‚Œã‚‹å‰?ã?«ã€?ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?®ã‚³ãƒ¼ãƒ‰ãƒšãƒ¼ã‚¸ã?‹ã‚‰æŒ‡å®šã?—ã?Ÿã‚³ãƒ¼ãƒ‰ãƒšãƒ¼ã‚¸ã?«å¤‰æ?›ã?•ã‚Œã?¾ã?™ã€‚
+NULLå€¤ã‚’æŒ‡å®šã?—ã?¦å®Ÿè¡Œä¸­ã?®JVMã?¨å?Œã?˜ã‚³ãƒ¼ãƒ‰ãƒšãƒ¼ã‚¸ã‚’æŒ‡å®šã?™ã‚‹ã?“ã?¨ã‚‚ã?§ã??ã?¾ã?™ã€‚<span class="parmname">CODESET</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯VARCHAR (128)åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">LOBSFILENAME</dt>
+
+<dd>large objectã?®æƒ…å ±ã?Œã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?•ã‚Œã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ãƒ‘ã‚¹ã?Œçœ?ç•¥ã?•ã‚Œã?Ÿå ´å?ˆã€?lobã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¯ä¸»ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?¨å?Œã?˜ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã?«ä½œæˆ?ã?•ã‚Œã?¾ã?™ã€‚ã‚‚ã?—æ—¢å­˜ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¨å?Œã?˜å??å‰?ã‚’æŒ‡å®šã?—ã?Ÿå ´å?ˆã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ã?¯ãƒ•ã‚¡ã‚¤ãƒ«ã?®å†…å®¹ã‚’ä¸Šæ›¸ã??ã?—ã?¾ã?™ã€‚ãƒ•ã‚¡ã‚¤ãƒ«ã?«æƒ…å ±ã‚’è¿½è¨˜ã?™ã‚‹æŒ¯ã‚‹èˆžã?„ã?¯ã?—ã?¾ã?›ã‚“ã€‚
+ãƒ?ãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‚µãƒ¼ãƒ?ã‚’åˆ©ç”¨ã?—ã?¦ã?„ã‚‹å ´å?ˆã€?ã‚µãƒ¼ãƒ?ä¸Šã?®ãƒ•ã‚¡ã‚¤ãƒ«ä½?ç½®ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚
+NULLå€¤ã‚’æŒ‡å®šã?™ã‚‹ã?¨ã‚¨ãƒ©ãƒ¼ã?¨ã?ªã‚Šã?¾ã?™ã€‚<span class="parmname">LOBSFILENAME</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯VARCHAR (32672)åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+</dl>
+</div>
+
+<div class="section"><h4 class="sectiontitle">ä½¿ã?„æ–¹</h4>
+<p>ã?“ã?®æ‰‹ç¶šã??ã?®ä½¿ã?„æ–¹ã?«é–¢ã?™ã‚‹è¿½åŠ ã?®æƒ…å ±ã?¯ã€?<span><em>Derby ãƒ„ãƒ¼ãƒ«ã?¨ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ãƒ¼ã‚¬ã‚¤ãƒ‰</em></span>ã?®ã€Œãƒ?ãƒ«ã‚¯ã‚¤ãƒ³ãƒ?ãƒ¼ãƒˆã?¨ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã‚’ä½¿ã?†ã€?ã?¨ã?„ã?†ç« ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">LOBã?®æƒ…å ±ã‚’åˆ¥ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã?«ã?—ã?¦ã€?å•?ã?„å?ˆã‚?ã?›ã?Ÿæƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ä¾‹</h4>ã‚µãƒ³ãƒ—ãƒ«ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?«ã?‚ã‚‹STAFFè¡¨ã?‹ã‚‰ã€?20ã?®éƒ¨ç½²ã?®å¾“æ¥­å“¡ã?®æƒ…å ±ã‚’ã€?ä¸»ãƒ•ã‚¡ã‚¤ãƒ«ã‚’<samp class="codeph">staff.del</samp>ã€?lobã?®æƒ…å ±ã‚’<samp class="codeph">pictures.dat</samp>ã?«ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹æ–¹æ³•ã‚’ã€?æ¬¡ã?®ä¾‹ã?§ç¤ºã?—ã?¾ã?™ã€‚
+<pre>CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(
+    'SELECT * FROM STAFF WHERE dept=20',
+    'c:ï¼¼dataï¼¼staff.del', ',' ,'"',
+    'UTF-8','c:ï¼¼dataï¼¼pictures.dat');  </pre>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="crefsqlbuiltinsystemprocedures.html" title="">çµ„ã?¿è¾¼ã?¿ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</a></div>
+</div>
+</div>
+
+</body>
+</html>

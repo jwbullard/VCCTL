@@ -1,0 +1,110 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="LEFT OUTER JOINæ¼”ç®—" />
+<meta content="LEFT OUTER JOIN operation" name="DC.subject" />
+<meta content="LEFT OUTER JOIN operation" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj29840.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefsqlj18922" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>LEFT OUTER JOINæ¼”ç®—</title>
+</head>
+<body id="rrefsqlj18922"><a name="rrefsqlj18922"><!-- --></a>
+
+
+<h1 class="topictitle1">LEFT OUTER JOINæ¼”ç®—</h1>
+
+
+<div>
+<div class="section"> 
+<p>LEFT OUTER JOINæ¼”ç®—ã?¯ã€?joinç¯€ã‚’è¨˜è¿°ã?§ã??ã‚‹<a href="rrefsqlj29840.html#rrefsqlj29840">JOINæ¼”ç®—</a>ã?®ä¸€ã?¤ã?§ã?™ã€‚
+ã?“ã?®æ¼”ç®—ã?§ã?¯æœ€åˆ?ã?®(å·¦ã?®)è¡¨ã?«ã?¦ã€?ä¸€è‡´ã?™ã‚‹è¡Œã?ŒäºŒã?¤ç›®ã?®(å?³ã?®)è¡¨ã?«ã?ªã?„è¡Œã?¯ã€?äºŒã?¤ç›®ã?®è¡¨ã?®NULLã?®è¡Œã?«çµ?å?ˆã?•ã‚Œã?Ÿã‚‚ã?®ã?¨ã?—ã?¦ã€?çµ?æžœã?«æ®‹ã‚Šã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4>
+<pre>
+<strong><em><a href="rreftableexpression.html#rreftableexpression">è¡¨å¼?</a></em> LEFT [ OUTER ] JOIN <em><a href="rreftableexpression.html#rreftableexpression">è¡¨å¼?</a></em>
+{
+    ON <em>çœŸå?½å¼?</em> 
+    }</strong></pre>
+
+<p>ONç¯€ã?«ã?‚ã‚‹ã?„ã?šã‚Œã?®çœŸå?½å¼?ã‚‚ã€?ç›´æŽ¥ã?®è¡¨ã?¨ç›´æŽ¥ã?®å•?ã?„å?ˆã‚?ã?›æ–‡ã?«ã?‚ã‚‹ã?„ã?‹ã?ªã‚‹è¡¨ã‚’å?‚ç…§ã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+ONç¯€ã?¯çµ?å?ˆã?•ã‚Œã?¦ã?„ã?ªã?„è¡¨ã‚’å?‚ç…§ã?™ã‚‹ã?“ã?¨ã‚‚ã?§ã??ã?¾ã?™ã?—ã€?çµ?å?ˆã?•ã‚Œã?¦ã?„ã‚‹è¡¨ã‚’å?‚ç…§ã?—ã?ªã??ã?¨ã‚‚ã?‹ã?¾ã?„ã?¾ã?›ã‚“ã€‚(ã?Ÿã? ã?—ä¸€èˆ¬çš„ã?«ã?¯å?‚ç…§ã?—ã?¾ã?™ã€‚)</p>
+ </div>
+
+<div class="example"><h4 class="sectiontitle">ä¾‹ 1</h4><pre><strong>--éƒ½å¸‚ã?«å¯¾å¿œã?™ã‚‹ã‚¢ã‚¸ã‚¢ã?®å›½</strong>
+
+SELECT CITIES.COUNTRY, CITIES.CITY_NAME, REGION 
+FROM Countries 
+LEFT OUTER JOIN Cities
+ON CITIES.COUNTRY_ISO_CODE = COUNTRIES.COUNTRY_ISO_CODE
+WHERE REGION = 'Asia'
+
+<strong>-- LEFT JOINã?¨ã?„ã?†åˆ¥ã?®æ›¸ã??æ–¹ã?«ã‚ˆã‚Šã€?å‰?ä¾‹ã?¨å?Œã?˜çµ?æžœã‚’
+-- å®Ÿç?¾ã?™ã‚‹ã€‚
+</strong>
+SELECT  COUNTRIES.COUNTRY, CITIES.CITY_NAME,REGION 
+FROM COUNTRIES 
+LEFT JOIN CITIES 
+ON CITIES.COUNTRY_ISO_CODE = COUNTRIES.COUNTRY_ISO_CODE
+WHERE REGION = 'Asia'
+</pre>
+</div>
+
+<div class="example"><h4 class="sectiontitle">ä¾‹ 2</h4><pre><strong>
+-- EMPLOYEEã?¨DEPAETMENTã?¨ã?„ã?†è¡¨ã‚’çµ?å?ˆã?—ã?¦ã€?
+-- 1930ã‚ˆã‚Šå‰?ã?«ç”Ÿã?¾ã‚Œã?Ÿ(BIRTHDATE)å…¨ã?¦ã?®ç¤¾å“¡ã?®ã€?
+-- ç¤¾å“¡ç•ªå?·(EMPNO)ã?¨ã€?
+-- ç¤¾å“¡ã?®è‹—å­—(LASTNAME)ã?¨ã€?
+-- éƒ¨ç½²ç•ªå?·(EMPLOYEEã?¨ã?„ã?†è¡¨ã?®WORKDEPTã?¨ã€?DEPARTMENTã?¨ã?„ã?†è¡¨ã?®DEPTNO)ã?¨ã€?
+-- éƒ¨ç½²å??(DEPTNAME)ã‚’é?¸æŠžã?™ã‚‹ã€‚
+</strong>
+SELECT EMPNO, LASTNAME, WORKDEPT, DEPTNAME 
+   FROM SAMP.EMPLOYEE LEFT OUTER JOIN SAMP.DEPARTMENT 
+   ON WORKDEPT = DEPTNO 
+   AND YEAR(BIRTHDATE) &lt; 1930
+
+<strong>-- ç®¡ç?†è€…ã?®ã?„ã?ªã?„éƒ¨ç½²ã‚’å?«ã‚?å…¨ã?¦ã?®éƒ¨ç½²ã‚’ã€?
+-- éƒ¨ç½²ã?®ç®¡ç?†è€…ã?®ç¤¾å“¡ç•ªå?·ã?¨è‹—å­—ã?¨å…±ã?«ä¸€è¦§ã?™ã‚‹ã€‚
+</strong>
+SELECT DEPTNO, DEPTNAME, EMPNO, LASTNAME
+      FROM DEPARTMENT LEFT OUTER JOIN EMPLOYEE
+	    ON MGRNO = EMPNO</pre>
+ </div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefsqlj29840.html" title="">JOIN æ¼”ç®—</a></div>
+</div>
+</div>
+
+</body>
+</html>

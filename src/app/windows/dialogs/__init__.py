@@ -9,6 +9,8 @@ from .material_dialog import (
     MaterialDialogBase,
     CementDialog, 
     AggregateDialog,
+    SilicaFumeDialog,
+    LimestoneDialog,
     create_material_dialog
 )
 from .file_operations_dialog import (
@@ -21,7 +23,9 @@ from .export_dialog import ExportDialog, show_export_dialog as show_advanced_exp
 __all__ = [
     'MaterialDialogBase',
     'CementDialog',
-    'AggregateDialog', 
+    'AggregateDialog',
+    'SilicaFumeDialog',
+    'LimestoneDialog', 
     'create_material_dialog',
     'FileOperationDialog',
     'OperationType',

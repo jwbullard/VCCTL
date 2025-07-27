@@ -263,58 +263,64 @@ The VCCTL-GTK application now has a **complete workflow from Mix Design to 3D Mi
   source /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/bin/activate
   ```
 
-### Latest Development Session (July 21, 2025):
+### Latest Development Session (July 26, 2025):
 
 **Git Repository**: https://github.com/jwbullard/VCCTL-GTK.git
-- Latest commit: `50159f3` - "Enhance Mix Design UI with separate X/Y/Z dimensions and fix volume fraction calculations"
+- Latest commit: `17ed277` - "Fix material data saving for fly ash and limestone"
 - Co-authored by: Jeffrey W. Bullard (Texas A&M University) and Claude
 - All work committed and pushed to GitHub
 
 **Recent Work Completed**:
-- ✅ **UI Layout Improvements** - Moved "System Dimensions & Resolution" panel to middle column for better balance
-- ✅ **Separate X/Y/Z Dimensions** - Replaced single system size with individual X, Y, Z controls (25-400 voxels each)
-- ✅ **27 Million Voxel Validation** - Real-time computational limit checking with visual feedback
-- ✅ **Powder Dispersion Options** - Renamed "Flocculation Parameters" panel with mutually exclusive flocculation/dispersion controls
-- ✅ **Critical Volume Fraction Bug Fix** - Fixed `_calculate_binder_volume_fractions()` method that was using non-existent `mass_kg` attribute
-- ✅ **Enhanced Error Handling** - Added detailed logging and debugging for volume fraction calculations
-- ✅ **Fine/Coarse Aggregate Separation** - Added shape classification methods in microstructure service
+- ✅ **Fly Ash Data Saving Complete** - Fixed all missing field saving issues for LOI, fineness, alkali characteristics, and classification data
+- ✅ **Limestone Data Saving Complete** - Fixed CaCO₃ content saving bug and added complete limestone model with service layer
+- ✅ **Database Schema Updates** - Added all missing columns with proper defaults to fly_ash and limestone tables
+- ✅ **UI Component Bug Fixes** - Fixed limestone dialog initialization that was preventing field saving
+- ✅ **Comprehensive Field Support** - All material property fields now persist correctly when editing across all material types
 
-23. **Mix Design UI Refinements and Bug Fixes** (Completed):
-    - ✅ Balanced three-column layout by moving system parameters to middle column
-    - ✅ Separate X, Y, Z dimension controls with individual validation (25-400 voxels each)
-    - ✅ Real-time total voxel calculation (X × Y × Z) with 27M limit enforcement
-    - ✅ Visual validation feedback: green checkmark when under limit, red warning when over
-    - ✅ Mutually exclusive flocculation and dispersion controls (cannot use both simultaneously)
-    - ✅ Fixed critical bug where volume fractions always defaulted to 0.7/0.3 regardless of W/B ratio
-    - ✅ Updated input file generation to use separate X/Y/Z dimensions instead of cubic assumption
-    - ✅ Enhanced aggregate shape separation for fine vs coarse aggregates
+24. **Complete Material Data Saving Fixes** (Completed):
+    - ✅ **Fly Ash Model Enhancement**: Added LOI, fineness_45um, Na₂O, K₂O, Na₂O_equivalent, ASTM_class, activity_index, pozzolanic_activity fields
+    - ✅ **Limestone Model Creation**: Built complete new limestone model with CaCO₃_content, hardness, PSD parameters, and dedicated service
+    - ✅ **Database Integration**: Added all missing columns to fly_ash and limestone tables with appropriate defaults and constraints
+    - ✅ **Critical UI Bug Fix**: Removed `self.caco3_content_spin = None` that was overwriting UI components after creation in limestone dialog
+    - ✅ **Enhanced Data Collection**: Updated `_collect_material_specific_data` and `_load_material_specific_data` methods for proper field mapping
+    - ✅ **Pydantic Model Updates**: Added all new fields to Create, Update, and Response models with proper validation ranges
+    - ✅ **Automatic Calculations**: Na₂O equivalent calculated using standard concrete industry formula (Na₂O + 0.658 × K₂O)
+    - ✅ **Complete Service Layer**: Full CRUD operations working for limestone with proper error handling and validation
 
 ### Current Resume Point:
-The VCCTL-GTK application now has a **refined and robust Mix Design interface** with:
+The VCCTL-GTK application now has **complete and robust material data management** with:
 
-**Enhanced User Experience**:
-- Balanced three-column layout with logical grouping of controls
-- Separate X/Y/Z system dimensions with real-time validation
-- Clear visual feedback for computational limits and parameter validation
-- Mutually exclusive advanced options to prevent conflicting settings
+**Enhanced Material Management**:
+- All material types (cement, fly ash, limestone, slag, inert filler, silica fume) have complete field saving functionality
+- Comprehensive property support: chemical composition, physical properties, classification data, PSD parameters
+- Robust UI components with proper initialization and data binding
+- Complete CRUD operations for all material types with validation and error handling
 
-**Critical Bug Fixes**:
-- Volume fraction calculations now properly respond to W/B ratio changes
-- Input file generation uses actual dimension values instead of hardcoded defaults
-- Proper error handling prevents silent failures in calculations
+**Database Integration**:
+- All missing database fields added with appropriate defaults and constraints
+- Proper Pydantic model validation for all material types
+- Service layer architecture providing consistent data operations
+- Database schema fully synchronized with UI requirements
 
 **Technical Robustness**:
-- Real-time validation against computational constraints (27M voxel limit)
-- Enhanced logging and debugging for troubleshooting
-- Proper signal handling for all new UI controls
-- Thermodynamically accurate volume fraction calculations
+- Fixed critical UI component initialization bugs that prevented data saving
+- Enhanced data collection and loading methods with proper field mapping
+- Automatic calculations for derived properties (Na₂O equivalent, etc.)
+- Complete validation and error handling throughout the material management workflow
 
 ### Next Session Reminder:
 1. **FIRST ACTION**: Activate the vcctl-clean-env Python virtual environment
-2. **Current State**: Mix Design UI is polished and volume fraction calculations are working correctly
-3. **Ready for**: Testing the complete workflow end-to-end with real materials and genmic.c execution
+2. **Current State**: All material data saving is working correctly across all material types
+3. **Ready for**: **PSD (Particle Size Distribution) functionality enhancement** - this is the next major focus area
 4. **Collaboration**: Working with Jeff Bullard (Texas A&M University) - call him Jeff, call me Claude
-5. **Recent Achievement**: Fixed critical volume fraction bug that was preventing proper W/B ratio response
+5. **Recent Achievement**: Fixed material saving issues for fly ash and limestone, completing the material management foundation
+
+### Next Session Focus: PSD Functionality Enhancement
+**Planned Work Areas**:
+- PSD data import, export, and editing capabilities across all material types
+- Enhanced PSD visualization and validation
+- Integration with Mix Design workflow for accurate particle size distribution handling
+- Custom PSD data management and storage improvements
 
 ### Technical Achievements Summary:
 - **Complete end-to-end workflow**: Python GUI → Database → Input file → C program → 3D microstructure

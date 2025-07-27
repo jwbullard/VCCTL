@@ -1,0 +1,299 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="fnã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ä½¿ã?£ã?ŸJDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡" />
+<meta content="fn, JDBC escape keyword, JDBC, escape keyword, escape keyword, JDBC, escape functions, substring, JDBC scalar function, mod, JDBC scalar function, locate, JDBC scalar function, abs, sqrt, concat, TIMESTAMPADD function, TIMESTAMPDIFF function, acos, asin, atan, ceiling, cos, degrees, exp, floor, log, log10, pi, radians, sin, tan" name="DC.subject" />
+<meta content="fn, JDBC escape keyword, JDBC, escape keyword, escape keyword, JDBC, escape functions, substring, JDBC scalar function, mod, JDBC scalar function, locate, JDBC scalar function, abs, sqrt, concat, TIMESTAMPADD function, TIMESTAMPDIFF function, acos, asin, atan, ceiling, cos, degrees, exp, floor, log, log10, pi, radians, sin, tan" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc1020262.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc70824.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc27768.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc28456.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc37244.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc12124.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbcescapedate.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc41784.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefjdbc88908" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>fnã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ä½¿ã?£ã?ŸJDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</title>
+</head>
+<body id="rrefjdbc88908"><a name="rrefjdbc88908"><!-- --></a>
+
+
+<h1 class="topictitle1">fnã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ä½¿ã?£ã?ŸJDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</h1>
+
+
+<div>
+<div class="section"> <p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?«ã?¦<span class="parmname">fn</span>ã?¨ã?„ã?†ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ä½¿ã?†ã?“ã?¨ã?§é–¢æ•°ã‚’æŒ‡å®šã?§ã??ã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4><pre><strong>{fn <em>é–¢æ•°å‘¼ã?³å‡ºã?—</em>}</strong></pre>
+<p>ã?“ã?“ã?§<em>é–¢æ•°å‘¼ã?³å‡ºã?—</em>ã?¯ã€?ä»¥ä¸‹ã?«æŒ™ã?’ã‚‹ã‚¹ã‚«ãƒ©ãƒ¼é–¢æ•°ã?®ä½•ã‚Œã?‹ã?®å??å‰?ã?§ã?™ã€‚</p>
+<dl>
+<dt class="dlterm">abs</dt>
+
+<dd>æ•°ã?®çµ¶å¯¾å€¤ã‚’è¿”ã?™ã€‚<pre><strong>abs(<em>æ•°å¼?</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn abs(<em>æ•°å¼?</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®<a href="rrefsqlj98067.html#rrefsqlj98067__i1195049">ABSOLUTE(æ•°å¼?)</a>ã?¨å?Œç­‰ã?§ã?™ã€‚
+ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<a href="rrefsqlj98067.html#rrefsqlj98067">ABSã?¨ABSVALé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">acos</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®é€†ä½™å¼¦ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>acos(<em>æ•°</em>)</strong></pre>
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn acos(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®ACOS(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<a href="rreffuncacos.html#rreffuncacos">ACOS</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">asin</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®é€†æ­£å¼¦ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>asin(<em>æ•°</em>)</strong></pre>
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn asin(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®ASIN(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<a href="rreffuncasin.html#rreffuncasin">ASIN</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">atan</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®é€†æ­£æŽ¥ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>atan(<em>æ•°</em>)</strong></pre>
+<p>The
+JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn atan(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®ATAN(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<a href="rreffuncatan.html#rreffuncatan">ATAN</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">ceiling</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã‚’åˆ‡ã‚Šä¸Šã?’ã?¦ã€?æŒ‡å®šã?—ã?Ÿæ•°ä»¥ä¸Šã?®æœ€å°?ã?®æ•°ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>ceiling(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn ceiling(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®CEILING(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯<a href="rreffuncceil.html#rreffuncceil">CEILã?Šã‚ˆã?³CEILINGé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">concat</dt>
+
+<dd>é€£çµ?ã?—ã?Ÿæ–‡å­—åˆ—ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>concat(<em>æ–‡å­—å¼?</em>, <em>æ–‡å­—å¼?</em>)</strong></pre>
+<p>æœ€åˆ?ã?®æ–‡å­—åˆ—ã?«äºŒã?¤ç›®ã?®æ–‡å­—åˆ—ã‚’é€£çµ?ã?—ã?Ÿæ–‡å­—åˆ—ã?Œæ§‹æˆ?ã?•ã‚Œã?¾ã?™ã€‚ã‚‚ã?—ã?©ã?¡ã‚‰ã?‹ã?®æ–‡å­—åˆ—ã?Œç©ºã?ªã‚‰ã€?è¿”ã‚Šå€¤ã?¯NULLã?¨ã?ªã‚Šã?¾ã?™ã€‚JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn concat
+(<em>æ–‡å­—å¼?</em>, <em>æ–‡å­—å¼?</em>)ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®{ æ–‡å­—å¼? || æ–‡å­—å¼? }ã?¨å?Œç­‰ã?§ã?™ã€‚è©³ç´°ã?¯ã€?<a href="rrefsqlj40899.html#rrefsqlj40899">Concatenation</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">cos</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿå¼•æ•°ã?®ä½™å¼¦ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>cos(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn cos(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®COS(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚è©³ç´°ã?¯ã€?<a href="rreffunccos.html#rreffunccos">COS é–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">degrees</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã‚’ãƒ©ã‚¸ã‚¢ãƒ³ã?‹ã‚‰åº¦ã?«å¤‰æ?›ã?—ã?¾ã?™ã€‚<pre><strong>degrees(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn degrees(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®DEGREES(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffuncdegrees.html#rreffuncdegrees">DEGREES é–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">exp</dt>
+
+<dd><dfn class="term">e</dfn>ã‚’æŒ‡å®šã?—ã?Ÿæ•°ã?§ç´¯ä¹—ã?—ã?Ÿæ•°ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>exp(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn exp(<em>æ•°</em>)}ã?¯ã€?çµ„ã?¿è¾¼ã?¿æ§‹æ–‡ã?®EXP(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffuncexp.html#rreffuncexp">EXPé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">floor</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã‚’åˆ‡ã‚Šæ?¨ã?¦ã?¦ã€?æŒ‡å®šã?—ã?Ÿæ•°ä»¥ä¸‹ã?®æœ€å¤§ã?®æ•°ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>floor(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn floor(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®FLOOR(æ•°)ã?¨å?Œç­‰ã?§ã?™ã€‚
+è©³ç´°ã?¯<a href="rreffuncfloor.html#rreffuncfloor">FLOORé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">locate</dt>
+
+<dd>äºŒã?¤ç›®ã?®<em>æ–‡å­—å¼?</em>ã?®ã?†ã?¡ã?§ã€?ä¸€ã?¤ç›®ã?®<em>æ–‡å­—å¼?</em>ã?Œè¦‹ã?¤ã?‹ã‚‹ä½?ç½®ã‚’è¿”ã?—ã?¾ã?™ã€‚
+<em>é–‹å§‹ä½?ç½®</em>ã?ŒæŒ‡å®šã?•ã‚Œã?ªã?„å ´å?ˆã€?äºŒã?¤ç›®ã?®<em>æ–‡å­—å¼?</em>ã?®é ­ã?‹ã‚‰ã€?ä¸€è‡´ã?™ã‚‹ä½?ç½®ã‚’è¦‹ã?¤ã?‘ã‚ˆã?†ã?¨ã?—ã?¾ã?™ã€‚<pre><strong>locate(<em>æ–‡å­—å¼?</em>,<em>æ–‡å­—å¼?</em> [, <em>é–‹å§‹ä½?ç½®</em>] )</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn locate(<em>æ–‡å­—å¼?</em>,<em>æ–‡å­—å¼?</em> [, <em>é–‹å§‹ä½?ç½®</em>]
+)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®<a href="rrefsqlj61998.html#rrefsqlj61998__i1195050">LOCATE(CharacterExpression,
+CharacterExpression [, StartPosition] )</a>ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rrefsqlj61998.html#rrefsqlj61998">LOCATEé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">log</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®è‡ªç„¶å¯¾æ•°(åº•ã‚’<dfn class="term">e</dfn>ã?¨ã?—ã?¾ã?™ã€‚)ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>log(<em>æ•°</em>)</strong> </pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn log(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®LOG(æ•°)ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffunclog.html#rreffunclog">LNã?‚ã‚‹ã?„ã?¯LOGé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">log10</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®10ã‚’åº•ã?¨ã?™ã‚‹å¯¾æ•°ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>log10(<em>æ•°</em>)</strong></pre>
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn log10(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®ã€?LOG10(æ•°)ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffunclog10.html#rreffunclog10">LOG10 é–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">mod</dt>
+
+<dd> ä¸€ã?¤ç›®ã?®å¼•æ•°ã‚’äºŒã?¤ç›®ã?®å¼•æ•°ã?§å‰²ã?£ã?Ÿä½™ã‚Š(å‰°ä½™)ã‚’è¿”ã?—ã?¾ã?™ã€‚
+ä¸€ã?¤ç›®ã?®å¼•æ•°ã?Œè² ã?§ã?‚ã?£ã?Ÿå ´å?ˆã?®ã?¿ã€?çµ?æžœã?¯è² ã?¨ã?ªã‚Šã?¾ã?™ã€‚<pre><strong>mod(<em>æ•´æ•°</em>, <em>æ•´æ•°</em>)</strong></pre>
+
+<p>è©³ç´°ã?¯<a href="rrefsqljmod.html#rrefsqljmod">MODé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">pi</dt>
+
+<dd><dfn class="term">pi</dfn>ã?®æœ€è¿‘ä¼¼å€¤ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>pi()</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn pi()}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®PI()ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffuncpi.html#rreffuncpi">PI é–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">radians</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã‚’åº¦ã?‹ã‚‰ãƒ©ã‚¸ã‚¢ãƒ³ã?«å¤‰æ?›ã?—ã?¾ã?™ã€‚<pre><strong>radians(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn radians(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®RADIANS(æ•°)ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffuncradians.html#rreffuncradians">RADIANS é–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">sin</dt>
+
+<dd>æŒ‡å®šã?—ã?Ÿæ•°ã?®æ­£å¼¦ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>sin(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn sin(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®SIN(æ•°)ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffuncsin.html#rreffuncsin">SIN</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">sqrt</dt>
+
+<dd>æµ®å‹•å°?æ•°ç‚¹æ•°ã?®å¹³æ–¹æ ¹ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>sqrt(<em>æµ®å‹•å°?æ•°ç‚¹æ•°å¼?</em>)</strong></pre>
+<p>
+JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn sqrt (<em>æµ®å‹•å°?æ•°ç‚¹æ•°å¼?</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®<a href="rrefsqlj73147.html#rrefsqlj73147__i1195048">SQRT(æµ®å‹•å°?æ•°ç‚¹æ•°å¼?)</a>ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rrefsqlj73147.html#rrefsqlj73147">SQRTé–¢æ•°</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">substring</dt>
+
+<dd><em>æ–‡å­—å¼?</em>ã?®<em>é–‹å§‹ä½?ç½®</em>ã?‹ã‚‰å§‹ã?¾ã‚‹éƒ¨åˆ†æ–‡å­—åˆ—ã‚’æ§‹æˆ?ã?—ã?¦è¿”ã?—ã?¾ã?™ã€‚
+<em>æ–‡å­—å¼?</em>ã?®æœ€åˆ?ã?®æ–‡å­—ã?¯1ã?¨æ•°ã?ˆã?¾ã?™ã€‚
+<pre><strong>substring(<em>æ–‡å­—å¼?</em>, <em>é–‹å§‹ä½?ç½®</em>, <em>é•·ã?•</em>)</strong></pre>
+</dd>
+
+
+<dt class="dlterm">tan</dt>
+
+<dd>å¼•æ•°ã?®æ­£æŽ¥ã‚’è¿”ã?—ã?¾ã?™ã€‚<pre><strong>tan(<em>æ•°</em>)</strong></pre>
+
+<p>JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡ã?®{fn tan(<em>æ•°</em>)}ã?¯ã€?çµ„è¾¼ã?¿æ§‹æ–‡ã?®TAN(æ•°)ã?¨ç­‰ä¾¡ã?§ã?™ã€‚è©³ç´°ã?¯<a href="rreffunctan.html#rreffunctan">TAN</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">TIMESTAMPADD</dt>
+
+<dd><samp class="codeph">TIMESTAMPADD</samp>é–¢æ•°ã‚’ä½¿ã?£ã?¦ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«æ™‚é–“ã‚’è¶³ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚é–¢æ•°ã?¯ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«æ•´æ•°ã‚’æ™‚é–“ã?®ç¨®é¡žã?«æ²¿ã?£ã?¦å‡¦ç?†ã?—ã?¦ã€?åŠ ç®—ã?—ã?Ÿå€¤ã‚’æ–°ã?—ã?„ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?¨ã?—ã?¦è¿”ã?—ã?¾ã?™ã€‚è² ã?®æ•´æ•°ã‚’ä¸Žã?ˆã‚‹ã?“ã?¨ã?§æ¸›ç®—ã‚‚ã?§ã??ã?¾ã?™ã€‚
+<p><samp class="codeph">TIMESTAMPADD</samp>ã?¯JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã?®é–¢æ•°ã?§ã€?JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—é–¢æ•°ã?®æ§‹æ–‡ã?§ã?®ã?¿åˆ©ç”¨å?¯èƒ½ã?§ã?™ã€‚</p>
+
+<pre><strong>TIMESTAMPADD( <em>æ™‚é–“ã?®ç¨®é¡ž</em>, <em>æ•´æ•°å¼?</em>, <em>ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—å¼?</em> )</strong></pre>
+
+<p>æ—¥ä»˜ã‚„æ™‚åˆ»ã?«<samp class="codeph">TIMESTAMPADD</samp>ã‚’å®Ÿè¡Œã?™ã‚‹ã?«ã?¯ã€?æ—¥ä»˜ã‚„æ™‚åˆ»ã‚’ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?™ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚æ—¥ä»˜ã?¯æ™‚åˆ»ã?®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã?«00:00:00.0ã‚’ä¸Žã?ˆã‚‹ã?“ã?¨ã?§ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?§ã??ã?¾ã?™ã€‚æ™‚åˆ»ã?¯ç?¾åœ¨æ—¥ä»˜ã‚’æ—¥ä»˜ã?®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã?«ä¸Žã?ˆã‚‹ã?“ã?¨ã?§ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?§ã??ã?¾ã?™ã€‚</p>
+
+<p>WHEREç¯€ã?«ã?¦ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã‚’è¨ˆç®—ã?™ã‚‹é–¢æ•°ã?«æ—¥æ™‚ã?®åˆ—ã‚’ç½®ã??ã?¹ã??ã?§ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚ã?ªã?œã?ªã‚‰ã‚ªãƒ—ãƒ†ã‚£ãƒžã‚¤ã‚¶ã?Œã€?ã??ã?®åˆ—ã?¸ã?®ç´¢å¼•ã‚’åˆ©ç”¨ã?—ã?ªã??ã?ªã‚‹ã?‹ã‚‰ã?§ã?™ã€‚</p>
+</dd>
+
+
+<dt class="dlterm">TIMESTAMPDIFF</dt>
+
+<dd><samp class="codeph">TIMESTAMPDIFF</samp>é–¢æ•°ã?«ã‚ˆã‚ŠæŒ‡å®šã?—ã?Ÿæ™‚é–“ã?®ç¨®é¡žã?«ã‚ˆã‚‹ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?®é–“ã?®å·®ã‚’è¨ˆç®—ã?§ã??ã?¾ã?™ã€‚ä¾‹ã?ˆã?°ã€?é–¢æ•°ã?«ã‚ˆã‚ŠäºŒã?¤ã?®ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—é–“ã?®åˆ†æ•°ã‚’è¿”ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+<p><samp class="codeph">TIMESTAMPDIFF</samp>ã?¯JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã?®é–¢æ•°ã?§ã€?JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—é–¢æ•°ã?®æ§‹æ–‡ã?§ã?®ã?¿åˆ©ç”¨ã?§ã??ã?¾ã?™ã€‚</p>
+
+<pre><strong>TIMESTAMPDIFF( <em>æ™‚é–“ã?®ç¨®é¡ž</em>, <em>ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—å¼?1</em>, <em>ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—å¼?2</em> )</strong></pre>
+
+<p>æ—¥ä»˜ã‚„æ™‚åˆ»ã?«<samp class="codeph">TIMESTAMPDIFF</samp>ã‚’å®Ÿè¡Œã?™ã‚‹ã?«ã?¯ã€?æ—¥ä»˜ã‚„æ™‚åˆ»ã‚’ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?™ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚æ—¥ä»˜ã?¯æ™‚åˆ»ã?®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã?«00:00:00.0ã‚’ä¸Žã?ˆã‚‹ã?“ã?¨ã?§ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?§ã??ã?¾ã?™ã€‚æ™‚åˆ»ã?¯ç?¾åœ¨æ—¥ä»˜ã‚’æ—¥ä»˜ã?®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã?«ä¸Žã?ˆã‚‹ã?“ã?¨ã?§ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?«å¤‰æ?›ã?§ã??ã?¾ã?™ã€‚</p>
+
+<p>WHEREç¯€ã?«ã?¦ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã‚’è¨ˆç®—ã?™ã‚‹é–¢æ•°ã?«æ—¥æ™‚ã?®åˆ—ã‚’ç½®ã??ã?¹ã??ã?§ã?¯ã?‚ã‚Šã?¾ã?›ã‚“ã€‚ã?ªã?œã?ªã‚‰ã‚ªãƒ—ãƒ†ã‚£ãƒžã‚¤ã‚¶ã?Œã€?ã??ã?®åˆ—ã?¸ã?®ç´¢å¼•ã‚’åˆ©ç”¨ã?—ã?ªã??ã?ªã‚‹ã?‹ã‚‰ã?§ã?™ã€‚</p>
+</dd>
+
+</dl>
+</div>
+
+<div class="section"><h4 class="sectiontitle">TIMESTAMPADD ã?Šã‚ˆã?³ TIMESTAMPDIFFã?«æŒ‡å®šã?§ã??ã‚‹æ™‚é–“ã?®ç¨®é¡ž</h4>
+<samp class="codeph">TIMESTAMPADD</samp>ã?Šã‚ˆã?³<samp class="codeph">TIMESTAMPDIFF</samp>ã?¯ã€?ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ã?¸ã?®ç®—è¡“æ¼”ç®—ã‚’è¡Œã?†ã?Ÿã‚?ã?«ä½¿ã‚?ã‚Œã?¾ã?™ã€‚ã?“ã‚Œç­‰ã?®é–¢æ•°ã?¯ä»¥ä¸‹ã?«ã?‚ã?’ã‚‹æ™‚é–“ã?®ç¨®é¡žã‚’æ¼”ç®—å‡¦ç?†ã?§åˆ©ç”¨ã?§ã??ã?¾ã?™ã€‚<ul>
+<li>SQL_TSI_DAY</li>
+
+<li>SQL_TSI_FRAC_SECOND</li>
+
+<li>SQL_TSI_HOUR</li>
+
+<li>SQL_TSI_MINUTE</li>
+
+<li>SQL_TSI_MONTH</li>
+
+<li>SQL_TSI_QUARTER</li>
+
+<li>SQL_TSI_SECOND</li>
+
+<li>SQL_TSI_WEEK</li>
+
+<li>SQL_TSI_YEAR</li>
+
+</ul>
+</div>
+
+<div class="example"><h4 class="sectiontitle">ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—é–¢æ•°ã?®TIMESTAMPADDã?¨TIMESTAMPDIFFã‚’åˆ©ç”¨ã?™ã‚‹ä¾‹</h4>
+<p>æ¬¡ã?®æ›¸ã??æ–¹ã?§ã€?ç?¾åœ¨ã‚ˆã‚Šä¸€ãƒµæœˆå¾Œã?®å€¤ã‚’è¿”ã?—ã?¾ã?™ã€‚</p>
+<pre><strong>{fn TIMESTAMPADD( SQL_TSI_MONTH, 1, CURRENT_TIMESTAMP)}</strong></pre>
+
+<p>æ¬¡ã?®æ›¸ã??æ–¹ã?§ã€?ç?¾åœ¨ã?¨2008å¹´1æœˆ1æ—¥ã?®é–“ã?Œä½•é€±é–“ã?‹ã‚’è¿”ã?—ã?¾ã?™ã€‚</p>
+<pre><strong>{fn TIMESTAMPDIFF(SQL_TSI_WEEK, CURRENT_TIMESTAMP, 
+  timestamp('2008-01-01-12.00.00.000000'))}</strong></pre>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefjdbc1020262.html" title="">JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã?®æ§‹æ–‡</a></div>
+</div>
+<div class="relref"><strong>é–¢é€£è³‡æ–™</strong><br />
+<div><a href="rrefjdbc70824.html" title="">å‘¼ã?³å‡ºã?—æ–‡ã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰</a></div>
+<div><a href="rrefjdbc27768.html" title="">JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+<div><a href="rrefjdbc28456.html" title="">LIKEç¯€ã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+<div><a href="rrefjdbc37244.html" title="">å¤–éƒ¨çµ?å?ˆã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+<div><a href="rrefjdbc12124.html" title="">æ™‚åˆ»æ›¸å¼?ã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+<div><a href="rrefjdbcescapedate.html" title="">æ—¥ä»˜æ›¸å¼?ã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+<div><a href="rrefjdbc41784.html" title="">ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—æ›¸å¼?ã?®JDBCã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ§‹æ–‡</a></div>
+</div>
+</div>
+
+</body>
+</html>

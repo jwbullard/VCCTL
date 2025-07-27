@@ -1,0 +1,118 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="SYSCS_UTIL.SYSCS_EXPORT_TABLE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??" />
+<meta name="abstract" content="SYSCS_UTIL.SYSCS_EXPORT_TABLEã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??ã?«ã‚ˆã‚Šã€?åŸºæœ¬ã‚½ãƒ•ãƒˆ(OS)ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã€?è¡¨ã?«ã?‚ã‚‹å…¨ã?¦ã?®æƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚" />
+<meta name="description" content="SYSCS_UTIL.SYSCS_EXPORT_TABLEã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??ã?«ã‚ˆã‚Šã€?åŸºæœ¬ã‚½ãƒ•ãƒˆ(OS)ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã€?è¡¨ã?«ã?‚ã‚‹å…¨ã?¦ã?®æƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚" />
+<meta content="system procedures, SYSCS_UTIL.SYSCS_EXPORT_TABLE" name="DC.subject" />
+<meta content="system procedures, SYSCS_UTIL.SYSCS_EXPORT_TABLE" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="crefsqlbuiltinsystemprocedures.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefexportproc" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>SYSCS_UTIL.SYSCS_EXPORT_TABLE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</title>
+</head>
+<body id="rrefexportproc"><a name="rrefexportproc"><!-- --></a>
+
+
+<h1 class="topictitle1">SYSCS_UTIL.SYSCS_EXPORT_TABLE ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</h1>
+
+
+
+<div><p><samp class="codeph">SYSCS_UTIL.SYSCS_EXPORT_TABLE</samp>ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??ã?«ã‚ˆã‚Šã€?åŸºæœ¬ã‚½ãƒ•ãƒˆ(OS)ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã€?è¡¨ã?«ã?‚ã‚‹å…¨ã?¦ã?®æƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚</p>
+
+<div class="section"><p><samp class="codeph">SYSCS_UTIL.SYSCS_EXPORT_TABLE</samp>ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??ã?¯ã€?ãƒ‡ãƒªãƒŸãƒˆã?•ã‚Œã?Ÿãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«ã?®æ›¸å¼?ã?§ã€?è¡¨ã?‹ã‚‰åŸºæœ¬ã‚½ãƒ•ãƒˆ(OS)ã?®ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã‚’è¡Œã?„ã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><p>ã‚»ã‚­ãƒ¥ãƒªãƒ†ã‚£çš„ã?ªé…?æ…®ã?¨æ„?å›³ã?›ã?¬ãƒ•ã‚¡ã‚¤ãƒ«ã?®ç ´å£Šã‚’é?¿ã?‘ã‚‹ã?Ÿã‚?ã€?ã?“ã?®ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?¯æƒ…å ±ã‚’æ—¢å­˜ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?—ã?¾ã?›ã‚“ã€‚ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?§ã?¯æ–°è¦?ã?®ãƒ•ã‚¡ã‚¤ãƒ«å??ã‚’æŒ‡å®šã?™ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚ã?“ã?®æ‰‹ç¶šã??ã‚’å®Ÿè¡Œã?™ã‚‹ã?¨ã€?ä½œæˆ?ã?—ã?Ÿæ–°è¦?ãƒ•ã‚¡ã‚¤ãƒ«ã?¸æƒ…å ±ã?Œã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?•ã‚Œã?¾ã?™ã€‚</p>
+
+<p>ãƒ‡ãƒªãƒŸãƒˆã?•ã‚Œã?Ÿãƒ•ã‚¡ã‚¤ãƒ«æ›¸å¼?ã?«ã‚ˆã‚Šæƒ…å ±ã?¯ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?•ã‚Œã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4> <pre>SYSCS_UTIL.SYSCS_EXPORT_TABLE (IN SCHEMANAME  VARCHAR(128),
+IN TABLENAME VARCHAR(128), IN FILENAME VARCHAR(32672),
+IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER CHAR(1),
+IN CODESET VARCHAR(128)) </pre>
+ 
+<p>ã?“ã?®ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??ã?¯çµ?æžœã‚’è¿”ã?—ã?¾ã?›ã‚“ã€‚</p>
+ <dl>
+
+<dt class="dlterm">SCHEMANAME</dt>
+
+<dd>An input argument of type VARCHAR(128) that specifies the schema name
+of the table. Passing a NULL value will use the default schema name.</dd>
+
+
+<dt class="dlterm">TABLENAME</dt>
+
+<dd>ã?“ã?®å¼•æ•°ã?®åž‹ã?¯VARCHAR(128)ã?§ã€?ã?“ã?®å¼•æ•°ã?«ã‚ˆã‚Šæƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹è¡¨ã‚„ãƒ“ãƒ¥ãƒ¼ã?®å??å‰?ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ç©ºã?®å€¤ã‚’æ¸¡ã?™ã?¨ã‚¨ãƒ©ãƒ¼ã?«ã?ªã‚Šã?¾ã?™ã€‚</dd>
+
+
+<dt class="dlterm">FILENAME</dt>
+
+<dd>æƒ…å ±ã‚’ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?™ã‚‹æ–°è¦?ãƒ•ã‚¡ã‚¤ãƒ«ã?®å??ç§°ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ãƒ‘ã‚¹ã?Œçœ?ç•¥ã?•ã‚Œã?Ÿå ´å?ˆã€?ç?¾åœ¨ã?®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã?Œä½¿ã‚?ã‚Œã?¾ã?™ã€‚ã‚‚ã?—æ—¢å­˜ãƒ•ã‚¡ã‚¤ãƒ«ã?®å??å‰?ã?ŒæŒ‡å®šã?•ã‚Œã?Ÿå ´å?ˆã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã?¯ã‚¨ãƒ©ãƒ¼ã‚’è¿”ã?—ã?¾ã?™ã€‚ãƒ?ãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‚µãƒ¼ãƒ?ã‚’ä½¿ã?£ã?¦ã?„ã‚‹å ´å?ˆã€?ã‚µãƒ¼ãƒ?ä¸Šã?®ãƒ•ã‚¡ã‚¤ãƒ«ä½?ç½®ã‚’æŒ‡å®šã?™ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚NULLå€¤ã‚’æŒ‡å®šã?™ã‚‹ã?¨ã‚¨ãƒ©ãƒ¼ã?¨ã?ªã‚Šã?¾ã?™ã€‚<span class="parmname">FILENAME</span>ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?¯VARCHAR (32672)åž‹ã?®å€¤ã‚’å…¥åŠ›ã?«ã?¨ã‚‹å¼•æ•°ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">COLUMNDELIMITER</dt>
+
+<dd>ã?“ã?®å¼•æ•°ã?®åž‹ã?¯CHAR(1)ã?§ã€?åˆ—ã?®ãƒ‡ãƒªãƒŸã‚¿ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚æŒ‡å®šã?•ã‚Œã?Ÿæ–‡å­—ã?¯ã‚³ãƒ³ãƒžã?®ä»£ã‚?ã‚Šã?«åˆ—ã?®çµ‚ã‚?ã‚Šã‚’è¡¨ã?™ã?Ÿã‚?ã?«ç”¨ã?„ã‚‰ã‚Œã?¾ã?™ã€‚ç©ºã?®å€¤ã‚’æ¸¡ã?—ã?Ÿå ´å?ˆã?¯æ—¢å®šã?®å€¤ã?Œä½¿ã‚?ã‚Œã€?æ—¢å®šå€¤ã?¯ã‚³ãƒ³ãƒž(,)ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">CHARACTERDELIMITER</dt>
+
+<dd>ã?“ã?®å¼•æ•°ã?®åž‹ã?¯CHAR(1)ã?§ã€?æ–‡å­—ã?®ãƒ‡ãƒªãƒŸã‚¿ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚æŒ‡å®šã?•ã‚Œã?Ÿæ–‡å­—ã?¯äºŒé‡?å¼•ç”¨ç¬¦ã?®ä»£ã‚?ã‚Šã?«æ–‡å­—åˆ—ã‚’å›²ã?†ã?Ÿã‚?ã?«ç”¨ã?„ã‚‰ã‚Œã?¾ã?™ã€‚
+ç©ºã?®å€¤ã‚’æ¸¡ã?™ã?¨æ—¢å®šå€¤ã?Œç”¨ã?„ã‚‰ã‚Œã€?æ—¢å®šå€¤ã?¯äºŒé‡?å¼•ç”¨ç¬¦(")ã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">CODESET</dt>
+
+<dd>ã?“ã?®å¼•æ•°ã?®åž‹ã?¯VARCHAR(128)ã?§ã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?•ã‚Œã‚‹ãƒ•ã‚¡ã‚¤ãƒ«ã?«ã?Šã?‘ã‚‹æƒ…å ±ã?®ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã?®å??å‰?ã?¯Javaã?®ã‚µãƒ?ãƒ¼ãƒˆã?™ã‚‹æ–‡å­—ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã?®å†…ã?®ä¸€ã?¤ã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚æƒ…å ±ã?¯ãƒ•ã‚¡ã‚¤ãƒ«ã?«æ›¸ã??å‡ºã?™å‰?ã?«ã€?ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?®ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã?‹ã‚‰æŒ‡å®šã?•ã‚Œã?Ÿã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã?«å¤‰æ?›ã?•ã‚Œã?¾ã?™ã€‚
+ç©ºã?®å€¤ã‚’æ¸¡ã?—ã?Ÿå ´å?ˆã€?æƒ…å ±ã?¯å®Ÿè¡Œä¸­ã?®JVMã?¨å?Œã?˜ã‚³ãƒ¼ãƒ‰ã‚»ãƒƒãƒˆã?§å‡ºåŠ›ã?•ã‚Œã?¾ã?™ã€‚</dd>
+
+</dl>
+ã‚‚ã?—ã‚¹ã‚­ãƒ¼ãƒžã‚„è¡¨ã?®å??å‰?ã‚’ãƒ‡ãƒªãƒŸãƒˆã?•ã‚Œã?ªã?„è­˜åˆ¥å­?ã?§ä½œæˆ?ã?—ã?Ÿå ´å?ˆã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã‚’è¡Œã?†æ‰‹ç¶šã??ã?«æ¸¡ã?™å??å‰?ã?¯å…¨ã?¦å¤§æ–‡å­—ã?¨ã?—ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚ã‚‚ã?—ã‚¹ã‚­ãƒ¼ãƒžã‚„è¡¨ã€?åˆ—å??ã‚’ãƒ‡ãƒªãƒŸãƒˆã?•ã‚Œã?Ÿè­˜åˆ¥å­?ã?§ä½œæˆ?ã?—ã?Ÿå ´å?ˆã€?ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã‚’è¡Œã?†æ‰‹ç¶šã??ã?«æ¸¡ã?™å??å‰?ã?®å¤§æ–‡å­—å°?æ–‡å­—ã?¯ã€?ä½œæˆ?ã?—ã?Ÿã?¨ã??ã?¨å?Œã?˜ã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚</div>
+
+<div class="section"><h4 class="sectiontitle">ä½¿ã?„æ–¹</h4><p>ã?“ã?®æ‰‹ç¶šã??ã?®ä½¿ã?„æ–¹ã?®ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<span><em>Derby ãƒ„ãƒ¼ãƒ«ã?¨ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ãƒ¼ã‚¬ã‚¤ãƒ‰</em></span>ã?®ã€Œãƒ?ãƒ«ã‚¯ã‚¤ãƒ³ãƒ?ãƒ¼ãƒˆã?¨ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã?®æ‰‹ç¶šã??ã‚’ä½¿ã?†ã€?ã?®ç« ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">ä¾‹</h4>
+<p>æ¬¡ã?®ä¾‹ã?§ã?¯SAMPLEãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?«ã?‚ã‚‹STAFFè¡¨ã?‹ã‚‰<samp class="codeph">myfile.del</samp>ã?¨ã?„ã?†ãƒ•ã‚¡ã‚¤ãƒ«ã?¸ã‚¨ã‚¯ã‚¹ãƒ?ãƒ¼ãƒˆã‚’è¡Œã?†æ–¹æ³•ã‚’ç¤ºã?—ã?¾ã?™ã€‚</p>
+
+<pre>CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'STAFF', 'myfile.del', null, null, null);</pre>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="crefsqlbuiltinsystemprocedures.html" title="">çµ„ã?¿è¾¼ã?¿ã‚·ã‚¹ãƒ†ãƒ æ‰‹ç¶šã??</a></div>
+</div>
+</div>
+
+</body>
+</html>

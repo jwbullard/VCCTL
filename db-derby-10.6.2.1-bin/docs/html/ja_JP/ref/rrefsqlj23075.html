@@ -1,0 +1,263 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="çœŸå?½å¼?" />
+<meta content="Boolean expressions, Boolean operators, part of WHERE clause, AND boolean operator, OR boolean operator, NOT boolean operator, Comparison boolean operators, IS NULL boolean operator, IS NOT NULL boolean operator, LIKE boolean operator, LIKE, escape character for, BETWEEN boolean operator, IN boolean operator, EXISTS boolean operator, Quantified comparison boolean operator" name="DC.subject" />
+<meta content="Boolean expressions, Boolean operators, part of WHERE clause, AND boolean operator, OR boolean operator, NOT boolean operator, Comparison boolean operators, IS NULL boolean operator, IS NOT NULL boolean operator, LIKE boolean operator, LIKE, escape character for, BETWEEN boolean operator, IN boolean operator, EXISTS boolean operator, Quantified comparison boolean operator" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj19433.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefselectexpression.html" />
+<meta scheme="URI" name="DC.Relation" content="rreftableexpression.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj11277.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj1080779.html" />
+<meta scheme="URI" name="DC.Relation" content="crefsqlj29911.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefsqlj23075" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>çœŸå?½å¼?</title>
+</head>
+<body id="rrefsqlj23075"><a name="rrefsqlj23075"><!-- --></a>
+
+
+<h1 class="topictitle1">çœŸå?½å¼?</h1>
+
+
+<div>
+<div class="section"><p>çœŸå?½å¼?ã?¯WHEREç¯€ã‚„ãƒ?ã‚§ãƒƒã‚¯åˆ¶ç´„ã?«ç½®ã??ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+ãƒ?ã‚§ãƒƒã‚¯åˆ¶ç´„ã?«ç½®ã??çœŸå?½å¼?ã?«ã?¯ã€?ã?“ã?“ã?§è¨˜è¿°ã?•ã‚Œã?¦ã?„ã?ªã?„åˆ¶é™?ã?Œã?‚ã‚Šã?¾ã?™ã€‚
+è©³ç´°ã?¯<a href="rrefsqlj13590.html#rrefsqlj13590">CONSTRAINT ç¯€</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚
+WHEREç¯€ã?«ç½®ã??çœŸå?½å¼?ã?®æ§‹æ–‡ã?¯æŸ”è»Ÿã?ªã‚‚ã?®ã?¨ã?ªã?£ã?¦ã?„ã?¾ã?™ã€‚å…·ä½“çš„ã?ªä¾‹ã?¯ã€?<a href="rrefsqlj33602.html#rrefsqlj33602">WHEREç¯€</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚
+</p>
+</div>
+
+<div class="section"><div class="p">çœŸå?½å¼?ã?«ã?¯ãƒ–ãƒ¼ãƒªã‚¢ãƒ³æ¼”ç®—å­?ã‚’ä¸€ã?¤ä»¥ä¸Šç½®ã??ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+ã?“ã?®æ¼”ç®—å­?ã?¯<a href="rrefsqlj23075.html#rrefsqlj23075__sqlj34517">SQL ã?®ãƒ–ãƒ¼ãƒªã‚¢ãƒ³æ¼”ç®—å­?</a>ã?«ä¸€è¦§ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚   
+
+<div class="tablenoborder"><a name="rrefsqlj23075__sqlj34517"><!-- --></a><table summary="" cellspacing="0" cellpadding="4" id="rrefsqlj23075__sqlj34517" width="100%" frame="border" border="1" rules="all"><caption>è¡¨ 1. SQL ã?®ãƒ–ãƒ¼ãƒªã‚¢ãƒ³æ¼”ç®—å­?</caption>
+
+<thead align="left">
+<tr>
+<th align="left" valign="bottom" width="24.242424242424242%" id="N100DB">æ¼”ç®—å­?</th>
+
+<th align="left" valign="bottom" width="45.45454545454545%" id="N100E4">èª¬æ˜Žã?¨ä¾‹</th>
+
+<th align="left" valign="bottom" width="30.303030303030305%" id="N100ED">æ§‹æ–‡</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">AND, OR, NOT</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã?«ã?¨ã‚‹çœŸå?½å¼?ã‚’è©•ä¾¡ã?—ã?¾ã?™ã€‚   <pre><strong>(orig_airport = 'SFO') OR
+    (dest_airport = 'GRU')
+<span>    -- çœŸã‚’è¿”ã?™ã€‚</span></strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong>{
+<strong><em>  å¼?</em></strong> AND
+<strong><em>    å¼?</em></strong>|
+<strong><em>  å¼?</em></strong> OR
+<strong><em>    å¼?</em></strong> |
+  NOT <strong><em>å¼?</em></strong>
+}</strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">æ¯”è¼ƒæ¼”ç®—å­?</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">&lt;, =, &gt;, &lt;=, &gt;=, &lt;&gt; ã?¯ã€?å…¨ã?¦ã?®çµ„ã?¿è¾¼ã?¿ã?®åž‹ã?«é?©ç”¨ã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚   <pre><strong>DATE('1998-02-26') &lt;
+    DATE('1998-03-01')
+<span>-- çœŸã‚’è¿”ã?™ã€‚</span></strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong><strong><em>å¼?</em></strong>
+{
+  &lt; |
+  = |
+  &gt; |
+  &lt;= |
+  &gt;= |
+  &lt;&gt;
+}
+<strong><em>å¼?</em></strong></strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">IS NULL, IS NOT NULL</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">å¼?ã?®çµ?æžœã?Œç©ºã?‹ã??ã?†ã?§ã?ªã?„ã?‹ã‚’åˆ¤å®šã?—ã?¾ã?™ã€‚
+  <pre><strong>WHERE MiddleName IS NULL</strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong><strong><em>å¼?</em></strong> IS [ NOT ]
+  NULL</strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">LIKE</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">æ–‡å­—å¼?ã?Œæ–‡å­—ãƒ‘ã‚¿ãƒ¼ãƒ³ã?¨ä¸€è‡´ã?™ã‚‹ã?‹ã‚’åˆ¤å®šã?—ã?¾ã?™ã€‚æ–‡å­—ãƒ‘ã‚¿ãƒ¼ãƒ³ã?«ã?¯ä¸€ã?¤ä»¥ä¸Šã?®ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰ã?Œå?«ã?¾ã‚Œã?¾ã?™ã€‚
+  <p>%ã?¯æœ€åˆ?ã?®æ–‡å­—å¼?ã?«ã?¦ã€?è©²å½“ã?™ã‚‹ä½?ç½®ã?®ä»»æ„?ã?®æ–‡å­—æ•°(0æ–‡å­—ä»¥ä¸Š)ã?®æ–‡å­—åˆ—ã?«ä¸€è‡´ã?—ã?¾ã?™ã€‚</p>
+  
+<p>_ã?¯æ–‡å­—å¼?ã?«ã?¦ã€?è©²å½“ã?™ã‚‹ä½?ç½®ã?®ä¸€æ–‡å­—ã?«ä¸€è‡´ã?—ã?¾ã?™ã€‚</p>
+  
+<div class="p">ã??ã‚Œä»¥å¤–ã?®æ–‡å­—ã?¯ã€?æ–‡å­—å¼?ã?«ã?¦è©²å½“ã?™ã‚‹ä½?ç½®ã?®å?Œã?˜æ–‡å­—ã?«ä¸€è‡´ã?—ã?¾ã?™ã€‚<pre><strong>city LIKE 'Sant_'</strong></pre>
+</div>
+  
+<div class="p">%ã‚„_ã‚’ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰ã?§ã?¯ã?ªã?„æ–‡å­—ã?¨ã?™ã‚‹ã?«ã?¯ã€?ESCAPEç¯€ã?§æŒ‡å®šã?™ã‚‹ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ–‡å­—ã‚’ä½¿ã?£ã?¦æ–‡å­—ã‚’ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—ã?—ã?¾ã?™ã€‚
+<pre><strong>SELECT a FROM tabA WHERE a 
+LIKE '%=_' ESCAPE '='</strong></pre>
+</div>
+
+<div class="note"><span class="notetitle">æ³¨: </span>
+LIKEã?«ã‚ˆã‚‹æ¯”è¼ƒã?§ã?¯<span>Derby</span>ã?¯ã€?å€‹ã€…ã?®æ–‡å­—ã‚’é?žãƒ¡ã‚¿æ–‡å­—ã?¨æ¯”è¼ƒã?—ã?¾ã?™ã€‚ã?“ã‚Œã?¯<span>Derby</span>ã?Œ=ã?«ã‚ˆã‚‹æ¯”è¼ƒã?®ã?¨ã??è¡Œã?†å‡¦ç?†ã?¨ã?¯é?•ã?„ã?¾ã?™ã€‚=ã?«ã‚ˆã‚‹æ¯”è¼ƒã?§ã?¯å·¦è¾ºã?®æ–‡å­—åˆ—å…¨ä½“ã?Œã€?=æ¼”ç®—å­?ã?®å?³è¾ºã?®æ–‡å­—åˆ—å…¨ä½“ã?¨æ¯”è¼ƒã?•ã‚Œã?¾ã?™ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?«ã?¤ã?„ã?¦ã?¯ã€?<span><em>Derby ãƒ‡ã‚£ãƒ™ãƒ­ãƒƒãƒ‘ãƒ¼ã‚º ã‚¬ã‚¤ãƒ‰</em></span>ã?®<strong><span>Derby</span>ã?«ã?Šã?‘ã‚‹æ–‡å­—ã?®ç…§å?ˆ</strong>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</div>
+
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong><strong><em>æ–‡å­—å¼?</em></strong>
+  [ NOT ] LIKE
+<strong><em>  ãƒ¯ã‚¤ãƒ«ãƒ‰ã‚«ãƒ¼ãƒ‰ã?®ã?‚ã‚‹æ–‡å­—å¼?</em></strong>
+  [ ESCAPE
+
+'<strong><em>ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—æ–‡å­—</em></strong>']</strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">BETWEEN</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">æœ€åˆ?ã?®ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã?ŒäºŒã?¤ç›®ã?¨ä¸‰ã?¤ç›®ã?®ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã?®é–“ã?®å€¤ã?§ã?‚ã‚‹ã?‹ã‚’åˆ¤å®šã?—ã?¾ã?™ã€‚äºŒã?¤ç›®ã?®ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã?¯ä¸‰ã?¤ç›®ã?®ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚ˆã‚Šå°?ã?•ã?ªå€¤ã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚
+ã?“ã?®æ¼”ç®—å­?ã?¯&lt;=ã?¨&gt;=ã?Œé?©ç”¨ã?§ã??ã‚‹åž‹ã?«å¯¾ã?—ã?¦ã?®ã?¿é?©ç”¨ã?§ã??ã?¾ã?™ã€‚
+<pre><strong>WHERE booking_date BETWEEN
+    DATE('1998-02-26') AND
+    DATE('1998-03-01')</strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong><strong><em>å¼?</em></strong> [ NOT ]
+BETWEEN <strong><em>å¼?</em></strong>
+  AND <strong><em>å¼?</em></strong></strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">IN</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">è¡¨å‰¯å•?å?ˆã?›ã‚„å€¤ã?®ä¸¦ã?³ã?«ä½œç”¨ã?—ã?¾ã?™ã€‚å·¦è¾ºã?®å¼?ã?®å€¤ã?Œè¡¨å‰¯å•?å?ˆã?›ã‚„å€¤ã?®ä¸¦ã?³ã?«å?«ã?¾ã‚Œã‚‹ã?ªã‚‰ã?°ã€?çœŸã‚’è¿”ã?—ã?¾ã?™ã€‚ã?ªã?Šã€?è¡¨å‰¯å•?å?ˆã?›ã?¯è¤‡æ•°è¡Œã‚’è¿”ã?—ã?¦ã?‹ã?¾ã?„ã?¾ã?›ã‚“ã?Œã€?åˆ—ã?¯ä¸€ã?¤ã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚<pre><strong>WHERE booking_date NOT IN
+    (SELECT booking_date FROM
+HotelBookings WHERE rooms_available = 0)</strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong>{
+<strong><em> å¼?</em></strong> [ NOT ]
+    IN
+    <strong><em><a href="rreftablesubquery.html#rreftablesubquery">è¡¨å‰¯å•?å?ˆã?›</a></em></strong> |
+<strong><em>  å¼?</em></strong> [ NOT ]
+    IN ( <strong><em>å¼?</em></strong>
+    [, <strong><em>å¼?</em></strong> ]* )
+}</strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">EXISTS</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">è¡¨å‰¯å•?å?ˆã?›ã?«ä½œç”¨ã?—ã?¦ã€?ã??ã?®è¡¨å‰¯å•?å?ˆã?›ã?Œè¡Œã‚’è¿”ã?™ã?ªã‚‰ã?°çœŸã‚’è¿”ã?—ã€?è¡Œã?Œè¿”ã‚‰ã?ªã?„ã?ªã‚‰ã?°å?½ã‚’è¿”ã?—ã?¾ã?™ã€‚è¡¨å‰¯å•?å?ˆã?›ã?¯è¤‡æ•°ã?®åˆ—(*ã‚’ä½¿ã?£ã?Ÿå ´å?ˆã?«é™?ã‚Šã?¾ã?™ã€‚)ã‚„è¡Œã‚’è¿”ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚<pre><strong>WHERE EXISTS
+  (SELECT *
+  FROM Flights
+  WHERE dest_airport = 'SFO'
+  AND orig_airport = 'GRU')</strong></pre>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong>[NOT] EXISTS <strong><em><a href="rreftablesubquery.html#rreftablesubquery">è¡¨å‰¯å•?å?ˆã?›</a></em></strong></strong></pre>
+</td>
+
+</tr>
+
+<tr>
+<td valign="top" width="24.242424242424242%" headers="N100DB ">å®šé‡?æ¯”è¼ƒ</td>
+
+<td valign="top" width="45.45454545454545%" headers="N100E4 ">å®šé‡?æ¯”è¼ƒã?¯ALLã€?ANYã€?SOMEã?®ä½•ã‚Œã?‹ã?Œé?©ç”¨ã?•ã‚Œã?Ÿæ¯”è¼ƒæ¼”ç®—å­?
+(&lt;,=, &gt;, &lt;=, &gt;=, &lt;&gt;)ã?¨ã?ªã‚Šã?¾ã?™ã€‚
+<p>
+ã?“ã‚Œã?¯è¡¨å‰¯å•?å?ˆã?›ã?«ä½œç”¨ã?—ã?¾ã?™ã€‚è¡¨å‰¯å•?å?ˆã?›ã?¯è¤‡æ•°ã?®è¡Œã‚’è¿”ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã?Œã€?å?˜ä¸€ã?®åˆ—ã?—ã?‹è¿”ã?›ã?¾ã?›ã‚“ã€‚</p>
+  
+<div class="p">ALLã?ŒæŒ‡å®šã?•ã‚Œã?Ÿå ´å?ˆã€?è¡¨å‰¯å•?å?ˆã?›ã?Œè¿”ã?™å…¨ã?¦ã?®å€¤ã?«å¯¾ã?—ã?¦ã€?æ¯”è¼ƒã?®çµ?æžœã?ŒçœŸã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚ANYã?ªã?„ã?—SOMEã?ŒæŒ‡å®šã?•ã‚Œã?Ÿå ´å?ˆã€?è¡¨å‰¯å•?å?ˆã?›ã?Œè¿”ã?™ä½•ã‚Œã?‹ã?®å€¤ã?«å¯¾ã?—ã?¦ã€?æ¯”è¼ƒã?®çµ?æžœã?ŒçœŸã?§ã?‚ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚ANYã?¨SOMEã?¯å?Œã?˜æ„?å‘³ã?§ã?™ã€‚
+  <pre><strong>WHERE normal_rate &lt; ALL
+(SELECT budget/550 FROM Groups) </strong></pre>
+</div>
+</td>
+
+<td valign="top" width="30.303030303030305%" headers="N100ED "> <pre><strong><strong><em>å¼?</em></strong>
+  æ¯”è¼ƒæ¼”ç®—å­?
+  {
+    ALL |
+    ANY |
+    SOME
+  }
+  <strong><em><a href="rreftablesubquery.html#rreftablesubquery">è¡¨å‰¯å•?å?ˆã?›</a></em></strong></strong></pre>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+</div>
+</div>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefsqlj19433.html" title="å¤šã??ã?®æ–‡ã‚„å¼?ã?®æ§‹æ–‡ã?®èªžå?¥ã?«ã€?å¼?ã‚„è¡¨å‰¯å•?å?ˆã?›ã?®ã‚ˆã?†ã?ªå¼?ã?®ä¸€ç¨®ã?Œã?‚ã‚Šã?¾ã?™ã€‚ å¼?ã?¯æ–‡ã?®å®šã‚?ã‚‰ã‚Œã?Ÿå ´æ‰€ã?«ç½®ã??ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚">SQLå¼?</a></div>
+</div>
+<div class="relconcepts"><strong>é–¢é€£æ¦‚å¿µ</strong><br />
+<div><a href="crefsqlj29911.html" title="">å‹•çš„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿</a></div>
+</div>
+<div class="relref"><strong>é–¢é€£è³‡æ–™</strong><br />
+<div><a href="rrefselectexpression.html" title="">é?¸æŠžå¼?</a></div>
+<div><a href="rreftableexpression.html" title="">TableExpression</a></div>
+<div><a href="rrefsqlj11277.html" title="">VALUESå¼?</a></div>
+<div><a href="rrefsqlj1080779.html" title="">å¼?ã?«é–¢ã?™ã‚‹å„ªå…ˆé †ä½?</a></div>
+</div>
+</div>
+
+</body>
+</html>

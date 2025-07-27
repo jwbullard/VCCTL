@@ -1,0 +1,104 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="java.sql.SQLXMLã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹" />
+<meta content="java.sql.SQLXML interface" name="DC.subject" />
+<meta content="java.sql.SQLXML interface" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="crefjdbc12657.html" />
+<meta scheme="URI" name="DC.Relation" content="crefjdbc25142.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc32052.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc34565.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc27734.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc15905.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc40794.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc20485.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc16643.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc29874.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc23502.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc38274.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc30469.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc20377.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc2_0summary.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc80004.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc66688.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc99392.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc77156.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc71949.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefjdbc59162.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefjdbcrefsqlxml" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>java.sql.SQLXMLã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</title>
+</head>
+<body id="rrefjdbcrefsqlxml"><a name="rrefjdbcrefsqlxml"><!-- --></a>
+
+
+<h1 class="topictitle1">java.sql.SQLXMLã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</h1>
+
+
+<div>
+<div class="section"><p>JDBC 4.0ã?§ã?¯ã€?SQLã?®XMLåž‹ã?®æƒ…å ±ã?¯java.sql.SQLXMLã?«å¯¾å¿œä»˜ã?‘ã‚‰ã‚Œã?¾ã?™ã€‚ã?—ã?‹ã?—ã?ªã?Œã‚‰ã€?<span>Derby</span>ã?§ã?¯ã€?XMLåž‹ã?¯SQLã?®å±¤ã?§ã?®ã?¿å®Ÿç?¾ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚JDBCã?®å?´ã?§ã?¯XMLåž‹ã‚„æ¼”ç®—å­?ã?¯å®Ÿç?¾ã?•ã‚Œã?¦ã?„ã?¾ã?›ã‚“ã€‚</p>
+
+<p><span>Derby</span>ã?§ã?¯ã€?java.sql.SQLXMLã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã?®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç”Ÿæˆ?ã?§ã??ã?¾ã?›ã‚“ã€‚ã?¾ã?ŸXMLã?®å€¤ã‚’ç›´æŽ¥ãƒ?ã‚¤ãƒ³ãƒ‰ã?—ã?Ÿã‚Šã€?çµ?æžœã‚»ãƒƒãƒˆã?‹ã‚‰ç›´æŽ¥XMLã?®å€¤ã‚’å?–å¾—ã?™ã‚‹ã?“ã?¨ã‚‚ã?§ã??ã?¾ã?›ã‚“ã€‚XMLã?®å€¤ã‚’ãƒ?ã‚¤ãƒ³ãƒ‰ã?—ã?Ÿã‚Šå?–å¾—ã?™ã‚‹ç‚ºã?«ã?¯ã€?SQLã?®å•?å?ˆã?›æ–‡ã?«ã?¦XMLPARSEã‚„XMLSERIALIZEç­‰ã?®XMLæ¼”ç®—å­?ã‚’æ˜Žç¤ºçš„ã?«è¨˜è¿°ã?—ã?¦ã€?XMLã?®æƒ…å ±ã‚’Javaã?®æ–‡å­—åˆ—ã?¨ã?—ã?¦æ‰±ã?†å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚</p>
+<p>åŠ ã?ˆã?¦<span>Derby</span>ã?§ã?¯ã€?XMLåž‹ã?«ã?¤ã?„ã?¦JDBCãƒ¡ã‚¿ãƒ‡ãƒ¼ã‚¿ã?®æ©Ÿèƒ½ã?¯å®Ÿç?¾ã?•ã‚Œã?¦ã?„ã?¾ã?›ã‚“ã€‚</p>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="crefjdbc12657.html" title="Derbyã?¯çµ„ã?¿è¾¼ã?¿ã?®JDBCãƒ‰ãƒ©ã‚¤ãƒ?ã?¨å…±ã?«æ??ä¾›ã?•ã‚Œã?¾ã?™ã€‚">JDBC ãƒªãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹</a></div>
+</div>
+<div class="relconcepts"><strong>é–¢é€£æ¦‚å¿µ</strong><br />
+<div><a href="crefjdbc25142.html" title="">java.sqlã?«ã?‚ã‚‹ã€?JDBCã?®ä¸»ã?ªã‚¯ãƒ©ã‚¹ã€? ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹ã€?ãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+</div>
+<div class="relref"><strong>é–¢é€£è³‡æ–™</strong><br />
+<div><a href="rrefjdbc32052.html" title="">java.sql.Driverã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc34565.html" title="">java.sql.DriverManager.getConnection ãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+<div><a href="rrefjdbc27734.html" title="">java.sql.Connection ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc15905.html" title="">java.sql.DatabaseMetaData ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc40794.html" title="">java.sql.Statementã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc20485.html" title="">java.sql.CallableStatement ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc16643.html" title="">java.sql.SQLException ã‚¯ãƒ©ã‚¹</a></div>
+<div><a href="rrefjdbc29874.html" title="">java.sql.PreparedStatementã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc23502.html" title="">java.sql.ResultSet ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc38274.html" title="">java.sql.ResultSetMetaData ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹</a></div>
+<div><a href="rrefjdbc30469.html" title="">java.sql.SQLWarning ã‚¯ãƒ©ã‚¹</a></div>
+<div><a href="rrefjdbc20377.html" title="Derbyã?«ã?¦java.sql.Typesã?¯SQLãƒ‡ãƒ¼ã‚¿åž‹ã?«å¯¾å¿œä»˜ã?‘ã?•ã‚Œã?¾ã?™ã€‚">SQLåž‹ã?¨java.sql.Typesã?®å¯¾å¿œ</a></div>
+<div><a href="rrefjdbc2_0summary.html" title="">JDBC 2.0 ã?®æ©Ÿèƒ½</a></div>
+<div><a href="rrefjdbc80004.html" title="">java.sql.Connection ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: JDBC 2.0ã?§åˆ©ç”¨å?¯èƒ½ã?ªãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+<div><a href="rrefjdbc66688.html" title="">java.sql.DatabaseMetaData ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: åˆ©ç”¨å?¯èƒ½ã?ªJDBC 2.0ã?®ãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+<div><a href="rrefjdbc99392.html" title="">java.sql.PreparedStatementã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: JDBC2.0ã?§æ??ä¾›ã?•ã‚Œã‚‹ãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+<div><a href="rrefjdbc77156.html" title="">java.sql.ResultSet</a></div>
+<div><a href="rrefjdbc71949.html" title="">java.sql.ResultSetMetaData ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: JDBC 2.0ã?§åˆ©ç”¨å?¯èƒ½ã?ªãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+<div><a href="rrefjdbc59162.html" title="">java.sql.Statement ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ã‚¤ã‚¹: åˆ©ç”¨å?¯èƒ½ã?ªJDBC 2.0ã?®ãƒ¡ã‚½ãƒƒãƒ‰</a></div>
+</div>
+</div>
+
+</body>
+</html>

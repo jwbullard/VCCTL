@@ -1,0 +1,211 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="CREATE FUNCTION æ–‡" />
+<meta name="abstract" content="CREATE FUNCTIONæ–‡ã?«ã‚ˆã‚Šã€?å¼?ã?§åˆ©ç”¨ã?§ã??ã‚‹Javaé–¢æ•°ã‚’ä½œæˆ?ã?§ã??ã?¾ã?™ã€‚" />
+<meta name="description" content="CREATE FUNCTIONæ–‡ã?«ã‚ˆã‚Šã€?å¼?ã?§åˆ©ç”¨ã?§ã??ã‚‹Javaé–¢æ•°ã‚’ä½œæˆ?ã?§ã??ã?¾ã?™ã€‚" />
+<meta content="CREATE FUNCTION statement, CREATE FUNCTION, SQL statements, functions, creating" name="DC.subject" />
+<meta content="CREATE FUNCTION statement, CREATE FUNCTION, SQL statements, functions, creating" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="crefsqlj95081.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj20937.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefcreateprocedurestatement.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj31580.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqljcreatesynonym.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj24513.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj43125.html" />
+<meta scheme="URI" name="DC.Relation" content="rrefsqlj15446.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefcreatefunctionstatement" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>CREATE FUNCTION æ–‡</title>
+</head>
+<body id="rrefcreatefunctionstatement"><a name="rrefcreatefunctionstatement"><!-- --></a>
+
+
+<h1 class="topictitle1">CREATE FUNCTION æ–‡</h1>
+
+
+
+<div><p>CREATE FUNCTIONæ–‡ã?«ã‚ˆã‚Šã€?å¼?ã?§åˆ©ç”¨ã?§ã??ã‚‹Javaé–¢æ•°ã‚’ä½œæˆ?ã?§ã??ã?¾ã?™ã€‚</p>
+
+<div class="section"><p>é–¢æ•°ã?®æ‰€æœ‰è€…ã?Šã‚ˆã?³ã€?<a href="rrefattrib26867.html#rrefattrib26867">ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?®æ‰€æœ‰è€…</a>ã?¯ã€?è‡ªå‹•çš„ã?«é–¢æ•°ã?¸ã?®EXECUTEæ¨©é™?ã‚’æ‰‹ã?«å…¥ã‚Œã?¾ã?™ã€‚åŠ ã?ˆã?¦ã€?ä»–ã?®ãƒ¦ãƒ¼ã‚¶ã?¸ã?®æ¨©é™?ä»˜ä¸Žã?®æ¨©é™?ã‚‚æ‰‹ã?«å…¥ã‚Œã?¾ã?™ã€‚é–¢æ•°ã?¨ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?®æ‰€æœ‰è€…ã?‹ã‚‰ã€?é–¢æ•°ã?®å®Ÿè¡Œæ¨©é™?ã‚’å‰¥å¥ªã?™ã‚‹ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">æ§‹æ–‡</h4> <pre><strong>CREATE FUNCTION <em><a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrprofunctionname">é–¢æ•°å??</a></em> ( [ <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrprofunctionparameter">é–¢æ•°ã?®å¼•æ•°</a> 
+   [, <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrprofunctionparameter">FunctionParameter</a>] ] * ) RETURNS <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctionreturntype">è¿”å?´ãƒ‡ãƒ¼ã‚¿åž‹</a> [ <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrprofunctionelement">é–¢æ•°ã?®è¦?ç´ </a> ] *</strong></pre>
+</div>
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrprofunctionname"><a name="rrefcreatefunctionstatement__rrefcrprofunctionname"><!-- --></a><h4 class="sectiontitle">é–¢æ•°å??</h4><pre><strong>[ <em><a href="rrefschemaname.html#rrefschemaname">ã‚¹ã‚­ãƒ¼ãƒžå??</a>.</em> ] <em><a href="crefsqlj34834.html#crefsqlj34834">SQL92è­˜åˆ¥å­?</a></em></strong></pre>
+
+<p>ã‚¹ã‚­ãƒ¼ãƒžå??ã?Œä¸Žã?ˆã‚‰ã‚Œã?ªã?‹ã?£ã?Ÿå ´å?ˆã€?ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã?¯ç?¾åœ¨ã?®ã‚¹ã‚­ãƒ¼ãƒžã?¨ã?ªã‚Šã?¾ã?™ã€‚é™?å®šã?•ã‚Œã?Ÿé–¢æ•°å??ã?«ã?¦ã€?ã‚¹ã‚­ãƒ¼ãƒžå??ã?¯SYSã?§å§‹ã?¾ã?£ã?¦ã?¯ã?ªã‚Šã?¾ã?›ã‚“ã€‚</p>
+</div>
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrprofunctionparameter"><a name="rrefcreatefunctionstatement__rrefcrprofunctionparameter"><!-- --></a><h4 class="sectiontitle">é–¢æ•°ã?®å¼•æ•°</h4><pre><strong>[ å¼•æ•°å?? ] <em>ãƒ‡ãƒ¼ã‚¿åž‹</em></strong></pre>
+</div>
+
+<div class="section"><p>å¼•æ•°å??ã?¯é–¢æ•°ã?«ã?¦ä¸€æ„?ã?§ã?‚ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚</p>
+<p><em>ãƒ‡ãƒ¼ã‚¿åž‹</em>ã?®æ§‹æ–‡ã?¯ã€?<a href="crefsqlj31068.html#crefsqlj31068">ãƒ‡ãƒ¼ã‚¿åž‹</a>ã?«æ›¸ã?‹ã‚Œã?¦ã?„ã?¾ã?™ã€‚</p>
+
+<div class="note"><span class="notetitle">æ³¨: </span>CREATE FUNCTIONæ–‡ã?®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?«ã?§ã??ã?ªã?„ãƒ‡ãƒ¼ã‚¿åž‹ã?Œã?‚ã‚Šã?¾ã?™ã€‚ã??ã‚Œã?¯ã€?BLOBã€?CLOBã€?LONG VARCHARã€?LONG VARCHAR FOR BIT DATAã‚„XMLç­‰ã?§ã?™ã€‚</div>
+</div>
+
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrfunctionreturntype"><a name="rrefcreatefunctionstatement__rrefcrfunctionreturntype"><!-- --></a><h4 class="sectiontitle">è¿”å?´ãƒ‡ãƒ¼ã‚¿åž‹</h4>
+<pre><strong><a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctiontabletype">è¡¨åž‹</a> | <em>ãƒ‡ãƒ¼ã‚¿åž‹</em></strong></pre>
+</div>
+
+<div class="section"><p>ãƒ‡ãƒ¼ã‚¿åž‹ã?®æ§‹æ–‡ã?¯<a href="crefsqlj31068.html#crefsqlj31068">ãƒ‡ãƒ¼ã‚¿åž‹</a>ã?«è¨˜è¿°ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚</p>
+</div>
+
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrfunctiontabletype"><a name="rrefcreatefunctionstatement__rrefcrfunctiontabletype"><!-- --></a><h4 class="sectiontitle">è¡¨åž‹</h4>
+<pre><strong>TABLE( <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctioncolelement">åˆ—è¦?ç´ </a> [, <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctioncolelement">åˆ—è¦?ç´ </a> ]* )</strong></pre>
+</div>
+
+<div class="section"><p>è¡¨é–¢æ•°ã?®è¿”ã‚Šå€¤ã?®åž‹ã?§ã?™ã€‚ç?¾åœ¨åˆ©ç”¨ã?§ã??ã‚‹ã?®ã?¯Derbyã?®è¡¨é–¢æ•°ã?®å½¢å¼?ã?®ã?¿ã?§ã?™ã€‚
+ã?“ã‚Œã‚‰ã?¯JDBCã?®<em>ResultSet</em>ã‚’è¿”ã?™é–¢æ•°ã?§ã?™ã€‚
+ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<cite><span><em>Derby ãƒ‡ã‚£ãƒ™ãƒ­ãƒƒãƒ‘ãƒ¼ã‚º ã‚¬ã‚¤ãƒ‰</em></span></cite>ã?«è¨˜è¿°ã?•ã‚Œã?Ÿã€ŒDerbyã?®è¡¨é–¢æ•°ã?®ãƒ—ãƒ­ã‚°ãƒ©ãƒŸãƒ³ã‚°ã€?ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚</p>
+</div>
+
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrfunctioncolelement"><a name="rrefcreatefunctionstatement__rrefcrfunctioncolelement"><!-- --></a><h4 class="sectiontitle">åˆ—è¦?ç´ </h4>
+<pre><strong><em><a href="crefsqlj34834.html#crefsqlj34834">SQL92è­˜åˆ¥å­?</a></em> <em>ãƒ‡ãƒ¼ã‚¿åž‹</em></strong></pre>
+</div>
+
+<div class="section"><p><em>ãƒ‡ãƒ¼ã‚¿åž‹</em>ã?®æ§‹æ–‡ã?¯ã€?<a href="crefsqlj31068.html#crefsqlj31068">ãƒ‡ãƒ¼ã‚¿åž‹</a>ã?«è¨˜è¿°ã?•ã‚Œã?¦ã?„ã?¾ã?™ã€‚</p>
+
+<div class="note"><span class="notetitle">æ³¨: </span>è¡¨é–¢æ•°ã?‹ã‚‰è¿”å?´ã?™ã‚‹æƒ…å ±ã?®åˆ—ã?®åž‹ã‚’ã€?XMLã?¨ã?™ã‚‹ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚</div>
+</div>
+
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrprofunctionelement"><a name="rrefcreatefunctionstatement__rrefcrprofunctionelement"><!-- --></a><h4 class="sectiontitle">é–¢æ•°ã?®è¦?ç´ </h4> <pre><strong> {
+| LANGUAGE { JAVA }
+| EXTERNAL NAME <em>æ–‡å­—åˆ—</em>
+| PARAMETER STYLE <a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctionparameterstyle">ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?®ç¨®é¡ž</a>
+| { NO SQL | CONTAINS SQL | READS SQL DATA }
+| { RETURNS NULL ON NULL INPUT | CALLED ON NULL INPUT }
+ }</strong></pre>
+</div>
+
+<div class="section"><h4 class="sectiontitle">LANGUAGE</h4><p><strong>JAVA</strong>- é–¢æ•°ã?¯Javaã?®ã‚¯ãƒ©ã‚¹ã?«ã?‚ã‚‹public staticã?ªãƒ¡ã‚½ãƒƒãƒ‰ã?¨ã?—ã?¦å‘¼ã?°ã‚Œã?¾ã?™ã€‚</p>
+</div>
+
+<div class="section"><h4 class="sectiontitle">EXTERNAL NAME <em>string</em></h4><div class="p"><em>æ–‡å­—åˆ—</em>ã?«ã‚ˆã‚Šã€?é–¢æ•°ã?Œå®Ÿè¡Œã?•ã‚Œã?Ÿã?¨ã??ã?«å‘¼ã?°ã‚Œã‚‹Javaã?®ãƒ¡ã‚½ãƒƒãƒ‰ã?Œè¨˜è¿°ã?•ã‚Œã?¾ã?™ã€‚ã?“ã?®æ–‡å­—åˆ—ã?¯æ¬¡ã?®æ›¸å¼?ã?§ã?™ã€‚<pre>ã‚¯ãƒ©ã‚¹å??.ãƒ¡ã‚½ãƒƒãƒ‰å??</pre>
+ã?“ã‚Œã?¯ç©ºç™½ã‚’å?«ã‚“ã?§ã?¯ã?ªã‚Šã?¾ã?›ã‚“ã€‚</div>
+</div>
+
+
+<div class="example" id="rrefcreatefunctionstatement__rrefcrfunctionparameterstyle"><a name="rrefcreatefunctionstatement__rrefcrfunctionparameterstyle"><!-- --></a><h4 class="sectiontitle">ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã?®ç¨®é¡ž</h4>
+<pre><strong>JAVA | DERBY_JDBC_RESULT_SET</strong></pre>
+</div>
+
+<div class="section">
+<p>
+é–¢æ•°ã?¯Javaè¨€èªžã?Šã‚ˆã?³SQLãƒ«ãƒ¼ãƒ?ãƒ³ã?®ä»•æ§˜ã?«æ²¿ã?£ã?¦ã€?å¼•æ•°ã‚’å€¤æ¸¡ã?—ã?—ã?¾ã?™ã€‚INOUTã?¨OUTã?®å¼•æ•°ã?¯å¤‰æ›´å¾Œã?®å€¤ã‚’è¿”ã?›ã‚‹ã‚ˆã?†ã?«ã€?è¦?ç´ ã?Œã?²ã?¨ã?¤ã?®é…?åˆ—ã?¨ã?—ã?¦æ¸¡ã?•ã‚Œã?¾ã?™ã€‚ã?•ã‚‰ã?«çµ?æžœã‚»ãƒƒãƒˆã?¯Javaã?®ãƒ¡ã‚½ãƒƒãƒ‰ã?®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’çµŒã?¦ã€?é…?åˆ—ã?«æ¸¡ã?—ã?Ÿjava.sql.ResultSet[]åž‹ã?®è¦?ç´ ã?«ã‚ˆã‚Šè¿”ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚</p>
+<p><span>Derby</span> ã?¯é•·ã?„åˆ—ã?®åž‹(ã?“ã‚Œã?¯ä¾‹ã?ˆã?°Long Varcharã‚„BLOBç­‰ã?®ã?“ã?¨ã?§ã?™ã€‚)ã‚’ã‚µãƒ?ãƒ¼ãƒˆã?—ã?¾ã?›ã‚“ã€‚
+ã?“ã‚Œã‚‰ã?®é•·ã?„åˆ—ã?®åž‹ã‚’ä½¿ã?Šã?†ã?¨ã?™ã‚‹ã?¨ã€?ã‚¨ãƒ©ãƒ¼ã?Œç™ºç”Ÿã?—ã?¾ã?™ã€‚</p>
+
+<p>Derbyã?®è¡¨é–¢æ•°ã?®å ´å?ˆã€?PARAMETER STYLEã?¯å¸¸ã?«DERBY_JDBC_RESULT_SETã?§ã€?ã?“ã‚Œä»¥å¤–ã?®å€¤ã?¨ã?™ã‚‹ã?“ã?¨ã?¯ã?§ã??ã?¾ã?›ã‚“ã€‚è¡¨é–¢æ•°ã?¨ã?¯<a href="rrefcreatefunctionstatement.html#rrefcreatefunctionstatement__rrefcrfunctiontabletype">è¡¨åž‹</a>ã‚’è¿”ã?™é–¢æ•°ã?§ã€?JDBCã?®<em>ResultSet</em>ã‚’è¿”ã?™ãƒ¡ã‚½ãƒƒãƒ‰ã?«å¯¾å¿œã?—ã?¾ã?™ã€‚
+ã??ã‚Œä»¥å¤–ã?®å ´å?ˆã?¯ã€?PARAMETER STYLEã?¯å¸¸ã?«JAVAã?§ã?™ã€‚
+</p>
+
+</div>
+
+<div class="section"><h4 class="sectiontitle">NO SQL, CONTAINS SQL, READS SQL DATA</h4> <p>ã?«ã‚ˆã‚Šé–¢æ•°ã?ŒSQLã‚’ç™ºè¡Œã?™ã‚‹ã?‹å?¦ã?‹ã€‚ã‚‚ã?—ã?™ã‚‹ã?ªã‚‰ã?©ã?®ã‚ˆã?†ã?ªSQLã‚’ç™ºè¡Œã?™ã‚‹ã?‹ã‚’è¨˜è¿°ã?—ã?¾ã?™ã€‚</p>
+ <dl>
+
+<dt class="dlterm">CONTAINS SQL</dt>
+
+<dd>é–¢æ•°ã?«ã‚ˆã‚Šå¤‰æ›´ã‚‚æ›´æ–°ã‚‚è¡Œã‚?ã?ªã?„SQLæ–‡ã‚’å®Ÿè¡Œã?§ã??ã?¾ã?™ã€‚
+é–¢æ•°ã?«ã?¦è¨±å?¯ã?•ã‚Œã?¦ã?„ã?ªã?„æ–‡ã?Œå®Ÿè¡Œã?•ã‚Œã?Ÿå ´å?ˆã€?é?•ã?†ã?¨ã?„ã?†ã‚¨ãƒ©ãƒ¼ã?Œè¿”ã‚Šã?¾ã?™ã€‚</dd>
+
+
+<dt class="dlterm">NO SQL</dt>
+
+<dd>é–¢æ•°ã?¯SQLã‚’å®Ÿè¡Œã?§ã??ã?¾ã?›ã‚“ã€‚</dd>
+
+
+<dt class="dlterm">READS SQL DATA </dt>
+
+<dd>é–¢æ•°ã?¯æƒ…å ±ã?®æ›´æ–°ã‚’è¡Œã‚?ã?ªã?„SQLã‚’å®Ÿè¡Œã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+é–¢æ•°ã?«ã?¦è¨±å?¯ã?•ã‚Œã?¦ã?„ã?ªã?„æ–‡ã?Œå®Ÿè¡Œã?•ã‚Œã?Ÿå ´å?ˆã€?é?•ã?†ã?¨ã?„ã?†ã‚¨ãƒ©ãƒ¼ã?Œè¿”ã‚Šã?¾ã?™ã€‚
+ã?“ã‚Œã?¯æ—¢å®šã?§ã?™ã€‚</dd>
+
+</dl>
+</div>
+
+<div class="section"><h4 class="sectiontitle">RETURNS NULL ON NULL INPUT or CALLED ON NULL INPUT</h4>
+<div class="p">å…¥åŠ›ã?®å¼•æ•°ã‚’nullã?«ã?—ã?¦é–¢æ•°ã?Œå‘¼ã?°ã‚Œã‚‹ã?‹ã‚’ã?‚ã‚‰ã‚?ã?—ã?¾ã?™ã€‚ã??ã?®å ´å?ˆã?¯nullå€¤ã?¨æ‰±ã?„ã?¾ã?™ã€‚<dl>
+<dt class="dlterm">RETURNS NULL ON NULL INPUT</dt>
+
+<dd>å…¥åŠ›ã?®å¼•æ•°ã?®ã?†ã?¡ã?„ã?šã‚Œã?‹ã?Œnullã?§ã?‚ã?£ã?Ÿå ´å?ˆã€?é–¢æ•°ã?¯å‘¼ã?°ã‚Œã?¾ã?›ã‚“ã€‚ã??ã?®ã?¨ã??ã?®å¸°ã‚Šå€¤ã?¯nullã?¨ã?ªã‚Šã?¾ã?™ã€‚</dd>
+
+
+<dt class="dlterm">CALLED ON NULL INPUT</dt>
+
+<dd>é–¢æ•°ã?¯å…¥åŠ›ã?®å¼•æ•°ã‚’nullã?«ã?—ã?¦å‘¼ã?¶ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚ã?“ã?®å ´å?ˆã?¯é–¢æ•°ã?Œnullã?®å¼•æ•°ã‚’ã?¨ã?£ã?¦ã‚‚å‹•ä½œã?™ã‚‹ã‚ˆã?†ã?«ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã?•ã‚Œã?¦ã?„ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚é–¢æ•°ã?¯nullã?‚ã‚‹ã?„ã?¯ã??ã‚Œä»¥å¤–ã?®å€¤ã‚’è¿”ã?™ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚ã?“ã‚Œã?¯æ—¢å®šã?§ã?™ã€‚</dd>
+
+</dl>
+</div>
+</div>
+
+<div class="section"><div class="p">é–¢æ•°ã?®è¦?ç´ ã?¯ã?©ã?®ã‚ˆã?†ã?ªé †åº?ã?§ç?¾ã‚Œã?¦ã‚‚ã?‹ã?¾ã?„ã?¾ã?›ã‚“ã?Œã€?ã??ã‚Œã?žã‚Œã?®è¦?ç´ ã?¯ä¸€å›žã?—ã?‹ç?¾ã‚Œã?¦ã?¯ã?ªã‚Šã?¾ã?›ã‚“ã€‚é–¢æ•°ã?®å®šç¾©ã?«ã?¯ã?“ã‚Œã‚‰ã?®è¦?ç´ ã?Œå¿…è¦?ã?§ã?™ã€‚<ul>
+<li><strong>LANGUAGE</strong></li>
+
+<li><strong>PARAMETER STYLE</strong></li>
+
+<li><strong>EXTERNAL NAME</strong></li>
+
+</ul>
+</div>
+</div>
+
+<div class="section"><h4 class="sectiontitle">Example</h4><pre><strong>CREATE FUNCTION TO_DEGREES(RADIANS DOUBLE) RETURNS DOUBLE
+PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA
+EXTERNAL NAME 'java.lang.Math.toDegrees'</strong></pre>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="crefsqlj95081.html" title="">CREATE æ–‡</a></div>
+</div>
+<div class="relref"><strong>é–¢é€£è³‡æ–™</strong><br />
+<div><a href="rrefsqlj20937.html" title="">CREATE INDEX æ–‡</a></div>
+<div><a href="rrefcreateprocedurestatement.html" title="">CREATE PROCEDURE æ–‡</a></div>
+<div><a href="rrefsqlj31580.html" title="">CREATE SCHEMA æ–‡</a></div>
+<div><a href="rrefsqljcreatesynonym.html" title="">CREATE SYNONYM æ–‡</a></div>
+<div><a href="rrefsqlj24513.html" title="">CREATE TABLE æ–‡</a></div>
+<div><a href="rrefsqlj43125.html" title="">CREATE TRIGGER æ–‡</a></div>
+<div><a href="rrefsqlj15446.html" title="">CREATE VIEW æ–‡</a></div>
+</div>
+</div>
+
+</body>
+</html>

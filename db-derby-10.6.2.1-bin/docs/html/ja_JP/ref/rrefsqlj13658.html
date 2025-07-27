@@ -1,0 +1,126 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja">
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta name="copyright" content="(C) Copyright 2005" />
+<meta name="DC.rights.owner" content="(C) Copyright 2005" />
+<meta content="public" name="security" />
+<meta content="index,follow" name="Robots" />
+<meta http-equiv="PICS-Label" content='(PICS-1.1 "http://www.icra.org/ratingsv02.html" l gen true r (cz 1 lz 1 nz 1 oz 1 vz 1) "http://www.rsac.org/ratingsv01.html" l gen true r (n 0 s 0 v 0 l 0) "http://www.classify.org/safesurf/" l gen true r (SS~~000 1))' />
+<meta content="reference" name="DC.Type" />
+<meta name="DC.Title" content="ORDER BY ç¯€" />
+<meta name="abstract" content="ORDER BYç¯€ã?¯SELECTæ–‡ã?®çœ?ç•¥å?¯èƒ½ã?ªè¦?ç´ ã?§ã?™ã€‚ ORDER BYç¯€ã?«ã?¦ResultSetã?«ã?‚ã‚‹è¡Œã?®é †ç•ªã‚’æŒ‡å®šã?§ã??ã?¾ã?™ã€‚" />
+<meta name="description" content="ORDER BYç¯€ã?¯SELECTæ–‡ã?®çœ?ç•¥å?¯èƒ½ã?ªè¦?ç´ ã?§ã?™ã€‚ ORDER BYç¯€ã?«ã?¦ResultSetã?«ã?‚ã‚‹è¡Œã?®é †ç•ªã‚’æŒ‡å®šã?§ã??ã?¾ã?™ã€‚" />
+<meta content="ORDER BY clause, syntax, ASC, implied in ORDER BY clause, DESC, optional element of ORDER BY clause, affecting cursors, specifying expressions" name="DC.subject" />
+<meta content="ORDER BY clause, syntax, ASC, implied in ORDER BY clause, DESC, optional element of ORDER BY clause, affecting cursors, specifying expressions" name="keywords" />
+<meta scheme="URI" name="DC.Relation" content="rrefclauses.html" />
+<meta content="XHTML" name="DC.Format" />
+<meta content="rrefsqlj13658" name="DC.Identifier" />
+<meta content="ja" name="DC.Language" />
+<link href="commonltr.css" type="text/css" rel="stylesheet" />
+<title>ORDER BY ç¯€</title>
+</head>
+<body id="rrefsqlj13658"><a name="rrefsqlj13658"><!-- --></a>
+
+
+<h1 class="topictitle1">ORDER BY ç¯€</h1>
+
+
+
+<div><p>ORDER BYç¯€ã?¯SELECTæ–‡ã?®çœ?ç•¥å?¯èƒ½ã?ªè¦?ç´ ã?§ã?™ã€‚
+ORDER BYç¯€ã?«ã?¦<var class="varname">ResultSet</var>ã?«ã?‚ã‚‹è¡Œã?®é †ç•ªã‚’æŒ‡å®šã?§ã??ã?¾ã?™ã€‚</p>
+
+<div class="section"><h4 class="sectiontitle">Syntax</h4><pre><strong>ORDER BY { <em><a href="rrefcolumnname.html#rrefcolumnname">åˆ—å??</a></em> | <em>ColumnPosition</em> | <em>Expression</em> }
+    [ ASC | DESC ]
+    [ , <em><a href="rrefcolumnname.html#rrefcolumnname">åˆ—å??</a></em> | <em>åˆ—ä½?ç½®</em> | <em>å¼?</em> 
+        [ ASC | DESC ] ] * </strong></pre>
+<dl>
+<dt class="dlterm">åˆ—å??</dt>
+
+<dd>å•?ã?„å?ˆã‚?ã?›ã?®<a href="rrefsqlj41360.html#rrefsqlj41360">SELECT æ–‡</a>ã?®<var class="varname">é?¸æŠžé …ç›®</var>ã?«ã?¦ã€?å?¯è¦–ã?§ã?‚ã‚‹å??å‰?ã‚’å?‚ç…§ã?—ã?¾ã?™ã€‚
+ORDER BYã?§æŒ‡å®šã?™ã‚‹åˆ—å??ã?¯SELECTã?•ã‚Œã‚‹é …ç›®ã?«ã?ªã??ã?¨ã‚‚æ§‹ã?„ã?¾ã?›ã‚“ã€‚</dd>
+
+
+<dt class="dlterm">åˆ—ä½?ç½®</dt>
+
+<dd><a href="rrefsqlj41360.html#rrefsqlj41360">SELECT æ–‡</a>ã?®<var class="varname">é?¸æŠžé …ç›®</var>ã?®ã€?åˆ—ã?®ç•ªå?·ã‚’æŒ‡å®šã?™ã‚‹æ•´æ•°ã?§ã?™ã€‚
+<span class="parmname">åˆ—ä½?ç½®</span>ã?¯ã€?0ã‚ˆã‚Šå¤§ã??ã??ã?‹ã?¤çµ?æžœè¡¨ã?®åˆ—æ•°ä»¥ä¸‹ã?§ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚è¨€ã?„æ?›ã?ˆã‚Œã?°ã€?åˆ—ã?§ä¸¦ã?³å¤‰ã?ˆã‚‹ã?Ÿã‚?ã?«ã€?ã??ã?®åˆ—ã?ŒSELECTã?•ã‚Œã‚‹é …ç›®ã?«ã?‚ã‚‹å¿…è¦?ã?Œã?‚ã‚Šã?¾ã?™ã€‚</dd>
+
+
+<dt class="dlterm">å¼?</dt>
+
+<dd>ä¸¦ã?³å¤‰ã?ˆã‚’è¡Œã?†ã‚­ãƒ¼ã?®å¼?ã?§ã€?æ•°å€¤ã‚„æ–‡å­—åˆ—ã€?æ—¥ä»˜ã?ªã?©ã?®å¼?ã?¨ã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+<em>å¼?</em>ã?¯ã‚¹ã‚«ãƒ©ãƒ¼å‰¯å•?ã?„å?ˆã‚?ã?›ã‚„CASEå¼?ã?ªã?©ã?®ã€?è¡Œã?®å€¤ã?«ã?Šã?‘ã‚‹å¼?ã?¨ã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚
+</dd>
+
+
+<dt class="dlterm">ASC</dt>
+
+<dd>çµ?æžœã‚’æ˜‡é †ã?§è¿”ã?™ã?“ã?¨ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚æ–¹å?‘ã?ŒæŒ‡å®šã?•ã‚Œã?ªã?„å ´å?ˆã€?ASCã?Œæ—¢å®šã?§ã?™ã€‚</dd>
+
+
+<dt class="dlterm">DESC</dt>
+
+<dd>çµ?æžœã‚’é™?é †ã?§è¿”ã?™ã?“ã?¨ã‚’æŒ‡å®šã?—ã?¾ã?™ã€‚</dd>
+
+</dl>
+ </div>
+
+<div class="section"><h4 class="sectiontitle">ä½†ã?—æ›¸ã??</h4><ul>
+<li>SELECT DISTINCTã?ŒæŒ‡å®šã?•ã‚Œã?Ÿã‚Šã€?SELECTæ–‡ã?«GROUP BYç¯€ã?Œã?‚ã?£ã?Ÿå ´å?ˆã€?ORDER BYã?™ã‚‹åˆ—ã?¯SELECTã?•ã‚Œã‚‹é …ç›®ã?«ã?ªã?‘ã‚Œã?°ã?ªã‚Šã?¾ã?›ã‚“ã€‚</li>
+
+<li>ORDER BYç¯€ã?Œã?‚ã‚‹ã?¨ã€?SELECTæ–‡ã‚’æ›´æ–°å?¯èƒ½ã‚«ãƒ¼ã‚½ãƒ«ã?¨ã?™ã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?›ã‚“ã€‚ã‚ˆã‚Šè©³ç´°ã?ªæƒ…å ±ã?¯ã€?<a href="rrefsqlj41360.html#rrefsqlj41360__sqlj15384">æ›´æ–°å?¯èƒ½ã?ªã‚«ãƒ¼ã‚½ãƒ«ã?Šã‚ˆã?³ResultSetã?®è¦?ä»¶</a>ã‚’å?‚ç…§ã?—ã?¦ã??ã? ã?•ã?„ã€‚
+ä¾‹ã?ˆã?°ã€?ã‚‚ã?—INTEGERã?®åˆ—ã?«æ•´æ•°ã?Œã?‚ã‚‹ã?¨ã€?ã‚½ãƒ¼ãƒˆã?®ã?¨ã??NULLã?¯1ã‚ˆã‚Šå¤§ã??ã?„ã?¨è¦‹ã?ªã?•ã‚Œã?¾ã?™ã€‚è¨€ã?„æ?›ã?ˆã‚Œã?°ã€?NULLã?®å€¤ã?¯ã€?ã‚ˆã‚Šä¸Šã?®ä½?ç½®ã?«ã‚½ãƒ¼ãƒˆã?•ã‚Œã?¾ã?™ã€‚</li>
+
+</ul>
+</div>
+
+<div class="example"><h4 class="sectiontitle">ç›¸é–¢å??ã‚’ä½¿ã?†ä¾‹</h4>
+<p>ç›¸é–¢å??ã?Œé?¸æŠžé …ç›®ã?«ã?¦æŒ‡å®šã?•ã‚Œã?¦ã?„ã‚Œã?°ã€?çµ?æžœã‚»ãƒƒãƒˆã‚’ç›¸é–¢å??ã?§ä¸¦ã?³å¤‰ã?ˆã?§ã??ã?¾ã?™ã€‚
+ã?Ÿã?¨ã?ˆã?°CITIESãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã?‹ã‚‰ã€?COUNTRYåˆ—ã?«NATIONã?¨ã?„ã?†ç›¸é–¢å??ã‚’ä¸Žã?ˆã?¦ã€?CITY_NAMEåˆ—ã?¨COUNTRYåˆ—ã?«æ ¼ç´?ã?•ã‚Œã?¦ã?„ã‚‹ã?™ã?¹ã?¦ã?®æƒ…å ±ã‚’è¿”ã?™å ´å?ˆã€?æ¬¡ã?®ã‚ˆã?†ã?ªSELECTæ–‡ã‚’æ›¸ã??ã?¾ã?™ã€‚</p>
+
+<pre>SELECT CITY_NAME, COUNTRY AS NATION 
+    FROM CITIES 
+    ORDER BY NATION
+</pre>
+ </div>
+
+<div class="example"><h4 class="sectiontitle">æ•°å¼?ã‚’ä½¿ã?†ä¾‹</h4>
+<div class="p">çµ?æžœã‚»ãƒƒãƒˆã‚’æ•°å¼?ã?§ä¸¦ã?³å¤‰ã?ˆã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚ä¾‹ã‚’æŒ™ã?’ã?¾ã?™ã€‚<pre>SELECT name, salary, bonus FROM employee 
+   ORDER BY salary+bonus</pre>
+ã?“ã?®ä¾‹ã?§ã?¯ã€?salaryã?¨bonusåˆ—ã?¯DECIMALãƒ‡ãƒ¼ã‚¿åž‹ã?§ã?™ã€‚</div>
+</div>
+
+<div class="example"><h4 class="sectiontitle">é–¢æ•°ã‚’ä½¿ã?†ä¾‹</h4><div class="p">çµ?æžœã‚»ãƒƒãƒˆã‚’é–¢æ•°ã?®å‘¼ã?³å‡ºã?—çµ?æžœã‚’å…ƒã?«ä¸¦ã?³å¤‰ã?ˆã‚‹ã?“ã?¨ã?Œã?§ã??ã?¾ã?™ã€‚ä¾‹ã‚’æŒ™ã?’ã?¾ã?™ã€‚<pre>SELECT i, len FROM measures 
+   ORDER BY sin(i) 
+</pre>
+</div>
+</div>
+
+</div>
+
+<div>
+<div class="familylinks">
+<div class="parentlink"><strong>è¦ªãƒˆãƒ”ãƒƒã‚¯:</strong> <a href="rrefclauses.html" title="">SQL ç¯€</a></div>
+</div>
+</div>
+
+</body>
+</html>

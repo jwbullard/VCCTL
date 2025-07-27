@@ -1,0 +1,75 @@
+ui:
+  alternating_row_colors: true
+  animation_enabled: true
+  bottom_panel_height: 200
+  confirm_destructive_actions: true
+  confirm_on_exit: true
+  custom_colors:
+    error:
+    - 211
+    - 47
+    - 47
+    info:
+    - 2
+    - 136
+    - 209
+    primary:
+    - 52
+    - 101
+    - 164
+    secondary:
+    - 92
+    - 53
+    - 102
+    success:
+    - 46
+    - 125
+    - 50
+    warning:
+    - 255
+    - 152
+    - 0
+  default_colormap: viridis
+  font_family: Sans
+  font_size: 11
+  high_contrast: false
+  keyboard_shortcuts:
+    about: F1
+    fullscreen: F11
+    new_project: <Ctrl>n
+    open_project: <Ctrl>o
+    preferences: <Ctrl>comma
+    quit: <Ctrl>q
+    save_as: <Ctrl><Shift>s
+    save_project: <Ctrl>s
+  large_icons: false
+  max_recent_files: 10
+  max_recent_projects: 5
+  monospace_font_family: Monospace
+  monospace_font_size: 10
+  notification_timeout: 5
+  plot_dpi: 100
+  plot_style: default
+  remember_dialog_sizes: true
+  screen_reader_support: false
+  show_bottom_panel: true
+  show_grid_lines: true
+  show_notifications: true
+  show_plot_toolbar: true
+  show_sidebar: true
+  show_statusbar: true
+  show_toolbar: true
+  sidebar_width: 250
+  smooth_scrolling: true
+  sound_enabled: false
+  theme: system
+  toolbar_icon_size: 24
+  toolbar_style: both
+  tree_indent: 20
+  use_dark_theme: false
+  use_opengl: false
+  window_height: 800
+  window_maximized: false
+  window_position_x: 400
+  window_position_y: 94
+  window_width: 1384

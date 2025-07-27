@@ -1,0 +1,2 @@
+cat ${1}/length-stats.dat ${1}/bin2D.dat ${1}/bin2D.html > ${1}/${1}.sst
+exit

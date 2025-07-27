@@ -7,7 +7,7 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, CheckConstraint
+from sqlalchemy import Column, String, Float, CheckConstraint, Text
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -37,9 +37,15 @@ class InertFiller(Base):
     psd = Column(String(64), nullable=False, default='cement141',
                 doc="Particle size distribution reference")
     
-    # Description
+    # Custom PSD data points (JSON format)
+    psd_custom_points = Column(Text, nullable=True, 
+                              doc="Custom PSD points stored as JSON")
+    
+    # Description and metadata
     description = Column(String(32700), nullable=True,
                         doc="Inert filler description and notes")
+    source = Column(String(255), nullable=True, doc="Material source")
+    notes = Column(String(1000), nullable=True, doc="Additional notes")
     
     # Add constraint for specific gravity
     __table_args__ = (
@@ -80,8 +86,12 @@ class InertFillerCreate(BaseModel):
                                    description="Specific gravity (must be positive)")
     psd: str = Field('cement141', max_length=64,
                     description="Particle size distribution reference")
+    psd_custom_points: Optional[str] = Field(None, 
+                                           description="Custom PSD points stored as JSON")
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     
     @field_validator('name')
     @classmethod
@@ -117,8 +127,12 @@ class InertFillerUpdate(BaseModel):
                                             description="Specific gravity")
     psd: Optional[str] = Field(None, max_length=64,
                               description="Particle size distribution reference")
+    psd_custom_points: Optional[str] = Field(None, 
+                                           description="Custom PSD points stored as JSON")
     description: Optional[str] = Field(None, max_length=32700,
                                      description="Filler description and notes")
+    source: Optional[str] = Field(None, max_length=255, description="Material source")
+    notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
     
     @field_validator('specific_gravity')
     @classmethod
@@ -136,6 +150,8 @@ class InertFillerResponse(BaseModel):
     specific_gravity: float
     psd: str
     description: Optional[str]
+    source: Optional[str]
+    notes: Optional[str]
     is_valid_specific_gravity: bool
     has_description: bool
     created_at: str

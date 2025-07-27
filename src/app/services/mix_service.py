@@ -17,6 +17,8 @@ from app.models.cement import Cement
 from app.models.fly_ash import FlyAsh
 from app.models.slag import Slag
 from app.models.inert_filler import InertFiller
+from app.models.silica_fume import SilicaFume
+from app.models.limestone import Limestone
 from app.models.aggregate import Aggregate
 from app.models.grading import Grading
 from app.services.base_service import BaseService, ServiceError, NotFoundError, ValidationError
@@ -28,6 +30,8 @@ class MaterialType(Enum):
     FLY_ASH = "fly_ash"
     SLAG = "slag"
     INERT_FILLER = "inert_filler"
+    SILICA_FUME = "silica_fume"
+    LIMESTONE = "limestone"
     AGGREGATE = "aggregate"
 
 
@@ -87,6 +91,8 @@ class MixService:
             MaterialType.FLY_ASH: 2.77,
             MaterialType.SLAG: 2.87,
             MaterialType.INERT_FILLER: 3.0,
+            MaterialType.SILICA_FUME: 2.22,
+            MaterialType.LIMESTONE: 2.71,
             MaterialType.AGGREGATE: 2.65
         }
     
@@ -169,6 +175,10 @@ class MixService:
                     material = session.query(Slag).filter_by(name=material_name).first()
                 elif material_type == MaterialType.INERT_FILLER:
                     material = session.query(InertFiller).filter_by(name=material_name).first()
+                elif material_type == MaterialType.SILICA_FUME:
+                    material = session.query(SilicaFume).filter_by(name=material_name).first()
+                elif material_type == MaterialType.LIMESTONE:
+                    material = session.query(Limestone).filter_by(name=material_name).first()
                 elif material_type == MaterialType.AGGREGATE:
                     material = session.query(Aggregate).filter_by(name=material_name).first()
                 else:
@@ -218,7 +228,7 @@ class MixService:
         """Calculate water-binder ratio for a mix design (water mass / powder mass)."""
         try:
             # Calculate total powder mass fraction (cement, fly ash, slag, inert filler)
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in powder_types
@@ -264,7 +274,7 @@ class MixService:
                 validation_result['warnings'].append("High air content (>10% volume fraction) may significantly reduce strength")
             
             # Check powder content
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in powder_types
@@ -313,6 +323,7 @@ class MixService:
             validation_result['is_valid'] = False
             return validation_result
     
+    
     def calculate_mix_properties(self, mix_design: MixDesign) -> Dict[str, Any]:
         """Calculate derived properties of a mix design."""
         try:
@@ -326,7 +337,7 @@ class MixService:
             properties['weighted_average_specific_gravity'] = total_weighted_sg
             
             # Calculate powder-specific properties
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             powder_components = [comp for comp in mix_design.components if comp.material_type in powder_types]
             
             # Calculate mass-weighted average specific gravity of powder components
@@ -399,7 +410,7 @@ class MixService:
         """Optimize water content to achieve target water-binder ratio (water mass / powder mass)."""
         try:
             # Calculate total powder mass fraction
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in powder_types
@@ -434,6 +445,10 @@ class MixService:
                     materials = session.query(Slag.name).all()
                 elif material_type == MaterialType.INERT_FILLER:
                     materials = session.query(InertFiller.name).all()
+                elif material_type == MaterialType.SILICA_FUME:
+                    materials = session.query(SilicaFume.name).all()
+                elif material_type == MaterialType.LIMESTONE:
+                    materials = session.query(Limestone.name).all()
                 elif material_type == MaterialType.AGGREGATE:
                     materials = session.query(Aggregate.name).all()
                 else:

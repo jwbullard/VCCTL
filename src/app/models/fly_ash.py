@@ -40,11 +40,21 @@ class FlyAsh(Base):
     psd_custom_points = Column(Text, nullable=True, 
                               doc="Custom PSD points stored as JSON")
     
-    # PSD parameters for log-normal distribution
+    # Complete PSD parameters (unified with cement model)
+    psd_mode = Column(String(64), nullable=True, default='log_normal',
+                     doc="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50 = Column(Float, nullable=True, default=5.0,
+                    doc="PSD D50 parameter (μm) for Rosin-Rammler")
+    psd_n = Column(Float, nullable=True, default=2.0,
+                  doc="PSD n parameter for Rosin-Rammler")
+    psd_dmax = Column(Float, nullable=True, default=75.0,
+                     doc="PSD Dmax parameter (μm)")
     psd_median = Column(Float, nullable=True, default=5.0,
                        doc="Median particle size (μm) for log-normal distribution")
     psd_spread = Column(Float, nullable=True, default=2.0,
                        doc="PSD distribution spread parameter for log-normal distribution")
+    psd_exponent = Column(Float, nullable=True, default=0.5,
+                         doc="PSD exponent parameter for Fuller-Thompson")
     
     # Phase distribution parameters
     distribute_phases_by = Column(Integer, nullable=True,
@@ -209,8 +219,16 @@ class FlyAshCreate(BaseModel):
     psd: Optional[str] = Field('cement141', max_length=64, 
                               description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
+    
+    # Complete PSD parameters (unified with cement model)
+    psd_mode: Optional[str] = Field('log_normal', max_length=64, 
+                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(5.0, gt=0.0, description="PSD D50 parameter (μm)")
+    psd_n: Optional[float] = Field(2.0, gt=0.0, description="PSD n parameter")
+    psd_dmax: Optional[float] = Field(75.0, gt=0.0, description="PSD Dmax parameter (μm)")
     psd_median: Optional[float] = Field(5.0, gt=0.0, description="Median particle size (μm)")
     psd_spread: Optional[float] = Field(2.0, gt=0.0, description="PSD distribution spread parameter")
+    psd_exponent: Optional[float] = Field(0.5, gt=0.0, description="PSD exponent parameter")
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Phase fractions
@@ -296,8 +314,16 @@ class FlyAshUpdate(BaseModel):
     psd: Optional[str] = Field(None, max_length=64, 
                               description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
+    
+    # Complete PSD parameters (unified with cement model)
+    psd_mode: Optional[str] = Field(None, max_length=64, 
+                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (μm)")
+    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
+    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (μm)")
     psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
     psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Phase fractions
@@ -347,8 +373,13 @@ class FlyAshResponse(BaseModel):
     name: str
     specific_gravity: Optional[float]
     psd: Optional[str]
+    psd_mode: Optional[str]
+    psd_d50: Optional[float]
+    psd_n: Optional[float]
+    psd_dmax: Optional[float]
     psd_median: Optional[float]
     psd_spread: Optional[float]
+    psd_exponent: Optional[float]
     distribute_phases_by: Optional[int]
     aluminosilicate_glass_fraction: Optional[float]
     calcium_aluminum_disilicate_fraction: Optional[float]

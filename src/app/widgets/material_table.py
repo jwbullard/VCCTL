@@ -724,7 +724,7 @@ class MaterialTable(Gtk.Box):
                         material_id = material_data.name
                     elif material_data.__tablename__ == 'aggregate':
                         material_id = material_data.display_name
-                    elif material_data.__tablename__ in ['limestone', 'silica_fume']:
+                    elif material_data.__tablename__ in ['limestone', 'silica_fume', 'inert_filler']:
                         # These materials have id=None, so use name
                         material_id = material_data.name
                     else:
@@ -900,7 +900,7 @@ class MaterialTable(Gtk.Box):
                     elif material['type'] == 'aggregate' and getattr(data_obj, 'display_name', None) == material_id:
                         material_data = material
                         break
-                    elif material['type'] in ['limestone', 'silica_fume'] and getattr(data_obj, 'name', None) == material_id:
+                    elif material['type'] in ['limestone', 'silica_fume', 'inert_filler'] and getattr(data_obj, 'name', None) == material_id:
                         material_data = material
                         break
                     elif getattr(data_obj, 'id', None) == material_id:
