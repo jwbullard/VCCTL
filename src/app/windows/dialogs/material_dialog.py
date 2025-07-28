@@ -2123,28 +2123,41 @@ class CementDialog(MaterialDialogBase):
             'na2so4': 'na2so4_surface_fraction'
         }
         
-        # Mass fractions
-        for phase_key, spin in self.phase_spins.items():
-            # Convert phase key to database field name
-            db_field = phase_mapping.get(phase_key, phase_key)
-            value = self.material_data.get(db_field, 0.0)
-            # Convert fraction (0-1) to percentage (0-100) for display
-            percentage_value = float(value) * 100.0 if value else 0.0
-            spin.set_value(percentage_value)
+        # Temporarily disable bidirectional updates during data loading
+        self._updating_fractions = True
         
-        # Volume fractions
-        for phase_key, spin in self.phase_volume_spins.items():
-            db_field = volume_mapping.get(phase_key, phase_key)
-            value = self.material_data.get(db_field, 0.0)
-            percentage_value = float(value) * 100.0 if value else 0.0
-            spin.set_value(percentage_value)
-        
-        # Surface fractions
-        for phase_key, spin in self.phase_surface_spins.items():
-            db_field = surface_mapping.get(phase_key, phase_key)
-            value = self.material_data.get(db_field, 0.0)
-            percentage_value = float(value) * 100.0 if value else 0.0
-            spin.set_value(percentage_value)
+        try:
+            # Mass fractions
+            for phase_key, spin in self.phase_spins.items():
+                # Convert phase key to database field name
+                db_field = phase_mapping.get(phase_key, phase_key)
+                value = self.material_data.get(db_field, 0.0)
+                # Convert fraction (0-1) to percentage (0-100) for display
+                percentage_value = float(value) * 100.0 if value else 0.0
+                
+                # DEBUG: Print values for cement116
+                if self.material_data.get('name') == 'cement116':
+                    print(f"DEBUG cement116: {phase_key} -> {db_field} = {value} -> {percentage_value}%")
+                
+                spin.set_value(percentage_value)
+            
+            # Volume fractions
+            for phase_key, spin in self.phase_volume_spins.items():
+                db_field = volume_mapping.get(phase_key, phase_key)
+                value = self.material_data.get(db_field, 0.0)
+                percentage_value = float(value) * 100.0 if value else 0.0
+                spin.set_value(percentage_value)
+            
+            # Surface fractions
+            for phase_key, spin in self.phase_surface_spins.items():
+                db_field = surface_mapping.get(phase_key, phase_key)
+                value = self.material_data.get(db_field, 0.0)
+                percentage_value = float(value) * 100.0 if value else 0.0
+                spin.set_value(percentage_value)
+                
+        finally:
+            # Re-enable bidirectional updates
+            self._updating_fractions = False
         
         # Setting times loading removed per user request
         
@@ -2717,7 +2730,7 @@ class FlyAshDialog(MaterialDialogBase):
         row += 1
         
         # Fineness (45μm sieve retention)
-        fineness_label = Gtk.Label("Fineness (45μm):")
+        fineness_label = Gtk.Label("Fineness:")
         fineness_label.set_halign(Gtk.Align.END)
         fineness_label.get_style_context().add_class("form-label")
         fineness_label.set_tooltip_text("Percent retained on 45μm sieve")
@@ -2726,7 +2739,7 @@ class FlyAshDialog(MaterialDialogBase):
         self.fineness_spin.set_digits(1)
         self.fineness_spin.set_value(20.0)  # Typical value
         
-        fineness_unit_label = Gtk.Label("% retained")
+        fineness_unit_label = Gtk.Label("% retained on 45μm")
         fineness_unit_label.get_style_context().add_class("dim-label")
         
         grid.attach(fineness_label, 0, row, 1, 1)
@@ -3188,7 +3201,7 @@ class SlagDialog(MaterialDialogBase):
         row = start_row
         
         # Glass content
-        glass_label = Gtk.Label("Glass Content (%):")
+        glass_label = Gtk.Label("Glass Content:")
         glass_label.set_halign(Gtk.Align.END)
         glass_label.get_style_context().add_class("form-label")
         
@@ -3196,12 +3209,16 @@ class SlagDialog(MaterialDialogBase):
         self.glass_content_spin.set_value(95.0)
         self.glass_content_spin.set_digits(1)
         
+        glass_unit_label = Gtk.Label("%")
+        glass_unit_label.get_style_context().add_class("dim-label")
+        
         grid.attach(glass_label, 0, row, 1, 1)
         grid.attach(self.glass_content_spin, 1, row, 1, 1)
+        grid.attach(glass_unit_label, 2, row, 1, 1)
         row += 1
         
         # Activity index
-        activity_label = Gtk.Label("Activity Index (%):")
+        activity_label = Gtk.Label("Activity Index:")
         activity_label.set_halign(Gtk.Align.END)
         activity_label.get_style_context().add_class("form-label")
         
@@ -3211,11 +3228,20 @@ class SlagDialog(MaterialDialogBase):
         
         activity_info = Gtk.Image()
         activity_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
-        activity_info.set_tooltip_text("Hydraulic activity relative to portland cement")
+        
+        # Wrap in EventBox to enable tooltip functionality
+        activity_info_box = Gtk.EventBox()
+        activity_info_box.add(activity_info)
+        activity_info_box.set_has_tooltip(True)
+        activity_info_box.set_tooltip_text("Hydraulic activity relative to portland cement")
+        
+        activity_unit_label = Gtk.Label("%")
+        activity_unit_label.get_style_context().add_class("dim-label")
         
         activity_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         activity_box.pack_start(self.activity_spin, False, False, 0)
-        activity_box.pack_start(activity_info, False, False, 0)
+        activity_box.pack_start(activity_unit_label, False, False, 0)
+        activity_box.pack_start(activity_info_box, False, False, 0)
         
         grid.attach(activity_label, 0, row, 1, 1)
         grid.attach(activity_box, 1, row, 1, 1)
@@ -3327,11 +3353,16 @@ class SlagDialog(MaterialDialogBase):
         
         cao_info = Gtk.Image()
         cao_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
-        cao_info.set_tooltip_text("Calculated automatically. Higher ratios indicate more hydraulic activity.")
+        
+        # Wrap in EventBox to enable tooltip functionality
+        cao_info_box = Gtk.EventBox()
+        cao_info_box.add(cao_info)
+        cao_info_box.set_has_tooltip(True)
+        cao_info_box.set_tooltip_text("Calculated automatically. Higher ratios indicate more hydraulic activity.")
         
         cao_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         cao_box.pack_start(self.cao_sio2_display, True, True, 0)
-        cao_box.pack_start(cao_info, False, False, 0)
+        cao_box.pack_start(cao_info_box, False, False, 0)
         
         ratio_grid.attach(cao_sio2_label, 0, 0, 1, 1)
         ratio_grid.attach(cao_box, 1, 0, 2, 1)
@@ -3348,11 +3379,16 @@ class SlagDialog(MaterialDialogBase):
         
         mgo_info = Gtk.Image()
         mgo_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
-        mgo_info.set_tooltip_text("Calculated automatically. Affects slag reactivity and durability.")
+        
+        # Wrap in EventBox to enable tooltip functionality
+        mgo_info_box = Gtk.EventBox()
+        mgo_info_box.add(mgo_info)
+        mgo_info_box.set_has_tooltip(True)
+        mgo_info_box.set_tooltip_text("Calculated automatically. Affects slag reactivity and durability.")
         
         mgo_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         mgo_box.pack_start(self.mgo_al2o3_display, True, True, 0)
-        mgo_box.pack_start(mgo_info, False, False, 0)
+        mgo_box.pack_start(mgo_info_box, False, False, 0)
         
         ratio_grid.attach(mgo_al2o3_label, 0, 1, 1, 1)
         ratio_grid.attach(mgo_box, 1, 1, 2, 1)
@@ -3376,7 +3412,7 @@ class SlagDialog(MaterialDialogBase):
         param_grid.set_column_spacing(15)
         
         # Activation energy
-        activation_label = Gtk.Label("Activation Energy (J/mol):")
+        activation_label = Gtk.Label("Activation Energy:")
         activation_label.set_halign(Gtk.Align.END)
         activation_label.get_style_context().add_class("form-label")
         
@@ -3385,8 +3421,12 @@ class SlagDialog(MaterialDialogBase):
         activation_spin.set_digits(0)
         self.reaction_params['activation_energy'] = activation_spin
         
+        activation_unit_label = Gtk.Label("J/mol")
+        activation_unit_label.get_style_context().add_class("dim-label")
+        
         param_grid.attach(activation_label, 0, 0, 1, 1)
         param_grid.attach(activation_spin, 1, 0, 1, 1)
+        param_grid.attach(activation_unit_label, 2, 0, 1, 1)
         
         # Reactivity factor
         reactivity_label = Gtk.Label("Reactivity Factor:")
@@ -3402,7 +3442,7 @@ class SlagDialog(MaterialDialogBase):
         param_grid.attach(reactivity_spin, 1, 1, 1, 1)
         
         # Hydration rate constant
-        rate_label = Gtk.Label("Rate Constant (1/s):")
+        rate_label = Gtk.Label("Rate Constant:")
         rate_label.set_halign(Gtk.Align.END)
         rate_label.get_style_context().add_class("form-label")
         
@@ -3411,8 +3451,12 @@ class SlagDialog(MaterialDialogBase):
         rate_spin.set_digits(9)
         self.reaction_params['rate_constant'] = rate_spin
         
+        rate_unit_label = Gtk.Label("1/s")
+        rate_unit_label.get_style_context().add_class("dim-label")
+        
         param_grid.attach(rate_label, 0, 2, 1, 1)
         param_grid.attach(rate_spin, 1, 2, 1, 1)
+        param_grid.attach(rate_unit_label, 2, 2, 1, 1)
         
         reaction_box.pack_start(param_grid, False, False, 0)
         reaction_frame.add(reaction_box)
@@ -3643,7 +3687,7 @@ class InertFillerDialog(MaterialDialogBase):
         row += 1
         
         # Specific surface area
-        surface_label = Gtk.Label("Specific Surface (m²/g):")
+        surface_label = Gtk.Label("Specific Surface:")
         surface_label.set_halign(Gtk.Align.END)
         surface_label.get_style_context().add_class("form-label")
         
@@ -3653,11 +3697,20 @@ class InertFillerDialog(MaterialDialogBase):
         
         surface_info = Gtk.Image()
         surface_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
-        surface_info.set_tooltip_text("Blaine specific surface area")
+        
+        # Wrap in EventBox to enable tooltip functionality
+        surface_info_box = Gtk.EventBox()
+        surface_info_box.add(surface_info)
+        surface_info_box.set_has_tooltip(True)
+        surface_info_box.set_tooltip_text("Blaine specific surface area")
+        
+        surface_unit_label = Gtk.Label("m²/g")
+        surface_unit_label.get_style_context().add_class("dim-label")
         
         surface_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         surface_box.pack_start(self.specific_surface_spin, False, False, 0)
-        surface_box.pack_start(surface_info, False, False, 0)
+        surface_box.pack_start(surface_unit_label, False, False, 0)
+        surface_box.pack_start(surface_info_box, False, False, 0)
         
         grid.attach(surface_label, 0, row, 1, 1)
         grid.attach(surface_box, 1, row, 1, 1)
@@ -3691,7 +3744,7 @@ class InertFillerDialog(MaterialDialogBase):
         props_grid.set_column_spacing(15)
         
         # Water absorption
-        absorption_label = Gtk.Label("Water Absorption (%):")
+        absorption_label = Gtk.Label("Water Absorption:")
         absorption_label.set_halign(Gtk.Align.END)
         absorption_label.get_style_context().add_class("form-label")
         
@@ -3699,8 +3752,12 @@ class InertFillerDialog(MaterialDialogBase):
         self.absorption_spin.set_value(0.1)
         self.absorption_spin.set_digits(2)
         
+        absorption_unit_label = Gtk.Label("%")
+        absorption_unit_label.get_style_context().add_class("dim-label")
+        
         props_grid.attach(absorption_label, 0, 0, 1, 1)
         props_grid.attach(self.absorption_spin, 1, 0, 1, 1)
+        props_grid.attach(absorption_unit_label, 2, 0, 1, 1)
         
         # Color
         color_label = Gtk.Label("Color:")
@@ -3755,7 +3812,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         row = start_row
         
         # Silica content (typically 85-98%)
-        silica_label = Gtk.Label("SiO2 Content (%):")
+        silica_label = Gtk.Label("SiO2 Content:")
         silica_label.set_halign(Gtk.Align.END)
         silica_label.get_style_context().add_class("form-label")
         silica_label.set_tooltip_text("Silicon dioxide content (typically 85-98%)")
@@ -3765,12 +3822,16 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.silica_content_spin.set_value(92.0)  # Typical value
         self.silica_content_spin.set_tooltip_text("High-quality silica fume is typically >90% SiO2")
         
+        silica_unit_label = Gtk.Label("%")
+        silica_unit_label.get_style_context().add_class("dim-label")
+        
         grid.attach(silica_label, 0, row, 1, 1)
         grid.attach(self.silica_content_spin, 1, row, 1, 1)
+        grid.attach(silica_unit_label, 2, row, 1, 1)
         row += 1
         
         # Specific surface area (very high for silica fume)
-        surface_label = Gtk.Label("Surface Area (m²/kg):")
+        surface_label = Gtk.Label("Surface Area:")
         surface_label.set_halign(Gtk.Align.END)
         surface_label.get_style_context().add_class("form-label")
         surface_label.set_tooltip_text("Specific surface area (very high for silica fume)")
@@ -3780,8 +3841,12 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.surface_area_spin.set_value(20000)  # Typical value
         self.surface_area_spin.set_tooltip_text("Silica fume typically has 15,000-25,000 m²/kg")
         
+        surface_unit_label = Gtk.Label("m²/kg")
+        surface_unit_label.get_style_context().add_class("dim-label")
+        
         grid.attach(surface_label, 0, row, 1, 1)
         grid.attach(self.surface_area_spin, 1, row, 1, 1)
+        grid.attach(surface_unit_label, 2, row, 1, 1)
         row += 1
         
         return row
@@ -3850,7 +3915,7 @@ class LimestoneDialog(MaterialDialogBase):
         row = start_row
         
         # CaCO3 content (typically 95-99%)
-        caco3_label = Gtk.Label("CaCO3 Content (%):")
+        caco3_label = Gtk.Label("CaCO3 Content:")
         caco3_label.set_halign(Gtk.Align.END)
         caco3_label.get_style_context().add_class("form-label")
         caco3_label.set_tooltip_text("Calcium carbonate content (typically 95-99%)")
@@ -3860,8 +3925,12 @@ class LimestoneDialog(MaterialDialogBase):
         self.caco3_content_spin.set_value(97.0)  # Typical value
         self.caco3_content_spin.set_tooltip_text("High-grade limestone is typically >95% CaCO3")
         
+        caco3_unit_label = Gtk.Label("%")
+        caco3_unit_label.get_style_context().add_class("dim-label")
+        
         grid.attach(caco3_label, 0, row, 1, 1)
         grid.attach(self.caco3_content_spin, 1, row, 1, 1)
+        grid.attach(caco3_unit_label, 2, row, 1, 1)
         row += 1
         
         return row

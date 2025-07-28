@@ -158,15 +158,19 @@ class UnifiedPSDWidget(Gtk.Box):
         grid.set_row_spacing(5)
         
         # D50 parameter
-        d50_label = Gtk.Label("D₅₀ (μm):")
+        d50_label = Gtk.Label("D₅₀:")
         d50_label.set_halign(Gtk.Align.END)
         d50_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
         d50_spin.set_digits(1)
         d50_spin.set_value(15.0)
         d50_spin.connect('value-changed', self._on_parameter_changed)
         
+        d50_unit = Gtk.Label("μm")
+        d50_unit.get_style_context().add_class("dim-label")
+        
         grid.attach(d50_label, 0, 0, 1, 1)
         grid.attach(d50_spin, 1, 0, 1, 1)
+        grid.attach(d50_unit, 2, 0, 1, 1)
         
         # N parameter
         n_label = Gtk.Label("n:")
@@ -180,15 +184,19 @@ class UnifiedPSDWidget(Gtk.Box):
         grid.attach(n_spin, 1, 1, 1, 1)
         
         # Dmax parameter
-        dmax_label = Gtk.Label("D_max (μm):")
+        dmax_label = Gtk.Label("D_max:")
         dmax_label.set_halign(Gtk.Align.END)
         dmax_spin = Gtk.SpinButton.new_with_range(1.0, 200.0, 1.0)
         dmax_spin.set_digits(0)
         dmax_spin.set_value(75.0)
         dmax_spin.connect('value-changed', self._on_parameter_changed)
         
+        dmax_unit = Gtk.Label("μm")
+        dmax_unit.get_style_context().add_class("dim-label")
+        
         grid.attach(dmax_label, 0, 2, 1, 1)
         grid.attach(dmax_spin, 1, 2, 1, 1)
+        grid.attach(dmax_unit, 2, 2, 1, 1)
         
         self.rosin_rammler_widgets = {
             'd50': d50_spin,
@@ -215,15 +223,19 @@ class UnifiedPSDWidget(Gtk.Box):
         grid.set_row_spacing(5)
         
         # Median parameter
-        median_label = Gtk.Label("Median (μm):")
+        median_label = Gtk.Label("Median:")
         median_label.set_halign(Gtk.Align.END)
         median_spin = Gtk.SpinButton.new_with_range(0.1, 100.0, 0.1)
         median_spin.set_digits(1)
         median_spin.set_value(10.0)
         median_spin.connect('value-changed', self._on_parameter_changed)
         
+        median_unit = Gtk.Label("μm")
+        median_unit.get_style_context().add_class("dim-label")
+        
         grid.attach(median_label, 0, 0, 1, 1)
         grid.attach(median_spin, 1, 0, 1, 1)
+        grid.attach(median_unit, 2, 0, 1, 1)
         
         # Sigma parameter
         sigma_label = Gtk.Label("Std Dev:")
@@ -271,15 +283,19 @@ class UnifiedPSDWidget(Gtk.Box):
         grid.attach(exp_spin, 1, 0, 1, 1)
         
         # Dmax parameter
-        dmax_label = Gtk.Label("D_max (μm):")
+        dmax_label = Gtk.Label("D_max:")
         dmax_label.set_halign(Gtk.Align.END)
         dmax_spin = Gtk.SpinButton.new_with_range(1.0, 200.0, 1.0)
         dmax_spin.set_digits(0)
         dmax_spin.set_value(75.0)
         dmax_spin.connect('value-changed', self._on_parameter_changed)
         
+        dmax_unit = Gtk.Label("μm")
+        dmax_unit.get_style_context().add_class("dim-label")
+        
         grid.attach(dmax_label, 0, 1, 1, 1)
         grid.attach(dmax_spin, 1, 1, 1, 1)
+        grid.attach(dmax_unit, 2, 1, 1, 1)
         
         self.fuller_widgets = {
             'exponent': exp_spin,
@@ -293,11 +309,6 @@ class UnifiedPSDWidget(Gtk.Box):
         """Create action buttons for PSD operations."""
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
-        # Generate/Update button
-        generate_button = Gtk.Button("Generate Table")
-        generate_button.set_tooltip_text("Generate discrete points from mathematical model")
-        generate_button.connect('clicked', self._on_generate_clicked)
-        button_box.pack_start(generate_button, False, False, 0)
         
         # Import CSV button
         import_button = Gtk.Button("Import CSV")
