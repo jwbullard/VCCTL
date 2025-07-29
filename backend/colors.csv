@@ -1,0 +1,24 @@
+Phase,id,Phase,name,Red,Green,Blue
+0,Porosity,0,25,25
+1,C3S,42,42,210
+2,C2S,139,79,19
+3,C3A,178,178,178
+4,C4AF,253,253,253
+5,K2SO4,255,0,0
+6,Na2SO4,255,20,0
+7,Gypsum,255,255,0
+8,Hemihydrate,255,240,86
+9,Anhydrite,255,255,128
+10,Sfume,40,173,75
+11,Inert Filler,100,100,255
+12,Slag,255,165,0
+13,Fly Ash,255,192,65
+16,Brucite,26,100,26
+17,Hydrotalcite,0,200,200
+19,Portlandite,7,72,142
+20,CSH,245,222,179
+22,AFt,127,0,255
+24,AFm,244,70,203
+33,CACO3,0,204,0
+34,AFmc,250,198,220
+55,Void,0,0,0

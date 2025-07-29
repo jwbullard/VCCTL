@@ -529,9 +529,9 @@ class MixDesignPanel(Gtk.Box):
         row_box.pack_start(name_combo, False, False, 0)
         
         # Mass (kg) spin button
-        mass_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.1)
-        mass_spin.set_digits(1)
-        mass_spin.set_value(1.0)  # Default to 1.0 kg
+        mass_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.001)
+        mass_spin.set_digits(3)
+        mass_spin.set_value(1.000)  # Default to 1.000 kg
         mass_spin.set_size_request(80, -1)
         row_box.pack_start(mass_spin, False, False, 0)
         
@@ -1261,7 +1261,7 @@ class MixDesignPanel(Gtk.Box):
             if water_mass > 0:
                 water_component = MixComponent(
                     material_name="Water",
-                    material_type=MaterialType.AGGREGATE,  # Use aggregate type for water temporarily  
+                    material_type=MaterialType.WATER,  # Use proper water type 
                     mass_fraction=water_mass / total_mass_all if total_mass_all > 0 else 0.0,
                     specific_gravity=1.0
                 )
@@ -1802,21 +1802,45 @@ class MixDesignPanel(Gtk.Box):
                 hemihyd_mf = cement.hemihyd or 0.0
                 anhyd_mf = cement.anhyd or 0.0
                 
-                # Calculate clinker mass fraction (all non-gypsum phases)
-                clinker_mf = c3s_mf + c2s_mf + c3a_mf + c4af_mf + k2so4_mf + na2so4_mf
+                # Individual clinker phase specific gravities
+                c3s_sg = 3.15     # C3S
+                c2s_sg = 3.28     # C2S  
+                c3a_sg = 3.03     # C3A
+                c4af_sg = 3.73    # C4AF
+                k2so4_sg = 2.66   # K2SO4
+                na2so4_sg = 2.68  # Na2SO4
                 
-                # Calculate component's fraction of total binder solids (by mass)
-                total_powder_mass = sum(comp.mass_fraction for comp in mix_design.components 
-                                      if comp.material_type in {MaterialType.CEMENT, MaterialType.FLY_ASH, 
-                                                               MaterialType.SLAG, MaterialType.INERT_FILLER})
-                component_fraction = component.mass_fraction / total_powder_mass
+                # Gypsum phase specific gravities
+                dihydrate_sg = 2.32  # CaSO4·2H2O
+                hemihydrate_sg = 2.74  # CaSO4·0.5H2O
+                anhydrite_sg = 2.61  # CaSO4
                 
-                # Calculate volume fractions on binder solid basis
-                # Each cement phase gets its share of this component's total contribution
-                clinker_vf = clinker_mf * component_fraction
-                dihydrate_vf = dihyd_mf * component_fraction
-                hemihydrate_vf = hemihyd_mf * component_fraction
-                anhydrite_vf = anhyd_mf * component_fraction
+                # Convert individual clinker phases from mass to volume fractions
+                c3s_vf_raw = c3s_mf / c3s_sg if c3s_sg > 0 else 0.0
+                c2s_vf_raw = c2s_mf / c2s_sg if c2s_sg > 0 else 0.0
+                c3a_vf_raw = c3a_mf / c3a_sg if c3a_sg > 0 else 0.0
+                c4af_vf_raw = c4af_mf / c4af_sg if c4af_sg > 0 else 0.0
+                k2so4_vf_raw = k2so4_mf / k2so4_sg if k2so4_sg > 0 else 0.0
+                na2so4_vf_raw = na2so4_mf / na2so4_sg if na2so4_sg > 0 else 0.0
+                
+                # Sum all clinker volume fractions
+                clinker_vf_raw = c3s_vf_raw + c2s_vf_raw + c3a_vf_raw + c4af_vf_raw + k2so4_vf_raw + na2so4_vf_raw
+                dihydrate_vf_raw = dihyd_mf / dihydrate_sg if dihydrate_sg > 0 else 0.0
+                hemihydrate_vf_raw = hemihyd_mf / hemihydrate_sg if hemihydrate_sg > 0 else 0.0
+                anhydrite_vf_raw = anhyd_mf / anhydrite_sg if anhydrite_sg > 0 else 0.0
+                
+                # Normalize cement phase volume fractions to sum to 1.0
+                total_cement_vf = clinker_vf_raw + dihydrate_vf_raw + hemihydrate_vf_raw + anhydrite_vf_raw
+                
+                if total_cement_vf > 0:
+                    clinker_vf = clinker_vf_raw / total_cement_vf
+                    dihydrate_vf = dihydrate_vf_raw / total_cement_vf
+                    hemihydrate_vf = hemihydrate_vf_raw / total_cement_vf
+                    anhydrite_vf = anhydrite_vf_raw / total_cement_vf
+                else:
+                    # Fallback if no cement phases found
+                    clinker_vf = 1.0
+                    dihydrate_vf = hemihydrate_vf = anhydrite_vf = 0.0
                 
                 return {
                     'clinker': clinker_vf,
@@ -2095,6 +2119,14 @@ class MixDesignPanel(Gtk.Box):
         gypsum_probability = 0.0  # Obsolete mechanism - gypsum already added as separate phases
         lines.append(f"{gypsum_probability:.6f}")
         
+        # Percentage of calcium sulfate that is hemihydrate (0.0 since we add it explicitly)
+        hemihydrate_percentage = 0.0
+        lines.append(f"{hemihydrate_percentage:.6f}")
+        
+        # Percentage of calcium sulfate that is anhydrite (0.0 since we add it explicitly)
+        anhydrite_percentage = 0.0
+        lines.append(f"{anhydrite_percentage:.6f}")
+        
         # Add aggregate if present
         aggregate_components = [comp for comp in mix_design.components 
                              if comp.material_type == MaterialType.AGGREGATE]
@@ -2170,11 +2202,51 @@ class MixDesignPanel(Gtk.Box):
             # Menu choice 9: DISTRIB (distribute clinker phases)
             lines.append("9")
             
-            # Path/root name for cement correlation files
-            # TODO: This will be the path to the mix folder + root name
+            # Path/root name for cement correlation files (absolute path)
             mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-            correlation_path = f"{mix_name_safe}/{mix_name_safe}"
+            mix_folder_path = os.path.abspath(mix_name_safe)  # Create absolute path to mix folder
+            correlation_path = os.path.join(mix_folder_path, mix_name_safe)  # Platform-independent path joining
             lines.append(correlation_path)
+            
+            # Add volume and surface fractions for cement clinker phases (C3S through NA2SO4)
+            # distrib3d() expects volume fraction then surface fraction for each of 6 phases
+            cement_component = next((comp for comp in mix_design.components 
+                                   if comp.material_type == MaterialType.CEMENT), None)
+            if cement_component:
+                # Get cement material data from database
+                from app.database.service import DatabaseService
+                db_service = DatabaseService()
+                try:
+                    with db_service.get_session() as session:
+                        from app.models.cement import Cement
+                        cement = session.query(Cement).filter(Cement.name == cement_component.material_name).first()
+                        if cement:
+                            # Phase order expected by genmic.c: C3S, C2S, C3A, C4AF, K2SO4, NA2SO4
+                            phase_fractions = [
+                                (cement.c3s_volume_fraction or 0.0, cement.c3s_surface_fraction or 0.0),
+                                (cement.c2s_volume_fraction or 0.0, cement.c2s_surface_fraction or 0.0),
+                                (cement.c3a_volume_fraction or 0.0, cement.c3a_surface_fraction or 0.0),
+                                (cement.c4af_volume_fraction or 0.0, cement.c4af_surface_fraction or 0.0),
+                                (cement.k2so4_volume_fraction or 0.0, cement.k2so4_surface_fraction or 0.0),
+                                (cement.na2so4_volume_fraction or 0.0, cement.na2so4_surface_fraction or 0.0)
+                            ]
+                            
+                            # Add volume fraction then surface fraction for each phase
+                            for vol_frac, surf_frac in phase_fractions:
+                                lines.append(f"{vol_frac:.6f}")
+                                lines.append(f"{surf_frac:.6f}")
+                        else:
+                            # Fallback values if cement not found
+                            for _ in range(12):
+                                lines.append("0.000000")
+                except Exception as e:
+                    # Fallback values on database error
+                    for _ in range(12):
+                        lines.append("0.000000")
+            else:
+                # Fallback values if no cement component found
+                for _ in range(12):
+                    lines.append("0.000000")
             
             # Menu choice 11: ONEPIX (add one-pixel particles)
             lines.append("11")
@@ -2185,13 +2257,14 @@ class MixDesignPanel(Gtk.Box):
         # Menu choice 10: OUTPUTMIC (output microstructure file)
         lines.append("10")
         
-        # Output filename for microstructure (full path to mix folder + mix name)
+        # Output filename for microstructure (absolute path)
         mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-        output_filename = f"{mix_name_safe}/{mix_name_safe}.img"
+        mix_folder_path = os.path.abspath(mix_name_safe)  # Create absolute path to mix folder
+        output_filename = os.path.join(mix_folder_path, f"{mix_name_safe}.img")  # Platform-independent path
         lines.append(output_filename)
         
-        # Output filename for particle IDs (full path to mix folder + mix name)
-        particle_filename = f"{mix_name_safe}/{mix_name_safe}.pimg"
+        # Output filename for particle IDs (absolute path)
+        particle_filename = os.path.join(mix_folder_path, f"{mix_name_safe}.pimg")  # Platform-independent path
         lines.append(particle_filename)
         
         # Menu choice 1: Exit
