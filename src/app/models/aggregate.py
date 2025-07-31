@@ -57,7 +57,10 @@ class Aggregate(Base):
     
     # Additional UI fields
     source = Column(String(255), nullable=True, doc="Material source")
+    description = Column(String(1000), nullable=True, doc="Basic description")
+    properties_description = Column(String(1000), nullable=True, doc="Properties tab description")
     notes = Column(String(1000), nullable=True, doc="Additional notes")
+    immutable = Column(Integer, nullable=True, default=0, doc="Immutable flag (1=true, 0=false)")
     
     # Define table indexes
     __table_args__ = (
@@ -133,9 +136,18 @@ class AggregateCreate(BaseModel):
     shear_modulus: Optional[float] = Field(None, ge=0.0, description="Shear modulus (GPa)")
     conductivity: Optional[float] = Field(0.0, ge=0.0, description="Thermal conductivity")
     
+    # Binary data fields
+    image: Optional[bytes] = Field(None, description="Aggregate image data")
+    txt: Optional[bytes] = Field(None, description="Text analysis data")
+    inf: Optional[bytes] = Field(None, description="Information data")
+    shape_stats: Optional[bytes] = Field(None, description="Shape statistics data")
+    
     # Additional UI fields
     source: Optional[str] = Field(None, max_length=255, description="Material source")
+    description: Optional[str] = Field(None, max_length=1000, description="Basic description")
+    properties_description: Optional[str] = Field(None, max_length=1000, description="Properties tab description")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    immutable: Optional[bool] = Field(False, description="Immutable flag")
     
     @field_validator('display_name')
     @classmethod
@@ -166,7 +178,10 @@ class AggregateUpdate(BaseModel):
     
     # Additional fields for UI
     source: Optional[str] = Field(None, max_length=255, description="Material source")
+    description: Optional[str] = Field(None, max_length=1000, description="Basic description")
+    properties_description: Optional[str] = Field(None, max_length=1000, description="Properties tab description")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
+    immutable: Optional[bool] = Field(False, description="Immutable flag")
 
 
 class AggregateResponse(BaseModel):

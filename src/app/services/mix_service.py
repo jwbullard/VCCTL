@@ -33,6 +33,7 @@ class MaterialType(Enum):
     SILICA_FUME = "silica_fume"
     LIMESTONE = "limestone"
     AGGREGATE = "aggregate"
+    WATER = "water"
 
 
 @dataclass
@@ -93,7 +94,8 @@ class MixService:
             MaterialType.INERT_FILLER: 3.0,
             MaterialType.SILICA_FUME: 2.22,
             MaterialType.LIMESTONE: 2.71,
-            MaterialType.AGGREGATE: 2.65
+            MaterialType.AGGREGATE: 2.65,
+            MaterialType.WATER: 1.0
         }
     
     def create_mix_design(self, mix_data: Dict[str, Any]) -> MixDesign:
@@ -450,15 +452,41 @@ class MixService:
                 elif material_type == MaterialType.LIMESTONE:
                     materials = session.query(Limestone.name).all()
                 elif material_type == MaterialType.AGGREGATE:
-                    materials = session.query(Aggregate.name).all()
+                    materials = session.query(Aggregate.display_name).all()
                 else:
                     return []
                 
-                return [material.name for material in materials]
+                # For aggregates, return display_name; for others, return name
+                if material_type == MaterialType.AGGREGATE:
+                    return [material.display_name for material in materials]
+                else:
+                    return [material.name for material in materials]
                 
         except Exception as e:
             self.logger.error(f"Failed to get compatible materials for {material_type}: {e}")
             raise ServiceError(f"Failed to retrieve materials: {e}")
+    
+    def get_fine_aggregates(self) -> List[str]:
+        """Get list of fine aggregates (type = 2)."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                fine_aggregates = session.query(Aggregate.display_name).filter(Aggregate.type == 2).all()
+                return [agg.display_name for agg in fine_aggregates]
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get fine aggregates: {e}")
+            raise ServiceError(f"Failed to retrieve fine aggregates: {e}")
+    
+    def get_coarse_aggregates(self) -> List[str]:
+        """Get list of coarse aggregates (type = 1)."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                coarse_aggregates = session.query(Aggregate.display_name).filter(Aggregate.type == 1).all()
+                return [agg.display_name for agg in coarse_aggregates]
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get coarse aggregates: {e}")
+            raise ServiceError(f"Failed to retrieve coarse aggregates: {e}")
     
     def compare_mix_designs(self, mix1: MixDesign, mix2: MixDesign) -> Dict[str, Any]:
         """Compare two mix designs and return differences."""

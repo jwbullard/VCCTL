@@ -893,17 +893,28 @@ class MaterialTable(Gtk.Box):
                 material_data = None
                 for material in self.materials_data:
                     data_obj = material['data']
+                    material_type = material['type']
+                    
+                    # Debug: show what we're checking
+                    name_attr = getattr(data_obj, 'name', None)
+                    display_name_attr = getattr(data_obj, 'display_name', None)
+                    id_attr = getattr(data_obj, 'id', None)
+                    
+                    
                     # Check the correct identifier based on material type
-                    if material['type'] == 'cement' and getattr(data_obj, 'name', None) == material_id:
+                    if material['type'] == 'cement' and name_attr == material_id:
                         material_data = material
                         break
-                    elif material['type'] == 'aggregate' and getattr(data_obj, 'display_name', None) == material_id:
+                    elif material['type'] == 'aggregate' and display_name_attr == material_id:
                         material_data = material
                         break
-                    elif material['type'] in ['limestone', 'silica_fume', 'inert_filler'] and getattr(data_obj, 'name', None) == material_id:
+                    elif material['type'] in ['limestone', 'silica_fume', 'inert_filler'] and name_attr == material_id:
                         material_data = material
                         break
-                    elif getattr(data_obj, 'id', None) == material_id:
+                    elif material['type'] in ['slag', 'fly_ash'] and name_attr == material_id:
+                        material_data = material
+                        break
+                    elif id_attr == material_id:
                         material_data = material
                         break
                 
@@ -928,8 +939,18 @@ class MaterialTable(Gtk.Box):
                     else:
                         continue
                     
-                    # Delete using the material_id (which is the correct identifier for each type)
-                    service.delete(material_id)
+                    # Delete using the correct identifier for each material type
+                    data_obj = material_data['data']
+                    if material_type == 'cement':
+                        delete_param = data_obj.name
+                    elif material_type == 'aggregate':
+                        delete_param = data_obj.display_name
+                    elif material_type in ['limestone', 'silica_fume', 'inert_filler', 'fly_ash', 'slag']:
+                        delete_param = data_obj.name
+                    else:
+                        delete_param = data_obj.id
+                    
+                    service.delete(delete_param)
                     deleted_count += 1
             
             # Clear selection and reload

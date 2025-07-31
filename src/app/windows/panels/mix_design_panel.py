@@ -11,12 +11,15 @@ import logging
 import random
 import os
 import json
+import subprocess
+import threading
 import numpy as np
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
+from datetime import timedelta
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject, Pango, Gdk
+from gi.repository import Gtk, GObject, Pango, Gdk, GLib
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -441,21 +444,22 @@ class MixDesignPanel(Gtk.Box):
             for material_type in MaterialType:
                 self.material_lists[material_type] = self.mix_service.get_compatible_materials(material_type)
             
-            # Populate aggregate combo boxes
-            if MaterialType.AGGREGATE in self.material_lists:
-                # Fine aggregate combo
-                self.fine_agg_combo.remove_all()
-                self.fine_agg_combo.append("", "-- Select Fine Aggregate --")
-                for aggregate_name in self.material_lists[MaterialType.AGGREGATE]:
-                    self.fine_agg_combo.append(aggregate_name, aggregate_name)
-                self.fine_agg_combo.set_active(0)
-                
-                # Coarse aggregate combo
-                self.coarse_agg_combo.remove_all()
-                self.coarse_agg_combo.append("", "-- Select Coarse Aggregate --")
-                for aggregate_name in self.material_lists[MaterialType.AGGREGATE]:
-                    self.coarse_agg_combo.append(aggregate_name, aggregate_name)
-                self.coarse_agg_combo.set_active(0)
+            # Populate aggregate combo boxes with filtered lists
+            # Fine aggregate combo - only fine aggregates (type = 2)
+            self.fine_agg_combo.remove_all()
+            self.fine_agg_combo.append("", "-- Select Fine Aggregate --")
+            fine_aggregates = self.mix_service.get_fine_aggregates()
+            for aggregate_name in fine_aggregates:
+                self.fine_agg_combo.append(aggregate_name, aggregate_name)
+            self.fine_agg_combo.set_active(0)
+            
+            # Coarse aggregate combo - only coarse aggregates (type = 1)
+            self.coarse_agg_combo.remove_all()
+            self.coarse_agg_combo.append("", "-- Select Coarse Aggregate --")
+            coarse_aggregates = self.mix_service.get_coarse_aggregates()
+            for aggregate_name in coarse_aggregates:
+                self.coarse_agg_combo.append(aggregate_name, aggregate_name)
+            self.coarse_agg_combo.set_active(0)
             
             self.logger.info("Loaded material lists for mix design")
             
@@ -2289,7 +2293,7 @@ class MixDesignPanel(Gtk.Box):
             return 1  # Default to C3S
     
     def _save_input_file(self, content: str, mix_name: str) -> None:
-        """Save input file content to disk."""
+        """Save input file content to disk and execute genmic program."""
         try:
             # Create safe filename
             mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
@@ -2332,34 +2336,288 @@ class MixDesignPanel(Gtk.Box):
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 filename = dialog.get_filename()
+                input_dir = os.path.dirname(filename)
+                
+                self.logger.info(f"Dialog response OK, selected file: {filename}")
                 
                 # Write file
-                with open(filename, 'w') as f:
-                    f.write(content)
+                try:
+                    with open(filename, 'w') as f:
+                        f.write(content)
+                    self.logger.info(f"Successfully wrote input file: {filename}")
+                except Exception as e:
+                    self.logger.error(f"Failed to write input file: {e}")
+                    dialog.destroy()
+                    return
                 
                 self.logger.info(f"Saved microstructure input file: {filename}")
                 self.main_window.update_status(f"Input file saved: {filename}", "success", 5)
                 
-                # Show info dialog with next steps
-                info_dialog = Gtk.MessageDialog(
-                    transient_for=self.main_window,
-                    message_type=Gtk.MessageType.INFO,
-                    buttons=Gtk.ButtonsType.OK,
-                    text="Input File Created Successfully"
-                )
-                info_dialog.format_secondary_text(
-                    f"Input file saved to:\n{filename}\n\n"
-                    f"To generate the 3D microstructure, run:\n"
-                    f"./backend/genmic < {filename}"
-                )
-                info_dialog.run()
-                info_dialog.destroy()
+                # Close dialog before executing genmic
+                dialog.destroy()
+                
+                # Execute genmic program
+                self.logger.info(f"Starting genmic execution...")
+                try:
+                    self._execute_genmic(filename, input_dir)
+                except Exception as e:
+                    self.logger.error(f"Error in genmic execution: {e}")
+                    self.main_window.update_status(f"Error executing genmic: {e}", "error", 5)
+                return  # Exit early to avoid calling destroy again
             
             dialog.destroy()
             
         except Exception as e:
             self.logger.error(f"Failed to save input file: {e}")
             self.main_window.update_status(f"Error saving file: {e}", "error", 5)
+    
+    def _execute_genmic(self, input_file: str, output_dir: str) -> None:
+        """Execute genmic program with input file and redirect output to same directory."""
+        
+        try:
+            self.logger.info(f"_execute_genmic called with input_file={input_file}, output_dir={output_dir}")
+            
+            # Path to genmic executable (go up to project root, then to backend/bin/genmic)
+            # From src/app/windows/panels/mix_design_panel.py, go up 5 levels to vcctl-gtk
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+            genmic_path = os.path.join(project_root, 'backend', 'bin', 'genmic')
+            
+            self.logger.info(f"Project root: {project_root}")
+            self.logger.info(f"Genmic path: {genmic_path}")
+            self.logger.info(f"Genmic exists: {os.path.exists(genmic_path)}")
+            
+            if not os.path.exists(genmic_path):
+                raise FileNotFoundError(f"genmic executable not found at: {genmic_path}")
+            
+            # Register operation with Operations panel
+            operations_panel = getattr(self.main_window, 'operations_panel', None)
+            operation_id = None
+            
+            self.logger.info(f"Operations panel found: {operations_panel is not None}")
+            
+            # Operations panel integration re-enabled - should work now
+            
+            if operations_panel:
+                try:
+                    from app.windows.panels.operations_monitoring_panel import OperationType
+                    operation_name = f"3D Microstructure Generation"
+                    metadata = {
+                        'input_file': input_file,
+                        'output_dir': output_dir,
+                        'genmic_path': genmic_path
+                    }
+                    operation_id = operations_panel.register_operation(
+                        name=operation_name,
+                        operation_type=OperationType.MICROSTRUCTURE_GENERATION,
+                        total_steps=4,  # Initialize -> Parse -> Generate -> Complete
+                        estimated_duration=timedelta(minutes=5),  # Rough estimate
+                        metadata=metadata
+                    )
+                    operations_panel.start_operation(operation_id, "Initializing genmic execution...")
+                except Exception as e:
+                    self.logger.warning(f"Could not register operation with Operations panel: {e}")
+                    operation_id = None
+            
+            def run_genmic():
+                """Run genmic in separate thread."""
+                try:
+                    self.logger.info("Inside run_genmic thread - starting execution")
+                    
+                    # Update progress: Starting
+                    if operations_panel and operation_id:
+                        GLib.idle_add(operations_panel.update_operation_progress, 
+                                    operation_id, 0.1, "Preparing input file...", 1)
+                    
+                    # Change to output directory for execution
+                    original_cwd = os.getcwd()
+                    self.logger.info(f"Changing directory from {original_cwd} to {output_dir}")
+                    os.chdir(output_dir)
+                    
+                    # Verify we're in the correct directory
+                    current_dir = os.getcwd()
+                    self.logger.info(f"Current working directory after change: {current_dir}")
+                    
+                    # Update progress: Parsing input
+                    if operations_panel and operation_id:
+                        GLib.idle_add(operations_panel.update_operation_progress, 
+                                    operation_id, 0.3, "Parsing input and setting up simulation...", 2)
+                    
+                    # Run genmic with input redirection and stdout/stderr logging
+                    self.logger.info(f"About to run genmic: {genmic_path} with input file: {input_file}")
+                    self.logger.info(f"genmic will run in directory: {output_dir}")
+                    
+                    # Create log file names based on input file name
+                    input_basename = os.path.splitext(os.path.basename(input_file))[0]
+                    stdout_log = os.path.join(output_dir, f"{input_basename}_stdout.log")
+                    stderr_log = os.path.join(output_dir, f"{input_basename}_stderr.log")
+                    
+                    self.logger.info(f"genmic stdout will be saved to: {stdout_log}")
+                    self.logger.info(f"genmic stderr will be saved to: {stderr_log}")
+                    
+                    with open(input_file, 'r') as input_f, \
+                         open(stdout_log, 'w') as stdout_f, \
+                         open(stderr_log, 'w') as stderr_f:
+                        result = subprocess.run(
+                            [genmic_path],
+                            stdin=input_f,
+                            stdout=stdout_f,
+                            stderr=stderr_f,
+                            text=True,
+                            cwd=output_dir
+                        )
+                    
+                    self.logger.info(f"genmic execution completed with return code: {result.returncode}")
+                    self.logger.info(f"genmic stdout saved to: {stdout_log}")
+                    self.logger.info(f"genmic stderr saved to: {stderr_log}")
+                    
+                    # Check if stderr log has content (indicates potential issues)
+                    try:
+                        if os.path.exists(stderr_log) and os.path.getsize(stderr_log) > 0:
+                            with open(stderr_log, 'r') as f:
+                                stderr_content = f.read(500)  # Read first 500 chars
+                                self.logger.warning(f"genmic stderr content: {stderr_content}")
+                    except Exception as e:
+                        self.logger.warning(f"Could not read stderr log: {e}")
+                    
+                    # Restore original working directory
+                    os.chdir(original_cwd)
+                    self.logger.info(f"Restored working directory to: {original_cwd}")
+                    
+                    # Update progress: Finalizing
+                    if operations_panel and operation_id:
+                        GLib.idle_add(operations_panel.update_operation_progress, 
+                                    operation_id, 0.9, "Finalizing output files...", 3)
+                    
+                    # Schedule UI update on main thread
+                    self.logger.info("Scheduling completion callback on main thread")
+                    GLib.idle_add(self._genmic_completed, result, output_dir, operation_id)
+                    
+                except Exception as e:
+                    self.logger.error(f"Exception in run_genmic thread: {e}")
+                    import traceback
+                    self.logger.error(f"Traceback: {traceback.format_exc()}")
+                    
+                    # Restore original working directory on error
+                    if 'original_cwd' in locals():
+                        os.chdir(original_cwd)
+                    GLib.idle_add(self._genmic_error, str(e), operation_id)
+            
+            # Start genmic execution in background thread
+            self.logger.info("Creating and starting background thread for genmic execution")
+            thread = threading.Thread(target=run_genmic)
+            thread.daemon = True
+            thread.start()
+            self.logger.info("Background thread started successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to execute genmic: {e}")
+            self.main_window.update_status(f"Error executing genmic: {e}", "error", 5)
+            # Mark operation as failed if it was registered
+            if operation_id and operations_panel:
+                operations_panel.complete_operation(operation_id, success=False, error_message=str(e))
+    
+    def _genmic_completed(self, result: subprocess.CompletedProcess, output_dir: str, operation_id: Optional[str] = None) -> bool:
+        """Handle genmic completion on main thread."""
+        operations_panel = getattr(self.main_window, 'operations_panel', None)
+        
+        if result.returncode == 0:
+            # Success
+            self.logger.info("genmic execution completed successfully")
+            self.main_window.update_status("3D microstructure generated successfully", "success", 5)
+            
+            # Find generated output files
+            output_files = []
+            for file in os.listdir(output_dir):
+                if file.endswith(('.img', '.pimg')):
+                    output_files.append(os.path.join(output_dir, file))
+            
+            # Complete operation in Operations panel
+            if operations_panel and operation_id:
+                operations_panel.complete_operation(operation_id, success=True)
+            
+            # Show success dialog
+            success_dialog = Gtk.MessageDialog(
+                transient_for=self.main_window,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.OK,
+                text="3D Microstructure Generated Successfully"
+            )
+            success_text = f"Microstructure generation completed!\n\nOutput directory: {output_dir}"
+            if output_files:
+                success_text += f"\n\nGenerated files:\n" + "\n".join([os.path.basename(f) for f in output_files])
+            
+            # Mention log files
+            log_files = [f for f in os.listdir(output_dir) if f.endswith(('_stdout.log', '_stderr.log'))]
+            if log_files:
+                success_text += f"\n\nExecution logs:\n" + "\n".join(log_files)
+            
+            success_dialog.format_secondary_text(success_text)
+            success_dialog.run()
+            success_dialog.destroy()
+            
+        else:
+            # Error
+            error_message = f"genmic execution failed (exit code: {result.returncode})"
+            
+            # Try to read stderr log file for error details
+            stderr_log = os.path.join(output_dir, f"{os.path.splitext(os.path.basename(os.path.dirname(output_dir)))[0]}_stderr.log")
+            stderr_content = ""
+            try:
+                if os.path.exists(stderr_log) and os.path.getsize(stderr_log) > 0:
+                    with open(stderr_log, 'r') as f:
+                        stderr_content = f.read(500)  # Read first 500 chars
+                        error_message += f"\nError output: {stderr_content}"
+            except Exception:
+                pass
+                
+            self.logger.error(error_message)
+            self.main_window.update_status(f"genmic execution failed", "error", 5)
+            
+            # Complete operation as failed in Operations panel
+            if operations_panel and operation_id:
+                operations_panel.complete_operation(operation_id, success=False, error_message=error_message)
+            
+            # Show error dialog
+            error_dialog = Gtk.MessageDialog(
+                transient_for=self.main_window,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Microstructure Generation Failed"
+            )
+            error_text = f"genmic execution failed (exit code: {result.returncode})"
+            if stderr_content:
+                error_text += f"\n\nError output:\n{stderr_content}"
+            else:
+                error_text += f"\n\nCheck log files in output directory for details."
+            error_dialog.format_secondary_text(error_text)
+            error_dialog.run()
+            error_dialog.destroy()
+        
+        return False  # Remove from idle queue
+    
+    def _genmic_error(self, error_msg: str, operation_id: Optional[str] = None) -> bool:
+        """Handle genmic error on main thread."""
+        operations_panel = getattr(self.main_window, 'operations_panel', None)
+        
+        self.logger.error(f"genmic execution error: {error_msg}")
+        self.main_window.update_status(f"Error executing genmic: {error_msg}", "error", 5)
+        
+        # Complete operation as failed in Operations panel
+        if operations_panel and operation_id:
+            operations_panel.complete_operation(operation_id, success=False, error_message=error_msg)
+        
+        # Show error dialog
+        error_dialog = Gtk.MessageDialog(
+            transient_for=self.main_window,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Microstructure Generation Error"
+        )
+        error_dialog.format_secondary_text(f"Failed to execute genmic program:\n{error_msg}")
+        error_dialog.run()
+        error_dialog.destroy()
+        
+        return False  # Remove from idle queue
     
     # =========================================================================
     # Microstructure Parameter Sections (moved from MicrostructurePanel)

@@ -114,6 +114,15 @@ class AggregateService(BaseService[Aggregate, AggregateCreate, AggregateUpdate])
             self.logger.error(f"Failed to get aggregate {name}: {e}")
             raise ServiceError(f"Failed to retrieve aggregate: {e}")
     
+    def get_by_display_name(self, display_name: str) -> Optional[Aggregate]:
+        """Get aggregate by display_name."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                return session.query(Aggregate).filter_by(display_name=display_name).first()
+        except Exception as e:
+            self.logger.error(f"Failed to get aggregate {display_name}: {e}")
+            raise ServiceError(f"Failed to retrieve aggregate: {e}")
+    
     def get_by_type(self, aggregate_type: AggregateType) -> List[Aggregate]:
         """Get aggregates by type (fine or coarse)."""
         try:
@@ -191,23 +200,23 @@ class AggregateService(BaseService[Aggregate, AggregateCreate, AggregateUpdate])
             self.logger.error(f"Failed to update aggregate {name}: {e}")
             raise ServiceError(f"Failed to update aggregate: {e}")
     
-    def delete(self, name: str) -> bool:
-        """Delete an aggregate material."""
+    def delete(self, display_name: str) -> bool:
+        """Delete an aggregate material by display_name (primary key)."""
         try:
             with self.db_service.get_session() as session:
-                aggregate = session.query(Aggregate).filter_by(name=name).first()
+                aggregate = session.query(Aggregate).filter_by(display_name=display_name).first()
                 if not aggregate:
-                    raise NotFoundError(f"Aggregate '{name}' not found")
+                    raise NotFoundError(f"Aggregate '{display_name}' not found")
                 
                 session.delete(aggregate)
                 
-                self.logger.info(f"Deleted aggregate: {name}")
+                self.logger.info(f"Deleted aggregate: {display_name}")
                 return True
                 
         except NotFoundError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to delete aggregate {name}: {e}")
+            self.logger.error(f"Failed to delete aggregate {display_name}: {e}")
             raise ServiceError(f"Failed to delete aggregate: {e}")
     
     def _validate_aggregate(self, aggregate: Aggregate) -> None:
