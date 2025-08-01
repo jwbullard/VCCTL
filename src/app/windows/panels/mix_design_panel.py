@@ -116,6 +116,11 @@ class MixDesignPanel(Gtk.Box):
         self.mix_name_entry.set_size_request(250, -1)
         name_box.pack_start(name_label, False, False, 0)
         name_box.pack_start(self.mix_name_entry, False, False, 0)
+        
+        # Add validation status label
+        self.mix_name_status_label = Gtk.Label()
+        self.mix_name_status_label.set_markup("")
+        name_box.pack_start(self.mix_name_status_label, False, False, 5)
         controls_box.pack_start(name_box, False, False, 0)
         
         # Action buttons
@@ -412,6 +417,7 @@ class MixDesignPanel(Gtk.Box):
         create_icon = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON)
         self.create_mix_button.set_image(create_icon)
         self.create_mix_button.set_always_show_image(True)
+        self.create_mix_button.set_tooltip_text("Generate 3D microstructure - creates input file and runs simulation automatically")
         self.create_mix_button.get_style_context().add_class("suggested-action")
         button_box.pack_start(self.create_mix_button, False, False, 0)
         
@@ -627,8 +633,50 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_mix_name_changed(self, entry) -> None:
         """Handle mix name change."""
+        self._validate_mix_name()
         if self.auto_calculate_enabled:
             self._trigger_calculation()
+    
+    def _validate_mix_name(self) -> bool:
+        """Validate mix name for directory conflicts and invalid characters."""
+        mix_name = self.mix_name_entry.get_text().strip()
+        
+        # Clear status if empty
+        if not mix_name:
+            self.mix_name_status_label.set_markup("")
+            self.create_mix_button.set_sensitive(True)
+            return True
+        
+        # Create safe folder name (same logic as used in operations)
+        mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
+        
+        # Check for invalid characters
+        if mix_name != mix_name_safe:
+            if not mix_name_safe:
+                self.mix_name_status_label.set_markup('<span color="red">✗ Invalid characters only</span>')
+                self.create_mix_button.set_sensitive(False)
+                return False
+            else:
+                self.mix_name_status_label.set_markup(f'<span color="orange">⚠ Will be saved as: {mix_name_safe}</span>')
+        
+        # Check if directory already exists
+        operations_dir = os.path.join(os.getcwd(), "Operations")
+        mix_folder_path = os.path.join(operations_dir, mix_name_safe)
+        
+        if os.path.exists(mix_folder_path):
+            self.mix_name_status_label.set_markup('<span color="red">✗ Directory already exists</span>')
+            self.create_mix_button.set_sensitive(False)
+            return False
+        
+        # Valid name
+        if mix_name == mix_name_safe:
+            self.mix_name_status_label.set_markup('<span color="green">✓ Available</span>')
+        else:
+            # Already showed warning about character conversion above
+            pass
+        
+        self.create_mix_button.set_sensitive(True)
+        return True
     
     def _on_add_component_clicked(self, button) -> None:
         """Handle add component button click."""
@@ -744,7 +792,31 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_create_mix_clicked(self, button) -> None:
         """Handle create mix button click."""
-        self._create_microstructure_input_file()
+        # Show immediate feedback that operation is starting
+        mix_name = self.mix_name_entry.get_text().strip() or "Untitled Mix"
+        
+        # Create confirmation dialog
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK_CANCEL,
+            text="Start 3D Microstructure Generation?"
+        )
+        dialog.format_secondary_text(
+            f"This will create a 3D microstructure for mix: {mix_name}\n\n"
+            "The process may take several minutes to complete.\n"
+            "Files will be saved to: Operations/{}/".format("".join(c for c in mix_name if c.isalnum() or c in ['_', '-']))
+        )
+        
+        response = dialog.run()
+        dialog.destroy()
+        
+        if response == Gtk.ResponseType.OK:
+            # Update status bar immediately
+            self.main_window.update_status("Starting 3D microstructure generation...", "info", 0)
+            # Start the actual operation
+            self._create_microstructure_input_file()
+        # If cancelled, do nothing
     
     def _on_validate_clicked(self, button) -> None:
         """Handle validate button click."""
@@ -1261,22 +1333,13 @@ class MixDesignPanel(Gtk.Box):
             if not components:
                 return None
             
-            # Add water as a component to ensure mass fractions sum to 1.0
-            if water_mass > 0:
-                water_component = MixComponent(
-                    material_name="Water",
-                    material_type=MaterialType.WATER,  # Use proper water type 
-                    mass_fraction=water_mass / total_mass_all if total_mass_all > 0 else 0.0,
-                    specific_gravity=1.0
-                )
-                components.append(water_component)
-            
             # Create mix design
+            # Note: Water is NOT added as a separate component since it's handled via total_water_content
             mix_design = MixDesign(
                 name=mix_name,
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
-                total_water_content=water_mass / total_mass_all if total_mass_all > 0 else 0.0,  # Water fraction
+                total_water_content=water_mass / total_mass_all if total_mass_all > 0 else 0.0,  # Water mass fraction
                 air_content=self.micro_air_content_spin.get_value()  # Already a volume fraction
             )
             
@@ -1444,13 +1507,18 @@ class MixDesignPanel(Gtk.Box):
     def _create_microstructure_input_file(self) -> None:
         """Create microstructure input file after validation."""
         try:
-            # Step 1: Validate mix design
+            # Step 1: Validate mix name
+            if not self._validate_mix_name():
+                self.main_window.update_status("Please fix mix name issues before proceeding", "error", 5)
+                return
+            
+            # Step 2: Validate mix design
             mix_design = self._create_mix_design_from_ui()
             if not mix_design:
                 self.main_window.update_status("Unable to create mix design - please check inputs", "error", 5)
                 return
             
-            # Validate the mix design
+            # Step 3: Validate the mix design
             validation_result = self.mix_service.validate_mix_design(mix_design)
             if not validation_result['is_valid']:
                 # Show validation errors
@@ -1466,16 +1534,16 @@ class MixDesignPanel(Gtk.Box):
                 dialog.destroy()
                 return
             
-            # Step 2: Create mix folder and generate correlation files
+            # Step 4: Create mix folder and generate correlation files
             self._create_mix_folder_and_correlation_files(mix_design)
             
-            # Step 3: Get microstructure parameters
+            # Step 5: Get microstructure parameters
             microstructure_params = self._get_microstructure_parameters()
             
-            # Step 4: Generate input file
+            # Step 6: Generate input file
             input_file_content = self._generate_genmic_input_file(mix_design, microstructure_params)
             
-            # Step 5: Save input file
+            # Step 7: Save input file and execute genmic
             self._save_input_file(input_file_content, mix_design.name)
             
         except Exception as e:
@@ -1945,7 +2013,14 @@ class MixDesignPanel(Gtk.Box):
         try:
             # Create safe folder name
             mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-            mix_folder_path = os.path.join(os.getcwd(), mix_name_safe)
+            
+            # Create Operations directory structure
+            operations_dir = os.path.join(os.getcwd(), "Operations")
+            mix_folder_path = os.path.join(operations_dir, mix_name_safe)
+            
+            # Create Operations directory if it doesn't exist
+            os.makedirs(operations_dir, exist_ok=True)
+            self.logger.info(f"Ensured Operations directory exists: {operations_dir}")
             
             # Create mix folder if it doesn't exist
             os.makedirs(mix_folder_path, exist_ok=True)
@@ -2022,6 +2097,15 @@ class MixDesignPanel(Gtk.Box):
         
         # Resolution (micrometers per voxel)
         lines.append(f"{params['resolution']}")
+        
+        # Check if aggregates are present - if so, add ADDAGG menu choice first
+        has_aggregates = (params.get('fine_aggregate_volume_fraction', 0) > 0 or 
+                         params.get('coarse_aggregate_volume_fraction', 0) > 0)
+        
+        if has_aggregates:
+            # Menu choice 6: ADDAGG (add aggregate to microstructure)
+            lines.append("6")
+            # ADDAGG doesn't require any additional input - it just adds a slab
         
         # Menu choice 3: ADDPART (add particles)
         lines.append("3")
@@ -2131,58 +2215,8 @@ class MixDesignPanel(Gtk.Box):
         anhydrite_percentage = 0.0
         lines.append(f"{anhydrite_percentage:.6f}")
         
-        # Add aggregate if present
-        aggregate_components = [comp for comp in mix_design.components 
-                             if comp.material_type == MaterialType.AGGREGATE]
-        
-        # Handle fine aggregate if present
-        fine_agg_components = [comp for comp in aggregate_components if 'fine' in comp.material_name.lower()]
-        if fine_agg_components and params['fine_aggregate_volume_fraction'] > 0:
-            for agg_component in fine_agg_components:
-                # Menu choice 3: ADDPART
-                lines.append("3")
-                
-                # Aggregate phase ID (typically INERTAGG = 13)
-                lines.append("13")
-                
-                # Fine aggregate volume fraction
-                lines.append(f"{params['fine_aggregate_volume_fraction']:.6f}")
-                
-                # Fine aggregate shape set
-                agg_shape = params['fine_aggregate_shape_set']
-                if agg_shape == "sphere":
-                    lines.append("0")  # Mathematical spheres
-                else:
-                    # Use shape file path
-                    shape_path = self.microstructure_service.get_aggregate_shape_path(agg_shape)
-                    if shape_path:
-                        lines.append(f"{shape_path}{os.sep}")
-                    else:
-                        lines.append("0")  # Fallback to spheres
-        
-        # Handle coarse aggregate if present
-        coarse_agg_components = [comp for comp in aggregate_components if 'coarse' in comp.material_name.lower() or 
-                               ('fine' not in comp.material_name.lower() and comp not in fine_agg_components)]
-        if coarse_agg_components and params['coarse_aggregate_volume_fraction'] > 0:
-            for agg_component in coarse_agg_components:
-                # Menu choice 3: ADDPART
-                lines.append("3")
-                
-                # Aggregate phase ID (typically INERTAGG = 13)
-                lines.append("13")
-                
-                # Coarse aggregate volume fraction
-                lines.append(f"{params['coarse_aggregate_volume_fraction']:.6f}")
-                
-                # Coarse aggregate shape set
-                agg_shape = params['coarse_aggregate_shape_set']
-                if agg_shape == "sphere":
-                    lines.append("1")  # Mathematical spherical
-                else:
-                    # File-based aggregate shape set
-                    lines.append("2")
-                    agg_path = os.path.join(os.getcwd(), "aggregate", agg_shape)
-                    lines.append(agg_path)
+        # Aggregate handling is now done by ADDAGG menu choice (6) which was added earlier
+        # No need for separate ADDPART operations for aggregates
         
         # Add porosity/water if needed
         if params['air_content'] > 0:
@@ -2208,7 +2242,7 @@ class MixDesignPanel(Gtk.Box):
             
             # Path/root name for cement correlation files (absolute path)
             mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-            mix_folder_path = os.path.abspath(mix_name_safe)  # Create absolute path to mix folder
+            mix_folder_path = os.path.abspath(os.path.join("Operations", mix_name_safe))  # Create absolute path to Operations/mix folder
             correlation_path = os.path.join(mix_folder_path, mix_name_safe)  # Platform-independent path joining
             lines.append(correlation_path)
             
@@ -2263,7 +2297,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Output filename for microstructure (absolute path)
         mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-        mix_folder_path = os.path.abspath(mix_name_safe)  # Create absolute path to mix folder
+        mix_folder_path = os.path.abspath(os.path.join("Operations", mix_name_safe))  # Create absolute path to Operations/mix folder
         output_filename = os.path.join(mix_folder_path, f"{mix_name_safe}.img")  # Platform-independent path
         lines.append(output_filename)
         
@@ -2293,79 +2327,46 @@ class MixDesignPanel(Gtk.Box):
             return 1  # Default to C3S
     
     def _save_input_file(self, content: str, mix_name: str) -> None:
-        """Save input file content to disk and execute genmic program."""
+        """Save input file content to disk automatically and execute genmic program."""
         try:
             # Create safe filename
             mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
             default_filename = f"genmic_input_{mix_name_safe}.txt"
             
-            # Set initial directory to mix folder if it exists
-            mix_folder_path = os.path.join(os.getcwd(), mix_name_safe)
-            if os.path.exists(mix_folder_path):
-                initial_path = os.path.join(mix_folder_path, default_filename)
-            else:
-                initial_path = default_filename
+            # Automatically save to mix folder in Operations directory
+            operations_dir = os.path.join(os.getcwd(), "Operations")
+            mix_folder_path = os.path.join(operations_dir, mix_name_safe)
+            if not os.path.exists(mix_folder_path):
+                # Mix folder should already exist from correlation file generation,
+                # but create it just in case
+                os.makedirs(mix_folder_path, exist_ok=True)
+                self.logger.info(f"Created mix folder: {mix_folder_path}")
             
-            # Create file chooser dialog
-            dialog = Gtk.FileChooserDialog(
-                title="Save Microstructure Input File",
-                parent=self.main_window,
-                action=Gtk.FileChooserAction.SAVE
-            )
-            dialog.add_buttons(
-                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                Gtk.STOCK_SAVE, Gtk.ResponseType.OK
-            )
+            # Full path to input file
+            filename = os.path.join(mix_folder_path, default_filename)
             
-            # Add file filter
-            filter_txt = Gtk.FileFilter()
-            filter_txt.set_name("Text files")
-            filter_txt.add_pattern("*.txt")
-            dialog.add_filter(filter_txt)
+            self.logger.info(f"Automatically saving input file to: {filename}")
             
-            filter_all = Gtk.FileFilter()
-            filter_all.set_name("All files")
-            filter_all.add_pattern("*")
-            dialog.add_filter(filter_all)
+            # Write file
+            try:
+                with open(filename, 'w') as f:
+                    f.write(content)
+                self.logger.info(f"Successfully wrote input file: {filename}")
+            except Exception as e:
+                self.logger.error(f"Failed to write input file: {e}")
+                self.main_window.update_status(f"Error writing input file: {e}", "error", 5)
+                return
             
-            # Set initial file path (directory + filename)
-            if os.path.exists(mix_folder_path):
-                dialog.set_current_folder(mix_folder_path)
-            dialog.set_current_name(default_filename)
+            self.logger.info(f"Saved microstructure input file: {filename}")
+            self.main_window.update_status(f"Input file created, starting 3D microstructure generation...", "info", 3)
             
-            response = dialog.run()
-            if response == Gtk.ResponseType.OK:
-                filename = dialog.get_filename()
-                input_dir = os.path.dirname(filename)
-                
-                self.logger.info(f"Dialog response OK, selected file: {filename}")
-                
-                # Write file
-                try:
-                    with open(filename, 'w') as f:
-                        f.write(content)
-                    self.logger.info(f"Successfully wrote input file: {filename}")
-                except Exception as e:
-                    self.logger.error(f"Failed to write input file: {e}")
-                    dialog.destroy()
-                    return
-                
-                self.logger.info(f"Saved microstructure input file: {filename}")
-                self.main_window.update_status(f"Input file saved: {filename}", "success", 5)
-                
-                # Close dialog before executing genmic
-                dialog.destroy()
-                
-                # Execute genmic program
-                self.logger.info(f"Starting genmic execution...")
-                try:
-                    self._execute_genmic(filename, input_dir)
-                except Exception as e:
-                    self.logger.error(f"Error in genmic execution: {e}")
-                    self.main_window.update_status(f"Error executing genmic: {e}", "error", 5)
-                return  # Exit early to avoid calling destroy again
-            
-            dialog.destroy()
+            # Execute genmic program immediately
+            self.logger.info(f"Starting genmic execution...")
+            try:
+                self._execute_genmic(filename, mix_folder_path)
+            except Exception as e:
+                self.logger.error(f"Error in genmic execution: {e}")
+                self.main_window.update_status(f"Error executing genmic: {e}", "error", 5)
             
         except Exception as e:
             self.logger.error(f"Failed to save input file: {e}")
@@ -2520,16 +2521,41 @@ class MixDesignPanel(Gtk.Box):
         """Handle genmic completion on main thread."""
         operations_panel = getattr(self.main_window, 'operations_panel', None)
         
-        if result.returncode == 0:
+        # Check for successful output files (more reliable than return code due to distrib3d stack corruption)
+        output_files = []
+        self.logger.info(f"_genmic_completed called with output_dir: {output_dir}, return_code: {result.returncode}")
+        
+        try:
+            self.logger.info(f"Checking for output files in directory: {output_dir}")
+            if not os.path.exists(output_dir):
+                self.logger.error(f"Output directory does not exist: {output_dir}")
+            else:
+                files_in_dir = os.listdir(output_dir)
+                self.logger.info(f"Files found in output directory ({len(files_in_dir)}): {files_in_dir}")
+                
+                for file in files_in_dir:
+                    if file.endswith(('.img', '.pimg')):
+                        output_files.append(os.path.join(output_dir, file))
+                        self.logger.info(f"Found output file: {file}")
+                
+                self.logger.info(f"Total output files found: {len(output_files)}")
+        except Exception as e:
+            self.logger.error(f"Error checking output directory: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Consider success if output files were created, regardless of return code
+        # (due to known stack corruption issue in distrib3d function)
+        success = len(output_files) > 0
+        self.logger.info(f"Success determination: output_files={len(output_files)}, success={success}, return_code={result.returncode}")
+        
+        if success:
             # Success
-            self.logger.info("genmic execution completed successfully")
+            if result.returncode != 0:
+                self.logger.info(f"genmic execution completed successfully (return code {result.returncode} ignored due to known stack corruption issue)")
+            else:
+                self.logger.info("genmic execution completed successfully")
             self.main_window.update_status("3D microstructure generated successfully", "success", 5)
-            
-            # Find generated output files
-            output_files = []
-            for file in os.listdir(output_dir):
-                if file.endswith(('.img', '.pimg')):
-                    output_files.append(os.path.join(output_dir, file))
             
             # Complete operation in Operations panel
             if operations_panel and operation_id:
@@ -2556,8 +2582,8 @@ class MixDesignPanel(Gtk.Box):
             success_dialog.destroy()
             
         else:
-            # Error
-            error_message = f"genmic execution failed (exit code: {result.returncode})"
+            # Error - no output files were created
+            error_message = f"genmic execution failed - no output files created (exit code: {result.returncode})"
             
             # Try to read stderr log file for error details
             stderr_log = os.path.join(output_dir, f"{os.path.splitext(os.path.basename(os.path.dirname(output_dir)))[0]}_stderr.log")
