@@ -81,13 +81,30 @@ class Microstructure3DViewer(Gtk.Box):
     
     def _create_3d_plot(self):
         """Create 3D matplotlib plot."""
-        # Create figure and 3D axes
-        self.figure = Figure(figsize=(8, 8), dpi=100)
-        self.ax = self.figure.add_subplot(111, projection='3d')
+        # Create figure and 3D axes with safe dimensions
+        # Use conservative figure size to prevent surface creation issues
+        figure_width = min(max(4, 6), 16)  # Clamp figure size between 4-16 inches
+        figure_height = min(max(4, 6), 16)
+        safe_dpi = min(max(72, 100), 200)  # Clamp DPI between 72-200
         
-        # Create canvas and toolbar
+        self.figure = Figure(figsize=(figure_width, figure_height), dpi=safe_dpi)
+        self.ax = self.figure.add_subplot(111, projection='3d')
+        self.logger.debug(f"Figure created with size {figure_width}x{figure_height} inches at {safe_dpi} DPI")
+        
+        # Create canvas and toolbar with safe size validation
         self.canvas = FigureCanvas(self.figure)
-        self.canvas.set_size_request(600, 600)
+        
+        # Apply safe size constraints to prevent infinite surface size errors
+        safe_width = min(max(200, 400), 32767)  # Clamp between 200-32767 pixels
+        safe_height = min(max(200, 400), 32767)  # Clamp between 200-32767 pixels
+        
+        # Validate dimensions before setting size request
+        if safe_width > 0 and safe_height > 0 and safe_width <= 32767 and safe_height <= 32767:
+            self.canvas.set_size_request(safe_width, safe_height)
+            self.logger.debug(f"Canvas size set to {safe_width}x{safe_height}")
+        else:
+            self.logger.warning(f"Invalid canvas dimensions {safe_width}x{safe_height}, using defaults")
+            self.canvas.set_size_request(400, 400)  # Safe fallback
         
         self.toolbar = NavigationToolbar(self.canvas)
         
@@ -287,20 +304,45 @@ class Microstructure3DViewer(Gtk.Box):
             return False
     
     def _generate_phase_colors(self):
-        """Generate colors for each phase."""
+        """Generate colors for each phase using standard VCCTL colors."""
+        # Standard VCCTL phase colors (from colors.csv)
+        standard_phase_colors = {
+            0: (25/255, 25/255, 25/255, 1.0),      # Porosity
+            1: (42/255, 42/255, 210/255, 1.0),     # C3S
+            2: (139/255, 79/255, 19/255, 1.0),     # C2S
+            3: (178/255, 178/255, 178/255, 1.0),   # C3A
+            4: (253/255, 253/255, 253/255, 1.0),   # C4AF
+            5: (255/255, 0/255, 0/255, 1.0),       # K2SO4
+            6: (255/255, 20/255, 0/255, 1.0),      # Na2SO4
+            7: (255/255, 255/255, 0/255, 1.0),     # Gypsum
+            8: (255/255, 240/255, 86/255, 1.0),    # Hemihydrate
+            9: (255/255, 255/255, 128/255, 1.0),   # Anhydrite
+            10: (40/255, 173/255, 75/255, 1.0),    # Sfume
+            11: (100/255, 100/255, 255/255, 1.0),  # Inert Filler
+            12: (255/255, 165/255, 0/255, 1.0),    # Slag
+            13: (255/255, 192/255, 65/255, 1.0),   # Fly Ash
+            16: (26/255, 100/255, 26/255, 1.0),    # Brucite
+            17: (0/255, 200/255, 200/255, 1.0),    # Hydrotalcite
+            19: (7/255, 72/255, 142/255, 1.0),     # Portlandite
+            20: (245/255, 222/255, 179/255, 1.0),  # CSH
+            22: (127/255, 0/255, 255/255, 1.0),    # AFt
+            24: (244/255, 70/255, 203/255, 1.0),   # AFm
+            33: (0/255, 204/255, 0/255, 1.0),      # CACO3
+            34: (250/255, 198/255, 220/255, 1.0),  # AFmc
+            55: (0/255, 0/255, 0/255, 1.0)         # Void
+        }
+        
         phases = list(self.phase_mapping.keys())
-        
-        # Use a qualitative colormap
-        if len(phases) <= 10:
-            cmap = plt.cm.tab10
-        elif len(phases) <= 20:
-            cmap = plt.cm.tab20
-        else:
-            cmap = plt.cm.hsv
-        
         self.phase_colors = {}
-        for i, phase in enumerate(phases):
-            self.phase_colors[phase] = cmap(i / len(phases))
+        
+        for phase_id in phases:
+            if phase_id in standard_phase_colors:
+                self.phase_colors[phase_id] = standard_phase_colors[phase_id]
+            else:
+                # Fallback: generate a color for unknown phases
+                import matplotlib.pyplot as plt
+                cmap = plt.cm.hsv
+                self.phase_colors[phase_id] = cmap(phase_id / 100.0)  # Spread colors across spectrum
     
     def _update_cross_section_ranges(self):
         """Update cross-section slider ranges based on data."""

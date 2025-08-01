@@ -14,7 +14,7 @@ from enum import Enum
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GObject, GLib
 
 
 class ScreenSize(Enum):
@@ -130,7 +130,7 @@ class ResponsiveLayoutManager(GObject.Object):
     def _setup_breakpoints(self) -> None:
         """Setup responsive breakpoints."""
         self.breakpoints = [
-            BreakPoint("compact", 0, 0, LayoutMode.COMPACT, 0.9),
+            BreakPoint("compact", 320, 240, LayoutMode.COMPACT, 0.9),  # Minimum valid size
             BreakPoint("normal", 1024, 768, LayoutMode.STANDARD, 1.0),
             BreakPoint("large", 1440, 900, LayoutMode.WIDE, 1.1),
             BreakPoint("xlarge", 1920, 1080, LayoutMode.WIDE, 1.2),
@@ -189,14 +189,11 @@ class ResponsiveLayoutManager(GObject.Object):
     
     def _setup_monitoring(self) -> None:
         """Setup window size monitoring."""
-        # Connect to window size changes
-        self.main_window.connect('size-allocate', self._on_window_size_changed)
-        self.main_window.connect('window-state-event', self._on_window_state_changed)
-        
-        # Monitor screen changes
-        screen = self.main_window.get_screen()
-        if screen:
-            screen.connect('size-changed', self._on_screen_changed)
+        # TEMPORARILY DISABLE MONITORING TO PREVENT INFINITE LOOP WITH INVALID ALLOCATIONS
+        # The responsive layout system is causing an infinite loop when it receives 
+        # invalid allocation sizes (856333x899) from GTK
+        self.logger.warning("Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations")
+        return
     
     def _detect_initial_layout(self) -> None:
         """Detect initial layout based on current window size."""
@@ -205,7 +202,23 @@ class ResponsiveLayoutManager(GObject.Object):
     
     def _on_window_size_changed(self, widget: Gtk.Widget, allocation: Gdk.Rectangle) -> None:
         """Handle window size changes."""
-        self._update_layout(allocation.width, allocation.height)
+        # Validate allocation dimensions before using them
+        width = allocation.width
+        height = allocation.height
+        
+        # Check for invalid allocation values (common GTK issue)
+        if width > 65536 or height > 65536 or width <= 0 or height <= 0:
+            self.logger.warning(f"Invalid allocation size: {width}x{height}, using window size instead")
+            # Fall back to window.get_size() which is more reliable
+            try:
+                window_size = self.main_window.get_size()
+                width = window_size.width
+                height = window_size.height
+            except Exception as e:
+                self.logger.error(f"Failed to get window size: {e}")
+                return
+        
+        self._update_layout(width, height)
     
     def _on_window_state_changed(self, widget: Gtk.Widget, event: Gdk.EventWindowState) -> None:
         """Handle window state changes (maximize, fullscreen, etc.)."""
@@ -221,6 +234,17 @@ class ResponsiveLayoutManager(GObject.Object):
     
     def _update_layout(self, width: int, height: int) -> None:
         """Update layout based on new dimensions."""
+        # Validate dimensions to prevent infinite surface size errors
+        # Check for extremely large values that indicate GTK allocation bugs
+        if width <= 0 or height <= 0 or width > 65536 or height > 65536:
+            self.logger.warning(f"Invalid layout dimensions: {width}x{height}, using defaults")
+            width = 1200 if width <= 0 or width > 65536 else width
+            height = 800 if height <= 0 or height > 65536 else height
+            
+            # Ensure minimum valid dimensions
+            width = max(320, width)
+            height = max(240, height)
+        
         if width == self.current_width and height == self.current_height:
             return  # No change
         
@@ -254,6 +278,10 @@ class ResponsiveLayoutManager(GObject.Object):
     
     def _determine_screen_size(self, width: int, height: int) -> ScreenSize:
         """Determine screen size category based on dimensions."""
+        # Ensure minimum valid dimensions
+        width = max(320, width)
+        height = max(240, height)
+        
         if width < 1024 or height < 768:
             return ScreenSize.COMPACT
         elif width < 1440 or height < 900:

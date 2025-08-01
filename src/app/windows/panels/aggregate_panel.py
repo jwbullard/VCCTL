@@ -187,9 +187,24 @@ class AggregatePanel(Gtk.Box):
         left_frame = Gtk.Frame(label="Grading Curve")
         left_frame.set_size_request(600, -1)
         
-        self.grading_widget = GradingCurveWidget()
-        self.grading_widget.connect('curve-changed', self._on_grading_changed)
-        left_frame.add(self.grading_widget)
+        # TEMPORARILY DISABLE GRADING CURVE WIDGET TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
+        # self.grading_widget = GradingCurveWidget()
+        # self.grading_widget.connect('curve-changed', self._on_grading_changed)
+        # left_frame.add(self.grading_widget)
+        
+        # Create placeholder for grading curve widget
+        placeholder_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        placeholder_label = Gtk.Label()
+        placeholder_label.set_markup('<span size="large">Grading Curve Widget</span>')
+        placeholder_label.set_halign(Gtk.Align.CENTER)
+        placeholder_box.pack_start(placeholder_label, True, True, 0)
+        
+        enable_button = Gtk.Button(label="Enable Grading Curve Widget")
+        enable_button.set_tooltip_text("Click to enable the grading curve widget")
+        placeholder_box.pack_start(enable_button, False, False, 0)
+        
+        left_frame.add(placeholder_box)
+        self.grading_widget = None  # Store reference for later activation
         
         page_box.pack_start(left_frame, True, True, 0)
         
@@ -217,8 +232,23 @@ class AggregatePanel(Gtk.Box):
         
         # Bottom: Combined grading result
         bottom_frame = Gtk.Frame(label="Combined Grading Curve")
-        self.combined_grading_widget = GradingCurveWidget()
-        bottom_frame.add(self.combined_grading_widget)
+        # TEMPORARILY DISABLE COMBINED GRADING CURVE WIDGET TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
+        # self.combined_grading_widget = GradingCurveWidget()
+        # bottom_frame.add(self.combined_grading_widget)
+        
+        # Create placeholder for combined grading curve widget
+        combined_placeholder_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        combined_placeholder_label = Gtk.Label()
+        combined_placeholder_label.set_markup('<span size="large">Combined Grading Curve Widget</span>')
+        combined_placeholder_label.set_halign(Gtk.Align.CENTER)
+        combined_placeholder_box.pack_start(combined_placeholder_label, True, True, 0)
+        
+        combined_enable_button = Gtk.Button(label="Enable Combined Grading Widget")
+        combined_enable_button.set_tooltip_text("Click to enable the combined grading curve widget")
+        combined_placeholder_box.pack_start(combined_enable_button, False, False, 0)
+        
+        bottom_frame.add(combined_placeholder_box)
+        self.combined_grading_widget = None  # Store reference for later activation
         blending_paned.pack2(bottom_frame, True, False)
         
         self.content_notebook.append_page(blending_paned, Gtk.Label("Blending"))

@@ -297,6 +297,7 @@ class MixDesignPanel(Gtk.Box):
         water_grid.attach(wb_label, 0, 0, 1, 1)
         
         self.wb_ratio_spin = Gtk.SpinButton.new_with_range(0.1, 2.0, 0.01)
+        self.wb_ratio_spin.set_name("wb-ratio-input")  # Test ID for Playwright
         self.wb_ratio_spin.set_digits(3)
         self.wb_ratio_spin.set_value(0.40)
         self.wb_ratio_spin.set_tooltip_text("Enter W/B ratio to calculate water mass")
@@ -309,6 +310,7 @@ class MixDesignPanel(Gtk.Box):
         water_grid.attach(water_label, 0, 1, 1, 1)
         
         self.water_content_spin = Gtk.SpinButton.new_with_range(0.0, 10000.0, 0.001)
+        self.water_content_spin.set_name("water-mass-input")  # Test ID for Playwright
         self.water_content_spin.set_value(0.40)  # Default to match W/B ratio
         self.water_content_spin.set_digits(3)
         self.water_content_spin.set_editable(True)  # Make it editable for user input
@@ -414,6 +416,7 @@ class MixDesignPanel(Gtk.Box):
         button_box.get_style_context().add_class("linked")
         
         self.create_mix_button = Gtk.Button(label="Create Mix")
+        self.create_mix_button.set_name("create-mix-button")  # Test ID for Playwright
         create_icon = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON)
         self.create_mix_button.set_image(create_icon)
         self.create_mix_button.set_always_show_image(True)
@@ -422,6 +425,7 @@ class MixDesignPanel(Gtk.Box):
         button_box.pack_start(self.create_mix_button, False, False, 0)
         
         self.validate_button = Gtk.Button(label="Validate")
+        self.validate_button.set_name("validate-button")  # Test ID for Playwright
         validate_icon = Gtk.Image.new_from_icon_name("dialog-information-symbolic", Gtk.IconSize.BUTTON)
         self.validate_button.set_image(validate_icon)
         self.validate_button.set_always_show_image(True)
@@ -616,9 +620,20 @@ class MixDesignPanel(Gtk.Box):
             for material_name in materials:
                 name_combo.append(material_name, material_name)
             
-            # Set first item as active if available
+            # Set smart defaults based on material type
+            default_selected = False
             if materials:
-                name_combo.set_active(0)
+                if material_type == MaterialType.INERT_FILLER:
+                    # Prefer "quartz" as default for inert fillers
+                    for i, material_name in enumerate(materials):
+                        if material_name.lower() == "quartz":
+                            name_combo.set_active(i)
+                            default_selected = True
+                            break
+                
+                # If no specific default found, use first item
+                if not default_selected:
+                    name_combo.set_active(0)
         
         except Exception as e:
             self.logger.warning(f"Failed to update material names: {e}")
@@ -1335,11 +1350,13 @@ class MixDesignPanel(Gtk.Box):
             
             # Create mix design
             # Note: Water is NOT added as a separate component since it's handled via total_water_content
+            water_mass_fraction = water_mass / total_mass_all if total_mass_all > 0 else 0.0
+            
             mix_design = MixDesign(
                 name=mix_name,
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
-                total_water_content=water_mass / total_mass_all if total_mass_all > 0 else 0.0,  # Water mass fraction
+                total_water_content=water_mass_fraction,  # Water mass fraction
                 air_content=self.micro_air_content_spin.get_value()  # Already a volume fraction
             )
             
@@ -1794,54 +1811,67 @@ class MixDesignPanel(Gtk.Box):
         return num_phases
 
     def _calculate_binder_volume_fractions(self, mix_design: MixDesign, params: Dict[str, Any]) -> tuple[float, float]:
-        """Calculate binder solid and water volume fractions on total paste basis."""
+        """Calculate binder solid and water volume fractions on PASTE-ONLY basis for genmic simulation.
+        
+        CRITICAL: genmic simulates only paste (powders + water), NOT the full concrete.
+        Air content and aggregate volumes are irrelevant to genmic input calculations.
+        """
         try:
-            # Calculate total powder mass and volume fractions
+            # Get powder components only (no aggregates)
             powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             
-            total_powder_mass_fraction = 0.0
-            total_powder_volume = 0.0
+            # Calculate total powder absolute volume (mass/sg)
+            total_powder_absolute_volume = 0.0
+            total_powder_mass_kg = 0.0
             
-            # Sum up all powder components using mass fractions
-            for component in mix_design.components:
-                if component.material_type in powder_types:
-                    mass_fraction = component.mass_fraction
-                    sg = component.specific_gravity
-                    if sg <= 0:
-                        sg = self.mix_service._get_material_specific_gravity(component.material_name, component.material_type)
-                    
-                    # Calculate volume = mass / specific_gravity
-                    volume_fraction = mass_fraction / sg if sg > 0 else 0.0
-                    
-                    total_powder_mass_fraction += mass_fraction
-                    total_powder_volume += volume_fraction
+            # Sum up powder masses from UI (in kg)
+            for row in self.component_rows:
+                type_str = row['type_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if type_str and mass_kg > 0:
+                    material_type = MaterialType(type_str)
+                    if material_type in powder_types:
+                        name = row['name_combo'].get_active_id()
+                        if name:
+                            sg = self.mix_service._get_material_specific_gravity(name, material_type)
+                            absolute_volume = mass_kg / sg if sg > 0 else 0.0
+                            
+                            total_powder_absolute_volume += absolute_volume
+                            total_powder_mass_kg += mass_kg
             
-            # Calculate water mass and volume from W/B ratio
+            # Calculate water mass from W/B ratio and powder mass
             wb_ratio = params['water_binder_ratio']
-            water_mass_fraction = wb_ratio * total_powder_mass_fraction
-            water_volume = water_mass_fraction / 1.0  # Water SG = 1.0
+            water_mass_kg = wb_ratio * total_powder_mass_kg
+            water_absolute_volume = water_mass_kg / 1.0  # Water SG = 1.0
             
-            # Calculate total paste volume (powder + water)
-            total_paste_volume = total_powder_volume + water_volume
+            # Calculate total PASTE volume (powder + water absolute volumes only)
+            total_paste_absolute_volume = total_powder_absolute_volume + water_absolute_volume
             
-            if total_paste_volume <= 0:
+            if total_paste_absolute_volume <= 0:
                 self.logger.error("Total paste volume is zero or negative")
                 return 0.7, 0.3
             
-            # Calculate volume fractions on total paste basis
-            binder_solid_vfrac = total_powder_volume / total_paste_volume
-            water_vfrac = water_volume / total_paste_volume
+            # Calculate volume fractions on PASTE basis (powder + water = 1.0)
+            binder_solid_vfrac = total_powder_absolute_volume / total_paste_absolute_volume
+            water_vfrac = water_absolute_volume / total_paste_absolute_volume
             
-            # Verify they sum to 1.0
+            # Verify they sum to 1.0 (they must for paste-only calculation)
             total = binder_solid_vfrac + water_vfrac
             if abs(total - 1.0) > 0.001:
-                self.logger.warning(f"Binder volume fractions don't sum to 1.0: {total:.6f}")
+                self.logger.warning(f"PASTE volume fractions don't sum to 1.0: {total:.6f} - this is an error!")
             
+            self.logger.info(f"=== PASTE-ONLY GENMIC CALCULATION ===")
             self.logger.info(f"W/B ratio: {wb_ratio:.3f}")
-            self.logger.info(f"Total powder mass fraction: {total_powder_mass_fraction:.6f}")
-            self.logger.info(f"Water mass fraction: {water_mass_fraction:.6f}")
-            self.logger.info(f"Binder solid volume fraction: {binder_solid_vfrac:.6f}")
-            self.logger.info(f"Water volume fraction: {water_vfrac:.6f}")
+            self.logger.info(f"Total powder mass: {total_powder_mass_kg:.3f} kg")
+            self.logger.info(f"Water mass: {water_mass_kg:.3f} kg")
+            self.logger.info(f"Total paste mass: {total_powder_mass_kg + water_mass_kg:.3f} kg")
+            self.logger.info(f"Powder absolute volume: {total_powder_absolute_volume:.6f}")
+            self.logger.info(f"Water absolute volume: {water_absolute_volume:.6f}")
+            self.logger.info(f"Total paste absolute volume: {total_paste_absolute_volume:.6f}")
+            self.logger.info(f"Binder solid volume fraction (paste basis): {binder_solid_vfrac:.6f}")
+            self.logger.info(f"Water volume fraction (paste basis): {water_vfrac:.6f}")
+            self.logger.info(f"=== END PASTE-ONLY CALCULATION ===")
             
             return binder_solid_vfrac, water_vfrac
             
@@ -1932,15 +1962,54 @@ class MixDesignPanel(Gtk.Box):
             }
 
     def _calculate_component_binder_solid_fraction(self, component, mix_design: MixDesign) -> float:
-        """Calculate component's volume fraction on binder solid basis."""
+        """Calculate component's volume fraction on BINDER SOLID basis (fraction of total powder volume).
+        
+        This is for genmic input where each powder component's volume fraction 
+        is relative to the total powder (binder solid) volume, NOT total concrete volume.
+        """
         try:
-            # Calculate total powder mass
             powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
-            total_powder_mass = sum(comp.mass_fraction for comp in mix_design.components 
-                                  if comp.material_type in powder_types)
             
-            # Component's fraction of total binder solids
-            component_fraction = component.mass_fraction / total_powder_mass
+            # Calculate total powder absolute volume from UI (paste-only basis)
+            total_powder_absolute_volume = 0.0
+            
+            for row in self.component_rows:
+                type_str = row['type_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if type_str and mass_kg > 0:
+                    material_type = MaterialType(type_str)
+                    if material_type in powder_types:
+                        name = row['name_combo'].get_active_id()
+                        if name:
+                            sg = self.mix_service._get_material_specific_gravity(name, material_type)
+                            absolute_volume = mass_kg / sg if sg > 0 else 0.0
+                            total_powder_absolute_volume += absolute_volume
+            
+            # Find this component's mass from UI
+            component_mass_kg = 0.0
+            for row in self.component_rows:
+                type_str = row['type_combo'].get_active_id()
+                name = row['name_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if (type_str and name and 
+                    MaterialType(type_str) == component.material_type and 
+                    name == component.material_name):
+                    component_mass_kg = mass_kg
+                    break
+            
+            # Calculate this component's absolute volume
+            component_absolute_volume = component_mass_kg / component.specific_gravity if component.specific_gravity > 0 else 0.0
+            
+            # Calculate component's fraction of total binder solid volume
+            if total_powder_absolute_volume > 0:
+                component_fraction = component_absolute_volume / total_powder_absolute_volume
+            else:
+                component_fraction = 0.0
+            
+            self.logger.debug(f"Component {component.material_name}: mass={component_mass_kg:.3f}kg, "
+                            f"abs_vol={component_absolute_volume:.6f}, fraction={component_fraction:.6f}")
             
             return component_fraction
             
@@ -2147,33 +2216,40 @@ class MixDesignPanel(Gtk.Box):
                     cement_phases = self._calculate_cement_phase_fractions(component.material_name, component, mix_design)
                     psd_data = self._get_material_psd_data(component.material_name, component.material_type)
                     
-                    # Phase ID 1: Clinker
+                    # Get cement's fraction of total binder solid volume (paste-only basis)
+                    cement_binder_solid_fraction = self._calculate_component_binder_solid_fraction(component, mix_design)
+                    
+                    # Phase ID 1: Clinker (scaled by cement's fraction of binder solid)
                     lines.append("1")
-                    lines.append(f"{cement_phases['clinker']:.6f}")
+                    clinker_fraction = cement_phases['clinker'] * cement_binder_solid_fraction
+                    lines.append(f"{clinker_fraction:.6f}")
                     lines.append(f"{len(psd_data)}")
                     for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
                         lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 7: Dihydrate
+                    # Phase ID 7: Dihydrate (scaled by cement's fraction of binder solid)
                     lines.append("7")
-                    lines.append(f"{cement_phases['dihydrate']:.6f}")
+                    dihydrate_fraction = cement_phases['dihydrate'] * cement_binder_solid_fraction
+                    lines.append(f"{dihydrate_fraction:.6f}")
                     lines.append(f"{len(psd_data)}")
                     for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
                         lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 8: Hemihydrate
+                    # Phase ID 8: Hemihydrate (scaled by cement's fraction of binder solid)
                     lines.append("8")
-                    lines.append(f"{cement_phases['hemihydrate']:.6f}")
+                    hemihydrate_fraction = cement_phases['hemihydrate'] * cement_binder_solid_fraction
+                    lines.append(f"{hemihydrate_fraction:.6f}")
                     lines.append(f"{len(psd_data)}")
                     for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
                         lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 9: Anhydrite
+                    # Phase ID 9: Anhydrite (scaled by cement's fraction of binder solid)
                     lines.append("9")
-                    lines.append(f"{cement_phases['anhydrite']:.6f}")
+                    anhydrite_fraction = cement_phases['anhydrite'] * cement_binder_solid_fraction
+                    lines.append(f"{anhydrite_fraction:.6f}")
                     lines.append(f"{len(psd_data)}")
                     for diameter, volume_fraction in psd_data:
                         lines.append(f"{int(round(diameter))}")
@@ -2215,16 +2291,10 @@ class MixDesignPanel(Gtk.Box):
         anhydrite_percentage = 0.0
         lines.append(f"{anhydrite_percentage:.6f}")
         
-        # Aggregate handling is now done by ADDAGG menu choice (6) which was added earlier
-        # No need for separate ADDPART operations for aggregates
-        
-        # Add porosity/water if needed
-        if params['air_content'] > 0:
-            # Menu choice 3: ADDPART for porosity
-            lines.append("3")
-            lines.append("0")  # POROSITY phase ID
-            lines.append(f"{params['air_content']:.6f}")
-            lines.append("1")  # Spherical for air/pores
+        # CRITICAL: genmic simulates PASTE ONLY (powders + water)
+        # Air content and aggregate volumes are NOT part of genmic simulation
+        # The ADDAGG menu choice (6) only adds a thin slab if aggregates are present
+        # but does NOT include aggregate volume in the paste microstructure calculations
         
         # Flocculation settings if enabled
         if params['flocculation_enabled']:

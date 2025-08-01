@@ -113,8 +113,10 @@ class VCCTLApplication(Gtk.Application):
                 logging.getLogger().setLevel(logging.DEBUG)
                 self.logger.debug("Verbose logging enabled")
             
-            # Activate the application
-            self.activate()
+            # For normal startup (no special flags), activate the application
+            # This must happen after startup signal has been emitted
+            if not (hasattr(parsed_args, 'version') and parsed_args.version):
+                app.activate()
             
         except SystemExit as e:
             return e.code if e.code is not None else 0

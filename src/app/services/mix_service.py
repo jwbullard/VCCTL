@@ -33,7 +33,6 @@ class MaterialType(Enum):
     SILICA_FUME = "silica_fume"
     LIMESTONE = "limestone"
     AGGREGATE = "aggregate"
-    WATER = "water"
 
 
 @dataclass
@@ -94,8 +93,7 @@ class MixService:
             MaterialType.INERT_FILLER: 3.0,
             MaterialType.SILICA_FUME: 2.22,
             MaterialType.LIMESTONE: 2.71,
-            MaterialType.AGGREGATE: 2.65,
-            MaterialType.WATER: 1.0
+            MaterialType.AGGREGATE: 2.65
         }
     
     def create_mix_design(self, mix_data: Dict[str, Any]) -> MixDesign:

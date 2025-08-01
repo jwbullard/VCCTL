@@ -53,6 +53,28 @@ class MicrostructurePanel(Gtk.Box):
         
         self.logger.info("Microstructure panel initialized")
     
+    def _on_enable_3d_viewer(self, button: Gtk.Button) -> None:
+        """Enable 3D viewer on demand to avoid surface creation issues during initialization."""
+        try:
+            if self.microstructure_3d_viewer is None:
+                # Create the 3D viewer now
+                self.microstructure_3d_viewer = Microstructure3DViewer()
+                
+                # Replace placeholder with actual viewer
+                parent = self.viewer_placeholder.get_parent()
+                parent.remove(self.viewer_placeholder)
+                parent.pack_start(self.microstructure_3d_viewer, True, True, 0)
+                self.microstructure_3d_viewer.show_all()
+                
+                self.logger.info("3D viewer enabled successfully")
+                button.set_label("3D Viewer Active")
+                button.set_sensitive(False)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to enable 3D viewer: {e}")
+            button.set_label("3D Viewer Error")
+            button.set_sensitive(False)
+    
     def _setup_ui(self) -> None:
         """Setup the microstructure panel UI."""
         # Create header
@@ -147,10 +169,36 @@ class MicrostructurePanel(Gtk.Box):
         vbox.set_margin_left(15)
         vbox.set_margin_right(15)
         
-        # 3D Microstructure Viewer
-        self.microstructure_3d_viewer = Microstructure3DViewer()
-        self.microstructure_3d_viewer.set_size_request(250, 200)
-        vbox.pack_start(self.microstructure_3d_viewer, True, True, 0)
+        # TEMPORARILY DISABLE 3D VIEWER TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
+        # The matplotlib GTK3Agg backend is causing surface creation issues during initialization
+        
+        # Create placeholder for 3D viewer instead of actual widget
+        viewer_placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        viewer_placeholder.set_size_request(300, 250)
+        
+        # Add informational label
+        info_label = Gtk.Label()
+        info_label.set_markup('<span size="large">3D Microstructure Viewer</span>')
+        info_label.set_halign(Gtk.Align.CENTER)
+        viewer_placeholder.pack_start(info_label, False, False, 0)
+        
+        # Add status message
+        status_label = Gtk.Label()
+        status_label.set_markup('<span size="small" color="#666666">3D visualization temporarily disabled to prevent rendering issues</span>')
+        status_label.set_halign(Gtk.Align.CENTER)
+        status_label.set_line_wrap(True)
+        viewer_placeholder.pack_start(status_label, True, True, 0)
+        
+        # Add enable button for on-demand loading
+        enable_button = Gtk.Button(label="Enable 3D Viewer")
+        enable_button.set_tooltip_text("Click to initialize 3D visualization (may cause surface warnings)")
+        enable_button.connect('clicked', self._on_enable_3d_viewer)
+        enable_button.set_halign(Gtk.Align.CENTER)
+        viewer_placeholder.pack_start(enable_button, False, False, 0)
+        
+        vbox.pack_start(viewer_placeholder, True, True, 0)
+        self.viewer_placeholder = viewer_placeholder
+        self.microstructure_3d_viewer = None  # Will be created on demand
         
         # Preview controls
         preview_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -686,18 +734,31 @@ class MicrostructurePanel(Gtk.Box):
                 phase_colors = {}
                 phase_names = {}
                 
-                # Standard VCCTL phase mappings
+                # Standard VCCTL phase mappings (from colors.csv)
                 standard_phases = {
-                    0: ("#000000", "Pores"),
-                    1: ("#808080", "C3S"),
-                    2: ("#A0A0A0", "C2S"), 
-                    3: ("#FF6600", "C3A"),
-                    4: ("#996633", "C4AF"),
-                    7: ("#FFFF00", "Gypsum Dihydrate"),
-                    8: ("#FFD700", "Gypsum Hemihydrate"),
-                    9: ("#FFA500", "Gypsum Anhydrite"),
-                    12: ("#00FF00", "Slag"),
-                    18: ("#00CCFF", "Fly Ash")
+                    0: ("#191919", "Porosity"),
+                    1: ("#2A2AD2", "C3S"),
+                    2: ("#8B4F13", "C2S"),
+                    3: ("#B2B2B2", "C3A"),
+                    4: ("#FDFDFD", "C4AF"),
+                    5: ("#FF0000", "K2SO4"),
+                    6: ("#FF1400", "Na2SO4"),
+                    7: ("#FFFF00", "Gypsum"),
+                    8: ("#FFF056", "Hemihydrate"),
+                    9: ("#FFFF80", "Anhydrite"),
+                    10: ("#28AD4B", "Sfume"),
+                    11: ("#6464FF", "Inert Filler"),
+                    12: ("#FFA500", "Slag"),
+                    13: ("#FFC041", "Fly Ash"),
+                    16: ("#1A641A", "Brucite"),
+                    17: ("#00C8C8", "Hydrotalcite"),
+                    19: ("#07488E", "Portlandite"),
+                    20: ("#F5DEB3", "CSH"),
+                    22: ("#7F00FF", "AFt"),
+                    24: ("#F446CB", "AFm"),
+                    33: ("#00CC00", "CACO3"),
+                    34: ("#FAC6DC", "AFmc"),
+                    55: ("#000000", "Void")
                 }
                 
                 for phase_id in unique_phases:

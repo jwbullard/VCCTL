@@ -220,7 +220,10 @@ class GradingCurveWidget(Gtk.Box):
         
         # Drawing area for the plot
         self.drawing_area = Gtk.DrawingArea()
-        self.drawing_area.set_size_request(self.plot_width, self.plot_height)
+        # Ensure minimum valid size with safety bounds to prevent infinite surface size errors
+        safe_width = max(100, min(self.plot_width, 800))  # Clamp between 100-800
+        safe_height = max(100, min(self.plot_height, 600))  # Clamp between 100-600
+        self.drawing_area.set_size_request(safe_width, safe_height)
         self.drawing_area.connect('draw', self._on_draw_plot)
         
         plot_box.pack_start(self.drawing_area, True, True, 0)
@@ -399,16 +402,27 @@ class GradingCurveWidget(Gtk.Box):
             width = allocation.width
             height = allocation.height
             
+            # Ensure we have valid dimensions - CRITICAL fix for infinite surface size errors
+            if width <= 0 or height <= 0 or width > 32767 or height > 32767:
+                self.logger.warning(f"Invalid drawing area size: {width}x{height}, skipping draw")
+                return True  # Return True to prevent further rendering attempts
+            
+            # Additional safety check for extremely large values that could cause infinite surface errors
+            if width > 10000 or height > 10000:
+                self.logger.warning(f"Unexpectedly large drawing area: {width}x{height}, using safe defaults")
+                width = min(width, 800)
+                height = min(height, 600)
+            
             # Clear background
             cr.set_source_rgb(1.0, 1.0, 1.0)
             cr.rectangle(0, 0, width, height)
             cr.fill()
             
-            # Calculate plot area
+            # Calculate plot area with safety checks
             plot_x = self.margin
             plot_y = self.margin
-            plot_width = width - 2 * self.margin
-            plot_height = height - 2 * self.margin
+            plot_width = max(10, width - 2 * self.margin)  # Minimum 10px width
+            plot_height = max(10, height - 2 * self.margin)  # Minimum 10px height
             
             # Draw plot border
             cr.set_source_rgb(0.0, 0.0, 0.0)

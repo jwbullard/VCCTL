@@ -44,6 +44,26 @@ class MaterialsPanel(Gtk.Box):
         
         self.logger.info("Materials panel initialized")
     
+    def _create_fallback_panel(self, error_message: str) -> None:
+        """Create a simple fallback panel when the main panel fails."""
+        fallback_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        fallback_box.set_margin_top(50)
+        fallback_box.set_margin_bottom(50)
+        fallback_box.set_margin_left(50)
+        fallback_box.set_margin_right(50)
+        
+        error_label = Gtk.Label()
+        error_label.set_markup(f'<span size="large" weight="bold">Materials Panel - Safe Mode</span>')
+        error_label.set_halign(Gtk.Align.CENTER)
+        fallback_box.pack_start(error_label, False, False, 0)
+        
+        message_label = Gtk.Label(error_message)
+        message_label.set_halign(Gtk.Align.CENTER)
+        message_label.set_line_wrap(True)
+        fallback_box.pack_start(message_label, False, False, 0)
+        
+        self.pack_start(fallback_box, True, True, 0)
+    
     def _setup_ui(self) -> None:
         """Setup the materials panel UI."""
         # Create header section
@@ -454,6 +474,7 @@ class MaterialsPanel(Gtk.Box):
     
     def _on_material_selected(self, table, material_data) -> None:
         """Handle material selection from table."""
+        self.logger.debug(f"Material selected: {getattr(material_data, 'name', 'Unknown')} (type: {type(material_data)})")
         self.selected_material = material_data
         self._update_details_panel(material_data)
         self.details_revealer.set_reveal_child(True)
@@ -496,7 +517,10 @@ class MaterialsPanel(Gtk.Box):
     
     def _on_delete_material_clicked(self, button) -> None:
         """Handle delete material button click."""
+        self.logger.info(f"Delete button clicked. Selected material: {self.selected_material}")
         if not self.selected_material:
+            self.logger.warning("No material selected for deletion")
+            self.main_window.update_status("No material selected for deletion", "warning", 3)
             return
         
         # Show confirmation dialog
@@ -512,8 +536,12 @@ class MaterialsPanel(Gtk.Box):
         response = dialog.run()
         dialog.destroy()
         
+        self.logger.info(f"Delete confirmation dialog response: {response}")
         if response == Gtk.ResponseType.YES:
+            self.logger.info(f"User confirmed deletion, calling _delete_material for: {self.selected_material.name}")
             self._delete_material(self.selected_material)
+        else:
+            self.logger.info("User cancelled deletion")
     
     def _update_details_panel(self, material_data) -> None:
         """Update the details panel with material information."""
@@ -1523,11 +1551,11 @@ class MaterialsPanel(Gtk.Box):
                 service.delete(material_data.name)
             elif material_type == 'aggregate':
                 service.delete(material_data.display_name)
-            elif material_type in ['limestone', 'silica_fume', 'inert_filler']:
-                # Limestone, silica fume, and inert filler services use name-based delete
+            elif material_type in ['limestone', 'silica_fume', 'inert_filler', 'fly_ash', 'slag']:
+                # These services use name-based delete
                 service.delete(material_data.name)
             else:
-                # For other material types (fly_ash, slag), use ID-based delete
+                # Fallback for any other material types
                 service.delete(material_data.id)
             
             # Refresh data
@@ -1544,30 +1572,49 @@ class MaterialsPanel(Gtk.Box):
             
         except Exception as e:
             self.logger.error(f"Error deleting material: {e}")
+            import traceback
+            self.logger.error(f"Full traceback: {traceback.format_exc()}")
             self.main_window.update_status(f"Error deleting material: {e}", "error", 5)
     
     def _add_gif_display_safe(self, cement_data) -> None:
         """Safely add GIF image display without causing crashes."""
+        # TEMPORARILY DISABLE GIF DISPLAY TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
+        # This feature was causing infinite surface size errors during pixbuf creation
         try:
             # Check if cement has GIF data
             if not hasattr(cement_data, 'gif') or not cement_data.gif:
                 return
             
-            # Validate it's actually a GIF (check header)
+            # Show GIF availability without actually displaying the image
             gif_data = cement_data.gif
-            if len(gif_data) < 6:
-                return
+            size_kb = len(gif_data) / 1024
             
-            if gif_data[:6] not in [b'GIF87a', b'GIF89a']:
-                self.logger.warning(f"Invalid GIF header for {cement_data.name}")
-                return
+            # Add info section instead of actual image
+            separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+            separator.set_margin_top(10)
+            separator.set_margin_bottom(10)
+            self.details_content.pack_start(separator, False, False, 0)
             
-            # Create image display section
-            self._create_gif_display_section(cement_data, gif_data)
+            img_label = Gtk.Label()
+            img_label.set_markup('<b>Microstructure Image Data</b>')
+            img_label.set_halign(Gtk.Align.START)
+            img_label.set_margin_bottom(5)
+            self.details_content.pack_start(img_label, False, False, 0)
+            
+            info_label = Gtk.Label()
+            info_label.set_markup(f'<span size="small" style="italic">GIF image data available ({size_kb:.1f} KB)</span>')
+            info_label.set_halign(Gtk.Align.START)
+            self.details_content.pack_start(info_label, False, False, 0)
+            
+            note_label = Gtk.Label()
+            note_label.set_markup('<span size="small" color="#666666">Image display temporarily disabled to prevent rendering issues</span>')
+            note_label.set_halign(Gtk.Align.START)
+            note_label.set_margin_top(5)
+            self.details_content.pack_start(note_label, False, False, 0)
             
         except Exception as e:
-            self.logger.warning(f"Error adding GIF display for {cement_data.name}: {e}")
-            # Don't let GIF display errors break the rest of the panel
+            self.logger.warning(f"Error adding GIF info for {cement_data.name}: {e}")
+            # Don't let GIF info errors break the rest of the panel
     
     def _create_gif_display_section(self, cement_data, gif_data: bytes) -> None:
         """Create the GIF image display section."""
@@ -1602,14 +1649,23 @@ class MaterialsPanel(Gtk.Box):
                 pixbuf = GdkPixbuf.Pixbuf.new_from_stream(gif_stream, None)
                 
                 if pixbuf:
-                    # Scale image if too large (max 300px width)
+                    # Validate pixbuf dimensions to prevent infinite surface size errors
                     orig_width = pixbuf.get_width()
                     orig_height = pixbuf.get_height()
+                    
+                    # Check for invalid dimensions
+                    if orig_width <= 0 or orig_height <= 0 or orig_width > 32768 or orig_height > 32768:
+                        raise Exception(f"Invalid pixbuf dimensions: {orig_width}x{orig_height}")
                     
                     if orig_width > 300:
                         scale_factor = 300.0 / orig_width
                         new_width = 300
                         new_height = int(orig_height * scale_factor)
+                        
+                        # Validate scaled dimensions
+                        if new_height <= 0 or new_height > 32768:
+                            raise Exception(f"Invalid scaled dimensions: {new_width}x{new_height}")
+                        
                         pixbuf = pixbuf.scale_simple(new_width, new_height, GdkPixbuf.InterpType.BILINEAR)
                     
                     # Create image widget

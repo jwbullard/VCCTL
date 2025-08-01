@@ -7,13 +7,14 @@ including progress tracking, resource usage, and operation controls.
 """
 
 import gi
+import json
 import logging
 import time
 import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, List, Dict, Any, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 gi.require_version('Gtk', '3.0')
@@ -86,6 +87,36 @@ class Operation:
             total_estimated = self.duration / self.progress
             return total_estimated - self.duration
         return None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert operation to dictionary for JSON serialization."""
+        data = asdict(self)
+        # Convert datetime objects to ISO strings
+        if self.start_time:
+            data['start_time'] = self.start_time.isoformat()
+        if self.end_time:
+            data['end_time'] = self.end_time.isoformat()
+        if self.estimated_duration:
+            data['estimated_duration'] = self.estimated_duration.total_seconds()
+        # Convert enums to strings
+        data['operation_type'] = self.operation_type.value
+        data['status'] = self.status.value
+        return data
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Operation':
+        """Create operation from dictionary (JSON deserialization)."""
+        # Convert string datetime back to datetime objects
+        if data.get('start_time'):
+            data['start_time'] = datetime.fromisoformat(data['start_time'])
+        if data.get('end_time'):
+            data['end_time'] = datetime.fromisoformat(data['end_time'])
+        if data.get('estimated_duration'):
+            data['estimated_duration'] = timedelta(seconds=data['estimated_duration'])
+        # Convert strings back to enums
+        data['operation_type'] = OperationType(data['operation_type'])
+        data['status'] = OperationStatus(data['status'])
+        return cls(**data)
 
 
 @dataclass
@@ -127,10 +158,15 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.operation_counter = 0
         self.system_resources = SystemResources()
         
+        # Persistence
+        self.operations_file = Path.cwd() / "config" / "operations_history.json"
+        
         # Monitoring control
         self.monitoring_active = False
         self.update_interval = 1.0  # seconds
         self.monitor_thread: Optional[threading.Thread] = None
+        self.last_ui_update = 0.0  # Track last UI update time
+        self.ui_update_throttle = 0.2  # Minimum seconds between UI updates
         
         # UI components
         self.operations_store: Optional[Gtk.ListStore] = None
@@ -140,6 +176,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Setup UI
         self._setup_ui()
         self._connect_signals()
+        
+        # Load saved operations
+        self._load_operations_from_file()
         
         # Start monitoring
         self._start_monitoring()
@@ -254,17 +293,17 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Create columns
         columns = [
-            ("Name", 0, 150),
-            ("Type", 1, 120),
-            ("Status", 2, 80),
-            ("Progress", 3, 100),
-            ("Duration", 4, 80),
-            ("Current Step", 5, 150),
-            ("Resources", 6, 100)
+            ("Name", 1, 150),         # Column 1: Name
+            ("Type", 2, 120),         # Column 2: Type  
+            ("Status", 3, 80),        # Column 3: Status
+            ("Progress", 4, 100),     # Column 4: Progress
+            ("Duration", 5, 80),      # Column 5: Duration
+            ("Current Step", 6, 150), # Column 6: Current Step
+            ("Resources", 7, 100)     # Column 7: Resources
         ]
         
         for title, col_id, width in columns:
-            if col_id == 3:  # Progress column
+            if col_id == 4:  # Progress column
                 column = Gtk.TreeViewColumn(title)
                 progress_renderer = Gtk.CellRendererProgress()
                 column.pack_start(progress_renderer, True)
@@ -307,6 +346,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Performance Metrics tab
         self._create_performance_metrics_tab()
+        
+        # Operations Files tab
+        self._create_operations_files_tab()
         
         details_frame.add(self.details_notebook)
         parent.pack2(details_frame, False, False)  # Fixed size
@@ -607,6 +649,132 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         self.details_notebook.append_page(tab_box, Gtk.Label("Performance"))
     
+    def _create_operations_files_tab(self) -> None:
+        """Create the operations files browser tab."""
+        tab_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        tab_box.set_margin_left(10)
+        tab_box.set_margin_right(10)
+        tab_box.set_margin_top(10)
+        tab_box.set_margin_bottom(10)
+        
+        # Toolbar for file operations
+        toolbar = Gtk.Toolbar()
+        toolbar.set_style(Gtk.ToolbarStyle.BOTH_HORIZ)
+        
+        # Refresh button
+        refresh_button = Gtk.ToolButton()
+        refresh_button.set_icon_name("view-refresh")
+        refresh_button.set_label("Refresh")
+        refresh_button.set_tooltip_text("Refresh Operations directory")
+        refresh_button.connect('clicked', self._on_refresh_files_clicked)
+        toolbar.insert(refresh_button, -1)
+        
+        # Open folder button
+        open_folder_button = Gtk.ToolButton()
+        open_folder_button.set_icon_name("folder-open")
+        open_folder_button.set_label("Open Folder")
+        open_folder_button.set_tooltip_text("Open Operations directory in file manager")
+        open_folder_button.connect('clicked', self._on_open_operations_folder_clicked)
+        toolbar.insert(open_folder_button, -1)
+        
+        # Separator
+        toolbar.insert(Gtk.SeparatorToolItem(), -1)
+        
+        # Delete operation button
+        delete_button = Gtk.ToolButton()
+        delete_button.set_icon_name("edit-delete")
+        delete_button.set_label("Delete")
+        delete_button.set_tooltip_text("Delete selected operation folder")
+        delete_button.connect('clicked', self._on_delete_operation_clicked)
+        toolbar.insert(delete_button, -1)
+        
+        tab_box.pack_start(toolbar, False, False, 0)
+        
+        # Create paned layout - file tree on left, file details on right
+        files_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        
+        # File tree (left side)
+        tree_frame = Gtk.Frame(label="Operations Directory")
+        tree_scrolled = Gtk.ScrolledWindow()
+        tree_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        tree_scrolled.set_size_request(300, 400)
+        
+        # Create file tree store: Name, Path, Type, Size, Modified
+        self.files_store = Gtk.TreeStore(str, str, str, str, str)
+        
+        # Create tree view
+        self.files_view = Gtk.TreeView(model=self.files_store)
+        self.files_view.set_rules_hint(True)
+        self.files_view.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
+        self.files_view.get_selection().connect('changed', self._on_file_selection_changed)
+        
+        # Name column
+        name_column = Gtk.TreeViewColumn("Name")
+        name_renderer = Gtk.CellRendererText()
+        name_column.pack_start(name_renderer, True)
+        name_column.add_attribute(name_renderer, "text", 0)
+        name_column.set_expand(True)
+        self.files_view.append_column(name_column)
+        
+        # Size column
+        size_column = Gtk.TreeViewColumn("Size")
+        size_renderer = Gtk.CellRendererText()
+        size_column.pack_start(size_renderer, False)
+        size_column.add_attribute(size_renderer, "text", 3)
+        size_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
+        size_column.set_fixed_width(80)
+        self.files_view.append_column(size_column)
+        
+        # Modified column
+        modified_column = Gtk.TreeViewColumn("Modified")
+        modified_renderer = Gtk.CellRendererText()
+        modified_column.pack_start(modified_renderer, False)
+        modified_column.add_attribute(modified_renderer, "text", 4)
+        modified_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
+        modified_column.set_fixed_width(120)
+        self.files_view.append_column(modified_column)
+        
+        tree_scrolled.add(self.files_view)
+        tree_frame.add(tree_scrolled)
+        files_paned.pack1(tree_frame, True, False)
+        
+        # File details (right side)
+        details_frame = Gtk.Frame(label="File Details")
+        details_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        details_box.set_margin_left(10)
+        details_box.set_margin_right(10)
+        details_box.set_margin_top(5)
+        details_box.set_margin_bottom(5)
+        
+        # File info
+        self.file_info_label = Gtk.Label("Select a file to view details")
+        self.file_info_label.set_halign(Gtk.Align.START)
+        self.file_info_label.set_line_wrap(True)
+        details_box.pack_start(self.file_info_label, False, False, 0)
+        
+        # File preview area
+        preview_scrolled = Gtk.ScrolledWindow()
+        preview_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        preview_scrolled.set_size_request(300, 300)
+        
+        self.file_preview = Gtk.TextView()
+        self.file_preview.set_editable(False)
+        self.file_preview.set_cursor_visible(False)
+        self.file_preview.set_wrap_mode(Gtk.WrapMode.WORD)
+        preview_scrolled.add(self.file_preview)
+        details_box.pack_start(preview_scrolled, True, True, 0)
+        
+        details_frame.add(details_box)
+        files_paned.pack2(details_frame, False, False)
+        
+        tab_box.pack_start(files_paned, True, True, 0)
+        
+        # Add tab to notebook
+        self.details_notebook.append_page(tab_box, Gtk.Label("Files"))
+        
+        # Load initial file tree
+        self._load_operations_files()
+    
     def _create_status_bar(self) -> None:
         """Create the status bar."""
         self.status_bar = Gtk.Statusbar()
@@ -647,8 +815,14 @@ class OperationsMonitoringPanel(Gtk.Box):
                 # Update operations
                 self._update_operations()
                 
-                # Update UI
-                GLib.idle_add(self._update_ui)
+                # Save operations periodically
+                self._save_operations_periodically()
+                
+                # Throttle UI updates to reduce blinking
+                current_time = time.time()
+                if current_time - self.last_ui_update >= self.ui_update_throttle:
+                    self.last_ui_update = current_time
+                    GLib.idle_add(self._update_ui)
                 
                 # Sleep until next update
                 time.sleep(self.update_interval)
@@ -709,6 +883,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                     operation.status = OperationStatus.COMPLETED
                     operation.end_time = current_time
                     operation.completed_steps = operation.total_steps
+                    # Save immediately when operation completes
+                    self._save_operations_to_file()
     
     def _update_ui(self) -> None:
         """Update the UI with current data."""
@@ -718,6 +894,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             # Update system resources display
             self._update_system_resources_display()
+            
+            # Update performance metrics
+            self._update_performance_metrics()
             
             # Update status bar
             active_ops = len([op for op in self.operations.values() 
@@ -730,13 +909,12 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.logger.error(f"Error updating UI: {e}")
     
     def _update_operations_list(self) -> None:
-        """Update the operations list view."""
+        """Update the operations list view efficiently without clearing."""
         if not self.operations_store:
             return
         
-        # Clear and rebuild the store
-        self.operations_store.clear()
-        
+        # Build current operation data
+        current_ops = {}
         for operation in self.operations.values():
             duration_str = ""
             if operation.duration:
@@ -747,16 +925,54 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             resource_str = f"CPU: {operation.cpu_usage:.1f}% MEM: {operation.memory_usage:.0f}MB"
             
-            self.operations_store.append([
-                operation.id,
-                operation.name,
-                operation.operation_type.value.replace('_', ' ').title(),
-                operation.status.value.title(),
-                operation.progress_percentage,
-                duration_str,
-                operation.current_step,
-                resource_str
-            ])
+            current_ops[operation.id] = [
+                operation.id,                                                    # Column 0: ID
+                operation.name,                                                  # Column 1: Name  
+                operation.operation_type.value.replace('_', ' ').title(),      # Column 2: Type
+                operation.status.value.title(),                                # Column 3: Status
+                operation.progress_percentage,                                  # Column 4: Progress
+                duration_str,                                                   # Column 5: Duration
+                operation.current_step,                                         # Column 6: Current Step
+                resource_str                                                    # Column 7: Resources
+            ]
+        
+        # Update existing rows and track which operations are in the store
+        store_ops = set()
+        tree_iter = self.operations_store.get_iter_first()
+        
+        while tree_iter:
+            operation_id = self.operations_store.get_value(tree_iter, 0)
+            store_ops.add(operation_id)
+            
+            if operation_id in current_ops:
+                # Update existing row if values changed
+                current_data = current_ops[operation_id]
+                needs_update = False
+                
+                for col_idx in range(len(current_data)):
+                    store_value = self.operations_store.get_value(tree_iter, col_idx)
+                    if store_value != current_data[col_idx]:
+                        needs_update = True
+                        break
+                
+                if needs_update:
+                    for col_idx, value in enumerate(current_data):
+                        self.operations_store.set_value(tree_iter, col_idx, value)
+                
+                # Remove from current_ops since it's been processed
+                del current_ops[operation_id]
+            else:
+                # Operation no longer exists, mark for removal
+                next_iter = self.operations_store.iter_next(tree_iter)
+                self.operations_store.remove(tree_iter)
+                tree_iter = next_iter
+                continue
+            
+            tree_iter = self.operations_store.iter_next(tree_iter)
+        
+        # Add new operations that weren't in the store
+        for operation_data in current_ops.values():
+            self.operations_store.append(operation_data)
     
     def _update_system_resources_display(self) -> None:
         """Update system resources display."""
@@ -786,6 +1002,92 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Network
         self.network_in_label.set_text(f"Download: {resources.network_in:.2f} MB/s")
         self.network_out_label.set_text(f"Upload: {resources.network_out:.2f} MB/s")
+    
+    def _update_performance_metrics(self) -> None:
+        """Update performance metrics display."""
+        # Calculate metrics from operations
+        total_ops = len(self.operations)
+        completed_ops = len([op for op in self.operations.values() 
+                           if op.status == OperationStatus.COMPLETED])
+        failed_ops = len([op for op in self.operations.values() 
+                        if op.status == OperationStatus.FAILED])
+        
+        # Calculate success rate
+        success_rate = 0.0
+        if total_ops > 0:
+            success_rate = (completed_ops / total_ops) * 100
+        
+        # Calculate average duration for completed operations
+        completed_durations = [op.duration for op in self.operations.values() 
+                             if op.duration and op.status in [OperationStatus.COMPLETED, OperationStatus.FAILED]]
+        
+        avg_duration_str = "00:00:00"
+        total_runtime_str = "00:00:00"
+        
+        if completed_durations:
+            avg_duration = sum(completed_durations, timedelta()) / len(completed_durations)
+            total_seconds = int(avg_duration.total_seconds())
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            avg_duration_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            
+            # Total runtime
+            total_runtime = sum(completed_durations, timedelta())
+            total_seconds = int(total_runtime.total_seconds())
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            total_runtime_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        
+        # Calculate resource efficiency (simplified metric)
+        efficiency = 0.0
+        if completed_ops > 0:
+            # Base efficiency on completion rate and average resource usage
+            avg_cpu = sum(op.cpu_usage for op in self.operations.values() if op.cpu_usage > 0) / max(1, len([op for op in self.operations.values() if op.cpu_usage > 0]))
+            efficiency = min(100.0, success_rate * (avg_cpu / 100.0) if avg_cpu > 0 else success_rate)
+        
+        # Update metric labels
+        self.metrics_completed_value.set_text(str(completed_ops))
+        self.metrics_failed_value.set_text(str(failed_ops))
+        self.metrics_avg_duration_value.set_text(avg_duration_str)
+        self.metrics_total_runtime_value.set_text(total_runtime_str)
+        self.metrics_success_rate_value.set_text(f"{success_rate:.1f}%")
+        self.metrics_efficiency_value.set_text(f"{efficiency:.1f}%")
+        
+        # Update operation history
+        self._update_operation_history()
+    
+    def _update_operation_history(self) -> None:
+        """Update the operation history list."""
+        # Clear existing history
+        self.history_store.clear()
+        
+        # Get completed and failed operations, sorted by end time
+        finished_ops = [op for op in self.operations.values() 
+                       if op.status in [OperationStatus.COMPLETED, OperationStatus.FAILED, OperationStatus.CANCELLED]]
+        
+        # Sort by end time (most recent first)
+        finished_ops.sort(key=lambda op: op.end_time or datetime.min, reverse=True)
+        
+        # Add up to 20 most recent operations to history
+        for operation in finished_ops[:20]:
+            duration_str = "00:00:00"
+            if operation.duration:
+                total_seconds = int(operation.duration.total_seconds())
+                hours, remainder = divmod(total_seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                duration_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            
+            completed_str = "Never"
+            if operation.end_time:
+                completed_str = operation.end_time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            self.history_store.append([
+                operation.name,
+                operation.operation_type.value.replace('_', ' ').title(),
+                operation.status.value.title(),
+                duration_str,
+                completed_str
+            ])
     
     # Event handlers
     
@@ -994,15 +1296,524 @@ class OperationsMonitoringPanel(Gtk.Box):
             mark = self.log_buffer.get_insert()
             self.log_view.scroll_to_mark(mark, 0.0, False, 0.0, 0.0)
     
+    # =========================================================================
+    # Public API Methods for Operation Management
+    # =========================================================================
+    
+    def register_operation(self, name: str, operation_type: OperationType, 
+                          total_steps: int = 0, estimated_duration: Optional[timedelta] = None,
+                          metadata: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Register a new operation with the monitoring system.
+        
+        Args:
+            name: Human-readable operation name
+            operation_type: Type of operation
+            total_steps: Total number of steps (for step-based progress)
+            estimated_duration: Estimated time to completion
+            metadata: Additional operation metadata
+            
+        Returns:
+            operation_id: Unique identifier for the operation
+        """
+        self.operation_counter += 1
+        operation_id = f"op_{self.operation_counter:04d}"
+        
+        operation = Operation(
+            id=operation_id,
+            name=name,
+            operation_type=operation_type,
+            status=OperationStatus.PENDING,
+            total_steps=total_steps,
+            estimated_duration=estimated_duration,
+            metadata=metadata or {}
+        )
+        
+        self.operations[operation_id] = operation
+        self._add_log_entry(f"Registered operation: {name}")
+        self._update_operations_list()
+        
+        return operation_id
+    
+    def start_operation(self, operation_id: str, current_step: str = "Starting...") -> bool:
+        """
+        Start a registered operation.
+        
+        Args:
+            operation_id: Operation identifier
+            current_step: Description of current step
+            
+        Returns:
+            True if operation was started successfully
+        """
+        operation = self.operations.get(operation_id)
+        if operation and operation.status == OperationStatus.PENDING:
+            operation.status = OperationStatus.RUNNING
+            operation.start_time = datetime.now()
+            operation.current_step = current_step
+            
+            self._add_log_entry(f"Started operation: {operation.name}")
+            self._update_operations_list()
+            return True
+        return False
+    
+    def update_operation_progress(self, operation_id: str, progress: float, 
+                                current_step: str = "", completed_steps: int = 0) -> bool:
+        """
+        Update operation progress.
+        
+        Args:
+            operation_id: Operation identifier
+            progress: Progress value (0.0 to 1.0)
+            current_step: Description of current step
+            completed_steps: Number of completed steps
+            
+        Returns:
+            True if operation was updated successfully
+        """
+        operation = self.operations.get(operation_id)
+        if operation and operation.status == OperationStatus.RUNNING:
+            operation.progress = max(0.0, min(1.0, progress))
+            if current_step:
+                operation.current_step = current_step
+            if completed_steps > 0:
+                operation.completed_steps = completed_steps
+            
+            self._update_operations_list()
+            return True
+        return False
+    
+    def complete_operation(self, operation_id: str, success: bool = True, 
+                          error_message: Optional[str] = None) -> bool:
+        """
+        Mark an operation as completed.
+        
+        Args:
+            operation_id: Operation identifier
+            success: Whether operation completed successfully
+            error_message: Error message if operation failed
+            
+        Returns:
+            True if operation was completed successfully
+        """
+        operation = self.operations.get(operation_id)
+        if operation and operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+            operation.status = OperationStatus.COMPLETED if success else OperationStatus.FAILED
+            operation.end_time = datetime.now()
+            operation.progress = 1.0
+            operation.error_message = error_message
+            
+            status_text = "completed successfully" if success else "failed"
+            self._add_log_entry(f"Operation {status_text}: {operation.name}")
+            if error_message:
+                self._add_log_entry(f"Error: {error_message}")
+                
+            self._update_operations_list()
+            self._save_operations_to_file()  # Save when operation completes
+            return True
+        return False
+    
+    def cancel_operation(self, operation_id: str) -> bool:
+        """
+        Cancel a running operation.
+        
+        Args:
+            operation_id: Operation identifier
+            
+        Returns:
+            True if operation was cancelled successfully
+        """
+        operation = self.operations.get(operation_id)
+        if operation and operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED, OperationStatus.PENDING]:
+            operation.status = OperationStatus.CANCELLED
+            operation.end_time = datetime.now()
+            
+            self._add_log_entry(f"Cancelled operation: {operation.name}")
+            self._update_operations_list()
+            self._save_operations_to_file()  # Save when operation cancelled
+            return True
+        return False
+    
+    def get_operation(self, operation_id: str) -> Optional[Operation]:
+        """
+        Get operation by ID.
+        
+        Args:
+            operation_id: Operation identifier
+            
+        Returns:
+            Operation object or None if not found
+        """
+        return self.operations.get(operation_id)
+    
+    def get_active_operations(self) -> List[Operation]:
+        """
+        Get all active (running or paused) operations.
+        
+        Returns:
+            List of active operations
+        """
+        return [op for op in self.operations.values() 
+                if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]]
+    
     def _update_status(self, message: str) -> None:
         """Update status bar message."""
         self.status_bar.pop(self.status_context)
         self.status_bar.push(self.status_context, message)
     
+    # Operations Files Browser Methods
+    
+    def _load_operations_files(self) -> None:
+        """Load the Operations directory structure into the file tree."""
+        try:
+            self.files_store.clear()
+            
+            # Get the Operations directory path
+            operations_dir = Path.cwd() / "Operations"
+            
+            if not operations_dir.exists():
+                # Add a message that Operations directory doesn't exist
+                self.files_store.append(None, ["No Operations directory found", "", "info", "", ""])
+                return
+            
+            # Add root Operations folder
+            root_iter = self.files_store.append(None, ["Operations", str(operations_dir), "folder", "", ""])
+            
+            # Load operation directories
+            try:
+                operation_dirs = sorted([d for d in operations_dir.iterdir() if d.is_dir()])
+                for op_dir in operation_dirs:
+                    self._add_operation_folder(root_iter, op_dir)
+                    
+                # Expand the root by default
+                self.files_view.expand_row(self.files_store.get_path(root_iter), False)
+                
+            except Exception as e:
+                self.logger.error(f"Error loading operation directories: {e}")
+                self.files_store.append(root_iter, [f"Error: {e}", "", "error", "", ""])
+                
+        except Exception as e:
+            self.logger.error(f"Error loading operations files: {e}")
+            self.files_store.append(None, [f"Error loading files: {e}", "", "error", "", ""])
+    
+    def _add_operation_folder(self, parent_iter, op_dir: Path) -> None:
+        """Add an operation folder and its files to the tree."""
+        try:
+            # Get folder info
+            stat_info = op_dir.stat()
+            modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            
+            # Add operation folder
+            folder_iter = self.files_store.append(parent_iter, [
+                op_dir.name,
+                str(op_dir),
+                "folder", 
+                "",
+                modified_time
+            ])
+            
+            # Add files in the operation directory
+            try:
+                files = sorted(op_dir.iterdir())
+                for file_path in files:
+                    if file_path.is_file():
+                        self._add_file_item(folder_iter, file_path)
+                        
+            except Exception as e:
+                self.logger.error(f"Error loading files in {op_dir}: {e}")
+                self.files_store.append(folder_iter, [f"Error loading files: {e}", "", "error", "", ""])
+                
+        except Exception as e:
+            self.logger.error(f"Error adding operation folder {op_dir}: {e}")
+    
+    def _add_file_item(self, parent_iter, file_path: Path) -> None:
+        """Add a file item to the tree."""
+        try:
+            stat_info = file_path.stat()
+            file_size = self._format_file_size(stat_info.st_size)
+            modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            
+            # Determine file type for icon
+            file_type = self._get_file_type(file_path)
+            
+            self.files_store.append(parent_iter, [
+                file_path.name,
+                str(file_path),
+                file_type,
+                file_size,
+                modified_time
+            ])
+            
+        except Exception as e:
+            self.logger.error(f"Error adding file {file_path}: {e}")
+    
+    def _format_file_size(self, size_bytes: int) -> str:
+        """Format file size in human readable format."""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        elif size_bytes < 1024 * 1024 * 1024:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+        else:
+            return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
+    
+    def _get_file_type(self, file_path: Path) -> str:
+        """Determine file type based on extension."""
+        suffix = file_path.suffix.lower()
+        if suffix in ['.txt', '.log']:
+            return 'text'
+        elif suffix in ['.img', '.pimg']:
+            return 'image'
+        elif suffix in ['.c3s', '.c3a', '.c4f', '.alu', '.sil', '.k2o', '.n2o']:
+            return 'data'
+        elif suffix in ['.dat']:
+            return 'binary'
+        else:
+            return 'file'
+    
+    # Event handlers for file browser
+    
+    def _on_refresh_files_clicked(self, button) -> None:
+        """Handle refresh files button click."""
+        self._load_operations_files()
+        self._update_status("Operations files refreshed")
+    
+    def _on_open_operations_folder_clicked(self, button) -> None:
+        """Handle open operations folder button click."""
+        try:
+            operations_dir = Path.cwd() / "Operations"
+            if operations_dir.exists():
+                # Open in file manager (works on macOS, Linux, Windows)
+                import subprocess
+                import sys
+                
+                if sys.platform == "darwin":  # macOS
+                    subprocess.run(["open", str(operations_dir)])
+                elif sys.platform.startswith("linux"):  # Linux
+                    subprocess.run(["xdg-open", str(operations_dir)])
+                elif sys.platform == "win32":  # Windows
+                    subprocess.run(["explorer", str(operations_dir)])
+                    
+                self._update_status(f"Opened Operations folder: {operations_dir}")
+            else:
+                self._update_status("Operations folder does not exist")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to open Operations folder: {e}")
+            self._update_status(f"Error opening folder: {e}")
+    
+    def _on_delete_operation_clicked(self, button) -> None:
+        """Handle delete operation button click."""
+        selection = self.files_view.get_selection()
+        model, tree_iter = selection.get_selected()
+        
+        if tree_iter:
+            file_path = model.get_value(tree_iter, 1)  # Path is in column 1
+            file_name = model.get_value(tree_iter, 0)  # Name is in column 0
+            file_type = model.get_value(tree_iter, 2)  # Type is in column 2
+            
+            if file_type == "folder" and "Operations" in file_path:
+                # Show confirmation dialog
+                dialog = Gtk.MessageDialog(
+                    transient_for=self.main_window,
+                    message_type=Gtk.MessageType.WARNING,
+                    buttons=Gtk.ButtonsType.YES_NO,
+                    text="Delete Operation Folder?"
+                )
+                dialog.format_secondary_text(
+                    f"Are you sure you want to delete the operation folder '{file_name}'?\n\n"
+                    "This will permanently delete all files including:\n"
+                    "• Input files\n"
+                    "• Output files (.img, .pimg)\n"
+                    "• Log files\n"
+                    "• Correlation files\n\n"
+                    "This action cannot be undone."
+                )
+                
+                response = dialog.run()
+                dialog.destroy()
+                
+                if response == Gtk.ResponseType.YES:
+                    try:
+                        import shutil
+                        shutil.rmtree(file_path)
+                        self._load_operations_files()  # Refresh the tree
+                        self._update_status(f"Deleted operation folder: {file_name}")
+                    except Exception as e:
+                        self.logger.error(f"Failed to delete operation folder: {e}")
+                        self._update_status(f"Error deleting folder: {e}")
+            else:
+                self._update_status("Please select an operation folder to delete")
+        else:
+            self._update_status("No operation selected")
+    
+    def _on_file_selection_changed(self, selection) -> None:
+        """Handle file selection change in the tree view."""
+        model, tree_iter = selection.get_selected()
+        
+        if tree_iter:
+            file_path = model.get_value(tree_iter, 1)  # Path is in column 1
+            file_name = model.get_value(tree_iter, 0)  # Name is in column 0
+            file_type = model.get_value(tree_iter, 2)  # Type is in column 2
+            file_size = model.get_value(tree_iter, 3)  # Size is in column 3
+            file_modified = model.get_value(tree_iter, 4)  # Modified is in column 4
+            
+            # Update file info
+            if file_type == "folder":
+                self.file_info_label.set_text(f"Folder: {file_name}\nPath: {file_path}\nModified: {file_modified}")
+                self._clear_file_preview()
+            else:
+                self.file_info_label.set_text(
+                    f"File: {file_name}\n"
+                    f"Type: {file_type}\n"
+                    f"Size: {file_size}\n" 
+                    f"Modified: {file_modified}\n"
+                    f"Path: {file_path}"
+                )
+                self._load_file_preview(file_path, file_type)
+        else:
+            self.file_info_label.set_text("Select a file to view details")
+            self._clear_file_preview()
+    
+    def _load_file_preview(self, file_path: str, file_type: str) -> None:
+        """Load file preview in the text view."""
+        try:
+            path = Path(file_path)
+            if not path.exists():
+                self._set_preview_text("File not found")
+                return
+            
+            # Only preview text files and logs
+            if file_type in ['text', 'data'] or path.suffix.lower() in ['.txt', '.log', '.dat']:
+                try:
+                    # Try to read as text (limit to 10KB for performance)
+                    max_size = 10 * 1024  # 10KB
+                    if path.stat().st_size > max_size:
+                        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read(max_size)
+                        content += f"\n\n[File truncated - showing first {max_size} bytes]"
+                    else:
+                        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+                    
+                    self._set_preview_text(content)
+                    
+                except UnicodeDecodeError:
+                    # Try as binary file
+                    with open(path, 'rb') as f:
+                        data = f.read(min(1024, path.stat().st_size))
+                    hex_content = ' '.join(f'{b:02x}' for b in data)
+                    self._set_preview_text(f"Binary file (hex preview):\n{hex_content}")
+                    
+            elif file_type == 'image':
+                self._set_preview_text(f"Microstructure image file: {path.name}\n\nThis is a binary image file generated by genmic.\nUse the 3D Visualization tool to view the microstructure.")
+            else:
+                self._set_preview_text(f"Binary file: {path.name}\n\nFile type: {file_type}\nUse appropriate tools to view this file.")
+                
+        except Exception as e:
+            self.logger.error(f"Error loading file preview: {e}")
+            self._set_preview_text(f"Error loading file: {e}")
+    
+    def _set_preview_text(self, text: str) -> None:
+        """Set text in the preview area."""
+        buffer = self.file_preview.get_buffer()
+        buffer.set_text(text)
+    
+    def _clear_file_preview(self) -> None:
+        """Clear the file preview area."""
+        buffer = self.file_preview.get_buffer()
+        buffer.set_text("")
+
     def cleanup(self) -> None:
         """Cleanup resources."""
-        self._stop_monitoring()
-        self.logger.info("Operations monitoring panel cleanup completed")
+        self.logger.info("Starting operations monitoring panel cleanup...")
+        try:
+            self._stop_monitoring()
+            self._save_operations_to_file()  # Save operations before cleanup
+            self.logger.info(f"Operations monitoring panel cleanup completed - saved {len(self.operations)} operations")
+        except Exception as e:
+            self.logger.error(f"Error during operations panel cleanup: {e}")
+    
+    def save_operations_now(self) -> None:
+        """Manually save operations immediately."""
+        self._save_operations_to_file()
+    
+    def _save_operations_to_file(self) -> None:
+        """Save operations to JSON file."""
+        try:
+            self.logger.info(f"Attempting to save {len(self.operations)} operations to {self.operations_file}")
+            
+            # Ensure config directory exists
+            self.operations_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Convert operations to serializable format
+            operations_data = {
+                'operations': {op_id: op.to_dict() for op_id, op in self.operations.items()},
+                'operation_counter': self.operation_counter,
+                'saved_at': datetime.now().isoformat()
+            }
+            
+            # Write to file
+            with open(self.operations_file, 'w') as f:
+                json.dump(operations_data, f, indent=2)
+            
+            self.logger.info(f"Successfully saved {len(self.operations)} operations to {self.operations_file}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save operations to file: {e}", exc_info=True)
+    
+    def _load_operations_from_file(self) -> None:
+        """Load operations from JSON file."""
+        try:
+            self.logger.info(f"Attempting to load operations from {self.operations_file}")
+            
+            if not self.operations_file.exists():
+                self.logger.info("No operations history file found - starting fresh")
+                return
+            
+            with open(self.operations_file, 'r') as f:
+                data = json.load(f)
+            
+            self.logger.info(f"Found operations file with {len(data.get('operations', {}))} operations")
+            
+            # Load operations
+            operations_data = data.get('operations', {})
+            for op_id, op_data in operations_data.items():
+                try:
+                    operation = Operation.from_dict(op_data)
+                    self.operations[op_id] = operation
+                except Exception as e:
+                    self.logger.warning(f"Failed to load operation {op_id}: {e}")
+            
+            # Restore operation counter
+            self.operation_counter = data.get('operation_counter', 0)
+            
+            self.logger.info(f"Successfully loaded {len(self.operations)} operations from {self.operations_file}")
+            
+            # Update UI with loaded operations
+            if self.operations:
+                self._update_operations_list()
+                self._update_performance_metrics()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load operations from file: {e}", exc_info=True)
+    
+    def _save_operations_periodically(self) -> None:
+        """Save operations periodically (called from monitoring loop)."""
+        # Save every 5 minutes or when operations change significantly
+        if hasattr(self, '_last_save_time'):
+            time_since_save = time.time() - self._last_save_time
+            if time_since_save < 300:  # 5 minutes
+                return
+        
+        # Check if there are completed operations since last save
+        completed_ops = [op for op in self.operations.values() 
+                        if op.status in [OperationStatus.COMPLETED, OperationStatus.FAILED, OperationStatus.CANCELLED]]
+        
+        if completed_ops:
+            self._save_operations_to_file()
+            self._last_save_time = time.time()
 
 
 # Register the widget

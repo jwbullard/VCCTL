@@ -1,0 +1,163 @@
+{
+  "operations": {
+    "test_persistence_001": {
+      "id": "test_persistence_001",
+      "name": "Test Persistence Operation",
+      "operation_type": "property_calculation",
+      "status": "completed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T10:51:41.999949",
+      "end_time": "2025-08-01T10:51:41.999950",
+      "estimated_duration": null,
+      "current_step": "",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "log_entries": [],
+      "metadata": {}
+    },
+    "op_0002": {
+      "id": "op_0002",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "completed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T10:54:53.913388",
+      "end_time": "2025-08-01T10:56:17.938406",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/NormalPaste10/genmic_input_NormalPaste10.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/NormalPaste10",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    },
+    "op_0003": {
+      "id": "op_0003",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "failed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T10:56:29.614442",
+      "end_time": "2025-08-01T10:56:29.697765",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": "genmic execution failed - no output files created (exit code: 1)",
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/AirPaste/genmic_input_AirPaste.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/AirPaste",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    },
+    "op_0004": {
+      "id": "op_0004",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "failed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T10:58:26.695543",
+      "end_time": "2025-08-01T10:58:26.960655",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": "genmic execution failed - no output files created (exit code: 1)",
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Paste116/genmic_input_Paste116.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Paste116",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    },
+    "op_0005": {
+      "id": "op_0005",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "failed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T11:05:46.811684",
+      "end_time": "2025-08-01T11:05:47.081490",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": "genmic execution failed - no output files created (exit code: 1)",
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/FumePaste/genmic_input_FumePaste.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/FumePaste",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    },
+    "op_0006": {
+      "id": "op_0006",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "completed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T15:36:41.048747",
+      "end_time": "2025-08-01T15:38:04.045202",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Test01/genmic_input_Test01.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Test01",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    },
+    "op_0007": {
+      "id": "op_0007",
+      "name": "3D Microstructure Generation",
+      "operation_type": "microstructure_generation",
+      "status": "completed",
+      "progress": 1.0,
+      "start_time": "2025-08-01T15:40:57.572419",
+      "end_time": "2025-08-01T15:42:17.190143",
+      "estimated_duration": 300.0,
+      "current_step": "Finalizing output files...",
+      "total_steps": 4,
+      "completed_steps": 3,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "log_entries": [],
+      "metadata": {
+        "input_file": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Test02/genmic_input_Test02.txt",
+        "output_dir": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/Test02",
+        "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
+      }
+    }
+  },
+  "operation_counter": 7,
+  "saved_at": "2025-08-01T16:45:00.220595"
+}

@@ -374,6 +374,10 @@ class FileBrowserWidget(Gtk.Box):
             icon_theme = Gtk.IconTheme.get_default()
             icon_size = 16
             
+            # Validate icon size to prevent infinite surface size errors
+            if icon_size <= 0 or icon_size > 1024:
+                icon_size = 16  # Safe default
+            
             if file_type == FileType.DIRECTORY:
                 icon_name = "folder"
             elif file_type == FileType.JSON:

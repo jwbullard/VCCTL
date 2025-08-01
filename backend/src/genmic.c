@@ -21,10 +21,10 @@
  *******************************************************/
 #include "include/vcctl.h"
 #include <math.h>
+#include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <setjmp.h>
 
 /* Global variables for distrib3d return address workaround */
 jmp_buf distrib3d_jmpbuf;
@@ -609,21 +609,25 @@ int main(int argc, char *argv[]) {
           freegenmic();
           exit(1);
         }
-        /* Normal return path (should not reach here due to return address corruption) */
+        /* Normal return path (should not reach here due to return address
+         * corruption) */
         printf("\n=== DEBUG: Reached normal return path (unexpected) ===");
         fflush(stdout);
       } else {
         /* longjmp target - distrib3d used longjmp to return */
-        printf("\n=== DEBUG: Returned via longjmp, success = %d ===", distrib3d_success);
+        printf("\n=== DEBUG: Returned via longjmp, success = %d ===",
+               distrib3d_success);
         fflush(stdout);
         if (!distrib3d_success) {
-          printf("\nFailure in function distrib3d (via longjmp).  Exiting.\n\n");
+          printf(
+              "\nFailure in function distrib3d (via longjmp).  Exiting.\n\n");
           freegenmic();
           exit(1);
         }
       }
       /* distrib3d() already called freedistrib3d() internally before longjmp */
-      printf("\n=== DEBUG: DISTRIB case completed, continuing to next menu ===");
+      printf(
+          "\n=== DEBUG: DISTRIB case completed, continuing to next menu ===");
       fflush(stdout);
       /* Check to see that the correct number of C3S pixels is there */
       break;
@@ -3601,11 +3605,15 @@ void makefloc(void) {
 void measure(void) {
   int npor, nc2s, ngyp, ncem, nagg, nsfume, ninert, nfreelime;
   int nflyash, nanh, nhem, ncaco3, nslag;
+  int nc3a, nc4af, nk2so4, nna2so4;
   int i, j, k, valph;
 
   /* Counters for the various phase fractions */
 
   npor = ngyp = ncem = nagg = ninert = 0;
+  nfreelime = nflyash = nanh = ncaco3 = 0;
+  nslag = nc3a = nfreelime = nhem = nc4af = 0;
+  nk2so4 = nna2so4 = 0;
   ;
   nslag = nc2s = nsfume = nflyash = nanh = 0;
   nhem = ncaco3 = nfreelime = 0;
@@ -3626,6 +3634,18 @@ void measure(void) {
           break;
         case C2S:
           nc2s++;
+          break;
+        case C3A:
+          nc3a++;
+          break;
+        case C4AF:
+          nc4af++;
+          break;
+        case K2SO4:
+          nk2so4++;
+          break;
+        case NA2SO4:
+          nna2so4++;
           break;
         case GYPSUM:
           ngyp++;
@@ -3658,7 +3678,7 @@ void measure(void) {
           nfreelime++;
           break;
         default:
-          printf("\nWARNING:  Unidentifiable phase ID ");
+          printf("\nWARNING:  Unidentifiable phase ID (%d) ", valph);
           printf("encountered.\nPixel at location ");
           printf("(%d,%d,%d)\n", i, j, k);
           break;
@@ -4510,12 +4530,12 @@ void free_particlepointervector(struct particle **ps) {
 int distrib3d(void) {
   printf("\n=== DEBUG: Entering distrib3d() ===");
   fflush(stdout);
-  
+
   /* Stack canary to detect corruption */
   const unsigned long stack_canary = 0xDEADBEEF;
   printf("\n=== DEBUG: Stack canary set to 0x%lx ===", stack_canary);
   fflush(stdout);
-  
+
   int nskip[6]; /* number of lines to skip as header in corr. files */
   register int i, j, k;
   int fileSizeInBytes = 0;
@@ -4585,7 +4605,7 @@ int distrib3d(void) {
   if (Verbose)
     printf("\n%s", filek2so4);
   fflush(stdout);
-
+  Verbose = 1;
   sprintf(filena2so4, "%s", filecem);
   strcat(filena2so4, ".n2o");
   if (Verbose)
@@ -4659,14 +4679,17 @@ int distrib3d(void) {
       printf("Trying to open file %s \n", buff);
     testfile = filehandler("distrib3d", buff, "READ_NOFAIL");
     if (!testfile) {
-      if (i == 3) {
-        alumdo = 0;
-      } else if (i == 4) {
-        k2so4do = 0;
-      } else {
+      if (i < 3) {
         freedistrib3d();
         bailout("distrib3d", "Could not open file");
         exit(1);
+      } else if (i == 3) {
+        alumdo = 0;
+        printf("=== No alu file detected, set alumdo = 0 \n");
+        fflush(stdout);
+      } else if (i == 4) {
+        printf("=== No k2o file detected, set k2so4do = 0 \n");
+        k2so4do = 0;
       }
     } else {
       fscanf(testfile, "%s", buff);
@@ -4807,10 +4830,12 @@ int distrib3d(void) {
 
     printf("\n=== DEBUG: First rand3d() completed successfully ===");
     fflush(stdout);
-    
+
     /* Check stack canary after first rand3d */
     if (stack_canary != 0xDEADBEEF) {
-      printf("\n!!! STACK CORRUPTION DETECTED after first rand3d: canary = 0x%lx !!!", stack_canary);
+      printf("\n!!! STACK CORRUPTION DETECTED after first rand3d: canary = "
+             "0x%lx !!!",
+             stack_canary);
       fflush(stdout);
     } else {
       printf("\n=== DEBUG: Stack canary still intact after first rand3d ===");
@@ -5332,24 +5357,27 @@ int distrib3d(void) {
 
   printf("\n=== DEBUG: About to return from distrib3d() ===");
   fflush(stdout);
-  
+
   /* Check stack canary before return */
   if (stack_canary != 0xDEADBEEF) {
-    printf("\n!!! STACK CORRUPTION DETECTED: canary = 0x%lx (expected 0xDEADBEEF) !!!", stack_canary);
+    printf("\n!!! STACK CORRUPTION DETECTED: canary = 0x%lx (expected "
+           "0xDEADBEEF) !!!",
+           stack_canary);
     fflush(stdout);
   } else {
     printf("\n=== DEBUG: Stack canary intact, safe to return ===");
     fflush(stdout);
   }
 
-  /* WORKAROUND: Use longjmp instead of return to bypass corrupted return address */
+  /* WORKAROUND: Use longjmp instead of return to bypass corrupted return
+   * address */
   printf("\n=== DEBUG: Using longjmp to bypass return address corruption ===");
   fflush(stdout);
-  
+
   /* Set global success flag and jump back to main */
   distrib3d_success = 1;
   longjmp(distrib3d_jmpbuf, 1);
-  
+
   /* This line should never be reached */
   printf("\n!!! ERROR: longjmp failed, trying normal return !!!");
   fflush(stdout);

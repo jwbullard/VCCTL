@@ -184,3 +184,6 @@ src/data/database/*.sqlite
 src/data/database/*.sqlite3
 logs/
 *.log
+
+# VCCTL Operations folder - contains user-generated mix designs and simulation outputs
+Operations/

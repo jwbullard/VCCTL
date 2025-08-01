@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING, Optional, Dict, Any, List, Callable
 from abc import ABC, abstractmethod
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject, Pango
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import Gtk, GObject, Pango, GdkPixbuf
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -369,11 +370,16 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 name = self.material_data.get('name', '')
             self.name_entry.set_text(name)
             
+            # Load description field (now all materials have separate description and notes)
             description = self.material_data.get('description', '')
             if description:
                 # Decode hex-encoded description if needed
                 decoded_description = self._decode_description_if_hex(description)
                 self.description_buffer.set_text(decoded_description)
+            
+            notes = self.material_data.get('notes', '')
+            if notes:
+                self.notes_buffer.set_text(notes)
             
             source = self.material_data.get('source', '')
             if source:
@@ -381,10 +387,6 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             
             specific_gravity = self.material_data.get('specific_gravity', 2.65)
             self.specific_gravity_spin.set_value(float(specific_gravity))
-            
-            notes = self.material_data.get('notes', '')
-            if notes:
-                self.notes_buffer.set_text(notes)
             
             # Load material-specific data
             self._load_material_specific_data()
@@ -479,7 +481,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 if self.material_type == 'aggregate':
                     # For aggregates, check by display_name (primary key)
                     with service.db_service.get_read_only_session() as session:
-                        existing = session.query(service.model).filter_by(display_name=name).first()
+                        existing = session.query(service.model_class).filter_by(display_name=name).first()
                         return existing is not None
                 else:
                     # For cement materials, check by name
@@ -719,6 +721,14 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         self.duplicate_button.show()
         self.set_default_response(Gtk.ResponseType.APPLY)
     
+    def _restore_save_button(self) -> None:
+        """Restore Save button and hide Duplicate button."""
+        if hasattr(self, 'duplicate_button'):
+            self.duplicate_button.hide()
+        
+        self.save_button.show()
+        self.set_default_response(Gtk.ResponseType.OK)
+    
     def _collect_form_data(self) -> Dict[str, Any]:
         """Collect all form data into a dictionary."""
         # Get text from description buffer
@@ -742,6 +752,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                     'name': name,
                     'specific_gravity': self.specific_gravity_spin.get_value(),
                     'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'description': description.strip() if description.strip() else None,
                     'notes': notes.strip() if notes.strip() else None
                 }
             else:
@@ -749,11 +760,15 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 data = {
                     'display_name': name,
                     'name': name,  # Also set name field for aggregates
-                    'description': description.strip() if description.strip() else None,
                     'source': self.source_entry.get_text().strip() if self.source_entry.get_text().strip() else None,
+                    'description': description.strip() if description.strip() else None,
                     'specific_gravity': self.specific_gravity_spin.get_value(),
                     'notes': notes.strip() if notes.strip() else None
                 }
+            
+            # Add aggregate-specific fields for both create and edit modes
+            material_specific_data = self._collect_material_specific_data()
+            data.update(material_specific_data)
         else:
             # For cement materials
             if self.is_edit_mode:
@@ -1025,8 +1040,12 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         elif response_id == Gtk.ResponseType.APPLY:
             # Handle duplicate button click
             if self._duplicate_material():
-                # Close dialog after successful duplication
-                return
+                # For aggregates that switch to edit mode, prevent dialog from closing
+                if self.material_type == 'aggregate' and self.is_edit_mode:
+                    self.stop_emission_by_name('response')
+                else:
+                    # Close dialog after successful duplication for other materials
+                    return
             else:
                 # Prevent dialog from closing if duplication failed
                 self.stop_emission_by_name('response')
@@ -2663,40 +2682,583 @@ class AggregateDialog(MaterialDialogBase):
     """Dialog for aggregate materials."""
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
+        # Initialize aggregate-specific widgets (don't create specific_gravity_spin - it's in base class)
+        self.bulk_modulus_spin = None
+        self.shear_modulus_spin = None
+        self.conductivity_spin = None
+        self.type_combo = None
+        self.image_widget = None
+        self.shape_stats_textview = None
+        self.aggregate_description_textview = None
+        
         super().__init__(parent, "aggregate", material_data)
+        
+        # Set larger dialog size for aggregate data
+        self.set_default_size(800, 700)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
-        # Placeholder - implement aggregate-specific fields
-        return start_row
+        """Add aggregate type selection field."""
+        row = start_row
+        
+        # Aggregate Type (Coarse vs Fine)
+        type_label = Gtk.Label("Type:")
+        type_label.set_halign(Gtk.Align.END)
+        type_label.get_style_context().add_class("form-label")
+        
+        self.type_combo = Gtk.ComboBoxText()
+        self.type_combo.append_text("Fine Aggregate")
+        self.type_combo.append_text("Coarse Aggregate")
+        self.type_combo.set_active(0)  # Default to fine
+        
+        grid.attach(type_label, 0, row, 1, 1)
+        grid.attach(self.type_combo, 1, row, 2, 1)
+        row += 1
+        
+        return row
     
     def _add_property_sections(self, container: Gtk.Box) -> None:
-        # Placeholder - implement aggregate properties
-        placeholder = Gtk.Label("Aggregate properties will be implemented")
-        placeholder.get_style_context().add_class("dim-label")
-        container.pack_start(placeholder, True, True, 0)
+        """Add comprehensive aggregate property sections."""
+        # Create horizontal layout for two main columns
+        main_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        main_paned.set_wide_handle(True)
+        container.pack_start(main_paned, True, True, 0)
+        
+        # Left column: Shape data (top) + Image (bottom)
+        left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        left_box.set_margin_left(10)
+        left_box.set_margin_right(10)
+        main_paned.pack1(left_box, True, True)
+        
+        self._add_shape_data_section(left_box)
+        self._add_image_section(left_box)
+        
+        # Right column: Mechanical properties + Description
+        right_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        right_box.set_margin_left(10)
+        right_box.set_margin_right(10)
+        main_paned.pack2(right_box, True, True)
+        
+        self._add_mechanical_properties_section(right_box)
+        self._add_description_section(right_box)
+        
+        # Set paned position for balanced layout (left column slightly wider for image)
+        main_paned.set_position(380)
+    
+    def _add_shape_data_section(self, container: Gtk.Box) -> None:
+        """Add shape statistics section."""
+        # Shape statistics frame
+        shape_frame = Gtk.Frame(label="Shape Data")
+        shape_frame.get_style_context().add_class("property-frame")
+        container.pack_start(shape_frame, True, True, 0)
+        
+        # Shape statistics text view with scrolling
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_size_request(-1, 250)  # Give more height for shape data
+        scrolled.set_margin_top(10)
+        scrolled.set_margin_bottom(10)
+        scrolled.set_margin_left(10)
+        scrolled.set_margin_right(10)
+        shape_frame.add(scrolled)
+        
+        self.shape_stats_textview = Gtk.TextView()
+        self.shape_stats_textview.set_editable(False)
+        self.shape_stats_textview.set_wrap_mode(Gtk.WrapMode.WORD)
+        scrolled.add(self.shape_stats_textview)
+        
+        # Add monospace font for better formatting
+        buffer = self.shape_stats_textview.get_buffer()
+        tag = buffer.create_tag("monospace", family="monospace", size_points=9)
+    
+    def _add_image_section(self, container: Gtk.Box) -> None:
+        """Add image section at bottom of left column."""
+        # Image frame
+        image_frame = Gtk.Frame(label="Image")
+        image_frame.get_style_context().add_class("property-frame")
+        container.pack_start(image_frame, False, False, 0)
+        
+        # Image widget with proper sizing
+        image_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        image_box.set_margin_top(10)
+        image_box.set_margin_bottom(10)
+        image_box.set_margin_left(10)
+        image_box.set_margin_right(10)
+        image_frame.add(image_box)
+        
+        self.image_widget = Gtk.Image()
+        self.image_widget.set_size_request(250, 180)  # Larger size since it has its own section
+        self.image_widget.set_from_icon_name("image-x-generic", Gtk.IconSize.DIALOG)
+        image_box.pack_start(self.image_widget, False, False, 0)
+    
+    def _add_mechanical_properties_section(self, container: Gtk.Box) -> None:
+        """Add mechanical properties section."""
+        frame = Gtk.Frame(label="Mechanical Properties")
+        frame.get_style_context().add_class("property-frame")
+        container.pack_start(frame, False, False, 0)
+        
+        grid = Gtk.Grid()
+        grid.set_row_spacing(8)
+        grid.set_column_spacing(10)
+        grid.set_margin_top(10)
+        grid.set_margin_bottom(10)
+        grid.set_margin_left(10)
+        grid.set_margin_right(10)
+        frame.add(grid)
+        
+        row = 0
+        
+        # Note: Specific Gravity is handled in Basic Info tab - don't duplicate it here
+        
+        # Bulk Modulus
+        bulk_label = Gtk.Label("Bulk Modulus:")
+        bulk_label.set_halign(Gtk.Align.END)
+        bulk_label.get_style_context().add_class("form-label")
+        
+        self.bulk_modulus_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+        self.bulk_modulus_spin.set_digits(1)
+        self.bulk_modulus_spin.set_value(36.7)
+        
+        bulk_unit_label = Gtk.Label("GPa")
+        bulk_unit_label.get_style_context().add_class("dim-label")
+        
+        grid.attach(bulk_label, 0, row, 1, 1)
+        grid.attach(self.bulk_modulus_spin, 1, row, 1, 1)
+        grid.attach(bulk_unit_label, 2, row, 1, 1)
+        row += 1
+        
+        # Shear Modulus
+        shear_label = Gtk.Label("Shear Modulus:")
+        shear_label.set_halign(Gtk.Align.END)
+        shear_label.get_style_context().add_class("form-label")
+        
+        self.shear_modulus_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+        self.shear_modulus_spin.set_digits(1)
+        self.shear_modulus_spin.set_value(22.0)
+        
+        shear_unit_label = Gtk.Label("GPa")
+        shear_unit_label.get_style_context().add_class("dim-label")
+        
+        grid.attach(shear_label, 0, row, 1, 1)
+        grid.attach(self.shear_modulus_spin, 1, row, 1, 1)
+        grid.attach(shear_unit_label, 2, row, 1, 1)
+        row += 1
+        
+        # Conductivity
+        cond_label = Gtk.Label("Conductivity:")
+        cond_label.set_halign(Gtk.Align.END)
+        cond_label.get_style_context().add_class("form-label")
+        
+        self.conductivity_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
+        self.conductivity_spin.set_digits(1)
+        self.conductivity_spin.set_value(0.0)
+        
+        grid.attach(cond_label, 0, row, 1, 1)
+        grid.attach(self.conductivity_spin, 1, row, 1, 1)
+        row += 1
+    
+    def _add_description_section(self, container: Gtk.Box) -> None:
+        """Add description section."""
+        frame = Gtk.Frame(label="Description")
+        frame.get_style_context().add_class("property-frame")
+        container.pack_start(frame, True, True, 0)
+        
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_size_request(-1, 100)
+        frame.add(scrolled)
+        
+        self.aggregate_description_textview = Gtk.TextView()
+        self.aggregate_description_textview.set_wrap_mode(Gtk.WrapMode.WORD)
+        scrolled.add(self.aggregate_description_textview)
     
     def _add_advanced_sections(self, container: Gtk.Box) -> None:
-        # Placeholder
+        """Add advanced sections - placeholder for future features."""
         pass
     
     def _connect_material_signals(self) -> None:
-        # Placeholder
+        """Connect aggregate-specific signals."""
+        if self.type_combo:
+            self.type_combo.connect('changed', self._on_type_changed)
+    
+    def _on_type_changed(self, combo: Gtk.ComboBoxText) -> None:
+        """Handle aggregate type changes."""
+        # Update UI based on aggregate type if needed
         pass
     
     def _load_material_specific_data(self) -> None:
-        # Placeholder
-        pass
+        """Load aggregate-specific data."""
+        if not self.is_edit_mode or not self.material_data:
+            return
+        
+        try:
+            # Note: specific_gravity is loaded by base class
+            
+            if self.bulk_modulus_spin:
+                bm = self.material_data.get('bulk_modulus', 0.0)
+                self.bulk_modulus_spin.set_value(float(bm) if bm else 0.0)
+            
+            if self.shear_modulus_spin:
+                sm = self.material_data.get('shear_modulus', 0.0)
+                self.shear_modulus_spin.set_value(float(sm) if sm else 0.0)
+            
+            if self.conductivity_spin:
+                cond = self.material_data.get('conductivity', 0.0)
+                self.conductivity_spin.set_value(float(cond) if cond else 0.0)
+            
+            # Load aggregate type based on display name
+            if self.type_combo:
+                display_name = self.material_data.get('display_name', '')
+                if 'coarse' in display_name.lower():
+                    self.type_combo.set_active(1)  # Coarse
+                else:
+                    self.type_combo.set_active(0)  # Fine
+            
+            # Load shape statistics from txt field
+            if self.shape_stats_textview:
+                txt_data = self.material_data.get('txt', '')
+                if txt_data:
+                    # Handle both string and bytes data
+                    if isinstance(txt_data, bytes):
+                        txt_data = txt_data.decode('utf-8', errors='replace')
+                    
+                    buffer = self.shape_stats_textview.get_buffer()
+                    buffer.set_text(str(txt_data))
+                    # Apply monospace formatting
+                    start_iter = buffer.get_start_iter()
+                    end_iter = buffer.get_end_iter()
+                    buffer.apply_tag_by_name("monospace", start_iter, end_iter)
+            
+            # Load Properties tab description (independent field)
+            if self.aggregate_description_textview:
+                properties_desc = self.material_data.get('properties_description', '')
+                buffer = self.aggregate_description_textview.get_buffer()
+                buffer.set_text(properties_desc if properties_desc else '')
+            
+            # Load image if available
+            self._load_aggregate_image()
+            
+            # Check immutable status after all UI components are loaded
+            self._check_immutable_status()
+            
+        except Exception as e:
+            self.logger.error(f"Error loading aggregate data: {e}")
+    
+    def _load_aggregate_image(self) -> None:
+        """Load aggregate image from file system."""
+        if not self.material_data or not self.image_widget:
+            return
+        
+        try:
+            display_name = self.material_data.get('display_name', '')
+            if not display_name:
+                return
+            
+            # Look for PNG image file using absolute paths
+            import os
+            from pathlib import Path
+            
+            # Get absolute path to project root (from src/app/windows/dialogs/ go up to project root)
+            project_root = Path(__file__).parent.parent.parent.parent.parent
+            
+            # Check image locations with absolute paths
+            image_paths = [
+                project_root / "images" / "aggregates" / f"{display_name}.png",
+                project_root / "data" / "images" / f"{display_name}.png", 
+                project_root / "aggregate_images" / f"{display_name}.png"
+            ]
+            
+            for img_path in image_paths:
+                if img_path.exists():
+                    try:
+                        # Load and scale image
+                        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                            str(img_path), 200, 150, True
+                        )
+                        self.image_widget.set_from_pixbuf(pixbuf)
+                        self.logger.info(f"Loaded aggregate image: {img_path}")
+                        return
+                    except Exception as e:
+                        self.logger.debug(f"Could not load image {img_path}: {e}")
+                        continue
+            
+            # If no image found, keep placeholder
+            self.logger.debug(f"No image found for aggregate {display_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Error loading aggregate image: {e}")
     
     def _validate_material_specific_field(self, widget) -> None:
-        # Placeholder
-        pass
+        """Validate aggregate-specific fields."""
+        # Clear previous errors for this widget
+        # Handle TextBuffer objects which don't have get_name()
+        if hasattr(widget, 'get_name'):
+            widget_name = widget.get_name() or str(widget)
+        else:
+            widget_name = str(widget)
+        
+        if widget_name in self.validation_errors:
+            del self.validation_errors[widget_name]
+        
+        # Note: specific_gravity_spin validation is handled by base class
+        
+        # Validate modulus values
+        if widget in [self.bulk_modulus_spin, self.shear_modulus_spin]:
+            value = widget.get_value()
+            if value < 0:
+                self.validation_errors[widget_name] = "Modulus values cannot be negative"
     
     def _validate_all_material_fields(self) -> None:
-        # Placeholder
-        pass
+        """Validate all aggregate fields."""
+        # Note: specific_gravity_spin validation is handled by base class
+        if self.bulk_modulus_spin:
+            self._validate_material_specific_field(self.bulk_modulus_spin)
+        if self.shear_modulus_spin:
+            self._validate_material_specific_field(self.shear_modulus_spin)
     
     def _collect_material_specific_data(self) -> Dict[str, Any]:
-        return {}
+        """Collect aggregate-specific data."""
+        data = {}
+        
+        # Note: specific_gravity is collected by base class
+        
+        if self.bulk_modulus_spin:
+            data['bulk_modulus'] = self.bulk_modulus_spin.get_value()
+        
+        if self.shear_modulus_spin:
+            data['shear_modulus'] = self.shear_modulus_spin.get_value()
+        
+        if self.conductivity_spin:
+            data['conductivity'] = self.conductivity_spin.get_value()
+        
+        if self.type_combo:
+            # Map UI values to database values: UI 0=fine->DB 2, UI 1=coarse->DB 1
+            ui_value = self.type_combo.get_active()
+            data['type'] = 2 if ui_value == 0 else 1  # 0=fine->2, 1=coarse->1
+        
+        # Collect Properties tab description (independent field)
+        if self.aggregate_description_textview:
+            buffer = self.aggregate_description_textview.get_buffer()
+            start_iter = buffer.get_start_iter()
+            end_iter = buffer.get_end_iter()
+            properties_desc = buffer.get_text(start_iter, end_iter, True)
+            if properties_desc.strip():
+                data['properties_description'] = properties_desc.strip()
+        
+        return data
+    
+    def _check_immutable_status(self) -> None:
+        """Check if aggregate is immutable and update UI accordingly."""
+        if not self.is_edit_mode or not self.material_data:
+            return
+        
+        # Check if aggregate is immutable
+        is_immutable = self.material_data.get('immutable', False)
+        
+        if is_immutable:
+            self._disable_all_aggregate_inputs()
+            self._show_immutable_message()
+            self._replace_save_with_duplicate_button()
+        else:
+            self._enable_all_aggregate_inputs()
+            self._hide_immutable_message()
+            self._restore_save_button()
+    
+    def _disable_all_aggregate_inputs(self) -> None:
+        """Disable all input fields for immutable aggregates."""
+        # Disable basic fields
+        self.name_entry.set_sensitive(False)
+        self.source_entry.set_sensitive(False)
+        self.specific_gravity_spin.set_sensitive(False)
+        
+        # Disable text views
+        self.description_textview.set_sensitive(False)
+        self.notes_textview.set_sensitive(False)
+        
+        # Disable aggregate-specific fields
+        if self.bulk_modulus_spin:
+            self.bulk_modulus_spin.set_sensitive(False)
+        if self.shear_modulus_spin:
+            self.shear_modulus_spin.set_sensitive(False)
+        if self.conductivity_spin:
+            self.conductivity_spin.set_sensitive(False)
+        if self.type_combo:
+            self.type_combo.set_sensitive(False)
+        
+        # Disable Properties tab description
+        if self.aggregate_description_textview:
+            self.aggregate_description_textview.set_sensitive(False)
+    
+    def _enable_all_aggregate_inputs(self) -> None:
+        """Enable all input fields for mutable aggregates."""
+        # Enable basic fields
+        self.name_entry.set_sensitive(True)
+        self.source_entry.set_sensitive(True)
+        self.specific_gravity_spin.set_sensitive(True)
+        
+        # Enable text views
+        self.description_textview.set_sensitive(True)
+        self.notes_textview.set_sensitive(True)
+        
+        # Enable aggregate-specific fields
+        if self.bulk_modulus_spin:
+            self.bulk_modulus_spin.set_sensitive(True)
+        if self.shear_modulus_spin:
+            self.shear_modulus_spin.set_sensitive(True)
+        if self.conductivity_spin:
+            self.conductivity_spin.set_sensitive(True)
+        if self.type_combo:
+            self.type_combo.set_sensitive(True)
+        
+        # Enable Properties tab description
+        if self.aggregate_description_textview:
+            self.aggregate_description_textview.set_sensitive(True)
+    
+    def _duplicate_aggregate(self) -> bool:
+        """Duplicate the current immutable aggregate as a mutable copy."""
+        if not self.material_data:
+            return False
+        
+        try:
+            # Create a copy of current aggregate data
+            original_name = self.material_data.get('display_name', 'aggregate')
+            new_name = f"{original_name}_copy"
+            
+            # Check if the name already exists and find a unique name
+            counter = 1
+            final_name = new_name
+            
+            # Get aggregate service for checking duplicates
+            aggregate_service = self.service_container.aggregate_service
+            while aggregate_service.get_by_display_name(final_name):
+                counter += 1
+                final_name = f"{new_name}_{counter}"
+            
+            # Start with all original material data
+            duplicate_data = {}
+            
+            # Copy all fields from original material
+            if isinstance(self.material_data, dict):
+                duplicate_data.update(self.material_data)
+            else:
+                # Convert SQLAlchemy object to dict, including binary fields
+                for column in self.material_data.__table__.columns:
+                    duplicate_data[column.name] = getattr(self.material_data, column.name)
+            
+            # Override with current form data
+            form_data = self._collect_form_data()
+            material_specific_data = self._collect_material_specific_data()
+            duplicate_data.update(form_data)
+            duplicate_data.update(material_specific_data)
+            
+            # Set new name for duplicate
+            duplicate_data['display_name'] = final_name
+            duplicate_data['name'] = final_name
+            
+            # Mark as mutable (editable)
+            duplicate_data['immutable'] = False
+            
+            # Remove auto-generated fields that shouldn't be copied
+            duplicate_data.pop('created_at', None)
+            duplicate_data.pop('updated_at', None)
+            
+            # Create the duplicate aggregate
+            from app.models.aggregate import AggregateCreate
+            create_data = AggregateCreate(**duplicate_data)
+            
+            created_aggregate = aggregate_service.create(create_data)
+            self.logger.info(f"Duplicated aggregate: {original_name} -> {final_name}")
+            
+            # Show success message
+            self.parent_window.update_status(f"Aggregate '{final_name}' created successfully", "success", 3)
+            
+            # Ask if user wants to edit the new duplicate
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                modal=True,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text=f"Aggregate duplicated as '{final_name}'"
+            )
+            dialog.format_secondary_text("Would you like to open the duplicate for editing?")
+            
+            response = dialog.run()
+            dialog.destroy()
+            
+            if response == Gtk.ResponseType.YES:
+                # Update current dialog to edit the duplicate in place
+                duplicate_material_data = {}
+                for column in created_aggregate.__table__.columns:
+                    duplicate_material_data[column.name] = getattr(created_aggregate, column.name)
+                
+                # Switch this dialog to edit the new duplicate
+                self.material_data = duplicate_material_data
+                self.is_edit_mode = True
+                
+                # Update window title
+                self.set_title(f"Edit Aggregate - {final_name}")
+                
+                # Reload the dialog with new data
+                self._load_material_data()
+                
+                # Re-check immutable status (should be False now)
+                self._check_immutable_status()
+                
+                # Show success message
+                self.parent_window.update_status(f"Now editing duplicate: {final_name}", "info", 3)
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to duplicate aggregate: {e}")
+            
+            # Show error message with more detail for debugging
+            error_msg = f"Failed to duplicate aggregate: {str(e)}"
+            print(f"Duplicate error: {error_msg}")
+            self.parent_window.update_status(error_msg, "error", 5)
+            
+            # Show dialog to user with error details
+            error_dialog = Gtk.MessageDialog(
+                transient_for=self,
+                modal=True,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Duplication Failed"
+            )
+            error_dialog.format_secondary_text(str(e))
+            error_dialog.run()
+            error_dialog.destroy()
+            
+            return False
+    
+    def _duplicate_material(self) -> bool:
+        """Override base class to handle aggregate duplication."""
+        if self.material_type == 'aggregate':
+            return self._duplicate_aggregate()
+        else:
+            # Fallback to base class implementation for other material types
+            return super()._duplicate_material()
+    
+    def _show_immutable_message(self) -> None:
+        """Show message that aggregate is read-only."""
+        if not hasattr(self, 'immutable_message_bar'):
+            # Create info bar
+            self.immutable_message_bar = Gtk.InfoBar()
+            self.immutable_message_bar.set_message_type(Gtk.MessageType.INFO)
+            
+            # Add aggregate-specific message
+            message_label = Gtk.Label()
+            message_label.set_markup('<b>This is an original database aggregate.</b> Duplicate this aggregate to make changes.')
+            message_label.set_halign(Gtk.Align.START)
+            
+            content_area = self.immutable_message_bar.get_content_area()
+            content_area.add(message_label)
+            
+            # Insert at top of dialog content
+            content_box = self.get_content_area()
+            content_box.pack_start(self.immutable_message_bar, False, False, 0)
+            content_box.reorder_child(self.immutable_message_bar, 0)
+            
+        self.immutable_message_bar.show_all()
 
 
 class FlyAshDialog(MaterialDialogBase):

@@ -325,10 +325,32 @@ class HydrationPanel(Gtk.Box):
         
         vbox.pack_start(profile_box, False, False, 0)
         
+        # TEMPORARILY DISABLE HYDRATION PLOT TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
         # Temperature profile plot
-        self.hydration_plot_widget = HydrationPlotWidget(self.plot_manager)
-        self.hydration_plot_widget.set_size_request(400, 200)
-        vbox.pack_start(self.hydration_plot_widget, True, True, 0)
+        # self.hydration_plot_widget = HydrationPlotWidget(self.plot_manager)
+        # # Ensure minimum valid size for plot widget  
+        # self.hydration_plot_widget.set_size_request(max(400, 400), max(250, 200))
+        # vbox.pack_start(self.hydration_plot_widget, True, True, 0)
+        
+        # Create placeholder for hydration plot instead of actual widget
+        plot_placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        plot_placeholder.set_size_request(400, 200)
+        
+        # Add informational label
+        info_label = Gtk.Label()
+        info_label.set_markup('<span size="large">Hydration Plot</span>')
+        info_label.set_halign(Gtk.Align.CENTER)
+        plot_placeholder.pack_start(info_label, True, True, 0)
+        
+        enable_button = Gtk.Button(label="Enable Plot Widget")
+        enable_button.set_tooltip_text("Click to enable the hydration plot widget")
+        plot_placeholder.pack_start(enable_button, False, False, 0)
+        
+        vbox.pack_start(plot_placeholder, True, True, 0)
+        
+        # Store reference for potential later activation
+        self.hydration_plot_widget = None
+        self.plot_placeholder = plot_placeholder
         
         # Profile summary
         self.profile_summary_label = Gtk.Label()

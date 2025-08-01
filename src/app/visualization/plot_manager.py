@@ -96,10 +96,32 @@ class PlotManager(GObject.Object):
         plot_id = f"{plot_type.value}_{len(self.plots)}"
         config = get_plot_config(plot_type)
         
-        # Create matplotlib figure and canvas
+        # Create matplotlib figure and canvas with safe allocation handling
         figure = Figure(figsize=(8, 6), dpi=self.default_dpi)
         canvas = FigureCanvas(figure)
-        canvas.set_size_request(600, 400)
+        
+        # Ensure minimum valid canvas size with safety bounds to prevent infinite surface errors
+        safe_width = max(200, min(600, 800))  # Clamp between 200-800
+        safe_height = max(150, min(400, 600))  # Clamp between 150-600
+        canvas.set_size_request(safe_width, safe_height)
+        
+        # Override canvas size allocation to prevent infinite surface size errors
+        original_size_allocate = canvas.do_size_allocate
+        def safe_size_allocate(allocation):
+            # Validate allocation dimensions
+            if allocation.width <= 0 or allocation.height <= 0 or allocation.width > 32767 or allocation.height > 32767:
+                self.logger.warning(f"Invalid canvas allocation: {allocation.width}x{allocation.height}, using safe defaults")
+                # Create safe allocation
+                allocation.width = min(max(200, allocation.width), 800) if 0 < allocation.width <= 32767 else 600
+                allocation.height = min(max(150, allocation.height), 600) if 0 < allocation.height <= 32767 else 400
+            
+            try:
+                return original_size_allocate(allocation)
+            except Exception as e:
+                self.logger.error(f"Canvas size allocation failed: {e}")
+                return False
+        
+        canvas.do_size_allocate = safe_size_allocate
         
         # Create navigation toolbar
         toolbar = NavigationToolbar(canvas)

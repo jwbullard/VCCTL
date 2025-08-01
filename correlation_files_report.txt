@@ -1,0 +1,184 @@
+VCCTL Cement Correlation Files Report
+==================================================
+Generated: 2025-07-29 10:21:30
+
+Total cements in database: 37
+
+SUMMARY STATISTICS
+--------------------
+Total correlation files: 158
+Cements with files: 36
+Cements without files: 1
+
+File type distribution:
+  ALU: 9 cements
+  C3A: 36 cements
+  C3S: 36 cements
+  C4F: 12 cements
+  K2O: 5 cements
+  N2O: 24 cements
+  SIL: 36 cements
+
+DETAILED CEMENT LISTING
+-------------------------
+
+cement115       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+cement116       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement133       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+cement135       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+cement136       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+cement140       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement141       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement151       (6 files): alu c3a c3s c4f k2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) c4f(713b) k2o(713b) sil(713b)
+
+cement152       (6 files): alu c3a c3s k2o n2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) k2o(713b) n2o(713b) sil(713b)
+
+cement16130     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16131     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16132     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16133     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16134     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16148     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16149     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16150     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16155     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement16594     (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cement168       (6 files): alu c3a c3s k2o n2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) k2o(713b) n2o(713b) sil(713b)
+
+cementhoc       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cementotc       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+cementrci       (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+csatype10       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+csatype50       (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+danwhite        (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+dh              (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+frcement        (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+ma157           (5 files): alu c3a c3s n2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+ma160           (5 files): alu c3a c3s c4f sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+ma165           (6 files): alu c3a c3s c4f k2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) c4f(713b) k2o(713b) sil(713b)
+
+ma178           (6 files): alu c3a c3s k2o n2o sil
+                 Sizes: alu(713b) c3a(713b) c3s(713b) k2o(713b) n2o(713b) sil(713b)
+
+newCement       (0 files): NO CORRELATION FILES
+
+rossi           (5 files): alu c3a c3s n2o sil
+                 Sizes: alu(724b) c3a(724b) c3s(724b) n2o(724b) sil(724b)
+
+sacci-425       (5 files): alu c3a c3s n2o sil
+                 Sizes: alu(724b) c3a(724b) c3s(724b) n2o(724b) sil(724b)
+
+sacement        (4 files): c3a c3s c4f sil
+                 Sizes: c3a(713b) c3s(713b) c4f(713b) sil(713b)
+
+ustype1         (4 files): c3a c3s n2o sil
+                 Sizes: c3a(713b) c3s(713b) n2o(713b) sil(713b)
+
+CEMENTS BY FILE TYPE
+--------------------
+C3S files (36 cements):
+  cement115    cement116    cement133    cement135    cement136   
+  cement140    cement141    cement151    cement152    cement16130 
+  cement16131  cement16132  cement16133  cement16134  cement16148 
+  cement16149  cement16150  cement16155  cement16594  cement168   
+  cementhoc    cementotc    cementrci    csatype10    csatype50   
+  danwhite     dh           frcement     ma157        ma160       
+  ma165        ma178        rossi        sacci-425    sacement    
+  ustype1     
+
+SIL files (36 cements):
+  cement115    cement116    cement133    cement135    cement136   
+  cement140    cement141    cement151    cement152    cement16130 
+  cement16131  cement16132  cement16133  cement16134  cement16148 
+  cement16149  cement16150  cement16155  cement16594  cement168   
+  cementhoc    cementotc    cementrci    csatype10    csatype50   
+  danwhite     dh           frcement     ma157        ma160       
+  ma165        ma178        rossi        sacci-425    sacement    
+  ustype1     
+
+C3A files (36 cements):
+  cement115    cement116    cement133    cement135    cement136   
+  cement140    cement141    cement151    cement152    cement16130 
+  cement16131  cement16132  cement16133  cement16134  cement16148 
+  cement16149  cement16150  cement16155  cement16594  cement168   
+  cementhoc    cementotc    cementrci    csatype10    csatype50   
+  danwhite     dh           frcement     ma157        ma160       
+  ma165        ma178        rossi        sacci-425    sacement    
+  ustype1     
+
+C4F files (12 cements):
+  cement115    cement133    cement135    cement136    cement151   
+  csatype10    csatype50    dh           frcement     ma160       
+  ma165        sacement    
+
+ALU files (9 cements):
+  cement151    cement152    cement168    ma157        ma160       
+  ma165        ma178        rossi        sacci-425   
+
+K2O files (5 cements):
+  cement151    cement152    cement168    ma165        ma178       
+
+N2O files (24 cements):
+  cement116    cement140    cement141    cement152    cement16130 
+  cement16131  cement16132  cement16133  cement16134  cement16148 
+  cement16149  cement16150  cement16155  cement16594  cement168   
+  cementhoc    cementotc    cementrci    danwhite     ma157       
+  ma178        rossi        sacci-425    ustype1     

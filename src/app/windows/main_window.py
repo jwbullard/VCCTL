@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GObject, GLib
 
 if TYPE_CHECKING:
     from app.application import VCCTLApplication
@@ -96,8 +96,13 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         # Setup help system integration
         self._setup_help_system_integration()
         
-        # Show all widgets
-        self.show_all()
+        # Show window immediately - revert to direct approach for better performance
+        try:
+            self.resize(1200, 800)  # Set initial size
+            self.show_all()
+            self.logger.debug("Window displayed successfully")
+        except Exception as e:
+            self.logger.error(f"Error showing window: {e}")
     
     def _create_header_bar(self) -> None:
         """Create and setup the header bar."""
@@ -271,15 +276,15 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         # Connect notebook signals
         self.notebook.connect('switch-page', self._on_tab_switched)
         
-        # Create tab pages
+        # Create tabs directly for better performance
         self._create_home_tab()
-        self._create_materials_tab()
-        self._create_mix_design_tab()
-        self._create_microstructure_tab()
-        self._create_hydration_tab()
-        self._create_file_management_tab()
-        self._create_operations_tab()
-        self._create_results_tab()
+        self._create_materials_tab()         # WORKING - contains aggregate data (now FIXED)
+        self._create_mix_design_tab()        # RE-ENABLED - aggregate names fixed
+        self._create_microstructure_tab()    # RE-ENABLED - 3D viewer working
+        self._create_hydration_tab()         # RE-ENABLED - plot widgets working
+        self._create_file_management_tab()   # RE-ENABLED - testing file operations
+        self._create_operations_tab()        # RE-ENABLED - testing monitoring panel
+        self._create_results_tab()           # RE-ENABLED - testing results visualization
         
         # Pack notebook into main container
         main_vbox.pack_start(self.notebook, True, True, 0)
@@ -412,6 +417,9 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
     def _on_destroy(self, widget: Gtk.Widget) -> None:
         """Handle window destroy event."""
         try:
+            # Cleanup all panels first
+            self.cleanup()
+            
             # Stop performance monitoring
             if hasattr(self, 'performance_monitor'):
                 self.performance_monitor.stop_monitoring()
@@ -785,8 +793,94 @@ Services:"""
         """Hide the progress bar."""
         self.progress_bar.hide()
     
+    def _create_placeholder_tabs(self) -> None:
+        """Create placeholder tabs without complex widgets to prevent surface creation issues."""
+        # Create single placeholder tab
+        placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        placeholder.set_margin_top(50)
+        placeholder.set_margin_bottom(50)
+        placeholder.set_margin_left(50)
+        placeholder.set_margin_right(50)
+        
+        # Add loading message
+        loading_label = Gtk.Label("Loading VCCTL...")
+        loading_label.set_name("loading-label")
+        loading_label.set_markup('<span size="large">Loading VCCTL Application...</span>')
+        placeholder.pack_start(loading_label, True, True, 0)
+        
+        # Add progress indicator
+        spinner = Gtk.Spinner()
+        spinner.start()
+        placeholder.pack_start(spinner, False, False, 10)
+        
+        # Create tab label
+        tab_label = Gtk.Label("Loading")
+        
+        # Add to notebook
+        self.notebook.append_page(placeholder, tab_label)
+    
+    def _initialize_complex_widgets(self) -> None:
+        """Initialize complex widgets after window is properly sized to prevent surface creation issues."""
+        try:
+            self.logger.debug("Initializing complex widgets...")
+            
+            # Clear placeholder tabs
+            while self.notebook.get_n_pages() > 0:
+                self.notebook.remove_page(0)
+            
+            # Create actual tabs (temporarily load only essential ones to isolate infinite surface warnings)
+            self._create_home_tab()
+            # RE-ENABLE MATERIALS PANEL WITH DIAGNOSTIC MODE
+            self._create_materials_tab()
+            # RE-ENABLE ALL PANELS - APPLICATION WORKS PROPERLY DESPITE COSMETIC WARNINGS
+            self._create_mix_design_tab()
+            self._create_microstructure_tab() 
+            self._create_hydration_tab()
+            self._create_file_management_tab()
+            self._create_operations_tab()
+            self._create_results_tab()
+            
+            # Set initial tab
+            self.notebook.set_current_page(0)
+            
+            self.logger.debug("Complex widgets initialized successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize complex widgets: {e}")
+            # Show error tab
+            error_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+            error_box.set_margin_top(50)
+            error_box.set_margin_bottom(50)
+            error_box.set_margin_left(50)
+            error_box.set_margin_right(50)
+            
+            error_label = Gtk.Label(f"Error loading application: {e}")
+            error_label.set_name("error-label")
+            error_label.set_line_wrap(True)
+            error_box.pack_start(error_label, True, True, 0)
+            
+            tab_label = Gtk.Label("Error")
+            self.notebook.append_page(error_box, tab_label)
+    
+    def _create_simple_tab(self, tab_name: str, message: str) -> None:
+        """Create a simple tab with just a message label."""
+        tab_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        tab_box.set_margin_top(50)
+        tab_box.set_margin_bottom(50)
+        tab_box.set_margin_left(50)
+        tab_box.set_margin_right(50)
+        
+        message_label = Gtk.Label(message)
+        message_label.set_halign(Gtk.Align.CENTER)
+        message_label.set_valign(Gtk.Align.CENTER)
+        tab_box.pack_start(message_label, True, True, 0)
+        
+        tab_label = Gtk.Label(tab_name)
+        self.notebook.append_page(tab_box, tab_label)
+    
     def _create_home_tab(self) -> None:
         """Create the home/welcome tab."""
+        
         # Create welcome content
         welcome_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
         welcome_box.set_margin_top(40)
@@ -888,6 +982,7 @@ This GTK3 desktop application provides an intuitive interface for:
     
     def _create_materials_tab(self) -> None:
         """Create the materials management tab."""
+        
         # Create the actual materials panel
         self.materials_panel = MaterialsPanel(self)
         self.panels['materials'] = self.materials_panel
@@ -903,6 +998,7 @@ This GTK3 desktop application provides an intuitive interface for:
         )
         
         tab_label = Gtk.Label("Materials")
+        tab_label.set_name("materials-tab")  # Test ID for Playwright
         self.notebook.append_page(self.materials_panel, tab_label)
     
     def _create_mix_design_tab(self) -> None:
@@ -922,6 +1018,7 @@ This GTK3 desktop application provides an intuitive interface for:
         )
         
         tab_label = Gtk.Label("Mix Design")
+        tab_label.set_name("mix-design-tab")  # Test ID for Playwright
         self.notebook.append_page(self.mix_design_panel, tab_label)
     
     def _create_microstructure_tab(self) -> None:
@@ -998,6 +1095,7 @@ This GTK3 desktop application provides an intuitive interface for:
         )
         
         tab_label = Gtk.Label("Operations")
+        tab_label.set_name("operations-tab")  # Test ID for Playwright
         self.notebook.append_page(self.operations_panel, tab_label)
     
     def _create_results_tab(self) -> None:
