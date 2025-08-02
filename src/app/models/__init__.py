@@ -19,6 +19,7 @@ from app.models.grading import Grading, GradingCreate, GradingUpdate, GradingRes
 from app.models.operation import Operation, OperationCreate, OperationUpdate, OperationResponse, OperationStatus, OperationType
 from app.models.db_file import DbFile, DbFileCreate, DbFileUpdate, DbFileResponse
 from app.models.aggregate_sieve import AggregateSieve, AggregateSieveCreate, AggregateSieveUpdate, AggregateSieveResponse, SieveType
+from app.models.mix_design import MixDesign, MixDesignCreate, MixDesignUpdate, MixDesignResponse, MixDesignComponentData, MixDesignPropertiesData
 
 # Export all models for easy importing
 __all__ = [
@@ -35,6 +36,7 @@ __all__ = [
     'Operation',
     'DbFile',
     'AggregateSieve',
+    'MixDesign',
     
     # Pydantic Create Models
     'CementCreate',
@@ -49,6 +51,7 @@ __all__ = [
     'OperationCreate',
     'DbFileCreate',
     'AggregateSieveCreate',
+    'MixDesignCreate',
     
     # Pydantic Update Models
     'CementUpdate',
@@ -63,6 +66,7 @@ __all__ = [
     'OperationUpdate',
     'DbFileUpdate',
     'AggregateSieveUpdate',
+    'MixDesignUpdate',
     
     # Pydantic Response Models
     'CementResponse',
@@ -77,6 +81,7 @@ __all__ = [
     'OperationResponse',
     'DbFileResponse',
     'AggregateSieveResponse',
+    'MixDesignResponse',
     
     # Enumerations
     'GradingType',
@@ -101,6 +106,7 @@ def get_all_models():
         Operation,
         DbFile,
         AggregateSieve,
+        MixDesign,
     ]
 
 
@@ -117,6 +123,7 @@ def get_model_by_name(model_name: str):
         'particle_shape_set': ParticleShapeSet,
         'grading': Grading,
         'operation': Operation,
+        'mix_design': MixDesign,
     }
     return model_map.get(model_name.lower())
 
@@ -134,6 +141,7 @@ def get_create_model_by_name(model_name: str):
         'particle_shape_set': ParticleShapeSetCreate,
         'grading': GradingCreate,
         'operation': OperationCreate,
+        'mix_design': MixDesignCreate,
     }
     return create_model_map.get(model_name.lower())
 
@@ -151,6 +159,7 @@ def get_update_model_by_name(model_name: str):
         'particle_shape_set': ParticleShapeSetUpdate,
         'grading': GradingUpdate,
         'operation': OperationUpdate,
+        'mix_design': MixDesignUpdate,
     }
     return update_model_map.get(model_name.lower())
 
@@ -168,5 +177,6 @@ def get_response_model_by_name(model_name: str):
         'particle_shape_set': ParticleShapeSetResponse,
         'grading': GradingResponse,
         'operation': OperationResponse,
+        'mix_design': MixDesignResponse,
     }
     return response_model_map.get(model_name.lower())

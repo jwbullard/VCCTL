@@ -267,6 +267,148 @@ class MigrationManager:
                     grading = Grading(**grading_data)
                     session.add(grading)
     
+    def _apply_mix_design_migration(self) -> None:
+        """Apply migration to add mix_design table."""
+        try:
+            self.logger.info("Creating mix_design table...")
+            
+            # Create the SQL for mix_design table
+            mix_design_sql = """
+            CREATE TABLE IF NOT EXISTS mix_design (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(128) NOT NULL UNIQUE,
+                description TEXT,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                water_binder_ratio REAL NOT NULL DEFAULT 0.0,
+                total_water_content REAL NOT NULL DEFAULT 0.0,
+                air_content REAL NOT NULL DEFAULT 0.0,
+                water_volume_fraction REAL NOT NULL DEFAULT 0.0,
+                air_volume_fraction REAL NOT NULL DEFAULT 0.0,
+                system_size INTEGER NOT NULL DEFAULT 100,
+                random_seed INTEGER NOT NULL DEFAULT -1,
+                cement_shape_set VARCHAR(64) DEFAULT 'spherical',
+                aggregate_shape_set VARCHAR(64) DEFAULT 'spherical',
+                components TEXT NOT NULL DEFAULT '[]',
+                calculated_properties TEXT DEFAULT '{}',
+                notes TEXT,
+                is_template BOOLEAN NOT NULL DEFAULT 0
+            )
+            """
+            
+            # Run the migration
+            self.run_sql_migration(mix_design_sql, "002_add_mix_design_table", "Add mix_design table for saved mix designs")
+            
+            # Create some template mix designs
+            self._seed_template_mix_designs()
+            
+            self.logger.info("mix_design table migration completed successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to apply mix_design migration: {e}")
+            raise
+    
+    def _seed_template_mix_designs(self) -> None:
+        """Create template mix designs for users."""
+        try:
+            self.logger.info("Seeding template mix designs...")
+            
+            template_designs = [
+                {
+                    'name': 'Standard Cement Paste (W/B=0.40)',
+                    'description': 'Basic cement paste template with W/B ratio of 0.40',
+                    'water_binder_ratio': 0.40,
+                    'total_water_content': 400.0,
+                    'air_content': 0.0,
+                    'water_volume_fraction': 0.40,
+                    'air_volume_fraction': 0.0,
+                    'system_size': 100,
+                    'random_seed': -1,
+                    'cement_shape_set': 'spherical',
+                    'aggregate_shape_set': 'spherical',
+                    'components': '[{"material_name": "cement140", "material_type": "CEMENT", "mass_fraction": 1.0, "volume_fraction": 0.6, "specific_gravity": 3.15}]',
+                    'calculated_properties': '{"paste_volume_fraction": 1.0, "powder_volume_fraction": 0.6, "aggregate_volume_fraction": 0.0, "binder_content": 1000.0, "water_content": 400.0}',
+                    'notes': 'Template for cement paste studies and microstructure generation',
+                    'is_template': 1
+                },
+                {
+                    'name': 'High Performance Paste (W/B=0.30)',
+                    'description': 'High performance cement paste with low W/B ratio',
+                    'water_binder_ratio': 0.30,
+                    'total_water_content': 300.0,
+                    'air_content': 0.0,
+                    'water_volume_fraction': 0.30,
+                    'air_volume_fraction': 0.0,
+                    'system_size': 100,
+                    'random_seed': -1,
+                    'cement_shape_set': 'spherical',
+                    'aggregate_shape_set': 'spherical',
+                    'components': '[{"material_name": "cement140", "material_type": "CEMENT", "mass_fraction": 1.0, "volume_fraction": 0.7, "specific_gravity": 3.15}]',
+                    'calculated_properties': '{"paste_volume_fraction": 1.0, "powder_volume_fraction": 0.7, "aggregate_volume_fraction": 0.0, "binder_content": 1000.0, "water_content": 300.0}',
+                    'notes': 'High performance paste for durability studies',
+                    'is_template': 1
+                },
+                {
+                    'name': 'Cement + Fly Ash Blend (W/B=0.45)',
+                    'description': 'Binary paste with 20% fly ash replacement',
+                    'water_binder_ratio': 0.45,
+                    'total_water_content': 450.0,
+                    'air_content': 0.0,
+                    'water_volume_fraction': 0.45,
+                    'air_volume_fraction': 0.0,
+                    'system_size': 100,
+                    'random_seed': -1,
+                    'cement_shape_set': 'spherical',
+                    'aggregate_shape_set': 'spherical',
+                    'components': '[{"material_name": "cement140", "material_type": "CEMENT", "mass_fraction": 0.8, "volume_fraction": 0.48, "specific_gravity": 3.15}, {"material_name": "fa80", "material_type": "FLYASH", "mass_fraction": 0.2, "volume_fraction": 0.12, "specific_gravity": 2.2}]',
+                    'calculated_properties': '{"paste_volume_fraction": 1.0, "powder_volume_fraction": 0.6, "aggregate_volume_fraction": 0.0, "binder_content": 1000.0, "water_content": 450.0}',
+                    'notes': 'Binary paste for sustainability studies',
+                    'is_template': 1
+                }
+            ]
+            
+            insert_statements = []
+            for design in template_designs:
+                values = []
+                for key in ['name', 'description', 'water_binder_ratio', 'total_water_content', 'air_content', 
+                           'water_volume_fraction', 'air_volume_fraction', 'system_size', 'random_seed',
+                           'cement_shape_set', 'aggregate_shape_set', 'components', 'calculated_properties', 
+                           'notes', 'is_template']:
+                    value = design[key]
+                    if isinstance(value, str):
+                        # Escape single quotes in strings
+                        value = value.replace("'", "''")
+                        values.append(f"'{value}'")
+                    elif value is None:
+                        values.append('NULL')
+                    else:
+                        values.append(str(value))
+                
+                insert_sql = f"""
+                INSERT OR IGNORE INTO mix_design 
+                (name, description, water_binder_ratio, total_water_content, air_content, 
+                 water_volume_fraction, air_volume_fraction, system_size, random_seed,
+                 cement_shape_set, aggregate_shape_set, components, calculated_properties, 
+                 notes, is_template, created_at, updated_at)
+                VALUES ({', '.join(values)}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                """
+                insert_statements.append(insert_sql)
+            
+            # Execute all insert statements
+            with self.db_service.get_session() as session:
+                for statement in insert_statements:
+                    try:
+                        session.execute(text(statement))
+                    except Exception as e:
+                        self.logger.warning(f"Failed to insert template mix design: {e}")
+                        # Continue with other templates
+            
+            self.logger.info("Template mix designs seeded successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to seed template mix designs: {e}")
+            # Don't raise - this is optional seeding
+    
     def check_database_version(self) -> Dict[str, Any]:
         """Check the current database version and status."""
         version_info = {
@@ -314,8 +456,14 @@ class MigrationManager:
                 self.seed_initial_data()
             else:
                 self.logger.info("Database already initialized")
-                # Here we would apply any new migrations
-                # For now, just log the current state
+                # Apply any new migrations
+                applied_migrations = version_info['applied_migrations']
+                
+                # Check for mix_design table migration
+                if "002_add_mix_design_table" not in applied_migrations:
+                    self.logger.info("Applying mix_design table migration...")
+                    self._apply_mix_design_migration()
+                
                 self.logger.info(f"Current version: {version_info['current_version']}")
                 self.logger.info(f"Applied migrations: {version_info['applied_migrations']}")
             

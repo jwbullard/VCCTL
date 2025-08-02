@@ -865,13 +865,19 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_load_mix_clicked(self, button) -> None:
         """Handle load mix button click."""
-        # TODO: Implement mix loading
-        self.main_window.update_status("Mix loading will be implemented", "info", 3)
+        try:
+            self._show_mix_design_selection_dialog()
+        except Exception as e:
+            self.logger.error(f"Error showing mix design selection dialog: {e}")
+            self.main_window.update_status(f"Error loading mix designs: {e}", "error", 5)
     
     def _on_save_mix_clicked(self, button) -> None:
         """Handle save mix button click."""
-        # TODO: Implement mix saving
-        self.main_window.update_status("Mix saving will be implemented", "info", 3)
+        try:
+            self._show_save_mix_dialog()
+        except Exception as e:
+            self.logger.error(f"Error saving mix design: {e}")
+            self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
     
     def _on_create_mix_clicked(self, button) -> None:
         """Handle create mix button click."""
@@ -3290,3 +3296,562 @@ class MixDesignPanel(Gtk.Box):
             
         except Exception as e:
             self.logger.error(f"Error updating calculated values: {e}")
+    
+    # =============================================================================
+    # Mix Design Save/Load Methods
+    # =============================================================================
+    
+    def _show_save_mix_dialog(self) -> None:
+        """Show dialog to save current mix design."""
+        # Create save dialog
+        dialog = Gtk.Dialog(
+            title="Save Mix Design",
+            transient_for=self.main_window,
+            flags=0
+        )
+        dialog.add_buttons(
+            "Cancel", Gtk.ResponseType.CANCEL,
+            "Save", Gtk.ResponseType.OK
+        )
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        dialog.set_size_request(400, 300)
+        
+        # Create content
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_margin_left(20)
+        content_area.set_margin_right(20)
+        content_area.set_margin_top(10)
+        content_area.set_margin_bottom(10)
+        
+        # Mix name
+        name_label = Gtk.Label("Mix Design Name:")
+        name_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(name_label, False, False, 0)
+        
+        name_entry = Gtk.Entry()
+        current_name = self.mix_name_entry.get_text().strip()
+        name_entry.set_text(current_name if current_name else "New Mix Design")
+        content_area.pack_start(name_entry, False, False, 0)
+        
+        # Description
+        desc_label = Gtk.Label("Description (optional):")
+        desc_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(desc_label, False, False, 0)
+        
+        desc_scrolled = Gtk.ScrolledWindow()
+        desc_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        desc_scrolled.set_size_request(-1, 100)
+        
+        desc_textview = Gtk.TextView()
+        desc_textview.set_wrap_mode(Gtk.WrapMode.WORD)
+        desc_scrolled.add(desc_textview)
+        content_area.pack_start(desc_scrolled, True, True, 0)
+        
+        # Template checkbox
+        template_check = Gtk.CheckButton("Save as template for future use")
+        content_area.pack_start(template_check, False, False, 0)
+        
+        # Notes
+        notes_label = Gtk.Label("Notes (optional):")
+        notes_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(notes_label, False, False, 0)
+        
+        notes_entry = Gtk.Entry()
+        notes_entry.set_placeholder_text("Additional notes or comments...")
+        content_area.pack_start(notes_entry, False, False, 0)
+        
+        dialog.show_all()
+        
+        # Handle response
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            name = name_entry.get_text().strip()
+            
+            # Get description
+            desc_buffer = desc_textview.get_buffer()
+            desc_start = desc_buffer.get_start_iter()
+            desc_end = desc_buffer.get_end_iter()
+            description = desc_buffer.get_text(desc_start, desc_end, False).strip()
+            
+            notes = notes_entry.get_text().strip()
+            is_template = template_check.get_active()
+            
+            if name:
+                self._save_current_mix_design(name, description, notes, is_template)
+            else:
+                self.main_window.update_status("Mix design name is required", "error", 3)
+        
+        dialog.destroy()
+    
+    def _show_mix_design_selection_dialog(self) -> None:
+        """Show dialog to select and load a saved mix design."""
+        # Create selection dialog
+        dialog = Gtk.Dialog(
+            title="Load Mix Design",
+            transient_for=self.main_window,
+            flags=0
+        )
+        dialog.add_buttons(
+            "Cancel", Gtk.ResponseType.CANCEL,
+            "Load", Gtk.ResponseType.OK,
+            "Duplicate", Gtk.ResponseType.APPLY,
+            "Delete", Gtk.ResponseType.REJECT
+        )
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        dialog.set_size_request(600, 400)
+        
+        # Create content
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_margin_left(20)
+        content_area.set_margin_right(20)
+        content_area.set_margin_top(10)
+        content_area.set_margin_bottom(10)
+        
+        # Search box
+        search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        search_label = Gtk.Label("Search:")
+        search_entry = Gtk.Entry()
+        search_entry.set_placeholder_text("Search mix designs...")
+        search_box.pack_start(search_label, False, False, 0)
+        search_box.pack_start(search_entry, True, True, 0)
+        content_area.pack_start(search_box, False, False, 0)
+        
+        # Mix design list
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create list store: name, description, created_date, is_template, mix_id
+        list_store = Gtk.ListStore(str, str, str, bool, int)
+        
+        tree_view = Gtk.TreeView(model=list_store)
+        
+        # Name column
+        name_renderer = Gtk.CellRendererText()
+        name_column = Gtk.TreeViewColumn("Mix Design", name_renderer, text=0)
+        name_column.set_sort_column_id(0)
+        tree_view.append_column(name_column)
+        
+        # Description column
+        desc_renderer = Gtk.CellRendererText()
+        desc_renderer.set_property("ellipsize", 3)  # ELLIPSIZE_END
+        desc_column = Gtk.TreeViewColumn("Description", desc_renderer, text=1)
+        desc_column.set_sort_column_id(1)
+        tree_view.append_column(desc_column)
+        
+        # Created date column
+        date_renderer = Gtk.CellRendererText()
+        date_column = Gtk.TreeViewColumn("Created", date_renderer, text=2)
+        date_column.set_sort_column_id(2)
+        tree_view.append_column(date_column)
+        
+        # Template column
+        template_renderer = Gtk.CellRendererToggle()
+        template_renderer.set_property("activatable", False)
+        template_column = Gtk.TreeViewColumn("Template", template_renderer, active=3)
+        tree_view.append_column(template_column)
+        
+        scrolled.add(tree_view)
+        content_area.pack_start(scrolled, True, True, 0)
+        
+        # Info label
+        info_label = Gtk.Label()
+        info_label.set_halign(Gtk.Align.START)
+        info_label.set_markup("<i>Select a mix design to load, duplicate, or delete</i>")
+        content_area.pack_start(info_label, False, False, 0)
+        
+        # Load mix designs (placeholder for now)
+        self._populate_mix_design_list(list_store)
+        
+        dialog.show_all()
+        
+        # Handle response
+        response = dialog.run()
+        if response in [Gtk.ResponseType.OK, Gtk.ResponseType.APPLY, Gtk.ResponseType.REJECT]:
+            selection = tree_view.get_selection()
+            model, treeiter = selection.get_selected()
+            
+            if treeiter:
+                mix_id = model[treeiter][4]
+                mix_name = model[treeiter][0]
+                
+                if response == Gtk.ResponseType.OK:
+                    self._load_mix_design(mix_id)
+                elif response == Gtk.ResponseType.APPLY:
+                    self._duplicate_mix_design(mix_id, mix_name)
+                elif response == Gtk.ResponseType.REJECT:
+                    self._delete_mix_design(mix_id, mix_name)
+            else:
+                self.main_window.update_status("Please select a mix design", "info", 3)
+        
+        dialog.destroy()
+    
+    def _populate_mix_design_list(self, list_store: Gtk.ListStore) -> None:
+        """Populate the mix design list store."""
+        try:
+            # Load actual mix designs from database
+            from app.services.mix_design_service import MixDesignService
+            
+            list_store.clear()
+            
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            mix_designs = mix_design_service.get_all()
+            
+            for design in mix_designs:
+                # Format: (name, description, date, is_template, id)
+                date_str = design.updated_at.strftime("%Y-%m-%d") if design.updated_at else "Unknown"
+                list_store.append((
+                    design.name,
+                    design.description or "No description",
+                    date_str,
+                    design.is_template,
+                    design.id
+                ))
+            
+            self.logger.info(f"Populated mix design list with {len(mix_designs)} designs")
+            
+        except Exception as e:
+            self.logger.error(f"Error populating mix design list: {e}")
+            self.main_window.update_status(f"Error loading mix designs: {e}", "error", 5)
+    
+    def _extract_current_mix_design_data(self) -> Dict[str, Any]:
+        """Extract current mix design data from UI controls."""
+        try:
+            # Extract component data
+            components = []
+            for row in self.component_rows:
+                material_type = row['type_combo'].get_active_id()
+                material_name = row['name_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if material_type and material_name and mass_kg > 0:
+                    # Get specific gravity from service
+                    specific_gravity = 3.15  # Default
+                    try:
+                        material_type_enum = MaterialType(material_type)
+                        sg = self.mix_service.get_specific_gravity(material_name, material_type_enum)
+                        if sg:
+                            specific_gravity = sg
+                    except Exception as e:
+                        self.logger.warning(f"Could not get specific gravity for {material_name}: {e}")
+                    
+                    # Calculate volume fraction
+                    total_mass = self._calculate_total_mass()
+                    mass_fraction = mass_kg / total_mass if total_mass > 0 else 0.0
+                    volume_fraction = (mass_fraction / specific_gravity) / self._calculate_total_volume_per_unit_mass()
+                    
+                    components.append({
+                        'material_name': material_name,
+                        'material_type': material_type,
+                        'mass_fraction': mass_fraction,
+                        'volume_fraction': volume_fraction,
+                        'specific_gravity': specific_gravity
+                    })
+            
+            # Extract system parameters
+            water_content = self.water_content_spin.get_value()
+            total_mass = self._calculate_total_mass()
+            
+            # Calculate calculated properties
+            paste_volume_fraction, powder_volume_fraction = self._calculate_volume_fractions()
+            aggregate_volume_fraction = self._calculate_aggregate_volume_fraction('fine') + self._calculate_aggregate_volume_fraction('coarse')
+            
+            calculated_properties = {
+                'paste_volume_fraction': paste_volume_fraction,
+                'powder_volume_fraction': powder_volume_fraction,
+                'aggregate_volume_fraction': aggregate_volume_fraction,
+                'binder_content': self._calculate_total_binder_mass(),
+                'water_content': water_content
+            }
+            
+            # Return complete mix design data
+            return {
+                'water_binder_ratio': self.wb_ratio_spin.get_value(),
+                'total_water_content': water_content,
+                'air_content': self.micro_air_content_spin.get_value() * 100.0,  # Convert to percentage
+                'water_volume_fraction': self._calculate_water_volume_fraction(),
+                'air_volume_fraction': self.micro_air_content_spin.get_value(),
+                'system_size': int(self.system_size_x_spin.get_value()),  # Use X dimension as representative
+                'random_seed': int(self.random_seed_spin.get_value()),
+                'cement_shape_set': self.cement_shape_combo.get_active_id() or "spherical",
+                'aggregate_shape_set': self.fine_agg_shape_combo.get_active_id() or "spherical",
+                'components': components,
+                'calculated_properties': calculated_properties
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error extracting mix design data: {e}")
+            raise
+    
+    def _calculate_water_volume_fraction(self) -> float:
+        """Calculate water volume fraction for the current mix."""
+        try:
+            water_mass = self.water_content_spin.get_value()
+            total_mass = self._calculate_total_mass()
+            
+            if total_mass > 0:
+                water_mass_fraction = water_mass / total_mass
+                # Water has specific gravity of 1.0
+                return water_mass_fraction / 1.0
+            return 0.0
+        except Exception:
+            return 0.0
+    
+    def _calculate_total_volume_per_unit_mass(self) -> float:
+        """Calculate total volume per unit mass for volume fraction calculations."""
+        try:
+            total_volume = 0.0
+            total_mass = 0.0
+            
+            # Add powder components
+            for row in self.component_rows:
+                mass_kg = row['mass_spin'].get_value()
+                if mass_kg > 0:
+                    material_type = row['type_combo'].get_active_id()
+                    material_name = row['name_combo'].get_active_id()
+                    
+                    # Get specific gravity
+                    specific_gravity = 3.15  # Default
+                    try:
+                        material_type_enum = MaterialType(material_type)
+                        sg = self.mix_service.get_specific_gravity(material_name, material_type_enum)
+                        if sg:
+                            specific_gravity = sg
+                    except Exception:
+                        pass
+                    
+                    total_volume += mass_kg / specific_gravity
+                    total_mass += mass_kg
+            
+            # Add water (specific gravity = 1.0)
+            water_mass = self.water_content_spin.get_value()
+            total_volume += water_mass / 1.0
+            total_mass += water_mass
+            
+            return total_volume / total_mass if total_mass > 0 else 0.0
+        except Exception:
+            return 0.0
+
+    def _save_current_mix_design(self, name: str, description: str, notes: str, is_template: bool) -> None:
+        """Save the current mix design to database."""
+        try:
+            # Extract current mix design data
+            mix_data = self._extract_current_mix_design_data()
+            
+            # Import mix design service and models
+            from app.services.mix_design_service import MixDesignService
+            from app.models.mix_design import MixDesignCreate, MixDesignComponentData, MixDesignPropertiesData
+            
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            
+            # Convert to Pydantic models
+            components = [MixDesignComponentData(**comp) for comp in mix_data['components']]
+            properties = MixDesignPropertiesData(**mix_data['calculated_properties']) if mix_data['calculated_properties'] else None
+            
+            # Create mix design
+            create_data = MixDesignCreate(
+                name=name,
+                description=description,
+                water_binder_ratio=mix_data['water_binder_ratio'],
+                total_water_content=mix_data['total_water_content'],
+                air_content=mix_data['air_content'],
+                water_volume_fraction=mix_data['water_volume_fraction'],
+                air_volume_fraction=mix_data['air_volume_fraction'],
+                system_size=mix_data['system_size'],
+                random_seed=mix_data['random_seed'],
+                cement_shape_set=mix_data['cement_shape_set'],
+                aggregate_shape_set=mix_data['aggregate_shape_set'],
+                components=components,
+                calculated_properties=properties,
+                notes=notes,
+                is_template=is_template
+            )
+            
+            # Save to database
+            saved_mix = mix_design_service.create(create_data)
+            
+            # Show success message
+            component_count = len(mix_data['components'])
+            self.main_window.update_status(f"Mix design '{name}' saved successfully", "success", 3)
+            self.logger.info(f"Saved mix design: {name} (ID: {saved_mix.id}, components: {component_count}, template: {is_template})")
+            
+        except Exception as e:
+            self.logger.error(f"Error saving mix design: {e}")
+            self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
+    
+    def _populate_ui_from_mix_design(self, mix_design_data: Dict[str, Any]) -> None:
+        """Populate UI controls from mix design data."""
+        try:
+            # Clear existing components
+            self._reset_mix_design()
+            
+            # Set basic parameters
+            self.wb_ratio_spin.set_value(mix_design_data.get('water_binder_ratio', 0.40))
+            self.water_content_spin.set_value(mix_design_data.get('total_water_content', 0.0))
+            self.micro_air_content_spin.set_value(mix_design_data.get('air_volume_fraction', 0.0))
+            
+            # Set system parameters
+            system_size = mix_design_data.get('system_size', 100)
+            self.system_size_x_spin.set_value(system_size)
+            self.system_size_y_spin.set_value(system_size)
+            self.system_size_z_spin.set_value(system_size)
+            
+            self.random_seed_spin.set_value(mix_design_data.get('random_seed', -1))
+            
+            # Set shape sets
+            cement_shape = mix_design_data.get('cement_shape_set', 'spherical')
+            aggregate_shape = mix_design_data.get('aggregate_shape_set', 'spherical')
+            
+            # Find and set cement shape
+            cement_model = self.cement_shape_combo.get_model()
+            for i in range(len(cement_model)):
+                if cement_model[i][0] == cement_shape:
+                    self.cement_shape_combo.set_active(i)
+                    break
+            
+            # Find and set aggregate shape (assuming fine aggregate shape combo)
+            fine_model = self.fine_agg_shape_combo.get_model()
+            for i in range(len(fine_model)):
+                if fine_model[i][0] == aggregate_shape:
+                    self.fine_agg_shape_combo.set_active(i)
+                    break
+            
+            # Add components
+            components = mix_design_data.get('components', [])
+            for comp_data in components:
+                # Add new component row
+                self._add_component_row()
+                
+                # Get the last added row
+                if self.component_rows:
+                    row = self.component_rows[-1]
+                    
+                    # Set material type
+                    material_type = comp_data.get('material_type', '')
+                    type_combo = row['type_combo']
+                    type_model = type_combo.get_model()
+                    for i in range(len(type_model)):
+                        if type_model[i][0] == material_type:
+                            type_combo.set_active(i)
+                            break
+                    
+                    # Update material names for this type
+                    self._update_material_names(row)
+                    
+                    # Set material name
+                    material_name = comp_data.get('material_name', '')
+                    name_combo = row['name_combo']
+                    name_model = name_combo.get_model()
+                    for i in range(len(name_model)):
+                        if name_model[i][0] == material_name:
+                            name_combo.set_active(i)
+                            break
+                    
+                    # Calculate mass from mass fraction
+                    mass_fraction = comp_data.get('mass_fraction', 0.0)
+                    total_water_content = mix_design_data.get('total_water_content', 0.0)
+                    
+                    # Estimate total mass (this is approximate, will be recalculated)
+                    estimated_total_mass = total_water_content / mix_design_data.get('water_binder_ratio', 0.40)
+                    component_mass = mass_fraction * estimated_total_mass
+                    
+                    # Set mass
+                    row['mass_spin'].set_value(component_mass)
+            
+            # Trigger recalculation
+            self._update_all_calculations()
+            
+            self.logger.info(f"Populated UI with mix design data ({len(components)} components)")
+            
+        except Exception as e:
+            self.logger.error(f"Error populating UI from mix design: {e}")
+            raise
+
+    def _load_mix_design(self, mix_id: int) -> None:
+        """Load a mix design from database."""
+        try:
+            # Import mix design service
+            from app.services.mix_design_service import MixDesignService
+            
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            mix_design = mix_design_service.get_by_id(mix_id)
+            
+            if not mix_design:
+                raise ValueError(f"Mix design with ID {mix_id} not found")
+            
+            # Convert to dictionary format for UI population
+            mix_data = {
+                'water_binder_ratio': mix_design.water_binder_ratio,
+                'total_water_content': mix_design.total_water_content,
+                'air_content': mix_design.air_content,
+                'air_volume_fraction': mix_design.air_volume_fraction,
+                'system_size': mix_design.system_size,
+                'random_seed': mix_design.random_seed,
+                'cement_shape_set': mix_design.cement_shape_set,
+                'aggregate_shape_set': mix_design.aggregate_shape_set,
+                'components': mix_design.components,
+                'calculated_properties': mix_design.calculated_properties
+            }
+            
+            # Populate UI
+            self._populate_ui_from_mix_design(mix_data)
+            
+            self.main_window.update_status(f"Loaded mix design '{mix_design.name}' successfully", "success", 3)
+            self.logger.info(f"Loaded mix design: {mix_design.name} (ID: {mix_id})")
+            
+        except Exception as e:
+            self.logger.error(f"Error loading mix design: {e}")
+            self.main_window.update_status(f"Error loading mix design: {e}", "error", 5)
+    
+    def _duplicate_mix_design(self, mix_id: int, mix_name: str) -> None:
+        """Duplicate a mix design."""
+        try:
+            # Import mix design service
+            from app.services.mix_design_service import MixDesignService
+            
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            new_name = mix_design_service.generate_unique_name(f"{mix_name}_copy")
+            duplicated_mix = mix_design_service.duplicate(mix_id, new_name)
+            
+            # Load the duplicated mix into UI
+            self._load_mix_design(duplicated_mix.id)
+            
+            self.main_window.update_status(f"Duplicated '{mix_name}' as '{new_name}'", "success", 3)
+            self.logger.info(f"Duplicated mix design: {mix_id} -> {new_name} (ID: {duplicated_mix.id})")
+            
+        except Exception as e:
+            self.logger.error(f"Error duplicating mix design: {e}")
+            self.main_window.update_status(f"Error duplicating mix design: {e}", "error", 5)
+    
+    def _delete_mix_design(self, mix_id: int, mix_name: str) -> None:
+        """Delete a mix design with confirmation."""
+        try:
+            # Confirmation dialog
+            confirm_dialog = Gtk.MessageDialog(
+                transient_for=self.main_window,
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text=f"Delete Mix Design '{mix_name}'?"
+            )
+            confirm_dialog.format_secondary_text(
+                "This action cannot be undone. The mix design will be permanently removed."
+            )
+            
+            response = confirm_dialog.run()
+            if response == Gtk.ResponseType.YES:
+                # Import mix design service
+                from app.services.mix_design_service import MixDesignService
+                
+                mix_design_service = MixDesignService(self.service_container.database_service)
+                mix_design_service.delete(mix_id)
+                
+                self.main_window.update_status(f"Deleted mix design '{mix_name}'", "success", 3)
+                self.logger.info(f"Deleted mix design: {mix_name} (ID: {mix_id})")
+            
+            confirm_dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Error deleting mix design: {e}")
+            self.main_window.update_status(f"Error deleting mix design: {e}", "error", 5)
