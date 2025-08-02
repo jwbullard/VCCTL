@@ -236,6 +236,14 @@ class OperationsMonitoringPanel(Gtk.Box):
         clear_button.connect('clicked', self._on_clear_completed_clicked)
         toolbar.insert(clear_button, -1)
         
+        # Delete operation button
+        delete_button = Gtk.ToolButton()
+        delete_button.set_icon_name("edit-delete")
+        delete_button.set_label("Delete")
+        delete_button.set_tooltip_text("Delete selected operation and its files")
+        delete_button.connect('clicked', self._on_delete_selected_operation_clicked)
+        toolbar.insert(delete_button, -1)
+        
         # Refresh button
         refresh_button = Gtk.ToolButton()
         refresh_button.set_icon_name("view-refresh")
@@ -349,6 +357,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Operations Files tab
         self._create_operations_files_tab()
+        
+        # Results Analysis Dashboard tab
+        self._create_results_analysis_tab()
         
         details_frame.add(self.details_notebook)
         parent.pack2(details_frame, False, False)  # Fixed size
@@ -775,6 +786,259 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Load initial file tree
         self._load_operations_files()
     
+    def _create_results_analysis_tab(self) -> None:
+        """Create the results analysis dashboard tab."""
+        tab_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        tab_box.set_margin_left(10)
+        tab_box.set_margin_right(10)
+        tab_box.set_margin_top(10)
+        tab_box.set_margin_bottom(10)
+        
+        # Create main scrolled window for the dashboard
+        main_scroll = Gtk.ScrolledWindow()
+        main_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create main content box inside scroll
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        content_box.set_margin_left(10)
+        content_box.set_margin_right(10)
+        content_box.set_margin_top(10)
+        content_box.set_margin_bottom(10)
+        
+        # =====================================================================
+        # Operation Outcome Summary Section
+        # =====================================================================
+        outcome_frame = Gtk.Frame(label="📊 Operation Outcome Summary")
+        outcome_grid = Gtk.Grid()
+        outcome_grid.set_column_spacing(20)
+        outcome_grid.set_row_spacing(10)
+        outcome_grid.set_margin_left(15)
+        outcome_grid.set_margin_right(15)
+        outcome_grid.set_margin_top(10)
+        outcome_grid.set_margin_bottom(10)
+        
+        # Success/Failure metrics with progress bars
+        outcome_metrics = [
+            ("Total Operations:", "results_total_ops", "0"),
+            ("Successful:", "results_success_count", "0"),
+            ("Failed:", "results_failed_count", "0"),
+            ("Success Rate:", "results_success_rate", "0%"),
+            ("Most Recent:", "results_last_operation", "None"),
+            ("Avg Duration:", "results_avg_duration", "00:00:00")
+        ]
+        
+        for row, (label_text, attr_name, default_value) in enumerate(outcome_metrics):
+            # Label
+            label = Gtk.Label(label_text)
+            label.set_halign(Gtk.Align.END)
+            label.get_style_context().add_class("dim-label")
+            outcome_grid.attach(label, 0, row, 1, 1)
+            
+            # Value
+            value_label = Gtk.Label(default_value)
+            value_label.set_halign(Gtk.Align.START)
+            setattr(self, attr_name, value_label)
+            outcome_grid.attach(value_label, 1, row, 1, 1)
+            
+            # Add progress bar for success rate
+            if attr_name == "results_success_rate":
+                self.results_success_progress = Gtk.ProgressBar()
+                self.results_success_progress.set_show_text(False)
+                self.results_success_progress.set_size_request(100, -1)
+                outcome_grid.attach(self.results_success_progress, 2, row, 1, 1)
+        
+        outcome_frame.add(outcome_grid)
+        content_box.pack_start(outcome_frame, False, False, 0)
+        
+        # =====================================================================
+        # Result File Analysis Section  
+        # =====================================================================
+        files_frame = Gtk.Frame(label="📁 Generated Result Files Analysis")
+        files_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        files_box.set_margin_left(15)
+        files_box.set_margin_right(15)
+        files_box.set_margin_top(10)
+        files_box.set_margin_bottom(10)
+        
+        # File statistics
+        files_stats_grid = Gtk.Grid()
+        files_stats_grid.set_column_spacing(20)
+        files_stats_grid.set_row_spacing(5)
+        
+        file_metrics = [
+            ("Microstructure Files (.img):", "results_img_files", "0"),
+            ("Parameter Files (.pimg):", "results_pimg_files", "0"),
+            ("Input Files Generated:", "results_input_files", "0"),
+            ("Total Data Size:", "results_total_size", "0 MB"),
+            ("Largest Operation:", "results_largest_op", "None"),
+            ("Storage Used:", "results_storage_used", "0 MB")
+        ]
+        
+        for row, (label_text, attr_name, default_value) in enumerate(file_metrics):
+            label = Gtk.Label(label_text)
+            label.set_halign(Gtk.Align.END)
+            label.get_style_context().add_class("dim-label")
+            files_stats_grid.attach(label, 0, row, 1, 1)
+            
+            value_label = Gtk.Label(default_value)
+            value_label.set_halign(Gtk.Align.START)
+            setattr(self, attr_name, value_label)
+            files_stats_grid.attach(value_label, 1, row, 1, 1)
+        
+        files_box.pack_start(files_stats_grid, False, False, 0)
+        files_frame.add(files_box)
+        content_box.pack_start(files_frame, False, False, 0)
+        
+        # =====================================================================
+        # Performance Trends Section
+        # =====================================================================
+        trends_frame = Gtk.Frame(label="📈 Performance Trends & Patterns")
+        trends_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        trends_box.set_margin_left(15)
+        trends_box.set_margin_right(15)
+        trends_box.set_margin_top(10)
+        trends_box.set_margin_bottom(10)
+        
+        # Performance metrics
+        trends_grid = Gtk.Grid()
+        trends_grid.set_column_spacing(20)
+        trends_grid.set_row_spacing(5)
+        
+        trend_metrics = [
+            ("Fastest Operation:", "results_fastest_op", "None"),
+            ("Slowest Operation:", "results_slowest_op", "None"),
+            ("Recent Trend:", "results_recent_trend", "No pattern"),
+            ("Failure Pattern:", "results_failure_pattern", "No pattern"),
+            ("Peak Performance Time:", "results_peak_time", "Unknown"),
+            ("Resource Efficiency:", "results_efficiency", "0%")
+        ]
+        
+        for row, (label_text, attr_name, default_value) in enumerate(trend_metrics):
+            label = Gtk.Label(label_text)
+            label.set_halign(Gtk.Align.END)
+            label.get_style_context().add_class("dim-label")
+            trends_grid.attach(label, 0, row, 1, 1)
+            
+            value_label = Gtk.Label(default_value)
+            value_label.set_halign(Gtk.Align.START)
+            setattr(self, attr_name, value_label)
+            trends_grid.attach(value_label, 1, row, 1, 1)
+        
+        trends_box.pack_start(trends_grid, False, False, 0)
+        trends_frame.add(trends_box)
+        content_box.pack_start(trends_frame, False, False, 0)
+        
+        # =====================================================================
+        # Error Analysis Section
+        # =====================================================================
+        errors_frame = Gtk.Frame(label="🔍 Error Analysis & Troubleshooting")
+        errors_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        errors_box.set_margin_left(15)
+        errors_box.set_margin_right(15)
+        errors_box.set_margin_top(10)
+        errors_box.set_margin_bottom(10)
+        
+        # Error patterns
+        self.results_error_text = Gtk.TextView()
+        self.results_error_text.set_editable(False)
+        self.results_error_text.set_cursor_visible(False)
+        self.results_error_text.set_wrap_mode(Gtk.WrapMode.WORD)
+        
+        error_scroll = Gtk.ScrolledWindow()
+        error_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        error_scroll.set_size_request(-1, 150)
+        error_scroll.add(self.results_error_text)
+        
+        errors_box.pack_start(error_scroll, True, True, 0)
+        errors_frame.add(errors_box)
+        content_box.pack_start(errors_frame, True, True, 0)
+        
+        # =====================================================================
+        # Quality Assessment Section  
+        # =====================================================================
+        quality_frame = Gtk.Frame(label="✅ Quality Assessment & Validation")
+        quality_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        quality_box.set_margin_left(15)
+        quality_box.set_margin_right(15)
+        quality_box.set_margin_top(10)
+        quality_box.set_margin_bottom(10)
+        
+        # Quality metrics
+        quality_grid = Gtk.Grid()
+        quality_grid.set_column_spacing(20)
+        quality_grid.set_row_spacing(5)
+        
+        quality_metrics = [
+            ("Valid Results:", "results_valid_count", "0"),
+            ("Invalid Results:", "results_invalid_count", "0"),
+            ("Validation Rate:", "results_validation_rate", "0%"),
+            ("File Integrity:", "results_file_integrity", "Unknown"),
+            ("Data Consistency:", "results_data_consistency", "Unknown"),
+            ("Overall Quality:", "results_overall_quality", "Unknown")
+        ]
+        
+        for row, (label_text, attr_name, default_value) in enumerate(quality_metrics):
+            label = Gtk.Label(label_text)
+            label.set_halign(Gtk.Align.END)
+            label.get_style_context().add_class("dim-label")
+            quality_grid.attach(label, 0, row, 1, 1)
+            
+            value_label = Gtk.Label(default_value)
+            value_label.set_halign(Gtk.Align.START)
+            setattr(self, attr_name, value_label)
+            quality_grid.attach(value_label, 1, row, 1, 1)
+        
+        quality_box.pack_start(quality_grid, False, False, 0)
+        quality_frame.add(quality_box)
+        content_box.pack_start(quality_frame, False, False, 0)
+        
+        # =====================================================================
+        # Dashboard Controls
+        # =====================================================================
+        controls_frame = Gtk.Frame(label="🔧 Dashboard Controls")
+        controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        controls_box.set_margin_left(15)
+        controls_box.set_margin_right(15)
+        controls_box.set_margin_top(10)
+        controls_box.set_margin_bottom(10)
+        
+        # Refresh analysis button
+        refresh_analysis_btn = Gtk.Button(label="🔄 Refresh Analysis")
+        refresh_analysis_btn.set_tooltip_text("Refresh all result analysis data")
+        refresh_analysis_btn.connect('clicked', self._on_refresh_analysis_clicked)
+        controls_box.pack_start(refresh_analysis_btn, False, False, 0)
+        
+        # Export report button
+        export_report_btn = Gtk.Button(label="📄 Export Report") 
+        export_report_btn.set_tooltip_text("Export results analysis report")
+        export_report_btn.connect('clicked', self._on_export_report_clicked)
+        controls_box.pack_start(export_report_btn, False, False, 0)
+        
+        # Cleanup old results button
+        cleanup_btn = Gtk.Button(label="🧹 Cleanup Old Results")
+        cleanup_btn.set_tooltip_text("Remove old operation results to free space")
+        cleanup_btn.connect('clicked', self._on_cleanup_results_clicked)
+        controls_box.pack_start(cleanup_btn, False, False, 0)
+        
+        # Validation check button
+        validate_btn = Gtk.Button(label="🔍 Validate Results") 
+        validate_btn.set_tooltip_text("Run validation check on all results")
+        validate_btn.connect('clicked', self._on_validate_results_clicked)
+        controls_box.pack_start(validate_btn, False, False, 0)
+        
+        controls_frame.add(controls_box)
+        content_box.pack_start(controls_frame, False, False, 0)
+        
+        # Add content to scroll window
+        main_scroll.add(content_box)
+        tab_box.pack_start(main_scroll, True, True, 0)
+        
+        # Add tab to notebook
+        self.details_notebook.append_page(tab_box, Gtk.Label("📊 Results Analysis"))
+        
+        # Initial analysis refresh
+        self._refresh_results_analysis()
+    
     def _create_status_bar(self) -> None:
         """Create the status bar."""
         self.status_bar = Gtk.Statusbar()
@@ -908,6 +1172,27 @@ class OperationsMonitoringPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error updating UI: {e}")
     
+    def _get_meaningful_operation_name(self, operation: Operation) -> str:
+        """Extract meaningful operation name from metadata."""
+        # Check if metadata contains output_dir with mix name
+        if hasattr(operation, 'metadata') and isinstance(operation.metadata, dict):
+            output_dir = operation.metadata.get('output_dir', '')
+            if output_dir:
+                # Extract mix name from path like "/Operations/NormalPaste10/"
+                path_parts = Path(output_dir).parts
+                if len(path_parts) >= 2 and path_parts[-2] == 'Operations':
+                    mix_name = path_parts[-1]
+                    if mix_name:
+                        return f"{mix_name} Microstructure"
+                elif len(path_parts) >= 1:
+                    # Just take the last directory name
+                    mix_name = path_parts[-1]
+                    if mix_name and mix_name != 'Operations':
+                        return f"{mix_name} Microstructure"
+        
+        # Fallback to original name
+        return operation.name
+
     def _update_operations_list(self) -> None:
         """Update the operations list view efficiently without clearing."""
         if not self.operations_store:
@@ -925,9 +1210,12 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             resource_str = f"CPU: {operation.cpu_usage:.1f}% MEM: {operation.memory_usage:.0f}MB"
             
+            # Get meaningful operation name from metadata
+            meaningful_name = self._get_meaningful_operation_name(operation)
+            
             current_ops[operation.id] = [
                 operation.id,                                                    # Column 0: ID
-                operation.name,                                                  # Column 1: Name  
+                meaningful_name,                                                 # Column 1: Name  
                 operation.operation_type.value.replace('_', ' ').title(),      # Column 2: Type
                 operation.status.value.title(),                                # Column 3: Status
                 operation.progress_percentage,                                  # Column 4: Progress
@@ -1164,6 +1452,76 @@ class OperationsMonitoringPanel(Gtk.Box):
             del self.operations[op_id]
         
         self._update_operations_list()
+    
+    def _on_delete_selected_operation_clicked(self, button: Gtk.Button) -> None:
+        """Handle delete selected operation button click."""
+        selected_operation = self._get_selected_operation()
+        if not selected_operation:
+            self._update_status("No operation selected for deletion")
+            return
+        
+        # Only allow deletion of non-running operations
+        if selected_operation.status == OperationStatus.RUNNING:
+            self._update_status("Cannot delete running operation. Stop it first.")
+            return
+        
+        # Get meaningful name for confirmation dialog
+        meaningful_name = self._get_meaningful_operation_name(selected_operation)
+        
+        # Show confirmation dialog
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.YES_NO,
+            text="Delete Operation?"
+        )
+        dialog.format_secondary_text(
+            f"Are you sure you want to delete the operation '{meaningful_name}'?\n\n"
+            "This will permanently delete:\n"
+            "• Operation from database\n"
+            "• Associated folder and all files\n"
+            "• Input files\n"
+            "• Output files (.img, .pimg)\n"
+            "• Log files\n"
+            "• Correlation files\n\n"
+            "This action cannot be undone."
+        )
+        
+        response = dialog.run()
+        dialog.destroy()
+        
+        if response == Gtk.ResponseType.YES:
+            try:
+                # Delete from operations dictionary
+                operation_id = selected_operation.id
+                
+                # Get the operation folder path from metadata
+                output_dir = None
+                if hasattr(selected_operation, 'metadata') and isinstance(selected_operation.metadata, dict):
+                    output_dir = selected_operation.metadata.get('output_dir', '')
+                
+                # Delete the operation from memory
+                if operation_id in self.operations:
+                    del self.operations[operation_id]
+                
+                # Delete the associated folder if it exists
+                if output_dir and Path(output_dir).exists():
+                    import shutil
+                    shutil.rmtree(output_dir)
+                    self.logger.info(f"Deleted operation folder: {output_dir}")
+                
+                # Save updated operations to file
+                self._save_operations_to_file()
+                
+                # Refresh the UI
+                self._update_operations_list()
+                self._load_operations_files()  # Refresh file browser
+                
+                self._update_status(f"Operation '{meaningful_name}' deleted successfully")
+                
+            except Exception as e:
+                self.logger.error(f"Error deleting operation: {e}")
+                self._update_status(f"Error deleting operation: {e}")
     
     def _on_refresh_clicked(self, button: Gtk.Button) -> None:
         """Handle refresh button click."""
@@ -1724,6 +2082,668 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Clear the file preview area."""
         buffer = self.file_preview.get_buffer()
         buffer.set_text("")
+    
+    # =========================================================================
+    # Results Analysis Dashboard Methods
+    # =========================================================================
+    
+    def _refresh_results_analysis(self) -> None:
+        """Refresh all results analysis data."""
+        try:
+            self.logger.info("Refreshing results analysis dashboard...")
+            
+            # Get operations data from saved history  
+            operations_data = self._load_operations_data()
+            
+            # Analyze operation outcomes
+            self._analyze_operation_outcomes(operations_data)
+            
+            # Analyze result files
+            self._analyze_result_files()
+            
+            # Analyze performance trends
+            self._analyze_performance_trends(operations_data)
+            
+            # Analyze error patterns
+            self._analyze_error_patterns(operations_data)
+            
+            # Assess quality metrics
+            self._assess_quality_metrics()
+            
+            self.logger.info("Results analysis dashboard refresh completed")
+            
+        except Exception as e:
+            self.logger.error(f"Error refreshing results analysis: {e}")
+            self._set_error_analysis(f"Error refreshing analysis: {e}")
+    
+    def _load_operations_data(self) -> Dict[str, Any]:
+        """Load operations data from history file."""
+        try:
+            if self.operations_file.exists():
+                with open(self.operations_file, 'r') as f:
+                    return json.load(f)
+            return {'operations': {}}
+        except Exception as e:
+            self.logger.error(f"Error loading operations data: {e}")
+            return {'operations': {}}
+    
+    def _analyze_operation_outcomes(self, operations_data: Dict[str, Any]) -> None:
+        """Analyze operation success/failure patterns."""
+        operations = operations_data.get('operations', {})
+        
+        # Count outcomes
+        total_ops = len(operations)
+        successful_ops = 0
+        failed_ops = 0
+        last_operation = "None"
+        durations = []
+        
+        for op_id, op_data in operations.items():
+            status = op_data.get('status', 'unknown')
+            
+            if status == 'completed':
+                successful_ops += 1
+            elif status == 'failed':
+                failed_ops += 1
+            
+            # Track durations
+            start_time = op_data.get('start_time')
+            end_time = op_data.get('end_time')
+            if start_time and end_time:
+                try:
+                    start_dt = datetime.fromisoformat(start_time)
+                    end_dt = datetime.fromisoformat(end_time)
+                    duration = (end_dt - start_dt).total_seconds()
+                    durations.append(duration)
+                except:
+                    pass
+            
+            # Find most recent operation
+            if end_time:
+                last_operation = op_data.get('name', op_id)
+        
+        # Calculate metrics
+        success_rate = (successful_ops / total_ops * 100) if total_ops > 0 else 0
+        avg_duration = sum(durations) / len(durations) if durations else 0
+        
+        # Format average duration
+        hours, remainder = divmod(int(avg_duration), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        avg_duration_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        
+        # Update UI
+        self.results_total_ops.set_text(str(total_ops))
+        self.results_success_count.set_text(str(successful_ops))
+        self.results_failed_count.set_text(str(failed_ops))
+        self.results_success_rate.set_text(f"{success_rate:.1f}%")
+        self.results_last_operation.set_text(last_operation)
+        self.results_avg_duration.set_text(avg_duration_str)
+        
+        # Update progress bar
+        self.results_success_progress.set_fraction(success_rate / 100.0)
+    
+    def _analyze_result_files(self) -> None:
+        """Analyze generated result files in Operations directory."""
+        try:
+            operations_dir = Path.cwd() / "Operations"
+            
+            if not operations_dir.exists():
+                # No operations directory
+                self.results_img_files.set_text("0")
+                self.results_pimg_files.set_text("0")
+                self.results_input_files.set_text("0")
+                self.results_total_size.set_text("0 MB")
+                self.results_largest_op.set_text("None")
+                self.results_storage_used.set_text("0 MB")
+                return
+            
+            # Count files and sizes
+            img_files = 0
+            pimg_files = 0
+            input_files = 0
+            total_size = 0
+            largest_op = "None"
+            largest_size = 0
+            
+            for op_dir in operations_dir.iterdir():
+                if op_dir.is_dir():
+                    op_size = 0
+                    for file_path in op_dir.rglob('*'):
+                        if file_path.is_file():
+                            file_size = file_path.stat().st_size
+                            total_size += file_size
+                            op_size += file_size
+                            
+                            # Count file types
+                            suffix = file_path.suffix.lower()
+                            if suffix == '.img':
+                                img_files += 1
+                            elif suffix == '.pimg':
+                                pimg_files += 1
+                            elif file_path.name.startswith('genmic_input'):
+                                input_files += 1
+                    
+                    # Track largest operation
+                    if op_size > largest_size:
+                        largest_size = op_size
+                        largest_op = op_dir.name
+            
+            # Format sizes
+            total_mb = total_size / (1024 * 1024)
+            
+            # Update UI
+            self.results_img_files.set_text(str(img_files))
+            self.results_pimg_files.set_text(str(pimg_files))
+            self.results_input_files.set_text(str(input_files))
+            self.results_total_size.set_text(f"{total_mb:.1f} MB")
+            self.results_largest_op.set_text(largest_op)
+            self.results_storage_used.set_text(f"{total_mb:.1f} MB")
+            
+        except Exception as e:
+            self.logger.error(f"Error analyzing result files: {e}")
+            self._set_all_file_metrics_error()
+    
+    def _analyze_performance_trends(self, operations_data: Dict[str, Any]) -> None:
+        """Analyze performance trends and patterns."""
+        operations = operations_data.get('operations', {})
+        
+        if not operations:
+            self._set_all_trend_metrics_none()
+            return
+        
+        # Calculate performance metrics
+        durations = []
+        recent_ops = []
+        failure_times = []
+        
+        for op_id, op_data in operations.items():
+            start_time = op_data.get('start_time')
+            end_time = op_data.get('end_time')
+            status = op_data.get('status')
+            
+            if start_time and end_time:
+                try:
+                    start_dt = datetime.fromisoformat(start_time)
+                    end_dt = datetime.fromisoformat(end_time)
+                    duration = (end_dt - start_dt).total_seconds()
+                    
+                    durations.append({
+                        'name': op_data.get('name', op_id),
+                        'duration': duration,
+                        'start_time': start_dt,
+                        'status': status
+                    })
+                    
+                    # Track recent operations (last 24 hours)
+                    if (datetime.now() - end_dt).days == 0:
+                        recent_ops.append({'name': op_data.get('name', op_id), 'status': status})
+                    
+                    # Track failure times
+                    if status == 'failed':
+                        failure_times.append(start_dt.hour)
+                        
+                except Exception as e:
+                    self.logger.warning(f"Error parsing operation times for {op_id}: {e}")
+        
+        # Find fastest and slowest operations
+        if durations:
+            fastest = min(durations, key=lambda x: x['duration'])
+            slowest = max(durations, key=lambda x: x['duration'])
+            
+            # Format durations
+            def format_duration(seconds):
+                hours, remainder = divmod(int(seconds), 3600)
+                minutes, secs = divmod(remainder, 60)
+                return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+            
+            fastest_str = f"{fastest['name']} ({format_duration(fastest['duration'])})"
+            slowest_str = f"{slowest['name']} ({format_duration(slowest['duration'])})"
+        else:
+            fastest_str = "None"
+            slowest_str = "None"
+        
+        # Analyze recent trend
+        recent_trend = "No recent operations"
+        if recent_ops:
+            recent_successes = len([op for op in recent_ops if op['status'] == 'completed'])
+            recent_total = len(recent_ops)
+            if recent_total > 0:
+                recent_rate = (recent_successes / recent_total) * 100
+                if recent_rate >= 80:
+                    recent_trend = f"Excellent ({recent_rate:.0f}% success)"
+                elif recent_rate >= 60:
+                    recent_trend = f"Good ({recent_rate:.0f}% success)"
+                else:
+                    recent_trend = f"Poor ({recent_rate:.0f}% success)"
+        
+        # Analyze failure patterns
+        failure_pattern = "No failures detected" 
+        if failure_times:
+            # Find most common failure hour
+            from collections import Counter
+            hour_counts = Counter(failure_times)
+            if hour_counts:
+                most_common_hour = hour_counts.most_common(1)[0][0]
+                failure_pattern = f"Most failures around {most_common_hour:02d}:00"
+        
+        # Peak performance time (simplified analysis)
+        peak_time = "Analysis needed"
+        if durations:
+            # Group by hour and find fastest average
+            hourly_performance = {}
+            for op in durations:
+                hour = op['start_time'].hour
+                if hour not in hourly_performance:
+                    hourly_performance[hour] = []
+                hourly_performance[hour].append(op['duration'])
+            
+            if hourly_performance:
+                # Find hour with best average performance
+                best_hour = min(hourly_performance.keys(), 
+                              key=lambda h: sum(hourly_performance[h]) / len(hourly_performance[h]))
+                peak_time = f"{best_hour:02d}:00 - {best_hour+1:02d}:00"
+        
+        # Calculate efficiency (simplified)
+        efficiency = 0.0
+        if durations:
+            successful_durations = [op['duration'] for op in durations if op['status'] == 'completed']
+            if successful_durations:
+                avg_successful = sum(successful_durations) / len(successful_durations)
+                # Efficiency based on speed (faster = more efficient)
+                # Assume 300 seconds (5 min) as baseline for 100% efficiency
+                efficiency = min(100.0, (300.0 / avg_successful) * 100) if avg_successful > 0 else 0.0
+        
+        # Update UI
+        self.results_fastest_op.set_text(fastest_str)
+        self.results_slowest_op.set_text(slowest_str)
+        self.results_recent_trend.set_text(recent_trend)
+        self.results_failure_pattern.set_text(failure_pattern)
+        self.results_peak_time.set_text(peak_time)
+        self.results_efficiency.set_text(f"{efficiency:.1f}%")
+    
+    def _analyze_error_patterns(self, operations_data: Dict[str, Any]) -> None:
+        """Analyze error patterns and provide troubleshooting insights."""
+        operations = operations_data.get('operations', {})
+        
+        error_analysis = []
+        error_messages = []
+        error_counts = {}
+        
+        # Collect error information
+        for op_id, op_data in operations.items():
+            if op_data.get('status') == 'failed':
+                error_msg = op_data.get('error_message', 'Unknown error')
+                error_messages.append(error_msg)
+                
+                # Count error types
+                if 'genmic execution failed' in error_msg:
+                    error_counts['genmic_execution'] = error_counts.get('genmic_execution', 0) + 1
+                elif 'no output files created' in error_msg:
+                    error_counts['no_output'] = error_counts.get('no_output', 0) + 1
+                elif 'exit code: 1' in error_msg:
+                    error_counts['exit_code_1'] = error_counts.get('exit_code_1', 0) + 1
+                else:
+                    error_counts['other'] = error_counts.get('other', 0) + 1
+        
+        if not error_messages:
+            error_analysis.append("✅ No errors detected in operation history.")
+            error_analysis.append("")
+            error_analysis.append("All operations completed successfully or are still running.")
+        else:
+            error_analysis.append(f"🚨 ERROR ANALYSIS - {len(error_messages)} failed operations detected")
+            error_analysis.append("=" * 60)
+            error_analysis.append("")
+            
+            # Most common errors
+            if error_counts:
+                error_analysis.append("📊 ERROR FREQUENCY:")
+                for error_type, count in sorted(error_counts.items(), key=lambda x: x[1], reverse=True):
+                    if error_type == 'genmic_execution':
+                        error_analysis.append(f"   • genmic execution failures: {count}")
+                    elif error_type == 'no_output':
+                        error_analysis.append(f"   • No output files generated: {count}")
+                    elif error_type == 'exit_code_1':
+                        error_analysis.append(f"   • Process exit errors: {count}")
+                    else:
+                        error_analysis.append(f"   • Other errors: {count}")
+                error_analysis.append("")
+            
+            # Troubleshooting recommendations
+            error_analysis.append("🔧 TROUBLESHOOTING RECOMMENDATIONS:")
+            error_analysis.append("")
+            
+            if error_counts.get('genmic_execution', 0) > 0:
+                error_analysis.append("1. GENMIC EXECUTION ISSUES:")
+                error_analysis.append("   • Check that genmic binary exists and is executable")
+                error_analysis.append("   • Verify input file format and syntax")  
+                error_analysis.append("   • Check available memory and disk space")
+                error_analysis.append("   • Review system resource limits")
+                error_analysis.append("")
+            
+            if error_counts.get('no_output', 0) > 0:
+                error_analysis.append("2. NO OUTPUT FILES GENERATED:")
+                error_analysis.append("   • Verify Operations directory permissions")
+                error_analysis.append("   • Check disk space in output directory")
+                error_analysis.append("   • Review genmic input parameters")
+                error_analysis.append("   • Check for corrupted input data")
+                error_analysis.append("")
+            
+            if error_counts.get('exit_code_1', 0) > 0:
+                error_analysis.append("3. PROCESS EXIT ERRORS:")
+                error_analysis.append("   • Review input file syntax and parameters")
+                error_analysis.append("   • Check for missing correlation files")
+                error_analysis.append("   • Verify cement phase fraction data integrity")
+                error_analysis.append("   • Consider reducing system size if memory limited")
+                error_analysis.append("")
+            
+            # Recent error messages
+            error_analysis.append("📋 RECENT ERROR MESSAGES:")
+            for i, msg in enumerate(error_messages[-5:], 1):  # Last 5 errors
+                error_analysis.append(f"{i}. {msg}")
+        
+        # Update error analysis display
+        error_text = "\n".join(error_analysis)
+        buffer = self.results_error_text.get_buffer()
+        buffer.set_text(error_text)
+    
+    def _assess_quality_metrics(self) -> None:
+        """Assess quality of generated results."""
+        try:
+            operations_dir = Path.cwd() / "Operations"
+            
+            if not operations_dir.exists():
+                self._set_all_quality_metrics_unknown()
+                return
+            
+            # Quality assessment metrics
+            valid_results = 0
+            invalid_results = 0
+            total_operations = 0
+            file_integrity_issues = 0
+            data_consistency_issues = 0
+            
+            for op_dir in operations_dir.iterdir():
+                if op_dir.is_dir():
+                    total_operations += 1
+                    op_valid = True
+                    
+                    # Check for required output files
+                    img_files = list(op_dir.glob('*.img'))
+                    pimg_files = list(op_dir.glob('*.pimg'))
+                    input_files = list(op_dir.glob('genmic_input_*.txt'))
+                    
+                    # Basic validation checks
+                    if not img_files and not pimg_files:
+                        # No output files - likely failed operation
+                        invalid_results += 1
+                        op_valid = False
+                    else:
+                        # Check file integrity (basic size checks)
+                        for img_file in img_files:
+                            if img_file.stat().st_size < 1000:  # Very small files likely corrupted
+                                file_integrity_issues += 1
+                                op_valid = False
+                        
+                        # Check input file exists and has content
+                        if input_files:
+                            for input_file in input_files:
+                                if input_file.stat().st_size < 100:  # Very small input files
+                                    data_consistency_issues += 1
+                        else:
+                            data_consistency_issues += 1  # Missing input file
+                    
+                    if op_valid:
+                        valid_results += 1
+            
+            # Calculate metrics
+            validation_rate = (valid_results / total_operations * 100) if total_operations > 0 else 0
+            
+            # Assess file integrity
+            if file_integrity_issues == 0:
+                file_integrity = "Excellent - No issues detected"
+            elif file_integrity_issues <= 2:
+                file_integrity = f"Good - {file_integrity_issues} minor issues"
+            else:
+                file_integrity = f"Poor - {file_integrity_issues} issues detected"
+            
+            # Assess data consistency  
+            if data_consistency_issues == 0:
+                data_consistency = "Excellent - All files consistent"
+            elif data_consistency_issues <= 2:
+                data_consistency = f"Good - {data_consistency_issues} minor issues"
+            else:
+                data_consistency = f"Poor - {data_consistency_issues} issues detected"
+            
+            # Overall quality assessment
+            if validation_rate >= 90 and file_integrity_issues == 0 and data_consistency_issues == 0:
+                overall_quality = "Excellent ⭐⭐⭐"
+            elif validation_rate >= 75 and file_integrity_issues <= 2 and data_consistency_issues <= 2:
+                overall_quality = "Good ⭐⭐"
+            elif validation_rate >= 50:
+                overall_quality = "Fair ⭐"
+            else:
+                overall_quality = "Poor - Needs attention"
+            
+            # Update UI
+            self.results_valid_count.set_text(str(valid_results))
+            self.results_invalid_count.set_text(str(invalid_results))
+            self.results_validation_rate.set_text(f"{validation_rate:.1f}%")
+            self.results_file_integrity.set_text(file_integrity)
+            self.results_data_consistency.set_text(data_consistency)
+            self.results_overall_quality.set_text(overall_quality)
+            
+        except Exception as e:
+            self.logger.error(f"Error assessing quality metrics: {e}")
+            self._set_all_quality_metrics_error()
+    
+    def _set_error_analysis(self, error_message: str) -> None:
+        """Set error message in analysis display."""
+        buffer = self.results_error_text.get_buffer()
+        buffer.set_text(f"❌ Error performing analysis:\n\n{error_message}")
+    
+    def _set_all_file_metrics_error(self) -> None:
+        """Set error state for all file metrics."""
+        self.results_img_files.set_text("Error")
+        self.results_pimg_files.set_text("Error")
+        self.results_input_files.set_text("Error")
+        self.results_total_size.set_text("Error")
+        self.results_largest_op.set_text("Error")
+        self.results_storage_used.set_text("Error")
+    
+    def _set_all_trend_metrics_none(self) -> None:
+        """Set 'None' state for all trend metrics."""
+        self.results_fastest_op.set_text("None")
+        self.results_slowest_op.set_text("None")
+        self.results_recent_trend.set_text("No operations")
+        self.results_failure_pattern.set_text("No data")
+        self.results_peak_time.set_text("Unknown")
+        self.results_efficiency.set_text("0%")
+    
+    def _set_all_quality_metrics_unknown(self) -> None:
+        """Set 'Unknown' state for all quality metrics.""" 
+        self.results_valid_count.set_text("0")
+        self.results_invalid_count.set_text("0")
+        self.results_validation_rate.set_text("0%")
+        self.results_file_integrity.set_text("No operations directory")
+        self.results_data_consistency.set_text("No operations directory")
+        self.results_overall_quality.set_text("No data available")
+    
+    def _set_all_quality_metrics_error(self) -> None:
+        """Set error state for all quality metrics."""
+        self.results_valid_count.set_text("Error")
+        self.results_invalid_count.set_text("Error")
+        self.results_validation_rate.set_text("Error")
+        self.results_file_integrity.set_text("Error")
+        self.results_data_consistency.set_text("Error")
+        self.results_overall_quality.set_text("Error")
+    
+    # Results Analysis Event Handlers
+    
+    def _on_refresh_analysis_clicked(self, button: Gtk.Button) -> None:
+        """Handle refresh analysis button click."""
+        self._refresh_results_analysis()
+        self._update_status("Results analysis refreshed")
+    
+    def _on_export_report_clicked(self, button: Gtk.Button) -> None:
+        """Handle export report button click."""
+        try:
+            # Create report content
+            report_lines = []
+            report_lines.append("VCCTL Operations Results Analysis Report")
+            report_lines.append("=" * 50)
+            report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report_lines.append("")
+            
+            # Operation outcomes
+            report_lines.append("OPERATION OUTCOMES:")
+            report_lines.append(f"  Total Operations: {self.results_total_ops.get_text()}")
+            report_lines.append(f"  Successful: {self.results_success_count.get_text()}")
+            report_lines.append(f"  Failed: {self.results_failed_count.get_text()}")
+            report_lines.append(f"  Success Rate: {self.results_success_rate.get_text()}")
+            report_lines.append(f"  Average Duration: {self.results_avg_duration.get_text()}")
+            report_lines.append("")
+            
+            # File analysis
+            report_lines.append("RESULT FILES:")
+            report_lines.append(f"  Microstructure Files: {self.results_img_files.get_text()}")
+            report_lines.append(f"  Parameter Files: {self.results_pimg_files.get_text()}")
+            report_lines.append(f"  Input Files: {self.results_input_files.get_text()}")
+            report_lines.append(f"  Total Size: {self.results_total_size.get_text()}")
+            report_lines.append("")
+            
+            # Performance trends
+            report_lines.append("PERFORMANCE TRENDS:")
+            report_lines.append(f"  Fastest Operation: {self.results_fastest_op.get_text()}")
+            report_lines.append(f"  Slowest Operation: {self.results_slowest_op.get_text()}")
+            report_lines.append(f"  Recent Trend: {self.results_recent_trend.get_text()}")
+            report_lines.append(f"  Efficiency: {self.results_efficiency.get_text()}")
+            report_lines.append("")
+            
+            # Quality assessment
+            report_lines.append("QUALITY ASSESSMENT:")
+            report_lines.append(f"  Valid Results: {self.results_valid_count.get_text()}")
+            report_lines.append(f"  Validation Rate: {self.results_validation_rate.get_text()}")
+            report_lines.append(f"  File Integrity: {self.results_file_integrity.get_text()}")
+            report_lines.append(f"  Overall Quality: {self.results_overall_quality.get_text()}")
+            report_lines.append("")
+            
+            # Error analysis
+            buffer = self.results_error_text.get_buffer()
+            start_iter = buffer.get_start_iter()
+            end_iter = buffer.get_end_iter()
+            error_text = buffer.get_text(start_iter, end_iter, False)
+            
+            report_lines.append("ERROR ANALYSIS:")
+            report_lines.extend(error_text.split('\n'))
+            
+            # Show save dialog
+            dialog = Gtk.FileChooserDialog(
+                title="Export Results Analysis Report",
+                parent=self.main_window,
+                action=Gtk.FileChooserAction.SAVE
+            )
+            dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+            dialog.add_button("Save", Gtk.ResponseType.OK)
+            
+            # Set default filename
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            dialog.set_current_name(f"vcctl_results_analysis_{timestamp}.txt")
+            
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                filename = dialog.get_filename()
+                with open(filename, 'w') as f:
+                    f.write('\n'.join(report_lines))
+                self._update_status(f"Report exported to: {filename}")
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Error exporting report: {e}")
+            self._update_status(f"Error exporting report: {e}")
+    
+    def _on_cleanup_results_clicked(self, button: Gtk.Button) -> None:
+        """Handle cleanup old results button click."""
+        # Show confirmation dialog
+        dialog = Gtk.MessageDialog(
+            transient_for=self.main_window,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.YES_NO,
+            text="Cleanup Old Operation Results?"
+        )
+        dialog.format_secondary_text(
+            "This will permanently delete:\n"
+            "• Failed operation folders and files\n"
+            "• Operations older than 30 days\n"
+            "• Temporary and log files\n\n"
+            "This action cannot be undone."
+        )
+        
+        response = dialog.run()
+        dialog.destroy()
+        
+        if response == Gtk.ResponseType.YES:
+            try:
+                operations_dir = Path.cwd() / "Operations"
+                if not operations_dir.exists():
+                    self._update_status("No Operations directory found")
+                    return
+                
+                deleted_count = 0
+                freed_space = 0
+                cutoff_date = datetime.now() - timedelta(days=30)
+                
+                for op_dir in operations_dir.iterdir():
+                    if op_dir.is_dir():
+                        should_delete = False
+                        
+                        # Check if operation is old
+                        mod_time = datetime.fromtimestamp(op_dir.stat().st_mtime)
+                        if mod_time < cutoff_date:
+                            should_delete = True
+                        
+                        # Check if operation failed (no output files)
+                        img_files = list(op_dir.glob('*.img'))
+                        pimg_files = list(op_dir.glob('*.pimg'))
+                        if not img_files and not pimg_files:
+                            should_delete = True
+                        
+                        if should_delete:
+                            # Calculate size before deletion
+                            dir_size = sum(f.stat().st_size for f in op_dir.rglob('*') if f.is_file())
+                            freed_space += dir_size
+                            
+                            # Delete directory
+                            import shutil
+                            shutil.rmtree(op_dir)
+                            deleted_count += 1
+                
+                freed_mb = freed_space / (1024 * 1024)
+                self._update_status(f"Cleanup completed: {deleted_count} operations deleted, {freed_mb:.1f} MB freed")
+                
+                # Refresh analysis after cleanup
+                self._refresh_results_analysis()
+                
+            except Exception as e:
+                self.logger.error(f"Error during cleanup: {e}")
+                self._update_status(f"Error during cleanup: {e}")
+    
+    def _on_validate_results_clicked(self, button: Gtk.Button) -> None:
+        """Handle validate results button click."""
+        try:
+            self._update_status("Running results validation...")
+            
+            # Force refresh quality assessment
+            self._assess_quality_metrics()
+            
+            # Update analysis
+            self._refresh_results_analysis()
+            
+            self._update_status("Results validation completed")
+            
+        except Exception as e:
+            self.logger.error(f"Error during validation: {e}")
+            self._update_status(f"Error during validation: {e}")
 
     def cleanup(self) -> None:
         """Cleanup resources."""
@@ -1795,6 +2815,11 @@ class OperationsMonitoringPanel(Gtk.Box):
             if self.operations:
                 self._update_operations_list()
                 self._update_performance_metrics()
+                # Refresh results analysis with loaded data
+                try:
+                    self._refresh_results_analysis()
+                except Exception as e:
+                    self.logger.warning(f"Error refreshing results analysis on load: {e}")
             
         except Exception as e:
             self.logger.error(f"Failed to load operations from file: {e}", exc_info=True)
@@ -1814,6 +2839,12 @@ class OperationsMonitoringPanel(Gtk.Box):
         if completed_ops:
             self._save_operations_to_file()
             self._last_save_time = time.time()
+            
+            # Also refresh results analysis when operations complete
+            try:
+                self._refresh_results_analysis()
+            except Exception as e:
+                self.logger.warning(f"Error refreshing results analysis: {e}")
 
 
 # Register the widget

@@ -531,10 +531,8 @@ class MixDesignPanel(Gtk.Box):
         # Material type combo (exclude aggregate - it's not a powder component)
         type_combo = Gtk.ComboBoxText()
         type_combo.set_size_request(120, -1)
-        for material_type in MaterialType:
-            if material_type != MaterialType.AGGREGATE:  # Aggregate is not a powder component
-                type_combo.append(material_type.value, material_type.value.replace("_", " ").title())
-        type_combo.set_active(0)
+        # Populate with available material types (will be filtered dynamically)
+        self._populate_material_type_combo(type_combo)
         row_box.pack_start(type_combo, False, False, 0)
         
         # Material name combo
@@ -554,9 +552,10 @@ class MixDesignPanel(Gtk.Box):
         row_box.pack_start(kg_label, False, False, 0)
         
         # Specific gravity display
-        sg_label = Gtk.Label("2.650")
-        sg_label.set_size_request(60, -1)
+        sg_label = Gtk.Label("SG: 2.650")
+        sg_label.set_size_request(80, -1)
         sg_label.get_style_context().add_class("dim-label")
+        sg_label.set_tooltip_text("Specific Gravity - ratio of material density to water density")
         row_box.pack_start(sg_label, False, False, 0)
         
         # Grading button (only for aggregates)
@@ -707,9 +706,75 @@ class MixDesignPanel(Gtk.Box):
         """Handle normalize button click - not applicable for absolute masses."""
         self.main_window.update_status("Normalization not applicable for absolute masses (kg)", "info", 3)
     
+    def _populate_material_type_combo(self, type_combo: Gtk.ComboBoxText) -> None:
+        """Populate material type combo with available types (excluding already selected ones)."""
+        self._populate_material_type_combo_for_row(type_combo)
+    
+    def _update_all_material_type_combos(self, exclude_combo=None) -> None:
+        """Update all material type combos to reflect current selections."""
+        for row in self.component_rows:
+            # Skip the combo that triggered the change to avoid interference
+            if exclude_combo and row['type_combo'] == exclude_combo:
+                continue
+                
+            # Save current selection
+            current_selection = row['type_combo'].get_active_id()
+            
+            # Temporarily block signals to prevent recursive updates
+            row['type_combo'].handler_block_by_func(self._on_component_type_changed)
+            
+            # Repopulate combo
+            self._populate_material_type_combo_for_row(row['type_combo'], current_selection)
+            
+            # Restore selection if still valid
+            if current_selection:
+                # Try to restore the previous selection
+                model = row['type_combo'].get_model()
+                iter_item = model.get_iter_first()
+                while iter_item:
+                    if model.get_value(iter_item, 0) == current_selection:
+                        row['type_combo'].set_active_iter(iter_item)
+                        break
+                    iter_item = model.iter_next(iter_item)
+            
+            # Unblock signals
+            row['type_combo'].handler_unblock_by_func(self._on_component_type_changed)
+    
+    def _populate_material_type_combo_for_row(self, type_combo: Gtk.ComboBoxText, keep_selection: str = None) -> None:
+        """Populate material type combo, optionally keeping a specific selection available."""
+        # Get currently selected material types from all existing rows
+        selected_types = set()
+        for row in self.component_rows:
+            selected_type = row['type_combo'].get_active_id()
+            if selected_type and selected_type != keep_selection:
+                selected_types.add(selected_type)
+        
+        # Clear and repopulate combo
+        type_combo.remove_all()
+        
+        # Add available material types (excluding aggregate and already selected types)
+        available_added = False
+        for material_type in MaterialType:
+            if (material_type != MaterialType.AGGREGATE and 
+                material_type.value not in selected_types):
+                type_combo.append(material_type.value, material_type.value.replace("_", " ").title())
+                available_added = True
+        
+        # If no types are available, show a placeholder
+        if not available_added:
+            type_combo.append("", "No more material types available")
+            type_combo.set_sensitive(False)
+        else:
+            type_combo.set_sensitive(True)
+            if type_combo.get_active() == -1:  # Only set active if nothing is selected
+                type_combo.set_active(0)
+
     def _on_component_type_changed(self, combo, row_data) -> None:
         """Handle component type change."""
         self._update_material_names(row_data)
+        
+        # Update all other material type combos to reflect the new selection
+        self._update_all_material_type_combos(exclude_combo=combo)
         
         # Enable grading button only for aggregates
         material_type_str = combo.get_active_id()
@@ -749,6 +814,9 @@ class MixDesignPanel(Gtk.Box):
         # Remove from our list
         if row_data in self.component_rows:
             self.component_rows.remove(row_data)
+        
+        # Update all remaining material type combos to show newly available options
+        self._update_all_material_type_combos()
         
         if self.auto_calculate_enabled:
             self._trigger_calculation()
@@ -980,13 +1048,13 @@ class MixDesignPanel(Gtk.Box):
             if material_type_str and material_name:
                 material_type = MaterialType(material_type_str)
                 sg = self.mix_service._get_material_specific_gravity(material_name, material_type)
-                sg_label.set_text(f"{sg:.3f}")
+                sg_label.set_text(f"SG: {sg:.3f}")
             else:
-                sg_label.set_text("—")
+                sg_label.set_text("SG: —")
         
         except Exception as e:
             self.logger.warning(f"Failed to update specific gravity: {e}")
-            row_data['sg_label'].set_text("—")
+            row_data['sg_label'].set_text("SG: —")
     
     def _calculate_water_content_from_wb_ratio(self) -> None:
         """Calculate water mass (kg) from W/B ratio (water mass / powder mass)."""
@@ -1442,7 +1510,7 @@ class MixDesignPanel(Gtk.Box):
         # Reset water and air values
         self.wb_ratio_spin.set_value(0.40)
         self.water_content_spin.set_value(0.40)  # Default to match W/B ratio
-        self.micro_air_content_spin.set_value(0.05)  # 5% volume fraction
+        self.micro_air_content_spin.set_value(0.0)  # 5% volume fraction
         
         # Reset microstructure parameters
         self.system_size_x_spin.set_value(100)
@@ -2828,7 +2896,7 @@ class MixDesignPanel(Gtk.Box):
         
         self.fine_agg_mass_spin = Gtk.SpinButton.new_with_range(0.0, 10.0, 0.01)
         self.fine_agg_mass_spin.set_digits(3)
-        self.fine_agg_mass_spin.set_value(1.5)
+        self.fine_agg_mass_spin.set_value(0.0)
         grid.attach(self.fine_agg_mass_spin, 1, 0, 1, 1)
         
         # Add kg label
@@ -2875,7 +2943,7 @@ class MixDesignPanel(Gtk.Box):
         
         self.coarse_agg_mass_spin = Gtk.SpinButton.new_with_range(0.0, 10.0, 0.01)
         self.coarse_agg_mass_spin.set_digits(3)
-        self.coarse_agg_mass_spin.set_value(2.0)
+        self.coarse_agg_mass_spin.set_value(0.0)
         grid.attach(self.coarse_agg_mass_spin, 1, 3, 1, 1)
         
         # Add kg label
@@ -2922,7 +2990,7 @@ class MixDesignPanel(Gtk.Box):
         
         self.micro_air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.2, 0.001)
         self.micro_air_content_spin.set_digits(3)
-        self.micro_air_content_spin.set_value(0.05)
+        self.micro_air_content_spin.set_value(0.0)
         grid.attach(self.micro_air_content_spin, 1, 6, 1, 1)
         
         # Total volume fraction display

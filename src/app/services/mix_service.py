@@ -384,7 +384,21 @@ class MixService:
             # Calculate total volume fractions for different phases
             powder_volume_fraction = sum(comp.volume_fraction for comp in powder_components)
             properties['powder_volume_fraction'] = powder_volume_fraction
-            properties['paste_volume_fraction'] = powder_volume_fraction + properties['water_volume_fraction']
+            
+            # Calculate paste volume fraction correctly - paste is 100% for genmic simulation
+            # Since genmic simulates only paste (powder + water), not air voids
+            air_volume_fraction = properties['air_volume_fraction']
+            solid_volume_fraction = 1.0 - air_volume_fraction  # Volume excluding air
+            
+            if solid_volume_fraction > 0:
+                # For display purposes: normalize powder and water to solid volume (excluding air)
+                # This shows what genmic actually simulates (paste-only basis)
+                properties['powder_volume_fraction'] = powder_volume_fraction / solid_volume_fraction
+                properties['water_volume_fraction'] = properties['water_volume_fraction'] / solid_volume_fraction
+                properties['paste_volume_fraction'] = 1.0  # Always 100% for paste-only simulation
+            else:
+                # Edge case: no air present
+                properties['paste_volume_fraction'] = powder_volume_fraction + properties['water_volume_fraction']
             
             # Calculate powder mass composition
             total_powder_mass = sum(comp.mass_fraction for comp in powder_components)
