@@ -1871,10 +1871,15 @@ class MixDesignPanel(Gtk.Box):
             elif component.material_type == MaterialType.SLAG:
                 # Slag has 1 phase: SLAG(12)
                 num_phases += 1
+            elif component.material_type == MaterialType.SILICA_FUME:
+                # Silica fume has 1 phase: SILICA_FUME(10)
+                num_phases += 1
             elif component.material_type == MaterialType.INERT_FILLER:
                 # Inert filler has 1 phase: INERT(11)
                 num_phases += 1
-            # Future: SILICA_FUME(10) and LIMESTONE(33) would each add 1
+            elif component.material_type == MaterialType.LIMESTONE:
+                # Limestone has 1 phase: CaCO3(33)
+                num_phases += 1
         
         return num_phases
 
@@ -2459,8 +2464,12 @@ class MixDesignPanel(Gtk.Box):
             return 18  # FLYASH
         elif material_type == MaterialType.SLAG:
             return 12  # SLAG
+        elif material_type == MaterialType.SILICA_FUME:
+            return 10  # SILICA_FUME
         elif material_type == MaterialType.INERT_FILLER:
             return 11  # INERT
+        elif material_type == MaterialType.LIMESTONE:
+            return 33  # CaCO3/LIMESTONE
         else:
             return 1  # Default to C3S
     
@@ -2593,17 +2602,28 @@ class MixDesignPanel(Gtk.Box):
                     self.logger.info(f"genmic stdout will be saved to: {stdout_log}")
                     self.logger.info(f"genmic stderr will be saved to: {stderr_log}")
                     
+                    # Use Popen for real-time progress monitoring
                     with open(input_file, 'r') as input_f, \
                          open(stdout_log, 'w') as stdout_f, \
                          open(stderr_log, 'w') as stderr_f:
-                        result = subprocess.run(
+                        
+                        process = subprocess.Popen(
                             [genmic_path],
                             stdin=input_f,
-                            stdout=stdout_f,
-                            stderr=stderr_f,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
                             text=True,
-                            cwd=output_dir
+                            cwd=output_dir,
+                            bufsize=1,  # Line buffered
+                            universal_newlines=True
                         )
+                        
+                        # Monitor progress in real-time
+                        self._monitor_genmic_progress(process, stdout_f, stderr_f, operations_panel, operation_id)
+                        
+                        # Wait for completion
+                        result = process
+                        result.returncode = process.returncode
                     
                     self.logger.info(f"genmic execution completed with return code: {result.returncode}")
                     self.logger.info(f"genmic stdout saved to: {stdout_log}")
@@ -2654,6 +2674,121 @@ class MixDesignPanel(Gtk.Box):
             # Mark operation as failed if it was registered
             if operation_id and operations_panel:
                 operations_panel.complete_operation(operation_id, success=False, error_message=str(e))
+    
+    def _monitor_genmic_progress(self, process: subprocess.Popen, stdout_f, stderr_f, operations_panel, operation_id: Optional[str]) -> None:
+        """Monitor genmic progress in real-time by parsing stdout output."""
+        
+        # Define progress mapping for genmic phases
+        progress_map = {
+            'VCCTL_PROGRESS: INIT_START': (0.05, "Initializing simulation..."),
+            'VCCTL_PROGRESS: SPECSIZE_START': (0.15, "Setting up system dimensions..."),
+            'VCCTL_PROGRESS: ADDAGG_START': (0.22, "Adding aggregate layer..."),
+            'VCCTL_PROGRESS: ADDPART_START': (0.30, "Adding particles..."),
+            'VCCTL_PROGRESS: DISTRIB_START': (0.65, "Distributing cement phases..."),
+            'VCCTL_PROGRESS: ONEPIX_START': (0.82, "Processing one pixel operations..."),
+            'VCCTL_PROGRESS: MEASURE_START': (0.87, "Measuring phase fractions..."),
+            'VCCTL_PROGRESS: OUTPUTMIC_START': (0.92, "Writing output files..."),
+            'VCCTL_PROGRESS: COMPLETE': (1.0, "Simulation complete")
+        }
+        
+        # Fallback progress markers (for genmic without progress markers)
+        fallback_markers = {
+            'Reading input file': (0.05, "Reading input parameters..."),
+            'Generating microstructure': (0.30, "Generating microstructure..."),
+            'Writing output': (0.90, "Writing output files..."),
+            'Finished': (1.0, "Simulation complete")
+        }
+        
+        current_progress = 0.3  # Start at 30% (after input parsing)
+        step_count = 3
+        
+        try:
+            # Read stdout and stderr simultaneously
+            import select
+            
+            while process.poll() is None:
+                # Check if there's data to read (non-blocking)
+                ready_streams = []
+                if hasattr(select, 'select'):  # Unix-like systems
+                    ready_streams, _, _ = select.select([process.stdout, process.stderr], [], [], 0.1)
+                else:
+                    # Windows fallback - just try to read
+                    ready_streams = [process.stdout, process.stderr]
+                
+                for stream in ready_streams:
+                    if stream == process.stdout:
+                        line = stream.readline()
+                        if line:
+                            stdout_f.write(line)
+                            stdout_f.flush()
+                            
+                            # Check for progress markers
+                            line_stripped = line.strip()
+                            
+                            # Check for explicit progress markers first
+                            if line_stripped in progress_map:
+                                progress, message = progress_map[line_stripped]
+                                current_progress = progress
+                                step_count += 1
+                                
+                                if operations_panel and operation_id:
+                                    GLib.idle_add(operations_panel.update_operation_progress,
+                                                operation_id, progress, message, step_count)
+                                
+                                self.logger.info(f"genmic progress: {progress*100:.1f}% - {message}")
+                            
+                            # Check for fallback markers
+                            else:
+                                for marker, (progress, message) in fallback_markers.items():
+                                    if marker.lower() in line_stripped.lower():
+                                        if progress > current_progress:  # Only advance progress
+                                            current_progress = progress
+                                            step_count += 1
+                                            
+                                            if operations_panel and operation_id:
+                                                GLib.idle_add(operations_panel.update_operation_progress,
+                                                            operation_id, progress, message, step_count)
+                                            
+                                            self.logger.info(f"genmic progress (fallback): {progress*100:.1f}% - {message}")
+                                            break
+                    
+                    elif stream == process.stderr:
+                        line = stream.readline()
+                        if line:
+                            stderr_f.write(line)
+                            stderr_f.flush()
+                            
+                            # Log errors but don't update progress for stderr
+                            if line.strip():
+                                self.logger.warning(f"genmic stderr: {line.strip()}")
+            
+            # Final progress update if not already at 100%
+            if current_progress < 1.0:
+                if operations_panel and operation_id:
+                    GLib.idle_add(operations_panel.update_operation_progress,
+                                operation_id, 0.95, "Finalizing...", step_count + 1)
+            
+        except Exception as e:
+            self.logger.error(f"Error monitoring genmic progress: {e}")
+            # Continue with basic progress updates
+            if operations_panel and operation_id:
+                GLib.idle_add(operations_panel.update_operation_progress,
+                            operation_id, 0.8, "Processing (monitoring error)...", step_count)
+        
+        # Ensure all remaining output is captured
+        try:
+            remaining_stdout, remaining_stderr = process.communicate(timeout=5)
+            if remaining_stdout:
+                stdout_f.write(remaining_stdout)
+            if remaining_stderr:
+                stderr_f.write(remaining_stderr)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            remaining_stdout, remaining_stderr = process.communicate()
+            if remaining_stdout:
+                stdout_f.write(remaining_stdout)
+            if remaining_stderr:
+                stderr_f.write(remaining_stderr)
     
     def _genmic_completed(self, result: subprocess.CompletedProcess, output_dir: str, operation_id: Optional[str] = None) -> bool:
         """Handle genmic completion on main thread."""

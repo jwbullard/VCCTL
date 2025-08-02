@@ -454,7 +454,7 @@ int main(int argc, char *argv[]) {
   char instring[MAXSTRING];
   register int ig, jg, kg;
 
-  printf("\nMade it into genmic");
+  printf("VCCTL_PROGRESS: INIT_START\n");
   fflush(stdout);
 
   A = NULL;
@@ -539,6 +539,8 @@ int main(int argc, char *argv[]) {
         bailout("genmic", "Memory allocation error");
         exit(1);
       }
+      printf("VCCTL_PROGRESS: SPECSIZE_START\n");
+      fflush(stdout);
 
       /* Clear the 3-D system to all porosity to start */
 
@@ -552,6 +554,8 @@ int main(int argc, char *argv[]) {
       }
       break;
     case ADDPART:
+      printf("VCCTL_PROGRESS: ADDPART_START\n");
+      fflush(stdout);
       create();
       /*
       Fprog = filehandler("genmic",Progfilename,"WRITE");
@@ -569,12 +573,15 @@ int main(int argc, char *argv[]) {
       makefloc();
       break;
     case MEASURE:
+      printf("VCCTL_PROGRESS: MEASURE_START\n");
+      fflush(stdout);
       measure();
       break;
     case ADDAGG:
+      printf("VCCTL_PROGRESS: ADDAGG_START\n");
+      fflush(stdout);
       Simwall = 1;
       Wallpos = (int)(Xsyssize / 2);
-      printf("\nPlacing one-pixel slab at x = %d\n", Wallpos);
       for (kg = 0; kg < Zsyssize; kg++) {
         for (jg = 0; jg < Ysyssize; jg++) {
           Cement.val[getInt3dindex(Cement, Wallpos, jg, kg)] = TMPAGGID;
@@ -601,6 +608,8 @@ int main(int argc, char *argv[]) {
       break;
     case DISTRIB:
       /* Set up longjmp target for distrib3d return address workaround */
+      printf("VCCTL_PROGRESS: DISTRIB_START\n");
+      fflush(stdout);
       distrib3d_success = 0;
       if (setjmp(distrib3d_jmpbuf) == 0) {
         /* First time - call distrib3d normally */
@@ -646,9 +655,13 @@ int main(int argc, char *argv[]) {
       /* Check to see that the correct number of C3S pixels is there */
       break;
     case OUTPUTMIC:
+      printf("VCCTL_PROGRESS: OUTPUTMIC_START\n");
+      fflush(stdout);
       outmic();
       break;
     case ONEPIX:
+      printf("VCCTL_PROGRESS: ONEPIX_START\n");
+      fflush(stdout);
       if (addonepixels()) {
         printf("\nFailure in adding one-pixel particles.  Exiting.\n\n");
         freedistrib3d();
@@ -663,6 +676,8 @@ int main(int argc, char *argv[]) {
   } while (userc != EXIT);
 
   freegenmic();
+  printf("VCCTL_PROGRESS: COMPLETE\n");
+  fflush(stdout);
   return (0);
 }
 

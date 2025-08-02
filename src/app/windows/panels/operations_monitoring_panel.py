@@ -240,7 +240,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         delete_button = Gtk.ToolButton()
         delete_button.set_icon_name("edit-delete")
         delete_button.set_label("Delete")
-        delete_button.set_tooltip_text("Delete selected operation and its files")
+        delete_button.set_tooltip_text("Delete selected operation(s) and their files")
         delete_button.connect('clicked', self._on_delete_selected_operation_clicked)
         toolbar.insert(delete_button, -1)
         
@@ -297,7 +297,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Create tree view
         self.operations_view = Gtk.TreeView(model=self.operations_store)
         self.operations_view.set_rules_hint(True)
-        self.operations_view.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
+        self.operations_view.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
         
         # Create columns
         columns = [
@@ -1381,12 +1381,17 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _on_operation_selection_changed(self, selection: Gtk.TreeSelection) -> None:
         """Handle operation selection change."""
-        model, treeiter = selection.get_selected()
-        if treeiter:
-            operation_id = model[treeiter][0]
-            operation = self.operations.get(operation_id)
-            if operation:
-                self._update_operation_details(operation)
+        selected_operations = self._get_selected_operations()
+        
+        if len(selected_operations) == 1:
+            # Single selection - show details for that operation
+            self._update_operation_details(selected_operations[0])
+        elif len(selected_operations) > 1:
+            # Multiple selection - show summary information
+            self._update_multiple_operation_details(selected_operations)
+        else:
+            # No selection - clear details
+            self._clear_operation_details()
     
     def _update_operation_details(self, operation: Operation) -> None:
         """Update operation details display."""
@@ -1424,6 +1429,65 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.step_progress.set_fraction(0.0)
             self.step_progress.set_text("0/0")
     
+    def _update_multiple_operation_details(self, operations: List[Operation]) -> None:
+        """Update operation details display for multiple selected operations."""
+        count = len(operations)
+        
+        # Show summary information
+        self.operation_name_value.set_text(f"{count} operations selected")
+        
+        # Count by type
+        type_counts = {}
+        status_counts = {}
+        for op in operations:
+            op_type = op.operation_type.value.replace('_', ' ').title()
+            type_counts[op_type] = type_counts.get(op_type, 0) + 1
+            
+            status = op.status.value.title()
+            status_counts[status] = status_counts.get(status, 0) + 1
+        
+        # Show type summary
+        type_summary = ", ".join(f"{count}x {type_name}" for type_name, count in type_counts.items())
+        self.operation_type_value.set_text(type_summary)
+        
+        # Show status summary  
+        status_summary = ", ".join(f"{count}x {status}" for status, count in status_counts.items())
+        self.operation_status_value.set_text(status_summary)
+        
+        # Show average progress for running operations
+        running_ops = [op for op in operations if op.status == OperationStatus.RUNNING]
+        if running_ops:
+            avg_progress = sum(op.progress for op in running_ops) / len(running_ops)
+            self.overall_progress.set_fraction(avg_progress)
+            self.overall_progress.set_text(f"Avg: {avg_progress * 100:.1f}%")
+        else:
+            self.overall_progress.set_fraction(0.0)
+            self.overall_progress.set_text("N/A")
+        
+        # Clear step progress (not meaningful for multiple operations)
+        self.step_progress.set_fraction(0.0)
+        self.step_progress.set_text("Multiple")
+        
+        # Clear time fields
+        self.operation_start_time_value.set_text("Various")
+        self.operation_duration_value.set_text("Various")
+        self.operation_estimated_completion_value.set_text("Various")
+    
+    def _clear_operation_details(self) -> None:
+        """Clear operation details display when no operations are selected."""
+        self.operation_name_value.set_text("No operation selected")
+        self.operation_type_value.set_text("-")
+        self.operation_status_value.set_text("-")
+        self.operation_start_time_value.set_text("-")
+        self.operation_duration_value.set_text("-")
+        self.operation_estimated_completion_value.set_text("-")
+        
+        # Clear progress bars
+        self.overall_progress.set_fraction(0.0)
+        self.overall_progress.set_text("0%")
+        self.step_progress.set_fraction(0.0)
+        self.step_progress.set_text("0/0")
+    
     def _on_start_operation_clicked(self, button: Gtk.Button) -> None:
         """Handle start operation button click."""
         # Show operation selection dialog
@@ -1454,32 +1518,44 @@ class OperationsMonitoringPanel(Gtk.Box):
         self._update_operations_list()
     
     def _on_delete_selected_operation_clicked(self, button: Gtk.Button) -> None:
-        """Handle delete selected operation button click."""
-        selected_operation = self._get_selected_operation()
-        if not selected_operation:
-            self._update_status("No operation selected for deletion")
+        """Handle delete selected operation(s) button click."""
+        selected_operations = self._get_selected_operations()
+        if not selected_operations:
+            self._update_status("No operations selected for deletion")
             return
         
-        # Only allow deletion of non-running operations
-        if selected_operation.status == OperationStatus.RUNNING:
-            self._update_status("Cannot delete running operation. Stop it first.")
+        # Check for running operations
+        running_operations = [op for op in selected_operations if op.status == OperationStatus.RUNNING]
+        if running_operations:
+            running_names = [self._get_meaningful_operation_name(op) for op in running_operations]
+            self._update_status(f"Cannot delete running operation(s): {', '.join(running_names)}. Stop them first.")
             return
         
-        # Get meaningful name for confirmation dialog
-        meaningful_name = self._get_meaningful_operation_name(selected_operation)
+        # Prepare confirmation dialog
+        operation_count = len(selected_operations)
+        if operation_count == 1:
+            # Single operation - use existing detailed message
+            meaningful_name = self._get_meaningful_operation_name(selected_operations[0])
+            dialog_title = "Delete Operation?"
+            dialog_text = f"Are you sure you want to delete the operation '{meaningful_name}'?"
+        else:
+            # Multiple operations - use bulk message
+            operation_names = [self._get_meaningful_operation_name(op) for op in selected_operations]
+            dialog_title = f"Delete {operation_count} Operations?"
+            dialog_text = f"Are you sure you want to delete {operation_count} operations?\n\nOperations to delete:\n" + "\n".join(f"• {name}" for name in operation_names)
         
         # Show confirmation dialog
         dialog = Gtk.MessageDialog(
             transient_for=self.main_window,
             message_type=Gtk.MessageType.WARNING,
             buttons=Gtk.ButtonsType.YES_NO,
-            text="Delete Operation?"
+            text=dialog_title
         )
         dialog.format_secondary_text(
-            f"Are you sure you want to delete the operation '{meaningful_name}'?\n\n"
+            f"{dialog_text}\n\n"
             "This will permanently delete:\n"
-            "• Operation from database\n"
-            "• Associated folder and all files\n"
+            "• Operation(s) from database\n"
+            "• Associated folder(s) and all files\n"
             "• Input files\n"
             "• Output files (.img, .pimg)\n"
             "• Log files\n"
@@ -1491,37 +1567,51 @@ class OperationsMonitoringPanel(Gtk.Box):
         dialog.destroy()
         
         if response == Gtk.ResponseType.YES:
-            try:
-                # Delete from operations dictionary
-                operation_id = selected_operation.id
-                
-                # Get the operation folder path from metadata
-                output_dir = None
-                if hasattr(selected_operation, 'metadata') and isinstance(selected_operation.metadata, dict):
-                    output_dir = selected_operation.metadata.get('output_dir', '')
-                
-                # Delete the operation from memory
-                if operation_id in self.operations:
-                    del self.operations[operation_id]
-                
-                # Delete the associated folder if it exists
-                if output_dir and Path(output_dir).exists():
-                    import shutil
-                    shutil.rmtree(output_dir)
-                    self.logger.info(f"Deleted operation folder: {output_dir}")
-                
-                # Save updated operations to file
-                self._save_operations_to_file()
-                
-                # Refresh the UI
-                self._update_operations_list()
-                self._load_operations_files()  # Refresh file browser
-                
-                self._update_status(f"Operation '{meaningful_name}' deleted successfully")
-                
-            except Exception as e:
-                self.logger.error(f"Error deleting operation: {e}")
-                self._update_status(f"Error deleting operation: {e}")
+            deleted_count = 0
+            failed_count = 0
+            
+            for operation in selected_operations:
+                try:
+                    # Delete from operations dictionary
+                    operation_id = operation.id
+                    
+                    # Get the operation folder path from metadata
+                    output_dir = None
+                    if hasattr(operation, 'metadata') and isinstance(operation.metadata, dict):
+                        output_dir = operation.metadata.get('output_dir', '')
+                    
+                    # Delete the operation from memory
+                    if operation_id in self.operations:
+                        del self.operations[operation_id]
+                    
+                    # Delete the associated folder if it exists
+                    if output_dir and Path(output_dir).exists():
+                        import shutil
+                        shutil.rmtree(output_dir)
+                        self.logger.info(f"Deleted operation folder: {output_dir}")
+                    
+                    deleted_count += 1
+                    
+                except Exception as e:
+                    failed_count += 1
+                    meaningful_name = self._get_meaningful_operation_name(operation)
+                    self.logger.error(f"Error deleting operation '{meaningful_name}': {e}")
+            
+            # Save updated operations to file
+            self._save_operations_to_file()
+            
+            # Refresh the UI
+            self._update_operations_list()
+            self._load_operations_files()  # Refresh file browser
+            
+            # Update status with results
+            if failed_count == 0:
+                if deleted_count == 1:
+                    self._update_status(f"Operation deleted successfully")
+                else:
+                    self._update_status(f"{deleted_count} operations deleted successfully")
+            else:
+                self._update_status(f"{deleted_count} operations deleted, {failed_count} failed. Check logs for details.")
     
     def _on_refresh_clicked(self, button: Gtk.Button) -> None:
         """Handle refresh button click."""
@@ -1560,6 +1650,25 @@ class OperationsMonitoringPanel(Gtk.Box):
             operation_id = model[treeiter][0]
             return self.operations.get(operation_id)
         return None
+    
+    def _get_selected_operations(self) -> List[Operation]:
+        """Get all currently selected operations."""
+        if not self.operations_view:
+            return []
+        
+        selection = self.operations_view.get_selection()
+        model, selected_rows = selection.get_selected_rows()
+        selected_operations = []
+        
+        for path in selected_rows:
+            treeiter = model.get_iter(path)
+            if treeiter:
+                operation_id = model[treeiter][0]
+                operation = self.operations.get(operation_id)
+                if operation:
+                    selected_operations.append(operation)
+        
+        return selected_operations
     
     def _show_start_operation_dialog(self) -> None:
         """Show dialog to start a new operation."""
@@ -1837,18 +1946,40 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Add root Operations folder
             root_iter = self.files_store.append(None, ["Operations", str(operations_dir), "folder", "", ""])
             
-            # Load operation directories
-            try:
-                operation_dirs = sorted([d for d in operations_dir.iterdir() if d.is_dir()])
-                for op_dir in operation_dirs:
-                    self._add_operation_folder(root_iter, op_dir)
+            # Load operation directories (filter out hidden files and system files)
+            # Add retry logic and better error handling for running operations
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    all_items = list(operations_dir.iterdir())
+                    operation_dirs = sorted([
+                        d for d in all_items 
+                        if d.is_dir() and not d.name.startswith('.') and d.name not in ['__pycache__', 'Thumbs.db']
+                    ])
                     
-                # Expand the root by default
-                self.files_view.expand_row(self.files_store.get_path(root_iter), False)
-                
-            except Exception as e:
-                self.logger.error(f"Error loading operation directories: {e}")
-                self.files_store.append(root_iter, [f"Error: {e}", "", "error", "", ""])
+                    for op_dir in operation_dirs:
+                        self._add_operation_folder(root_iter, op_dir)
+                        
+                    # Expand the root by default
+                    self.files_view.expand_row(self.files_store.get_path(root_iter), False)
+                    break  # Success, exit retry loop
+                    
+                except (PermissionError, OSError, FileNotFoundError) as e:
+                    self.logger.warning(f"File access error on attempt {attempt + 1}: {e}")
+                    if attempt == max_retries - 1:
+                        # Final attempt failed
+                        self.files_store.append(root_iter, [
+                            "⚠️ Files temporarily unavailable (operation running?)", 
+                            "", "warning", "", ""
+                        ])
+                    else:
+                        # Wait a bit before retrying
+                        import time
+                        time.sleep(0.1)
+                except Exception as e:
+                    self.logger.error(f"Error loading operation directories: {e}")
+                    self.files_store.append(root_iter, [f"Error: {e}", "", "error", "", ""])
+                    break
                 
         except Exception as e:
             self.logger.error(f"Error loading operations files: {e}")
@@ -1857,9 +1988,13 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _add_operation_folder(self, parent_iter, op_dir: Path) -> None:
         """Add an operation folder and its files to the tree."""
         try:
-            # Get folder info
-            stat_info = op_dir.stat()
-            modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            # Get folder info with error handling for running operations
+            try:
+                stat_info = op_dir.stat()
+                modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            except (PermissionError, OSError, FileNotFoundError):
+                # Folder access issues, likely due to running operation
+                modified_time = "Accessing..."
             
             # Add operation folder
             folder_iter = self.files_store.append(parent_iter, [
@@ -1870,16 +2005,31 @@ class OperationsMonitoringPanel(Gtk.Box):
                 modified_time
             ])
             
-            # Add files in the operation directory
-            try:
-                files = sorted(op_dir.iterdir())
-                for file_path in files:
-                    if file_path.is_file():
-                        self._add_file_item(folder_iter, file_path)
-                        
-            except Exception as e:
-                self.logger.error(f"Error loading files in {op_dir}: {e}")
-                self.files_store.append(folder_iter, [f"Error loading files: {e}", "", "error", "", ""])
+            # Add files in the operation directory with retry logic
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    files = sorted(op_dir.iterdir())
+                    for file_path in files:
+                        if file_path.is_file():
+                            self._add_file_item(folder_iter, file_path)
+                    break  # Success, exit retry loop
+                    
+                except (PermissionError, OSError, FileNotFoundError) as e:
+                    if attempt == max_retries - 1:
+                        # Final attempt failed
+                        self.files_store.append(folder_iter, [
+                            "⚠️ Files temporarily inaccessible", 
+                            "", "warning", "", ""
+                        ])
+                    else:
+                        # Brief pause before retry
+                        import time
+                        time.sleep(0.05)
+                except Exception as e:
+                    self.logger.error(f"Error loading files in {op_dir}: {e}")
+                    self.files_store.append(folder_iter, [f"Error loading files: {e}", "", "error", "", ""])
+                    break
                 
         except Exception as e:
             self.logger.error(f"Error adding operation folder {op_dir}: {e}")
@@ -1887,9 +2037,15 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _add_file_item(self, parent_iter, file_path: Path) -> None:
         """Add a file item to the tree."""
         try:
-            stat_info = file_path.stat()
-            file_size = self._format_file_size(stat_info.st_size)
-            modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            # Handle file access issues gracefully for running operations
+            try:
+                stat_info = file_path.stat()
+                file_size = self._format_file_size(stat_info.st_size)
+                modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            except (PermissionError, OSError, FileNotFoundError):
+                # File is being written to or temporarily inaccessible
+                file_size = "..."
+                modified_time = "Writing..."
             
             # Determine file type for icon
             file_type = self._get_file_type(file_path)
@@ -1903,7 +2059,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             ])
             
         except Exception as e:
-            self.logger.error(f"Error adding file {file_path}: {e}")
+            # Log error but don't prevent the overall refresh from working
+            self.logger.debug(f"Skipping file {file_path.name}: {e}")
     
     def _format_file_size(self, size_bytes: int) -> str:
         """Format file size in human readable format."""
@@ -2206,7 +2363,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             largest_size = 0
             
             for op_dir in operations_dir.iterdir():
-                if op_dir.is_dir():
+                if op_dir.is_dir() and not op_dir.name.startswith('.') and op_dir.name not in ['__pycache__', 'Thumbs.db']:
                     op_size = 0
                     for file_path in op_dir.rglob('*'):
                         if file_path.is_file():
@@ -2463,7 +2620,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             data_consistency_issues = 0
             
             for op_dir in operations_dir.iterdir():
-                if op_dir.is_dir():
+                if op_dir.is_dir() and not op_dir.name.startswith('.') and op_dir.name not in ['__pycache__', 'Thumbs.db']:
                     total_operations += 1
                     op_valid = True
                     

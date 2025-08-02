@@ -385,20 +385,32 @@ class MixService:
             powder_volume_fraction = sum(comp.volume_fraction for comp in powder_components)
             properties['powder_volume_fraction'] = powder_volume_fraction
             
-            # Calculate paste volume fraction correctly - paste is 100% for genmic simulation
-            # Since genmic simulates only paste (powder + water), not air voids
+            # Calculate paste volume fraction for display
             air_volume_fraction = properties['air_volume_fraction']
-            solid_volume_fraction = 1.0 - air_volume_fraction  # Volume excluding air
             
-            if solid_volume_fraction > 0:
-                # For display purposes: normalize powder and water to solid volume (excluding air)
-                # This shows what genmic actually simulates (paste-only basis)
-                properties['powder_volume_fraction'] = powder_volume_fraction / solid_volume_fraction
-                properties['water_volume_fraction'] = properties['water_volume_fraction'] / solid_volume_fraction
-                properties['paste_volume_fraction'] = 1.0  # Always 100% for paste-only simulation
+            # Check if aggregates are present in the mix
+            aggregate_components = [comp for comp in mix_design.components if comp.material_type == MaterialType.AGGREGATE]
+            aggregate_volume_fraction = sum(comp.volume_fraction for comp in aggregate_components)
+            
+            # Calculate actual paste volume fraction (powder + water) relative to total concrete
+            actual_paste_volume_fraction = powder_volume_fraction + properties['water_volume_fraction']
+            
+            if aggregate_volume_fraction > 0:
+                # When aggregates are present, show actual paste volume relative to total concrete
+                properties['paste_volume_fraction'] = actual_paste_volume_fraction
+                # Keep powder and water fractions as calculated (relative to total concrete)
+                # No normalization needed for display
             else:
-                # Edge case: no air present
-                properties['paste_volume_fraction'] = powder_volume_fraction + properties['water_volume_fraction']
+                # When no aggregates (paste-only mix), normalize to solid volume (excluding air)
+                solid_volume_fraction = 1.0 - air_volume_fraction
+                if solid_volume_fraction > 0:
+                    # For paste-only mixes: normalize to solid volume basis for display
+                    properties['powder_volume_fraction'] = powder_volume_fraction / solid_volume_fraction
+                    properties['water_volume_fraction'] = properties['water_volume_fraction'] / solid_volume_fraction
+                    properties['paste_volume_fraction'] = 1.0  # 100% for paste-only simulation
+                else:
+                    # Edge case: no air present
+                    properties['paste_volume_fraction'] = actual_paste_volume_fraction
             
             # Calculate powder mass composition
             total_powder_mass = sum(comp.mass_fraction for comp in powder_components)
