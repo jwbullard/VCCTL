@@ -2,6 +2,20 @@
 
 ## Current Status: PyVista 3D Viewer Complete - Professional Microstructure Visualization System
 
+### Critical Bug Fix Session (August 4, 2025 - Session 6):
+
+**🚨 CRITICAL AUTO-SELECTION REGRESSION FIXED**:
+- ✅ **Root Cause**: GTK ComboBoxText parameter mismatch in `_populate_material_type_combo_for_row()`
+- ✅ **Issue**: Auto-selection searching for wrong material type format (lowercase vs display format)
+- ✅ **Fix**: Corrected material type comparison logic in `_get_highest_unused_material_type_index()`
+- ✅ **Files Fixed**: `src/app/windows/panels/mix_design_panel.py:765-780`
+- ✅ **Status**: Auto-selection now works correctly (Cement → Fly Ash → Slag → Silica Fume → Limestone → Inert Filler)
+
+**⚠️ PROTECTED FEATURES - DO NOT MODIFY WITHOUT EXPLICIT REQUEST**:
+- `_get_highest_unused_material_type_index()` method (lines 741-778)
+- `_populate_material_type_combo_for_row()` method (lines 722-739) 
+- Auto-selection logic is critical for user experience and was working perfectly in Session 4
+
 ### Latest Development Session (August 3, 2025 - Session 5):
 
 **Git Repository**: https://github.com/jwbullard/VCCTL-GTK.git

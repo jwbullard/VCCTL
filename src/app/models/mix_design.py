@@ -41,15 +41,41 @@ class MixDesign(Base):
     water_volume_fraction = Column(Float, nullable=False, default=0.0)
     air_volume_fraction = Column(Float, nullable=False, default=0.0)
     
-    # System size for microstructure generation
-    system_size = Column(Integer, nullable=False, default=100)
+    # System size for microstructure generation (individual X, Y, Z dimensions)
+    system_size_x = Column(Integer, nullable=False, default=100)
+    system_size_y = Column(Integer, nullable=False, default=100)
+    system_size_z = Column(Integer, nullable=False, default=100)
+    system_size = Column(Integer, nullable=False, default=100)  # Keep for backward compatibility
+    
+    # Resolution for microstructure generation
+    resolution = Column(Float, nullable=False, default=1.0)
     
     # Random seed for reproducibility
     random_seed = Column(Integer, nullable=False, default=-1)
     
     # Cement and aggregate shape settings
     cement_shape_set = Column(String(64), nullable=True, default="spherical")
-    aggregate_shape_set = Column(String(64), nullable=True, default="spherical")
+    fine_aggregate_shape_set = Column(String(64), nullable=True, default="spherical")  # Fine aggregate shapes
+    coarse_aggregate_shape_set = Column(String(64), nullable=True, default="spherical")  # Coarse aggregate shapes
+    aggregate_shape_set = Column(String(64), nullable=True, default="spherical")  # Keep for backward compatibility
+    
+    # Flocculation parameters
+    flocculation_enabled = Column(Boolean, nullable=False, default=False)
+    flocculation_degree = Column(Float, nullable=False, default=0.0)
+    
+    # Dispersion parameters
+    dispersion_factor = Column(Integer, nullable=False, default=0)
+    
+    # Auto-calculation setting
+    auto_calculation_enabled = Column(Boolean, nullable=False, default=True)
+    
+    # Fine aggregate parameters
+    fine_aggregate_name = Column(String(128), nullable=True)
+    fine_aggregate_mass = Column(Float, nullable=False, default=0.0)
+    
+    # Coarse aggregate parameters
+    coarse_aggregate_name = Column(String(128), nullable=True)
+    coarse_aggregate_mass = Column(Float, nullable=False, default=0.0)
     
     # Component data stored as JSON
     # Format: [{"material_name": str, "material_type": str, "mass_fraction": float, "volume_fraction": float, "specific_gravity": float}, ...]
@@ -96,10 +122,44 @@ class MixDesignCreate(BaseModel):
     air_content: float = Field(ge=0.0, le=20.0)  # %
     water_volume_fraction: float = Field(ge=0.0, le=1.0)
     air_volume_fraction: float = Field(ge=0.0, le=1.0)
-    system_size: int = Field(ge=50, le=500, default=100)
+    
+    # System size parameters (individual X, Y, Z dimensions)
+    system_size_x: int = Field(ge=25, le=400, default=100)
+    system_size_y: int = Field(ge=25, le=400, default=100)
+    system_size_z: int = Field(ge=25, le=400, default=100)
+    system_size: int = Field(ge=50, le=500, default=100)  # Keep for backward compatibility
+    
+    # Resolution parameter
+    resolution: float = Field(ge=0.01, le=100.0, default=1.0)
+    
+    # Random seed
     random_seed: int = Field(ge=-2147483647, le=-1, default=-1)
+    
+    # Shape set parameters
     cement_shape_set: Optional[str] = Field(default="spherical", max_length=64)
-    aggregate_shape_set: Optional[str] = Field(default="spherical", max_length=64)
+    fine_aggregate_shape_set: Optional[str] = Field(default="spherical", max_length=64)
+    coarse_aggregate_shape_set: Optional[str] = Field(default="spherical", max_length=64)
+    aggregate_shape_set: Optional[str] = Field(default="spherical", max_length=64)  # Keep for backward compatibility
+    
+    # Flocculation parameters
+    flocculation_enabled: bool = Field(default=False)
+    flocculation_degree: float = Field(ge=0.0, le=1.0, default=0.0)
+    
+    # Dispersion parameters
+    dispersion_factor: int = Field(ge=0, le=2, default=0)
+    
+    # Auto-calculation setting
+    auto_calculation_enabled: bool = Field(default=True)
+    
+    # Fine aggregate parameters
+    fine_aggregate_name: Optional[str] = Field(None, max_length=128)
+    fine_aggregate_mass: float = Field(ge=0.0, le=10.0, default=0.0)
+    
+    # Coarse aggregate parameters
+    coarse_aggregate_name: Optional[str] = Field(None, max_length=128)
+    coarse_aggregate_mass: float = Field(ge=0.0, le=10.0, default=0.0)
+    
+    # Component and properties data
     components: List[MixDesignComponentData] = Field(default_factory=list)
     calculated_properties: Optional[MixDesignPropertiesData] = Field(None)
     notes: Optional[str] = Field(None, max_length=2000)
@@ -146,10 +206,44 @@ class MixDesignUpdate(BaseModel):
     air_content: Optional[float] = Field(None, ge=0.0, le=20.0)
     water_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0)
     air_volume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0)
+    
+    # System size parameters
+    system_size_x: Optional[int] = Field(None, ge=25, le=400)
+    system_size_y: Optional[int] = Field(None, ge=25, le=400)
+    system_size_z: Optional[int] = Field(None, ge=25, le=400)
     system_size: Optional[int] = Field(None, ge=50, le=500)
+    
+    # Resolution parameter
+    resolution: Optional[float] = Field(None, ge=0.01, le=100.0)
+    
+    # Random seed
     random_seed: Optional[int] = Field(None, ge=-2147483647, le=-1)
+    
+    # Shape set parameters
     cement_shape_set: Optional[str] = Field(None, max_length=64)
+    fine_aggregate_shape_set: Optional[str] = Field(None, max_length=64)
+    coarse_aggregate_shape_set: Optional[str] = Field(None, max_length=64)
     aggregate_shape_set: Optional[str] = Field(None, max_length=64)
+    
+    # Flocculation parameters
+    flocculation_enabled: Optional[bool] = None
+    flocculation_degree: Optional[float] = Field(None, ge=0.0, le=1.0)
+    
+    # Dispersion parameters
+    dispersion_factor: Optional[int] = Field(None, ge=0, le=2)
+    
+    # Auto-calculation setting
+    auto_calculation_enabled: Optional[bool] = None
+    
+    # Fine aggregate parameters
+    fine_aggregate_name: Optional[str] = Field(None, max_length=128)
+    fine_aggregate_mass: Optional[float] = Field(None, ge=0.0, le=10.0)
+    
+    # Coarse aggregate parameters
+    coarse_aggregate_name: Optional[str] = Field(None, max_length=128)
+    coarse_aggregate_mass: Optional[float] = Field(None, ge=0.0, le=10.0)
+    
+    # Component and properties data
     components: Optional[List[MixDesignComponentData]] = None
     calculated_properties: Optional[MixDesignPropertiesData] = None
     notes: Optional[str] = Field(None, max_length=2000)
@@ -183,10 +277,42 @@ class MixDesignResponse(BaseModel):
     air_content: float
     water_volume_fraction: float
     air_volume_fraction: float
-    system_size: int
+    
+    # System size parameters
+    system_size_x: int
+    system_size_y: int
+    system_size_z: int
+    system_size: int  # Keep for backward compatibility
+    
+    # Resolution parameter
+    resolution: float
+    
+    # Random seed
     random_seed: int
+    
+    # Shape set parameters
     cement_shape_set: Optional[str]
-    aggregate_shape_set: Optional[str]
+    fine_aggregate_shape_set: Optional[str]
+    coarse_aggregate_shape_set: Optional[str]
+    aggregate_shape_set: Optional[str]  # Keep for backward compatibility
+    
+    # Flocculation parameters
+    flocculation_enabled: bool
+    flocculation_degree: float
+    
+    # Dispersion parameters
+    dispersion_factor: int
+    
+    # Auto-calculation setting
+    auto_calculation_enabled: bool
+    
+    # Fine aggregate parameters
+    fine_aggregate_name: Optional[str]
+    fine_aggregate_mass: float
+    
+    # Coarse aggregate parameters
+    coarse_aggregate_name: Optional[str]
+    coarse_aggregate_mass: float
     components: List[MixDesignComponentData]
     calculated_properties: Optional[MixDesignPropertiesData]
     notes: Optional[str]

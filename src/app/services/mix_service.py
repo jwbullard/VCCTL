@@ -194,6 +194,10 @@ class MixService:
             self.logger.warning(f"Failed to get specific gravity for {material_name}: {e}")
             return self.default_specific_gravities.get(material_type, 2.65)
     
+    def get_specific_gravity(self, material_name: str, material_type: MaterialType) -> float:
+        """Public method to get specific gravity for a material."""
+        return self._get_material_specific_gravity(material_name, material_type)
+    
     def _calculate_volume_fractions(self, mix_design: MixDesign) -> None:
         """Calculate volume fractions from mass fractions and specific gravities."""
         try:

@@ -1932,58 +1932,211 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _load_operations_files(self) -> None:
         """Load the Operations directory structure into the file tree."""
-        try:
+        self.logger.info("=== Starting _load_operations_files ===")
+        
+        # Get the Operations directory path using absolute path from project root
+        # Don't rely on current working directory since genmic changes it
+        # Path: src/app/windows/panels/operations_monitoring_panel.py -> go up 5 levels to project root
+        project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
+        operations_dir = project_root / "Operations"
+        self.logger.info(f"Project root: {project_root}")
+        self.logger.info(f"Operations directory: {operations_dir}")
+        self.logger.info(f"Operations directory exists: {operations_dir.exists()}")
+        
+        if not operations_dir.exists():
             self.files_store.clear()
-            
-            # Get the Operations directory path
-            operations_dir = Path.cwd() / "Operations"
-            
-            if not operations_dir.exists():
-                # Add a message that Operations directory doesn't exist
-                self.files_store.append(None, ["No Operations directory found", "", "info", "", ""])
-                return
+            self.files_store.append(None, ["No Operations directory found", "", "info", "", ""])
+            return
+        
+        # Build the new tree data first, then replace the store content
+        new_tree_data = []
+        
+        # Add retry logic and better error handling for running operations
+        max_retries = 3
+        success = False
+        
+        for attempt in range(max_retries):
+            try:
+                self.logger.info(f"Attempt {attempt + 1}: scanning operations directory")
+                all_items = list(operations_dir.iterdir())
+                self.logger.info(f"Found {len(all_items)} total items in Operations directory")
+                
+                operation_dirs = sorted([
+                    d for d in all_items 
+                    if d.is_dir() and not d.name.startswith('.') and d.name not in ['__pycache__', 'Thumbs.db']
+                ])
+                self.logger.info(f"Found {len(operation_dirs)} operation directories: {[d.name for d in operation_dirs]}")
+                
+                # Successfully got directory list, now build tree data
+                for op_dir in operation_dirs:
+                    self.logger.info(f"Building data for operation directory: {op_dir.name}")
+                    op_data = self._build_operation_folder_data(op_dir)
+                    if op_data:
+                        new_tree_data.append(op_data)
+                        self.logger.info(f"Successfully built data for {op_dir.name} with {len(op_data['files'])} files")
+                    else:
+                        self.logger.warning(f"Failed to build data for {op_dir.name}")
+                
+                success = True
+                self.logger.info(f"Successfully gathered data for {len(new_tree_data)} operations")
+                break  # Success, exit retry loop
+                
+            except (PermissionError, OSError, FileNotFoundError) as e:
+                self.logger.warning(f"File access error on attempt {attempt + 1}: {e}")
+                if attempt < max_retries - 1:
+                    # Wait a bit before retrying
+                    import time
+                    time.sleep(0.1)
+            except Exception as e:
+                self.logger.error(f"Unexpected error loading operation directories: {e}")
+                break
+        
+        # Now update the display - clear and rebuild
+        try:
+            self.logger.info("=== Updating display ===")
+            self.files_store.clear()
             
             # Add root Operations folder
             root_iter = self.files_store.append(None, ["Operations", str(operations_dir), "folder", "", ""])
             
-            # Load operation directories (filter out hidden files and system files)
-            # Add retry logic and better error handling for running operations
-            max_retries = 3
+            if success and new_tree_data:
+                self.logger.info(f"Adding {len(new_tree_data)} operations to display")
+                # Add all the operation folders we successfully gathered
+                for op_data in new_tree_data:
+                    self._add_operation_folder_from_data(root_iter, op_data)
+            else:
+                self.logger.warning(f"Failed to load operations: success={success}, data_count={len(new_tree_data)}")
+                # Failed to load after retries
+                self.files_store.append(root_iter, [
+                    "⚠️ Files temporarily unavailable (operation running?)", 
+                    "", "warning", "", ""
+                ])
+            
+            # Expand the root by default
+            self.files_view.expand_row(self.files_store.get_path(root_iter), False)
+            self.logger.info("=== Display update complete ===\n")
+            
+        except Exception as e:
+            self.logger.error(f"Error updating files display: {e}")
+            self.files_store.clear()
+            self.files_store.append(None, [f"Error loading files: {e}", "", "error", "", ""])
+    
+    def _build_operation_folder_data(self, op_dir: Path) -> dict:
+        """Build operation folder data structure without adding to tree store."""
+        try:
+            # Get folder info with error handling for running operations
+            try:
+                stat_info = op_dir.stat()
+                modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            except (PermissionError, OSError, FileNotFoundError):
+                # Folder access issues, likely due to running operation
+                modified_time = "Accessing..."
+            
+            folder_data = {
+                'name': op_dir.name,
+                'path': str(op_dir),
+                'type': 'folder',
+                'size': '',
+                'modified': modified_time,
+                'files': []
+            }
+            
+            # Add files in the operation directory with retry logic
+            max_retries = 2
             for attempt in range(max_retries):
                 try:
-                    all_items = list(operations_dir.iterdir())
-                    operation_dirs = sorted([
-                        d for d in all_items 
-                        if d.is_dir() and not d.name.startswith('.') and d.name not in ['__pycache__', 'Thumbs.db']
-                    ])
-                    
-                    for op_dir in operation_dirs:
-                        self._add_operation_folder(root_iter, op_dir)
-                        
-                    # Expand the root by default
-                    self.files_view.expand_row(self.files_store.get_path(root_iter), False)
+                    files = sorted(op_dir.iterdir())
+                    for file_path in files:
+                        if file_path.is_file():
+                            file_data = self._build_file_data(file_path)
+                            if file_data:
+                                folder_data['files'].append(file_data)
                     break  # Success, exit retry loop
                     
                 except (PermissionError, OSError, FileNotFoundError) as e:
-                    self.logger.warning(f"File access error on attempt {attempt + 1}: {e}")
                     if attempt == max_retries - 1:
-                        # Final attempt failed
-                        self.files_store.append(root_iter, [
-                            "⚠️ Files temporarily unavailable (operation running?)", 
-                            "", "warning", "", ""
-                        ])
+                        # Final attempt failed - add warning indicator
+                        folder_data['files'].append({
+                            'name': "⚠️ Files temporarily inaccessible",
+                            'path': "",
+                            'type': 'warning',
+                            'size': "",
+                            'modified': ""
+                        })
                     else:
-                        # Wait a bit before retrying
+                        # Brief pause before retry
                         import time
-                        time.sleep(0.1)
+                        time.sleep(0.05)
                 except Exception as e:
-                    self.logger.error(f"Error loading operation directories: {e}")
-                    self.files_store.append(root_iter, [f"Error: {e}", "", "error", "", ""])
+                    self.logger.error(f"Error loading files in {op_dir}: {e}")
+                    folder_data['files'].append({
+                        'name': f"Error loading files: {e}",
+                        'path': "",
+                        'type': 'error',
+                        'size': "",
+                        'modified': ""
+                    })
                     break
+            
+            return folder_data
+            
+        except Exception as e:
+            self.logger.error(f"Error building operation folder data for {op_dir}: {e}")
+            return None
+    
+    def _build_file_data(self, file_path: Path) -> dict:
+        """Build file data structure without adding to tree store."""
+        try:
+            # Handle file access issues gracefully for running operations
+            try:
+                stat_info = file_path.stat()
+                file_size = self._format_file_size(stat_info.st_size)
+                modified_time = datetime.fromtimestamp(stat_info.st_mtime).strftime("%Y-%m-%d %H:%M")
+            except (PermissionError, OSError, FileNotFoundError):
+                # File is being written to or temporarily inaccessible
+                file_size = "..."
+                modified_time = "Writing..."
+            
+            # Determine file type for icon
+            file_type = self._get_file_type(file_path)
+            
+            return {
+                'name': file_path.name,
+                'path': str(file_path),
+                'type': file_type,
+                'size': file_size,
+                'modified': modified_time
+            }
+            
+        except Exception as e:
+            # Log error but don't prevent the overall refresh from working
+            self.logger.debug(f"Skipping file {file_path.name}: {e}")
+            return None
+    
+    def _add_operation_folder_from_data(self, parent_iter, op_data: dict) -> None:
+        """Add an operation folder to the tree from pre-built data."""
+        try:
+            # Add operation folder
+            folder_iter = self.files_store.append(parent_iter, [
+                op_data['name'],
+                op_data['path'],
+                op_data['type'],
+                op_data['size'],
+                op_data['modified']
+            ])
+            
+            # Add files
+            for file_data in op_data['files']:
+                self.files_store.append(folder_iter, [
+                    file_data['name'],
+                    file_data['path'],
+                    file_data['type'],
+                    file_data['size'],
+                    file_data['modified']
+                ])
                 
         except Exception as e:
-            self.logger.error(f"Error loading operations files: {e}")
-            self.files_store.append(None, [f"Error loading files: {e}", "", "error", "", ""])
+            self.logger.error(f"Error adding operation folder from data: {e}")
     
     def _add_operation_folder(self, parent_iter, op_dir: Path) -> None:
         """Add an operation folder and its files to the tree."""
@@ -2091,6 +2244,7 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _on_refresh_files_clicked(self, button) -> None:
         """Handle refresh files button click."""
+        self.logger.info("=== Files tab refresh button clicked ===")
         self._load_operations_files()
         self._update_status("Operations files refreshed")
     

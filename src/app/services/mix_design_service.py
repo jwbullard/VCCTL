@@ -73,7 +73,7 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
             components_json = [comp.model_dump() for comp in mix_design_data.components]
             properties_json = mix_design_data.calculated_properties.model_dump() if mix_design_data.calculated_properties else {}
             
-            # Create database object
+            # Create database object with ALL fields
             mix_design = MixDesign(
                 name=mix_design_data.name,
                 description=mix_design_data.description,
@@ -82,10 +82,44 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                 air_content=mix_design_data.air_content,
                 water_volume_fraction=mix_design_data.water_volume_fraction,
                 air_volume_fraction=mix_design_data.air_volume_fraction,
-                system_size=mix_design_data.system_size,
+                
+                # System size parameters (individual X, Y, Z dimensions)
+                system_size_x=mix_design_data.system_size_x,
+                system_size_y=mix_design_data.system_size_y,
+                system_size_z=mix_design_data.system_size_z,
+                system_size=mix_design_data.system_size,  # Keep for backward compatibility
+                
+                # Resolution parameter
+                resolution=mix_design_data.resolution,
+                
+                # Random seed
                 random_seed=mix_design_data.random_seed,
+                
+                # Shape set parameters
                 cement_shape_set=mix_design_data.cement_shape_set,
-                aggregate_shape_set=mix_design_data.aggregate_shape_set,
+                fine_aggregate_shape_set=mix_design_data.fine_aggregate_shape_set,
+                coarse_aggregate_shape_set=mix_design_data.coarse_aggregate_shape_set,
+                aggregate_shape_set=mix_design_data.aggregate_shape_set,  # Keep for backward compatibility
+                
+                # Flocculation parameters
+                flocculation_enabled=mix_design_data.flocculation_enabled,
+                flocculation_degree=mix_design_data.flocculation_degree,
+                
+                # Dispersion parameters
+                dispersion_factor=mix_design_data.dispersion_factor,
+                
+                # Auto-calculation setting
+                auto_calculation_enabled=mix_design_data.auto_calculation_enabled,
+                
+                # Fine aggregate parameters
+                fine_aggregate_name=mix_design_data.fine_aggregate_name,
+                fine_aggregate_mass=mix_design_data.fine_aggregate_mass,
+                
+                # Coarse aggregate parameters
+                coarse_aggregate_name=mix_design_data.coarse_aggregate_name,
+                coarse_aggregate_mass=mix_design_data.coarse_aggregate_mass,
+                
+                # Component and properties data
                 components=components_json,
                 calculated_properties=properties_json,
                 notes=mix_design_data.notes,
@@ -314,10 +348,44 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                 air_content=mix_design.air_content,
                 water_volume_fraction=mix_design.water_volume_fraction,
                 air_volume_fraction=mix_design.air_volume_fraction,
-                system_size=mix_design.system_size,
+                
+                # System size parameters (individual X, Y, Z dimensions)
+                system_size_x=mix_design.system_size_x,
+                system_size_y=mix_design.system_size_y,
+                system_size_z=mix_design.system_size_z,
+                system_size=mix_design.system_size,  # Keep for backward compatibility
+                
+                # Resolution parameter
+                resolution=mix_design.resolution,
+                
+                # Random seed
                 random_seed=mix_design.random_seed,
+                
+                # Shape set parameters
                 cement_shape_set=mix_design.cement_shape_set,
-                aggregate_shape_set=mix_design.aggregate_shape_set,
+                fine_aggregate_shape_set=mix_design.fine_aggregate_shape_set,
+                coarse_aggregate_shape_set=mix_design.coarse_aggregate_shape_set,
+                aggregate_shape_set=mix_design.aggregate_shape_set,  # Keep for backward compatibility
+                
+                # Flocculation parameters
+                flocculation_enabled=mix_design.flocculation_enabled,
+                flocculation_degree=mix_design.flocculation_degree,
+                
+                # Dispersion parameters
+                dispersion_factor=mix_design.dispersion_factor,
+                
+                # Auto-calculation setting
+                auto_calculation_enabled=mix_design.auto_calculation_enabled,
+                
+                # Fine aggregate parameters
+                fine_aggregate_name=mix_design.fine_aggregate_name,
+                fine_aggregate_mass=mix_design.fine_aggregate_mass,
+                
+                # Coarse aggregate parameters
+                coarse_aggregate_name=mix_design.coarse_aggregate_name,
+                coarse_aggregate_mass=mix_design.coarse_aggregate_mass,
+                
+                # Component and properties data
                 components=components,
                 calculated_properties=properties,
                 notes=mix_design.notes,

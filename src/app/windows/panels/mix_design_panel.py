@@ -146,6 +146,14 @@ class MixDesignPanel(Gtk.Box):
         self.save_button.get_style_context().add_class("suggested-action")
         action_box.pack_start(self.save_button, False, False, 0)
         
+        # Reset button to restore defaults
+        self.reset_button = Gtk.Button(label="Reset")
+        reset_icon = Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        self.reset_button.set_image(reset_icon)
+        self.reset_button.set_always_show_image(True)
+        self.reset_button.set_tooltip_text("Reset all parameters to default values")
+        action_box.pack_start(self.reset_button, False, False, 0)
+        
         controls_box.pack_end(action_box, False, False, 0)
         
         header_box.pack_start(controls_box, False, False, 0)
@@ -487,6 +495,7 @@ class MixDesignPanel(Gtk.Box):
         self.new_button.connect('clicked', self._on_new_mix_clicked)
         self.load_button.connect('clicked', self._on_load_mix_clicked)
         self.save_button.connect('clicked', self._on_save_mix_clicked)
+        self.reset_button.connect('clicked', self._on_reset_mix_clicked)
         
         # Water controls
         self.wb_ratio_spin.connect('value-changed', self._on_wb_ratio_changed)
@@ -710,71 +719,127 @@ class MixDesignPanel(Gtk.Box):
         """Populate material type combo with available types (excluding already selected ones)."""
         self._populate_material_type_combo_for_row(type_combo)
     
-    def _update_all_material_type_combos(self, exclude_combo=None) -> None:
-        """Update all material type combos to reflect current selections."""
-        for row in self.component_rows:
-            # Skip the combo that triggered the change to avoid interference
-            if exclude_combo and row['type_combo'] == exclude_combo:
-                continue
-                
-            # Save current selection
-            current_selection = row['type_combo'].get_active_id()
-            
-            # Temporarily block signals to prevent recursive updates
-            row['type_combo'].handler_block_by_func(self._on_component_type_changed)
-            
-            # Repopulate combo
-            self._populate_material_type_combo_for_row(row['type_combo'], current_selection)
-            
-            # Restore selection if still valid
-            if current_selection:
-                # Try to restore the previous selection
-                model = row['type_combo'].get_model()
-                iter_item = model.get_iter_first()
-                while iter_item:
-                    if model.get_value(iter_item, 0) == current_selection:
-                        row['type_combo'].set_active_iter(iter_item)
-                        break
-                    iter_item = model.iter_next(iter_item)
-            
-            # Unblock signals
-            row['type_combo'].handler_unblock_by_func(self._on_component_type_changed)
-    
     def _populate_material_type_combo_for_row(self, type_combo: Gtk.ComboBoxText, keep_selection: str = None) -> None:
-        """Populate material type combo, optionally keeping a specific selection available."""
-        # Get currently selected material types from all existing rows
-        selected_types = set()
-        for row in self.component_rows:
-            selected_type = row['type_combo'].get_active_id()
-            if selected_type and selected_type != keep_selection:
-                selected_types.add(selected_type)
+        """Populate material type combo with all powder types. Constraint is enforced at selection time.
         
+        ⚠️ PROTECTED METHOD - DO NOT MODIFY WITHOUT EXPLICIT REQUEST
+        This method populates combo boxes and triggers auto-selection logic.
+        Working correctly as of Session 6 (Aug 4, 2025).
+        """
         # Clear and repopulate combo
         type_combo.remove_all()
         
-        # Add available material types (excluding aggregate and already selected types)
-        available_added = False
+        # Add all powder material types (excluding aggregate)
+        # Constraint enforcement is now handled in _on_component_type_changed
         for material_type in MaterialType:
-            if (material_type != MaterialType.AGGREGATE and 
-                material_type.value not in selected_types):
-                type_combo.append(material_type.value, material_type.value.replace("_", " ").title())
-                available_added = True
+            if material_type != MaterialType.AGGREGATE:
+                type_value = material_type.value
+                display_name = material_type.value.replace("_", " ").title()
+                type_combo.append(type_value, display_name)  # append(id, text) where id=type_value, text=display_name
         
-        # If no types are available, show a placeholder
-        if not available_added:
-            type_combo.append("", "No more material types available")
-            type_combo.set_sensitive(False)
-        else:
-            type_combo.set_sensitive(True)
-            if type_combo.get_active() == -1:  # Only set active if nothing is selected
-                type_combo.set_active(0)
+        # Auto-select highest unused material type if nothing is selected
+        if type_combo.get_active() == -1 and not keep_selection:
+            selected_index = self._get_highest_unused_material_type_index(type_combo)
+            if selected_index >= 0:
+                type_combo.set_active(selected_index)
+
+    def _get_highest_unused_material_type_index(self, current_combo: Gtk.ComboBoxText) -> int:
+        """Get the index of the highest priority unused material type.
+        
+        ⚠️ PROTECTED METHOD - DO NOT MODIFY WITHOUT EXPLICIT REQUEST
+        This method implements critical auto-selection logic that was working perfectly
+        in Session 4. Any changes risk breaking the user experience.
+        
+        Fixed in Session 6 (Aug 4, 2025): Corrected material type comparison logic
+        to handle GTK ComboBoxText parameter format mismatch.
+        """
+        # Define material type priority order (highest to lowest priority)
+        priority_order = [
+            MaterialType.CEMENT,
+            MaterialType.FLY_ASH, 
+            MaterialType.SLAG,
+            MaterialType.SILICA_FUME,
+            MaterialType.LIMESTONE,
+            MaterialType.INERT_FILLER
+        ]
+        
+        # Get currently used material types from other components
+        used_types = set()
+        for row in self.component_rows:
+            type_combo = row['type_combo']
+            if type_combo != current_combo:  # Don't check current combo
+                active_id = type_combo.get_active_id()
+                if active_id:
+                    # Convert display name back to type value for comparison
+                    # active_id contains display name like 'Cement', convert to 'cement'
+                    type_value = active_id.lower().replace(" ", "_")
+                    used_types.add(type_value)
+        
+        # Find highest priority unused type
+        for material_type in priority_order:
+            type_value = material_type.value
+            display_name = material_type.value.replace("_", " ").title()
+            if type_value not in used_types:
+                # Find this type's index in the current combo
+                model = current_combo.get_model()
+                for i in range(len(model)):
+                    # Look for the display_name in the ID field
+                    if model[i][0] == display_name:
+                        return i
+        
+        # Fallback to first item if all types are used
+        return 0
 
     def _on_component_type_changed(self, combo, row_data) -> None:
         """Handle component type change."""
-        self._update_material_names(row_data)
+        # Skip constraint checking if we're loading from database
+        loading_flag = getattr(self, '_loading_in_progress', False)
         
-        # Update all other material type combos to reflect the new selection
-        self._update_all_material_type_combos(exclude_combo=combo)
+        if loading_flag:
+            print("DEBUG: Skipping constraint check - loading in progress")
+        else:
+            # Check for duplicate material type selection
+            selected_type = combo.get_active_id()
+            print(f"DEBUG: Constraint check: selected_type='{selected_type}', total_rows={len(self.component_rows)}")
+            
+            if selected_type:
+                # Check if this type is already selected in another component
+                duplicate_found = False
+                for i, other_row in enumerate(self.component_rows):
+                    other_combo = other_row['type_combo']
+                    is_same_combo = (other_combo == combo)
+                    other_type = other_combo.get_active_id()
+                    
+                    print(f"DEBUG: Row {i}: other_type='{other_type}', same_combo={is_same_combo}")
+                    
+                    if not is_same_combo and other_type == selected_type:
+                        # Duplicate detected - show error and revert
+                        print(f"DEBUG: DUPLICATE DETECTED: {selected_type} is already used in row {i}")
+                        
+                        # Show popup dialog to make constraint violation visible
+                        import gi
+                        gi.require_version('Gtk', '3.0')
+                        from gi.repository import Gtk
+                        dialog = Gtk.MessageDialog(
+                            transient_for=self.main_window,
+                            flags=0,
+                            message_type=Gtk.MessageType.ERROR,
+                            buttons=Gtk.ButtonsType.OK,
+                            text=f"CONSTRAINT VIOLATION: Material type '{selected_type.replace('_', ' ').title()}' is already selected in another component"
+                        )
+                        dialog.run()
+                        dialog.destroy()
+                        
+                        self.main_window.update_status(f"Material type '{selected_type.replace('_', ' ').title()}' is already selected in another component", "error", 5)
+                        # Reset to no selection
+                        combo.set_active(-1)
+                        duplicate_found = True
+                        break
+                
+                if not duplicate_found:
+                    print(f"DEBUG: No duplicates found for '{selected_type}'")
+        
+        self._update_material_names(row_data)
         
         # Enable grading button only for aggregates
         material_type_str = combo.get_active_id()
@@ -814,9 +879,6 @@ class MixDesignPanel(Gtk.Box):
         # Remove from our list
         if row_data in self.component_rows:
             self.component_rows.remove(row_data)
-        
-        # Update all remaining material type combos to show newly available options
-        self._update_all_material_type_combos()
         
         if self.auto_calculate_enabled:
             self._trigger_calculation()
@@ -1354,18 +1416,26 @@ class MixDesignPanel(Gtk.Box):
             water_mass = self.water_content_spin.get_value()
             total_mass_all = total_component_mass + water_mass + fine_agg_mass + coarse_agg_mass
             
-            # Create components with mass fractions (relative to total mass including everything)
+            # Calculate total solid mass (excluding water) for mass fraction calculation
+            total_solid_mass = total_component_mass + fine_agg_mass + coarse_agg_mass
+            
+            # Create components with mass fractions (relative to total solid mass, excluding water)
             for row in self.component_rows:
                 type_str = row['type_combo'].get_active_id()
                 name = row['name_combo'].get_active_id()
                 mass_kg = row['mass_spin'].get_value()
                 
-                if type_str and name and mass_kg > 0 and total_mass_all > 0:
+                if type_str and name and mass_kg > 0 and total_solid_mass > 0:
                     material_type = MaterialType(type_str)
-                    sg = self.mix_service._get_material_specific_gravity(name, material_type)
+                    try:
+                        sg = self.mix_service._get_material_specific_gravity(name, material_type)
+                        self.logger.info(f"COMPONENT DEBUG: {name} ({material_type}) - mass={mass_kg}, sg={sg}")
+                    except Exception as e:
+                        self.logger.error(f"COMPONENT ERROR: Failed to get SG for {name} ({material_type}): {e}")
+                        continue  # Skip this component
                     
-                    # Convert kg to mass fraction (relative to total mass of everything)
-                    mass_fraction = mass_kg / total_mass_all
+                    # Convert kg to mass fraction (relative to total solid mass, excluding water)
+                    mass_fraction = mass_kg / total_solid_mass
                     
                     component = MixComponent(
                         material_name=name,
@@ -1387,8 +1457,8 @@ class MixDesignPanel(Gtk.Box):
                 except:
                     pass  # Use default if lookup fails
                 
-                # Calculate mass fraction (using total mass of all components)
-                mass_fraction = fine_agg_mass / total_mass_all if total_mass_all > 0 else 0.0
+                # Calculate mass fraction (using total solid mass, excluding water)
+                mass_fraction = fine_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
                 
                 fine_agg_component = MixComponent(
                     material_name=fine_agg_name,
@@ -1408,8 +1478,8 @@ class MixDesignPanel(Gtk.Box):
                 except:
                     pass  # Use default if lookup fails
                 
-                # Calculate mass fraction (using total mass of all components)
-                mass_fraction = coarse_agg_mass / total_mass_all if total_mass_all > 0 else 0.0
+                # Calculate mass fraction (using total solid mass, excluding water)
+                mass_fraction = coarse_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
                 
                 coarse_agg_component = MixComponent(
                     material_name=coarse_agg_name,
@@ -1422,8 +1492,17 @@ class MixDesignPanel(Gtk.Box):
             if not components:
                 return None
             
+            # DEBUG: Log component mass fractions
+            total_mass_fraction_check = 0.0
+            self.logger.info(f"MASS FRACTION DEBUG - Total solid mass: {total_solid_mass}")
+            for i, comp in enumerate(components):
+                self.logger.info(f"Component {i}: {comp.material_name} = {comp.mass_fraction:.6f}")
+                total_mass_fraction_check += comp.mass_fraction
+            self.logger.info(f"Sum of mass fractions: {total_mass_fraction_check:.6f}")
+            
             # Create mix design
             # Note: Water is NOT added as a separate component since it's handled via total_water_content
+            # Water mass fraction is relative to total mass including water for W/B ratio calculations
             water_mass_fraction = water_mass / total_mass_all if total_mass_all > 0 else 0.0
             
             mix_design = MixDesign(
@@ -1532,6 +1611,88 @@ class MixDesignPanel(Gtk.Box):
         
         # Update status
         self.status_label.set_markup('<span size="small">Ready to design mix</span>')
+    
+    def _on_reset_mix_clicked(self, button) -> None:
+        """Handle reset button click to restore all defaults."""
+        # Show confirmation dialog
+        confirm_dialog = Gtk.MessageDialog(
+            transient_for=self.main_window,
+            flags=0,
+            message_type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.YES_NO,
+            text="Reset Mix Design to Defaults?"
+        )
+        confirm_dialog.format_secondary_text(
+            "This will reset all parameters to their default values. Any unsaved changes will be lost."
+        )
+        
+        response = confirm_dialog.run()
+        confirm_dialog.destroy()
+        
+        if response == Gtk.ResponseType.YES:
+            self._reset_to_defaults()
+            self.main_window.update_status("Mix design reset to default values", "info", 3)
+    
+    def _reset_to_defaults(self) -> None:
+        """Reset ALL mix design parameters to their default values."""
+        # Clear mix name
+        self.mix_name_entry.set_text("")
+        
+        # Remove all component rows
+        for row in self.component_rows[:]:
+            self.components_box.remove(row['box'])
+        self.component_rows.clear()
+        
+        # Reset basic parameters to defaults
+        self.wb_ratio_spin.set_value(0.40)
+        self.water_content_spin.set_value(0.40)
+        self.micro_air_content_spin.set_value(0.0)
+        
+        # Reset system size parameters (individual X, Y, Z dimensions)
+        self.system_size_x_spin.set_value(100)
+        self.system_size_y_spin.set_value(100)
+        self.system_size_z_spin.set_value(100)
+        
+        # Reset resolution parameter
+        self.resolution_spin.set_value(1.0)
+        
+        # Reset random seed
+        self.random_seed_spin.set_value(-1)
+        
+        # Reset flocculation parameters
+        self.flocculation_check.set_active(False)
+        self.flocculation_spin.set_value(0.0)
+        
+        # Reset dispersion parameter
+        self.dispersion_factor_spin.set_value(0)
+        
+        # Reset auto-calculation setting
+        self.auto_calc_switch.set_active(True)
+        
+        # Reset fine aggregate parameters
+        self.fine_agg_combo.set_active(0)  # Set to first item (usually "-- Select --")
+        self.fine_agg_mass_spin.set_value(0.0)
+        
+        # Reset coarse aggregate parameters
+        self.coarse_agg_combo.set_active(0)  # Set to first item (usually "-- Select --")
+        self.coarse_agg_mass_spin.set_value(0.0)
+        
+        # Reset shape sets to first item (usually "spherical")
+        self.cement_shape_combo.set_active(0)
+        self.fine_agg_shape_combo.set_active(0)
+        self.coarse_agg_shape_combo.set_active(0)
+        
+        # Clear properties and validation displays
+        for label in self.property_labels.values():
+            label.set_text("—")
+        
+        self.validation_textview.get_buffer().set_text("Ready for new mix design")
+        
+        # Update status
+        self.status_label.set_markup('<span size="small">Ready to design mix</span>')
+        
+        # Trigger recalculation to update display
+        self._trigger_calculation()
         
         self.logger.info("Mix design cleared")
     
@@ -3395,7 +3556,6 @@ class MixDesignPanel(Gtk.Box):
         dialog.add_buttons(
             "Cancel", Gtk.ResponseType.CANCEL,
             "Load", Gtk.ResponseType.OK,
-            "Duplicate", Gtk.ResponseType.APPLY,
             "Delete", Gtk.ResponseType.REJECT
         )
         dialog.set_default_response(Gtk.ResponseType.OK)
@@ -3468,7 +3628,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Handle response
         response = dialog.run()
-        if response in [Gtk.ResponseType.OK, Gtk.ResponseType.APPLY, Gtk.ResponseType.REJECT]:
+        if response in [Gtk.ResponseType.OK, Gtk.ResponseType.REJECT]:
             selection = tree_view.get_selection()
             model, treeiter = selection.get_selected()
             
@@ -3478,14 +3638,21 @@ class MixDesignPanel(Gtk.Box):
                 
                 if response == Gtk.ResponseType.OK:
                     self._load_mix_design(mix_id)
-                elif response == Gtk.ResponseType.APPLY:
-                    self._duplicate_mix_design(mix_id, mix_name)
+                    dialog.destroy()
                 elif response == Gtk.ResponseType.REJECT:
-                    self._delete_mix_design(mix_id, mix_name)
+                    # Handle delete with confirmation but keep main dialog open
+                    delete_success = self._delete_mix_design(mix_id, mix_name)
+                    if delete_success:
+                        # Refresh the list and keep dialog open
+                        list_store.clear()
+                        self._populate_mix_design_list(list_store)
+                    # Don't destroy main dialog - let user continue or cancel
+                    return
             else:
                 self.main_window.update_status("Please select a mix design", "info", 3)
-        
-        dialog.destroy()
+                dialog.destroy()
+        else:
+            dialog.destroy()
     
     def _populate_mix_design_list(self, list_store: Gtk.ListStore) -> None:
         """Populate the mix design list store."""
@@ -3520,26 +3687,32 @@ class MixDesignPanel(Gtk.Box):
         try:
             # Extract component data
             components = []
+            
+            # Calculate total masses for fractions
+            powder_mass = self._calculate_total_powder_mass()
+            water_mass = self.water_content_spin.get_value()
+            total_mass = powder_mass + water_mass
+            
             for row in self.component_rows:
                 material_type = row['type_combo'].get_active_id()
                 material_name = row['name_combo'].get_active_id()
                 mass_kg = row['mass_spin'].get_value()
                 
                 if material_type and material_name and mass_kg > 0:
-                    # Get specific gravity from service
+                    # Get specific gravity from label
                     specific_gravity = 3.15  # Default
                     try:
-                        material_type_enum = MaterialType(material_type)
-                        sg = self.mix_service.get_specific_gravity(material_name, material_type_enum)
-                        if sg:
-                            specific_gravity = sg
-                    except Exception as e:
-                        self.logger.warning(f"Could not get specific gravity for {material_name}: {e}")
+                        sg_text = row['sg_label'].get_text()
+                        if sg_text and sg_text != "—":
+                            specific_gravity = float(sg_text)
+                    except (ValueError, TypeError):
+                        self.logger.warning(f"Could not parse specific gravity for {material_name}")
                     
-                    # Calculate volume fraction
-                    total_mass = self._calculate_total_mass()
+                    # Calculate fractions
                     mass_fraction = mass_kg / total_mass if total_mass > 0 else 0.0
-                    volume_fraction = (mass_fraction / specific_gravity) / self._calculate_total_volume_per_unit_mass()
+                    
+                    # Simple volume fraction calculation (more accurate calculation done in service)
+                    volume_fraction = mass_fraction / specific_gravity
                     
                     components.append({
                         'material_name': material_name,
@@ -3549,39 +3722,127 @@ class MixDesignPanel(Gtk.Box):
                         'specific_gravity': specific_gravity
                     })
             
-            # Extract system parameters
-            water_content = self.water_content_spin.get_value()
-            total_mass = self._calculate_total_mass()
+            # Add water component
+            if water_mass > 0:
+                water_mass_fraction = water_mass / total_mass if total_mass > 0 else 0.0
+                components.append({
+                    'material_name': 'Water',
+                    'material_type': 'water',
+                    'mass_fraction': water_mass_fraction,
+                    'volume_fraction': water_mass_fraction / 1.0,  # Water SG = 1.0
+                    'specific_gravity': 1.0
+                })
             
-            # Calculate calculated properties
-            paste_volume_fraction, powder_volume_fraction = self._calculate_volume_fractions()
-            aggregate_volume_fraction = self._calculate_aggregate_volume_fraction('fine') + self._calculate_aggregate_volume_fraction('coarse')
+            # Calculate properties using existing methods
+            volumes = self._calculate_volumes_from_masses()
             
             calculated_properties = {
-                'paste_volume_fraction': paste_volume_fraction,
-                'powder_volume_fraction': powder_volume_fraction,
-                'aggregate_volume_fraction': aggregate_volume_fraction,
-                'binder_content': self._calculate_total_binder_mass(),
-                'water_content': water_content
+                'paste_volume_fraction': 1.0,  # Paste-only simulation
+                'powder_volume_fraction': volumes.get('powder_volume', 0.0) / volumes.get('paste_volume', 1.0) if volumes.get('paste_volume', 0) > 0 else 0.0,
+                'aggregate_volume_fraction': 0.0,  # Paste-only
+                'binder_content': powder_mass,
+                'water_content': water_mass
             }
             
-            # Return complete mix design data
+            # Get ALL current UI values with debug logging
+            cement_shape = self.cement_shape_combo.get_active_id() or "spherical"
+            fine_agg_shape = self.fine_agg_shape_combo.get_active_id() or "spherical"
+            coarse_agg_shape = self.coarse_agg_shape_combo.get_active_id() or "spherical"
+            random_seed = int(self.random_seed_spin.get_value())
+            
+            # System size parameters (individual X, Y, Z)
+            system_size_x = int(self.system_size_x_spin.get_value())
+            system_size_y = int(self.system_size_y_spin.get_value())
+            system_size_z = int(self.system_size_z_spin.get_value())
+            
+            # Resolution parameter
+            resolution = self.resolution_spin.get_value()
+            
+            # Flocculation parameters
+            flocculation_enabled = self.flocculation_check.get_active()
+            flocculation_degree = self.flocculation_spin.get_value()
+            
+            # Dispersion parameter
+            dispersion_factor = int(self.dispersion_factor_spin.get_value())
+            
+            # Auto-calculation setting
+            auto_calc_enabled = self.auto_calc_switch.get_active()
+            
+            # Fine aggregate parameters
+            fine_agg_name = self.fine_agg_combo.get_active_id()
+            fine_agg_mass = self.fine_agg_mass_spin.get_value()
+            
+            # Coarse aggregate parameters
+            coarse_agg_name = self.coarse_agg_combo.get_active_id()
+            coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
+            
+            # Debug logging for troubleshooting
+            self.logger.info(f"SAVE DEBUG - System size: X={system_size_x}, Y={system_size_y}, Z={system_size_z}")
+            self.logger.info(f"SAVE DEBUG - Resolution: {resolution}")
+            self.logger.info(f"SAVE DEBUG - Cement shape: '{cement_shape}'")
+            self.logger.info(f"SAVE DEBUG - Fine agg shape: '{fine_agg_shape}'")
+            self.logger.info(f"SAVE DEBUG - Coarse agg shape: '{coarse_agg_shape}'")
+            self.logger.info(f"SAVE DEBUG - Random seed: {random_seed}")
+            self.logger.info(f"SAVE DEBUG - Flocculation: enabled={flocculation_enabled}, degree={flocculation_degree}")
+            self.logger.info(f"SAVE DEBUG - Dispersion factor: {dispersion_factor}")
+            self.logger.info(f"SAVE DEBUG - Auto calc: {auto_calc_enabled}")
+            self.logger.info(f"SAVE DEBUG - Fine agg: name={fine_agg_name}, mass={fine_agg_mass}")
+            self.logger.info(f"SAVE DEBUG - Coarse agg: name={coarse_agg_name}, mass={coarse_agg_mass}")
+            self.logger.info(f"SAVE DEBUG - Components count: {len(components)}")
+            
+            # Return COMPLETE mix design data with ALL UI parameters
             return {
                 'water_binder_ratio': self.wb_ratio_spin.get_value(),
-                'total_water_content': water_content,
+                'total_water_content': water_mass,
                 'air_content': self.micro_air_content_spin.get_value() * 100.0,  # Convert to percentage
-                'water_volume_fraction': self._calculate_water_volume_fraction(),
+                'water_volume_fraction': water_mass_fraction / 1.0 if water_mass_fraction else 0.0,
                 'air_volume_fraction': self.micro_air_content_spin.get_value(),
-                'system_size': int(self.system_size_x_spin.get_value()),  # Use X dimension as representative
-                'random_seed': int(self.random_seed_spin.get_value()),
-                'cement_shape_set': self.cement_shape_combo.get_active_id() or "spherical",
-                'aggregate_shape_set': self.fine_agg_shape_combo.get_active_id() or "spherical",
+                
+                # System size parameters (individual X, Y, Z dimensions)
+                'system_size_x': system_size_x,
+                'system_size_y': system_size_y,
+                'system_size_z': system_size_z,
+                'system_size': system_size_x,  # Keep for backward compatibility
+                
+                # Resolution parameter
+                'resolution': resolution,
+                
+                # Random seed
+                'random_seed': random_seed,
+                
+                # Shape set parameters
+                'cement_shape_set': cement_shape,
+                'fine_aggregate_shape_set': fine_agg_shape,
+                'coarse_aggregate_shape_set': coarse_agg_shape,
+                'aggregate_shape_set': fine_agg_shape,  # Keep for backward compatibility
+                
+                # Flocculation parameters
+                'flocculation_enabled': flocculation_enabled,
+                'flocculation_degree': flocculation_degree,
+                
+                # Dispersion parameters
+                'dispersion_factor': dispersion_factor,
+                
+                # Auto-calculation setting
+                'auto_calculation_enabled': auto_calc_enabled,
+                
+                # Fine aggregate parameters
+                'fine_aggregate_name': fine_agg_name,
+                'fine_aggregate_mass': fine_agg_mass,
+                
+                # Coarse aggregate parameters
+                'coarse_aggregate_name': coarse_agg_name,
+                'coarse_aggregate_mass': coarse_agg_mass,
+                
+                # Component and properties data
                 'components': components,
                 'calculated_properties': calculated_properties
             }
             
         except Exception as e:
             self.logger.error(f"Error extracting mix design data: {e}")
+            import traceback
+            traceback.print_exc()
             raise
     
     def _calculate_water_volume_fraction(self) -> float:
@@ -3645,11 +3906,37 @@ class MixDesignPanel(Gtk.Box):
             
             mix_design_service = MixDesignService(self.service_container.database_service)
             
+            # Check if name already exists
+            existing_mix = mix_design_service.get_by_name(name)
+            if existing_mix:
+                # Show confirmation dialog
+                confirm_dialog = Gtk.MessageDialog(
+                    transient_for=self.main_window,
+                    flags=0,
+                    message_type=Gtk.MessageType.QUESTION,
+                    buttons=Gtk.ButtonsType.YES_NO,
+                    text=f"Mix design '{name}' already exists"
+                )
+                confirm_dialog.format_secondary_text(
+                    "Do you want to replace the existing mix design? This action cannot be undone."
+                )
+                
+                response = confirm_dialog.run()
+                confirm_dialog.destroy()
+                
+                if response != Gtk.ResponseType.YES:
+                    self.main_window.update_status("Save cancelled - mix design name already exists", "info", 3)
+                    return
+                
+                # Delete existing mix design to replace it
+                mix_design_service.delete_by_id(existing_mix.id)
+                self.logger.info(f"Replaced existing mix design: {name} (ID: {existing_mix.id})")
+            
             # Convert to Pydantic models
             components = [MixDesignComponentData(**comp) for comp in mix_data['components']]
             properties = MixDesignPropertiesData(**mix_data['calculated_properties']) if mix_data['calculated_properties'] else None
             
-            # Create mix design
+            # Create mix design with ALL fields
             create_data = MixDesignCreate(
                 name=name,
                 description=description,
@@ -3658,10 +3945,44 @@ class MixDesignPanel(Gtk.Box):
                 air_content=mix_data['air_content'],
                 water_volume_fraction=mix_data['water_volume_fraction'],
                 air_volume_fraction=mix_data['air_volume_fraction'],
-                system_size=mix_data['system_size'],
+                
+                # System size parameters (individual X, Y, Z dimensions)
+                system_size_x=mix_data['system_size_x'],
+                system_size_y=mix_data['system_size_y'],
+                system_size_z=mix_data['system_size_z'],
+                system_size=mix_data['system_size'],  # Keep for backward compatibility
+                
+                # Resolution parameter
+                resolution=mix_data['resolution'],
+                
+                # Random seed
                 random_seed=mix_data['random_seed'],
+                
+                # Shape set parameters
                 cement_shape_set=mix_data['cement_shape_set'],
-                aggregate_shape_set=mix_data['aggregate_shape_set'],
+                fine_aggregate_shape_set=mix_data['fine_aggregate_shape_set'],
+                coarse_aggregate_shape_set=mix_data['coarse_aggregate_shape_set'],
+                aggregate_shape_set=mix_data['aggregate_shape_set'],  # Keep for backward compatibility
+                
+                # Flocculation parameters
+                flocculation_enabled=mix_data['flocculation_enabled'],
+                flocculation_degree=mix_data['flocculation_degree'],
+                
+                # Dispersion parameters
+                dispersion_factor=mix_data['dispersion_factor'],
+                
+                # Auto-calculation setting
+                auto_calculation_enabled=mix_data['auto_calculation_enabled'],
+                
+                # Fine aggregate parameters
+                fine_aggregate_name=mix_data['fine_aggregate_name'],
+                fine_aggregate_mass=mix_data['fine_aggregate_mass'],
+                
+                # Coarse aggregate parameters
+                coarse_aggregate_name=mix_data['coarse_aggregate_name'],
+                coarse_aggregate_mass=mix_data['coarse_aggregate_mass'],
+                
+                # Component and properties data
                 components=components,
                 calculated_properties=properties,
                 notes=notes,
@@ -3681,27 +4002,66 @@ class MixDesignPanel(Gtk.Box):
             self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
     
     def _populate_ui_from_mix_design(self, mix_design_data: Dict[str, Any]) -> None:
-        """Populate UI controls from mix design data."""
+        """Populate ALL UI controls from mix design data."""
         try:
+            # Temporarily disable constraint checking during loading
+            self._loading_in_progress = True
+            
             # Clear existing components
-            self._reset_mix_design()
+            self._clear_mix_design()
             
             # Set basic parameters
             self.wb_ratio_spin.set_value(mix_design_data.get('water_binder_ratio', 0.40))
             self.water_content_spin.set_value(mix_design_data.get('total_water_content', 0.0))
             self.micro_air_content_spin.set_value(mix_design_data.get('air_volume_fraction', 0.0))
             
-            # Set system parameters
-            system_size = mix_design_data.get('system_size', 100)
-            self.system_size_x_spin.set_value(system_size)
-            self.system_size_y_spin.set_value(system_size)
-            self.system_size_z_spin.set_value(system_size)
+            # Set system size parameters (individual X, Y, Z dimensions)
+            self.system_size_x_spin.set_value(mix_design_data.get('system_size_x', mix_design_data.get('system_size', 100)))
+            self.system_size_y_spin.set_value(mix_design_data.get('system_size_y', mix_design_data.get('system_size', 100)))
+            self.system_size_z_spin.set_value(mix_design_data.get('system_size_z', mix_design_data.get('system_size', 100)))
             
+            # Set resolution parameter
+            self.resolution_spin.set_value(mix_design_data.get('resolution', 1.0))
+            
+            # Set random seed
             self.random_seed_spin.set_value(mix_design_data.get('random_seed', -1))
             
-            # Set shape sets
+            # Set flocculation parameters
+            self.flocculation_check.set_active(mix_design_data.get('flocculation_enabled', False))
+            self.flocculation_spin.set_value(mix_design_data.get('flocculation_degree', 0.0))
+            
+            # Set dispersion parameter
+            self.dispersion_factor_spin.set_value(mix_design_data.get('dispersion_factor', 0))
+            
+            # Set auto-calculation setting
+            self.auto_calc_switch.set_active(mix_design_data.get('auto_calculation_enabled', True))
+            
+            # Set fine aggregate parameters
+            fine_agg_name = mix_design_data.get('fine_aggregate_name')
+            if fine_agg_name:
+                # Find and set fine aggregate selection
+                fine_model = self.fine_agg_combo.get_model()
+                for i in range(len(fine_model)):
+                    if fine_model[i][0] == fine_agg_name:
+                        self.fine_agg_combo.set_active(i)
+                        break
+            self.fine_agg_mass_spin.set_value(mix_design_data.get('fine_aggregate_mass', 0.0))
+            
+            # Set coarse aggregate parameters
+            coarse_agg_name = mix_design_data.get('coarse_aggregate_name')
+            if coarse_agg_name:
+                # Find and set coarse aggregate selection
+                coarse_model = self.coarse_agg_combo.get_model()
+                for i in range(len(coarse_model)):
+                    if coarse_model[i][0] == coarse_agg_name:
+                        self.coarse_agg_combo.set_active(i)
+                        break
+            self.coarse_agg_mass_spin.set_value(mix_design_data.get('coarse_aggregate_mass', 0.0))
+            
+            # Set shape sets (support both new and legacy field names)
             cement_shape = mix_design_data.get('cement_shape_set', 'spherical')
-            aggregate_shape = mix_design_data.get('aggregate_shape_set', 'spherical')
+            fine_agg_shape = mix_design_data.get('fine_aggregate_shape_set', mix_design_data.get('aggregate_shape_set', 'spherical'))
+            coarse_agg_shape = mix_design_data.get('coarse_aggregate_shape_set', 'spherical')
             
             # Find and set cement shape
             cement_model = self.cement_shape_combo.get_model()
@@ -3710,63 +4070,178 @@ class MixDesignPanel(Gtk.Box):
                     self.cement_shape_combo.set_active(i)
                     break
             
-            # Find and set aggregate shape (assuming fine aggregate shape combo)
+            # Find and set fine aggregate shape
             fine_model = self.fine_agg_shape_combo.get_model()
             for i in range(len(fine_model)):
-                if fine_model[i][0] == aggregate_shape:
+                if fine_model[i][0] == fine_agg_shape:
                     self.fine_agg_shape_combo.set_active(i)
                     break
             
-            # Add components
+            # Find and set coarse aggregate shape
+            coarse_model = self.coarse_agg_shape_combo.get_model()
+            for i in range(len(coarse_model)):
+                if coarse_model[i][0] == coarse_agg_shape:
+                    self.coarse_agg_shape_combo.set_active(i)
+                    break
+            
+            # Calculate total mass for component mass calculations
+            total_water_content = mix_design_data.get('total_water_content', 0.0)
+            wb_ratio = mix_design_data.get('water_binder_ratio', 0.40)
+            total_powder_mass = total_water_content / wb_ratio if wb_ratio > 0 else 0.0
+            total_mass = total_powder_mass + total_water_content
+            
+            # Add components (skip water - it's handled separately)
             components = mix_design_data.get('components', [])
-            for comp_data in components:
+            self.logger.info(f"Loading {len(components)} components from mix design")
+            
+            for i, comp_data in enumerate(components):
+                self.logger.info(f"Processing component {i+1}/{len(components)}: {comp_data}")
+                
+                # Skip water component - it's set by water_content_spin (case-insensitive check)
+                if comp_data.get('material_type', '').lower() == 'water':
+                    self.logger.info("Skipping water component")
+                    continue
+                    
                 # Add new component row
-                self._add_component_row()
+                self.logger.info(f"Adding component row {i+1}...")
+                row_data = self._create_component_row()
+                self.component_rows.append(row_data)
+                self.components_box.pack_start(row_data['box'], False, False, 0)
+                self.components_box.show_all()
                 
                 # Get the last added row
                 if self.component_rows:
                     row = self.component_rows[-1]
+                    self.logger.info(f"Setting up component row with {len(self.component_rows)} total rows")
                     
-                    # Set material type
-                    material_type = comp_data.get('material_type', '')
+                    # Set material type (convert to lowercase to match enum values)
+                    material_type = comp_data.get('material_type', '').lower()
+                    material_name = comp_data.get('material_name', '')
+                    
                     type_combo = row['type_combo']
                     type_model = type_combo.get_model()
+                    
+                    # Convert stored lowercase material type to UI format
+                    # Database stores: 'cement', 'inert_filler', 'silica_fume'
+                    # UI expects: 'Cement', 'Inert Filler', 'Silica Fume'
+                    type_conversion = {
+                        'cement': 'Cement',
+                        'fly_ash': 'Fly Ash', 
+                        'slag': 'Slag',
+                        'inert_filler': 'Inert Filler',
+                        'silica_fume': 'Silica Fume',
+                        'limestone': 'Limestone'
+                    }
+                    
+                    ui_material_type = type_conversion.get(material_type, material_type)
+                    
+                    type_found = False
+                    # Need to find by ID (column 0), not by display text
                     for i in range(len(type_model)):
-                        if type_model[i][0] == material_type:
+                        model_row = type_model[i]
+                        combo_id = model_row[0] if model_row else None
+                        if combo_id == ui_material_type:
                             type_combo.set_active(i)
+                            type_found = True
                             break
+                    
+                    if not type_found:
+                        continue  # Skip this component if type not found
                     
                     # Update material names for this type
                     self._update_material_names(row)
                     
-                    # Set material name
-                    material_name = comp_data.get('material_name', '')
+                    # Set material name - try to find exact match first
+                    self.logger.info(f"Setting material name: {material_name}")
                     name_combo = row['name_combo']
                     name_model = name_combo.get_model()
+                    
+                    name_found = False
                     for i in range(len(name_model)):
                         if name_model[i][0] == material_name:
                             name_combo.set_active(i)
+                            name_found = True
+                            self.logger.info(f"Found and set material name '{material_name}' at index {i}")
                             break
+                    
+                    if not name_found:
+                        # If material not found, try to add it to the dropdown if it exists in database
+                        self.logger.warning(f"Material name '{material_name}' not found in current dropdown")
+                        
+                        # Try to verify the material exists in the database
+                        try:
+                            from app.enums.material_type import MaterialType
+                            # Use UI material type for enum lookup (uppercase format)
+                            material_type_enum = MaterialType(ui_material_type.upper().replace(' ', '_'))
+                            
+                            # Get the appropriate service for this material type
+                            service = None
+                            if material_type_enum == MaterialType.CEMENT:
+                                service = self.service_container.cement_service
+                            elif material_type_enum == MaterialType.FLY_ASH:
+                                service = self.service_container.fly_ash_service
+                            elif material_type_enum == MaterialType.SLAG:
+                                service = self.service_container.slag_service
+                            elif material_type_enum == MaterialType.INERT_FILLER:
+                                service = self.service_container.inert_filler_service
+                            elif material_type_enum == MaterialType.SILICA_FUME:
+                                service = self.service_container.silica_fume_service
+                            elif material_type_enum == MaterialType.LIMESTONE:
+                                service = self.service_container.limestone_service
+                            
+                            if service:
+                                material = service.get_by_name(material_name)
+                                if material:
+                                    # Material exists in database, add it to dropdown and select it
+                                    name_combo.append(material_name, material_name)
+                                    # Set to the newly added item (last item)
+                                    name_combo.set_active(len(name_model))
+                                    name_found = True
+                                    self.logger.info(f"Added missing material '{material_name}' to dropdown and selected it")
+                                else:
+                                    self.logger.error(f"Material '{material_name}' not found in database for type '{material_type}'")
+                            else:
+                                self.logger.error(f"No service available for material type '{material_type}'")
+                        except Exception as e:
+                            self.logger.error(f"Error checking for material '{material_name}': {e}")
+                        
+                        if not name_found:
+                            self.logger.error(f"Could not restore material '{material_name}' - using default instead")
+                            # Keep the default selection from _update_material_names()
                     
                     # Calculate mass from mass fraction
                     mass_fraction = comp_data.get('mass_fraction', 0.0)
-                    total_water_content = mix_design_data.get('total_water_content', 0.0)
-                    
-                    # Estimate total mass (this is approximate, will be recalculated)
-                    estimated_total_mass = total_water_content / mix_design_data.get('water_binder_ratio', 0.40)
-                    component_mass = mass_fraction * estimated_total_mass
+                    component_mass = mass_fraction * total_mass
+                    self.logger.info(f"Setting component mass: {component_mass} kg (from fraction {mass_fraction})")
                     
                     # Set mass
                     row['mass_spin'].set_value(component_mass)
+                    self.logger.info(f"Component row setup complete")
             
-            # Trigger recalculation
-            self._update_all_calculations()
+            # Trigger recalculation and UI update
+            self._trigger_calculation()
+            
+            # Update mix name if available (from database)
+            if hasattr(self, 'mix_name_entry'):
+                # Don't overwrite current mix name - user might be editing
+                pass
             
             self.logger.info(f"Populated UI with mix design data ({len(components)} components)")
             
+            # Log successful component loading for debugging
+            loaded_components = [comp.get('material_name', 'Unknown') for comp in components if comp.get('material_type') != 'water']
+            if loaded_components:
+                self.logger.info(f"Loaded components: {', '.join(loaded_components)}")
+            
         except Exception as e:
             self.logger.error(f"Error populating UI from mix design: {e}")
+            import traceback
+            traceback.print_exc()
             raise
+        finally:
+            # Always clear the loading flag
+            self._loading_in_progress = False
+            self.logger.info("Loading completed - constraint checking re-enabled")
 
     def _load_mix_design(self, mix_id: int) -> None:
         """Load a mix design from database."""
@@ -3780,22 +4255,60 @@ class MixDesignPanel(Gtk.Box):
             if not mix_design:
                 raise ValueError(f"Mix design with ID {mix_id} not found")
             
-            # Convert to dictionary format for UI population
+            # Convert to dictionary format for UI population with ALL fields
             mix_data = {
                 'water_binder_ratio': mix_design.water_binder_ratio,
                 'total_water_content': mix_design.total_water_content,
                 'air_content': mix_design.air_content,
                 'air_volume_fraction': mix_design.air_volume_fraction,
-                'system_size': mix_design.system_size,
+                
+                # System size parameters (individual X, Y, Z dimensions)
+                'system_size_x': getattr(mix_design, 'system_size_x', mix_design.system_size),
+                'system_size_y': getattr(mix_design, 'system_size_y', mix_design.system_size),
+                'system_size_z': getattr(mix_design, 'system_size_z', mix_design.system_size),
+                'system_size': mix_design.system_size,  # Keep for backward compatibility
+                
+                # Resolution parameter
+                'resolution': getattr(mix_design, 'resolution', 1.0),
+                
+                # Random seed
                 'random_seed': mix_design.random_seed,
+                
+                # Shape set parameters
                 'cement_shape_set': mix_design.cement_shape_set,
-                'aggregate_shape_set': mix_design.aggregate_shape_set,
+                'fine_aggregate_shape_set': getattr(mix_design, 'fine_aggregate_shape_set', mix_design.aggregate_shape_set),
+                'coarse_aggregate_shape_set': getattr(mix_design, 'coarse_aggregate_shape_set', 'spherical'),
+                'aggregate_shape_set': mix_design.aggregate_shape_set,  # Keep for backward compatibility
+                
+                # Flocculation parameters
+                'flocculation_enabled': getattr(mix_design, 'flocculation_enabled', False),
+                'flocculation_degree': getattr(mix_design, 'flocculation_degree', 0.0),
+                
+                # Dispersion parameters
+                'dispersion_factor': getattr(mix_design, 'dispersion_factor', 0),
+                
+                # Auto-calculation setting
+                'auto_calculation_enabled': getattr(mix_design, 'auto_calculation_enabled', True),
+                
+                # Fine aggregate parameters
+                'fine_aggregate_name': getattr(mix_design, 'fine_aggregate_name', None),
+                'fine_aggregate_mass': getattr(mix_design, 'fine_aggregate_mass', 0.0),
+                
+                # Coarse aggregate parameters
+                'coarse_aggregate_name': getattr(mix_design, 'coarse_aggregate_name', None),
+                'coarse_aggregate_mass': getattr(mix_design, 'coarse_aggregate_mass', 0.0),
+                
+                # Component and properties data
                 'components': mix_design.components,
                 'calculated_properties': mix_design.calculated_properties
             }
             
             # Populate UI
             self._populate_ui_from_mix_design(mix_data)
+            
+            # Set mix name with "_copy" suffix
+            copy_name = f"{mix_design.name}_copy"
+            self.mix_name_entry.set_text(copy_name)
             
             self.main_window.update_status(f"Loaded mix design '{mix_design.name}' successfully", "success", 3)
             self.logger.info(f"Loaded mix design: {mix_design.name} (ID: {mix_id})")
@@ -3804,28 +4317,8 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Error loading mix design: {e}")
             self.main_window.update_status(f"Error loading mix design: {e}", "error", 5)
     
-    def _duplicate_mix_design(self, mix_id: int, mix_name: str) -> None:
-        """Duplicate a mix design."""
-        try:
-            # Import mix design service
-            from app.services.mix_design_service import MixDesignService
-            
-            mix_design_service = MixDesignService(self.service_container.database_service)
-            new_name = mix_design_service.generate_unique_name(f"{mix_name}_copy")
-            duplicated_mix = mix_design_service.duplicate(mix_id, new_name)
-            
-            # Load the duplicated mix into UI
-            self._load_mix_design(duplicated_mix.id)
-            
-            self.main_window.update_status(f"Duplicated '{mix_name}' as '{new_name}'", "success", 3)
-            self.logger.info(f"Duplicated mix design: {mix_id} -> {new_name} (ID: {duplicated_mix.id})")
-            
-        except Exception as e:
-            self.logger.error(f"Error duplicating mix design: {e}")
-            self.main_window.update_status(f"Error duplicating mix design: {e}", "error", 5)
-    
-    def _delete_mix_design(self, mix_id: int, mix_name: str) -> None:
-        """Delete a mix design with confirmation."""
+    def _delete_mix_design(self, mix_id: int, mix_name: str) -> bool:
+        """Delete a mix design with confirmation. Returns True if deleted, False if cancelled."""
         try:
             # Confirmation dialog
             confirm_dialog = Gtk.MessageDialog(
@@ -3840,18 +4333,22 @@ class MixDesignPanel(Gtk.Box):
             )
             
             response = confirm_dialog.run()
+            confirm_dialog.destroy()  # Destroy confirmation dialog immediately
+            
             if response == Gtk.ResponseType.YES:
                 # Import mix design service
                 from app.services.mix_design_service import MixDesignService
                 
                 mix_design_service = MixDesignService(self.service_container.database_service)
-                mix_design_service.delete(mix_id)
+                mix_design_service.delete_by_id(mix_id)
                 
                 self.main_window.update_status(f"Deleted mix design '{mix_name}'", "success", 3)
                 self.logger.info(f"Deleted mix design: {mix_name} (ID: {mix_id})")
-            
-            confirm_dialog.destroy()
+                return True
+            else:
+                return False  # User cancelled
             
         except Exception as e:
             self.logger.error(f"Error deleting mix design: {e}")
             self.main_window.update_status(f"Error deleting mix design: {e}", "error", 5)
+            return False
