@@ -18,6 +18,7 @@ from .plot_widgets import (
 )
 from .plot_types import PlotType, PlotStyle, ExportFormat
 from .visualization_3d import Microstructure3DViewer
+from .pyvista_3d_viewer import PyVistaViewer3D
 from .plot_export import PlotExporter
 
 __all__ = [
@@ -30,6 +31,7 @@ __all__ = [
     'PlotStyle', 
     'ExportFormat',
     'Microstructure3DViewer',
+    'PyVistaViewer3D',
     'PlotExporter'
 ]
 

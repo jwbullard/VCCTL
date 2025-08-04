@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.services.microstructure_service import MicrostructureParams, PhaseType
-from app.visualization import create_visualization_manager, Microstructure3DViewer
+from app.visualization import create_visualization_manager, Microstructure3DViewer, PyVistaViewer3D
 
 
 class MicrostructurePanel(Gtk.Box):
@@ -38,6 +38,8 @@ class MicrostructurePanel(Gtk.Box):
         # Initialize visualization manager
         self.plot_manager, self.plot_exporter = create_visualization_manager(main_window)
         self.microstructure_3d_viewer = None
+        self.pyvista_3d_viewer = None
+        self.current_viewer_type = 'matplotlib'  # 'matplotlib' or 'pyvista'
         
         # Panel state
         self.current_params = None
@@ -54,26 +56,65 @@ class MicrostructurePanel(Gtk.Box):
         self.logger.info("Microstructure panel initialized")
     
     def _on_enable_3d_viewer(self, button: Gtk.Button) -> None:
-        """Enable 3D viewer on demand to avoid surface creation issues during initialization."""
+        """Enable 3D viewer on demand based on selected viewer type."""
         try:
-            if self.microstructure_3d_viewer is None:
-                # Create the 3D viewer now
-                self.microstructure_3d_viewer = Microstructure3DViewer()
-                
-                # Replace placeholder with actual viewer
-                parent = self.viewer_placeholder.get_parent()
-                parent.remove(self.viewer_placeholder)
-                parent.pack_start(self.microstructure_3d_viewer, True, True, 0)
-                self.microstructure_3d_viewer.show_all()
-                
-                self.logger.info("3D viewer enabled successfully")
-                button.set_label("3D Viewer Active")
-                button.set_sensitive(False)
+            self.current_viewer_type = self.viewer_type_combo.get_active_id()
+            
+            if self.current_viewer_type == 'pyvista':
+                if self.pyvista_3d_viewer is None:
+                    # Create PyVista viewer
+                    self.pyvista_3d_viewer = PyVistaViewer3D()
+                    self._replace_viewer_placeholder(self.pyvista_3d_viewer)
+                    self.logger.info("PyVista 3D viewer enabled successfully")
+                    button.set_label("PyVista Viewer Active")
+                    
+            else:  # matplotlib
+                if self.microstructure_3d_viewer is None:
+                    # Create matplotlib viewer
+                    self.microstructure_3d_viewer = Microstructure3DViewer()
+                    self._replace_viewer_placeholder(self.microstructure_3d_viewer)
+                    self.logger.info("Matplotlib 3D viewer enabled successfully")
+                    button.set_label("Matplotlib Viewer Active")
+            
+            button.set_sensitive(False)
+            self.viewer_type_combo.set_sensitive(False)  # Lock viewer type once enabled
             
         except Exception as e:
-            self.logger.error(f"Failed to enable 3D viewer: {e}")
-            button.set_label("3D Viewer Error")
+            self.logger.error(f"Failed to enable {self.current_viewer_type} viewer: {e}")
+            button.set_label(f"{self.current_viewer_type.title()} Viewer Error")
             button.set_sensitive(False)
+    
+    def _replace_viewer_placeholder(self, viewer_widget):
+        """Replace the placeholder with the actual viewer widget."""
+        parent = self.viewer_placeholder.get_parent()
+        parent.remove(self.viewer_placeholder)
+        parent.pack_start(viewer_widget, True, True, 0)
+        viewer_widget.show_all()
+    
+    def _on_viewer_type_changed(self, combo):
+        """Handle viewer type change (only works before enabling)."""
+        # This just updates the selection - actual change happens when Enable is clicked
+        selected_type = combo.get_active_id()
+        self.logger.debug(f"Viewer type selected: {selected_type}")
+        
+        # Update Generate Preview button visibility based on viewer type
+        if hasattr(self, 'preview_button'):
+            if selected_type == 'pyvista':
+                # PyVista loads data automatically, no Generate Preview needed
+                self.preview_button.set_visible(False)
+                self.preview_button.set_no_show_all(True)
+            else:
+                # Matplotlib viewer needs Generate Preview button
+                self.preview_button.set_visible(True)
+                self.preview_button.set_no_show_all(False)
+    
+    def _get_active_viewer(self):
+        """Get the currently active 3D viewer."""
+        if self.current_viewer_type == 'pyvista' and self.pyvista_3d_viewer is not None:
+            return self.pyvista_3d_viewer
+        elif self.current_viewer_type == 'matplotlib' and self.microstructure_3d_viewer is not None:
+            return self.microstructure_3d_viewer
+        return None
     
     def _setup_ui(self) -> None:
         """Setup the microstructure panel UI."""
@@ -82,9 +123,6 @@ class MicrostructurePanel(Gtk.Box):
         
         # Create main content area
         self._create_content_area()
-        
-        # Create status area
-        self._create_status_area()
     
     def _create_header(self) -> None:
         """Create the panel header."""
@@ -133,24 +171,6 @@ class MicrostructurePanel(Gtk.Box):
         content_box.set_margin_left(15)
         content_box.set_margin_right(15)
         
-        # Info message about parameters being in Mix Design
-        info_frame = Gtk.Frame(label="Parameter Configuration")
-        info_frame.get_style_context().add_class("card")
-        
-        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        info_box.set_margin_top(15)
-        info_box.set_margin_bottom(15)
-        info_box.set_margin_left(15)
-        info_box.set_margin_right(15)
-        
-        info_label = Gtk.Label()
-        info_label.set_markup('<span size="medium">Microstructure generation parameters are now configured in the <b>Mix Design</b> tool.\n\nUse this panel to preview and visualize the generated 3D microstructure.</span>')
-        info_label.set_line_wrap(True)
-        info_label.set_justify(Gtk.Justification.CENTER)
-        info_box.pack_start(info_label, False, False, 0)
-        
-        info_frame.add(info_box)
-        content_box.pack_start(info_frame, False, False, 0)
         
         # Preview section - now takes full width
         self._create_preview_section(content_box)
@@ -182,16 +202,32 @@ class MicrostructurePanel(Gtk.Box):
         info_label.set_halign(Gtk.Align.CENTER)
         viewer_placeholder.pack_start(info_label, False, False, 0)
         
+        # Add viewer type selection
+        viewer_type_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        viewer_type_box.set_halign(Gtk.Align.CENTER)
+        
+        viewer_type_label = Gtk.Label("Viewer Type:")
+        viewer_type_box.pack_start(viewer_type_label, False, False, 0)
+        
+        self.viewer_type_combo = Gtk.ComboBoxText()
+        self.viewer_type_combo.append("matplotlib", "Matplotlib (Interactive)")
+        self.viewer_type_combo.append("pyvista", "PyVista (High Quality)")
+        self.viewer_type_combo.set_active_id("pyvista")  # Default to PyVista
+        self.viewer_type_combo.connect('changed', self._on_viewer_type_changed)
+        viewer_type_box.pack_start(self.viewer_type_combo, False, False, 0)
+        
+        viewer_placeholder.pack_start(viewer_type_box, False, False, 5)
+        
         # Add status message
         status_label = Gtk.Label()
-        status_label.set_markup('<span size="small" color="#666666">3D visualization temporarily disabled to prevent rendering issues</span>')
+        status_label.set_markup('<span size="small" color="#666666">Choose viewer type and click Enable to initialize 3D visualization</span>')
         status_label.set_halign(Gtk.Align.CENTER)
         status_label.set_line_wrap(True)
         viewer_placeholder.pack_start(status_label, True, True, 0)
         
         # Add enable button for on-demand loading
         enable_button = Gtk.Button(label="Enable 3D Viewer")
-        enable_button.set_tooltip_text("Click to initialize 3D visualization (may cause surface warnings)")
+        enable_button.set_tooltip_text("Click to initialize selected 3D viewer")
         enable_button.connect('clicked', self._on_enable_3d_viewer)
         enable_button.set_halign(Gtk.Align.CENTER)
         viewer_placeholder.pack_start(enable_button, False, False, 0)
@@ -209,6 +245,9 @@ class MicrostructurePanel(Gtk.Box):
         
         self.preview_button = Gtk.Button(label="Generate Preview")
         self.preview_button.set_tooltip_text("Generate 3D microstructure preview")
+        # Initially hidden since PyVista is default and loads data automatically
+        self.preview_button.set_visible(False)
+        self.preview_button.set_no_show_all(True)  # Prevent show_all() from making it visible
         preview_controls.pack_start(self.preview_button, True, True, 0)
         
         self.export_preview_button = Gtk.Button(label="Export")
@@ -221,61 +260,6 @@ class MicrostructurePanel(Gtk.Box):
         frame.add(vbox)
         parent.pack_start(frame, True, True, 0)
     
-    def _create_status_area(self) -> None:
-        """Create the status and validation area."""
-        # Separator
-        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pack_start(separator, False, False, 0)
-        
-        # Status area
-        status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
-        status_box.set_margin_top(10)
-        status_box.set_margin_bottom(10)
-        status_box.set_margin_left(15)
-        status_box.set_margin_right(15)
-        
-        # Validation status
-        validation_frame = Gtk.Frame(label="Validation Status")
-        validation_frame.set_size_request(300, -1)
-        
-        self.validation_text = Gtk.TextView()
-        self.validation_text.set_editable(False)
-        self.validation_text.set_cursor_visible(False)
-        self.validation_text.set_size_request(-1, 100)
-        
-        validation_scroll = Gtk.ScrolledWindow()
-        validation_scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        validation_scroll.add(self.validation_text)
-        
-        validation_frame.add(validation_scroll)
-        status_box.pack_start(validation_frame, True, True, 0)
-        
-        # Computation estimate
-        compute_frame = Gtk.Frame(label="Computation Estimate")
-        compute_frame.set_size_request(300, -1)
-        
-        compute_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        compute_box.set_margin_top(10)
-        compute_box.set_margin_bottom(10)
-        compute_box.set_margin_left(10)
-        compute_box.set_margin_right(10)
-        
-        self.memory_label = Gtk.Label()
-        self.memory_label.set_halign(Gtk.Align.START)
-        compute_box.pack_start(self.memory_label, False, False, 0)
-        
-        self.time_label = Gtk.Label()
-        self.time_label.set_halign(Gtk.Align.START)
-        compute_box.pack_start(self.time_label, False, False, 0)
-        
-        self.complexity_label = Gtk.Label()
-        self.complexity_label.set_halign(Gtk.Align.START)
-        compute_box.pack_start(self.complexity_label, False, False, 0)
-        
-        compute_frame.add(compute_box)
-        status_box.pack_start(compute_frame, True, True, 0)
-        
-        self.pack_start(status_box, False, False, 0)
     
     def _connect_signals(self) -> None:
         """Connect UI signals."""
@@ -283,6 +267,9 @@ class MicrostructurePanel(Gtk.Box):
         self.load_img_button.connect('clicked', self._on_load_img_clicked)
         self.preview_button.connect('clicked', self._on_preview_clicked)
         self.export_preview_button.connect('clicked', self._on_export_preview_clicked)
+        
+        # Update button visibility based on default viewer selection
+        self._on_viewer_type_changed(self.viewer_type_combo)
     
     def _load_default_parameters(self) -> None:
         """Load default parameters - simplified for preview-only mode."""
@@ -523,10 +510,13 @@ class MicrostructurePanel(Gtk.Box):
             }
             
             # Load data into 3D viewer
-            voxel_size = (params.resolution, params.resolution, params.resolution)
-            success = self.microstructure_3d_viewer.load_voxel_data(
-                voxel_data, phase_mapping, voxel_size
-            )
+            active_viewer = self._get_active_viewer()
+            success = False
+            if active_viewer:
+                voxel_size = (params.resolution, params.resolution, params.resolution)
+                success = active_viewer.load_voxel_data(
+                    voxel_data, phase_mapping, voxel_size
+                )
             
             if success:
                 self.export_preview_button.set_sensitive(True)
@@ -777,11 +767,15 @@ class MicrostructurePanel(Gtk.Box):
                     phase_names[int(phase_id)] = name
                 
                 # Display in 3D viewer using correct method
-                success = self.microstructure_3d_viewer.load_voxel_data(
-                    voxel_data,
-                    phase_names,
-                    (1.0, 1.0, 1.0)  # voxel size
-                )
+                active_viewer = self._get_active_viewer()
+                if active_viewer:
+                    success = active_viewer.load_voxel_data(
+                        voxel_data,
+                        phase_names,
+                        (1.0, 1.0, 1.0)  # voxel size
+                    )
+                else:
+                    success = False
                 
                 if success:
                     self.export_preview_button.set_sensitive(True)
@@ -838,9 +832,23 @@ class MicrostructurePanel(Gtk.Box):
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
                 filename = dialog.get_filename()
-                if self.microstructure_3d_viewer:
+                active_viewer = self._get_active_viewer()
+                if active_viewer:
                     format_type = filename.split('.')[-1].lower()
-                    success = self.microstructure_3d_viewer.export_3d_view(filename, format_type)
+                    # Both viewers have export_3d_view method, but PyVista uses screenshot
+                    if hasattr(active_viewer, 'export_3d_view'):
+                        success = active_viewer.export_3d_view(filename, format_type)
+                    elif hasattr(active_viewer, 'plotter'):
+                        # PyVista viewer - use screenshot method
+                        try:
+                            active_viewer.plotter.screenshot(filename, transparent_background=True)
+                            success = True
+                        except Exception as e:
+                            self.logger.error(f"PyVista export failed: {e}")
+                            success = False
+                    else:
+                        success = False
+                    
                     if success:
                         self._update_status(f"3D preview exported to {filename}")
                     else:

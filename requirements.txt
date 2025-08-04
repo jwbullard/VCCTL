@@ -12,6 +12,8 @@ pydantic>=2.0.0          # Data validation and settings management
 PyYAML>=6.0              # YAML configuration files
 Pillow>=10.0.0           # Image processing
 matplotlib>=3.7.0        # Plotting and visualization
+pyvista>=0.43.0          # Advanced 3D visualization (VTK-based)
+pyvistaqt>=0.11.0        # PyVista Qt integration for GUI
 
 # Development and Testing
 pytest>=7.4.0           # Testing framework
