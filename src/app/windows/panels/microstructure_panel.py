@@ -622,6 +622,13 @@ class MicrostructurePanel(Gtk.Box):
                 parent=self.main_window,
                 action=Gtk.FileChooserAction.OPEN
             )
+            
+            # Disable recent files to force folder browsing
+            try:
+                dialog.set_create_folders(False)
+                dialog.set_do_overwrite_confirmation(False)
+            except AttributeError:
+                pass  # Some methods may not exist in all GTK versions
             dialog.add_buttons(
                 Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                 Gtk.STOCK_OPEN, Gtk.ResponseType.OK
@@ -638,11 +645,38 @@ class MicrostructurePanel(Gtk.Box):
             filter_all.add_pattern("*")
             dialog.add_filter(filter_all)
             
-            # Set initial directory to Operations folder where generated .img files are located
+            # Set initial directory to Operations folder where generated .img files are located  
             import os
+            from gi.repository import GLib
+            
             operations_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "Operations")
             if os.path.exists(operations_path):
+                # Set current folder and ensure we're not in recent files mode
                 dialog.set_current_folder(operations_path)
+                
+                # Multiple approaches to force folder browsing instead of recent files
+                try:
+                    # Method 1: Use set_current_folder_uri to be more explicit
+                    folder_uri = GLib.filename_to_uri(operations_path)
+                    dialog.set_current_folder_uri(folder_uri)
+                except:
+                    pass
+                
+                try:
+                    # Method 2: Set a specific filename in the folder to force navigation
+                    # Look for any .img file in Operations subdirectories
+                    for item in os.listdir(operations_path):
+                        item_path = os.path.join(operations_path, item)
+                        if os.path.isdir(item_path):
+                            for subitem in os.listdir(item_path):
+                                if subitem.endswith('.img'):
+                                    example_img = os.path.join(item_path, subitem) 
+                                    dialog.set_filename(example_img)
+                                    dialog.unselect_all()  # Unselect the example file
+                                    break
+                            break
+                except:
+                    pass
             
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
