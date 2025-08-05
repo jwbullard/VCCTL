@@ -586,6 +586,15 @@ class PyVistaViewer3D(Gtk.Box):
         if self.voxel_data is None:
             return
         
+        # Clear existing mesh objects to prevent memory leaks
+        if hasattr(self, 'mesh_objects'):
+            for mesh in self.mesh_objects.values():
+                try:
+                    if hasattr(mesh, 'clear'):
+                        mesh.clear()
+                except:
+                    pass
+        
         self.mesh_objects = {}
         unique_phases = np.unique(self.voxel_data)
         
@@ -613,8 +622,12 @@ class PyVistaViewer3D(Gtk.Box):
             return
         
         try:
-            # Clear existing plots
+            # Clear existing plots and force memory cleanup
             self.plotter.clear()
+            
+            # Force garbage collection to prevent memory leaks
+            import gc
+            gc.collect()
             
             # Add coordinate axes for spatial reference
             self._add_coordinate_axes()

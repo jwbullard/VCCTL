@@ -2942,6 +2942,18 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _refresh_results_analysis(self) -> None:
         """Refresh all results analysis data."""
         try:
+            # Throttle dashboard refresh to prevent excessive performance impact
+            import time
+            current_time = time.time()
+            if not hasattr(self, '_last_dashboard_refresh'):
+                self._last_dashboard_refresh = 0
+            
+            # Only refresh if more than 30 seconds have passed since last refresh
+            if current_time - self._last_dashboard_refresh < 30:
+                self.logger.debug("Skipping dashboard refresh - throttled")
+                return
+            
+            self._last_dashboard_refresh = current_time
             self.logger.info("Refreshing results analysis dashboard...")
             
             # Get operations data from saved history  
