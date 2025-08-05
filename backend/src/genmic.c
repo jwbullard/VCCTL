@@ -4110,9 +4110,14 @@ void outmic(void) {
     exit(1);
   }
 
-  for (iz = 0; iz < Zsyssize; iz++) {
+  /***
+   *  2025 August 04
+   *  New convention is to write microstructures in C-order, where Z varies the
+   *  fastest, then Y, then X.
+   ***/
+  for (ix = 0; ix < Xsyssize; ix++) {
     for (iy = 0; iy < Ysyssize; iy++) {
-      for (ix = 0; ix < Xsyssize; ix++) {
+      for (iz = 0; iz < Zsyssize; iz++) {
         valout = Cemreal.val[getInt3dindex(Cemreal, ix, iy, iz)];
         if (valout == (int)(INERTAGG)) {
           valout = (int)(POROSITY);

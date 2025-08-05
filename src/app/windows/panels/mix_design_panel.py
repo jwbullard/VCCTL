@@ -25,8 +25,11 @@ if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
 
 from app.services.service_container import get_service_container
-from app.services.mix_service import MixService, MaterialType, MixComponent, MixDesign
+from app.services.mix_service import MixService, MixComponent, MixDesign
+from app.models.material_types import MaterialType
 from app.services.microstructure_service import MicrostructureParams, PhaseType
+# Import centralized validation
+from app.validation import MixDesignValidator, ComponentData
 from app.widgets import GradingCurveWidget
 
 
@@ -469,15 +472,23 @@ class MixDesignPanel(Gtk.Box):
             fine_aggregates = self.mix_service.get_fine_aggregates()
             for aggregate_name in fine_aggregates:
                 self.fine_agg_combo.append(aggregate_name, aggregate_name)
-            self.fine_agg_combo.set_active(0)
+            # Set default to highest fine aggregate in list (last item), or placeholder if no aggregates
+            if fine_aggregates:
+                self.fine_agg_combo.set_active(len(fine_aggregates))  # Last aggregate (after placeholder at index 0)
+            else:
+                self.fine_agg_combo.set_active(0)
             
-            # Coarse aggregate combo - only coarse aggregates (type = 1)
+            # Coarse aggregate combo - only coarse aggregates (type = 1) 
             self.coarse_agg_combo.remove_all()
             self.coarse_agg_combo.append("", "-- Select Coarse Aggregate --")
             coarse_aggregates = self.mix_service.get_coarse_aggregates()
             for aggregate_name in coarse_aggregates:
                 self.coarse_agg_combo.append(aggregate_name, aggregate_name)
-            self.coarse_agg_combo.set_active(0)
+            # Set default to highest coarse aggregate in list (last item), or placeholder if no aggregates
+            if coarse_aggregates:
+                self.coarse_agg_combo.set_active(len(coarse_aggregates))  # Last aggregate (after placeholder at index 0)
+            else:
+                self.coarse_agg_combo.set_active(0)
             
             self.logger.info("Loaded material lists for mix design")
             
@@ -858,6 +869,9 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_component_mass_changed(self, spin, row_data) -> None:
         """Handle component mass change."""
+        # Real-time validation feedback
+        self._update_real_time_validation()
+        
         # Update volume fraction validation
         self._calculate_total_volume_fractions()
         
@@ -905,6 +919,9 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_mass_changed(self, widget) -> None:
         """Handle aggregate mass changes and update validation."""
+        # Real-time validation feedback
+        self._update_real_time_validation()
+        
         # Update total volume fraction display
         self._calculate_total_volume_fractions()
         
@@ -1492,24 +1509,40 @@ class MixDesignPanel(Gtk.Box):
             if not components:
                 return None
             
-            # DEBUG: Log component mass fractions
-            total_mass_fraction_check = 0.0
-            self.logger.info(f"MASS FRACTION DEBUG - Total solid mass: {total_solid_mass}")
-            for i, comp in enumerate(components):
-                self.logger.info(f"Component {i}: {comp.material_name} = {comp.mass_fraction:.6f}")
-                total_mass_fraction_check += comp.mass_fraction
-            self.logger.info(f"Sum of mass fractions: {total_mass_fraction_check:.6f}")
+            # Validate components using centralized validation
+            validation_components = [
+                ComponentData(
+                    material_name=comp.material_name,
+                    material_type=comp.material_type.value if hasattr(comp.material_type, 'value') else str(comp.material_type),
+                    mass_fraction=comp.mass_fraction,
+                    volume_fraction=comp.volume_fraction,
+                    specific_gravity=comp.specific_gravity
+                )
+                for comp in components
+            ]
+            
+            # Quick validation for immediate feedback
+            is_valid, error_msg = MixDesignValidator.validate_mass_fractions_only(validation_components)
+            if not is_valid:
+                self.logger.error(f"Mass fraction validation failed: {error_msg}")
+                self.main_window.update_status(f"Validation error: {error_msg}", "error", 5)
+                return None
+            
+            # Log validation success
+            total_mass_fraction = sum(comp.mass_fraction for comp in components)
+            self.logger.info(f"Mass fraction validation passed: {total_mass_fraction:.6f} = 1.000")
             
             # Create mix design
             # Note: Water is NOT added as a separate component since it's handled via total_water_content
-            # Water mass fraction is relative to total mass including water for W/B ratio calculations
-            water_mass_fraction = water_mass / total_mass_all if total_mass_all > 0 else 0.0
+            # total_water_content should be the water mass fraction relative to solids only (for genmic calculations)
+            water_mass_fraction_to_solids = water_mass / total_solid_mass if total_solid_mass > 0 else 0.0
+            self.logger.info(f"WATER DEBUG: water_mass={water_mass}, total_solid_mass={total_solid_mass}, water_fraction={water_mass_fraction_to_solids:.6f}")
             
             mix_design = MixDesign(
                 name=mix_name,
                 components=components,
                 water_binder_ratio=self.wb_ratio_spin.get_value(),
-                total_water_content=water_mass_fraction,  # Water mass fraction
+                total_water_content=water_mass_fraction_to_solids,  # Water mass fraction relative to solids
                 air_content=self.micro_air_content_spin.get_value()  # Already a volume fraction
             )
             
@@ -1518,6 +1551,100 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to create mix design from UI: {e}")
             return None
+    
+    def _update_real_time_validation(self) -> None:
+        """Update validation status in real-time as user types."""
+        try:
+            # Get current components for validation
+            validation_components = self._get_current_components_for_validation()
+            if not validation_components:
+                return
+            
+            # Quick validation
+            is_valid, error_msg = MixDesignValidator.validate_mass_fractions_only(validation_components)
+            
+            # Update UI feedback
+            if is_valid:
+                self.main_window.update_status("✓ Valid mix proportions", "success", 2)
+            else:
+                self.main_window.update_status(f"⚠ {error_msg}", "warning", 3)
+                
+        except Exception as e:
+            self.logger.error(f"Real-time validation error: {e}")
+    
+    def _get_current_components_for_validation(self) -> List[ComponentData]:
+        """Get current components in format suitable for validation."""
+        try:
+            components = []
+            
+            # Get powder components
+            for row in self.component_rows:
+                material_type = row['type_combo'].get_active_id()
+                material_name = row['name_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if material_type and material_name and mass_kg > 0:
+                    # Get specific gravity
+                    specific_gravity = 3.15  # Default
+                    try:
+                        sg_text = row['sg_label'].get_text()
+                        if sg_text and sg_text != "—":
+                            specific_gravity = float(sg_text)
+                    except (ValueError, TypeError):
+                        pass
+                    
+                    components.append(ComponentData(
+                        material_name=material_name,
+                        material_type=material_type,
+                        mass_fraction=0.0,  # Will be calculated below
+                        volume_fraction=0.0,  # Will be calculated below
+                        specific_gravity=specific_gravity
+                    ))
+            
+            # Get aggregate components
+            fine_agg_mass = self.fine_agg_mass_spin.get_value()
+            coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
+            
+            # Calculate total solid mass
+            powder_mass = sum(row['mass_spin'].get_value() for row in self.component_rows)
+            total_solid_mass = powder_mass + fine_agg_mass + coarse_agg_mass
+            
+            if total_solid_mass <= 0:
+                return []
+            
+            # Update mass fractions for powder components
+            for i, row in enumerate(self.component_rows):
+                if i < len(components):
+                    mass_kg = row['mass_spin'].get_value()
+                    components[i].mass_fraction = mass_kg / total_solid_mass
+                    components[i].volume_fraction = components[i].mass_fraction / components[i].specific_gravity
+            
+            # Add aggregates if present
+            fine_agg_name = self.fine_agg_combo.get_active_id()
+            if fine_agg_name and fine_agg_name != "" and fine_agg_mass > 0:
+                components.append(ComponentData(
+                    material_name=fine_agg_name,
+                    material_type="aggregate",
+                    mass_fraction=fine_agg_mass / total_solid_mass,
+                    volume_fraction=(fine_agg_mass / total_solid_mass) / 2.65,
+                    specific_gravity=2.65
+                ))
+            
+            coarse_agg_name = self.coarse_agg_combo.get_active_id()
+            if coarse_agg_name and coarse_agg_name != "" and coarse_agg_mass > 0:
+                components.append(ComponentData(
+                    material_name=coarse_agg_name,
+                    material_type="aggregate",
+                    mass_fraction=coarse_agg_mass / total_solid_mass,
+                    volume_fraction=(coarse_agg_mass / total_solid_mass) / 2.65,
+                    specific_gravity=2.65
+                ))
+            
+            return components
+            
+        except Exception as e:
+            self.logger.error(f"Error getting components for validation: {e}")
+            return []
     
     def _update_properties_display(self, properties: Dict[str, Any]) -> None:
         """Update the properties display with calculated values."""
@@ -2025,28 +2152,58 @@ class MixDesignPanel(Gtk.Box):
         return list(zip(diameters, volume_fractions))
 
     def _calculate_total_phases(self, mix_design: MixDesign) -> int:
-        """Calculate total number of phases to add to genmic.c."""
+        """Calculate total number of phases to add to genmic.c, excluding zero-fraction phases."""
         num_phases = 0
         
         for component in mix_design.components:
             if component.material_type == MaterialType.CEMENT:
-                # Each cement has 4 phases: Clinker(1), Dihydrate(7), Hemihydrate(8), Anhydrite(9)
-                num_phases += 4
+                # Cement phases: Clinker(1) + gypsum phases only if non-zero
+                # Clinker is always included (contains C3S, C2S, C3A, C4AF, K2SO4, Na2SO4)
+                num_phases += 1  # Clinker phase
+                
+                # Check gypsum fractions from database
+                try:
+                    from app.database.service import DatabaseService
+                    db_service = DatabaseService()
+                    with db_service.get_session() as session:
+                        from app.models.cement import Cement
+                        cement = session.query(Cement).filter(Cement.name == component.material_name).first()
+                        if cement:
+                            # Only count gypsum phases with non-zero volume fractions
+                            if (cement.dihyd_volume_fraction or 0.0) > 0.0:
+                                num_phases += 1  # Dihydrate(7)
+                            if (cement.hemihyd_volume_fraction or 0.0) > 0.0:
+                                num_phases += 1  # Hemihydrate(8)
+                            if (cement.anhyd_volume_fraction or 0.0) > 0.0:
+                                num_phases += 1  # Anhydrite(9)
+                        else:
+                            # Fallback: assume all 3 gypsum phases if cement not found
+                            num_phases += 3
+                except Exception as e:
+                    self.logger.warning(f"Error checking cement gypsum fractions: {e}")
+                    # Fallback: assume all 3 gypsum phases on database error
+                    num_phases += 3
+                    
             elif component.material_type == MaterialType.FLY_ASH:
-                # Fly ash has 1 phase: FLYASH(18)
-                num_phases += 1
+                # Fly ash has 1 phase: FLYASH(18) - only if non-zero mass fraction
+                if component.mass_fraction > 0.0:
+                    num_phases += 1
             elif component.material_type == MaterialType.SLAG:
-                # Slag has 1 phase: SLAG(12)
-                num_phases += 1
+                # Slag has 1 phase: SLAG(12) - only if non-zero mass fraction
+                if component.mass_fraction > 0.0:
+                    num_phases += 1
             elif component.material_type == MaterialType.SILICA_FUME:
-                # Silica fume has 1 phase: SILICA_FUME(10)
-                num_phases += 1
+                # Silica fume has 1 phase: SILICA_FUME(10) - only if non-zero mass fraction
+                if component.mass_fraction > 0.0:
+                    num_phases += 1
             elif component.material_type == MaterialType.INERT_FILLER:
-                # Inert filler has 1 phase: INERT(11)
-                num_phases += 1
+                # Inert filler has 1 phase: INERT(11) - only if non-zero mass fraction
+                if component.mass_fraction > 0.0:
+                    num_phases += 1
             elif component.material_type == MaterialType.LIMESTONE:
-                # Limestone has 1 phase: CaCO3(33)
-                num_phases += 1
+                # Limestone has 1 phase: CaCO3(33) - only if non-zero mass fraction
+                if component.mass_fraction > 0.0:
+                    num_phases += 1
         
         return num_phases
 
@@ -2450,7 +2607,7 @@ class MixDesignPanel(Gtk.Box):
         powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         
         for component in mix_design.components:
-            if component.material_type in powder_types:
+            if component.material_type in powder_types and component.mass_fraction > 0.0:
                 if component.material_type == MaterialType.CEMENT:
                     # Break cement into 4 phases: Clinker, Dihydrate, Hemihydrate, Anhydrite
                     cement_phases = self._calculate_cement_phase_fractions(component.material_name, component, mix_design)
@@ -2468,32 +2625,35 @@ class MixDesignPanel(Gtk.Box):
                         lines.append(f"{int(round(diameter))}")
                         lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 7: Dihydrate (scaled by cement's fraction of binder solid)
-                    lines.append("7")
-                    dihydrate_fraction = cement_phases['dihydrate'] * cement_binder_solid_fraction
-                    lines.append(f"{dihydrate_fraction:.6f}")
-                    lines.append(f"{len(psd_data)}")
-                    for diameter, volume_fraction in psd_data:
-                        lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{volume_fraction:.6f}")
+                    # Phase ID 7: Dihydrate (only if non-zero fraction)
+                    if cement_phases['dihydrate'] > 0.0:
+                        lines.append("7")
+                        dihydrate_fraction = cement_phases['dihydrate'] * cement_binder_solid_fraction
+                        lines.append(f"{dihydrate_fraction:.6f}")
+                        lines.append(f"{len(psd_data)}")
+                        for diameter, volume_fraction in psd_data:
+                            lines.append(f"{int(round(diameter))}")
+                            lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 8: Hemihydrate (scaled by cement's fraction of binder solid)
-                    lines.append("8")
-                    hemihydrate_fraction = cement_phases['hemihydrate'] * cement_binder_solid_fraction
-                    lines.append(f"{hemihydrate_fraction:.6f}")
-                    lines.append(f"{len(psd_data)}")
-                    for diameter, volume_fraction in psd_data:
-                        lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{volume_fraction:.6f}")
+                    # Phase ID 8: Hemihydrate (only if non-zero fraction)
+                    if cement_phases['hemihydrate'] > 0.0:
+                        lines.append("8")
+                        hemihydrate_fraction = cement_phases['hemihydrate'] * cement_binder_solid_fraction
+                        lines.append(f"{hemihydrate_fraction:.6f}")
+                        lines.append(f"{len(psd_data)}")
+                        for diameter, volume_fraction in psd_data:
+                            lines.append(f"{int(round(diameter))}")
+                            lines.append(f"{volume_fraction:.6f}")
                     
-                    # Phase ID 9: Anhydrite (scaled by cement's fraction of binder solid)
-                    lines.append("9")
-                    anhydrite_fraction = cement_phases['anhydrite'] * cement_binder_solid_fraction
-                    lines.append(f"{anhydrite_fraction:.6f}")
-                    lines.append(f"{len(psd_data)}")
-                    for diameter, volume_fraction in psd_data:
-                        lines.append(f"{int(round(diameter))}")
-                        lines.append(f"{volume_fraction:.6f}")
+                    # Phase ID 9: Anhydrite (only if non-zero fraction)
+                    if cement_phases['anhydrite'] > 0.0:
+                        lines.append("9")
+                        anhydrite_fraction = cement_phases['anhydrite'] * cement_binder_solid_fraction
+                        lines.append(f"{anhydrite_fraction:.6f}")
+                        lines.append(f"{len(psd_data)}")
+                        for diameter, volume_fraction in psd_data:
+                            lines.append(f"{int(round(diameter))}")
+                            lines.append(f"{volume_fraction:.6f}")
                         
                 else:
                     # Non-cement materials: fly ash, slag, inert filler
@@ -2710,28 +2870,41 @@ class MixDesignPanel(Gtk.Box):
             
             self.logger.info(f"Operations panel found: {operations_panel is not None}")
             
-            # Operations panel integration re-enabled - should work now
-            
+            # Launch through Operations panel with real process control
             if operations_panel:
                 try:
                     from app.windows.panels.operations_monitoring_panel import OperationType
-                    operation_name = f"3D Microstructure Generation"
-                    metadata = {
-                        'input_file': input_file,
-                        'output_dir': output_dir,
-                        'genmic_path': genmic_path
-                    }
-                    operation_id = operations_panel.register_operation(
+                    mix_name_safe = os.path.splitext(os.path.basename(input_file))[0]
+                    operation_name = f"{mix_name_safe} Microstructure"
+                    
+                    # Read input file content to pass as stdin
+                    with open(input_file, 'r') as f:
+                        input_content = f.read()
+                    
+                    # Launch real process operation
+                    operation_id = operations_panel.start_real_process_operation(
                         name=operation_name,
                         operation_type=OperationType.MICROSTRUCTURE_GENERATION,
-                        total_steps=4,  # Initialize -> Parse -> Generate -> Complete
-                        estimated_duration=timedelta(minutes=5),  # Rough estimate
-                        metadata=metadata
+                        command=[genmic_path],
+                        working_dir=output_dir,
+                        input_data=input_content
                     )
-                    operations_panel.start_operation(operation_id, "Initializing genmic execution...")
+                    
+                    if operation_id:
+                        self.logger.info(f"Successfully launched genmic through Operations panel: {operation_id}")
+                        self.main_window.update_status(
+                            f"Genmic process started! Monitor progress in Operations tab.", 
+                            "success", 5
+                        )
+                        return
+                    else:
+                        self.logger.error("Failed to launch genmic through Operations panel")
+                        raise Exception("Failed to launch genmic process")
+                        
                 except Exception as e:
-                    self.logger.warning(f"Could not register operation with Operations panel: {e}")
-                    operation_id = None
+                    self.logger.error(f"Could not launch through Operations panel: {e}")
+                    self.main_window.update_status(f"Error launching genmic: {e}", "error", 5)
+                    return
             
             def run_genmic():
                 """Run genmic in separate thread."""
@@ -3691,7 +3864,13 @@ class MixDesignPanel(Gtk.Box):
             # Calculate total masses for fractions
             powder_mass = self._calculate_total_powder_mass()
             water_mass = self.water_content_spin.get_value()
-            total_mass = powder_mass + water_mass
+            
+            # Get aggregate masses
+            fine_agg_mass = self.fine_agg_mass_spin.get_value()
+            coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
+            
+            # Calculate total solid mass (excluding water) for mass fraction calculation
+            total_solid_mass = powder_mass + fine_agg_mass + coarse_agg_mass
             
             for row in self.component_rows:
                 material_type = row['type_combo'].get_active_id()
@@ -3708,8 +3887,9 @@ class MixDesignPanel(Gtk.Box):
                     except (ValueError, TypeError):
                         self.logger.warning(f"Could not parse specific gravity for {material_name}")
                     
-                    # Calculate fractions
-                    mass_fraction = mass_kg / total_mass if total_mass > 0 else 0.0
+                    # Calculate fractions using total_solid_mass (excluding water)
+                    mass_fraction = mass_kg / total_solid_mass if total_solid_mass > 0 else 0.0
+                    self.logger.info(f"VALIDATION DEBUG: {material_name} - mass_kg={mass_kg}, total_solid_mass={total_solid_mass}, mass_fraction={mass_fraction}")
                     
                     # Simple volume fraction calculation (more accurate calculation done in service)
                     volume_fraction = mass_fraction / specific_gravity
@@ -3722,9 +3902,35 @@ class MixDesignPanel(Gtk.Box):
                         'specific_gravity': specific_gravity
                     })
             
-            # Add water component
+            # Add aggregate components if they exist
+            fine_agg_name = self.fine_agg_combo.get_active_id()
+            if fine_agg_name and fine_agg_name != "" and fine_agg_mass > 0:
+                fine_agg_mass_fraction = fine_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: {fine_agg_name} - mass_kg={fine_agg_mass}, total_solid_mass={total_solid_mass}, mass_fraction={fine_agg_mass_fraction}")
+                components.append({
+                    'material_name': fine_agg_name,
+                    'material_type': 'aggregate',
+                    'mass_fraction': fine_agg_mass_fraction,
+                    'volume_fraction': fine_agg_mass_fraction / 2.65,  # Default aggregate SG
+                    'specific_gravity': 2.65
+                })
+            
+            coarse_agg_name = self.coarse_agg_combo.get_active_id()
+            if coarse_agg_name and coarse_agg_name != "" and coarse_agg_mass > 0:
+                coarse_agg_mass_fraction = coarse_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: {coarse_agg_name} - mass_kg={coarse_agg_mass}, total_solid_mass={total_solid_mass}, mass_fraction={coarse_agg_mass_fraction}")
+                components.append({
+                    'material_name': coarse_agg_name,
+                    'material_type': 'aggregate',
+                    'mass_fraction': coarse_agg_mass_fraction,
+                    'volume_fraction': coarse_agg_mass_fraction / 2.65,  # Default aggregate SG
+                    'specific_gravity': 2.65
+                })
+            
+            # Add water component - water fraction relative to solids only
             if water_mass > 0:
-                water_mass_fraction = water_mass / total_mass if total_mass > 0 else 0.0
+                water_mass_fraction = water_mass / total_solid_mass if total_solid_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: Water - mass_kg={water_mass}, total_solid_mass={total_solid_mass}, mass_fraction={water_mass_fraction}")
                 components.append({
                     'material_name': 'Water',
                     'material_type': 'water',

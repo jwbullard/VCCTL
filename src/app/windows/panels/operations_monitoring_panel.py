@@ -11,6 +11,10 @@ import json
 import logging
 import time
 import threading
+import subprocess
+import signal
+import os
+import psutil
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, List, Dict, Any, Callable
@@ -56,6 +60,7 @@ class Operation:
     progress: float = 0.0  # 0.0 to 1.0
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
+    paused_time: Optional[datetime] = None  # Time when operation was paused
     estimated_duration: Optional[timedelta] = None
     current_step: str = ""
     total_steps: int = 0
@@ -67,12 +72,27 @@ class Operation:
     log_entries: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
     
+    # Process control fields (not serialized)
+    process: Optional[subprocess.Popen] = field(default=None, init=False)
+    pid: Optional[int] = field(default=None, init=False)
+    working_directory: Optional[str] = field(default=None, init=False)
+    command_line: Optional[List[str]] = field(default=None, init=False)
+    stdout_file: Optional[str] = field(default=None, init=False)
+    stderr_file: Optional[str] = field(default=None, init=False)
+    stdout_handle: Optional[object] = field(default=None, init=False)
+    stderr_handle: Optional[object] = field(default=None, init=False)
+    
     @property
     def duration(self) -> Optional[timedelta]:
-        """Get operation duration."""
+        """Get operation duration (frozen when paused)."""
         if self.start_time:
-            end = self.end_time or datetime.now()
-            return end - self.start_time
+            if self.status == OperationStatus.PAUSED and self.paused_time:
+                # Return duration up to pause time
+                return self.paused_time - self.start_time
+            else:
+                # Normal duration calculation
+                end = self.end_time or datetime.now()
+                return end - self.start_time
         return None
     
     @property
@@ -88,14 +108,125 @@ class Operation:
             return total_estimated - self.duration
         return None
     
+    def is_process_running(self) -> bool:
+        """Check if the underlying process is still running."""
+        if self.process:
+            poll_result = self.process.poll()
+            return poll_result is None
+        elif self.pid:
+            try:
+                # Check if process exists
+                process = psutil.Process(self.pid)
+                return process.is_running()
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                return False
+        return False
+    
+    def get_process_info(self) -> Optional[Dict[str, Any]]:
+        """Get current process information (CPU, memory usage)."""
+        if not self.is_process_running():
+            return None
+        
+        try:
+            if self.pid:
+                process = psutil.Process(self.pid)
+                return {
+                    'cpu_percent': process.cpu_percent(),
+                    'memory_mb': process.memory_info().rss / 1024 / 1024,
+                    'status': process.status(),
+                    'create_time': datetime.fromtimestamp(process.create_time())
+                }
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+        return None
+    
+    def pause_process(self) -> bool:
+        """Pause the underlying process using OS signals."""
+        if not self.is_process_running():
+            return False
+        
+        try:
+            if os.name == 'nt':  # Windows
+                # Windows doesn't have SIGSTOP, would need more complex implementation
+                return False
+            else:  # Unix/Linux/macOS
+                os.kill(self.pid, signal.SIGSTOP)
+                return True
+        except (OSError, ProcessLookupError):
+            return False
+    
+    def resume_process(self) -> bool:
+        """Resume the paused process using OS signals."""
+        if not self.is_process_running():
+            return False
+        
+        try:
+            if os.name == 'nt':  # Windows
+                # Windows doesn't have SIGCONT, would need more complex implementation
+                return False
+            else:  # Unix/Linux/macOS
+                os.kill(self.pid, signal.SIGCONT)
+                return True
+        except (OSError, ProcessLookupError):
+            return False
+    
+    def terminate_process(self) -> bool:
+        """Terminate the underlying process."""
+        if not self.is_process_running():
+            return False
+        
+        try:
+            if self.process:
+                self.process.terminate()
+                # Wait a bit for graceful termination
+                try:
+                    self.process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    # Force kill if it doesn't terminate gracefully
+                    self.process.kill()
+                
+                # Close output file handles when terminating
+                self.close_output_files()
+                return True
+            elif self.pid:
+                os.kill(self.pid, signal.SIGTERM)
+                # Close output file handles when terminating
+                self.close_output_files()
+                return True
+        except (OSError, ProcessLookupError):
+            pass
+        return False
+    
+    def close_output_files(self) -> None:
+        """Close stdout/stderr file handles if they're open."""
+        try:
+            if self.stdout_handle and not self.stdout_handle.closed:
+                self.stdout_handle.close()
+        except Exception:
+            pass  # Ignore close errors
+        
+        try:
+            if self.stderr_handle and not self.stderr_handle.closed:
+                self.stderr_handle.close()
+        except Exception:
+            pass  # Ignore close errors
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert operation to dictionary for JSON serialization."""
         data = asdict(self)
+        
+        # Remove process-related fields that shouldn't be serialized
+        for field_name in ['process', 'pid', 'working_directory', 'command_line', 
+                          'stdout_file', 'stderr_file', 'stdout_handle', 'stderr_handle']:
+            data.pop(field_name, None)
+        
         # Convert datetime objects to ISO strings
         if self.start_time:
             data['start_time'] = self.start_time.isoformat()
         if self.end_time:
             data['end_time'] = self.end_time.isoformat()
+        if self.paused_time:
+            data['paused_time'] = self.paused_time.isoformat()
         if self.estimated_duration:
             data['estimated_duration'] = self.estimated_duration.total_seconds()
         # Convert enums to strings
@@ -111,6 +242,8 @@ class Operation:
             data['start_time'] = datetime.fromisoformat(data['start_time'])
         if data.get('end_time'):
             data['end_time'] = datetime.fromisoformat(data['end_time'])
+        if data.get('paused_time'):
+            data['paused_time'] = datetime.fromisoformat(data['paused_time'])
         if data.get('estimated_duration'):
             data['estimated_duration'] = timedelta(seconds=data['estimated_duration'])
         # Convert strings back to enums
@@ -202,68 +335,116 @@ class OperationsMonitoringPanel(Gtk.Box):
         toolbar.set_style(Gtk.ToolbarStyle.BOTH_HORIZ)
         
         # Start operation button
-        start_button = Gtk.ToolButton()
-        start_button.set_icon_name("media-playback-start")
-        start_button.set_label("Start")
-        start_button.set_tooltip_text("Start new operation")
-        start_button.connect('clicked', self._on_start_operation_clicked)
-        toolbar.insert(start_button, -1)
+        self.start_button = Gtk.ToolButton()
+        self.start_button.set_icon_name("media-playback-start")
+        self.start_button.set_label("Start")
+        self.start_button.set_tooltip_text("Launch a new microstructure generation or hydration simulation")
+        self.start_button.connect('clicked', self._on_start_operation_clicked)
+        toolbar.insert(self.start_button, -1)
         
         # Stop operation button
-        stop_button = Gtk.ToolButton()
-        stop_button.set_icon_name("media-playback-stop")
-        stop_button.set_label("Stop")
-        stop_button.set_tooltip_text("Stop selected operation")
-        stop_button.connect('clicked', self._on_stop_operation_clicked)
-        toolbar.insert(stop_button, -1)
+        self.stop_button = Gtk.ToolButton()
+        self.stop_button.set_icon_name("media-playback-stop")
+        self.stop_button.set_label("Stop")
+        self.stop_button.set_tooltip_text("Terminate the selected running operation immediately")
+        self.stop_button.connect('clicked', self._on_stop_operation_clicked)
+        toolbar.insert(self.stop_button, -1)
         
         # Pause operation button
-        pause_button = Gtk.ToolButton()
-        pause_button.set_icon_name("media-playback-pause")
-        pause_button.set_label("Pause")
-        pause_button.set_tooltip_text("Pause selected operation")
-        pause_button.connect('clicked', self._on_pause_operation_clicked)
-        toolbar.insert(pause_button, -1)
+        self.pause_button = Gtk.ToolButton()
+        self.pause_button.set_icon_name("media-playback-pause")
+        self.pause_button.set_label("Pause")
+        self.pause_button.set_tooltip_text("Pause running operations or resume paused operations")
+        self.pause_button.connect('clicked', self._on_pause_operation_clicked)
+        toolbar.insert(self.pause_button, -1)
         
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
         # Clear completed button
-        clear_button = Gtk.ToolButton()
-        clear_button.set_icon_name("edit-clear")
-        clear_button.set_label("Clear")
-        clear_button.set_tooltip_text("Clear completed operations")
-        clear_button.connect('clicked', self._on_clear_completed_clicked)
-        toolbar.insert(clear_button, -1)
+        self.clear_button = Gtk.ToolButton()
+        self.clear_button.set_icon_name("edit-clear")
+        self.clear_button.set_label("Clear")
+        self.clear_button.set_tooltip_text("Remove all completed, failed, and cancelled operations from the list")
+        self.clear_button.connect('clicked', self._on_clear_completed_clicked)
+        toolbar.insert(self.clear_button, -1)
         
         # Delete operation button
-        delete_button = Gtk.ToolButton()
-        delete_button.set_icon_name("edit-delete")
-        delete_button.set_label("Delete")
-        delete_button.set_tooltip_text("Delete selected operation(s) and their files")
-        delete_button.connect('clicked', self._on_delete_selected_operation_clicked)
-        toolbar.insert(delete_button, -1)
+        self.delete_button = Gtk.ToolButton()
+        self.delete_button.set_icon_name("edit-delete")
+        self.delete_button.set_label("Delete")
+        self.delete_button.set_tooltip_text("Permanently delete selected operation(s) and all their output files")
+        self.delete_button.connect('clicked', self._on_delete_selected_operation_clicked)
+        toolbar.insert(self.delete_button, -1)
         
         # Refresh button
-        refresh_button = Gtk.ToolButton()
-        refresh_button.set_icon_name("view-refresh")
-        refresh_button.set_label("Refresh")
-        refresh_button.set_tooltip_text("Refresh operation status")
-        refresh_button.connect('clicked', self._on_refresh_clicked)
-        toolbar.insert(refresh_button, -1)
+        self.refresh_button = Gtk.ToolButton()
+        self.refresh_button.set_icon_name("view-refresh")
+        self.refresh_button.set_label("Refresh")
+        self.refresh_button.set_tooltip_text("Update operation status and check for new operations in the Operations folder")
+        self.refresh_button.connect('clicked', self._on_refresh_clicked)
+        toolbar.insert(self.refresh_button, -1)
         
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
         # Settings button
-        settings_button = Gtk.ToolButton()
-        settings_button.set_icon_name("preferences-system")
-        settings_button.set_label("Settings")
-        settings_button.set_tooltip_text("Monitoring settings")
-        settings_button.connect('clicked', self._on_settings_clicked)
-        toolbar.insert(settings_button, -1)
+        self.settings_button = Gtk.ToolButton()
+        self.settings_button.set_icon_name("preferences-system")
+        self.settings_button.set_label("Settings")
+        self.settings_button.set_tooltip_text("Configure operation monitoring preferences and resource limits")
+        self.settings_button.connect('clicked', self._on_settings_clicked)
+        toolbar.insert(self.settings_button, -1)
         
         self.pack_start(toolbar, False, False, 0)
+    
+    def _update_button_sensitivity(self) -> None:
+        """Update button sensitivity based on current operation status."""
+        try:
+            # Check if any operations are running
+            has_running_operations = any(
+                op.status == OperationStatus.RUNNING 
+                for op in self.operations.values()
+            )
+            
+            # Get selected operation
+            selected_operation = self._get_selected_operation()
+            has_selection = selected_operation is not None
+            selected_is_running = (
+                selected_operation and 
+                selected_operation.status == OperationStatus.RUNNING
+            ) if has_selection else False
+            
+            # Update button sensitivity
+            # Start button: Always enabled
+            self.start_button.set_sensitive(True)
+            
+            # Stop button: Only enabled if selected operation is running
+            self.stop_button.set_sensitive(selected_is_running)
+            
+            # Pause button: Enabled if selected operation is running OR paused
+            selected_is_paused = (
+                selected_operation and 
+                selected_operation.status == OperationStatus.PAUSED
+            ) if has_selection else False
+            self.pause_button.set_sensitive(selected_is_running or selected_is_paused)
+            
+            # Clear button: Enabled if there are completed operations
+            has_completed = any(
+                op.status in [OperationStatus.COMPLETED, OperationStatus.FAILED, OperationStatus.CANCELLED]
+                for op in self.operations.values()
+            )
+            self.clear_button.set_sensitive(has_completed)
+            
+            # Delete button: Enabled if selection exists and selected operation is not running
+            self.delete_button.set_sensitive(has_selection and not selected_is_running)
+            
+            # Refresh and Settings: Always enabled (should work even during running operations)
+            self.refresh_button.set_sensitive(True)
+            self.settings_button.set_sensitive(True)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating button sensitivity: {e}")
     
     def _create_content_area(self) -> None:
         """Create the main content area."""
@@ -676,7 +857,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         refresh_button = Gtk.ToolButton()
         refresh_button.set_icon_name("view-refresh")
         refresh_button.set_label("Refresh")
-        refresh_button.set_tooltip_text("Refresh Operations directory")
+        refresh_button.set_tooltip_text("Scan Operations directory for new files and updated operation results")
         refresh_button.connect('clicked', self._on_refresh_files_clicked)
         toolbar.insert(refresh_button, -1)
         
@@ -684,7 +865,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         open_folder_button = Gtk.ToolButton()
         open_folder_button.set_icon_name("folder-open")
         open_folder_button.set_label("Open Folder")
-        open_folder_button.set_tooltip_text("Open Operations directory in file manager")
+        open_folder_button.set_tooltip_text("Open the Operations directory in your system's file manager")
         open_folder_button.connect('clicked', self._on_open_operations_folder_clicked)
         toolbar.insert(open_folder_button, -1)
         
@@ -695,7 +876,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         delete_button = Gtk.ToolButton()
         delete_button.set_icon_name("edit-delete")
         delete_button.set_label("Delete")
-        delete_button.set_tooltip_text("Delete selected operation folder")
+        delete_button.set_tooltip_text("Permanently delete the selected operation folder and all its contents")
         delete_button.connect('clicked', self._on_delete_operation_clicked)
         toolbar.insert(delete_button, -1)
         
@@ -1004,25 +1185,25 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Refresh analysis button
         refresh_analysis_btn = Gtk.Button(label="🔄 Refresh Analysis")
-        refresh_analysis_btn.set_tooltip_text("Refresh all result analysis data")
+        refresh_analysis_btn.set_tooltip_text("Recalculate operation success rates, performance metrics, and quality assessments")
         refresh_analysis_btn.connect('clicked', self._on_refresh_analysis_clicked)
         controls_box.pack_start(refresh_analysis_btn, False, False, 0)
         
         # Export report button
         export_report_btn = Gtk.Button(label="📄 Export Report") 
-        export_report_btn.set_tooltip_text("Export results analysis report")
+        export_report_btn.set_tooltip_text("Generate and save a comprehensive operations analysis report to file")
         export_report_btn.connect('clicked', self._on_export_report_clicked)
         controls_box.pack_start(export_report_btn, False, False, 0)
         
         # Cleanup old results button
         cleanup_btn = Gtk.Button(label="🧹 Cleanup Old Results")
-        cleanup_btn.set_tooltip_text("Remove old operation results to free space")
+        cleanup_btn.set_tooltip_text("Archive or delete old operation files to free up disk space (with confirmation)")
         cleanup_btn.connect('clicked', self._on_cleanup_results_clicked)
         controls_box.pack_start(cleanup_btn, False, False, 0)
         
         # Validation check button
         validate_btn = Gtk.Button(label="🔍 Validate Results") 
-        validate_btn.set_tooltip_text("Run validation check on all results")
+        validate_btn.set_tooltip_text("Verify integrity and completeness of all operation result files")
         validate_btn.connect('clicked', self._on_validate_results_clicked)
         controls_box.pack_start(validate_btn, False, False, 0)
         
@@ -1128,33 +1309,112 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.logger.warning(f"Failed to update system resources: {e}")
     
     def _update_operations(self) -> None:
-        """Update operation status information."""
-        # In a real implementation, this would query the actual operation services
-        # For now, we'll simulate some operations for demonstration
-        
+        """Update operation status information by checking real processes."""
         current_time = datetime.now()
         
-        # Update existing operations
+        # Update existing operations based on actual process status
         for operation in self.operations.values():
-            if operation.status == OperationStatus.RUNNING:
-                # Simulate progress
-                if operation.progress < 1.0:
-                    operation.progress = min(1.0, operation.progress + 0.01)
-                    operation.current_step = f"Processing step {operation.completed_steps + 1}"
-                
-                # Simulate completion
-                if operation.progress >= 1.0:
-                    operation.status = OperationStatus.COMPLETED
+            if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+                # Check if process is still running
+                if not operation.is_process_running():
+                    # Process has ended, determine if it completed successfully
+                    self.logger.info(f"Process {operation.id} ({operation.name}) has ended")
+                    
+                    if operation.process and operation.process.returncode is not None:
+                        return_code = operation.process.returncode
+                        self.logger.info(f"Process {operation.id} exit code: {return_code}")
+                        
+                        if return_code == 0:
+                            operation.status = OperationStatus.COMPLETED
+                            operation.progress = 1.0
+                            operation.current_step = "Process completed successfully"
+                            self.logger.info(f"Process {operation.id} marked as COMPLETED")
+                        else:
+                            operation.status = OperationStatus.FAILED
+                            operation.error_message = f"Process exited with code {return_code}"
+                            operation.current_step = "Process failed"
+                            self.logger.warning(f"Process {operation.id} marked as FAILED with code {return_code}")
+                    else:
+                        # Process ended without proper exit code tracking
+                        self.logger.info(f"Process {operation.id} ended without return code - marking as completed")
+                        operation.status = OperationStatus.COMPLETED
+                        operation.progress = 1.0
+                        operation.current_step = "Process completed"
+                    
                     operation.end_time = current_time
                     operation.completed_steps = operation.total_steps
-                    # Save immediately when operation completes
+                    
+                    # Close output file handles
+                    operation.close_output_files()
+                    
                     self._save_operations_to_file()
+                    
+                elif operation.status == OperationStatus.RUNNING:
+                    # Update process resource usage for running operations
+                    process_info = operation.get_process_info()
+                    if process_info:
+                        operation.cpu_usage = process_info['cpu_percent']
+                        operation.memory_usage = process_info['memory_mb']
+                    
+                    # Update progress based on elapsed time (time-based estimation)
+                    if operation.start_time and operation.estimated_duration:
+                        elapsed = current_time - operation.start_time
+                        # Progress based on estimated duration, capped at 95% until completion
+                        time_progress = min(0.95, elapsed.total_seconds() / operation.estimated_duration.total_seconds())
+                        operation.progress = max(operation.progress, time_progress)
+                        
+                        # Update step-based progress and current step description
+                        if time_progress < 0.15:
+                            step_desc = "Initializing simulation"
+                            operation.completed_steps = 0
+                        elif time_progress < 0.35:
+                            step_desc = "Parsing input and setting up geometry"
+                            operation.completed_steps = 1
+                        elif time_progress < 0.85:
+                            step_desc = "Generating 3D microstructure"
+                            operation.completed_steps = 2
+                        else:
+                            step_desc = "Finalizing output files"
+                            operation.completed_steps = 3
+                            
+                        # Combine step description with resource usage
+                        if process_info:
+                            operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
+                        else:
+                            operation.current_step = f"{step_desc}..."
+                            
+                    elif operation.start_time:
+                        # If no estimated duration, use a simple time-based progress (slower)
+                        elapsed = current_time - operation.start_time
+                        # Assume most operations take around 5 minutes, progress more slowly
+                        time_progress = min(0.90, elapsed.total_seconds() / (5 * 60))
+                        operation.progress = max(operation.progress, time_progress)
+                        
+                        # Simple step progression
+                        if time_progress < 0.25:
+                            step_desc = "Processing"
+                            operation.completed_steps = 1
+                        elif time_progress < 0.75:
+                            step_desc = "Generating microstructure"
+                            operation.completed_steps = 2
+                        else:
+                            step_desc = "Completing"
+                            operation.completed_steps = 3
+                            
+                        # Combine step description with resource usage
+                        if process_info:
+                            operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
+                        else:
+                            operation.current_step = f"{step_desc}..."
     
     def _update_ui(self) -> None:
         """Update the UI with current data."""
         try:
             # Update operations list
             self._update_operations_list()
+            
+            # Update button sensitivity based on current operations
+            self._update_button_sensitivity()
             
             # Update system resources display
             self._update_system_resources_display()
@@ -1382,6 +1642,9 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _on_operation_selection_changed(self, selection: Gtk.TreeSelection) -> None:
         """Handle operation selection change."""
         selected_operations = self._get_selected_operations()
+        
+        # Update button sensitivity based on new selection
+        self._update_button_sensitivity()
         
         if len(selected_operations) == 1:
             # Single selection - show details for that operation
@@ -1615,8 +1878,159 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _on_refresh_clicked(self, button: Gtk.Button) -> None:
         """Handle refresh button click."""
+        self._update_status("Refreshing operations and checking process status...")
+        
+        # Force a thorough update of all operations
+        self._force_cleanup_stale_operations()
         self._update_operations()
         self._update_ui()
+        
+        # Count active operations for status feedback
+        active_count = sum(1 for op in self.operations.values() 
+                          if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED])
+        
+        self._update_status(f"Refresh complete. {active_count} active operations.")
+    
+    def _force_cleanup_stale_operations(self) -> None:
+        """Force cleanup of stale operations by thoroughly checking process status."""
+        self.logger.info("=== Starting force cleanup of stale operations ===")
+        current_time = datetime.now()
+        cleaned_count = 0
+        
+        for operation in list(self.operations.values()):
+            # Check running/paused operations for stale processes
+            if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+                self.logger.info(f"Checking running operation {operation.id}: {operation.name}")
+                
+                # Multiple checks to ensure process is truly dead
+                is_running = False
+                
+                # ... (existing process check logic follows)
+            
+            # Also check failed operations that might have actually succeeded
+            elif operation.status == OperationStatus.FAILED:
+                self.logger.info(f"Checking failed operation {operation.id}: {operation.name}")
+                
+                # Verify if this "failed" operation actually completed successfully
+                if self._verify_operation_completion_by_files(operation):
+                    self.logger.info(f"  - Operation {operation.id} has success indicators - correcting status")
+                    operation.status = OperationStatus.COMPLETED
+                    operation.progress = 1.0
+                    operation.current_step = "Process completed successfully (corrected)"
+                    operation.error_message = None
+                    if not operation.end_time:
+                        operation.end_time = current_time
+                    operation.completed_steps = operation.total_steps
+                    self._add_log_entry(f"Corrected falsely failed operation: {operation.name}")
+                    cleaned_count += 1
+                else:
+                    self.logger.info(f"  - Operation {operation.id} genuinely failed")
+        
+        # Continue with existing running/paused operation checks
+        for operation in list(self.operations.values()):
+            if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+                self.logger.info(f"Checking operation {operation.id}: {operation.name}")
+                
+                # Multiple checks to ensure process is truly dead
+                is_running = False
+                
+                # Check 1: subprocess.Popen object
+                if operation.process:
+                    try:
+                        return_code = operation.process.poll()
+                        if return_code is None:
+                            is_running = True
+                            self.logger.info(f"  - Process object shows running (poll() returned None)")
+                        else:
+                            self.logger.info(f"  - Process object shows finished (return code: {return_code})")
+                    except Exception as e:
+                        self.logger.warning(f"  - Error checking process object: {e}")
+                
+                # Check 2: PID with psutil
+                if operation.pid and not is_running:
+                    try:
+                        process = psutil.Process(operation.pid)
+                        if process.is_running():
+                            is_running = True
+                            self.logger.info(f"  - PID {operation.pid} shows running via psutil")
+                        else:
+                            self.logger.info(f"  - PID {operation.pid} shows not running via psutil")
+                    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                        self.logger.info(f"  - PID {operation.pid} not found: {e}")
+                
+                # Check 3: System call (last resort)
+                if operation.pid and not is_running:
+                    try:
+                        os.kill(operation.pid, 0)  # Signal 0 just checks if process exists
+                        is_running = True
+                        self.logger.info(f"  - PID {operation.pid} exists via os.kill(0)")
+                    except (OSError, ProcessLookupError):
+                        self.logger.info(f"  - PID {operation.pid} does not exist via os.kill(0)")
+                
+                # If process is definitely not running, mark as completed/failed
+                if not is_running:
+                    self.logger.info(f"  - Operation {operation.id} marked as stale - cleaning up")
+                    
+                    # Determine final status based on available information
+                    if operation.process and hasattr(operation.process, 'returncode') and operation.process.returncode is not None:
+                        if operation.process.returncode == 0:
+                            operation.status = OperationStatus.COMPLETED
+                            operation.progress = 1.0
+                            operation.current_step = "Process completed successfully (cleanup)"
+                        else:
+                            operation.status = OperationStatus.FAILED
+                            operation.error_message = f"Process exited with code {operation.process.returncode} (cleanup)"
+                            operation.current_step = "Process failed (cleanup)"
+                    else:
+                        # Default to completed if we can't determine exit status
+                        operation.status = OperationStatus.COMPLETED
+                        operation.progress = 1.0
+                        operation.current_step = "Process completed (cleanup - status unknown)"
+                    
+                    operation.end_time = current_time
+                    operation.completed_steps = operation.total_steps
+                    
+                    # Close output file handles
+                    operation.close_output_files()
+                    
+                    self._add_log_entry(f"Cleaned up stale operation: {operation.name}")
+                    cleaned_count += 1
+                else:
+                    self.logger.info(f"  - Operation {operation.id} is legitimately running")
+        
+        if cleaned_count > 0:
+            self.logger.info(f"Force cleanup completed: {cleaned_count} stale operations cleaned")
+            self._save_operations_to_file()  # Save changes
+        else:
+            self.logger.info("Force cleanup completed: no stale operations found")
+    
+    def _verify_operation_completion_by_files(self, operation: Operation) -> bool:
+        """
+        Verify if an operation actually completed by checking its output files.
+        Returns True if operation should be marked as completed.
+        """
+        if not operation.working_directory:
+            return False
+        
+        working_dir = Path(operation.working_directory)
+        if not working_dir.exists():
+            return False
+        
+        # Check for common genmic output files that indicate successful completion
+        success_indicators = [
+            f"{working_dir.name}.img",      # Main microstructure file
+            f"{working_dir.name}.pimg",     # Particle ID file
+            f"{working_dir.name}.img.struct"  # Structure file
+        ]
+        
+        success_count = 0
+        for indicator in success_indicators:
+            file_path = working_dir / indicator
+            if file_path.exists() and file_path.stat().st_size > 0:
+                success_count += 1
+        
+        # If at least 2 of the 3 key output files exist, consider it successful
+        return success_count >= 2
     
     def _on_settings_clicked(self, button: Gtk.Button) -> None:
         """Handle settings button click."""
@@ -1640,15 +2054,20 @@ class OperationsMonitoringPanel(Gtk.Box):
     # Utility methods
     
     def _get_selected_operation(self) -> Optional[Operation]:
-        """Get the currently selected operation."""
+        """Get the currently selected operation (first one if multiple selected)."""
         if not self.operations_view:
             return None
         
         selection = self.operations_view.get_selection()
-        model, treeiter = selection.get_selected()
-        if treeiter:
-            operation_id = model[treeiter][0]
-            return self.operations.get(operation_id)
+        model, selected_rows = selection.get_selected_rows()
+        
+        if selected_rows:
+            # Get the first selected operation
+            first_path = selected_rows[0]
+            treeiter = model.get_iter(first_path)
+            if treeiter:
+                operation_id = model[treeiter][0]
+                return self.operations.get(operation_id)
         return None
     
     def _get_selected_operations(self) -> List[Operation]:
@@ -1733,21 +2152,49 @@ class OperationsMonitoringPanel(Gtk.Box):
         self._update_operations_list()
     
     def _stop_operation(self, operation_id: str) -> None:
-        """Stop an operation."""
+        """Stop an operation by terminating the underlying process."""
         operation = self.operations.get(operation_id)
-        if operation and operation.status == OperationStatus.RUNNING:
-            operation.status = OperationStatus.CANCELLED
-            operation.end_time = datetime.now()
-            self._add_log_entry(f"Stopped operation: {operation.name}")
+        if operation and operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+            # Try to terminate the actual process
+            if operation.terminate_process():
+                operation.status = OperationStatus.CANCELLED
+                operation.end_time = datetime.now()
+                self._add_log_entry(f"Successfully terminated process for operation: {operation.name}")
+            else:
+                # Process might have already ended, just update status
+                operation.status = OperationStatus.CANCELLED
+                operation.end_time = datetime.now()
+                self._add_log_entry(f"Operation marked as stopped: {operation.name} (process may have already ended)")
+            
             self._update_operations_list()
     
     def _pause_operation(self, operation_id: str) -> None:
-        """Pause an operation."""
+        """Pause or resume an operation using real process control."""
         operation = self.operations.get(operation_id)
-        if operation and operation.status == OperationStatus.RUNNING:
-            operation.status = OperationStatus.PAUSED
-            self._add_log_entry(f"Paused operation: {operation.name}")
-            self._update_operations_list()
+        if operation:
+            if operation.status == OperationStatus.RUNNING:
+                # Pause the actual process
+                if operation.pause_process():
+                    operation.status = OperationStatus.PAUSED
+                    operation.paused_time = datetime.now()  # Record when paused
+                    self._add_log_entry(f"Successfully paused process for operation: {operation.name}")
+                else:
+                    self._add_log_entry(f"Failed to pause process for operation: {operation.name} (process may have ended)")
+                self._update_operations_list()
+                
+            elif operation.status == OperationStatus.PAUSED:
+                # Resume the actual process
+                if operation.resume_process():
+                    operation.status = OperationStatus.RUNNING
+                    # Adjust start_time to account for paused duration
+                    if operation.paused_time and operation.start_time:
+                        paused_duration = datetime.now() - operation.paused_time
+                        operation.start_time = operation.start_time + paused_duration
+                    operation.paused_time = None  # Clear paused time
+                    self._add_log_entry(f"Successfully resumed process for operation: {operation.name}")
+                else:
+                    self._add_log_entry(f"Failed to resume process for operation: {operation.name} (process may have ended)")
+                self._update_operations_list()
     
     def _add_log_entry(self, message: str) -> None:
         """Add an entry to the operation log."""
@@ -1802,6 +2249,100 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         return operation_id
     
+    def start_real_process_operation(self, name: str, operation_type: OperationType, 
+                                    command: List[str], working_dir: str, 
+                                    input_data: Optional[str] = None) -> str:
+        """
+        Start a real process operation.
+        
+        Args:
+            name: Human-readable name for the operation
+            operation_type: Type of operation
+            command: Command line as list of strings
+            working_dir: Working directory for the process
+            input_data: Optional stdin data for the process
+            
+        Returns:
+            Operation ID
+        """
+        operation_id = f"proc_{int(time.time() * 1000)}"
+        
+        try:
+            # Create output files in the working directory
+            stdout_file = os.path.join(working_dir, f"{operation_id}_stdout.txt")
+            stderr_file = os.path.join(working_dir, f"{operation_id}_stderr.txt")
+            
+            # Open output files
+            stdout_handle = open(stdout_file, 'w', encoding='utf-8', buffering=1)
+            stderr_handle = open(stderr_file, 'w', encoding='utf-8', buffering=1)
+            
+            # Start the actual process with file redirection
+            process = subprocess.Popen(
+                command,
+                cwd=working_dir,
+                stdin=subprocess.PIPE if input_data else None,
+                stdout=stdout_handle,
+                stderr=stderr_handle,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            # Send input data if provided
+            if input_data:
+                process.stdin.write(input_data)
+                process.stdin.close()
+            
+            # Create operation with process information
+            operation = Operation(
+                id=operation_id,
+                name=name,
+                operation_type=operation_type,
+                status=OperationStatus.RUNNING,
+                start_time=datetime.now(),
+                progress=0.05,  # Start with 5% to show immediate feedback
+                current_step="Process started",
+                total_steps=4,  # Typical genmic phases: Init, Parse, Generate, Finalize
+                estimated_duration=timedelta(minutes=3)  # Reasonable default estimate
+            )
+            
+            # Set process information
+            operation.process = process
+            operation.pid = process.pid
+            operation.working_directory = working_dir
+            operation.command_line = command
+            operation.stdout_file = stdout_file
+            operation.stderr_file = stderr_file
+            operation.stdout_handle = stdout_handle
+            operation.stderr_handle = stderr_handle
+            
+            self.operations[operation_id] = operation
+            self._add_log_entry(f"Started real process operation: {name} (PID: {process.pid})")
+            self._add_log_entry(f"Command: {' '.join(command)}")
+            self._add_log_entry(f"Working directory: {working_dir}")
+            self._add_log_entry(f"Stdout redirected to: {os.path.basename(stdout_file)}")
+            self._add_log_entry(f"Stderr redirected to: {os.path.basename(stderr_file)}")
+            self._update_operations_list()
+            
+            return operation_id
+            
+        except Exception as e:
+            # Clean up file handles if they were opened
+            try:
+                if 'stdout_handle' in locals() and stdout_handle:
+                    stdout_handle.close()
+            except:
+                pass
+            try:
+                if 'stderr_handle' in locals() and stderr_handle:
+                    stderr_handle.close()
+            except:
+                pass
+            
+            self.logger.error(f"Failed to start process operation {name}: {e}")
+            self._add_log_entry(f"Failed to start operation {name}: {str(e)}")
+            return ""
+
     def start_operation(self, operation_id: str, current_step: str = "Starting...") -> bool:
         """
         Start a registered operation.

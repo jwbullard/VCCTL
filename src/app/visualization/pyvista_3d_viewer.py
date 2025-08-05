@@ -616,6 +616,9 @@ class PyVistaViewer3D(Gtk.Box):
             # Clear existing plots
             self.plotter.clear()
             
+            # Add coordinate axes for spatial reference
+            self._add_coordinate_axes()
+            
             # Add each phase based on rendering mode
             for phase_id, mesh in self.mesh_objects.items():
                 if not self.show_phase.get(phase_id, True):
@@ -1146,6 +1149,91 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.error(f"Failed to zoom camera: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
+    
+    def _add_coordinate_axes(self):
+        """Add coordinate axes to the visualization for spatial reference."""
+        try:
+            if not hasattr(self, 'plotter') or self.plotter is None:
+                return
+            
+            # Get the bounds of the microstructure data to position axes appropriately
+            if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+                x_size, y_size, z_size = self.voxel_data.shape
+                
+                # Position axes outside the microstructure bounds
+                # Place axes in lower-left-front corner, outside the volume
+                axis_length = min(x_size, y_size, z_size) * 0.2  # 20% of smallest dimension
+                
+                # Position axes outside the microstructure volume
+                axis_origin_x = -axis_length * 0.5  # Offset from left edge
+                axis_origin_y = -axis_length * 0.5  # Offset from front edge  
+                axis_origin_z = -axis_length * 0.5  # Offset from bottom edge
+                
+                # Create axes using PyVista's built-in axes actor first
+                try:
+                    # Method 1: Try to use add_axes with proper positioning
+                    if hasattr(self.plotter, 'add_axes'):
+                        axes_actor = self.plotter.add_axes(
+                            line_width=4,
+                            x_color='red',
+                            y_color='green',
+                            z_color='blue',
+                            xlabel='X (μm)',
+                            ylabel='Y (μm)', 
+                            zlabel='Z (μm)'
+                        )
+                        self.logger.debug("Added coordinate axes using add_axes")
+                        return
+                except Exception as e:
+                    self.logger.debug(f"add_axes failed: {e}")
+                
+                # Method 2: Manual axes creation using line plots positioned outside volume
+                try:
+                    import pyvista as pv
+                    import numpy as np
+                    
+                    # X-axis (red) - from origin to positive X
+                    x_start = [axis_origin_x, axis_origin_y, axis_origin_z]
+                    x_end = [axis_origin_x + axis_length, axis_origin_y, axis_origin_z]
+                    x_line = pv.Line(x_start, x_end)
+                    self.plotter.add_mesh(x_line, color='red', line_width=6, name='x_axis')
+                    
+                    # Y-axis (green) - from origin to positive Y
+                    y_start = [axis_origin_x, axis_origin_y, axis_origin_z]
+                    y_end = [axis_origin_x, axis_origin_y + axis_length, axis_origin_z] 
+                    y_line = pv.Line(y_start, y_end)
+                    self.plotter.add_mesh(y_line, color='green', line_width=6, name='y_axis')
+                    
+                    # Z-axis (blue) - from origin to positive Z
+                    z_start = [axis_origin_x, axis_origin_y, axis_origin_z]
+                    z_end = [axis_origin_x, axis_origin_y, axis_origin_z + axis_length]
+                    z_line = pv.Line(z_start, z_end)
+                    self.plotter.add_mesh(z_line, color='blue', line_width=6, name='z_axis')
+                    
+                    # Add axis labels at the ends of the axes
+                    try:
+                        # X label (red)
+                        self.plotter.add_text('X', 
+                                            position=(axis_origin_x + axis_length * 1.2, axis_origin_y, axis_origin_z),
+                                            color='red', font_size=14, name='x_label')
+                        # Y label (green)
+                        self.plotter.add_text('Y', 
+                                            position=(axis_origin_x, axis_origin_y + axis_length * 1.2, axis_origin_z),
+                                            color='green', font_size=14, name='y_label')
+                        # Z label (blue)
+                        self.plotter.add_text('Z', 
+                                            position=(axis_origin_x, axis_origin_y, axis_origin_z + axis_length * 1.2),
+                                            color='blue', font_size=14, name='z_label')
+                    except Exception as e:
+                        self.logger.debug(f"Adding axis labels failed: {e}")
+                    
+                    self.logger.debug(f"Added coordinate axes outside microstructure bounds at ({axis_origin_x:.1f}, {axis_origin_y:.1f}, {axis_origin_z:.1f})")
+                    
+                except Exception as e:
+                    self.logger.debug(f"Manual axes creation failed: {e}")
+                    
+        except Exception as e:
+            self.logger.warning(f"Failed to add coordinate axes: {e}")
     
     # Signal handlers
     def _on_rendering_mode_changed(self, combo):
