@@ -616,27 +616,32 @@ class MicrostructurePanel(Gtk.Box):
     def _on_load_img_clicked(self, button) -> None:
         """Handle load .img file button click."""
         try:
-            # Create file chooser dialog
-            dialog = Gtk.FileChooserDialog(
-                title="Load Microstructure .img File",
-                parent=self.main_window,
-                action=Gtk.FileChooserAction.OPEN
-            )
-            
-            # Try to disable recent files view completely
+            # Try native file chooser first (often better folder control)
             try:
-                # Some GTK versions support these methods to control recent files
-                dialog.set_show_hidden(False)
-                dialog.set_do_overwrite_confirmation(False)
+                dialog = Gtk.FileChooserNative.new(
+                    title="Load Microstructure .img File",
+                    parent=self.main_window,
+                    action=Gtk.FileChooserAction.OPEN,
+                    accept_label="_Open",
+                    cancel_label="_Cancel"
+                )
+                using_native = True
+            except (AttributeError, TypeError):
+                # Fallback to standard dialog if FileChooserNative not available
+                dialog = Gtk.FileChooserDialog(
+                    title="Load Microstructure .img File", 
+                    parent=self.main_window,
+                    action=Gtk.FileChooserAction.OPEN
+                )
+                dialog.add_buttons(
+                    Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                    Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+                )
+                using_native = False
                 
-                # Try to set select-multiple to False to simplify dialog behavior
-                dialog.set_select_multiple(False)
-            except AttributeError:
-                pass  # Some methods may not exist in all GTK versions
-            dialog.add_buttons(
-                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                Gtk.STOCK_OPEN, Gtk.ResponseType.OK
-            )
+            # Configure dialog settings
+            dialog.set_select_multiple(False)
+            dialog.set_show_hidden(False)
             
             # Add file filter for .img files
             filter_img = Gtk.FileFilter()
@@ -651,39 +656,18 @@ class MicrostructurePanel(Gtk.Box):
             
             # Set initial directory to Operations folder where generated .img files are located  
             import os
-            from gi.repository import GLib
             
             operations_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "Operations")
             if os.path.exists(operations_path):
-                # Add Operations folder as a shortcut in the sidebar for easy access
-                try:
-                    dialog.add_shortcut_folder(operations_path)
-                except:
-                    pass
-                
-                # Try multiple methods to force navigation to Operations folder
-                # Method 1: Standard set_current_folder
+                # Set current folder - this should work better with native chooser
                 dialog.set_current_folder(operations_path)
                 
-                # Method 2: Use URI-based setting (more explicit for some GTK versions)
-                try:
-                    folder_uri = GLib.filename_to_uri(operations_path)
-                    dialog.set_current_folder_uri(folder_uri)
-                except:
-                    pass
-                
-                # Method 3: If all else fails, manually show the dialog then set folder
-                # This will be done after dialog.show_all() if we add that call
-                
-            # Show dialog first, then ensure proper folder navigation
-            dialog.show_all()
-            
-            # Final attempt to force correct folder after dialog is shown
-            if os.path.exists(operations_path):
-                try:
-                    dialog.set_current_folder(operations_path)
-                except Exception as e:
-                    self.logger.debug(f"Final folder setting attempt failed: {e}")
+                # Add as shortcut only for non-native dialogs (native doesn't support this)
+                if not using_native:
+                    try:
+                        dialog.add_shortcut_folder(operations_path)
+                    except:
+                        pass
             
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
