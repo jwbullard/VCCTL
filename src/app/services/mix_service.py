@@ -22,17 +22,9 @@ from app.models.limestone import Limestone
 from app.models.aggregate import Aggregate
 from app.models.grading import Grading
 from app.services.base_service import BaseService, ServiceError, NotFoundError, ValidationError
-
-
-class MaterialType(Enum):
-    """Material type enumeration for mix design."""
-    CEMENT = "cement"
-    FLY_ASH = "fly_ash"
-    SLAG = "slag"
-    INERT_FILLER = "inert_filler"
-    SILICA_FUME = "silica_fume"
-    LIMESTONE = "limestone"
-    AGGREGATE = "aggregate"
+from app.models.material_types import MaterialType
+# Import centralized validation
+from app.validation import MixDesignValidator, ComponentData
 
 
 @dataclass
@@ -273,83 +265,44 @@ class MixService:
             raise ServiceError(f"Water-binder ratio calculation failed: {e}")
     
     def validate_mix_design(self, mix_design: MixDesign) -> Dict[str, Any]:
-        """Validate a mix design and return validation results."""
-        validation_result = {
-            'is_valid': True,
-            'warnings': [],
-            'errors': [],
-            'recommendations': []
-        }
-        
+        """Validate a mix design using centralized validation logic."""
         try:
-            # Check total mass fractions (components + water should sum to 1.0)
-            component_mass_total = sum(comp.mass_fraction for comp in mix_design.components)
-            water_mass_fraction = mix_design.total_water_content  # This is a mass fraction
-            total_mass = component_mass_total + water_mass_fraction
+            # Convert to standardized format for centralized validation
+            validation_components = [
+                ComponentData(
+                    material_name=comp.material_name,
+                    material_type=comp.material_type.value if hasattr(comp.material_type, 'value') else str(comp.material_type),
+                    mass_fraction=comp.mass_fraction,
+                    volume_fraction=comp.volume_fraction,
+                    specific_gravity=comp.specific_gravity
+                )
+                for comp in mix_design.components
+            ]
             
-            if abs(total_mass - 1.0) > 0.001:
-                validation_result['errors'].append(f"Mass fractions sum to {total_mass:.3f}, should be 1.0")
-                validation_result['is_valid'] = False
-            
-            # Check water-binder ratio
-            if mix_design.water_binder_ratio < 0.25:
-                validation_result['warnings'].append("Very low water-binder ratio may cause workability issues")
-            elif mix_design.water_binder_ratio > 0.65:
-                validation_result['warnings'].append("High water-binder ratio may reduce strength and durability")
-            
-            # Check air content (volume fraction)
-            if mix_design.air_content > 0.10:
-                validation_result['warnings'].append("High air content (>10% volume fraction) may significantly reduce strength")
-            
-            # Check powder content
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
-            total_powder = sum(
-                comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in powder_types
+            # Use centralized complete validation
+            result = MixDesignValidator.validate_complete_mix_design(
+                components=validation_components,
+                water_binder_ratio=mix_design.water_binder_ratio,
+                air_content=mix_design.air_content,
+                total_water_content=mix_design.total_water_content
             )
             
-            # Check binder content (powder + water)
-            total_binder = total_powder + mix_design.total_water_content
-            
-            if total_powder < 0.10:
-                validation_result['errors'].append("Insufficient powder content (<10%)")
-                validation_result['is_valid'] = False
-            elif total_binder > 0.50:
-                validation_result['warnings'].append("Very high binder content (>50%) may be uneconomical")
-            
-            # Check aggregate content
-            aggregate_components = [comp for comp in mix_design.components 
-                                 if comp.material_type == MaterialType.AGGREGATE]
-            total_aggregate = sum(comp.mass_fraction for comp in aggregate_components)
-            
-            if total_aggregate < 0.40:
-                validation_result['warnings'].append("Low aggregate content may affect economy and shrinkage")
-            
-            # Check for cement in mix
-            cement_components = [comp for comp in mix_design.components 
-                               if comp.material_type == MaterialType.CEMENT]
-            if not cement_components:
-                validation_result['errors'].append("No cement found in mix - cement is required for hydration")
-                validation_result['is_valid'] = False
-            
-            # Recommendations based on mix composition
-            scm_fraction = sum(
-                comp.mass_fraction for comp in mix_design.components 
-                if comp.material_type in {MaterialType.FLY_ASH, MaterialType.SLAG}
-            )
-            
-            if scm_fraction > 0.50:
-                validation_result['warnings'].append("High SCM replacement (>50%) may affect early strength")
-            elif scm_fraction > 0 and scm_fraction < 0.15:
-                validation_result['recommendations'].append("Consider increasing SCM content for improved sustainability")
-            
-            return validation_result
+            # Convert to expected format
+            return {
+                'is_valid': result.is_valid,
+                'errors': result.errors,
+                'warnings': result.warnings,
+                'recommendations': result.recommendations
+            }
             
         except Exception as e:
-            self.logger.error(f"Failed to validate mix design: {e}")
-            validation_result['errors'].append(f"Validation failed: {e}")
-            validation_result['is_valid'] = False
-            return validation_result
+            self.logger.error(f"Validation error: {e}")
+            return {
+                'is_valid': False,
+                'errors': [f"Validation error: {str(e)}"],
+                'warnings': [],
+                'recommendations': []
+            }
     
     
     def calculate_mix_properties(self, mix_design: MixDesign) -> Dict[str, Any]:

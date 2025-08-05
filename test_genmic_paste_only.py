@@ -27,7 +27,8 @@ def create_test_genmic_files():
         # Import after path setup
         from app.services.service_container import ServiceContainer
         from app.windows.panels.mix_design_panel import MixDesignPanel
-        from app.services.mix_service import MaterialType, MixComponent, MixDesign
+        from app.services.mix_service import MixComponent, MixDesign
+        from app.models.material_types import MaterialType
         import gi
         gi.require_version('Gtk', '3.0')
         from gi.repository import Gtk

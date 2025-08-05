@@ -55,66 +55,11 @@ class MicrostructurePanel(Gtk.Box):
         
         self.logger.info("Microstructure panel initialized")
     
-    def _on_enable_3d_viewer(self, button: Gtk.Button) -> None:
-        """Enable 3D viewer on demand based on selected viewer type."""
-        try:
-            self.current_viewer_type = self.viewer_type_combo.get_active_id()
-            
-            if self.current_viewer_type == 'pyvista':
-                if self.pyvista_3d_viewer is None:
-                    # Create PyVista viewer
-                    self.pyvista_3d_viewer = PyVistaViewer3D()
-                    self._replace_viewer_placeholder(self.pyvista_3d_viewer)
-                    self.logger.info("PyVista 3D viewer enabled successfully")
-                    button.set_label("PyVista Viewer Active")
-                    
-            else:  # matplotlib
-                if self.microstructure_3d_viewer is None:
-                    # Create matplotlib viewer
-                    self.microstructure_3d_viewer = Microstructure3DViewer()
-                    self._replace_viewer_placeholder(self.microstructure_3d_viewer)
-                    self.logger.info("Matplotlib 3D viewer enabled successfully")
-                    button.set_label("Matplotlib Viewer Active")
-            
-            button.set_sensitive(False)
-            self.viewer_type_combo.set_sensitive(False)  # Lock viewer type once enabled
-            
-        except Exception as e:
-            self.logger.error(f"Failed to enable {self.current_viewer_type} viewer: {e}")
-            button.set_label(f"{self.current_viewer_type.title()} Viewer Error")
-            button.set_sensitive(False)
-    
-    def _replace_viewer_placeholder(self, viewer_widget):
-        """Replace the placeholder with the actual viewer widget."""
-        parent = self.viewer_placeholder.get_parent()
-        parent.remove(self.viewer_placeholder)
-        parent.pack_start(viewer_widget, True, True, 0)
-        viewer_widget.show_all()
-    
-    def _on_viewer_type_changed(self, combo):
-        """Handle viewer type change (only works before enabling)."""
-        # This just updates the selection - actual change happens when Enable is clicked
-        selected_type = combo.get_active_id()
-        self.logger.debug(f"Viewer type selected: {selected_type}")
-        
-        # Update Generate Preview button visibility based on viewer type
-        if hasattr(self, 'preview_button'):
-            if selected_type == 'pyvista':
-                # PyVista loads data automatically, no Generate Preview needed
-                self.preview_button.set_visible(False)
-                self.preview_button.set_no_show_all(True)
-            else:
-                # Matplotlib viewer needs Generate Preview button
-                self.preview_button.set_visible(True)
-                self.preview_button.set_no_show_all(False)
+    # Methods removed - PyVista viewer is now initialized directly
     
     def _get_active_viewer(self):
-        """Get the currently active 3D viewer."""
-        if self.current_viewer_type == 'pyvista' and self.pyvista_3d_viewer is not None:
-            return self.pyvista_3d_viewer
-        elif self.current_viewer_type == 'matplotlib' and self.microstructure_3d_viewer is not None:
-            return self.microstructure_3d_viewer
-        return None
+        """Get the currently active 3D viewer (now always PyVista)."""
+        return self.pyvista_3d_viewer
     
     def _setup_ui(self) -> None:
         """Setup the microstructure panel UI."""
@@ -189,52 +134,15 @@ class MicrostructurePanel(Gtk.Box):
         vbox.set_margin_left(15)
         vbox.set_margin_right(15)
         
-        # TEMPORARILY DISABLE 3D VIEWER TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
-        # The matplotlib GTK3Agg backend is causing surface creation issues during initialization
+        # Create PyVista viewer directly (simplified UX - no more Enable button needed)
+        self.current_viewer_type = 'pyvista'
+        self.pyvista_3d_viewer = PyVistaViewer3D()
+        vbox.pack_start(self.pyvista_3d_viewer, True, True, 0)
+        self.logger.info("PyVista 3D viewer initialized automatically")
         
-        # Create placeholder for 3D viewer instead of actual widget
-        viewer_placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        viewer_placeholder.set_size_request(300, 250)
-        
-        # Add informational label
-        info_label = Gtk.Label()
-        info_label.set_markup('<span size="large">3D Microstructure Viewer</span>')
-        info_label.set_halign(Gtk.Align.CENTER)
-        viewer_placeholder.pack_start(info_label, False, False, 0)
-        
-        # Add viewer type selection
-        viewer_type_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        viewer_type_box.set_halign(Gtk.Align.CENTER)
-        
-        viewer_type_label = Gtk.Label("Viewer Type:")
-        viewer_type_box.pack_start(viewer_type_label, False, False, 0)
-        
-        self.viewer_type_combo = Gtk.ComboBoxText()
-        self.viewer_type_combo.append("matplotlib", "Matplotlib (Interactive)")
-        self.viewer_type_combo.append("pyvista", "PyVista (High Quality)")
-        self.viewer_type_combo.set_active_id("pyvista")  # Default to PyVista
-        self.viewer_type_combo.connect('changed', self._on_viewer_type_changed)
-        viewer_type_box.pack_start(self.viewer_type_combo, False, False, 0)
-        
-        viewer_placeholder.pack_start(viewer_type_box, False, False, 5)
-        
-        # Add status message
-        status_label = Gtk.Label()
-        status_label.set_markup('<span size="small" color="#666666">Choose viewer type and click Enable to initialize 3D visualization</span>')
-        status_label.set_halign(Gtk.Align.CENTER)
-        status_label.set_line_wrap(True)
-        viewer_placeholder.pack_start(status_label, True, True, 0)
-        
-        # Add enable button for on-demand loading
-        enable_button = Gtk.Button(label="Enable 3D Viewer")
-        enable_button.set_tooltip_text("Click to initialize selected 3D viewer")
-        enable_button.connect('clicked', self._on_enable_3d_viewer)
-        enable_button.set_halign(Gtk.Align.CENTER)
-        viewer_placeholder.pack_start(enable_button, False, False, 0)
-        
-        vbox.pack_start(viewer_placeholder, True, True, 0)
-        self.viewer_placeholder = viewer_placeholder
-        self.microstructure_3d_viewer = None  # Will be created on demand
+        # Legacy viewer support
+        self.microstructure_3d_viewer = None  # Matplotlib viewer no longer used
+        self.viewer_placeholder = None  # No longer needed with direct initialization
         
         # Preview controls
         preview_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -268,8 +176,7 @@ class MicrostructurePanel(Gtk.Box):
         self.preview_button.connect('clicked', self._on_preview_clicked)
         self.export_preview_button.connect('clicked', self._on_export_preview_clicked)
         
-        # Update button visibility based on default viewer selection
-        self._on_viewer_type_changed(self.viewer_type_combo)
+        # PyVista viewer is now initialized directly - no additional setup needed
     
     def _load_default_parameters(self) -> None:
         """Load default parameters - simplified for preview-only mode."""
@@ -616,32 +523,21 @@ class MicrostructurePanel(Gtk.Box):
     def _on_load_img_clicked(self, button) -> None:
         """Handle load .img file button click."""
         try:
-            # Try native file chooser first (often better folder control)
-            try:
-                dialog = Gtk.FileChooserNative.new(
-                    title="Load Microstructure .img File",
-                    parent=self.main_window,
-                    action=Gtk.FileChooserAction.OPEN,
-                    accept_label="_Open",
-                    cancel_label="_Cancel"
-                )
-                using_native = True
-            except (AttributeError, TypeError):
-                # Fallback to standard dialog if FileChooserNative not available
-                dialog = Gtk.FileChooserDialog(
-                    title="Load Microstructure .img File", 
-                    parent=self.main_window,
-                    action=Gtk.FileChooserAction.OPEN
-                )
-                dialog.add_buttons(
-                    Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                    Gtk.STOCK_OPEN, Gtk.ResponseType.OK
-                )
-                using_native = False
-                
+            # Create GTK file chooser dialog (better integration with app aesthetics)
+            dialog = Gtk.FileChooserDialog(
+                title="Load Microstructure .img File",
+                parent=self.main_window,
+                action=Gtk.FileChooserAction.OPEN
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+            )
+            
             # Configure dialog settings
             dialog.set_select_multiple(False)
             dialog.set_show_hidden(False)
+            dialog.set_create_folders(False)
             
             # Add file filter for .img files
             filter_img = Gtk.FileFilter()
@@ -656,10 +552,9 @@ class MicrostructurePanel(Gtk.Box):
             
             # Set initial directory to Operations folder where generated .img files are located  
             import os
+            from gi.repository import GLib
             
             # Get the absolute path to the Operations folder
-            # Current file is: vcctl-gtk/src/app/windows/panels/microstructure_panel.py
-            # Need to go up to vcctl-gtk root, then into Operations
             current_file = os.path.abspath(__file__)
             vcctl_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file)))))
             operations_path = os.path.join(vcctl_root, "Operations")
@@ -668,25 +563,58 @@ class MicrostructurePanel(Gtk.Box):
             self.logger.debug(f"Operations folder exists: {os.path.exists(operations_path)}")
             
             if os.path.exists(operations_path):
-                # Set current folder - native chooser should respect this
-                dialog.set_current_folder(operations_path)
-                self.logger.debug(f"Set current folder to: {operations_path}")
+                # Multiple approaches to override Recent files and force folder navigation
                 
-                # Add as shortcut only for non-native dialogs (native doesn't support this)
-                if not using_native:
-                    try:
-                        dialog.add_shortcut_folder(operations_path)
-                        self.logger.debug("Added Operations as shortcut folder")
-                    except Exception as e:
-                        self.logger.debug(f"Failed to add shortcut folder: {e}")
+                # Method 1: Add as shortcut folder first (creates sidebar entry)
+                try:
+                    dialog.add_shortcut_folder(operations_path)
+                    self.logger.debug("Added Operations as shortcut folder")
+                except Exception as e:
+                    self.logger.debug(f"Failed to add shortcut folder: {e}")
+                
+                # Method 2: Set current folder
+                dialog.set_current_folder(operations_path)
+                
+                # Method 3: Use URI-based setting for better compliance
+                try:
+                    operations_uri = GLib.filename_to_uri(operations_path)
+                    dialog.set_current_folder_uri(operations_uri)
+                    self.logger.debug(f"Set current folder URI to: {operations_uri}")
+                except Exception as e:
+                    self.logger.debug(f"Failed to set folder URI: {e}")
+                
+                # Method 4: Force dialog to show folder contents by pre-selecting a file
+                try:
+                    # Find the first .img file in any subdirectory
+                    first_img_file = None
+                    for root, dirs, files in os.walk(operations_path):
+                        for file in files:
+                            if file.endswith('.img'):
+                                first_img_file = os.path.join(root, file)
+                                break
+                        if first_img_file:
+                            break
+                    
+                    if first_img_file:
+                        dialog.set_filename(first_img_file)
+                        # Navigate to parent folder and unselect the file
+                        parent_folder = os.path.dirname(first_img_file)
+                        dialog.set_current_folder(parent_folder)
+                        dialog.unselect_all()
+                        self.logger.debug(f"Pre-selected and unselected: {first_img_file}")
+                
+                except Exception as e:
+                    self.logger.debug(f"Failed to pre-select file: {e}")
+                    
+                self.logger.debug(f"Set current folder to: {operations_path}")
             else:
                 self.logger.warning(f"Operations folder not found at: {operations_path}")
             
             response = dialog.run()
             self.logger.debug(f"File dialog response: {response}")
             
-            # Check for both OK response and native dialog accept response
-            if response == Gtk.ResponseType.OK or response == Gtk.ResponseType.ACCEPT:
+            # Standard GTK dialog response handling
+            if response == Gtk.ResponseType.OK:
                 filename = dialog.get_filename()
                 self.logger.debug(f"Selected filename: {filename}")
                 if filename:

@@ -1,0 +1,164 @@
+/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
+  warnings.warn(
+2025-08-05 16:39:41,396 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-08-05 16:39:41,477 - VCCTL - INFO - Application startup
+2025-08-05 16:39:41,478 - VCCTL - INFO - Application activated
+2025-08-05 16:39:41,479 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-08-05 16:39:41,485 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-08-05 16:39:41,499 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-05 16:39:41,499 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-08-05 16:39:41,500 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-08-05 16:39:41,500 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-08-05 16:39:41,500 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-08-05 16:39:41,500 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-08-05 16:39:41,501 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-05 16:39:41,501 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-05 16:39:41,501 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-05 16:39:41,501 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-08-05 16:39:41,812 - VCCTL.Database - INFO - Database engine created successfully
+2025-08-05 16:39:41,816 - VCCTL.Database - INFO - All database tables created successfully
+2025-08-05 16:39:41,816 - VCCTL.Database - INFO - Database initialized successfully
+2025-08-05 16:39:41,816 - VCCTL.Database - INFO - Session maker created successfully
+2025-08-05 16:39:41,845 - VCCTL.MaterialTable - INFO - Loaded 58 materials
+2025-08-05 16:39:41,845 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-08-05 16:39:41,847 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
+2025-08-05 16:39:41,847 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-08-05 16:39:41,848 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma157
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-08-05 16:39:41,849 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-08-05 16:39:41,850 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-08-05 16:39:41,859 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-08-05 16:39:41,859 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-08-05 16:39:41,859 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-08-05 16:39:42,061 - VCCTL.PyVistaViewer3D - INFO - PyVista headless plotter created successfully
+2025-08-05 16:39:42,063 - VCCTL.PyVistaViewer3D - INFO - PyVista 3D viewer initialized
+2025-08-05 16:39:42,063 - VCCTL.MicrostructurePanel - INFO - PyVista 3D viewer initialized automatically
+2025-08-05 16:39:42,064 - VCCTL.MicrostructurePanel - INFO - Microstructure panel initialized
+2025-08-05 16:39:42,064 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-08-05 16:39:42,064 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-08-05 16:39:42,066 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-08-05 16:39:42,074 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config
+2025-08-05 16:39:42,074 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-08-05 16:39:42,074 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-08-05 16:39:42,087 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-08-05 16:39:42,088 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-08-05 16:39:42,090 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-08-05 16:39:42,094 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-08-05 16:39:42,094 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
+2025-08-05 16:39:42,094 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Found 8 total items in Operations directory
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Found 7 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'MisDesignSaveTest_copy', 'ProcessControl']
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
+2025-08-05 16:39:42,095 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 11 files
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 13 files
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
+2025-08-05 16:39:42,096 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
+2025-08-05 16:39:42,097 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
+2025-08-05 16:39:42,097 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 7 operations
+2025-08-05 16:39:42,097 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-08-05 16:39:42,097 - VCCTL.OperationsMonitoringPanel - INFO - Adding 7 operations to display
+2025-08-05 16:39:42,098 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+
+2025-08-05 16:39:42,099 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-05 16:39:42,103 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Found operations file with 3 operations
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 3 operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-08-05 16:39:42,104 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:39:42,106 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:39:42,246 - VCCTL.MainWindow - INFO - Main window initialized
+2025-08-05 16:39:50,533 - VCCTL.MicrostructurePanel - INFO - Loading microstructure: 120x100x100 voxels, resolution: 1.0
+2025-08-05 16:39:50,661 - VCCTL.MicrostructurePanel - INFO - Reshaped voxel data to: (120, 100, 100)
+2025-08-05 16:39:50,664 - VCCTL.MicrostructurePanel - INFO - Found phases: [ 0  1  2  3  4 10]
+2025-08-05 16:39:51,735 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
+2025-08-05 16:39:51,735 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
+2025-08-05 16:39:51,929 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
+2025-08-05 16:39:51,929 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
+2025-08-05 16:39:51,996 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
+2025-08-05 16:39:52,024 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
+2025-08-05 16:39:52,025 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
+2025-08-05 16:39:52,026 - VCCTL.PyVistaViewer3D - INFO - Loaded voxel data: (120, 100, 100), 6 phases
+2025-08-05 16:39:52,028 - VCCTL.MicrostructurePanel - INFO - Successfully loaded microstructure from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/CemotcBox/CemotcBox.img
+2025-08-05 16:39:57,849 - VCCTL.PyVistaViewer3D - INFO - Starting connectivity analysis
+2025-08-05 16:39:58,343 - VCCTL.PyVistaViewer3D - INFO - Starting connectivity analysis with periodic boundary conditions...
+2025-08-05 16:39:58,796 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 15038 → 14688 components
+2025-08-05 16:40:04,343 - VCCTL.PyVistaViewer3D - INFO - Phase 1: 14688 components, ✓ PERCOLATED
+2025-08-05 16:40:04,678 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 14758 → 14427 components
+2025-08-05 16:40:10,102 - VCCTL.PyVistaViewer3D - INFO - Phase 2: 14427 components, ✓ PERCOLATED
+2025-08-05 16:40:10,400 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 7925 → 7749 components
+2025-08-05 16:40:11,524 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 2757.669024679278, 'current_memory_mb': 1767.015625}
+2025-08-05 16:40:13,294 - VCCTL.PyVistaViewer3D - INFO - Phase 3: 7749 components, ✓ PERCOLATED
+2025-08-05 16:40:13,587 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 6487 → 6370 components
+2025-08-05 16:40:15,972 - VCCTL.PyVistaViewer3D - INFO - Phase 4: 6370 components, ✓ PERCOLATED
+2025-08-05 16:40:16,265 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 1294 → 1266 components
+2025-08-05 16:40:16,755 - VCCTL.PyVistaViewer3D - INFO - Phase 10: 1266 components, ✓ PERCOLATED
+2025-08-05 16:40:37,141 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity analysis completed
+2025-08-05 16:40:41,548 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 1432.9971234617517, 'current_memory_mb': 1821.25}
+2025-08-05 16:41:11,580 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 956.1248547991567, 'current_memory_mb': 1822.453125}
+2025-08-05 16:41:41,665 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 717.0448037950451, 'current_memory_mb': 1822.4375}
+2025-08-05 16:42:11,739 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 573.4380524392058, 'current_memory_mb': 1822.46875}
+2025-08-05 16:42:41,805 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 477.77036541374576, 'current_memory_mb': 1822.46875}
+2025-08-05 16:43:11,869 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 409.4820166576785, 'current_memory_mb': 1822.5}
+2025-08-05 16:43:41,935 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 358.271456281814, 'current_memory_mb': 1822.5}
+2025-08-05 16:44:12,168 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 318.4431817315707, 'current_memory_mb': 1822.5}
+2025-08-05 16:44:43,021 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:44:43,024 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:44:43,024 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-05 16:44:43,044 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-08-05 16:49:43,484 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:49:43,486 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-05 16:49:43,486 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-05 16:49:43,499 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed

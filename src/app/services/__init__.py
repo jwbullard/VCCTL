@@ -18,7 +18,8 @@ from app.services.slag_service import SlagService
 from app.services.inert_filler_service import InertFillerService
 from app.services.silica_fume_service import SilicaFumeService
 from app.services.limestone_service import LimestoneService
-from app.services.mix_service import MixService, MaterialType, MixComponent, MixDesign
+from app.services.mix_service import MixService, MixComponent, MixDesign
+from app.models.material_types import MaterialType
 from app.services.aggregate_service import AggregateService, AggregateType, SieveData, GradingCurve
 from app.services.microstructure_service import MicrostructureService, PhaseType, MicrostructureParams
 from app.services.grading_service import GradingService, SieveStandard, GradationType

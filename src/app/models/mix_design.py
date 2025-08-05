@@ -11,6 +11,8 @@ from sqlalchemy import Column, String, Float, Text, Integer, Boolean, DateTime, 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
+# Import centralized validation
+from app.validation import MixDesignValidator, ComponentData
 
 
 class MixDesign(Base):
@@ -180,19 +182,31 @@ class MixDesignCreate(BaseModel):
     
     @model_validator(mode='after')
     def validate_components(self):
-        """Validate mix design components."""
+        """Validate mix design components using centralized validation."""
         if not self.components:
             raise ValueError('Mix design must have at least one component')
         
-        # Check for duplicate material names
-        material_names = [comp.material_name for comp in self.components]
-        if len(material_names) != len(set(material_names)):
-            raise ValueError('Mix design cannot have duplicate material names')
+        # Convert to standardized format for centralized validation
+        validation_components = [
+            ComponentData(
+                material_name=comp.material_name,
+                material_type=comp.material_type,
+                mass_fraction=comp.mass_fraction,
+                volume_fraction=comp.volume_fraction,
+                specific_gravity=comp.specific_gravity
+            )
+            for comp in self.components
+        ]
         
-        # Check mass fractions sum
-        total_mass_fraction = sum(comp.mass_fraction for comp in self.components)
-        if abs(total_mass_fraction - 1.0) > 0.001:  # Allow small floating-point errors
-            raise ValueError(f'Total mass fractions must sum to 1.0, got {total_mass_fraction:.3f}')
+        # Use centralized validation for mass fractions
+        is_valid, error = MixDesignValidator.validate_mass_fractions_only(validation_components)
+        if not is_valid:
+            raise ValueError(error)
+        
+        # Use centralized validation for component uniqueness
+        is_unique, error = MixDesignValidator.validate_component_uniqueness_only(validation_components)
+        if not is_unique:
+            raise ValueError(error)
         
         return self
 

@@ -146,9 +146,9 @@ int main(void) {
     return (1);
   }
 
-  for (iz = 0; iz < zsyssize; iz++) {
+  for (ix = 0; ix < xsyssize; ix++) {
     for (iy = 0; iy < ysyssize; iy++) {
-      for (ix = 0; ix < xsyssize; ix++) {
+      for (iz = 0; iz < zsyssize; iz++) {
         fscanf(infile, "%s", instring);
         ovalin = atoi(instring);
         valin = convert_id(ovalin, Version);

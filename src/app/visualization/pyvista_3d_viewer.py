@@ -19,17 +19,45 @@ from pathlib import Path
 import io
 import PIL.Image
 
-# Configure PyVista for headless rendering (no Qt required)
+# Configure PyVista for better memory management
 pv.set_plot_theme("default")  # Default theme with better lighting
 pv.global_theme.window_size = [800, 600] 
 pv.global_theme.font.size = 10
 pv.global_theme.background = 'white'  # Keep white background
+
+# Enable better memory management
+try:
+    pv.global_theme.auto_close = True  # Auto-close plotters
+except AttributeError:
+    pass  # Not available in this PyVista version
 
 # Try to start virtual display for headless rendering (Linux/CI only)
 try:
     pv.start_xvfb()
 except Exception:
     # On macOS/Windows, headless rendering works without xvfb
+    pass
+
+# Set VTK to be more aggressive about memory management
+try:
+    import vtk
+    vtk.vtkObject.SetGlobalWarningDisplay(0)  # Reduce VTK warnings
+    # Try to disable VTK's automatic object tracking (not available in all versions)
+    if hasattr(vtk.vtkReferenceCount, 'SetGlobalDebugFlag'):
+        vtk.vtkReferenceCount.SetGlobalDebugFlag(0)
+except Exception:
+    pass
+
+# Configure theme for better memory management
+try:
+    pv.global_theme.load_theme('default')
+except Exception:
+    pass
+
+# Try to disable some automatic features that can cause memory leaks
+try:
+    pv._BUILDING_GALLERY = True  
+except Exception:
     pass
 
 
@@ -63,6 +91,15 @@ class PyVistaViewer3D(Gtk.Box):
         self.phase_mapping = {}
         self.voxel_size = (1.0, 1.0, 1.0)  # μm per voxel
         self.mesh_objects = {}  # Store VTK mesh objects for each phase
+        
+        # Camera view tracking
+        self.current_view_type = 'isometric'  # Track current camera view
+        
+        # Measurement system
+        self.measurement_mode = None  # 'distance', 'volume', 'connectivity', 'surface_area'
+        self.measurement_results = {}  # Store measurement results
+        self.measurement_widgets = []  # Active measurement widgets
+        self.phase_statistics = {}  # Cached phase statistics
         
         # Visualization settings
         self.rendering_mode = 'volume'  # 'volume', 'isosurface', 'points', 'wireframe'  
@@ -162,12 +199,26 @@ class PyVistaViewer3D(Gtk.Box):
             self.image_widget.set_halign(Gtk.Align.CENTER)
             self.image_widget.set_valign(Gtk.Align.CENTER)
             
+            # Enable mouse events for distance measurement
+            self.image_widget.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | 
+                                       Gdk.EventMask.BUTTON_RELEASE_MASK |
+                                       Gdk.EventMask.POINTER_MOTION_MASK)
+            self.image_widget.set_can_focus(True)
+            
+            # Wrap image widget in EventBox to capture mouse events
+            self.image_eventbox = Gtk.EventBox()
+            self.image_eventbox.add(self.image_widget)
+            self.image_eventbox.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | 
+                                         Gdk.EventMask.BUTTON_RELEASE_MASK |
+                                         Gdk.EventMask.POINTER_MOTION_MASK)
+            self.image_eventbox.set_can_focus(True)
+            
             # Create scrolled window for the image
             scrolled = Gtk.ScrolledWindow()
             scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             scrolled.set_hexpand(True)
             scrolled.set_vexpand(True)
-            scrolled.add(self.image_widget)
+            scrolled.add(self.image_eventbox)
             
             # Create main widget container
             self.plotter_widget = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -368,6 +419,38 @@ class PyVistaViewer3D(Gtk.Box):
         reset_button = Gtk.Button("Reset View")
         reset_button.connect('clicked', self._on_reset_view_clicked)
         self.control_panel.pack_start(reset_button, False, False, 0)
+        
+        # Memory cleanup button
+        cleanup_button = Gtk.Button("Cleanup Memory")
+        cleanup_button.set_tooltip_text("Force aggressive memory cleanup")
+        cleanup_button.connect('clicked', self._on_cleanup_memory_clicked)
+        self.control_panel.pack_start(cleanup_button, False, False, 0)
+        
+        # Separator before measurement tools
+        separator_measure = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        self.control_panel.pack_start(separator_measure, False, False, 5)
+        
+        # Measurement tools section (grouped at far right)
+        measure_label = Gtk.Label("Measure:")
+        self.control_panel.pack_start(measure_label, False, False, 0)
+        
+        # Distance measurement button (hidden - not working as expected)
+        # distance_button = Gtk.Button("Distance")
+        # distance_button.set_tooltip_text("Measure distances between points")
+        # distance_button.connect('clicked', self._on_distance_measure_clicked)
+        # self.control_panel.pack_start(distance_button, False, False, 0)
+        
+        # Phase data analysis button
+        volume_button = Gtk.Button("Phase Data")
+        volume_button.set_tooltip_text("Analyze phase volumes, surface areas and statistics") 
+        volume_button.connect('clicked', self._on_volume_analyze_clicked)
+        self.control_panel.pack_start(volume_button, False, False, 0)
+        
+        # Connectivity analysis button
+        connectivity_button = Gtk.Button("Connectivity")
+        connectivity_button.set_tooltip_text("Analyze phase connectivity and percolation")
+        connectivity_button.connect('clicked', self._on_connectivity_analyze_clicked)
+        self.control_panel.pack_start(connectivity_button, False, False, 0)
     
     def _create_phase_control_panel(self):
         """Create phase control panel for color customization."""
@@ -542,6 +625,11 @@ class PyVistaViewer3D(Gtk.Box):
             True if data loaded successfully, False otherwise
         """
         try:
+            # Cleanup any existing data first to prevent memory leaks
+            if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+                self.logger.info("Cleaning up previous voxel data...")
+                self._cleanup_previous_data()
+            
             self.voxel_data = voxel_data.copy()
             self.phase_mapping = phase_mapping or {}
             self.voxel_size = voxel_size
@@ -592,10 +680,16 @@ class PyVistaViewer3D(Gtk.Box):
                 try:
                     if hasattr(mesh, 'clear'):
                         mesh.clear()
+                    # Force deletion of VTK objects
+                    del mesh
                 except:
                     pass
         
         self.mesh_objects = {}
+        
+        # Force garbage collection to free VTK memory
+        import gc
+        gc.collect()
         unique_phases = np.unique(self.voxel_data)
         
         for phase_id in unique_phases:
@@ -622,8 +716,14 @@ class PyVistaViewer3D(Gtk.Box):
             return
         
         try:
-            # Clear existing plots and force memory cleanup
+            # Safe approach: clear existing plots without destroying plotter
             self.plotter.clear()
+            
+            # Restore professional lighting after clear (clear removes lights)
+            self.plotter.remove_all_lights()  # Clear any default lights
+            self.plotter.add_light(pv.Light(position=(1, 1, 1), focal_point=(0, 0, 0), color='white', intensity=0.8))
+            self.plotter.add_light(pv.Light(position=(-1, -1, 1), focal_point=(0, 0, 0), color='white', intensity=0.4))
+            self.plotter.add_light(pv.Light(position=(0, 0, -1), focal_point=(0, 0, 0), color='white', intensity=0.2))
             
             # Force garbage collection to prevent memory leaks
             import gc
@@ -1026,6 +1126,9 @@ class PyVistaViewer3D(Gtk.Box):
                     self.logger.debug(f"Manual camera positioning failed: {e}")
             
             if view_success:
+                # Track current view type
+                self.current_view_type = view_type
+                
                 # Force immediate screenshot update
                 self._simple_render_update()
                 self.emit('view-changed')
@@ -1037,6 +1140,42 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.error(f"Failed to set camera view {view_type}: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
+    
+    def _is_orthographic_view(self):
+        """Check if current view is orthographic (XY, XZ, YZ) rather than isometric."""
+        return self.current_view_type in ['xy', 'xz', 'yz']
+    
+    def _project_to_front_surface(self, point, bounds):
+        """Project measurement point to the front surface of microstructure in orthographic views."""
+        try:
+            if not hasattr(self, 'voxel_data') or self.voxel_data is None:
+                self.logger.warning("No voxel data available for surface projection")
+                return point
+            
+            projected_point = point.copy()
+            
+            # Determine which axis to project along based on current view
+            if self.current_view_type == 'xy':
+                # XY view: looking down Z axis, project to maximum Z (front surface)
+                projected_point[2] = bounds[5]  # Max Z bound
+                self.logger.info(f"XY view: projecting to front Z surface at {bounds[5]}")
+                
+            elif self.current_view_type == 'xz':
+                # XZ view: looking down Y axis, project to maximum Y (front surface)  
+                projected_point[1] = bounds[3]  # Max Y bound
+                self.logger.info(f"XZ view: projecting to front Y surface at {bounds[3]}")
+                
+            elif self.current_view_type == 'yz':
+                # YZ view: looking down X axis, project to maximum X (front surface)
+                projected_point[0] = bounds[1]  # Max X bound  
+                self.logger.info(f"YZ view: projecting to front X surface at {bounds[1]}")
+            
+            self.logger.info(f"Surface projection: {point} -> {projected_point}")
+            return projected_point
+            
+        except Exception as e:
+            self.logger.error(f"Error in surface projection: {e}")
+            return point  # Return original point on error
     
     def _rotate_camera(self, direction: str, angle: float = 15.0):
         """Rotate camera in specified direction."""
@@ -1365,6 +1504,36 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.error(f"Reset view failed: {e}")
             return True
     
+    def _on_cleanup_memory_clicked(self, button):
+        """Handle memory cleanup button click."""
+        try:
+            self.logger.info("Manual memory cleanup triggered")
+            
+            # Perform safe cleanup (don't destroy plotter)
+            self._clear_measurement_widgets()
+            
+            # Clear plotter content safely
+            if hasattr(self, 'plotter') and self.plotter is not None:
+                try:
+                    self.plotter.clear()
+                except:
+                    pass
+            
+            # Force multiple rounds of garbage collection
+            import gc
+            for i in range(5):
+                collected = gc.collect()
+                self.logger.debug(f"GC round {i+1}: collected {collected} objects")
+            
+            # Re-render current data if available
+            if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+                self._update_visualization()
+            
+            self.logger.info("Manual memory cleanup completed")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to cleanup memory: {e}")
+    
     def _on_reset_view(self, button):
         """Handle reset view button."""
         if not hasattr(self, 'plotter') or self.plotter is None:
@@ -1499,3 +1668,1325 @@ class PyVistaViewer3D(Gtk.Box):
             }
         
         return info
+    
+    # =========================================================================
+    # Measurement and Analysis Methods
+    # =========================================================================
+    
+    def _on_distance_measure_clicked(self, button):
+        """Handle distance measurement button click."""
+        try:
+            self.logger.info("Activating distance measurement tool")
+            self._activate_distance_measurement()
+        except Exception as e:
+            self.logger.error(f"Failed to activate distance measurement: {e}")
+    
+    def _on_volume_analyze_clicked(self, button):
+        """Handle volume and surface area analysis button click."""
+        try:
+            self.logger.info("Starting volume and surface area analysis")
+            self._perform_volume_analysis()
+        except Exception as e:
+            self.logger.error(f"Failed to perform volume and surface area analysis: {e}")
+    
+    def _on_connectivity_analyze_clicked(self, button):
+        """Handle connectivity analysis button click."""
+        try:
+            self.logger.info("Starting connectivity analysis")
+            self._perform_connectivity_analysis()
+        except Exception as e:
+            self.logger.error(f"Failed to perform connectivity analysis: {e}")
+    
+    def _activate_distance_measurement(self):
+        """Activate interactive distance measurement using point picking."""
+        if not hasattr(self, 'plotter') or self.plotter is None:
+            self.logger.warning("No plotter available for distance measurement")
+            return
+        
+        try:
+            # Clear any existing measurement widgets
+            self._clear_measurement_widgets()
+            
+            # Initialize distance measurement state
+            self.distance_points = []
+            self.distance_actors = []
+            
+            # Show instruction dialog
+            self._show_distance_instructions()
+            
+            # Enable point picking for distance measurement
+            self._enable_distance_point_picking()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to activate distance measurement: {e}")
+    
+    def _show_distance_instructions(self):
+        """Show instructions for interactive distance measurement."""
+        instruction_dialog = Gtk.MessageDialog(
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            message_format="Interactive Distance Measurement"
+        )
+        
+        instruction_text = """Click on two points in the 3D view to measure distance.
+
+Instructions:
+1. Click the first point on the microstructure
+2. Click the second point on the microstructure
+3. The distance will be calculated and displayed
+
+• Left-click to select points
+• Right-click to cancel measurement
+• ESC key to exit measurement mode"""
+        
+        instruction_dialog.format_secondary_text(instruction_text)
+        instruction_dialog.run()
+        instruction_dialog.destroy()
+    
+    def _enable_distance_point_picking(self):
+        """Enable interactive point picking using GTK mouse events."""
+        try:
+            # Check if image eventbox is available
+            if not hasattr(self, 'image_eventbox') or self.image_eventbox is None:
+                self.logger.warning("No image eventbox available for distance measurement")
+                return
+            
+            # Check if current view is orthographic (not isometric)
+            if not self._is_orthographic_view():
+                dialog = Gtk.MessageDialog(
+                    parent=None,
+                    flags=Gtk.DialogFlags.MODAL,
+                    type=Gtk.MessageType.WARNING,
+                    buttons=Gtk.ButtonsType.OK,
+                    message_format="Distance measurement is only available in orthographic views (XY, XZ, YZ). Please switch to an orthographic view first."
+                )
+                dialog.run()
+                dialog.destroy()
+                return
+            
+            # Initialize distance measurement state
+            self.distance_measurement_active = True
+            self.distance_points = []
+            self.distance_click_count = 0
+            
+            # Add mouse click event handler to the image eventbox
+            self.distance_click_handler_id = self.image_eventbox.connect('button-press-event', self._on_image_clicked_for_distance)
+            
+            # Change cursor to crosshair to indicate measurement mode
+            cursor = Gdk.Cursor.new_for_display(Gdk.Display.get_default(), Gdk.CursorType.CROSSHAIR)
+            
+            # Set cursor on the eventbox window
+            if self.image_eventbox.get_window():
+                self.image_eventbox.get_window().set_cursor(cursor)
+            
+            self.logger.info("Distance measurement mouse clicking enabled")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to enable distance measurement: {e}")
+    
+    def _on_image_clicked_for_distance(self, widget, event):
+        """Handle mouse clicks on the image for distance measurement."""
+        try:
+            self.logger.info(f"Mouse click detected: button={event.button} at ({event.x}, {event.y})")
+            
+            if not getattr(self, 'distance_measurement_active', False):
+                self.logger.info("Distance measurement not active, ignoring click")
+                return False
+            
+            if event.button != 1:  # Only handle left clicks
+                self.logger.info(f"Ignoring non-left click (button {event.button})")
+                return False
+            
+            # Get click coordinates relative to the image widget
+            click_x = event.x
+            click_y = event.y
+            
+            # Get image widget allocation to understand scaling
+            allocation = widget.get_allocation()
+            widget_width = allocation.width
+            widget_height = allocation.height
+            
+            # Get the actual rendered image size from plotter
+            plotter_width, plotter_height = self.plotter.window_size
+            
+            self.logger.info(f"GTK widget click: ({click_x}, {click_y}), widget size: {widget_width}x{widget_height}")
+            self.logger.info(f"PyVista plotter size: {plotter_width}x{plotter_height}")
+            
+            # Calculate aspect ratios
+            widget_aspect = widget_width / widget_height if widget_height > 0 else 1.0
+            plotter_aspect = plotter_width / plotter_height if plotter_height > 0 else 1.0
+            
+            self.logger.info(f"Aspect ratios - widget: {widget_aspect:.3f}, plotter: {plotter_aspect:.3f}")
+            
+            # Convert widget coordinates to normalized coordinates [0,1]
+            norm_x = click_x / widget_width if widget_width > 0 else 0.5
+            norm_y = click_y / widget_height if widget_height > 0 else 0.5
+            
+            # Account for aspect ratio differences and image centering
+            if widget_aspect > plotter_aspect:
+                # Widget is wider than plotter - image is letterboxed horizontally
+                image_width_in_widget = widget_height * plotter_aspect
+                x_offset = (widget_width - image_width_in_widget) / 2
+                if click_x < x_offset or click_x > (widget_width - x_offset):
+                    self.logger.warning("Click outside image area (horizontal letterbox)")
+                    return False
+                norm_x = (click_x - x_offset) / image_width_in_widget
+            else:
+                # Widget is taller than plotter - image is letterboxed vertically  
+                image_height_in_widget = widget_width / plotter_aspect
+                y_offset = (widget_height - image_height_in_widget) / 2
+                if click_y < y_offset or click_y > (widget_height - y_offset):
+                    self.logger.warning("Click outside image area (vertical letterbox)")
+                    return False
+                norm_y = (click_y - y_offset) / image_height_in_widget
+            
+            # Convert to plotter coordinates
+            plotter_x = norm_x * plotter_width
+            plotter_y = (1.0 - norm_y) * plotter_height  # Flip Y coordinate for PyVista
+            
+            self.logger.info(f"Normalized coords: ({norm_x:.3f}, {norm_y:.3f})")
+            self.logger.info(f"Plotter coords: ({plotter_x:.1f}, {plotter_y:.1f})")
+            
+            # Convert 2D screen coordinates to 3D world coordinates using camera
+            world_point = self._screen_to_world_coordinates(plotter_x, plotter_y)
+            
+            if world_point is not None:
+                self._on_distance_point_picked(world_point)
+            
+            return True  # Event handled
+            
+        except Exception as e:
+            self.logger.error(f"Error handling image click for distance: {e}")
+            return False
+    
+    def _screen_to_world_coordinates(self, screen_x, screen_y):
+        """Convert 2D screen coordinates to 3D world coordinates."""
+        try:
+            self.logger.info(f"Converting screen coords ({screen_x}, {screen_y}) to world coordinates")
+            
+            # Get dataset bounds
+            if not hasattr(self, 'voxel_data') or self.voxel_data is None:
+                self.logger.warning("No voxel data available for coordinate conversion")
+                return None
+            
+            # Get plotter bounds
+            try:
+                bounds = self.plotter.bounds
+                if not bounds or len(bounds) < 6:
+                    self.logger.warning("No valid bounds available from plotter")
+                    return None
+            except Exception as e:
+                self.logger.warning(f"Could not get plotter bounds: {e}")
+                return None
+            
+            # Normalize screen coordinates to [0, 1] range first, then to [-1, 1]
+            width, height = self.plotter.window_size
+            norm_x = screen_x / width if width > 0 else 0.5
+            norm_y = screen_y / height if height > 0 else 0.5
+            
+            # Convert to normalized device coordinates [-1, 1]
+            ndc_x = (2.0 * norm_x) - 1.0  
+            ndc_y = (2.0 * norm_y) - 1.0
+            
+            self.logger.info(f"Normalized coords: ({ndc_x}, {ndc_y}), bounds: {bounds}")
+            
+            # Calculate center point and ranges of the dataset
+            center_x = (bounds[0] + bounds[1]) / 2
+            center_y = (bounds[2] + bounds[3]) / 2  
+            center_z = (bounds[4] + bounds[5]) / 2
+            
+            x_range = bounds[1] - bounds[0]
+            y_range = bounds[3] - bounds[2]
+            
+            # Try ray-casting approach using camera perspective
+            try:
+                # Get camera parameters using correct PyVista API
+                camera = self.plotter.camera
+                cam_pos = np.array(camera.position)
+                cam_focal = np.array(camera.focal_point)
+                
+                # Use GetViewUp() method instead of view_up property
+                try:
+                    if hasattr(camera, 'GetViewUp'):
+                        cam_viewup = np.array(camera.GetViewUp())
+                    elif hasattr(camera, 'view_up'):
+                        cam_viewup = np.array(camera.view_up)
+                    else:
+                        # Default view up vector
+                        cam_viewup = np.array([0, 0, 1])
+                        self.logger.warning("Using default view up vector [0,0,1]")
+                except Exception as viewup_error:
+                    self.logger.warning(f"Could not get view up vector: {viewup_error}")
+                    cam_viewup = np.array([0, 0, 1])  # Default
+                
+                self.logger.info(f"Camera position: {cam_pos}")
+                self.logger.info(f"Camera focal point: {cam_focal}")
+                
+                # Calculate view direction
+                view_dir = cam_focal - cam_pos
+                view_dir = view_dir / np.linalg.norm(view_dir)
+                
+                # Calculate right and up vectors for the camera
+                right_vec = np.cross(view_dir, cam_viewup)
+                right_vec = right_vec / np.linalg.norm(right_vec)
+                up_vec = np.cross(right_vec, view_dir)
+                up_vec = up_vec / np.linalg.norm(up_vec)
+                
+                # Scale factor based on dataset size and camera distance
+                dataset_diag = np.sqrt((bounds[1] - bounds[0])**2 + 
+                                     (bounds[3] - bounds[2])**2 + 
+                                     (bounds[5] - bounds[4])**2)
+                scale = dataset_diag * 0.3  # Adjust scale for better accuracy
+                
+                # Calculate world position based on NDC coordinates
+                # Project screen coordinates relative to camera focal point
+                offset_x = ndc_x * scale * right_vec
+                offset_y = ndc_y * scale * up_vec
+                
+                # Start from camera focal point and add offsets
+                world_point = cam_focal + offset_x + offset_y
+                
+                self.logger.info(f"Ray-cast world point: {world_point}")
+                
+                # Clamp to dataset bounds
+                world_point[0] = np.clip(world_point[0], bounds[0], bounds[1])
+                world_point[1] = np.clip(world_point[1], bounds[2], bounds[3])
+                world_point[2] = np.clip(world_point[2], bounds[4], bounds[5])
+                
+                # For orthographic views, project to front surface of microstructure
+                if self._is_orthographic_view():
+                    world_point = self._project_to_front_surface(world_point, bounds)
+                
+                self.logger.info(f"Final world point: {world_point}")
+                return world_point
+                
+            except Exception as ray_error:
+                self.logger.warning(f"Ray casting failed: {ray_error}")
+                
+                # Fallback to simple screen mapping with larger scale
+                scale_factor = 0.8  # Use 80% of the range from center
+                world_x = center_x + (ndc_x * x_range * scale_factor)
+                world_y = center_y + (ndc_y * y_range * scale_factor)
+                world_z = center_z
+                
+                world_point = np.array([world_x, world_y, world_z])
+                
+                # For orthographic views, project to front surface of microstructure
+                if self._is_orthographic_view():
+                    world_point = self._project_to_front_surface(world_point, bounds)
+                
+                self.logger.info(f"Final fallback world point: {world_point}")
+                return world_point
+            
+        except Exception as e:
+            self.logger.error(f"Error converting screen to world coordinates: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            return None
+    
+    def _on_distance_point_picked(self, point):
+        """Handle point picking for distance measurement."""
+        try:
+            if point is None:
+                self.logger.warning("Point is None, cannot add distance point")
+                return
+            
+            self.logger.info(f"Adding distance point {len(self.distance_points) + 1}: {point}")
+            
+            # Add point to our list
+            self.distance_points.append(point)
+            self.distance_click_count += 1
+            
+            # Add visual marker for the point (scale radius based on voxel size)
+            voxel_size = self.voxel_size[0] if hasattr(self, 'voxel_size') else 1.0
+            sphere_radius = max(voxel_size * 2, 0.5)  # Minimum 0.5μm radius
+            
+            self.logger.info(f"Creating sphere at {point} with radius {sphere_radius}")
+            sphere = pv.Sphere(radius=sphere_radius, center=point)
+            color = 'red' if len(self.distance_points) == 1 else 'blue'
+            
+            try:
+                actor = self.plotter.add_mesh(sphere, color=color, opacity=0.8)
+                
+                if not hasattr(self, 'distance_actors'):
+                    self.distance_actors = []
+                self.distance_actors.append(actor)
+                
+                self.logger.info(f"Successfully added {color} sphere for distance point {len(self.distance_points)}")
+                
+            except Exception as sphere_error:
+                self.logger.error(f"Failed to add sphere to plotter: {sphere_error}")
+            
+            # Update the render to show the new sphere
+            try:
+                self._render_to_gtk()
+                self.logger.info("GTK display updated with new distance marker")
+            except Exception as display_error:
+                self.logger.error(f"Failed to update GTK display: {display_error}")
+            
+            # If we have two points, calculate distance
+            if len(self.distance_points) == 2:
+                self.logger.info("Two points collected, calculating distance")
+                self._calculate_and_display_distance()
+                self._finish_distance_measurement()
+            else:
+                self.logger.info(f"Point {len(self.distance_points)} of 2 collected, waiting for second point")
+            
+        except Exception as e:
+            self.logger.error(f"Error handling distance point pick: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+    
+    def _calculate_and_display_distance(self):
+        """Calculate and display distance between two picked points."""
+        try:
+            if len(self.distance_points) != 2:
+                return
+            
+            point1, point2 = self.distance_points
+            
+            # Calculate Euclidean distance in world coordinates
+            distance_world = np.linalg.norm(np.array(point2) - np.array(point1))
+            
+            # Convert to micrometers (world coordinates are already in physical units)
+            distance_um = distance_world
+            
+            # Also convert to voxel coordinates for reference
+            voxel_size = self.voxel_size[0] if hasattr(self, 'voxel_size') else 1.0
+            distance_voxels = distance_um / voxel_size
+            
+            # Add line between points with maximum visibility
+            line = pv.Line(point1, point2)
+            
+            # Create a thick tube for maximum visibility
+            voxel_size = self.voxel_size[0] if hasattr(self, 'voxel_size') else 1.0
+            tube_radius = max(voxel_size * 1.0, 0.8)  # Even thicker tube radius
+            tube = line.tube(radius=tube_radius, n_sides=12)  # More sides for smoother appearance
+            
+            self.logger.info(f"Creating tube with radius {tube_radius} for distance line")
+            
+            line_actor = self.plotter.add_mesh(
+                tube, 
+                color='yellow',  # Even brighter color 
+                opacity=1.0,     # Fully opaque
+                lighting=True,   # Enable lighting for better visibility
+                show_edges=False, # No edge lines
+                smooth_shading=True
+            )
+            
+            # Set actor priority to render on top
+            try:
+                if hasattr(line_actor, 'GetProperty'):
+                    # Make it render in front of volume
+                    line_actor.GetProperty().SetOpacity(1.0)
+                    # Enable depth testing but bias toward front
+                    if hasattr(line_actor.GetMapper(), 'SetResolveCoincidentTopologyToPolygonOffset'):
+                        line_actor.GetMapper().SetResolveCoincidentTopologyToPolygonOffset()
+            except Exception as prop_error:
+                self.logger.warning(f"Could not set line actor properties: {prop_error}")
+            
+            # Store the line actor so it can be cleaned up later
+            if not hasattr(self, 'distance_actors'):
+                self.distance_actors = []
+            self.distance_actors.append(line_actor)
+            
+            self.logger.info(f"Added green line between points: {point1} -> {point2}")
+            
+            # Update display to show the line
+            try:
+                self._render_to_gtk()
+                self.logger.info("GTK display updated with distance line")
+            except Exception as display_error:
+                self.logger.error(f"Failed to update GTK display with line: {display_error}")
+            
+            # Show result
+            self._show_interactive_distance_result(point1, point2, distance_voxels, distance_um)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to calculate picked point distance: {e}")
+    
+    def _finish_distance_measurement(self):
+        """Clean up distance measurement mode."""
+        try:
+            # Disable distance measurement mode
+            self.distance_measurement_active = False
+            
+            # Remove the mouse click event handler
+            if hasattr(self, 'distance_click_handler_id') and hasattr(self, 'image_eventbox'):
+                try:
+                    self.image_eventbox.disconnect(self.distance_click_handler_id)
+                    delattr(self, 'distance_click_handler_id')
+                except:
+                    pass
+            
+            # Reset cursor to normal
+            if hasattr(self, 'image_eventbox') and self.image_eventbox.get_window():
+                cursor = Gdk.Cursor.new_for_display(Gdk.Display.get_default(), Gdk.CursorType.ARROW)
+                self.image_eventbox.get_window().set_cursor(cursor)
+            
+            # Reset measurement state (but keep distance_actors for visual feedback)
+            self.distance_points = []
+            self.distance_click_count = 0
+            
+            self.logger.info("Distance measurement completed")
+            
+        except Exception as e:
+            self.logger.error(f"Error finishing distance measurement: {e}")
+    
+    def _show_interactive_distance_result(self, point1, point2, distance_voxels, distance_um):
+        """Show interactive distance measurement result."""
+        result_dialog = Gtk.MessageDialog(
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            message_format="Distance Measurement Result"
+        )
+        
+        result_text = f"""Point A: ({point1[0]:.1f}, {point1[1]:.1f}, {point1[2]:.1f}) μm
+Point B: ({point2[0]:.1f}, {point2[1]:.1f}, {point2[2]:.1f}) μm
+
+Distance: {distance_um:.2f} μm
+Distance: {distance_voxels:.1f} voxels
+
+Visual indicators:
+• Red sphere: First point
+• Blue sphere: Second point  
+• Green line: Distance measurement"""
+        
+        result_dialog.format_secondary_text(result_text)
+        result_dialog.run()
+        result_dialog.destroy()
+        
+        self.logger.info(f"Interactive distance measured: {distance_um:.2f} μm ({distance_voxels:.1f} voxels)")
+        
+    def _show_distance_result(self, ax, ay, az, bx, by, bz, distance_voxels, distance_um):
+        """Show distance measurement result (legacy method for manual input)."""
+        result_dialog = Gtk.MessageDialog(
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            message_format="Distance Measurement Result"
+        )
+        
+        result_text = f"""Point A: ({ax:.0f}, {ay:.0f}, {az:.0f}) voxels
+Point B: ({bx:.0f}, {by:.0f}, {bz:.0f}) voxels
+
+Distance: {distance_voxels:.2f} voxels
+Distance: {distance_um:.2f} μm"""
+        
+        result_dialog.format_secondary_text(result_text)
+        result_dialog.run()
+        result_dialog.destroy()
+        
+        self.logger.info(f"Measured distance: {distance_um:.2f} μm ({distance_voxels:.2f} voxels)")
+    
+    def _perform_volume_analysis(self):
+        """Perform comprehensive volume and surface area analysis of all phases."""
+        if self.voxel_data is None:
+            self.logger.warning("No voxel data available for volume and surface area analysis")
+            return
+        
+        try:
+            # Calculate phase statistics including surface areas
+            phase_stats = self._calculate_phase_statistics()
+            
+            # Create results dialog
+            self._show_volume_analysis_results(phase_stats)
+            
+            self.logger.info("Volume and surface area analysis completed")
+            
+        except Exception as e:
+            self.logger.error(f"Volume and surface area analysis failed: {e}")
+    
+    def _perform_connectivity_analysis(self):
+        """Perform connectivity analysis with periodic boundary conditions and directional percolation."""
+        if self.voxel_data is None:
+            self.logger.warning("No voxel data available for connectivity analysis")
+            return
+        
+        try:
+            from scipy import ndimage
+            connectivity_results = {}
+            unique_phases = np.unique(self.voxel_data)
+            
+            self.logger.info("Starting connectivity analysis with periodic boundary conditions...")
+            
+            for phase_id in unique_phases:
+                if phase_id == 0:  # Skip porosity for connectivity analysis
+                    continue
+                
+                try:
+                    # Create binary mask for this phase
+                    phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
+                    
+                    # Use memory-efficient periodic connectivity analysis
+                    labeled_original, num_components = self._periodic_connectivity_analysis(phase_mask)
+                    
+                    if num_components == 0:
+                        connectivity_results[phase_id] = {
+                            'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                            'total_components': 0,
+                            'component_volumes': [],
+                            'largest_component_volume': 0,
+                            'total_phase_volume': 0,
+                            'percolation_ratio': 0,
+                            'percolates_x': False,
+                            'percolates_y': False,
+                            'percolates_z': False,
+                            'fully_percolated': False
+                        }
+                        continue
+                    
+                    # Analyze directional percolation for each component
+                    percolation_results = self._analyze_directional_percolation(
+                        labeled_original, num_components, phase_mask.shape
+                    )
+                    
+                    # Calculate volumes
+                    voxel_volume = np.prod(self.voxel_size)  # μm³ per voxel
+                    component_volumes = []
+                    component_voxel_counts = []
+                    
+                    for component_id in range(1, num_components + 1):
+                        component_voxels = np.sum(labeled_original == component_id)
+                        component_volume = component_voxels * voxel_volume
+                        component_volumes.append(component_volume)
+                        component_voxel_counts.append(component_voxels)
+                    
+                    # Sort by volume (largest first)
+                    sorted_indices = np.argsort(component_volumes)[::-1]
+                    component_volumes = [component_volumes[i] for i in sorted_indices]
+                    component_voxel_counts = [component_voxel_counts[i] for i in sorted_indices]
+                    
+                    total_phase_volume = sum(component_volumes)
+                    largest_component_volume = max(component_volumes) if component_volumes else 0
+                    percolation_ratio = largest_component_volume / total_phase_volume if total_phase_volume > 0 else 0
+                    
+                    connectivity_results[phase_id] = {
+                        'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                        'total_components': num_components,
+                        'component_volumes': component_volumes,
+                        'component_voxel_counts': component_voxel_counts,
+                        'largest_component_volume': largest_component_volume,
+                        'total_phase_volume': total_phase_volume,
+                        'percolation_ratio': percolation_ratio,
+                        'percolates_x': percolation_results['percolates_x'],
+                        'percolates_y': percolation_results['percolates_y'],
+                        'percolates_z': percolation_results['percolates_z'],
+                        'fully_percolated': percolation_results['fully_percolated'],
+                        'percolating_components': percolation_results['percolating_components']
+                    }
+                    
+                    perc_status = "✓ PERCOLATED" if percolation_results['fully_percolated'] else "✗ Not Percolated"
+                    self.logger.info(f"Phase {phase_id}: {num_components} components, {perc_status}")
+                    
+                except Exception as e:
+                    self.logger.error(f"Connectivity analysis failed for phase {phase_id}: {e}")
+                    connectivity_results[phase_id] = {
+                        'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                        'error': str(e)
+                    }
+            
+            # Show connectivity results
+            self._show_connectivity_analysis_results(connectivity_results)
+            
+            self.logger.info("Periodic connectivity analysis completed")
+            
+        except Exception as e:
+            self.logger.error(f"Connectivity analysis failed: {e}")
+            # Check if scipy is available
+            try:
+                import scipy
+            except ImportError:
+                self.logger.error("Connectivity analysis requires scipy. Please install scipy: pip install scipy")
+    
+    def _periodic_connectivity_analysis(self, phase_mask):
+        """Memory-efficient periodic connectivity analysis using iterative boundary matching."""
+        from scipy import ndimage
+        
+        # Start with standard connectivity analysis on original array
+        labeled_array, num_components = ndimage.label(
+            phase_mask, 
+            structure=ndimage.generate_binary_structure(3, 1)
+        )
+        
+        if num_components <= 1:
+            return labeled_array, num_components
+        
+        # Create component equivalence mapping for periodic boundaries
+        nz, ny, nx = phase_mask.shape
+        component_map = list(range(num_components + 1))  # component_map[i] = final_component_id
+        
+        # Check and merge components across X boundaries (left-right)
+        self._merge_periodic_boundaries(labeled_array, component_map, 
+                                      labeled_array[:, :, 0], labeled_array[:, :, nx-1])
+        
+        # Check and merge components across Y boundaries (front-back)  
+        self._merge_periodic_boundaries(labeled_array, component_map,
+                                      labeled_array[:, 0, :], labeled_array[:, ny-1, :])
+        
+        # Check and merge components across Z boundaries (bottom-top)
+        self._merge_periodic_boundaries(labeled_array, component_map,
+                                      labeled_array[0, :, :], labeled_array[nz-1, :, :])
+        
+        # Apply the component mapping to merge connected components
+        final_labeled = np.zeros_like(labeled_array)
+        unique_components = set()
+        
+        for z in range(nz):
+            for y in range(ny):
+                for x in range(nx):
+                    if labeled_array[z, y, x] > 0:
+                        # Follow the component mapping chain to get final component ID
+                        final_comp = self._find_root_component(component_map, labeled_array[z, y, x])
+                        final_labeled[z, y, x] = final_comp
+                        unique_components.add(final_comp)
+        
+        # Renumber components to be sequential
+        component_renumber = {comp: i+1 for i, comp in enumerate(sorted(unique_components))}
+        for z in range(nz):
+            for y in range(ny):
+                for x in range(nx):
+                    if final_labeled[z, y, x] > 0:
+                        final_labeled[z, y, x] = component_renumber[final_labeled[z, y, x]]
+        
+        final_num_components = len(unique_components)
+        self.logger.info(f"Periodic connectivity: {num_components} → {final_num_components} components")
+        
+        return final_labeled, final_num_components
+    
+    def _merge_periodic_boundaries(self, labeled_array, component_map, boundary1, boundary2):
+        """Merge components that connect across periodic boundaries."""
+        # Find all unique component pairs that touch opposite boundaries
+        components1 = set(boundary1[boundary1 > 0])
+        components2 = set(boundary2[boundary2 > 0]) 
+        
+        # Check for direct adjacency across boundary
+        flat1 = boundary1.flatten()
+        flat2 = boundary2.flatten()
+        
+        for i in range(len(flat1)):
+            if flat1[i] > 0 and flat2[i] > 0:
+                # These components should be merged
+                comp1 = flat1[i]
+                comp2 = flat2[i]
+                if comp1 != comp2:
+                    self._union_components(component_map, comp1, comp2)
+    
+    def _union_components(self, component_map, comp1, comp2):
+        """Union-find operation to merge two components."""
+        root1 = self._find_root_component(component_map, comp1)
+        root2 = self._find_root_component(component_map, comp2)
+        
+        if root1 != root2:
+            # Always point the higher ID to the lower ID to maintain consistency
+            if root1 < root2:
+                component_map[root2] = root1
+            else:
+                component_map[root1] = root2
+    
+    def _find_root_component(self, component_map, component):
+        """Find root component with path compression."""
+        if component_map[component] != component:
+            component_map[component] = self._find_root_component(component_map, component_map[component])
+        return component_map[component]
+    
+    def _analyze_directional_percolation(self, labeled_array, num_components, shape):
+        """Analyze directional percolation for each component with periodic boundaries."""
+        nz, ny, nx = shape
+        
+        percolates_x = False
+        percolates_y = False  
+        percolates_z = False
+        percolating_components = []
+        
+        # Check each connected component for directional percolation
+        for component_id in range(1, num_components + 1):
+            component_mask = (labeled_array == component_id)
+            
+            # Check X-direction percolation (spans from x=0 to x=nx-1)
+            x_percolates = self._check_x_percolation(component_mask, nx)
+            
+            # Check Y-direction percolation (spans from y=0 to y=ny-1)  
+            y_percolates = self._check_y_percolation(component_mask, ny)
+            
+            # Check Z-direction percolation (spans from z=0 to z=nz-1)
+            z_percolates = self._check_z_percolation(component_mask, nz)
+            
+            # Track which components percolate in each direction
+            if x_percolates or y_percolates or z_percolates:
+                percolating_components.append({
+                    'component_id': component_id,
+                    'x_percolates': x_percolates,
+                    'y_percolates': y_percolates,
+                    'z_percolates': z_percolates,
+                    'fully_percolates': x_percolates and y_percolates and z_percolates
+                })
+            
+            # Update global percolation status
+            percolates_x = percolates_x or x_percolates
+            percolates_y = percolates_y or y_percolates
+            percolates_z = percolates_z or z_percolates
+        
+        # Phase is fully percolated if it percolates in ALL three directions
+        fully_percolated = percolates_x and percolates_y and percolates_z
+        
+        return {
+            'percolates_x': percolates_x,
+            'percolates_y': percolates_y,
+            'percolates_z': percolates_z,
+            'fully_percolated': fully_percolated,
+            'percolating_components': percolating_components
+        }
+    
+    def _check_x_percolation(self, component_mask, nx):
+        """Check if component percolates in X direction (left to right boundary)."""
+        # Check if component has voxels on both X boundaries (x=0 and x=nx-1)
+        left_boundary = component_mask[:, :, 0]
+        right_boundary = component_mask[:, :, nx-1]
+        return np.any(left_boundary) and np.any(right_boundary)
+    
+    def _check_y_percolation(self, component_mask, ny):
+        """Check if component percolates in Y direction (front to back boundary)."""
+        # Check if component has voxels on both Y boundaries (y=0 and y=ny-1)
+        front_boundary = component_mask[:, 0, :]
+        back_boundary = component_mask[:, ny-1, :]
+        return np.any(front_boundary) and np.any(back_boundary)
+    
+    def _check_z_percolation(self, component_mask, nz):
+        """Check if component percolates in Z direction (bottom to top boundary)."""
+        # Check if component has voxels on both Z boundaries (z=0 and z=nz-1)
+        bottom_boundary = component_mask[0, :, :]
+        top_boundary = component_mask[nz-1, :, :]
+        return np.any(bottom_boundary) and np.any(top_boundary)
+    
+    def _calculate_phase_statistics(self):
+        """Calculate comprehensive statistics for all phases including volume and surface area."""
+        if self.voxel_data is None:
+            return {}
+        
+        stats = {}
+        unique_phases = np.unique(self.voxel_data)
+        total_voxels = self.voxel_data.size
+        voxel_volume = np.prod(self.voxel_size)  # μm³ per voxel
+        voxel_face_area = min(self.voxel_size[0] * self.voxel_size[1],
+                             self.voxel_size[0] * self.voxel_size[2],
+                             self.voxel_size[1] * self.voxel_size[2])  # μm² per face (smallest face)
+        
+        self.logger.info("Calculating phase statistics including surface areas...")
+        
+        for phase_id in unique_phases:
+            phase_mask = (self.voxel_data == phase_id)
+            voxel_count = np.sum(phase_mask)
+            
+            # Calculate surface area using interface detection
+            surface_area = self._calculate_phase_surface_area(phase_mask, phase_id)
+            
+            stats[phase_id] = {
+                'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                'voxel_count': int(voxel_count),
+                'volume_um3': float(voxel_count * voxel_volume),
+                'volume_fraction': float(voxel_count / total_voxels),
+                'volume_percentage': float(voxel_count / total_voxels * 100),
+                'surface_area_um2': surface_area,
+                'specific_surface_area': surface_area / max(voxel_count * voxel_volume, 1e-10),  # μm²/μm³ = μm⁻¹
+                'color': self.phase_colors.get(phase_id, '#808080')
+            }
+            
+            self.logger.info(f"Phase {phase_id}: Volume={stats[phase_id]['volume_um3']:.2f} μm³, "
+                           f"Surface Area={surface_area:.2f} μm²")
+        
+        return stats
+    
+    def _calculate_phase_surface_area(self, phase_mask, phase_id):
+        """Calculate surface area of a phase by counting interface voxel faces."""
+        try:
+            # Calculate voxel face areas
+            face_area_xy = self.voxel_size[0] * self.voxel_size[1]  # μm²
+            face_area_xz = self.voxel_size[0] * self.voxel_size[2]  # μm²
+            face_area_yz = self.voxel_size[1] * self.voxel_size[2]  # μm²
+            
+            total_surface_area = 0.0
+            
+            # Get 3D shape
+            nz, ny, nx = self.voxel_data.shape
+            
+            # For each voxel that belongs to this phase, check its 6 neighbors
+            # and count exposed faces (interfaces with other phases or boundaries)
+            for z in range(nz):
+                for y in range(ny):
+                    for x in range(nx):
+                        if not phase_mask[z, y, x]:
+                            continue  # Skip voxels not in this phase
+                        
+                        # Check 6 neighboring directions and count exposed faces
+                        neighbors = [
+                            # (dz, dy, dx, face_area)
+                            (-1, 0, 0, face_area_xy),  # Top face
+                            (1, 0, 0, face_area_xy),   # Bottom face
+                            (0, -1, 0, face_area_xz),  # Front face
+                            (0, 1, 0, face_area_xz),   # Back face
+                            (0, 0, -1, face_area_yz),  # Left face
+                            (0, 0, 1, face_area_yz)    # Right face
+                        ]
+                        
+                        for dz, dy, dx, face_area in neighbors:
+                            nz_pos, ny_pos, nx_pos = z + dz, y + dy, x + dx
+                            
+                            # Check if neighbor is outside bounds (boundary) or different phase
+                            is_boundary = (nz_pos < 0 or nz_pos >= nz or 
+                                         ny_pos < 0 or ny_pos >= ny or 
+                                         nx_pos < 0 or nx_pos >= nx)
+                            
+                            is_different_phase = (not is_boundary and 
+                                                self.voxel_data[nz_pos, ny_pos, nx_pos] != phase_id)
+                            
+                            if is_boundary or is_different_phase:
+                                total_surface_area += face_area
+            
+            self.logger.info(f"Phase {phase_id} surface area calculation: {total_surface_area:.2f} μm²")
+            return total_surface_area
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating surface area for phase {phase_id}: {e}")
+            return 0.0
+    
+    def _clear_measurement_widgets(self):
+        """Clear all active measurement widgets and prevent memory leaks."""
+        try:
+            # Clear measurement widgets from plotter
+            for widget in self.measurement_widgets:
+                try:
+                    if hasattr(widget, 'clear'):
+                        widget.clear()
+                    if hasattr(widget, 'delete'):
+                        widget.delete()
+                except:
+                    pass
+            
+            self.measurement_widgets.clear()
+            self.measurement_mode = None
+            
+            # Clear distance measurement actors (spheres, lines)
+            if hasattr(self, 'distance_actors'):
+                for actor in self.distance_actors:
+                    try:
+                        if hasattr(self, 'plotter') and self.plotter is not None:
+                            self.plotter.remove_actor(actor, render=False)
+                    except:
+                        pass
+                self.distance_actors.clear()
+            
+            # Clear distance measurement state
+            if hasattr(self, 'distance_points'):
+                self.distance_points.clear()
+            
+            # Remove measurement text and other actors from plotter
+            if hasattr(self, 'plotter') and self.plotter is not None:
+                try:
+                    # Try to remove measurement text
+                    self.plotter.remove_actor('distance_measurement', render=False)
+                    # Remove any measurement-related actors
+                    self.plotter.remove_actor('measurement_sphere_1', render=False)
+                    self.plotter.remove_actor('measurement_sphere_2', render=False)
+                    self.plotter.remove_actor('measurement_line', render=False)
+                except:
+                    pass
+            
+            # Disable any active picking
+            try:
+                if hasattr(self, 'plotter') and self.plotter is not None:
+                    self.plotter.disable_picking()
+            except:
+                pass
+            
+        except Exception as e:
+            self.logger.debug(f"Error clearing measurement widgets: {e}")
+    
+    def cleanup(self):
+        """Aggressively clean up PyVista/VTK resources to prevent memory leaks."""
+        try:
+            self.logger.info("Performing aggressive PyVista cleanup...")
+            
+            # Clear measurement widgets and actors first
+            self._clear_measurement_widgets()
+            
+            # Clear all plotter content aggressively
+            if hasattr(self, 'plotter') and self.plotter is not None:
+                try:
+                    # Clear all types of widgets that can hold references
+                    self.plotter.clear_actors()
+                    self.plotter.clear_box_widgets()
+                    self.plotter.clear_button_widgets()
+                    self.plotter.clear_camera3d_widgets()
+                    self.plotter.clear_camera_widgets()
+                    self.plotter.clear_line_widgets()
+                    self.plotter.clear_logo_widgets()
+                    self.plotter.clear_measure_widgets()
+                    self.plotter.clear_plane_widgets()
+                    self.plotter.clear_radio_button_widgets()
+                    self.plotter.clear_slider_widgets()
+                    self.plotter.clear_sphere_widgets()
+                    self.plotter.clear_spline_widgets()
+                    
+                    # Clear the main plotter
+                    self.plotter.clear()
+                    
+                    # Close the plotter
+                    self.plotter.close()
+                    
+                    # Explicitly delete the plotter reference
+                    del self.plotter
+                    self.plotter = None
+                    
+                except Exception as e:
+                    self.logger.warning(f"Error during plotter cleanup: {e}")
+            
+            # Clear mesh objects with explicit VTK cleanup
+            if hasattr(self, 'mesh_objects'):
+                for mesh_id, mesh in self.mesh_objects.items():
+                    try:
+                        # Clear VTK data arrays
+                        if hasattr(mesh, 'point_data'):
+                            mesh.point_data.clear()
+                        if hasattr(mesh, 'cell_data'):
+                            mesh.cell_data.clear()
+                        if hasattr(mesh, 'field_data'):
+                            mesh.field_data.clear()
+                        
+                        # Delete the mesh
+                        del mesh
+                        
+                    except Exception as e:
+                        self.logger.debug(f"Error cleaning mesh {mesh_id}: {e}")
+                
+                self.mesh_objects.clear()
+            
+            # Clear voxel data to free numpy arrays
+            if hasattr(self, 'voxel_data'):
+                try:
+                    del self.voxel_data
+                    self.voxel_data = None
+                except:
+                    pass
+            
+            # Clear phase statistics cache
+            if hasattr(self, 'phase_statistics'):
+                self.phase_statistics.clear()
+            
+            # Multiple rounds of garbage collection for VTK objects
+            import gc
+            for _ in range(3):
+                gc.collect()
+            
+            # Try to trigger VTK garbage collection if available
+            try:
+                import vtk
+                vtk.vtkObject.GlobalWarningDisplayOff()  # Reduce VTK warnings
+            except:
+                pass
+            
+            self.logger.info("Aggressive PyVista cleanup completed")
+            
+        except Exception as e:
+            self.logger.error(f"Error during aggressive PyVista cleanup: {e}")
+    
+    def _destroy_current_plotter(self):
+        """Completely destroy current plotter to prevent memory leaks."""
+        try:
+            if hasattr(self, 'plotter') and self.plotter is not None:
+                self.logger.debug("Destroying current plotter...")
+                
+                # Clear all widgets and actors
+                try:
+                    self.plotter.clear_actors()
+                    self.plotter.clear_box_widgets()
+                    self.plotter.clear_button_widgets()
+                    self.plotter.clear_camera3d_widgets()
+                    self.plotter.clear_camera_widgets()
+                    self.plotter.clear_line_widgets()
+                    self.plotter.clear_logo_widgets()
+                    self.plotter.clear_measure_widgets()
+                    self.plotter.clear_plane_widgets()
+                    self.plotter.clear_radio_button_widgets()
+                    self.plotter.clear_slider_widgets()
+                    self.plotter.clear_sphere_widgets()
+                    self.plotter.clear_spline_widgets()
+                    self.plotter.clear()
+                except:
+                    pass
+                
+                # Close and delete plotter
+                try:
+                    self.plotter.close()
+                    del self.plotter
+                    self.plotter = None
+                except:
+                    pass
+                
+        except Exception as e:
+            self.logger.debug(f"Error destroying plotter: {e}")
+
+    def _create_fresh_plotter(self):
+        """Create a completely fresh plotter with proper configuration."""
+        try:
+            self.logger.debug("Creating fresh plotter...")
+            
+            # Create new headless PyVista plotter
+            self.plotter = pv.Plotter(
+                off_screen=True,
+                window_size=(800, 600),
+                notebook=False
+            )
+            
+            # Configure plotter
+            self.plotter.background_color = 'white'
+            self.plotter.enable_depth_peeling(number_of_peels=10)  # Better transparency
+            self.plotter.enable_anti_aliasing('ssaa')  # Smooth edges
+            
+            # Set up professional lighting
+            self.plotter.remove_all_lights()  # Clear any default lights
+            self.plotter.add_light(pv.Light(position=(1, 1, 1), focal_point=(0, 0, 0), color='white', intensity=0.8))
+            self.plotter.add_light(pv.Light(position=(-1, -1, 1), focal_point=(0, 0, 0), color='white', intensity=0.4))
+            self.plotter.add_light(pv.Light(position=(0, 0, -1), focal_point=(0, 0, 0), color='white', intensity=0.2))
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create fresh plotter: {e}")
+            raise
+    
+    def _render_current_data(self):
+        """Render current data without recreating plotter."""
+        if not hasattr(self, 'plotter') or self.plotter is None or self.voxel_data is None:
+            return
+        
+        try:
+            # Add coordinate axes for spatial reference
+            self._add_coordinate_axes()
+            
+            # Add each phase based on rendering mode
+            for phase_id, mesh in self.mesh_objects.items():
+                if not self.show_phase.get(phase_id, True):
+                    continue  # Skip hidden phases
+                
+                opacity = self.phase_opacity.get(phase_id, 1.0)
+                color = self.phase_colors.get(phase_id, '#808080')
+                
+                if self.rendering_mode == 'volume':
+                    self._render_volume_phase(mesh, phase_id, color, opacity)
+                elif self.rendering_mode == 'isosurface':
+                    self._render_isosurface_phase(mesh, phase_id, color, opacity)
+                elif self.rendering_mode == 'points':
+                    self._render_points_phase(mesh, phase_id, color, opacity)
+                elif self.rendering_mode == 'wireframe':
+                    self._render_wireframe_phase(mesh, phase_id, color, opacity)
+            
+            # Update camera if needed
+            try:
+                self.plotter.reset_camera()
+            except:
+                pass
+            
+            # Update render status
+            self._update_render_status()
+            
+        except Exception as e:
+            self.logger.error(f"Error rendering current data: {e}")
+    
+    def _cleanup_previous_data(self):
+        """Clean up previous data to prevent memory accumulation."""
+        try:
+            # Clear measurement state
+            self._clear_measurement_widgets()
+            
+            # Clear mesh objects safely
+            if hasattr(self, 'mesh_objects'):
+                for mesh in self.mesh_objects.values():
+                    try:
+                        if hasattr(mesh, 'point_data'):
+                            mesh.point_data.clear()
+                        if hasattr(mesh, 'cell_data'):
+                            mesh.cell_data.clear()
+                        del mesh
+                    except:
+                        pass
+                self.mesh_objects.clear()
+            
+            # Clear plotter content safely (don't destroy plotter)
+            if hasattr(self, 'plotter') and self.plotter is not None:
+                try:
+                    self.plotter.clear()
+                except:
+                    pass
+            
+            # Clear cached statistics
+            if hasattr(self, 'phase_statistics'):
+                self.phase_statistics.clear()
+            
+            # Clear old voxel data
+            if hasattr(self, 'voxel_data'):
+                del self.voxel_data
+                self.voxel_data = None
+            
+            # Force garbage collection
+            import gc
+            gc.collect()
+            
+        except Exception as e:
+            self.logger.debug(f"Error during previous data cleanup: {e}")
+    
+    def __del__(self):
+        """Destructor to ensure cleanup."""
+        try:
+            self.cleanup()
+        except:
+            pass
+    
+    def _show_volume_analysis_results(self, phase_stats):
+        """Show volume and surface area analysis results in a dialog."""
+        dialog = Gtk.Dialog(
+            title="Volume & Surface Area Analysis Results",
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL
+        )
+        dialog.add_button("Close", Gtk.ResponseType.OK)
+        dialog.set_default_size(600, 500)
+        
+        # Create scrolled window
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create text view for results
+        text_view = Gtk.TextView()
+        text_view.set_editable(False)
+        text_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        
+        # Format results text
+        results_text = "MICROSTRUCTURE VOLUME & SURFACE AREA ANALYSIS\n"
+        results_text += "=" * 60 + "\n\n"
+        
+        total_volume = sum(stats['volume_um3'] for stats in phase_stats.values())
+        total_surface_area = sum(stats.get('surface_area_um2', 0) for stats in phase_stats.values())
+        
+        results_text += f"Total Volume: {total_volume:.2f} μm³\n"
+        results_text += f"Total Surface Area: {total_surface_area:.2f} μm²\n"
+        results_text += f"Total Voxels: {sum(stats['voxel_count'] for stats in phase_stats.values())}\n"
+        results_text += f"Voxel Size: {self.voxel_size[0]:.3f} × {self.voxel_size[1]:.3f} × {self.voxel_size[2]:.3f} μm³\n\n"
+        
+        results_text += "PHASE BREAKDOWN:\n"
+        results_text += "-" * 40 + "\n"
+        
+        for phase_id, stats in sorted(phase_stats.items()):
+            results_text += f"\n{stats['phase_name']} (Phase {phase_id}):\n"
+            results_text += f"  Volume: {stats['volume_um3']:.2f} μm³\n"
+            results_text += f"  Surface Area: {stats.get('surface_area_um2', 0):.2f} μm²\n"
+            results_text += f"  Specific Surface Area: {stats.get('specific_surface_area', 0):.3f} μm⁻¹\n"
+            results_text += f"  Voxel Count: {stats['voxel_count']:,}\n"
+            results_text += f"  Volume Fraction: {stats['volume_fraction']:.4f}\n"
+            results_text += f"  Volume Percentage: {stats['volume_percentage']:.2f}%\n"
+        
+        # Set text content
+        text_buffer = text_view.get_buffer()
+        text_buffer.set_text(results_text)
+        
+        scrolled.add(text_view)
+        dialog.get_content_area().pack_start(scrolled, True, True, 0)
+        
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def _show_connectivity_analysis_results(self, connectivity_results):
+        """Show connectivity analysis results in a dialog."""
+        dialog = Gtk.Dialog(
+            title="Connectivity Analysis Results", 
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL
+        )
+        dialog.add_button("Close", Gtk.ResponseType.OK)
+        dialog.set_default_size(500, 400)
+        
+        # Create scrolled window
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create text view for results
+        text_view = Gtk.TextView()
+        text_view.set_editable(False)
+        text_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        
+        # Format results text
+        results_text = "MICROSTRUCTURE CONNECTIVITY ANALYSIS\n"
+        results_text += "=" * 70 + "\n\n"
+        results_text += "PERIODIC BOUNDARY CONDITIONS: Enabled\n"
+        results_text += "DIRECTIONAL PERCOLATION: Phase must connect all three pairs of opposite boundaries\n"
+        results_text += "PERCOLATION CRITERIA: X-direction AND Y-direction AND Z-direction\n\n"
+        results_text += "Percolation Ratio: Fraction of phase volume in largest connected component\n"
+        results_text += "(Higher values indicate better connectivity within components)\n\n"
+        
+        for phase_id, results in sorted(connectivity_results.items()):
+            if 'error' in results:
+                results_text += f"{results['phase_name']} (Phase {phase_id}):\n"
+                results_text += f"  Error: {results['error']}\n\n"
+                continue
+            
+            results_text += f"{results['phase_name']} (Phase {phase_id}):\n"
+            results_text += f"  Connected Components: {results['total_components']}\n"
+            results_text += f"  Total Phase Volume: {results.get('total_phase_volume', 0):.2f} μm³\n"
+            results_text += f"  Largest Component Volume: {results['largest_component_volume']:.2f} μm³\n"
+            results_text += f"  Percolation Ratio: {results['percolation_ratio']:.3f}\n"
+            
+            # Add directional percolation information
+            if 'fully_percolated' in results:
+                results_text += f"\n  DIRECTIONAL PERCOLATION ANALYSIS:\n"
+                x_status = "✓" if results.get('percolates_x', False) else "✗"
+                y_status = "✓" if results.get('percolates_y', False) else "✗"
+                z_status = "✓" if results.get('percolates_z', False) else "✗"
+                
+                results_text += f"    X-direction (left ↔ right): {x_status}\n"
+                results_text += f"    Y-direction (front ↔ back): {y_status}\n"
+                results_text += f"    Z-direction (bottom ↔ top): {z_status}\n"
+                
+                if results.get('fully_percolated', False):
+                    results_text += f"    OVERALL STATUS: ✓ PERCOLATED (connects all boundaries)\n"
+                else:
+                    results_text += f"    OVERALL STATUS: ✗ NOT PERCOLATED (missing connections)\n"
+            
+            # Interpret percolation ratio
+            perc_ratio = results['percolation_ratio']
+            if perc_ratio > 0.8:
+                interp = "(Excellent component connectivity)"
+            elif perc_ratio > 0.5:
+                interp = "(Good component connectivity)"
+            elif perc_ratio > 0.2:
+                interp = "(Moderate component connectivity)"
+            else:
+                interp = "(Poor component connectivity/fragmented)"
+            results_text += f"\n  Component Analysis: {interp}\n"
+            
+            if results['total_components'] <= 10:
+                results_text += "  Component Volumes (largest first):\n"
+                for i, (vol, voxels) in enumerate(zip(results['component_volumes'], results.get('component_voxel_counts', []))):
+                    results_text += f"    Component {i+1}: {vol:.2f} μm³ ({voxels} voxels)\n"
+            else:
+                results_text += f"  Top 5 Components (of {results['total_components']} total):\n"
+                for i in range(min(5, len(results['component_volumes']))):
+                    vol = results['component_volumes'][i]
+                    voxels = results.get('component_voxel_counts', [0])[i] if i < len(results.get('component_voxel_counts', [])) else 0
+                    results_text += f"    Component {i+1}: {vol:.2f} μm³ ({voxels} voxels)\n"
+            
+            results_text += "\n"
+        
+        # Set text content
+        text_buffer = text_view.get_buffer()
+        text_buffer.set_text(results_text)
+        
+        scrolled.add(text_view)
+        dialog.get_content_area().pack_start(scrolled, True, True, 0)
+        
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()

@@ -36,18 +36,18 @@ int main(void) {
 
   red = ivector(NPHASES);
   if (!red) {
-    bailout("image100", "Could not allocate memory for red vector");
+    bailout("oneimage", "Could not allocate memory for red vector");
     exit(1);
   }
   green = ivector(NPHASES);
   if (!green) {
-    bailout("image100", "Could not allocate memory for red vector");
+    bailout("oneimage", "Could not allocate memory for red vector");
     free_ivector(red);
     exit(1);
   }
   blue = ivector(NPHASES);
   if (!blue) {
-    bailout("image100", "Could not allocate memory for red vector");
+    bailout("oneimage", "Could not allocate memory for red vector");
     free_ivector(green);
     free_ivector(red);
     exit(1);
@@ -214,9 +214,16 @@ int main(void) {
 
   printf("\nPreparing to scan image file... ");
   fflush(stdout);
-  for (k = 0; k < zsyssize; k++) {
+
+  /**
+   * 2025 August 5
+   * New convention for reading and writing image data is C-order (z varies
+   * fastest, then y, then x)
+   **/
+
+  for (i = 0; i < xsyssize; i++) {
     for (j = 0; j < ysyssize; j++) {
-      for (i = 0; i < xsyssize; i++) {
+      for (k = 0; k < zsyssize; k++) {
         fscanf(infile, "%s", instring);
         ovalin = atoi(instring);
         valout = convert_id(ovalin, Version);
