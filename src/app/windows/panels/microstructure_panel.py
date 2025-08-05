@@ -623,10 +623,14 @@ class MicrostructurePanel(Gtk.Box):
                 action=Gtk.FileChooserAction.OPEN
             )
             
-            # Disable recent files to force folder browsing
+            # Try to disable recent files view completely
             try:
-                dialog.set_create_folders(False)
+                # Some GTK versions support these methods to control recent files
+                dialog.set_show_hidden(False)
                 dialog.set_do_overwrite_confirmation(False)
+                
+                # Try to set select-multiple to False to simplify dialog behavior
+                dialog.set_select_multiple(False)
             except AttributeError:
                 pass  # Some methods may not exist in all GTK versions
             dialog.add_buttons(
@@ -651,32 +655,35 @@ class MicrostructurePanel(Gtk.Box):
             
             operations_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "Operations")
             if os.path.exists(operations_path):
-                # Set current folder and ensure we're not in recent files mode
+                # Add Operations folder as a shortcut in the sidebar for easy access
+                try:
+                    dialog.add_shortcut_folder(operations_path)
+                except:
+                    pass
+                
+                # Try multiple methods to force navigation to Operations folder
+                # Method 1: Standard set_current_folder
                 dialog.set_current_folder(operations_path)
                 
-                # Multiple approaches to force folder browsing instead of recent files
+                # Method 2: Use URI-based setting (more explicit for some GTK versions)
                 try:
-                    # Method 1: Use set_current_folder_uri to be more explicit
                     folder_uri = GLib.filename_to_uri(operations_path)
                     dialog.set_current_folder_uri(folder_uri)
                 except:
                     pass
                 
+                # Method 3: If all else fails, manually show the dialog then set folder
+                # This will be done after dialog.show_all() if we add that call
+                
+            # Show dialog first, then ensure proper folder navigation
+            dialog.show_all()
+            
+            # Final attempt to force correct folder after dialog is shown
+            if os.path.exists(operations_path):
                 try:
-                    # Method 2: Set a specific filename in the folder to force navigation
-                    # Look for any .img file in Operations subdirectories
-                    for item in os.listdir(operations_path):
-                        item_path = os.path.join(operations_path, item)
-                        if os.path.isdir(item_path):
-                            for subitem in os.listdir(item_path):
-                                if subitem.endswith('.img'):
-                                    example_img = os.path.join(item_path, subitem) 
-                                    dialog.set_filename(example_img)
-                                    dialog.unselect_all()  # Unselect the example file
-                                    break
-                            break
-                except:
-                    pass
+                    dialog.set_current_folder(operations_path)
+                except Exception as e:
+                    self.logger.debug(f"Final folder setting attempt failed: {e}")
             
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
