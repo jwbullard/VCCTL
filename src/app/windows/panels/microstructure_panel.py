@@ -657,17 +657,30 @@ class MicrostructurePanel(Gtk.Box):
             # Set initial directory to Operations folder where generated .img files are located  
             import os
             
-            operations_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "Operations")
+            # Get the absolute path to the Operations folder
+            # Current file is: vcctl-gtk/src/app/windows/panels/microstructure_panel.py
+            # Need to go up to vcctl-gtk root, then into Operations
+            current_file = os.path.abspath(__file__)
+            vcctl_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file)))))
+            operations_path = os.path.join(vcctl_root, "Operations")
+            
+            self.logger.debug(f"Attempting to set file dialog to Operations folder: {operations_path}")
+            self.logger.debug(f"Operations folder exists: {os.path.exists(operations_path)}")
+            
             if os.path.exists(operations_path):
-                # Set current folder - this should work better with native chooser
+                # Set current folder - native chooser should respect this
                 dialog.set_current_folder(operations_path)
+                self.logger.debug(f"Set current folder to: {operations_path}")
                 
                 # Add as shortcut only for non-native dialogs (native doesn't support this)
                 if not using_native:
                     try:
                         dialog.add_shortcut_folder(operations_path)
-                    except:
-                        pass
+                        self.logger.debug("Added Operations as shortcut folder")
+                    except Exception as e:
+                        self.logger.debug(f"Failed to add shortcut folder: {e}")
+            else:
+                self.logger.warning(f"Operations folder not found at: {operations_path}")
             
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
