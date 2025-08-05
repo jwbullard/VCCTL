@@ -683,9 +683,17 @@ class MicrostructurePanel(Gtk.Box):
                 self.logger.warning(f"Operations folder not found at: {operations_path}")
             
             response = dialog.run()
-            if response == Gtk.ResponseType.OK:
+            self.logger.debug(f"File dialog response: {response}")
+            
+            # Check for both OK response and native dialog accept response
+            if response == Gtk.ResponseType.OK or response == Gtk.ResponseType.ACCEPT:
                 filename = dialog.get_filename()
-                self._load_img_file(filename)
+                self.logger.debug(f"Selected filename: {filename}")
+                if filename:
+                    self._load_img_file(filename)
+                else:
+                    self.logger.warning("No filename returned from dialog")
+                    self._update_status("No file selected")
             
             dialog.destroy()
             
@@ -699,7 +707,21 @@ class MicrostructurePanel(Gtk.Box):
             import numpy as np
             import os
             
+            self.logger.debug(f"_load_img_file called with filepath: {filepath}")
+            self.logger.debug(f"File exists: {os.path.exists(filepath) if filepath else 'No filepath provided'}")
+            
+            if not filepath:
+                self.logger.error("No filepath provided to _load_img_file")
+                self._update_status("Error: No file path provided")
+                return
+                
+            if not os.path.exists(filepath):
+                self.logger.error(f"File does not exist: {filepath}")
+                self._update_status(f"Error: File not found - {filepath}")
+                return
+                
             self._update_status(f"Loading {os.path.basename(filepath)}...")
+            self.logger.debug(f"Starting to load file: {filepath}")
             
             # Read the .img file (text format from genmic.c)
             with open(filepath, 'r') as f:
