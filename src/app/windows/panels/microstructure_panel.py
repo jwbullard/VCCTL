@@ -638,11 +638,11 @@ class MicrostructurePanel(Gtk.Box):
             filter_all.add_pattern("*")
             dialog.add_filter(filter_all)
             
-            # Set initial directory to VCCTLCompare if it exists
-            vcctl_compare_path = "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/VCCTLCompare"
+            # Set initial directory to Operations folder where generated .img files are located
             import os
-            if os.path.exists(vcctl_compare_path):
-                dialog.set_current_folder(vcctl_compare_path)
+            operations_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "Operations")
+            if os.path.exists(operations_path):
+                dialog.set_current_folder(operations_path)
             
             response = dialog.run()
             if response == Gtk.ResponseType.OK:
