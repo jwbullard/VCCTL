@@ -103,11 +103,14 @@ class DatabaseService:
             self.logger.error(f"Failed to create session maker: {e}")
             raise
     
-    def initialize_database(self, create_tables: bool = True) -> None:
-        """Initialize the database, optionally creating tables."""
+    def initialize_database(self, create_tables: bool = True, initialize_data: bool = True) -> None:
+        """Initialize the database, optionally creating tables and populating initial data."""
         try:
             if create_tables:
                 self.create_all_tables()
+            
+            if initialize_data:
+                self._initialize_default_data()
             
             self._is_initialized = True
             self.logger.info("Database initialized successfully")
@@ -134,6 +137,67 @@ class DatabaseService:
             
         except Exception as e:
             self.logger.error(f"Failed to drop tables: {e}")
+            raise
+    
+    def _initialize_default_data(self) -> None:
+        """Initialize database with default data."""
+        try:
+            self.logger.info("Initializing default database data...")
+            
+            # Initialize hydration parameters
+            self._initialize_hydration_parameters()
+            
+            self.logger.info("Default database data initialized successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize default data: {e}")
+            raise
+    
+    def _initialize_hydration_parameters(self) -> None:
+        """Initialize hydration parameters with portland_cement_standard."""
+        from app.models.hydration_parameters import HydrationParameters
+        from pathlib import Path
+        
+        try:
+            # Create session directly to avoid recursion
+            session = self.sessionmaker()
+            try:
+                # Check if portland_cement_standard already exists
+                existing_params = session.query(HydrationParameters).filter_by(
+                    name="portland_cement_standard"
+                ).first()
+                
+                if existing_params:
+                    self.logger.info("portland_cement_standard parameters already exist")
+                    return
+                
+                # Path to default.prm file
+                project_root = Path(__file__).parent.parent.parent.parent
+                default_prm_path = project_root / "backend" / "examples" / "default.prm"
+                
+                if not default_prm_path.exists():
+                    self.logger.warning(f"Default parameters file not found: {default_prm_path}")
+                    return
+                
+                self.logger.info(f"Loading hydration parameters from: {default_prm_path}")
+                
+                # Create new parameter set from .prm file
+                hydration_params = HydrationParameters.create_from_prm_file(
+                    name="portland_cement_standard",
+                    filepath=str(default_prm_path),
+                    description="Default Portland cement hydration parameters for VCCTL simulations"
+                )
+                
+                # Save to database
+                session.add(hydration_params)
+                session.commit()
+                self.logger.info(f"Saved hydration parameters: {hydration_params.parameter_count} parameters loaded")
+            
+            finally:
+                session.close()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize hydration parameters: {e}")
             raise
     
     @contextmanager
