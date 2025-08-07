@@ -571,15 +571,30 @@ class PyVistaViewer3D(Gtk.Box):
             visible_check.connect('toggled', self._on_phase_visibility_changed, phase_id)
             phase_box.pack_start(visible_check, False, False, 0)
             
-            # Opacity scale
+            # Opacity spin box
             opacity_label = Gtk.Label("Opacity:")
             phase_box.pack_start(opacity_label, False, False, 0)
             
-            opacity_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 0.1)
-            opacity_scale.set_value(self.phase_opacity.get(phase_id, 0.8))
-            opacity_scale.set_size_request(100, -1)
-            opacity_scale.connect('value-changed', self._on_phase_opacity_changed, phase_id)
-            phase_box.pack_start(opacity_scale, False, False, 0)
+            # Create adjustment for opacity (0-100% range)
+            opacity_adjustment = Gtk.Adjustment(
+                value=self.phase_opacity.get(phase_id, 0.8) * 100,  # Convert 0.0-1.0 to 0-100
+                lower=0.0,
+                upper=100.0,
+                step_increment=5.0,
+                page_increment=10.0,
+                page_size=0.0
+            )
+            
+            opacity_spin = Gtk.SpinButton()
+            opacity_spin.set_adjustment(opacity_adjustment)
+            opacity_spin.set_digits(0)  # No decimal places
+            opacity_spin.set_size_request(80, -1)
+            opacity_spin.connect('value-changed', self._on_phase_opacity_changed, phase_id)
+            phase_box.pack_start(opacity_spin, False, False, 0)
+            
+            # Add percentage label with extra spacing
+            percent_label = Gtk.Label("%")
+            phase_box.pack_start(percent_label, False, False, 10)  # Added 10px right margin
             
             self.phase_controls_box.pack_start(phase_box, False, False, 0)
             
@@ -587,7 +602,7 @@ class PyVistaViewer3D(Gtk.Box):
             self.phase_widgets[phase_id] = {
                 'color_button': color_button,
                 'visible_check': visible_check,
-                'opacity_scale': opacity_scale
+                'opacity_spin': opacity_spin
             }
         
         self.phase_controls_box.show_all()
@@ -605,14 +620,16 @@ class PyVistaViewer3D(Gtk.Box):
         self.set_phase_visibility(phase_id, visible)
         self.logger.info(f"Set phase {phase_id} visibility to {visible}")
     
-    def _on_phase_opacity_changed(self, scale, phase_id):
+    def _on_phase_opacity_changed(self, spin_button, phase_id):
         """Handle phase opacity change."""
-        opacity = scale.get_value()
+        opacity_percentage = spin_button.get_value()
+        opacity = opacity_percentage / 100.0  # Convert percentage to 0.0-1.0 range
         self.set_phase_opacity(phase_id, opacity)
-        self.logger.info(f"Set phase {phase_id} opacity to {opacity:.2f}")
+        self.logger.info(f"Set phase {phase_id} opacity to {opacity:.2f} ({opacity_percentage:.0f}%)")
     
     def load_voxel_data(self, voxel_data: np.ndarray, phase_mapping: Dict[int, str] = None, 
-                       voxel_size: Tuple[float, float, float] = (1.0, 1.0, 1.0)) -> bool:
+                       voxel_size: Tuple[float, float, float] = (1.0, 1.0, 1.0), 
+                       source_file_path: str = None) -> bool:
         """
         Load 3D voxel data for visualization.
         
@@ -633,6 +650,7 @@ class PyVistaViewer3D(Gtk.Box):
             self.voxel_data = voxel_data.copy()
             self.phase_mapping = phase_mapping or {}
             self.voxel_size = voxel_size
+            self.source_file_path = source_file_path  # Store source file path for saving results
             
             # Set volume bounds for cross-section calculations
             shape = voxel_data.shape
@@ -2203,8 +2221,11 @@ Distance: {distance_um:.2f} μm"""
             return
         
         try:
+            self.logger.info("=== ATTEMPTING C STAT3D INTEGRATION ===")
             # Use C stat3d program for accurate volume and surface area analysis
             raw_output = self._run_stat3d_analysis_raw()
+            self.logger.info(f"stat3d returned {len(raw_output)} characters of output")
+            self.logger.info(f"stat3d output preview: {raw_output[:200]}...")
             
             # Display raw output directly (preserves UTF-8 formatting)
             self._show_raw_analysis_results(raw_output, "Volume & Surface Area Analysis Results")
@@ -2212,7 +2233,10 @@ Distance: {distance_um:.2f} μm"""
             self.logger.info("Volume and surface area analysis completed using C stat3d program")
             
         except Exception as e:
+            self.logger.error(f"=== C STAT3D FAILED - FALLING BACK ===")
             self.logger.error(f"Volume and surface area analysis failed: {e}")
+            import traceback
+            self.logger.error(f"Full traceback: {traceback.format_exc()}")
             # Fallback to Python implementation if C program fails
             try:
                 self.logger.info("Falling back to Python implementation...")
@@ -3059,11 +3083,19 @@ Distance: {distance_um:.2f} μm"""
         import tempfile
         import os
         
-        # Create temporary input file
+        # Create temporary input file and permanent output file in source directory
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
-        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
         temp_input.close()
-        temp_output.close()
+        
+        # Create output file in same directory as source microstructure file
+        if self.source_file_path:
+            base_name = os.path.splitext(self.source_file_path)[0]
+            output_file = f"{base_name}_PhaseData.txt"
+        else:
+            # Fallback to temporary file if no source path
+            temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+            temp_output.close()
+            output_file = temp_output.name
         
         try:
             # Write voxel data in VCCTL format
@@ -3073,7 +3105,9 @@ Distance: {distance_um:.2f} μm"""
                 f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
                 f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
                 f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
-                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                # Use first element of voxel_size tuple for VCCTL resolution
+                resolution = self.voxel_size[0] if isinstance(self.voxel_size, (tuple, list)) else self.voxel_size
+                f.write(f"Image_Resolution: {resolution:.2f}\n")
                 
                 # Write voxel data
                 for z in range(self.voxel_data.shape[2]):
@@ -3081,35 +3115,42 @@ Distance: {distance_um:.2f} μm"""
                         for x in range(self.voxel_data.shape[0]):
                             f.write(f"{int(self.voxel_data[x, y, z])}\n")
             
-            # Get path to stat3d executable
-            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
-            stat3d_path = os.path.join(backend_dir, 'stat3d')
+            # Get path to stat3d executable - use absolute path from project root
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+            stat3d_path = os.path.join(project_root, 'backend', 'bin', 'stat3d')
             
-            # Run stat3d program with command line arguments
-            cmd = [stat3d_path, temp_input.name, temp_output.name]
+            # Run stat3d program with input and output files
+            cmd = [stat3d_path, temp_input.name, output_file]
+            self.logger.info(f"Executing: {' '.join(cmd)}")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             
             if result.returncode != 0:
                 self.logger.error(f"stat3d execution details:")
                 self.logger.error(f"  Command: {' '.join(cmd)}")
                 self.logger.error(f"  Input file: {temp_input.name} (exists: {os.path.exists(temp_input.name)})")
-                self.logger.error(f"  Output file: {temp_output.name} (exists: {os.path.exists(temp_output.name)})")
+                self.logger.error(f"  Output file: {output_file} (exists: {os.path.exists(output_file)})")
                 self.logger.error(f"  Return code: {result.returncode}")
                 self.logger.error(f"  stdout: {result.stdout}")
                 self.logger.error(f"  stderr: {result.stderr}")
                 raise RuntimeError(f"stat3d failed with return code {result.returncode}: {result.stderr}")
             
-            # Read raw output file with UTF-8 encoding
-            with open(temp_output.name, 'r', encoding='utf-8', errors='replace') as f:
+            # Read the output file with UTF-8 encoding
+            if not os.path.exists(output_file):
+                raise RuntimeError(f"stat3d completed but output file not found: {output_file}")
+                
+            with open(output_file, 'r', encoding='utf-8', errors='replace') as f:
                 raw_output = f.read()
             
+            self.logger.info(f"Read {len(raw_output)} characters from output file")
             return raw_output
             
         finally:
-            # Clean up temporary files
+            # Clean up temporary input file only (keep permanent output file)
             try:
                 os.unlink(temp_input.name)
-                os.unlink(temp_output.name)
+                # Only delete output file if it's a temporary file
+                if not self.source_file_path and 'temp_output' in locals():
+                    os.unlink(output_file)
             except:
                 pass
 
@@ -3119,11 +3160,19 @@ Distance: {distance_um:.2f} μm"""
         import tempfile
         import os
         
-        # Create temporary input file
+        # Create temporary input file and permanent output file in source directory
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
-        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
         temp_input.close()
-        temp_output.close()
+        
+        # Create output file in same directory as source microstructure file
+        if self.source_file_path:
+            base_name = os.path.splitext(self.source_file_path)[0]
+            output_file = f"{base_name}_Connectivity.txt"
+        else:
+            # Fallback to temporary file if no source path
+            temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+            temp_output.close()
+            output_file = temp_output.name
         
         try:
             # Write voxel data in VCCTL format
@@ -3133,7 +3182,9 @@ Distance: {distance_um:.2f} μm"""
                 f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
                 f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
                 f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
-                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                # Use first element of voxel_size tuple for VCCTL resolution
+                resolution = self.voxel_size[0] if isinstance(self.voxel_size, (tuple, list)) else self.voxel_size
+                f.write(f"Image_Resolution: {resolution:.2f}\n")
                 
                 # Write voxel data
                 for z in range(self.voxel_data.shape[2]):
@@ -3142,27 +3193,41 @@ Distance: {distance_um:.2f} μm"""
                             f.write(f"{int(self.voxel_data[x, y, z])}\n")
             
             # Get path to perc3d executable
-            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
-            perc3d_path = os.path.join(backend_dir, 'perc3d')
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+            perc3d_path = os.path.join(project_root, 'backend', 'bin', 'perc3d')
             
             # Run perc3d program with command line arguments
-            cmd = [perc3d_path, temp_input.name, temp_output.name]
+            cmd = [perc3d_path, temp_input.name, output_file]
+            self.logger.info(f"Executing: {' '.join(cmd)}")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             
             if result.returncode != 0:
+                self.logger.error(f"perc3d execution details:")
+                self.logger.error(f"  Command: {' '.join(cmd)}")
+                self.logger.error(f"  Input file: {temp_input.name} (exists: {os.path.exists(temp_input.name)})")
+                self.logger.error(f"  Output file: {output_file} (exists: {os.path.exists(output_file)})")
+                self.logger.error(f"  Return code: {result.returncode}")
+                self.logger.error(f"  stdout: {result.stdout}")
+                self.logger.error(f"  stderr: {result.stderr}")
                 raise RuntimeError(f"perc3d failed with return code {result.returncode}: {result.stderr}")
             
-            # Read raw output file with UTF-8 encoding
-            with open(temp_output.name, 'r', encoding='utf-8', errors='replace') as f:
+            # Read the output file with UTF-8 encoding
+            if not os.path.exists(output_file):
+                raise RuntimeError(f"perc3d completed but output file not found: {output_file}")
+                
+            with open(output_file, 'r', encoding='utf-8', errors='replace') as f:
                 raw_output = f.read()
             
+            self.logger.info(f"Read {len(raw_output)} characters from perc3d output file")
             return raw_output
             
         finally:
-            # Clean up temporary files
+            # Clean up temporary input file only (keep permanent output file)
             try:
                 os.unlink(temp_input.name)
-                os.unlink(temp_output.name)
+                # Only delete output file if it's a temporary file
+                if not self.source_file_path and 'temp_output' in locals():
+                    os.unlink(output_file)
             except:
                 pass
 
@@ -3173,7 +3238,7 @@ Distance: {distance_um:.2f} μm"""
         import os
         import re
         
-        # Create temporary input file
+        # Create temporary input and output files
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
         temp_input.close()
@@ -3187,7 +3252,9 @@ Distance: {distance_um:.2f} μm"""
                 f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
                 f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
                 f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
-                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                # Use first element of voxel_size tuple for VCCTL resolution
+                resolution = self.voxel_size[0] if isinstance(self.voxel_size, (tuple, list)) else self.voxel_size
+                f.write(f"Image_Resolution: {resolution:.2f}\n")
                 
                 # Write voxel data
                 for z in range(self.voxel_data.shape[2]):
@@ -3195,19 +3262,19 @@ Distance: {distance_um:.2f} μm"""
                         for x in range(self.voxel_data.shape[0]):
                             f.write(f"{int(self.voxel_data[x, y, z])}\n")
             
-            # Get path to stat3d executable
-            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
-            stat3d_path = os.path.join(backend_dir, 'stat3d')
+            # Get path to stat3d executable - use absolute path from project root
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+            stat3d_path = os.path.join(project_root, 'backend', 'bin', 'stat3d')
             
             # Run stat3d program with command line arguments
-            cmd = [stat3d_path, temp_input.name, temp_output.name]
+            cmd = [stat3d_path, temp_input.name]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             
             if result.returncode != 0:
                 raise RuntimeError(f"stat3d failed with return code {result.returncode}: {result.stderr}")
             
-            # Parse output file
-            return self._parse_stat3d_output(temp_output.name)
+            # Return raw stdout output
+            return result.stdout
             
         finally:
             # Clean up temporary files
@@ -3256,7 +3323,7 @@ Distance: {distance_um:.2f} μm"""
         import tempfile
         import os
         
-        # Create temporary input file
+        # Create temporary input and output files
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
         temp_input.close()
@@ -3270,7 +3337,9 @@ Distance: {distance_um:.2f} μm"""
                 f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
                 f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
                 f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
-                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                # Use first element of voxel_size tuple for VCCTL resolution
+                resolution = self.voxel_size[0] if isinstance(self.voxel_size, (tuple, list)) else self.voxel_size
+                f.write(f"Image_Resolution: {resolution:.2f}\n")
                 
                 # Write voxel data
                 for z in range(self.voxel_data.shape[2]):
@@ -3279,18 +3348,18 @@ Distance: {distance_um:.2f} μm"""
                             f.write(f"{int(self.voxel_data[x, y, z])}\n")
             
             # Get path to perc3d executable
-            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
-            perc3d_path = os.path.join(backend_dir, 'perc3d')
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+            perc3d_path = os.path.join(project_root, 'backend', 'bin', 'perc3d')
             
             # Run perc3d program with command line arguments
-            cmd = [perc3d_path, temp_input.name, temp_output.name]
+            cmd = [perc3d_path, temp_input.name]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             
             if result.returncode != 0:
                 raise RuntimeError(f"perc3d failed with return code {result.returncode}: {result.stderr}")
             
-            # Parse output file
-            return self._parse_perc3d_output(temp_output.name)
+            # Return raw stdout output
+            return result.stdout
             
         finally:
             # Clean up temporary files

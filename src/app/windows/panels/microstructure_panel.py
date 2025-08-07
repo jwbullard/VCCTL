@@ -760,7 +760,8 @@ class MicrostructurePanel(Gtk.Box):
                     success = active_viewer.load_voxel_data(
                         voxel_data,
                         phase_names,
-                        (1.0, 1.0, 1.0)  # voxel size
+                        (1.0, 1.0, 1.0),  # voxel size
+                        filepath  # source file path
                     )
                 else:
                     success = False

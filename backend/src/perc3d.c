@@ -88,12 +88,6 @@ int main(int argc, char *argv[]) {
     printf("\nEnter name of input image file: ");
     read_string(filein, sizeof(filein));
     printf("\n%s", filein);
-    /*
-    printf("\nEnter phase id for checking percolation:  ");
-    read_string(instring, sizeof(instring));
-    phasein = atoi(instring);
-    printf("\n%d", phasein);
-    */
     printf("\nEnter name of output file: ");
     read_string(fileout, sizeof(fileout));
     printf("\n%s", fileout);
