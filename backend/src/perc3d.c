@@ -3,27 +3,20 @@
  * Program perc3d.c to test connectivity of various
  * phases in a 3D microstructure
  *
- * Programmer:	Dale P. Bentz
- * 				Building and Fire Research Laboratory
- *				NIST
- *				100 Bureau Drive Mail Stop 8621
- *				Gaithersburg, MD  20899-8621   USA
- *				(301) 975-5865      FAX: (301) 990-6891
- *				E-mail: dale.bentz@nist.gov
- *
- * Contact:		Jeffrey W. Bullard
- * 				Building and Fire Research Laboratory
- *				NIST
- *				100 Bureau Drive Mail Stop 8621
- *				Gaithersburg, MD  20899-8621   USA
- *				(301) 975-5725      FAX: (301) 990-6891
- *				E-mail: bullard@nist.gov
+ * Programmer:	Jeffrey W. Bullard
+ *              Zachry Department of Civil and Environmental Engineering
+ *              Department of Materials Science and Engineering
+ *              Texas A&M University
+ *              College Station, Texas 77843
+ *              jwbullard@tamu.edu
  *
  *******************************************************/
 #include "include/vcctl.h"
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #define TOTCSH OFFSET
 #define TOTGYP OFFSET + 1
@@ -34,7 +27,7 @@
 #define BURNT 70
 
 /* default size of matrices for holding burning locations */
-#define SIZE2D 49000
+#define SIZE2D 200000
 
 /* functions defining coordinates for burning in any of three directions */
 #define cx(x, y, z, a, b, c) (1 - b - c) * x + (1 - a - c) * y + (1 - a - b) * z
@@ -56,24 +49,62 @@ float Version;
 int Ntot = 0, Nperc = 0, Nburnt = 0;
 FILE *Resfile;
 
-int burn3d(int npix, int d1, int d2, int d3);
-int main(void) {
-  register int ix, iy, iz;
+struct BurnProps {
+  int totvox;
+  int x_vox_connected;
+  int y_vox_connected;
+  int z_vox_connected;
+  int x_vox_percolated;
+  int y_vox_percolated;
+  int z_vox_percolated;
+  int isPercInX;
+  int isPercInY;
+  int isPercInZ;
+};
+
+int burn3d(int npix, struct BurnProps *burnprops);
+
+int main(int argc, char *argv[]) {
+  int ix, iy, iz, i;
   int valin, ovalin, phasein, garb;
+  float voxelVolume = 1.0;
   char filein[MAXSTRING], fileout[MAXSTRING], instring[MAXSTRING];
+  char phasename[MAXSTRING];
+  char *locale;
+  wchar_t mu = 0x03BC;
+  wchar_t sup1 = 0x00B9;
+  wchar_t sup2 = 0x00B2;
+  wchar_t sup3 = 0x00B3;
+  wchar_t supminus = 0x207B;
+  struct BurnProps burnData;
   FILE *infile;
 
-  printf("\nEnter name of input image file: ");
-  read_string(filein, sizeof(filein));
-  printf("\n%s", filein);
-  printf("\nEnter phase id for checking percolation:  ");
-  read_string(instring, sizeof(instring));
-  phasein = atoi(instring);
-  printf("\n%d", phasein);
-  printf("\nEnter name of output file: ");
-  read_string(fileout, sizeof(fileout));
-  printf("\n%s", filein);
-  fflush(stdout);
+  /* Set up locale for printing unicode when necessary */
+  locale = setlocale(LC_ALL, "");
+
+  /* Check for command line arguments */
+  if (argc != 3) {
+    printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+    printf("\nEnter name of input image file: ");
+    read_string(filein, sizeof(filein));
+    printf("\n%s", filein);
+    /*
+    printf("\nEnter phase id for checking percolation:  ");
+    read_string(instring, sizeof(instring));
+    phasein = atoi(instring);
+    printf("\n%d", phasein);
+    */
+    printf("\nEnter name of output file: ");
+    read_string(fileout, sizeof(fileout));
+    printf("\n%s", fileout);
+    fflush(stdout);
+  } else {
+    /* Use command line arguments */
+    strcpy(filein, argv[1]);
+    strcpy(fileout, argv[2]);
+    printf("Input file: %s \n", filein);
+    printf("Output file: %s \n", fileout);
+  }
 
   infile = filehandler("perc3d", filein, "READ");
   if (!infile) {
@@ -86,11 +117,7 @@ int main(void) {
     exit(1);
   }
 
-  printf("\nXsyssize is %d", Xsyssize);
-  printf("\nYsyssize is %d", Ysyssize);
-  printf("\nZsyssize is %d\n", Zsyssize);
-  printf("Res is %f\n", Res);
-  fflush(stdout);
+  voxelVolume = Res * Res * Res; /* in um3 */
 
   /***
    *	Allocate memory for Mic array
@@ -103,9 +130,14 @@ int main(void) {
     exit(1);
   }
 
-  for (iz = 0; iz < Zsyssize; iz++) {
+  /**
+   * 2025 August 05
+   * New convention is to use C-ordering for reading and writing
+   * microstructure image files (Z varies fastest, then Y, then X)
+   **/
+  for (ix = 0; ix < Xsyssize; ix++) {
     for (iy = 0; iy < Ysyssize; iy++) {
-      for (ix = 0; ix < Xsyssize; ix++) {
+      for (iz = 0; iz < Zsyssize; iz++) {
         fscanf(infile, "%d", &ovalin);
         valin = convert_id(ovalin, Version);
         Mic[ix][iy][iz] = valin;
@@ -122,20 +154,62 @@ int main(void) {
     exit(1);
   }
 
-  garb = burn3d(phasein, 1, 0, 0);
-  if (garb == MEMERR) {
-    bailout("perc3d", "Could not allocate memory in burn3d function");
-    exit(1);
-  }
-  garb = burn3d(phasein, 0, 1, 0);
-  if (garb == MEMERR) {
-    bailout("perc3d", "Could not allocate memory in burn3d function");
-    exit(1);
-  }
-  garb = burn3d(phasein, 0, 0, 1);
-  if (garb == MEMERR) {
-    bailout("perc3d", "Could not allocate memory in burn3d function");
-    exit(1);
+  /* Write header to the results file */
+  fprintf(Resfile, "MICROSTRUCTURE CONNECTIVITY ANALYSIS\n");
+  fprintf(Resfile, "==============================");
+  fprintf(Resfile, "==============================\n");
+  fprintf(Resfile, "\nPERIODIC BOUNDARY CONDITIONS: Enabled");
+  fprintf(
+      Resfile,
+      "\nDIRECTIONAL PERCOLATION: All three directions tested independently");
+  fprintf(Resfile,
+          "\n\nPercolation ratio: Fraction of phase in percolated structure");
+  fprintf(Resfile, "\nHigher values indicate better connectivity of a phase");
+
+  for (i = 0; i < NSPHASES; ++i) {
+    garb = burn3d(i, &burnData);
+    if (garb == MEMERR) {
+      bailout("perc3d", "Could not allocate memory in burn3d function");
+      exit(1);
+    }
+    if (burnData.totvox > 0) {
+      id2phasename(i, phasename);
+      fprintf(Resfile, "\n\n%s (Phase %d):", phasename, i);
+      fwprintf(Resfile, L"\n Total volume: %.2f %lcm%lc  (%d voxels)",
+               ((float)(burnData.totvox) * voxelVolume), mu, sup3,
+               burnData.totvox);
+      fwprintf(Resfile,
+               L"\n Volume connected in X direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.x_vox_connected) * voxelVolume), mu, sup3,
+               burnData.x_vox_connected);
+      fwprintf(Resfile,
+               L"\n Volume connected in Y direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.y_vox_connected) * voxelVolume), mu, sup3,
+               burnData.y_vox_connected);
+      fwprintf(Resfile,
+               L"\n Volume connected in Z direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.z_vox_connected) * voxelVolume), mu, sup3,
+               burnData.z_vox_connected);
+      fwprintf(Resfile,
+               L"\n Volume percolated in X direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.x_vox_percolated) * voxelVolume), mu, sup3,
+               burnData.x_vox_percolated);
+      fwprintf(Resfile,
+               L"\n Volume percolated in Y direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.y_vox_percolated) * voxelVolume), mu, sup3,
+               burnData.y_vox_percolated);
+      fwprintf(Resfile,
+               L"\n Volume percolated in Z direction: %.2f %lcm%lc (%d voxels)",
+               ((float)(burnData.z_vox_percolated) * voxelVolume), mu, sup3,
+               burnData.z_vox_percolated);
+      fprintf(Resfile, "\n Percolation ratio, X direction: %.2f",
+              ((float)(burnData.x_vox_percolated) / (float)(burnData.totvox)));
+      fprintf(Resfile, "\n Percolation ratio, Y direction: %.2f",
+              ((float)(burnData.y_vox_percolated) / (float)(burnData.totvox)));
+      fprintf(Resfile, "\n Percolation ratio, Z direction: %.2f",
+              ((float)(burnData.z_vox_percolated) / (float)(burnData.totvox)));
+      fflush(Resfile);
+    }
   }
 
   fclose(Resfile);
@@ -158,20 +232,30 @@ int main(void) {
  * 				int d2: y-direction flag
  * 				int d3: z-direction flag
  *
- * 	Returns:	1 if a connected path is found, 0 otherwise
+ * 	Returns:	0 if no errors
  * 				MEMERR if a memory error is encountered
  *
  *	Calls:		No other routines
- *	Called by:	disrealnew
+ *	Called by:	main function
  ***/
 
-int burn3d(int npix, int d1, int d2, int d3) {
-  register int i, j, k, j1, k1;
-  int inew, x1, y1, z1, igood, jnew, icur, bflag;
+int burn3d(int npix, struct BurnProps *burnprops) {
+  int i, j, k, j1, k1, dir;
+  int d1, d2, d3, xsize, ysize, zsize;
+  int inew, x1, y1, z1, igood, jnew, icur, status;
   int *nmatx, *nmaty, *nmatz, *nnewx, *nnewy, *nnewz;
   int mult1, mult2, npix1, npix2, npix3;
   int xl, xh, px, py, pz, qx, qy, qz, xcn, ycn, zcn;
   int ntop, nthrough, ncur, nnew, nphc;
+  int npix_tot_count = 0;
+
+  burnprops->totvox = 0;
+  burnprops->x_vox_connected = 0;
+  burnprops->y_vox_connected = 0;
+  burnprops->z_vox_connected = 0;
+  burnprops->isPercInX = 0;
+  burnprops->isPercInY = 0;
+  burnprops->isPercInZ = 0;
 
   npix1 = npix;
   npix2 = npix;
@@ -198,182 +282,127 @@ int burn3d(int npix, int d1, int d2, int d3) {
     npix = C3A;
   }
 
-  nmatx = nmaty = nmatz = NULL;
-  nnewx = nnewy = nnewz = NULL;
-  mult1 = mult2 = 1;
+  /**
+   * Before starting analysis, find out how many
+   * total voxels of this phase(s) are in the whole microstructure
+   **/
 
-  nmatx = (int *)calloc(SIZE2D, sizeof(int));
-  nmaty = (int *)calloc(SIZE2D, sizeof(int));
-  nmatz = (int *)calloc(SIZE2D, sizeof(int));
-  nnewx = (int *)calloc(SIZE2D, sizeof(int));
-  nnewy = (int *)calloc(SIZE2D, sizeof(int));
-  nnewz = (int *)calloc(SIZE2D, sizeof(int));
-
-  if (!nmatx) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmatx.");
-    printf("\n\tExiting now.");
-    return (MEMERR);
-  }
-  if (!nmaty) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmaty.");
-    printf("\n\tExiting now.");
-    free(nmatx);
-    return (MEMERR);
-  }
-  if (!nmatz) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmatz.");
-    printf("\n\tExiting now.");
-    free(nmatx);
-    free(nmaty);
-    return (MEMERR);
-  }
-  if (!nnewx) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nnewx.");
-    printf("\n\tExiting now.");
-    free(nmatx);
-    free(nmaty);
-    free(nmatz);
-    return (MEMERR);
-  }
-  if (!nnewy) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nnewy.");
-    printf("\n\tExiting now.");
-    free(nmatx);
-    free(nmaty);
-    free(nmatz);
-    free(nnewx);
-    return (MEMERR);
-  }
-  if (!nnewz) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for newz.");
-    printf("\n\tExiting now.");
-    free(nmatx);
-    free(nmaty);
-    free(nmatz);
-    free(nnewx);
-    free(nnewy);
-    return (MEMERR);
+  for (i = 0; i < Xsyssize; ++i) {
+    for (j = 0; j < Ysyssize; ++j) {
+      for (k = 0; k < Zsyssize; ++k) {
+        if (Mic[i][j][k] == npix || Mic[i][j][k] == npix1 ||
+            Mic[i][j][k] == npix2 || Mic[i][j][k] == npix3) {
+          npix_tot_count++;
+        }
+      }
+    }
   }
 
-  /***
-   *	Counters for number of pixels of phase accessible
-   *	from surface #1 and number which are part of a
-   *	percolated pathway to surface #2
-   ***/
+  burnprops->totvox = npix_tot_count;
 
-  ntop = bflag = nthrough = nphc = 0;
-  printf("\nIn burn3d. Beginning.");
-  fflush(stdout);
+  if (npix_tot_count == 0)
+    return (0);
 
-  /***
-   *	Percolation is assessed from top to bottom only
-   *	and burning algorithm is periodic in other two
-   *	directions.
-   *
-   *	Use of directional flags allow transformation of
-   *	coordinates to burn in direction of choosing
-   *	(x, y, or z)
-   ***/
+  /**
+   * dir = 0 <--> x direction
+   * dir = 1 <--> y direction
+   * dir = 2 <--> z direction
+   **/
 
-  i = 0; /* Starting from the bottom x face */
+  for (dir = 0; dir < 3; ++dir) {
+    d1 = d2 = d3 = 0;
+    if (dir == 0) {
+      d1 = 1;
+      xsize = Xsyssize;
+      ysize = Ysyssize;
+      zsize = Zsyssize;
+    } else if (dir == 1) {
+      d2 = 1;
+      xsize = Ysyssize;
+      ysize = Xsyssize;
+      zsize = Zsyssize;
+    } else {
+      d3 = 1;
+      xsize = Zsyssize;
+      ysize = Ysyssize;
+      zsize = Xsyssize;
+    }
+    /***
+     *	Counters for number of pixels of phase accessible
+     *	from surface #1 and number which are part of a
+     *	percolated pathway to surface #2
+     ***/
 
-  for (k = 0; k < Zsyssize; k++) {
-    for (j = 0; j < Ysyssize; j++) {
+    ntop = status = nthrough = nphc = 0;
 
-      igood = ncur = Ntot = 0;
+    /***
+     *	Percolation is assessed from top to bottom only
+     *	and burning algorithm is periodic in other two
+     *	directions.
+     *
+     *	Use of directional flags allow transformation of
+     *	coordinates to burn in direction of choosing
+     *	(x, y, or z)
+     ***/
 
-      /* Transform coordinates */
+    i = 0; /* Starting from the bottom x face */
 
-      px = cx(i, j, k, d1, d2, d3);
-      py = cy(i, j, k, d1, d2, d3);
-      pz = cz(i, j, k, d1, d2, d3);
+    for (k = 0; k < zsize; k++) {
+      for (j = 0; j < ysize; j++) {
 
-      if (Mic[px][py][pz] == npix || Mic[px][py][pz] == npix1 ||
-          Mic[px][py][pz] == npix2 || Mic[px][py][pz] == npix3) {
+        ncur = Ntot = 0;
 
-        /* Start a burn front */
+        /* Transform coordinates */
 
-        Mic[px][py][pz] = BURNT;
-        Ntot++;
-        ncur++;
+        px = cx(i, j, k, d1, d2, d3);
+        py = cy(i, j, k, d1, d2, d3);
+        pz = cz(i, j, k, d1, d2, d3);
 
-        /***
-         *	Burn front is stored in matrices nmat*
-         *	and nnew*
-         ***/
+        if (Mic[px][py][pz] == npix || Mic[px][py][pz] == npix1 ||
+            Mic[px][py][pz] == npix2 || Mic[px][py][pz] == npix3) {
 
-        if (ncur >= (mult1 * SIZE2D)) {
+          /* Start a burn front */
+
+          Mic[px][py][pz] = BURNT;
+          Ntot++;
+          ncur++;
 
           /***
-           *	Must allocate more memory
+           * DEPTH-FIRST SEARCH (DFS) CONNECTIVITY ALGORITHM
+           * Efficiently finds all connected voxels using minimal memory
            ***/
 
-          mult1++;
-          nmatx = (int *)realloc((int *)nmatx, (mult1 * SIZE2D));
-          nmaty = (int *)realloc((int *)nmaty, (mult1 * SIZE2D));
-          nmatz = (int *)realloc((int *)nmatz, (mult1 * SIZE2D));
+          typedef struct {
+            int x, y, z;
+          } StackPoint;
 
-          if (!nmatx) {
-            printf("\nERROR in burn3d:");
-            printf("\n\tCould not reallocate space for nmatx.");
-            printf("\n\tExiting now.");
-            free(nmaty);
-            free(nmatz);
-            free(nnewx);
-            free(nnewy);
-            free(nnewz);
+#define DFS_STACK_SIZE 500000
+          StackPoint *dfs_stack =
+              (StackPoint *)malloc(DFS_STACK_SIZE * sizeof(StackPoint));
+          if (!dfs_stack) {
             return (MEMERR);
           }
-          if (!nmaty) {
-            printf("\nERROR in burn3d:");
-            printf("\n\tCould not reallocate space for nmaty.");
-            printf("\n\tExiting now.");
-            free(nmatx);
-            free(nmatz);
-            free(nnewx);
-            free(nnewy);
-            free(nnewz);
-            return (MEMERR);
-          }
-          if (!nmatz) {
-            printf("\nERROR in burn3d:");
-            printf("\n\tCould not reallocate space for nmatz.");
-            printf("\n\tExiting now.");
-            free(nmatx);
-            free(nmaty);
-            free(nnewx);
-            free(nnewy);
-            free(nnewz);
-            return (MEMERR);
-          }
-        }
 
-        nmatx[ncur] = i;
-        nmaty[ncur] = j;
-        nmatz[ncur] = k;
+          // Initialize DFS stack
+          int stack_top = 0;
+          dfs_stack[stack_top].x = i;
+          dfs_stack[stack_top].y = j;
+          dfs_stack[stack_top].z = k;
+          stack_top++;
 
-        /* Burn as long as new (fuel) pixels are found */
+          // DFS main loop
+          while (stack_top > 0) {
+            stack_top--;
+            int curr_x = dfs_stack[stack_top].x;
+            int curr_y = dfs_stack[stack_top].y;
+            int curr_z = dfs_stack[stack_top].z;
 
-        do {
-
-          nnew = 0;
-          for (inew = 1; inew <= ncur; inew++) {
-            xcn = nmatx[inew];
-            ycn = nmaty[inew];
-            zcn = nmatz[inew];
-
-            /* Check all six neighbors */
-
+            // Check all 6 neighbors
             for (jnew = 1; jnew <= 6; jnew++) {
-              x1 = xcn;
-              y1 = ycn;
-              z1 = zcn;
+              x1 = curr_x;
+              y1 = curr_y;
+              z1 = curr_z;
+
               if (jnew == 1)
                 x1--;
               if (jnew == 2)
@@ -387,185 +416,147 @@ int burn3d(int npix, int d1, int d2, int d3) {
               if (jnew == 6)
                 z1++;
 
-              /* Periodic in y and z directions */
+              y1 += checkbc(y1, ysize);
+              z1 += checkbc(z1, zsize);
 
-              y1 += checkbc(y1, Ysyssize);
-              z1 += checkbc(z1, Zsyssize);
-
-              /***
-               *	Nonperiodic in x so be sure to remain
-               *	in the 3-D box
-               ***/
-
-              if ((x1 >= 0) && (x1 < Xsyssize)) {
-
-                /* Transform coordinates */
-
+              if ((x1 >= 0) && (x1 < xsize)) {
                 px = cx(x1, y1, z1, d1, d2, d3);
                 py = cy(x1, y1, z1, d1, d2, d3);
                 pz = cz(x1, y1, z1, d1, d2, d3);
 
-                if (Mic[px][py][pz] == npix || Mic[px][py][pz] == npix1 ||
-                    Mic[px][py][pz] == npix2) {
+                if (px < 0 || px >= Xsyssize || py < 0 || py >= Ysyssize ||
+                    pz < 0 || pz >= Zsyssize) {
+                  continue;
+                }
+
+                if ((Mic[px][py][pz] == npix || Mic[px][py][pz] == npix1 ||
+                     Mic[px][py][pz] == npix2 || Mic[px][py][pz] == npix3) &&
+                    Mic[px][py][pz] != BURNT) {
 
                   Ntot++;
                   Mic[px][py][pz] = BURNT;
-                  nnew++;
 
-                  if (nnew >= (mult2 * SIZE2D)) {
-
-                    /***
-                     *	Must allocate more memory
-                     ***/
-
-                    mult2++;
-                    nnewx = (int *)realloc((int *)nnewx, (mult2 * SIZE2D));
-                    nnewy = (int *)realloc((int *)nnewy, (mult2 * SIZE2D));
-                    nnewz = (int *)realloc((int *)nnewz, (mult2 * SIZE2D));
-
-                    if (!nnewx) {
-                      printf("\nERROR in burn3d:");
-                      printf("\n\tCould not reallocate space for nnewx.");
-                      printf("\n\tExiting now.");
-                      free(nmaty);
-                      free(nmatz);
-                      free(nmatx);
-                      free(nnewy);
-                      free(nnewz);
-                      return (MEMERR);
-                    }
-                    if (!nnewy) {
-                      printf("\nERROR in burn3d:");
-                      printf("\n\tCould not reallocate space for nnewy.");
-                      printf("\n\tExiting now.");
-                      free(nmatx);
-                      free(nmatz);
-                      free(nnewx);
-                      free(nmaty);
-                      free(nnewz);
-                      return (MEMERR);
-                    }
-                    if (!nnewz) {
-                      printf("\nERROR in burn3d:");
-                      printf("\n\tCould not reallocate space for nnewz.");
-                      printf("\n\tExiting now.");
-                      free(nmatx);
-                      free(nmaty);
-                      free(nnewx);
-                      free(nnewy);
-                      free(nmatz);
-                      return (MEMERR);
-                    }
+                  if (stack_top < DFS_STACK_SIZE - 1) {
+                    dfs_stack[stack_top].x = x1;
+                    dfs_stack[stack_top].y = y1;
+                    dfs_stack[stack_top].z = z1;
+                    stack_top++;
+                  } else {
+                    free(dfs_stack);
+                    return (MEMERR);
                   }
-
-                  nnewx[nnew] = x1;
-                  nnewy[nnew] = y1;
-                  nnewz[nnew] = z1;
                 }
               }
-            } /* End of loop over nearest neighbors */
-          }   /* End of loop over current burn front */
-
-          if (nnew > 0) {
-            ncur = nnew;
-
-            /* update the burn front matrices */
-
-            for (icur = 1; icur <= ncur; icur++) {
-              nmatx[icur] = nnewx[icur];
-              nmaty[icur] = nnewy[icur];
-              nmatz[icur] = nnewz[icur];
             }
           }
 
-        } while (nnew > 0);
+          free(dfs_stack);
 
-        /* Run out of fuel.  Burning is over */
+          /* Connected component found - add to total */
+          ntop += Ntot;
+        }
+      }
+    }
 
-        ntop += Ntot;
-        xl = 0;
-        xh = Xsyssize - 1;
+    /***
+     * PERCOLATION ANALYSIS
+     * Check if BURNT voxels span from one face to the opposite face
+     * Uses original algorithm logic but optimized to run once per direction
+     ***/
 
-        /***
-         *	See if current path extends through
-         *	the microstructure
-         ***/
+    xl = 0;
+    xh = xsize - 1;
 
-        for (j1 = 0; j1 < Ysyssize; j1++) {
-          for (k1 = 0; k1 < Zsyssize; k1++) {
+    // Mark voxels on boundary faces and check for percolation
+    for (j1 = 0; j1 < ysize; j1++) {
+      for (k1 = 0; k1 < zsize; k1++) {
 
-            px = cx(xl, j1, k1, d1, d2, d3);
-            py = cy(xl, j1, k1, d1, d2, d3);
-            pz = cz(xl, j1, k1, d1, d2, d3);
-            qx = cx(xh, j1, k1, d1, d2, d3);
-            qy = cy(xh, j1, k1, d1, d2, d3);
-            qz = cz(xh, j1, k1, d1, d2, d3);
+        px = cx(xl, j1, k1, d1, d2, d3);
+        py = cy(xl, j1, k1, d1, d2, d3);
+        pz = cz(xl, j1, k1, d1, d2, d3);
+        qx = cx(xh, j1, k1, d1, d2, d3);
+        qy = cy(xh, j1, k1, d1, d2, d3);
+        qz = cz(xh, j1, k1, d1, d2, d3);
 
-            if ((Mic[px][py][pz] == BURNT) && (Mic[qx][qy][qz] == BURNT)) {
+        // Bounds check
+        if (px >= 0 && px < Xsyssize && py >= 0 && py < Ysyssize && pz >= 0 &&
+            pz < Zsyssize && qx >= 0 && qx < Xsyssize && qy >= 0 &&
+            qy < Ysyssize && qz >= 0 && qz < Zsyssize) {
 
-              igood = 2;
-            }
+          // Check if both faces have BURNT voxels (indicates percolation path)
+          if ((Mic[px][py][pz] == BURNT) && (Mic[qx][qy][qz] == BURNT)) {
+            nthrough =
+                ntop; // All connected voxels are part of percolating network
+            break;
+          }
 
-            if (Mic[px][py][pz] == BURNT) {
-              Mic[px][py][pz]++;
-            }
-
-            if (Mic[qx][qy][qz] == BURNT) {
-              Mic[qx][qy][qz]++;
-            }
+          // Mark face voxels (increment BURNT values for later restoration)
+          if (Mic[px][py][pz] == BURNT) {
+            Mic[px][py][pz]++;
+          }
+          if (Mic[qx][qy][qz] == BURNT) {
+            Mic[qx][qy][qz]++;
           }
         }
-
-        if (igood == 2)
-          nthrough += Ntot;
       }
+      if (nthrough > 0)
+        break;
     }
-  }
 
-  /***
-   *	Finished sampling all pixels of type npix along
-   *	the bottom x face
-   *
-   *	Return the burnt sites to their original
-   *	phase values
-   ***/
+    /***
+     *	Finished sampling all pixels of type npix along
+     *	the bottom x face
+     *
+     *	Return the burnt sites to their original
+     *	phase values
+     ***/
 
-  for (k = 0; k < Zsyssize; k++) {
-    for (j = 0; j < Ysyssize; j++) {
-      for (i = 0; i < Xsyssize; i++) {
+    for (k = 0; k < zsize; k++) {
+      for (j = 0; j < ysize; j++) {
+        for (i = 0; i < xsize; i++) {
 
-        if (Mic[i][j][k] >= BURNT) {
+          /* Transform coordinates */
+          px = cx(i, j, k, d1, d2, d3);
+          py = cy(i, j, k, d1, d2, d3);
+          pz = cz(i, j, k, d1, d2, d3);
 
-          nphc++;
-          Mic[i][j][k] = npix;
+          if (Mic[px][py][pz] >= BURNT) {
 
-        } else if ((Mic[i][j][k] == npix) || (Mic[i][j][k] == npix1) ||
-                   (Mic[i][j][k] == npix2)) {
-          nphc++;
+            nphc++;
+            Mic[px][py][pz] = npix;
+
+          } else if ((Mic[px][py][pz] == npix) || (Mic[px][py][pz] == npix1) ||
+                     (Mic[px][py][pz] == npix2) || (Mic[px][py][pz] == npix3)) {
+            nphc++;
+          }
         }
       }
     }
-  }
 
-  printf("Phase ID = %d \n", npix);
-  printf("Number accessible from first surface = %d \n", ntop);
-  printf("Number contained in through pathways= %d \n", nthrough);
-  fflush(stdout);
+    if (dir == 0) {
+      burnprops->x_vox_connected = ntop;
+      burnprops->x_vox_percolated = nthrough;
+      if (nthrough > 0)
+        burnprops->isPercInX = 1;
+    } else if (dir == 1) {
+      burnprops->y_vox_connected = ntop;
+      burnprops->y_vox_percolated = nthrough;
+      if (nthrough > 0)
+        burnprops->isPercInY = 1;
+    } else {
+      burnprops->z_vox_connected = ntop;
+      burnprops->z_vox_percolated = nthrough;
+      if (nthrough > 0)
+        burnprops->isPercInZ = 1;
+    }
 
-  Ntot = nphc;
-  Nperc = nthrough;
-  Nburnt = ntop;
-  if (nthrough > 0)
-    bflag = 1;
+    /***
+     * NOTE: No need to free BFS arrays since DFS algorithm doesn't use them.
+     * Each connected component allocates and frees its own small DFS stack
+     *locally.
+     ***/
 
-  fprintf(Resfile, "%d %d %d \n", Ntot, Nperc, Nburnt);
+  } /* End of loop over different directions */
 
-  free(nmatx);
-  free(nmaty);
-  free(nmatz);
-  free(nnewx);
-  free(nnewy);
-  free(nnewz);
-
-  return (bflag);
+  return (status);
 }

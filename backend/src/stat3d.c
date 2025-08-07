@@ -1,4 +1,4 @@
-/******************************************************
+/*****************************************************
  *
  * Program stat3d.c
  *
@@ -9,29 +9,21 @@
  * 	(3) pore-exposed surface area fractions
  * 	(4) mass fractions
  *
- *	Only processes the phase values 0-10, 24 and 25
- *
- * Programmer:	Dale P. Bentz
- * 				Building and Fire Research Laboratory
- *				NIST
- *				100 Bureau Drive Mail Stop 8621
- *				Gaithersburg, MD  20899-8621   USA
- *				(301) 975-5865      FAX: (301) 990-6891
- *				E-mail: dale.bentz@nist.gov
- *
- * Contact:		Jeffrey W. Bullard
- * 				Building and Fire Research Laboratory
- *				NIST
- *				100 Bureau Drive Mail Stop 8621
- *				Gaithersburg, MD  20899-8621   USA
- *				(301) 975-5725      FAX: (301) 990-6891
- *				E-mail: bullard@nist.gov
+ * Programmer:	Jeffrey W Bullard
+ *              Zachry Department of Civil and Environmental Engineering
+ *              Department of Materials Science and Engineering
+ *              Texas A&M University
+ *              100 Spence Street, 3136 TAMU
+ *              College Station, Texas  77843
+ *				E-mail: jwbullard@tamu.edu
  *
  *******************************************************/
 #include "include/vcctl.h"
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 /***
  *	Global variables
@@ -40,25 +32,42 @@ float Version;
 
 #include "include/properties.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
   int ***mic;
-  int phaselist[NPHASES], flag;
-  int valin, ovalin, ix, iy, iz, ix1, iy1, iz1, k, kk, syssize;
-  int xsyssize, ysyssize, zsyssize;
-  int voltot, surftot, totalvol;
-  int volume[NPHASES], surface[NPHASES], surfpix[NPHASES];
-  double mass[NPHASES], totmass, totalmass;
-  float res;
+  int flag;
+  int valin, ovalin, ix, iy, iz, ix1, iy1, iz1, k, kk, syssize, totalsysvoxels;
+  int xsyssize, ysyssize, zsyssize, totalsolidvoxels, totalporevoxels;
+  int volcount[NPHASES], surfcount[NPHASES];
+  float volume[NPHASES], totalsolidvolume, totalporevolume, totalvolume;
+  float surface[NPHASES], totalsurfacearea;
+  float mass[NPHASES], totalmass, totalsolidmass, totalporemass;
+  float facearea, voxelvolume, voxelvolumeInCm3;
+  float frac;
+
+  /* Resolution in units of micrometers */
+  float res, resInCm;
   char filen[MAXSTRING], fileout[MAXSTRING], buff[MAXSTRING];
   char phasename[MAXSTRING], instring[MAXSTRING];
+  char *locale;
+  wchar_t mu = 0x03BC;
+  wchar_t sup1 = 0x00B9;
+  wchar_t sup2 = 0x00B2;
+  wchar_t sup3 = 0x00B3;
+  wchar_t supminus = 0x207B;
+  wchar_t multsym = 0x00D7;
   FILE *infile, *statfile;
+
+  /* Set up locale for printing unicode when necessary */
+  locale = setlocale(LC_ALL, "");
 
   /* Initialize local arrays */
 
-  for (ix = 0; ix < NPHASES; ix++) {
-    phaselist[ix] = 0;
-    volume[ix] = surface[ix] = surfpix[ix] = 0;
-    mass[ix] = 0.0;
+  totalsurfacearea = totalvolume = totalmass = 0.0;
+  totalsolidvolume = totalporevolume = totalsolidmass = totalporemass = 0.0;
+  totalsolidvoxels = totalporevoxels = 0;
+  for (k = 0; k < NPHASES; k++) {
+    volume[k] = surface[k] = mass[k] = 0.0;
+    volcount[k] = surfcount[k] = 0;
   }
 
   /***
@@ -68,61 +77,22 @@ int main(void) {
 
   assign_properties();
 
-  printf("Enter name of file to open \n");
-  read_string(filen, sizeof(filen));
-  printf("%s \n", filen);
-  printf("Enter name of file to write statistics to \n");
-  read_string(fileout, sizeof(fileout));
-  printf("%s \n", fileout);
-
-  for (ix = 0; ix < NPHASES; ix++) {
-    volume[ix] = surface[ix] = 0;
-    mass[ix] = 0.0;
-    phaselist[ix] = -1;
+  /* Check for command line arguments */
+  if (argc != 3) {
+    printf("Usage: %s <input_file> <output_file>\n", argv[0]);
+    printf("Enter name of microstructure file to open \n");
+    read_string(filen, sizeof(filen));
+    printf("%s \n", filen);
+    printf("Enter name of file to write statistics to \n");
+    read_string(fileout, sizeof(fileout));
+    printf("%s \n", fileout);
+  } else {
+    /* Use command line arguments */
+    strcpy(filen, argv[1]);
+    strcpy(fileout, argv[2]);
+    printf("Input file: %s \n", filen);
+    printf("Output file: %s \n", fileout);
   }
-
-  /***
-   *	Specify the phases about which to print
-   *	statistics, other than porosity and clinker
-   ***/
-
-  phaselist[1] = C3S;
-  phaselist[2] = C2S;
-  phaselist[3] = C3A;
-  phaselist[4] = C4AF;
-  phaselist[5] = K2SO4;
-  phaselist[6] = NA2SO4;
-  phaselist[7] = GYPSUM;
-  phaselist[8] = HEMIHYD;
-  phaselist[9] = ANHYDRITE;
-  phaselist[10] = OC3A;
-  phaselist[11] = SFUME;
-  phaselist[12] = INERT;
-  phaselist[13] = SLAG;
-  phaselist[14] = ASG;
-  phaselist[15] = CAS2;
-  phaselist[16] = AMSIL;
-  phaselist[17] = CH;
-  phaselist[18] = CSH;
-  phaselist[19] = C3AH6;
-  phaselist[20] = ETTR;
-  phaselist[21] = ETTRC4AF;
-  phaselist[22] = AFM;
-  phaselist[23] = FH3;
-  phaselist[24] = POZZCSH;
-  phaselist[25] = SLAGCSH;
-  phaselist[26] = CACL2;
-  phaselist[27] = FRIEDEL;
-  phaselist[28] = STRAT;
-  phaselist[29] = GYPSUMS;
-  phaselist[30] = CACO3;
-  phaselist[31] = FREELIME;
-  phaselist[32] = AFMC;
-  phaselist[33] = INERTAGG;
-  phaselist[34] = ABSGYP;
-  phaselist[35] = FLYASH;
-  phaselist[36] = FAC3A;
-  phaselist[37] = EMPTYP;
 
   /***
    *	Open input and output files.  Output file
@@ -159,9 +129,7 @@ int main(void) {
       ysyssize = syssize;
       zsyssize = syssize;
     }
-    fscanf(infile, "%s", buff); /* Desc. of resolution */
-    fscanf(infile, "%s", instring);
-    res = atof(instring);
+    facearea = res * res; /* in um2 */
   } else {
 
     /***
@@ -180,6 +148,11 @@ int main(void) {
     rewind(infile);
   }
 
+  totalsysvoxels = xsyssize * ysyssize * zsyssize;
+  resInCm = res * 1.0e-4;
+  voxelvolume = res * res * res; /* in um3 */
+  voxelvolumeInCm3 = resInCm * resInCm * resInCm;
+
   /***
    *	Dynamically allocate the memory for mic array
    ***/
@@ -188,34 +161,48 @@ int main(void) {
 
   /* Read in image and accumulate volume totals */
 
-  totalmass = 0.0;
-  totalvol = 0;
-  for (iz = 0; iz < zsyssize; iz++) {
+  /**
+   * 2025 August 05
+   * The new convention is to read and write image data using
+   * C-order (z varies fastest, then y, and then x)
+   **/
+
+  for (ix = 0; ix < xsyssize; ix++) {
     for (iy = 0; iy < ysyssize; iy++) {
-      for (ix = 0; ix < xsyssize; ix++) {
+      for (iz = 0; iz < zsyssize; iz++) {
 
         fscanf(infile, "%s", instring);
         ovalin = atoi(instring);
         valin = convert_id(ovalin, Version);
         mic[ix][iy][iz] = valin;
 
-        if (valin < NPHASES) {
+        if (valin < NSPHASES) {
 
-          volume[valin]++;
+          volcount[valin]++;
 
           /***
            *	orthorhombic C3A counts as C3A, too, for
            *	clinker purposes
            ***/
 
-          if (valin == OC3A)
-            volume[C3A]++;
+          mass[valin] += ((float)Specgrav[valin]);
+          if (valin == OC3A) {
+            volcount[C3A]++;
+            mass[C3A] += ((float)Specgrav[valin]);
+          }
 
           if (valin != POROSITY && valin != DRIEDP && valin != EMPTYDP &&
               valin != EMPTYP) {
 
-            totalvol++;
-            totalmass += ((double)(Specgrav[valin]));
+            totalsolidvoxels++;
+
+            /** totalmass has units of voxel * (g per cm3) **/
+            /** This is the same as g /(cm3 per voxel) **/
+            /** It is the total solid mass **/
+            totalsolidmass += ((float)(Specgrav[valin]));
+          } else {
+            totalporevoxels++;
+            totalporemass += ((float)Specgrav[valin]);
           }
 
           /***
@@ -223,19 +210,15 @@ int main(void) {
            *	and defined in properties.c
            ***/
 
-          mass[valin] += ((double)Specgrav[valin]);
-          if (valin == OC3A)
-            mass[C3A] += ((double)Specgrav[valin]);
-
         } else {
 
           /***
            *	Anything not recognized is
-           *	assumed to be water-filled
-           *	porosity
+           *	generates an error
            ***/
 
-          volume[POROSITY]++;
+          printf("\n\nERROR: Urecognized phase id (%d)\n\n", valin);
+          exit(1);
         }
       }
     }
@@ -244,11 +227,9 @@ int main(void) {
   fclose(infile);
 
   ix1 = iy1 = iz1 = 0;
-  for (iz = 0; iz < zsyssize; iz++) {
+  for (ix = 0; ix < xsyssize; ix++) {
     for (iy = 0; iy < ysyssize; iy++) {
-      for (ix = 0; ix < xsyssize; ix++) {
-
-        flag = 0;
+      for (iz = 0; iz < zsyssize; iz++) {
 
         if ((mic[ix][iy][iz] != POROSITY) && (mic[ix][iy][iz] <= NSPHASES)) {
 
@@ -256,8 +237,10 @@ int main(void) {
 
           /* Check six neighboring pixels for porosity */
 
-          for (k = 1; k <= 6 && !flag; k++) {
+          for (k = 1; k <= 6; k++) {
 
+            /* Each face bordering porosity adds one to surfcount */
+            /* So a single voxel could have a surfcount up to six */
             switch (k) {
             case 1:
               ix1 = ix - 1;
@@ -308,82 +291,70 @@ int main(void) {
             if ((mic[ix1][iy1][iz1] == POROSITY) ||
                 (mic[ix1][iy1][iz1] > NSPHASES)) {
 
-              surface[valin]++;
-              flag = 1;
+              surfcount[valin]++;
             }
           }
         }
-        if (flag)
-          surfpix[valin]++;
       }
     }
   }
 
-  /***
-   *	Only include clinker phases in surface
-   *	area fraction calculation
-   ***/
+  /**
+   * Now generate statistics
+   **/
 
-  printf("Phase\tVol.Pix\tSurf.Pix\tVol.frac\tSurf.frac\tMass.frac\n");
-  fprintf(statfile,
-          "Phase\tVol.Pix\tSurf.Pix\tVol.frac\tSurf.frac\tMass.frac\n");
+  totalvolume = (float)(totalsysvoxels)*voxelvolume;
 
-  surftot = surface[C3S] + surface[C2S];
-  surftot += surface[C3A] + surface[C4AF];
-  surftot += surface[K2SO4] + surface[NA2SO4];
-
-  voltot = volume[C3S] + volume[C2S];
-  voltot += volume[C3A] + volume[C4AF];
-  voltot += volume[K2SO4] + volume[NA2SO4];
-
-  totmass = mass[C3S] + mass[C2S];
-  totmass += mass[C3A] + mass[C4AF];
-  totmass += mass[K2SO4] + mass[NA2SO4];
+  for (k = 0; k < NPHASES; k++) {
+    volume[k] = ((float)(volcount[k])) * voxelvolume;
+    mass[k] *= (voxelvolumeInCm3);
+    if (k != POROSITY && k != DRIEDP && k != EMPTYDP && k != EMPTYP) {
+      totalsolidvolume += volume[k];
+      surface[k] = ((float)(surfcount[k])) * facearea;
+      totalsurfacearea += surface[k];
+      totalsolidmass += mass[k];
+    } else {
+      totalporevolume += volume[k];
+      totalporemass += mass[k];
+    }
+  }
 
   k = POROSITY;
 
-  id2phasename(k, phasename);
-  printf("%s\t%8d", phasename, volume[POROSITY]);
-  printf("\t%8d      \n", surface[POROSITY]);
-  fprintf(statfile, "%s\t%8d", phasename, volume[POROSITY]);
-  fprintf(statfile, "\t%8d      \n", surface[POROSITY]);
+  fprintf(statfile, "MICROSTRUCTURE VOLUME & SURFACE AREA ANALYSIS\n");
+  fprintf(statfile, "==============================");
+  fprintf(statfile, "==============================\n\n");
+  fwprintf(statfile, L"Total Volume: %.2f %lcm%lc (%d voxels)\n", totalvolume,
+           mu, sup3, totalsysvoxels);
+  fwprintf(statfile, L"Total Solid Volume: %.2f %lcm%lc (%d voxels)\n",
+           totalsolidvolume, mu, sup3);
+  fwprintf(statfile, L"Total Surface Area: %.2f %lcm%lc\n", totalsurfacearea,
+           mu, sup2);
+  fwprintf(statfile, L"Total Pore Volume: %.2f %lcm%lc\n", totalporevolume, mu,
+           sup3);
+  fprintf(statfile, "Pore Volume Fraction: %.5f\n",
+          (totalporevolume / totalvolume));
+  fwprintf(statfile, L"Voxel Size: %.3f %lc %.3f %lc %.3f %lcm%lc\n\n", res,
+           multsym, res, multsym, res, mu, sup3);
+  fprintf(statfile, "PHASE BREAKDOWN:\n");
+  fprintf(statfile, "----------------------------------------");
 
-  /***
-   *	Print extra information about clinker phases
-   ***/
-
-  for (k = C3S; k <= NA2SO4; k++) {
-    id2phasename(k, phasename);
-    printf("%s\t%8d\t%8d", phasename, volume[k], surface[k]);
-    printf("\t%.5f", (double)volume[k] / (double)voltot);
-    printf("\t%.5f", (double)surface[k] / (double)surftot);
-    printf("\t%.5f\n", (double)mass[k] / (double)totmass);
-    fprintf(statfile, "%s\t%8d\t%8d", phasename, volume[k], surface[k]);
-    fprintf(statfile, "\t%.5f", (double)volume[k] / (double)voltot);
-    fprintf(statfile, "\t%.5f", (double)surface[k] / (double)surftot);
-    fprintf(statfile, "\t%.5f\n", (double)mass[k] / (double)totmass);
-  }
-
-  printf("TOTAL\t%8d\t%8d\n\n", voltot, surftot);
-  fprintf(statfile, "TOTAL\t%8d\t%8d", voltot, surftot);
-  fprintf(statfile, "\t%.5f", (double)voltot / (double)totalvol);
-  fprintf(statfile, "\t\t%.5f\n\n", (double)totmass / (double)totalmass);
-
-  /***
-   *	Now print generic information on volume
-   *	count and surface count for all other
-   *	phases specified in phaselist
-   ***/
-
-  for (k = 1; phaselist[k] >= 0; k++) {
-    kk = phaselist[k];
-    id2phasename(kk, phasename);
-    printf("\n%s\t%8d\t%8d", phasename, volume[kk], surface[kk]);
-    printf("\t%.5f", (double)volume[kk] / (double)totalvol);
-    printf("\t%.5f\n", (double)mass[kk] / (double)totalmass);
-    fprintf(statfile, "\n%s\t%8d\t%8d", phasename, volume[kk], surface[kk]);
-    fprintf(statfile, "\t%.5f", (double)volume[kk] / (double)totalvol);
-    fprintf(statfile, "\t%.5f\n", (double)mass[kk] / (double)totalmass);
+  for (k = 0; k < NSPHASES; ++k) {
+    if (volume[k] > 1.0e-9) {
+      id2phasename(k, phasename);
+      fprintf(statfile, "\n\n%s (Phase %2d):", phasename, k);
+      fwprintf(statfile, L"\n Volume: %.2g %lcm%lc", volume[k], mu, sup3);
+      if (k != 0) {
+        fwprintf(statfile, L"\n Surface Area: %.2g %lcm%lc", surface[k], mu,
+                 sup2);
+        fwprintf(statfile, L"\n Specific Surface Area: %.2g %lcm%lc%lc",
+                 (surface[k] / volume[k]), mu, supminus, sup1);
+      }
+      fprintf(statfile, "\n Voxel Count: %d", volcount[k]);
+      frac = volume[k] / totalvolume;
+      fprintf(statfile, "\n Volume Fraction: %.4f", frac);
+      fprintf(statfile, "\n Volume Percentage: %.2f %%", (100.0 * frac));
+    }
   }
 
   fclose(statfile);

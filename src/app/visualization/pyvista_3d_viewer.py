@@ -9,7 +9,7 @@ with professional lighting, materials, and interaction capabilities.
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
-from gi.repository import Gtk, GObject, Gdk, GdkPixbuf
+from gi.repository import Gtk, GObject, Gdk, GdkPixbuf, Pango
 
 import pyvista as pv
 import numpy as np
@@ -864,12 +864,24 @@ class PyVistaViewer3D(Gtk.Box):
                     self.logger.info(">>> GTK image widget updated and display refreshed")
                 else:
                     self.logger.warning(f">>> No image widget ({hasattr(self, 'image_widget')}) or pixbuf ({pixbuf is not None if 'pixbuf' in locals() else 'undefined'}) for update")
+                
+                # CRITICAL: Clean up memory to prevent leaks
+                buffer.close()
+                buffer = None
+                pil_image = None
+                pixbuf = None
                     
             except Exception as e:
                 self.logger.error(f"GTK update failed: {e}")
                 import traceback
                 self.logger.error(traceback.format_exc())
                 return
+            finally:
+                # Force cleanup of screenshot array
+                if 'image_array' in locals():
+                    image_array = None
+                import gc
+                gc.collect()
                 
             if hasattr(self, 'render_status'):
                 self.render_status.set_text(f"Rendered: {self.rendering_mode} mode")
@@ -2185,124 +2197,140 @@ Distance: {distance_um:.2f} μm"""
         self.logger.info(f"Measured distance: {distance_um:.2f} μm ({distance_voxels:.2f} voxels)")
     
     def _perform_volume_analysis(self):
-        """Perform comprehensive volume and surface area analysis of all phases."""
+        """Perform comprehensive volume and surface area analysis using C stat3d program."""
         if self.voxel_data is None:
             self.logger.warning("No voxel data available for volume and surface area analysis")
             return
         
         try:
-            # Calculate phase statistics including surface areas
-            phase_stats = self._calculate_phase_statistics()
+            # Use C stat3d program for accurate volume and surface area analysis
+            raw_output = self._run_stat3d_analysis_raw()
             
-            # Create results dialog
-            self._show_volume_analysis_results(phase_stats)
+            # Display raw output directly (preserves UTF-8 formatting)
+            self._show_raw_analysis_results(raw_output, "Volume & Surface Area Analysis Results")
             
-            self.logger.info("Volume and surface area analysis completed")
+            self.logger.info("Volume and surface area analysis completed using C stat3d program")
             
         except Exception as e:
             self.logger.error(f"Volume and surface area analysis failed: {e}")
+            # Fallback to Python implementation if C program fails
+            try:
+                self.logger.info("Falling back to Python implementation...")
+                phase_stats = self._calculate_phase_statistics()
+                self._show_volume_analysis_results(phase_stats)
+            except Exception as fallback_e:
+                self.logger.error(f"Python fallback also failed: {fallback_e}")
     
     def _perform_connectivity_analysis(self):
-        """Perform connectivity analysis with periodic boundary conditions and directional percolation."""
+        """Perform connectivity analysis using C perc3d program."""
         if self.voxel_data is None:
             self.logger.warning("No voxel data available for connectivity analysis")
             return
         
         try:
-            from scipy import ndimage
-            connectivity_results = {}
-            unique_phases = np.unique(self.voxel_data)
+            # Use C perc3d program for accurate connectivity analysis
+            raw_output = self._run_perc3d_analysis_raw()
             
-            self.logger.info("Starting connectivity analysis with periodic boundary conditions...")
+            # Display raw output directly (preserves UTF-8 formatting)
+            self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
             
-            for phase_id in unique_phases:
-                if phase_id == 0:  # Skip porosity for connectivity analysis
-                    continue
-                
-                try:
-                    # Create binary mask for this phase
-                    phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
-                    
-                    # Use memory-efficient periodic connectivity analysis
-                    labeled_original, num_components = self._periodic_connectivity_analysis(phase_mask)
-                    
-                    if num_components == 0:
-                        connectivity_results[phase_id] = {
-                            'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
-                            'total_components': 0,
-                            'component_volumes': [],
-                            'largest_component_volume': 0,
-                            'total_phase_volume': 0,
-                            'percolation_ratio': 0,
-                            'percolates_x': False,
-                            'percolates_y': False,
-                            'percolates_z': False,
-                            'fully_percolated': False
-                        }
-                        continue
-                    
-                    # Analyze directional percolation for each component
-                    percolation_results = self._analyze_directional_percolation(
-                        labeled_original, num_components, phase_mask.shape
-                    )
-                    
-                    # Calculate volumes
-                    voxel_volume = np.prod(self.voxel_size)  # μm³ per voxel
-                    component_volumes = []
-                    component_voxel_counts = []
-                    
-                    for component_id in range(1, num_components + 1):
-                        component_voxels = np.sum(labeled_original == component_id)
-                        component_volume = component_voxels * voxel_volume
-                        component_volumes.append(component_volume)
-                        component_voxel_counts.append(component_voxels)
-                    
-                    # Sort by volume (largest first)
-                    sorted_indices = np.argsort(component_volumes)[::-1]
-                    component_volumes = [component_volumes[i] for i in sorted_indices]
-                    component_voxel_counts = [component_voxel_counts[i] for i in sorted_indices]
-                    
-                    total_phase_volume = sum(component_volumes)
-                    largest_component_volume = max(component_volumes) if component_volumes else 0
-                    percolation_ratio = largest_component_volume / total_phase_volume if total_phase_volume > 0 else 0
-                    
-                    connectivity_results[phase_id] = {
-                        'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
-                        'total_components': num_components,
-                        'component_volumes': component_volumes,
-                        'component_voxel_counts': component_voxel_counts,
-                        'largest_component_volume': largest_component_volume,
-                        'total_phase_volume': total_phase_volume,
-                        'percolation_ratio': percolation_ratio,
-                        'percolates_x': percolation_results['percolates_x'],
-                        'percolates_y': percolation_results['percolates_y'],
-                        'percolates_z': percolation_results['percolates_z'],
-                        'fully_percolated': percolation_results['fully_percolated'],
-                        'percolating_components': percolation_results['percolating_components']
-                    }
-                    
-                    perc_status = "✓ PERCOLATED" if percolation_results['fully_percolated'] else "✗ Not Percolated"
-                    self.logger.info(f"Phase {phase_id}: {num_components} components, {perc_status}")
-                    
-                except Exception as e:
-                    self.logger.error(f"Connectivity analysis failed for phase {phase_id}: {e}")
-                    connectivity_results[phase_id] = {
-                        'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
-                        'error': str(e)
-                    }
-            
-            # Show connectivity results
-            self._show_connectivity_analysis_results(connectivity_results)
-            
-            self.logger.info("Periodic connectivity analysis completed")
+            self.logger.info("Connectivity analysis completed using C perc3d program")
             
         except Exception as e:
             self.logger.error(f"Connectivity analysis failed: {e}")
-            # Check if scipy is available
+            # Fallback to Python implementation if C program fails
             try:
-                import scipy
-            except ImportError:
-                self.logger.error("Connectivity analysis requires scipy. Please install scipy: pip install scipy")
+                self.logger.info("Falling back to Python implementation...")
+                connectivity_results = self._python_connectivity_fallback()
+                self._show_connectivity_analysis_results(connectivity_results)
+            except Exception as fallback_e:
+                self.logger.error(f"Python fallback also failed: {fallback_e}")
+
+    def _python_connectivity_fallback(self):
+        """Python fallback for connectivity analysis."""
+        from scipy import ndimage
+        connectivity_results = {}
+        unique_phases = np.unique(self.voxel_data)
+        
+        self.logger.info("Starting connectivity analysis with periodic boundary conditions...")
+        
+        for phase_id in unique_phases:
+            if phase_id == 0:  # Skip porosity for connectivity analysis
+                continue
+            
+            try:
+                # Create binary mask for this phase
+                phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
+                
+                # Use memory-efficient periodic connectivity analysis
+                labeled_original, num_components = self._periodic_connectivity_analysis(phase_mask)
+                
+                if num_components == 0:
+                    connectivity_results[phase_id] = {
+                        'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                        'total_components': 0,
+                        'component_volumes': [],
+                        'largest_component_volume': 0,
+                        'total_phase_volume': 0,
+                        'percolation_ratio': 0,
+                        'percolates_x': False,
+                        'percolates_y': False,
+                        'percolates_z': False,
+                        'fully_percolated': False
+                    }
+                    continue
+                
+                # Analyze directional percolation for each component
+                percolation_results = self._analyze_directional_percolation(
+                    labeled_original, num_components, phase_mask.shape
+                )
+                
+                # Calculate volumes
+                voxel_volume = np.prod(self.voxel_size)  # μm³ per voxel
+                component_volumes = []
+                component_voxel_counts = []
+                
+                for component_id in range(1, num_components + 1):
+                    component_voxels = np.sum(labeled_original == component_id)
+                    component_volume = component_voxels * voxel_volume
+                    component_volumes.append(component_volume)
+                    component_voxel_counts.append(component_voxels)
+                
+                # Sort by volume (largest first)
+                sorted_indices = np.argsort(component_volumes)[::-1]
+                component_volumes = [component_volumes[i] for i in sorted_indices]
+                component_voxel_counts = [component_voxel_counts[i] for i in sorted_indices]
+                
+                total_phase_volume = sum(component_volumes)
+                largest_component_volume = max(component_volumes) if component_volumes else 0
+                percolation_ratio = largest_component_volume / total_phase_volume if total_phase_volume > 0 else 0
+                
+                connectivity_results[phase_id] = {
+                    'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                    'total_components': num_components,
+                    'component_volumes': component_volumes,
+                    'component_voxel_counts': component_voxel_counts,
+                    'largest_component_volume': largest_component_volume,
+                    'total_phase_volume': total_phase_volume,
+                    'percolation_ratio': percolation_ratio,
+                    'percolates_x': percolation_results['percolates_x'],
+                    'percolates_y': percolation_results['percolates_y'],
+                    'percolates_z': percolation_results['percolates_z'],
+                    'fully_percolated': percolation_results['fully_percolated'],
+                    'percolating_components': percolation_results['percolating_components']
+                }
+                
+                perc_status = "✓ PERCOLATED" if percolation_results['fully_percolated'] else "✗ Not Percolated"
+                self.logger.info(f"Phase {phase_id}: {num_components} components, {perc_status}")
+                
+            except Exception as e:
+                self.logger.error(f"Connectivity analysis failed for phase {phase_id}: {e}")
+                connectivity_results[phase_id] = {
+                    'phase_name': self.phase_mapping.get(phase_id, f"Phase {phase_id}"),
+                    'error': str(e)
+                }
+        
+        return connectivity_results
     
     def _periodic_connectivity_analysis(self, phase_mask):
         """Memory-efficient periodic connectivity analysis using iterative boundary matching."""
@@ -2990,3 +3018,331 @@ Distance: {distance_um:.2f} μm"""
         dialog.show_all()
         dialog.run()
         dialog.destroy()
+
+    def _show_raw_analysis_results(self, raw_output, title):
+        """Show raw C program output directly in a dialog."""
+        dialog = Gtk.Dialog(
+            title=title,
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL
+        )
+        dialog.add_button("Close", Gtk.ResponseType.OK)
+        dialog.set_default_size(700, 600)
+        
+        # Create scrolled window
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create text view for results
+        text_view = Gtk.TextView()
+        text_view.set_editable(False)
+        text_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        
+        # Use monospace font to preserve formatting
+        font_desc = Pango.FontDescription.from_string("monospace 11")
+        text_view.modify_font(font_desc)
+        
+        # Set raw output content
+        text_buffer = text_view.get_buffer()
+        text_buffer.set_text(raw_output)
+        
+        scrolled.add(text_view)
+        dialog.get_content_area().pack_start(scrolled, True, True, 0)
+        
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+
+    def _run_stat3d_analysis_raw(self):
+        """Run the C stat3d program and return raw output."""
+        import subprocess
+        import tempfile
+        import os
+        
+        # Create temporary input file
+        temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
+        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        temp_input.close()
+        temp_output.close()
+        
+        try:
+            # Write voxel data in VCCTL format
+            with open(temp_input.name, 'w') as f:
+                # Write proper VCCTL header format
+                f.write("Version: 7.0\n")
+                f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
+                f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
+                f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
+                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                
+                # Write voxel data
+                for z in range(self.voxel_data.shape[2]):
+                    for y in range(self.voxel_data.shape[1]):
+                        for x in range(self.voxel_data.shape[0]):
+                            f.write(f"{int(self.voxel_data[x, y, z])}\n")
+            
+            # Get path to stat3d executable
+            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
+            stat3d_path = os.path.join(backend_dir, 'stat3d')
+            
+            # Run stat3d program with command line arguments
+            cmd = [stat3d_path, temp_input.name, temp_output.name]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode != 0:
+                self.logger.error(f"stat3d execution details:")
+                self.logger.error(f"  Command: {' '.join(cmd)}")
+                self.logger.error(f"  Input file: {temp_input.name} (exists: {os.path.exists(temp_input.name)})")
+                self.logger.error(f"  Output file: {temp_output.name} (exists: {os.path.exists(temp_output.name)})")
+                self.logger.error(f"  Return code: {result.returncode}")
+                self.logger.error(f"  stdout: {result.stdout}")
+                self.logger.error(f"  stderr: {result.stderr}")
+                raise RuntimeError(f"stat3d failed with return code {result.returncode}: {result.stderr}")
+            
+            # Read raw output file with UTF-8 encoding
+            with open(temp_output.name, 'r', encoding='utf-8', errors='replace') as f:
+                raw_output = f.read()
+            
+            return raw_output
+            
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(temp_input.name)
+                os.unlink(temp_output.name)
+            except:
+                pass
+
+    def _run_perc3d_analysis_raw(self):
+        """Run the C perc3d program and return raw output."""
+        import subprocess
+        import tempfile
+        import os
+        
+        # Create temporary input file
+        temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
+        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        temp_input.close()
+        temp_output.close()
+        
+        try:
+            # Write voxel data in VCCTL format
+            with open(temp_input.name, 'w') as f:
+                # Write proper VCCTL header format
+                f.write("Version: 7.0\n")
+                f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
+                f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
+                f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
+                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                
+                # Write voxel data
+                for z in range(self.voxel_data.shape[2]):
+                    for y in range(self.voxel_data.shape[1]):
+                        for x in range(self.voxel_data.shape[0]):
+                            f.write(f"{int(self.voxel_data[x, y, z])}\n")
+            
+            # Get path to perc3d executable
+            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
+            perc3d_path = os.path.join(backend_dir, 'perc3d')
+            
+            # Run perc3d program with command line arguments
+            cmd = [perc3d_path, temp_input.name, temp_output.name]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"perc3d failed with return code {result.returncode}: {result.stderr}")
+            
+            # Read raw output file with UTF-8 encoding
+            with open(temp_output.name, 'r', encoding='utf-8', errors='replace') as f:
+                raw_output = f.read()
+            
+            return raw_output
+            
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(temp_input.name)
+                os.unlink(temp_output.name)
+            except:
+                pass
+
+    def _run_stat3d_analysis(self):
+        """Run the C stat3d program for volume and surface area analysis."""
+        import subprocess
+        import tempfile
+        import os
+        import re
+        
+        # Create temporary input file
+        temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
+        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        temp_input.close()
+        temp_output.close()
+        
+        try:
+            # Write voxel data in VCCTL format
+            with open(temp_input.name, 'w') as f:
+                # Write proper VCCTL header format
+                f.write("Version: 7.0\n")
+                f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
+                f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
+                f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
+                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                
+                # Write voxel data
+                for z in range(self.voxel_data.shape[2]):
+                    for y in range(self.voxel_data.shape[1]):
+                        for x in range(self.voxel_data.shape[0]):
+                            f.write(f"{int(self.voxel_data[x, y, z])}\n")
+            
+            # Get path to stat3d executable
+            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
+            stat3d_path = os.path.join(backend_dir, 'stat3d')
+            
+            # Run stat3d program with command line arguments
+            cmd = [stat3d_path, temp_input.name, temp_output.name]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"stat3d failed with return code {result.returncode}: {result.stderr}")
+            
+            # Parse output file
+            return self._parse_stat3d_output(temp_output.name)
+            
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(temp_input.name)
+                os.unlink(temp_output.name)
+            except:
+                pass
+
+    def _parse_stat3d_output(self, output_file):
+        """Parse stat3d output file and return phase statistics."""
+        phase_stats = {}
+        
+        try:
+            # Explicitly use UTF-8 encoding for cross-platform compatibility
+            with open(output_file, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Parse phase data using regex patterns
+            phase_pattern = r'Phase\s+(\d+):\s*Volume:\s*([\d.]+)\s*Surface\s*Area:\s*([\d.]+)'
+            matches = re.findall(phase_pattern, content)
+            
+            for match in matches:
+                phase_id = int(match[0])
+                volume = float(match[1])
+                surface_area = float(match[2])
+                
+                phase_name = self.phase_mapping.get(phase_id, f"Phase {phase_id}")
+                
+                phase_stats[phase_id] = {
+                    'phase_name': phase_name,
+                    'volume_um3': volume,
+                    'surface_area_um2': surface_area,
+                    'voxel_count': int(volume / (self.voxel_size ** 3))
+                }
+        
+        except Exception as e:
+            self.logger.error(f"Failed to parse stat3d output: {e}")
+            raise
+        
+        return phase_stats
+
+    def _run_perc3d_analysis(self):
+        """Run the C perc3d program for connectivity analysis."""
+        import subprocess
+        import tempfile
+        import os
+        
+        # Create temporary input file
+        temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
+        temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
+        temp_input.close()
+        temp_output.close()
+        
+        try:
+            # Write voxel data in VCCTL format
+            with open(temp_input.name, 'w') as f:
+                # Write proper VCCTL header format
+                f.write("Version: 7.0\n")
+                f.write(f"X_Size: {self.voxel_data.shape[0]}\n")
+                f.write(f"Y_Size: {self.voxel_data.shape[1]}\n")
+                f.write(f"Z_Size: {self.voxel_data.shape[2]}\n")
+                f.write(f"Image_Resolution: {self.voxel_size:.2f}\n")
+                
+                # Write voxel data
+                for z in range(self.voxel_data.shape[2]):
+                    for y in range(self.voxel_data.shape[1]):
+                        for x in range(self.voxel_data.shape[0]):
+                            f.write(f"{int(self.voxel_data[x, y, z])}\n")
+            
+            # Get path to perc3d executable
+            backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '..', 'backend', 'bin')
+            perc3d_path = os.path.join(backend_dir, 'perc3d')
+            
+            # Run perc3d program with command line arguments
+            cmd = [perc3d_path, temp_input.name, temp_output.name]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"perc3d failed with return code {result.returncode}: {result.stderr}")
+            
+            # Parse output file
+            return self._parse_perc3d_output(temp_output.name)
+            
+        finally:
+            # Clean up temporary files
+            try:
+                os.unlink(temp_input.name)
+                os.unlink(temp_output.name)
+            except:
+                pass
+
+    def _parse_perc3d_output(self, output_file):
+        """Parse perc3d output file and return connectivity results."""
+        import re
+        connectivity_results = {}
+        
+        try:
+            # Explicitly use UTF-8 encoding for cross-platform compatibility
+            with open(output_file, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Parse connectivity data for each phase
+            phase_sections = re.split(r'Phase\s+(\d+):', content)[1:]  # Skip header
+            
+            for i in range(0, len(phase_sections), 2):
+                if i + 1 >= len(phase_sections):
+                    break
+                    
+                phase_id = int(phase_sections[i])
+                phase_data = phase_sections[i + 1]
+                
+                # Extract connectivity metrics
+                components_match = re.search(r'Components:\s*(\d+)', phase_data)
+                percolation_match = re.search(r'Percolation:\s*(\w+)', phase_data)
+                x_perc_match = re.search(r'X-direction:\s*(\w+)', phase_data)
+                y_perc_match = re.search(r'Y-direction:\s*(\w+)', phase_data)
+                z_perc_match = re.search(r'Z-direction:\s*(\w+)', phase_data)
+                
+                phase_name = self.phase_mapping.get(phase_id, f"Phase {phase_id}")
+                
+                connectivity_results[phase_id] = {
+                    'phase_name': phase_name,
+                    'total_components': int(components_match.group(1)) if components_match else 0,
+                    'fully_percolated': percolation_match.group(1).lower() == 'yes' if percolation_match else False,
+                    'percolates_x': x_perc_match.group(1).lower() == 'yes' if x_perc_match else False,
+                    'percolates_y': y_perc_match.group(1).lower() == 'yes' if y_perc_match else False,
+                    'percolates_z': z_perc_match.group(1).lower() == 'yes' if z_perc_match else False,
+                    'percolation_ratio': 0.0,  # Will be calculated from components
+                    'component_volumes': [],
+                    'component_voxel_counts': []
+                }
+        
+        except Exception as e:
+            self.logger.error(f"Failed to parse perc3d output: {e}")
+            raise
+        
+        return connectivity_results
