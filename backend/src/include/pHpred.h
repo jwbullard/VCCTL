@@ -256,7 +256,7 @@ void pHpred(void) {
   Conckplus = 0.0;
   Concohminus = 0.0;
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("\nIn pHpred...");
 
   /* Update CH activity product based on current system temperature */
@@ -442,12 +442,12 @@ void pHpred(void) {
 
   /* Do the following loop while Syngenite is precipitating */
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("\nConckplus and Concnaplus are %f and %f", Conckplus, Concnaplus);
 
   do {
 
-    if (Verbose)
+    if (Verbose_flag == 2)
       printf("\nIn syngenite precipitation loop.");
     /***
      *	Now compute the activities (estimated)
@@ -457,7 +457,7 @@ void pHpred(void) {
     ActivityCa = ActivityOH = ActivitySO4 = ActivityK = 1.0;
     Inew = 0.0;
 
-    if (Verbose) {
+    if (Verbose_flag == 2) {
       printf("\nConcnaplus = %f", Concnaplus);
       printf("\nConckplus = %f", Conckplus);
       printf("\nIs ettringite soluble? ");
@@ -470,7 +470,7 @@ void pHpred(void) {
     }
     if (((Concnaplus + Conckplus) > 0.0) && (!Soluble[ETTR])) {
 
-      if (Verbose)
+      if (Verbose_flag == 2)
         printf("\nEttringite not soluble.");
 
       /* Factor of 1000 to convert from M to mmol/L */
@@ -588,11 +588,11 @@ void pHpred(void) {
          *	electoneutrality
          ***/
 
-        if (Verbose)
+        if (Verbose_flag == 2)
           printf("\nHoping to print out the roots now\n");
         for (j = 1; j <= 4; j++) {
 
-          if (Verbose)
+          if (Verbose_flag == 2)
             printf("pH root %d is (%f,%f)\n", j, roots[j].r, roots[j].i);
 
           if (((roots[j].i) == 0.0) && ((roots[j].r) > 0.0)) {
@@ -633,7 +633,7 @@ void pHpred(void) {
       }
 
     } else {
-      if (Verbose)
+      if (Verbose_flag == 2)
         printf("\nEttringite is soluble or alkali concentration is zero.");
 
       /* Factor of 1000 to convert from M to mmol/L */
@@ -735,7 +735,7 @@ void pHpred(void) {
 
       if (test_precip > KspSyngenite) {
 
-        if (Verbose)
+        if (Verbose_flag == 2)
           printf("Syngenite precipitating at cycle %d\n", Cyccnt);
         syngen_change = syn_old = 1;
 
@@ -798,7 +798,7 @@ void pHpred(void) {
 
   /* End of syngenite precipitation loop */
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("\nDone with syngenite precipitation.");
 
   if (Concohminus < (0.0000001)) {

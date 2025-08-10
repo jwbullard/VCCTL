@@ -30,7 +30,7 @@
 #define VERSIONSTRING "Version:"
 #define VERSIONNUMBER "7.0"
 
-#define MAXSTRING 500 /* maximum length of strings */
+#define MAXSTRING 128 /* maximum length of strings */
 
 /***
  *	The gnuplot command

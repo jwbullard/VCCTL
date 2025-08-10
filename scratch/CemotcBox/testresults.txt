@@ -1,0 +1,80 @@
+MICROSTRUCTURE CONNECTIVITY ANALYSIS
+============================================================
+
+PERIODIC BOUNDARY CONDITIONS: Enabled
+DIRECTIONAL PERCOLATION: All three directions tested independently
+
+Percolation ratio: Fraction of phase in percolated structure
+Higher values indicate better connectivity of a phase
+
+POROSITY (Phase 0):
+ Total volume: 708241.00 (708241 voxels)
+ Volume connected in X direction: 707726.00 (707726 voxels)
+ Volume connected in Y direction: 707736.00 (707736 voxels)
+ Volume connected in Z direction: 707747.00 (707747 voxels)
+ Volume percolated in X direction: 707722.00 (707722 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 1.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00
+
+C3S (Phase 1):
+ Total volume: 295463.00 (295463 voxels)
+ Volume connected in X direction: 111475.00 (111475 voxels)
+ Volume connected in Y direction: 249581.00 (249581 voxels)
+ Volume connected in Z direction: 250332.00 (250332 voxels)
+ Volume percolated in X direction: 0.00 (0 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 0.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00
+
+C2S (Phase 2):
+ Total volume: 116004.00 (116004 voxels)
+ Volume connected in X direction: 1383.00 (1383 voxels)
+ Volume connected in Y direction: 10945.00 (10945 voxels)
+ Volume connected in Z direction: 14170.00 (14170 voxels)
+ Volume percolated in X direction: 0.00 (0 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 0.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00
+
+C3A (Phase 3):
+ Total volume: 36824.00 (36824 voxels)
+ Volume connected in X direction: 1219.00 (1219 voxels)
+ Volume connected in Y direction: 3488.00 (3488 voxels)
+ Volume connected in Z direction: 2251.00 (2251 voxels)
+ Volume percolated in X direction: 0.00 (0 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 0.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00
+
+C4AF (Phase 4):
+ Total volume: 25955.00 (25955 voxels)
+ Volume connected in X direction: 421.00 (421 voxels)
+ Volume connected in Y direction: 941.00 (941 voxels)
+ Volume connected in Z direction: 978.00 (978 voxels)
+ Volume percolated in X direction: 0.00 (0 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 0.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00
+
+SFUME (Phase 10):
+ Total volume: 17513.00 (17513 voxels)
+ Volume connected in X direction: 2961.00 (2961 voxels)
+ Volume connected in Y direction: 183.00 (183 voxels)
+ Volume connected in Z direction: 567.00 (567 voxels)
+ Volume percolated in X direction: 0.00 (0 voxels)
+ Volume percolated in Y direction: 0.00 (0 voxels)
+ Volume percolated in Z direction: 0.00 (0 voxels)
+ Percolation ratio, X direction: 0.00
+ Percolation ratio, Y direction: 0.00
+ Percolation ratio, Z direction: 0.00

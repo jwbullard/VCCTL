@@ -86,7 +86,7 @@ int burnset(int d1, int d2, int d3) {
    *	pathway to surface #2
    ***/
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nIn burnset: d1 = %d, d2 = %d, d3 = %d", d1, d2, d3);
     fflush(stdout);
   }
@@ -118,7 +118,7 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAssignment to xformMic is complete.");
     fflush(stdout);
   }
@@ -147,7 +147,7 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAssignment to xformMicpart is complete.");
     fflush(stdout);
   }
@@ -178,7 +178,7 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAssignment to newmat is complete.");
     fflush(stdout);
   }
@@ -186,38 +186,38 @@ int burnset(int d1, int d2, int d3) {
   nmatx = nmaty = nmatz = NULL;
   nnewx = nnewy = nnewz = NULL;
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nI am in burnset...");
     fflush(stdout);
   }
 
   nmatx = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmatx...");
     fflush(stdout);
   }
   nmaty = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmaty...");
     fflush(stdout);
   }
   nmatz = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmatz...");
     fflush(stdout);
   }
   nnewx = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewx...");
     fflush(stdout);
   }
   nnewy = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewy...");
     fflush(stdout);
   }
   nnewz = ivector(SIZESET);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewz...");
     fflush(stdout);
   }
@@ -306,7 +306,7 @@ int burnset(int d1, int d2, int d3) {
 
   ntop = nthrough = setyet = 0;
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAll memory allocation went okay...");
     fflush(stdout);
   }
@@ -321,7 +321,7 @@ int burnset(int d1, int d2, int d3) {
 
   for (k = 0; k < dimensions[2]; k++) {
     for (j = 0; j < dimensions[1]; j++) {
-      if (Verbose && dir == 1) {
+      if (Verbose_flag == 2 && dir == 1) {
         printf("\nLoop j,k = %d,%d", j, k);
         fflush(stdout);
       }
@@ -551,8 +551,8 @@ int burnset(int d1, int d2, int d3) {
                   nnewz[nnew] = z1;
                 }
               } /* nonperiodic if delimiter */
-            }   /* End of loop over nearest neighbors */
-          }     /* End of loop over current burn front */
+            } /* End of loop over nearest neighbors */
+          } /* End of loop over current burn front */
 
           if (nnew > 0) {
 
@@ -610,7 +610,7 @@ int burnset(int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("Phase ID= Solid Phases \n");
     printf("Number accessible from first surface = %d \n", ntop);
     printf("Number contained in through pathways= %d \n", nthrough);
@@ -632,11 +632,11 @@ int burnset(int d1, int d2, int d3) {
   count_solid += Count[C3AH6] + Count[ETTRC4AF] + Count[SFUME];
   count_solid += Count[AMSIL] + Count[ASG] + Count[SLAG] + Count[CAS2];
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("Count solids = %d\n", count_solid);
   if (count_solid > 0) {
     Con_fracs[dir] = (float)nthrough / (float)count_solid;
-    if (Verbose)
+    if (Verbose_flag == 2)
       printf("Con_fracs[%d] = %f\n", dir, Con_fracs[dir]);
   }
 

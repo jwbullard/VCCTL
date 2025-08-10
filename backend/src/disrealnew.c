@@ -156,10 +156,6 @@ int main(int argc, char *argv[]) {
   /* Get the local time using the current time */
   local_time = localtime(&current_time);
 
-  /* Display the local time */
-  fprintf(Logfile, "=== BEGIN DISREALNEW SIMULATION ===");
-  fprintf(Logfile, "\nStart time: %s\n\n", asctime(local_time));
-
   /* Initialize global arrays */
 
   for (ix = 0; ix <= NPHASES; ix++) {
@@ -195,13 +191,20 @@ int main(int argc, char *argv[]) {
   thtimelo = thtimehi = thtemplo = thtemphi = 0.0;
   thfile = NULL;
 
-  checkargs(argc, argv);
+  if (checkargs(argc, argv) != 0) {
+    return (1);
+  }
 
   /* Open the log file and keep it open throughout */
   if ((Logfile = fopen(LogFileName, "w")) == NULL) {
-    fprintf(stderr, "\nERROR:  Could not open disrealnew.log\n\n");
+    fprintf(stderr, "\nERROR:  Could not open %s\n\n", LogFileName);
     exit(1);
   }
+
+  /* Display the local time in the log */
+  fprintf(Logfile, "=== BEGIN DISREALNEW SIMULATION ===");
+  fprintf(Logfile, "\nStart time: %s", asctime(local_time));
+  fflush(Logfile);
 
   if (get_input(&pnucch, &pscalech, &pnuchg, &pscalehg, &pnucfh3, &pscalefh3,
                 &pnucgyp, &pscalegyp, &nmovstep)) {
@@ -1708,10 +1711,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   int nadd;
   char ch, imgfile[MAXSTRING], pimgfile[MAXSTRING];
   char buff[MAXSTRING], custcycfile[MAXSTRING];
-  char name[MAXSTRING], answer[MAXSTRING], calfilename[MAXSTRING];
+  char *name, answer[MAXSTRING], calfilename[MAXSTRING];
   char buff1[MAXSTRING], buff2[MAXSTRING];
   char *instring;
-  float dfrac, dends, dterm, bias, pc3a, b_estimate;
+  float dfrac, deactends, deactterm, deactinit, reactfrac;
+  float bias, pc3a, b_estimate;
   float newver, newres;
   FILE *fimgfile, *fpimgfile, *fprmfile, *fcofile, *fcalfile;
 
@@ -1721,47 +1725,54 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   if (Verbose_flag > 2)
-    fprintf(Logfile, "\tAllocating Disprob ...");
+    fprintf(Logfile, "Allocating Disprob ...");
   Disprob = fvector(NSPHASES + 1);
   if (!Disprob) {
     bailout("disrealnew", "Could not allocate memory for Disprob");
     return (1);
   }
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Disbase ...");
+    fprintf(Logfile, " done\nAllocating Disbase ...");
   Disbase = fvector(NSPHASES + 1);
   if (!Disbase) {
     bailout("disrealnew", "Could not allocate memory for Disbase");
     return (1);
   }
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Discoeff ...");
+    fprintf(Logfile, " done\nAllocating Discoeff ...");
   Discoeff = fvector(NSPHASES + 1);
   if (!Discoeff) {
     bailout("disrealnew", "Could not allocate memory for Discoeff");
     return (1);
   }
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Soluble ...");
+    fprintf(Logfile, " done\nAllocating Soluble ...");
   Soluble = ivector(NSPHASES + 1);
   if (!Soluble) {
     bailout("disrealnew", "Could not allocate memory for Soluble");
     return (1);
   }
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Creates ...");
+    fprintf(Logfile, " done\nAllocating Creates ...");
   Creates = ivector(NSPHASES + 1);
   if (!Creates) {
     bailout("disrealnew", "Could not allocate memory for Creates");
     return (1);
   }
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Onepixelbias ...");
+    fprintf(Logfile, " done\nAllocating Onepixelbias ...");
   Onepixelbias = fvector(NSPHASES + 1);
   if (!Onepixelbias) {
     bailout("disrealnew", "Could not allocate memory for Onepixelbias");
     return (1);
   }
+
+  fflush(Logfile);
 
   /***
    *    Allocate memory for the activation/deactivation start
@@ -1769,56 +1780,70 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   if (Verbose_flag > 2)
-    fprintf(Logfile, "  done\n\tAllocating Startflag ...");
+    fprintf(Logfile, "  done\nAllocating Startflag ...");
   Startflag = ivector(NSPHASES + 1);
   if (!Startflag) {
     bailout("disrealnew", "Could not allocate memory for Startflag");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Stopflag ...");
+    fprintf(Logfile, " done\nAllocating Stopflag ...");
   Stopflag = ivector(NSPHASES + 1);
   if (!Stopflag) {
     bailout("disrealnew", "Could not allocate memory for Stopflag");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactphaselist ...");
+    fprintf(Logfile, " done\nAllocating Deactphaselist ...");
   Deactphaselist = ivector(NSPHASES + 1);
   if (!Deactphaselist) {
     bailout("disrealnew", "Could not allocate memory for Deactphaselist");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactfrac ...");
+    fprintf(Logfile, " done\nAllocating Deactfrac ...");
   Deactfrac = fvector(NSPHASES + 1);
   if (!Deactfrac) {
     bailout("disrealnew", "Could not allocate memory for Deactfrac");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Reactfrac ...");
+    fprintf(Logfile, " done\nAllocating Reactfrac ...");
   Reactfrac = fvector(NSPHASES + 1);
   if (!Reactfrac) {
     bailout("disrealnew", "Could not allocate memory for Reactfrac");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactinit ...");
+    fprintf(Logfile, " done\nAllocating Deactinit ...");
   Deactinit = fvector(NSPHASES + 1);
   if (!Deactinit) {
     bailout("disrealnew", "Could not allocate memory for Deactinit");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactends ...");
+    fprintf(Logfile, " done\nAllocating Deactends ...");
   Deactends = fvector(NSPHASES + 1);
   if (!Deactends) {
     bailout("disrealnew", "Could not allocate memory for Deactends");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactterm ...");
+    fprintf(Logfile, " done\nAllocating Deactterm ...");
   Deactterm = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
@@ -1830,19 +1855,27 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    of pH on solubility of each phase in the system.
    ***/
 
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, "  done\n\tAllocating PHsulfcoeff ...");
+    fprintf(Logfile, "  done\nAllocating PHsulfcoeff ...");
   PHsulfcoeff = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
     return (1);
   }
+  fflush(Logfile);
+
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating PHfactor ...");
+    fprintf(Logfile, " done\nAllocating PHfactor ...");
   PHfactor = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
     return (1);
+  }
+  if (Verbose_flag > 2) {
+    fprintf(Logfile, " done");
+    fflush(Logfile);
   }
 
   /***
@@ -1851,585 +1884,601 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    nucleation probabilities, etc.
    ***/
 
+  fflush(Logfile);
+
   fprmfile = filehandler("disrealnew", ParameterFileName, "READ");
   if (!fprmfile) {
     return (1);
   }
 
+  fflush(Logfile);
+
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
+  fflush(Logfile);
+
   Cubesize = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, Cubesize);
+    fprintf(Logfile, "\n%s %d", name, Cubesize);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CUBEMIN = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, CUBEMIN);
+    fprintf(Logfile, "\n%s %d", name, CUBEMIN);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   PSFUME = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, PSFUME);
+    fprintf(Logfile, "\n%s %f", name, PSFUME);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SF_SiO2_val = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SF_SiO2_val);
+    fprintf(Logfile, "\n%s %f", name, SF_SiO2_val);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SF_BET_val = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SF_BET_val);
+    fprintf(Logfile, "\n%s %f", name, SF_BET_val);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SF_LOI_val = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SF_LOI_val);
+    fprintf(Logfile, "\n%s %f", name, SF_LOI_val);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SF_SiO2_normal = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SF_SiO2_normal);
+    fprintf(Logfile, "\n%s %f", name, SF_SiO2_normal);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SF_BET_normal = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SF_BET_normal);
+    fprintf(Logfile, "\n%s %f", name, SF_BET_normal);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
+  SF_LOI_normal = atof(instring);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "\n%s %f", name, SF_LOI_normal);
+  if (feof(fprmfile)) {
+    fprintf(Logfile, "Premature end of parameter file!!\n");
+    return (1);
+  }
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   PAMSIL = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, PAMSIL);
+    fprintf(Logfile, "\n%s %f", name, PAMSIL);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   MAXTRIES = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, MAXTRIES);
+    fprintf(Logfile, "\n%s %d", name, MAXTRIES);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISBIAS = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISBIAS);
+    fprintf(Logfile, "\n%s %f", name, DISBIAS);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disbias = DISBIAS;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMIN = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMIN);
+    fprintf(Logfile, "\n%s %f", name, DISMIN);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin = DISMIN;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMIN2 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMIN2);
+    fprintf(Logfile, "\n%s %f", name, DISMIN2);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin2 = DISMIN2;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMINSLAG = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMINSLAG);
+    fprintf(Logfile, "\n%s %f", name, DISMINSLAG);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disminslag = DISMINSLAG;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMINASG = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMINASG);
+    fprintf(Logfile, "\n%s %f", name, DISMINASG);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disminasg = DISMINASG;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMINCAS2 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMINCAS2);
+    fprintf(Logfile, "\n%s %f", name, DISMINCAS2);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismincas2 = DISMINCAS2;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMIN_C3A_0 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMIN_C3A_0);
+    fprintf(Logfile, "\n%s %f", name, DISMIN_C3A_0);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin_c3a = DISMIN_C3A_0;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISMIN_C4AF_0 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, DISMIN_C4AF_0);
+    fprintf(Logfile, "\n%s %f", name, DISMIN_C4AF_0);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin_c4af = DISMIN_C4AF_0;
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DK2SO4MAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DK2SO4MAX);
+    fprintf(Logfile, "\n%s %d", name, DK2SO4MAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DNA2SO4MAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DNA2SO4MAX);
+    fprintf(Logfile, "\n%s %d", name, DNA2SO4MAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DETTRMAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DETTRMAX);
+    fprintf(Logfile, "\n%s %d", name, DETTRMAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DGYPMAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DGYPMAX);
+    fprintf(Logfile, "\n%s %d", name, DGYPMAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DCACO3MAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DCACO3MAX);
+    fprintf(Logfile, "\n%s %d", name, DCACO3MAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DCACL2MAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DCACL2MAX);
+    fprintf(Logfile, "\n%s %d", name, DCACL2MAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DCAS2MAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DCAS2MAX);
+    fprintf(Logfile, "\n%s %d", name, DCAS2MAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DASMAX = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DASMAX);
+    fprintf(Logfile, "\n%s %d", name, DASMAX);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CHCRIT = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, CHCRIT);
+    fprintf(Logfile, "\n%s %f", name, CHCRIT);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pnucch = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pnucch);
+    fprintf(Logfile, "\n%s %f", name, *pnucch);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pscalech = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pscalech);
+    fprintf(Logfile, "\n%s %f", name, *pscalech);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pnucgyp = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pnucgyp);
+    fprintf(Logfile, "\n%s %f", name, *pnucgyp);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pscalegyp = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pscalegyp);
+    fprintf(Logfile, "\n%s %f", name, *pscalegyp);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pnuchg = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pnuchg);
+    fprintf(Logfile, "\n%s %f", name, *pnuchg);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pscalehg = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pscalehg);
+    fprintf(Logfile, "\n%s %f", name, *pscalehg);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pnucfh3 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pnucfh3);
+    fprintf(Logfile, "\n%s %f", name, *pnucfh3);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   *pscalefh3 = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, *pscalefh3);
+    fprintf(Logfile, "\n%s %f", name, *pscalefh3);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   C3AH6CRIT = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, C3AH6CRIT);
+    fprintf(Logfile, "\n%s %f", name, C3AH6CRIT);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CSHSCALE = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, CSHSCALE);
+    fprintf(Logfile, "\n%s %f", name, CSHSCALE);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   C3AH6_SCALE = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, C3AH6_SCALE);
+    fprintf(Logfile, "\n%s %f", name, C3AH6_SCALE);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   C3AH6GROW = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, C3AH6GROW);
+    fprintf(Logfile, "\n%s %f", name, C3AH6GROW);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CHGROW = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, CHGROW);
+    fprintf(Logfile, "\n%s %f", name, CHGROW);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CHGROWAGG = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, CHGROWAGG);
+    fprintf(Logfile, "\n%s %f", name, CHGROWAGG);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   ETTRGROW = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, ETTRGROW);
+    fprintf(Logfile, "\n%s %f", name, ETTRGROW);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   C3AETTR = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, C3AETTR);
+    fprintf(Logfile, "\n%s %f", name, C3AETTR);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   C3AGYP = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, C3AGYP);
+    fprintf(Logfile, "\n%s %f", name, C3AGYP);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SOLIDC3AGYP = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SOLIDC3AGYP);
+    fprintf(Logfile, "\n%s %f", name, SOLIDC3AGYP);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SOLIDC4AFGYP = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SOLIDC4AFGYP);
+    fprintf(Logfile, "\n%s %f", name, SOLIDC4AFGYP);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   AGRATE = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, AGRATE);
+    fprintf(Logfile, "\n%s %f", name, AGRATE);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   PCSH2CSH = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, PCSH2CSH);
+    fprintf(Logfile, "\n%s %f", name, PCSH2CSH);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   A0_CHSOL = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, A0_CHSOL);
+    fprintf(Logfile, "\n%s %f", name, A0_CHSOL);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   A1_CHSOL = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, A1_CHSOL);
+    fprintf(Logfile, "\n%s %f", name, A1_CHSOL);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   WCSCALE = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, WCSCALE);
+    fprintf(Logfile, "\n%s %f", name, WCSCALE);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   DISTLOCCSH = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, DISTLOCCSH);
+    fprintf(Logfile, "\n%s %d", name, DISTLOCCSH);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   NEIGHBORS = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, NEIGHBORS);
+    fprintf(Logfile, "\n%s %d", name, NEIGHBORS);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   WN = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, WN);
+    fprintf(Logfile, "\n%s %f", name, WN);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   WCHSH = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, WCHSH);
+    fprintf(Logfile, "\n%s %f", name, WCHSH);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   MAXDIFFSTEPS = atoi(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %d\n", name, MAXDIFFSTEPS);
+    fprintf(Logfile, "\n%s %d", name, MAXDIFFSTEPS);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   PDIFFCSH = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, PDIFFCSH);
+    fprintf(Logfile, "\n%s %f", name, PDIFFCSH);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
@@ -2441,11 +2490,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   Gypabsprob = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, Gypabsprob);
+    fprintf(Logfile, "\n%s %f", name, Gypabsprob);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
@@ -2457,33 +2506,33 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   CSH_Porosity = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, CSH_Porosity);
+    fprintf(Logfile, "\n%s %f", name, CSH_Porosity);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   POZZCSH_Porosity = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, POZZCSH_Porosity);
+    fprintf(Logfile, "\n%s %f", name, POZZCSH_Porosity);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
   fread_string(fprmfile, buff1);
-  instring = strtok(buff1, ",");
-  instring = strtok(NULL, ",");
+  name = strtok(buff1, ",");
+  instring = strtok(NULL, ",\n");
   SLAGCSH_Porosity = atof(instring);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "%s %f\n", name, SLAGCSH_Porosity);
+    fprintf(Logfile, "\n%s %f", name, SLAGCSH_Porosity);
   if (feof(fprmfile)) {
     fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
@@ -2514,129 +2563,127 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   y = 1;
 
   for (k = POROSITY; k <= NSPHASES; k++) {
-    if (Verbose_flag > 1) {
-      switch (k) {
-      case POROSITY:
-        strcpy(buff, "POROSITY");
-        break;
-      case C3S:
-        strcpy(buff, "C3S");
-        break;
-      case C2S:
-        strcpy(buff, "C2S");
-        break;
-      case C3A:
-        strcpy(buff, "C3A");
-        break;
-      case C4AF:
-        strcpy(buff, "C4AF");
-        break;
-      case NA2SO4:
-        strcpy(buff, "NA2SO4");
-        break;
-      case K2SO4:
-        strcpy(buff, "K2SO4");
-        break;
-      case GYPSUM:
-        strcpy(buff, "GYP");
-        break;
-      case HEMIHYD:
-        strcpy(buff, "HEM");
-        break;
-      case ANHYDRITE:
-        strcpy(buff, "ANH");
-        break;
-      case SFUME:
-        strcpy(buff, "SFUME");
-        break;
-      case AMSIL:
-        strcpy(buff, "AMSIL");
-        break;
-      case INERT:
-        strcpy(buff, "INERT");
-        break;
-      case INERTAGG:
-        strcpy(buff, "AGG");
-        break;
-      case ASG:
-        strcpy(buff, "ASG");
-        break;
-      case CAS2:
-        strcpy(buff, "CAS2");
-        break;
-      case SLAG:
-        strcpy(buff, "SLAG");
-        break;
-      case CH:
-        strcpy(buff, "CH");
-        break;
-      case CSH:
-        strcpy(buff, "CSH");
-        break;
-      case ETTR:
-        strcpy(buff, "ETTR");
-        break;
-      case ETTRC4AF:
-        strcpy(buff, "ETTRC4AF");
-        break;
-      case AFM:
-        strcpy(buff, "AFM");
-        break;
-      case C3AH6:
-        strcpy(buff, "C3AH6");
-        break;
-      case FH3:
-        strcpy(buff, "FH3");
-        break;
-      case CACO3:
-        strcpy(buff, "CACO3");
-        break;
-      case FREELIME:
-        strcpy(buff, "FREELIME");
-        break;
-      case OC3A:
-        strcpy(buff, "OC3A");
-        break;
-      case BRUCITE:
-        strcpy(buff, "BRUCITE");
-        break;
-      case MS:
-        strcpy(buff, "MS");
-        break;
-      case STRAT:
-        strcpy(buff, "STRAT");
-        break;
-      case FRIEDEL:
-        strcpy(buff, "FRIEDEL");
-        break;
-      case AFMC:
-        strcpy(buff, "AFMC");
-        break;
-      case CACL2:
-        strcpy(buff, "CACL2");
-        break;
-      case FAC3A:
-        strcpy(buff, "FAC3A");
-        break;
-      case FLYASH:
-        strcpy(buff, "FLYASH");
-        break;
-      case POZZCSH:
-        strcpy(buff, "POZZCSH");
-        break;
-      case SLAGCSH:
-        strcpy(buff, "SLAGCSH");
-        break;
-      case GYPSUMS:
-        strcpy(buff, "GYPS");
-        break;
-      case ABSGYP:
-        strcpy(buff, "ABSGYP");
-        break;
-      default:
-        strcpy(buff, "UNKNOWN");
-        break;
-      }
+    switch (k) {
+    case POROSITY:
+      strcpy(buff, "POROSITY");
+      break;
+    case C3S:
+      strcpy(buff, "C3S");
+      break;
+    case C2S:
+      strcpy(buff, "C2S");
+      break;
+    case C3A:
+      strcpy(buff, "C3A");
+      break;
+    case C4AF:
+      strcpy(buff, "C4AF");
+      break;
+    case NA2SO4:
+      strcpy(buff, "NA2SO4");
+      break;
+    case K2SO4:
+      strcpy(buff, "K2SO4");
+      break;
+    case GYPSUM:
+      strcpy(buff, "GYP");
+      break;
+    case HEMIHYD:
+      strcpy(buff, "HEM");
+      break;
+    case ANHYDRITE:
+      strcpy(buff, "ANH");
+      break;
+    case SFUME:
+      strcpy(buff, "SFUME");
+      break;
+    case AMSIL:
+      strcpy(buff, "AMSIL");
+      break;
+    case INERT:
+      strcpy(buff, "INERT");
+      break;
+    case INERTAGG:
+      strcpy(buff, "AGG");
+      break;
+    case ASG:
+      strcpy(buff, "ASG");
+      break;
+    case CAS2:
+      strcpy(buff, "CAS2");
+      break;
+    case SLAG:
+      strcpy(buff, "SLAG");
+      break;
+    case CH:
+      strcpy(buff, "CH");
+      break;
+    case CSH:
+      strcpy(buff, "CSH");
+      break;
+    case ETTR:
+      strcpy(buff, "ETTR");
+      break;
+    case ETTRC4AF:
+      strcpy(buff, "ETTRC4AF");
+      break;
+    case AFM:
+      strcpy(buff, "AFM");
+      break;
+    case C3AH6:
+      strcpy(buff, "C3AH6");
+      break;
+    case FH3:
+      strcpy(buff, "FH3");
+      break;
+    case CACO3:
+      strcpy(buff, "CACO3");
+      break;
+    case FREELIME:
+      strcpy(buff, "FREELIME");
+      break;
+    case OC3A:
+      strcpy(buff, "OC3A");
+      break;
+    case BRUCITE:
+      strcpy(buff, "BRUCITE");
+      break;
+    case MS:
+      strcpy(buff, "MS");
+      break;
+    case STRAT:
+      strcpy(buff, "STRAT");
+      break;
+    case FRIEDEL:
+      strcpy(buff, "FRIEDEL");
+      break;
+    case AFMC:
+      strcpy(buff, "AFMC");
+      break;
+    case CACL2:
+      strcpy(buff, "CACL2");
+      break;
+    case FAC3A:
+      strcpy(buff, "FAC3A");
+      break;
+    case FLYASH:
+      strcpy(buff, "FLYASH");
+      break;
+    case POZZCSH:
+      strcpy(buff, "POZZCSH");
+      break;
+    case SLAGCSH:
+      strcpy(buff, "SLAGCSH");
+      break;
+    case GYPSUMS:
+      strcpy(buff, "GYPS");
+      break;
+    case ABSGYP:
+      strcpy(buff, "ABSGYP");
+      break;
+    default:
+      strcpy(buff, "UNKNOWN");
+      break;
     }
 
     /* Set PHfactor to 1.0 initially */
@@ -2644,12 +2691,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     PHfactor[k] = 1.0;
 
     fread_string(fprmfile, buff1);
-    instring = strtok(buff1, ",");
-    instring = strtok(NULL, ",");
+    name = strtok(buff1, ",");
+    instring = strtok(NULL, ",\n");
     Discoeff[k] = atof(instring);
     if (Verbose_flag > 1) {
-      fprintf(Logfile, "\n%s:\n", buff);
-      fprintf(Logfile, "\t%s %f\n", name, Discoeff[k]);
+      fprintf(Logfile, "\n%s:", buff);
+      fprintf(Logfile, "\n\t%s %f", name, Discoeff[k]);
+      fflush(Logfile);
     }
     if (feof(fprmfile)) {
       fprintf(Logfile, "Premature end of parameter file!!\n");
@@ -2658,11 +2706,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     for (i = x; i <= y; i++) {
       for (j = 0; j < 3; j++) {
         fread_string(fprmfile, buff1);
-        instring = strtok(buff1, ",");
-        instring = strtok(NULL, ",");
+        name = strtok(buff1, ",");
+        instring = strtok(NULL, ",\n");
         FitpH[k][i][j] = atof(instring);
         if (Verbose_flag > 1)
-          fprintf(Logfile, "\t%s %f\n", name, FitpH[k][i][j]);
+          fprintf(Logfile, "\n\t%s %f", name, FitpH[k][i][j]);
         if (feof(fprmfile)) {
           fprintf(Logfile, "Premature end of parameter file!!\n");
           return (1);
@@ -2670,52 +2718,52 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
       }
     }
     fread_string(fprmfile, buff1);
-    instring = strtok(buff1, ",");
-    instring = strtok(NULL, ",");
+    name = strtok(buff1, ",");
+    instring = strtok(NULL, ",\n");
     PHsulfcoeff[k] = atof(instring);
     if (Verbose_flag > 1)
-      fprintf(Logfile, "\t%s %f\n", name, PHsulfcoeff[k]);
+      fprintf(Logfile, "\n\t%s %f", name, PHsulfcoeff[k]);
     if (feof(fprmfile)) {
       fprintf(Logfile, "Premature end of parameter file!!\n");
       return (1);
     }
     if (k == CSH) {
       fread_string(fprmfile, buff1);
-      instring = strtok(buff1, ",");
-      instring = strtok(NULL, ",");
+      name = strtok(buff1, ",");
+      instring = strtok(NULL, ",\n");
       Molarvcshcoeff_T = atof(instring);
       if (Verbose_flag > 1)
-        fprintf(Logfile, "\t%s %f\n", name, Molarvcshcoeff_T);
+        fprintf(Logfile, "\n\t%s %f", name, Molarvcshcoeff_T);
       if (feof(fprmfile)) {
         fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
       fread_string(fprmfile, buff1);
-      instring = strtok(buff1, ",");
-      instring = strtok(NULL, ",");
+      name = strtok(buff1, ",");
+      instring = strtok(NULL, ",\n");
       Watercshcoeff_T = atof(instring);
       if (Verbose_flag > 1)
-        fprintf(Logfile, "\t%s %f\n", name, Watercshcoeff_T);
+        fprintf(Logfile, "\n\t%s %f", name, Watercshcoeff_T);
       if (feof(fprmfile)) {
         fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
       fread_string(fprmfile, buff1);
-      instring = strtok(buff1, ",");
-      instring = strtok(NULL, ",");
+      name = strtok(buff1, ",");
+      instring = strtok(NULL, ",\n");
       Molarvcshcoeff_pH = atof(instring);
       if (Verbose_flag > 1)
-        fprintf(Logfile, "\t%s %f\n", name, Molarvcshcoeff_pH);
+        fprintf(Logfile, "\n\t%s %f", name, Molarvcshcoeff_pH);
       if (feof(fprmfile)) {
         fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
       fread_string(fprmfile, buff1);
-      instring = strtok(buff1, ",");
-      instring = strtok(NULL, ",");
+      name = strtok(buff1, ",");
+      instring = strtok(NULL, ",\n");
       Watercshcoeff_pH = atof(instring);
       if (Verbose_flag > 1)
-        fprintf(Logfile, "\t%s %f\n", name, Watercshcoeff_pH);
+        fprintf(Logfile, "\n\t%s %f", name, Watercshcoeff_pH);
       if (feof(fprmfile)) {
         fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
@@ -2724,57 +2772,98 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     }
   }
 
-  fclose(fprmfile);
-
   /***
    *    Done reading parameters from parameter file.  These are
    *    the parameters that previously were hard-wired at compile
    *    time.
-   *
+   ***/
+  /***
    *    Next, read the user-input variables for the hydration
    *    simulation in question
    ***/
 
-  fprintf(Logfile, "Enter random number seed \n");
-  read_string(instring, sizeof(instring));
-  Iseed = atoi(instring);
-  if (Iseed > 0)
-    Iseed = (-1 * Iseed);
-  fprintf(Logfile, "%d\n", Iseed);
-  Seed = (&Iseed);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Iseed")) {
+    instring = strtok(NULL, ",\n");
+    Iseed = atoi(instring);
+    fprintf(Logfile, "\nEnter random number seed: %d", Iseed);
+    if (Iseed > 0)
+      Iseed = (-1 * Iseed);
+    Seed = (&Iseed);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected Iseed",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "Dissolution bias is set at %f \n", DISBIAS);
+    fprintf(Logfile, "\nDissolution bias is set at %f", DISBIAS);
 
   /***
    *    Open file and read in original cement
    *    particle microstructure
    ***/
 
-  fprintf(Logfile,
-          "Enter name of directory containing initial microstructure files\n");
-  fprintf(Logfile, "Be sure to include final file separator:  ");
-  read_string(Micdir, sizeof(Micdir));
-  Filesep = Micdir[strlen(Micdir) - 1];
-  if ((Filesep != '/') && (Filesep != '\\')) {
-    fprintf(Logfile, "\nNo final file separator found.  Using /");
-    Filesep = '/';
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Micdir")) {
+    instring = strtok(NULL, ",\n");
+    strcpy(Micdir, instring);
+    Filesep = Micdir[strlen(Micdir) - 1];
+    if ((Filesep != '/') && (Filesep != '\\')) {
+      fprintf(Logfile, "\nNo final file separator found.  Using /");
+      Filesep = '/';
+    }
+    fprintf(
+        Logfile,
+        "\nEnter name of directory containing initial microstructure files: ");
+    fprintf(Logfile, "\nBe sure to include final file separator: %s", Micdir);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected Micdir",
+            name);
+    freeallmem();
+    exit(1);
   }
-  fprintf(Logfile, "%s\n", Micdir);
-  fprintf(Logfile, "Enter name of file from which the initial ");
-  fprintf(Logfile, "microstructure will be read\n");
-  read_string(name, sizeof(name));
-  fprintf(Logfile, "%s\n", name);
-  nlen = strcspn(name, ".");
-  strncpy(Fileroot, name, nlen);
-  sprintf(imgfile, "%s%s", Micdir, name);
-  if (Verbose_flag > 1)
-    fprintf(Logfile, "nlen is %d and Fileroot is now %s \n", nlen, Fileroot);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Fileroot")) {
+    name = strtok(NULL, ",\n");
+    nlen = strcspn(name, ".");
+    strncpy(Fileroot, name, nlen);
+    sprintf(imgfile, "%s%s", Micdir, name);
+    fprintf(stderr, "DEBUG: Micdir = '%s' (len=%zu)\n", Micdir, strlen(Micdir));
+    fprintf(stderr, "DEBUG: Fileroot = '%s' (len=%zu)\n", Fileroot,
+            strlen(Fileroot));
+    fprintf(Logfile, "\nEnter name of file from which the initial ");
+    fprintf(Logfile, "\nmicrostructure will be read: %s", name);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\nnlen is %d and Fileroot is now %s ", nlen, Fileroot);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected Fileroot",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "\nEnter name of particle image file:  ");
-  read_string(name, sizeof(name));
-  fprintf(Logfile, "%s\n", name);
-  sprintf(pimgfile, "%s%s", Micdir, name);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Pimgfile")) {
+    name = strtok(NULL, ",\n");
+    fprintf(Logfile, "\nEnter name of particle image file:  ");
+    fprintf(Logfile, "%s", name);
+    sprintf(pimgfile, "%s%s", Micdir, name);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected Pimgfile",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
   /***
    *    Assign various physical properties of phases
@@ -2782,66 +2871,143 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
   assign_properties();
 
-  fprintf(Logfile, "Enter fraction of C3A that is to be orthorhombic ");
-  fprintf(Logfile, "instead of cubic: ");
-  read_string(instring, sizeof(instring));
-  Oc3afrac = atof(instring);
-  fprintf(Logfile, "%f\n", Oc3afrac);
-
-  fprintf(Logfile,
-          "Enter number of seeds for CSH nucleation per um3 of mix water: ");
-  read_string(instring, sizeof(instring));
-  Csh_seeds = atof(instring);
-  fprintf(Logfile, "%f\n", Csh_seeds);
-
-  fprintf(Logfile, "Enter aging time in days: ");
-  read_string(instring, sizeof(instring));
-  End_time = atof(instring);
-  fprintf(Logfile, "\n%f \n", End_time);
-  End_time *= 24.0; /* Convert days to hours */
-
-  fprintf(Logfile, "Place a crack (y or n)? [n] ");
-  read_string(answer, sizeof(answer));
-  fprintf(Logfile, "%s\n", answer);
-  if (strlen(answer) < 1) {
-    strcpy(answer, "n");
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Oc3afrac")) {
+    instring = strtok(NULL, ",\n");
+    Oc3afrac = atof(instring);
+    fprintf(Logfile, "\nEnter fraction of C3A that is to be orthorhombic ");
+    fprintf(Logfile, "\ninstead of cubic: %f", Oc3afrac);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected Oc3afrac",
+            name);
+    freeallmem();
+    exit(1);
   }
 
-  if (toupper(answer[0]) == 'Y') {
-    fprintf(Logfile, "\nEnter total crack width (in pixels): ");
-    read_string(instring, sizeof(instring));
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Csh_seeds")) {
+    instring = strtok(NULL, ",\n");
+    Csh_seeds = atof(instring);
+    fprintf(
+        Logfile,
+        "\nEnter number of seeds for CSH nucleation per um3 of mix water: %f",
+        Csh_seeds);
+  } else {
+    fprintf(
+        stderr,
+        "\nERROR: Unexpected parameter order: got %s but expected Csh_seeds",
+        name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "End_time")) {
+    instring = strtok(NULL, ",\n");
+    End_time = atof(instring);
+    fprintf(Logfile, "\nEnter aging time in days: %f", End_time);
+    End_time *= 24.0; /* Convert days to hours */
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected End_time",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Place_crack")) {
+    instring = strtok(NULL, ",\n");
+    fprintf(Logfile, "\nPlace a crack (y or n)? [n]: %s", instring);
+    if (strlen(answer) < 1) {
+      strcpy(answer, "n");
+    }
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Place_crack",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Crackwidth")) {
+    instring = strtok(NULL, ",\n");
     Crackwidth = atoi(instring);
-    fprintf(Logfile, "%d", Crackwidth);
-    fprintf(Logfile, "\nEnter time at which to crack (in h): ");
-    read_string(instring, sizeof(instring));
+    fprintf(Logfile, "\nEnter total crack width (in pixels): %d", Crackwidth);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Crackwidth",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Cracktime")) {
+    instring = strtok(NULL, ",\n");
     Cracktime = atof(instring);
-    fprintf(Logfile, "%f", Cracktime);
+    fprintf(Logfile, "\nEnter time at which to crack (in h): %f", Cracktime);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Cracktime",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Crackorient")) {
+    instring = strtok(NULL, ",\n");
+    Crackorient = atoi(instring);
+    if (Crackorient > 3)
+      Crackorient = 3;
     fprintf(Logfile, "\nEnter orientation of crack as follows:");
     fprintf(Logfile, "\n\t 1 = parallel to yz plane");
     fprintf(Logfile, "\n\t 2 = parallel to xz plane");
     fprintf(Logfile, "\n\t 3 = parallel to xy plane");
     fprintf(Logfile, "\nOrientation: ");
-    read_string(instring, sizeof(instring));
-    Crackorient = atoi(instring);
-    if (Crackorient > 3)
-      Crackorient = 3;
-    fprintf(Logfile, "%d\n", Crackorient);
-
+    fprintf(Logfile, "%d", Crackorient);
   } else {
-    Crackwidth = 0;
-    Cracktime = -1.0;
-    Crackorient = 1;
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Crackorient",
+            name);
+    freeallmem();
+    exit(1);
   }
 
-  fprintf(Logfile,
-          "Customize times for outputting microstructure (y or n)? [n] ");
-  read_string(answer, sizeof(answer));
-  fprintf(Logfile, "%s\n", answer);
-  if (strlen(answer) < 1) {
-    strcpy(answer, "n");
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Customize_times")) {
+    instring = strtok(NULL, ",\n");
+    fprintf(Logfile,
+            "\nCustomize times for outputting microstructure (y or n)? [n]: %s",
+            instring);
+    if (strlen(instring) < 1) {
+      strcpy(instring, "n");
+    }
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Customize_times",
+            name);
+    freeallmem();
+    exit(1);
   }
 
-  if (toupper(answer[0]) == 'Y') {
+  if (toupper(instring[0]) == 'Y') {
     Tcustomoutputentries = 0;
     sprintf(custcycfile, "%scustomoutput.dat", WorkingDirectory);
     fcofile = filehandler("disrealnew", custcycfile, "READ");
@@ -2875,10 +3041,22 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
   } else {
     CustomImageTime = NULL;
-    fprintf(Logfile, "Output hydrating microstructure every ____ hours: ");
-    read_string(instring, sizeof(instring));
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Outtimefreq")) {
+    instring = strtok(NULL, ",\n");
     OutTimefreq = atof(instring);
-    fprintf(Logfile, "\n%f\n", OutTimefreq);
+    fprintf(Logfile, "\nOutput hydrating microstructure every ____ hours: %f",
+            OutTimefreq);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Outtimefreq",
+            name);
+    freeallmem();
+    exit(1);
   }
 
   /****
@@ -2906,12 +3084,12 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   }
 
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "\nDone reading image header...\n");
-    fprintf(Logfile, "\tVersion = %f\n", Version);
-    fprintf(Logfile, "\tX size = %d\n", Xsyssize_orig);
-    fprintf(Logfile, "\tY size = %d\n", Ysyssize_orig);
-    fprintf(Logfile, "\tZ size = %d\n", Ysyssize_orig);
-    fprintf(Logfile, "\tResolution = %f\n", Res);
+    fprintf(Logfile, "\nDone reading image header... ");
+    fprintf(Logfile, "\n\tVersion = %f", Version);
+    fprintf(Logfile, "\n\tX size = %d", Xsyssize_orig);
+    fprintf(Logfile, "\n\tY size = %d", Ysyssize_orig);
+    fprintf(Logfile, "\n\tZ size = %d", Ysyssize_orig);
+    fprintf(Logfile, "\n\tResolution = %f", Res);
     fflush(Logfile);
   }
 
@@ -2941,7 +3119,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   if (Verbose_flag > 2)
-    fprintf(Logfile, "\tAllocating Mic with dimensions %d %d %d...", Xsyssize,
+    fprintf(Logfile, "\nAllocating Mic with dimensions %d %d %d...", Xsyssize,
             Ysyssize, Zsyssize);
   Mic = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Mic) {
@@ -2951,7 +3129,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     return (1);
   }
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Micorig ...");
+    fprintf(Logfile, " done\nAllocating Micorig ...");
 
   Micorig = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micorig) {
@@ -2961,7 +3139,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     return (1);
   }
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Micpart ...");
+    fprintf(Logfile, " done\nAllocating Micpart ...");
 
   Micpart = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micpart) {
@@ -2971,7 +3149,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     return (1);
   }
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Cshage ...");
+    fprintf(Logfile, " done\nAllocating Cshage ...");
 
   Cshage = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Cshage) {
@@ -2981,7 +3159,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     return (1);
   }
   if (Verbose_flag > 2)
-    fprintf(Logfile, " done\n\tAllocating Deactivated ...");
+    fprintf(Logfile, " done\nAllocating Deactivated ...");
 
   Deactivated = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Deactivated) {
@@ -2991,7 +3169,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     return (1);
   }
   if (Verbose_flag > 1)
-    fprintf(Logfile, " done\n");
+    fprintf(Logfile, " done");
 
   Cshscale = CSHSCALE * Sizemag;
   C3ah6_scale = C3AH6_SCALE * Sizemag;
@@ -3020,7 +3198,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   Zsyssize = Zsyssize_orig;
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "\nPreparing to read image file ...");
+    fprintf(Logfile, "\n\nPreparing to read image file ...");
   for (ix = 0; ix < Xsyssize; ix++) {
     for (iy = 0; iy < Ysyssize; iy++) {
       for (iz = 0; iz < Zsyssize; iz++) {
@@ -3051,13 +3229,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
   fclose(fimgfile);
   if (Verbose_flag > 1)
-    fprintf(Logfile, " done\n");
+    fprintf(Logfile, " done");
 
   /* Now read in particle IDs from file */
 
   fpimgfile = filehandler("disrealnew", pimgfile, "READ");
   if (!fpimgfile) {
-    fprintf(Logfile, "\nCould not open fpimgfile: %s. Exiting ...", pimgfile);
+    fprintf(Logfile, "\n\nCould not open fpimgfile: %s. Exiting ...", pimgfile);
     fflush(Logfile);
     freeallmem();
     exit(1);
@@ -3093,12 +3271,12 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   fclose(fpimgfile);
 
   if (Version != newver) {
-    fprintf(Logfile, "WARNING: Some files were created with differing\n");
-    fprintf(Logfile, "\tVCCTL software versions.  This may create a");
-    fprintf(Logfile, "\tconflict.");
+    fprintf(Logfile, "\nWARNING: Some files were created with differing");
+    fprintf(Logfile, "\n\tVCCTL software versions.  This may create a");
+    fprintf(Logfile, "\n\tconflict.");
   }
   if (Xsyssize != newx) {
-    fprintf(Logfile, "Xsyssize = %d, New x size = %d", Xsyssize, newx);
+    fprintf(Logfile, "\nXsyssize = %d, New x size = %d", Xsyssize, newx);
     fflush(Logfile);
     freeallmem();
     bailout("disrealnew", "Incompatible size declarations");
@@ -3106,16 +3284,16 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   }
 
   if (Ysyssize != newy) {
-    fprintf(Logfile, "Ysyssize = %d, New y size = %d", Ysyssize, newy);
+    fprintf(Logfile, "\nYsyssize = %d, New y size = %d", Ysyssize, newy);
     fflush(Logfile);
     freeallmem();
-    fprintf(Logfile, "Ysyssize = %d, New y size = %d", Ysyssize, newy);
+    fprintf(Logfile, "\nYsyssize = %d, New y size = %d", Ysyssize, newy);
     bailout("disrealnew", "Incompatible size declarations");
     exit(1);
   }
 
   if (Zsyssize != newz) {
-    fprintf(Logfile, "Zsyssize = %d, New y size = %d", Ysyssize, newy);
+    fprintf(Logfile, "\nZsyssize = %d, New y size = %d", Ysyssize, newy);
     fflush(Logfile);
     freeallmem();
     bailout("disrealnew", "Incompatible size declarations");
@@ -3123,92 +3301,24 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   }
 
   /***
-   *    Allow user to iteratively add one-pixel
-   *    particles of various phases.
-   *
-   *    VCCTL software adds the one-pixel particles at the
-   *    microstructure creation stage rather than here, but
-   *    we keep this structure in place for possible manual
-   *    addition of one-pixel particles by the user.
+   * Get the one-pixel particle reaction bias for each phase
    ***/
 
-  fprintf(Logfile,
-          "Enter number of one pixel particles to add (-1 to quit) \n");
-  fflush(Logfile);
-  read_string(instring, sizeof(instring));
-  nadd = atoi(instring);
-  fprintf(Logfile, "%d\n", nadd);
-
-  while (nadd >= 0) {
-
-    onepixfloc = 0; /* No flocculation of one-pixel particles */
-    /*
-    fprintf(Logfile,"Should these particles flocculate ");
-    fprintf(Logfile,"to surfaces? No (0) or Yes (1): ");
-    read_string(instring,sizeof(instring));
-    onepixfloc = atoi(instring);
-    */
-
-    fprintf(Logfile, "Enter dissolution bias for these one pixel particles\n");
-    read_string(instring, sizeof(instring));
-    bias = atof(instring);
-    fprintf(Logfile, "%f\n", bias);
-
-    fprintf(Logfile, "Enter phase to add \n");
-    if (Verbose_flag > 1) {
-      fprintf(Logfile, "\tC3S %d\n", C3S);
-      fprintf(Logfile, "\tC2S %d\n", C2S);
-      fprintf(Logfile, "\tC3A %d\n", C3A);
-      fprintf(Logfile, "\tC4AF %d\n", C4AF);
-      fprintf(Logfile, "\tGYPSUM %d\n", GYPSUM);
-      fprintf(Logfile, "\tHEMIHYD %d\n", HEMIHYD);
-      fprintf(Logfile, "\tANHYDRITE %d\n", ANHYDRITE);
-      fprintf(Logfile, "\tSILICA FUME %d\n", SFUME);
-      fprintf(Logfile, "\tINERT %d\n", INERT);
-      fprintf(Logfile, "\tSLAG %d\n", SLAG);
-      fprintf(Logfile, "\tASG %d\n", ASG);
-      fprintf(Logfile, "\tCAS2 %d\n", CAS2);
-      fprintf(Logfile, "\tAMORPHOUS SILICA %d\n", AMSIL);
-      fprintf(Logfile, "\tCH %d\n", CH);
-      fprintf(Logfile, "\tCSH %d\n", CSH);
-      fprintf(Logfile, "\tC3AH6 %d\n", C3AH6);
-      fprintf(Logfile, "\tEttringite %d\n", ETTR);
-      fprintf(Logfile, "\tStable Ettringite from C4AF %d\n", ETTRC4AF);
-      fprintf(Logfile, "\tAFM %d\n", AFM);
-      fprintf(Logfile, "\tFH3 %d\n", FH3);
-      fprintf(Logfile, "\tPOZZCSH %d\n", POZZCSH);
-      fprintf(Logfile, "\tSLAGCSH %d\n", SLAGCSH);
-      fprintf(Logfile, "\tCACL2 %d\n", CACL2);
-      fprintf(Logfile, "\tFriedels salt %d\n", FRIEDEL);
-      fprintf(Logfile, "\tStratlingite %d\n", STRAT);
-      fprintf(Logfile, "\tCalcium carbonate %d\n", CACO3);
-      fprintf(Logfile, "\tAFmc %d\n", AFMC);
-      fprintf(Logfile, "\tBrucite %d\n", BRUCITE);
-      fprintf(Logfile, "\tMS %d\n", MS);
-      fprintf(Logfile, "\tFree Lime %d\n", FREELIME);
+  do {
+    fread_string(fprmfile, buff1);
+    name = strtok(buff1, ",");
+    if (!strcmp(name, "Onevoxelbias")) {
+      instring = strtok(NULL, ",\n");
+      phtodo = atoi(instring);
+      instring = strtok(NULL, ",\n");
+      bias = atof(instring);
+      if (phtodo > 0 && phtodo < NSPHASES) {
+        Onepixelbias[phtodo] = bias;
+      }
+      fprintf(Logfile, "\nOne-voxel bias for phase %d = %f", phtodo, bias);
+      fflush(Logfile);
     }
-
-    read_string(instring, sizeof(instring));
-    phtodo = atoi(instring);
-    fprintf(Logfile, "%d \n", phtodo);
-
-    if ((phtodo < 0) || (phtodo > NSPHASES)) {
-      freeallmem();
-      bailout("disrealnew", "Bad ID for one-pixel particle");
-      exit(1);
-    }
-
-    Onepixelbias[phtodo] = bias;
-
-    if (nadd > 0)
-      addrand(phtodo, nadd, onepixfloc);
-
-    fprintf(Logfile, "Enter number of one pixel particles ");
-    fprintf(Logfile, "to add (-1 to quit) \n");
-    read_string(instring, sizeof(instring));
-    nadd = atoi(instring);
-    fprintf(Logfile, "%d\n", nadd);
-  }
+  } while (!strcmp(name, "Onevoxelbias"));
 
   fflush(Logfile);
 
@@ -3216,76 +3326,186 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    Parameters for adiabatic temperature rise calculation
    ***/
 
-  fprintf(Logfile, "Enter the initial temperature of binder ");
-  fprintf(Logfile, "in degrees Celsius \n");
-  read_string(instring, sizeof(instring));
-  Temp_0 = atof(instring);
-  fprintf(Logfile, "%f \n", Temp_0);
-  Temp_cur_b = Temp_0;
-
-  fprintf(Logfile, "Hydration under 0) isothermal, 1) adiabatic ");
-  fprintf(Logfile, "or 2) programmed temperature history conditions \n");
-  read_string(instring, sizeof(instring));
-  Adiaflag = atoi(instring);
-  fprintf(Logfile, "%d \n", Adiaflag);
-  AggTempEffect = 1;
-  if ((Adiaflag == 0) || (Mass_agg * Cp_agg <= 0.0) ||
-      (fabs(Temp_0_agg - Temp_0) < 0.5) || (U_coeff_agg <= 0.0))
-    AggTempEffect = 0;
-
-  fprintf(Logfile, "Enter the ambient temperature ");
-  fprintf(Logfile, "in degrees Celsius \n");
-  read_string(instring, sizeof(instring));
-  T_ambient = atof(instring);
-  fprintf(Logfile, "%f \n", T_ambient);
-
-  fprintf(Logfile, "Enter the overall heat transfer coefficient ");
-  fprintf(Logfile, "in J/g/C/s \n");
-  read_string(instring, sizeof(instring));
-  U_coeff = atof(instring);
-  fprintf(Logfile, "%f \n", U_coeff);
-
-  fprintf(Logfile, "Enter apparent activation energy for hydration ");
-  fprintf(Logfile, "in kJ/mole \n");
-  read_string(instring, sizeof(instring));
-  E_act = atof(instring);
-  fprintf(Logfile, "%f \n", E_act);
-
-  fprintf(Logfile, "Enter apparent activation energy for pozzolanic ");
-  fprintf(Logfile, "reactions in kJ/mole \n");
-  read_string(instring, sizeof(instring));
-  E_act_pozz = atof(instring);
-  fprintf(Logfile, "%f \n", E_act_pozz);
-
-  fprintf(Logfile, "Enter apparent activation energy for slag ");
-  fprintf(Logfile, "reactions in kJ/mole \n");
-  read_string(instring, sizeof(instring));
-  E_act_slag = atof(instring);
-  fprintf(Logfile, "%f \n", E_act_slag);
-
-  fprintf(Logfile, "Calibrate time using beta factor (0), ");
-  fprintf(Logfile, "early-age calorimetry data (1), or ");
-  fprintf(Logfile, "early-age chemical shrinkage data (2): ");
-  read_string(instring, sizeof(instring));
-  TimeCalibrationMethod = atoi(instring);
-  if (TimeCalibrationMethod == BETAFACTOR) {
-    fprintf(Logfile, "\nEnter kinetic factor to convert cycles ");
-    fprintf(Logfile, "to time at 25 C \n");
-    read_string(instring, sizeof(instring));
-    Beta = atof(instring);
-    fprintf(Logfile, "%f \n", Beta);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Temp_0")) {
+    instring = strtok(NULL, ",\n");
+    Temp_0 = atof(instring);
+    fprintf(Logfile, "\nEnter the initial temperature of binder ");
+    fprintf(Logfile, "in degrees Celsius: %f", Temp_0);
+    Temp_cur_b = Temp_0;
   } else {
-    fprintf(Logfile, "\nEnter file name for early-age data: ");
-    read_string(name, sizeof(name));
-    fprintf(Logfile, "\n%s \n", name);
-    sprintf(calfilename, "%s", name);
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Temp_0",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-    /***
-     *  At this point, the isothermal calorimetry file
-     *  must have data taken
-     *  AT 25 degrees C.  We will correct the time scale using the
-     *  user-supplied activation energy for hydration
-     ***/
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Adiaflag")) {
+    instring = strtok(NULL, ",\n");
+    Adiaflag = atoi(instring);
+    fprintf(Logfile, "\nHydration under 0) isothermal, 1) adiabatic ");
+    fprintf(Logfile, "or 2) programmed temperature history conditions: %d",
+            Adiaflag);
+    AggTempEffect = 1;
+    if ((Adiaflag == 0) || (Mass_agg * Cp_agg <= 0.0) ||
+        (fabs(Temp_0_agg - Temp_0) < 0.5) || (U_coeff_agg <= 0.0))
+      AggTempEffect = 0;
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Adiaflag",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "T_ambient")) {
+    instring = strtok(NULL, ",\n");
+    T_ambient = atof(instring);
+    fprintf(Logfile, "\nEnter the ambient temperature ");
+    fprintf(Logfile, "in degrees Celsius: %f", T_ambient);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "T_ambient",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "U_coeff")) {
+    instring = strtok(NULL, ",\n");
+    U_coeff = atof(instring);
+    fprintf(Logfile, "\nEnter the overall heat transfer coefficient ");
+    fprintf(Logfile, "in J/g/C/s: %f", U_coeff);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "U_coeff",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "E_act")) {
+    instring = strtok(NULL, ",\n");
+    E_act = atof(instring);
+    fprintf(Logfile, "\nEnter apparent activation energy for hydration ");
+    fprintf(Logfile, "in kJ/mole: %f", E_act);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "E_act",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "E_act_pozz")) {
+    instring = strtok(NULL, ",\n");
+    E_act_pozz = atof(instring);
+    fprintf(Logfile,
+            "\nEnter apparent activation energy for pozzolanic reaction ");
+    fprintf(Logfile, "in kJ/mole: %f", E_act_pozz);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "E_act_pozz",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "E_act_slag")) {
+    instring = strtok(NULL, ",\n");
+    E_act_slag = atof(instring);
+    fprintf(Logfile, "\nEnter apparent activation energy for slag reactions ");
+    fprintf(Logfile, "in kJ/mole: %f", E_act_slag);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "E_act_slag",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "TimeCalibrationMethod")) {
+    instring = strtok(NULL, ",\n");
+    TimeCalibrationMethod = atoi(instring);
+    fprintf(Logfile, "\nCalibrate time using beta factor (0), ");
+    fprintf(Logfile, "\n\tearly-age calorimetry data (1), or ");
+    fprintf(Logfile, "\n\tearly-age chemical shrinkage data (2): %d",
+            TimeCalibrationMethod);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "TimeCalibrationMethod",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Beta")) {
+    instring = strtok(NULL, ",\n");
+    Beta = atof(instring);
+    fprintf(Logfile, "\nEnter kinetic factor to convert cycles ");
+    fprintf(Logfile, "to time at 25 C: %f", Beta);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Beta",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Calfilename")) {
+    instring = strtok(NULL, ",\n");
+    fprintf(Logfile, "\nEnter file name for early-age data: %s", instring);
+    sprintf(calfilename, "%s", instring);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Calfilename",
+            name);
+    freeallmem();
+    exit(1);
+  }
+
+  /***
+   *  At this point, the isothermal calorimetry file
+   *  must have data taken
+   *  AT 25 degrees C.  We will correct the time scale using the
+   *  user-supplied activation energy for hydration
+   ***/
+
+  if (TimeCalibrationMethod != BETAFACTOR) {
+
+    /* No way to estimate Ncyc rationally, so set it to a very large value and
+     * be prepared to allocate more memory as needed */
+    Ncyc = 10000;
 
     fcalfile = filehandler("disrealnew", calfilename, "READ");
     if (!fcalfile) {
@@ -3378,23 +3598,30 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     NDataLines = i;
 
     fclose(fcalfile);
-    fprintf(Logfile, "Enter temperature at which calibration data ");
-    fprintf(Logfile, "were obtained (in deg C): ");
-    read_string(buff, sizeof(buff));
-    fprintf(Logfile, "%s \n", buff);
-    DataMeasuredAtTemperature = atof(buff);
-  }
 
-  /* Have enough information to calculate upper bound on number of cycles */
+  } else {
 
-  if (TimeCalibrationMethod == BETAFACTOR) {
+    /* Have enough information to calculate upper bound on number of cycles */
+
     b_estimate = Beta * exp((1000.0 * E_act / 8.314) *
                             ((1.0 / (Temp_0 + 273.15)) - (1.0 / 298.15)));
     Ncyc = (int)((2.0 * sqrt(End_time / b_estimate)) + 0.5);
+  }
+
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "DataMeasuredAtTemperature")) {
+    instring = strtok(NULL, ",\n");
+    DataMeasuredAtTemperature = atof(instring);
+    fprintf(Logfile, "\nEnter temperature at which calibration data ");
+    fprintf(Logfile, "were obtained (in deg C): %f", DataMeasuredAtTemperature);
   } else {
-    /* No way to estimate Ncyc rationally, so set it to a very large value and
-     * be prepared to allocate more memory as needed */
-    Ncyc = 10000;
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "DataMeasuredAtTemperature",
+            name);
+    freeallmem();
+    exit(1);
   }
 
   if (Crackwidth == 0)
@@ -3402,7 +3629,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   if (CustomImageTime != NULL) {
     OutTimefreq = End_time + 1.0;
     fprintf(Logfile, "\nSetting DOH frequency for outputting ");
-    fprintf(Logfile, "microstructure = %f\n", OutTimefreq);
+    fprintf(Logfile, "microstructure = %f", OutTimefreq);
     fflush(Logfile);
   }
 
@@ -3434,104 +3661,219 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     exit(1);
   }
 
-  fprintf(Logfile, "Enter maximum degree of hydration to achieve ");
-  fprintf(Logfile, "before terminating \n");
-  read_string(instring, sizeof(instring));
-  Alpha_max = atof(instring);
-  fprintf(Logfile, "%f \n", Alpha_max);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Alpha_max")) {
+    instring = strtok(NULL, ",\n");
+    Alpha_max = atof(instring);
+    fprintf(Logfile, "\nEnter maximum degree of hydration to achieve ");
+    fprintf(Logfile, "before terminating: %f", Alpha_max);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Alpha_max",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Do you wish hydration under 0) saturated ");
-  fprintf(Logfile, "or 1) sealed conditions \n");
-  read_string(instring, sizeof(instring));
-  Sealed = atoi(instring);
-  fprintf(Logfile, "%d \n", Sealed);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Sealed")) {
+    instring = strtok(NULL, ",\n");
+    Sealed = atoi(instring);
+    fprintf(Logfile, "\nDo you wish hydration under 0) saturated ");
+    fprintf(Logfile, "or 1) sealed conditions: %d", Sealed);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Sealed",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
   Sealed_after_crack = Sealed;
 
   *pscalech *= Sizemag;
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "Nuc. prob. and scale factor for CH nucleation \n");
-    fprintf(Logfile, "%f %f \n", *pnucch, *pscalech);
+    fprintf(Logfile, "\nNuc. prob. and scale factor for CH nucleation: ");
+    fprintf(Logfile, "%f %f", *pnucch, *pscalech);
   }
 
   *pscalegyp *= Sizemag;
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "Nuc. prob. and scale factor for gypsum nucleation \n");
-    fprintf(Logfile, "%f %f \n", *pnucgyp, *pscalegyp);
+    fprintf(Logfile, "\nNuc. prob. and scale factor for gypsum nucleation: ");
+    fprintf(Logfile, "%f %f", *pnucgyp, *pscalegyp);
   }
 
   *pscalehg *= Sizemag;
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "Nuc. prob. and scale factor for C3AH6 nucleation \n");
-    fprintf(Logfile, "%f %f \n", *pnuchg, *pscalehg);
+    fprintf(Logfile, "\nNuc. prob. and scale factor for C3AH6 nucleation: ");
+    fprintf(Logfile, "%f %f", *pnuchg, *pscalehg);
   }
 
   *pscalefh3 *= Sizemag;
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "Nuc. prob. and scale factor for FH3 nucleation \n");
-    fprintf(Logfile, "%f %f \n", *pnucfh3, *pscalefh3);
+    fprintf(Logfile, "\nNuc. prob. and scale factor for FH3 nucleation");
+    fprintf(Logfile, "%f %f", *pnucfh3, *pscalefh3);
   }
 
-  fprintf(Logfile, "Enter time frequency for checking pore ");
-  fprintf(Logfile, "space percolation (in h): ");
-  read_string(instring, sizeof(instring));
-  Burntimefreq = atof(instring);
-  fprintf(Logfile, "\n%f\n", Burntimefreq);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Burntimefreq")) {
+    instring = strtok(NULL, ",\n");
+    Burntimefreq = atof(instring);
+    fprintf(Logfile, "\nEnter time frequency for checking pore ");
+    fprintf(Logfile, "space percolation (in h): %f", Burntimefreq);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Burntimefreq",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Enter time frequency for checking percolation ");
-  fprintf(Logfile, "of solids (set) (in h): ");
-  read_string(instring, sizeof(instring));
-  Settimefreq = atof(instring);
-  fprintf(Logfile, "\n%f\n", Settimefreq);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Settimefreq")) {
+    instring = strtok(NULL, ",\n");
+    Settimefreq = atof(instring);
+    fprintf(Logfile, "\nEnter time frequency for checking percolation  ");
+    fprintf(Logfile, "of solids [set] (in h): %f", Settimefreq);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Settimefreq",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Enter time frequency for checking hydration ");
-  fprintf(Logfile, "of particles (in h): ");
-  read_string(instring, sizeof(instring));
-  Phydtimefreq = atof(instring);
-  fprintf(Logfile, "\n%f\n", Phydtimefreq);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Phydtimefreq")) {
+    instring = strtok(NULL, ",\n");
+    Phydtimefreq = atof(instring);
+    fprintf(Logfile, "\nEnter time frequency for checking hydration  ");
+    fprintf(Logfile, "of particles (in h): %f", Phydtimefreq);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Phydtimefreq",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Enter mass fraction of aggregate in concrete \n");
-  read_string(buff, sizeof(buff));
-  fprintf(Logfile, "%s \n", buff);
-  Mass_agg = (double)(atof(buff));
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Mass_agg")) {
+    instring = strtok(NULL, ",\n");
+    Mass_agg = (double)(atof(instring));
+    fprintf(Logfile, "\nEnter mass fraction of aggregate in concrete: %f",
+            Mass_agg);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Mass_agg",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Enter initial temperature of aggregate in concrete \n");
-  read_string(instring, sizeof(instring));
-  Temp_0_agg = atof(instring);
-  fprintf(Logfile, "%f \n", Temp_0_agg);
-  Temp_cur_agg = Temp_0_agg;
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Temp_0_agg")) {
+    instring = strtok(NULL, ",\n");
+    Temp_0_agg = atof(instring);
+    fprintf(Logfile, "\nEnter initial temperature of aggregate in concrete: %f",
+            Temp_0_agg);
+    Temp_cur_agg = Temp_0_agg;
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Temp_0_agg",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile,
-          "Enter heat transfer coefficient between aggregate and binder \n");
-  read_string(instring, sizeof(instring));
-  U_coeff_agg = atof(instring);
-  fprintf(Logfile, "%f \n", U_coeff_agg);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "U_coeff_agg")) {
+    instring = strtok(NULL, ",\n");
+    U_coeff_agg = atof(instring);
+    fprintf(Logfile,
+            "\nEnter the overall heat transfer coefficient in J/g/C/s: %f",
+            U_coeff_agg);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "U_coeff_agg",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "CSH to pozzolanic CSH 0) prohibited or 1) allowed \n");
-  read_string(instring, sizeof(instring));
-  Csh2flag = atoi(instring);
-  fprintf(Logfile, "%d \n", Csh2flag);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Csh2flag")) {
+    instring = strtok(NULL, ",\n");
+    Csh2flag = atoi(instring);
+    fprintf(Logfile, "\nCSH to pozzolanic CSH 0) prohibited or 1) allowed: %d",
+            Csh2flag);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Csh2flag",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "CH precipitation on aggregate surfaces ");
-  fprintf(Logfile, "0) prohibited or 1) allowed \n");
-  read_string(instring, sizeof(instring));
-  Chflag = atoi(instring);
-  fprintf(Logfile, "%d \n", Chflag);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "Chflag")) {
+    instring = strtok(NULL, ",\n");
+    Chflag = atoi(instring);
+    fprintf(Logfile, "\nCH precipitation on aggregate surfaces ");
+    fprintf(Logfile, "0) prohibited or 1) allowed: %d", Chflag);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "Chflag",
+            name);
+    freeallmem();
+    exit(1);
+  }
 
-  fprintf(Logfile, "Output hydration movie frame every ____ hours: ");
-  read_string(instring, sizeof(instring));
-  MovieFrameFreq = atof(instring);
-  if (MovieFrameFreq > End_time)
-    MovieFrameFreq = End_time + 1.0;
-  if (MovieFrameFreq <= 0.0)
-    MovieFrameFreq = End_time + 1.0;
-  fprintf(Logfile, "\n%f \n", MovieFrameFreq);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "MovieFrameFreq")) {
+    instring = strtok(NULL, ",\n");
+    MovieFrameFreq = atof(instring);
+    if (MovieFrameFreq > End_time)
+      MovieFrameFreq = End_time + 1.0;
+    if (MovieFrameFreq <= 0.0)
+      MovieFrameFreq = End_time + 1.0;
+    fprintf(Logfile, "\nOutput hydration movie frame every ____ hours: %f",
+            MovieFrameFreq);
 
-  *nmovstep = 1;
-  if ((MovieFrameFreq > 0.0) && (MovieFrameFreq < 1.0)) {
-    *nmovstep = (int)(End_time / MovieFrameFreq);
-    if (*nmovstep < 1)
-      *nmovstep = 1;
+    *nmovstep = 1;
+    if ((MovieFrameFreq > 0.0) && (MovieFrameFreq < 1.0)) {
+      *nmovstep = (int)(End_time / MovieFrameFreq);
+      if (*nmovstep < 1)
+        *nmovstep = 1;
+    }
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "MovieFrameFreq",
+            name);
+    freeallmem();
+    exit(1);
   }
 
   /***
@@ -3552,64 +3894,57 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Stopflag[i] = 0;
   }
 
-  fprintf(Logfile, "Enter phase id of surface to deactivate (-1 to quit) \n");
-  read_string(instring, sizeof(instring));
-  dphase = atoi(instring);
-  fprintf(Logfile, "%d\n", dphase);
-
   Numdeact = 0;
-  while (dphase != -1) {
-    deactphase = dphase;
-
-    fprintf(Logfile, "Enter fraction of surface to deactivate \n");
-    read_string(instring, sizeof(instring));
-    dfrac = atof(instring);
-    fprintf(Logfile, "%f\n", dfrac);
-    Deactfrac[deactphase] = dfrac;
-
-    Deactphaselist[Numdeact] = deactphase;
-    Numdeact++;
-
-    if ((deactphase < C3S) || (deactphase > NSPHASES)) {
-      freeallmem();
-      bailout("disrealnew", "Bad ID for deactivated phase");
-      exit(1);
+  do {
+    fread_string(fprmfile, buff1);
+    name = strtok(buff1, ",");
+    if (!strcmp(name, "Deactivate")) {
+      instring = strtok(NULL, ",\n");
+      dphase = atoi(instring);
+      instring = strtok(NULL, ",\n");
+      dfrac = atof(instring);
+      instring = strtok(NULL, ",\n");
+      deactinit = atof(instring);
+      instring = strtok(NULL, ",\n");
+      deactends = atof(instring);
+      instring = strtok(NULL, ",\n");
+      deactterm = atof(instring);
+      instring = strtok(NULL, ",\n");
+      reactfrac = atof(instring);
+      if (dphase > 0 && dphase < NSPHASES) {
+        Deactphaselist[Numdeact] = dphase;
+        Numdeact++;
+        Deactfrac[dphase] = dfrac;
+        Deactinit[dphase] = deactinit;
+        Deactends[dphase] = deactends;
+        Deactterm[dphase] = deactterm;
+        if (deactterm == deactends) {
+          Reactfrac[dphase] = 1.0;
+        } else {
+          Reactfrac[dphase] = 1.0 / (deactterm - deactends + 1);
+        }
+        fprintf(Logfile, "\nDeactivate phase %d: %f,%f,%f,%f,%f", dphase, dfrac,
+                deactinit, deactends, deactterm, reactfrac);
+        fflush(Logfile);
+      }
     }
+  } while (!strcmp(name, "Deactivate"));
 
-    fprintf(Logfile, "Time to implement deactivation (in hours)\n");
-    read_string(instring, sizeof(instring));
-    Deactinit[deactphase] = atof(instring);
-    fprintf(Logfile, "%f\n", Deactinit[deactphase]);
-
-    fprintf(Logfile, "Time to begin reactivation (in hours)\n");
-    read_string(instring, sizeof(instring));
-    dends = atof(instring);
-    fprintf(Logfile, "%f\n", dends);
-    Deactends[deactphase] = dends;
-
-    fprintf(Logfile, "Time of full reactivation (in hours)\n");
-    read_string(instring, sizeof(instring));
-    dterm = atof(instring);
-    fprintf(Logfile, "%f\n", dterm);
-    Deactterm[deactphase] = dterm;
-
-    if (dterm == dends) {
-      Reactfrac[deactphase] = 1.0;
-    } else {
-      Reactfrac[deactphase] = 1.0 / (dterm - dends + 1);
-    }
-
-    fprintf(Logfile, "Enter phase id of surface to deactivate (-1 to quit) \n");
-    read_string(instring, sizeof(instring));
-    dphase = atoi(instring);
-    fprintf(Logfile, "%d\n", dphase);
+  fread_string(fprmfile, buff1);
+  name = strtok(buff1, ",");
+  if (!strcmp(name, "PHactive")) {
+    instring = strtok(NULL, ",\n");
+    PHactive = atoi(instring);
+    fprintf(Logfile, "\nDoes pH influence hydration kinetics? ");
+    fprintf(Logfile, "0) no or 1) yes: %d", PHactive);
+  } else {
+    fprintf(stderr,
+            "\nERROR: Unexpected parameter order: got %s but expected "
+            "PHactive",
+            name);
+    freeallmem();
+    exit(1);
   }
-
-  fprintf(Logfile, "Does pH influence hydration kinetics ");
-  fprintf(Logfile, "0) no or 1) yes \n");
-  read_string(instring, sizeof(instring));
-  PHactive = atoi(instring);
-  fprintf(Logfile, "%d\n", PHactive);
 
   /***
    *    Set possibility of topochemical conversion of silicates
@@ -3622,6 +3957,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   fflush(Logfile);
+  fclose(fprmfile);
   return (status);
 }
 
@@ -3854,7 +4190,7 @@ void init(void) {
        ***/
 
       /***
-       *    geändert am 01.06.00, urspr. 3.0
+       *    geï¿½ndert am 01.06.00, urspr. 3.0
        *
        *    Dissolved hemihydrate distributed at random
        *    throughout microstructure
@@ -4170,8 +4506,8 @@ void init(void) {
   if (P5slag > 1.0) {
     P5slag = 1.0;
     if (Verbose_flag > 0) {
-      fprintf(Logfile, "WARNING:  C3A/slag value exceeded 1.0.  ");
-      fprintf(Logfile, "Resetting to 1.0 \n");
+      fprintf(Logfile, "\nWARNING:  C3A/slag value exceeded 1.0.  ");
+      fprintf(Logfile, "Resetting to 1.0");
     }
   }
   if (Verbose_flag > 1) {
@@ -4270,7 +4606,7 @@ int initialize_output_files(void) {
     fprintf(Logfile, "\nWorkingDirectory is: %s", WorkingDirectory);
     fprintf(Logfile, "\noutputdirnosep is: %s", outputdirnosep);
     fprintf(Logfile, "\nSeparation character is %c", sepchar);
-    fprintf(Logfile, "Number of separation characters is %d", numsep);
+    fprintf(Logfile, "\nNumber of separation characters is %d", numsep);
     fprintf(Logfile, "\n\ndfileroot is: %s\n\n", dfileroot);
   }
 
@@ -4318,8 +4654,8 @@ void manage_deactivation_behavior(void) {
       Startflag[j] = 1;
       if (Verbose_flag > 1) {
         fprintf(Logfile, "\nDeactivating now at time %f...", Time_cur);
-        fprintf(Logfile, " phase %d\n", j);
-        fprintf(Logfile, "\tFraction to deactivate is %f\n", Deactfrac[j]);
+        fprintf(Logfile, " phase %d", j);
+        fprintf(Logfile, "\n\tFraction to deactivate is %f", Deactfrac[j]);
       }
       performdeactivation(j, Deactfrac[j]);
     }
@@ -4335,11 +4671,11 @@ void manage_deactivation_behavior(void) {
         Stopflag[j] = 1;
         if (Verbose_flag > 1) {
           fprintf(Logfile,
-                  "\nTerminating deactivation for phase %d \nat time %f\n", j,
+                  "\nTerminating deactivation for phase %d \nat time %f", j,
                   Time_cur);
         }
       } else if (Verbose_flag > 1) {
-        fprintf(Logfile, "\nPartially reactivating for phase %d \nat time %f\n",
+        fprintf(Logfile, "\nPartially reactivating for phase %d \nat time %f",
                 j, Time_cur);
       }
 
@@ -4350,9 +4686,8 @@ void manage_deactivation_behavior(void) {
 
       Stopflag[j] = 1;
       if (Verbose_flag > 1)
-        fprintf(Logfile,
-                "\nTerminating deactivation for phase %d \nat time %f\n", j,
-                Time_cur);
+        fprintf(Logfile, "\nTerminating deactivation for phase %d \nat time %f",
+                j, Time_cur);
     }
   }
 
@@ -5156,7 +5491,7 @@ void extslagcsh(int xpres, int ypres, int zpres) {
 
     sump *= moveone(&xchr, &ychr, &zchr, &action, sump);
     if (!action && (Verbose_flag > 1))
-      fprintf(Logfile, "Error in value of action in extpozz \n");
+      fprintf(Logfile, "\nError in value of action in extpozz");
 
     check = Mic[xchr][ychr][zchr];
 
@@ -5649,11 +5984,11 @@ void dissolve(int cycle) {
                 tot_mass;
 
     if (Verbose_flag > 2) {
-      fprintf(Logfile, "Calculated w/c is %.4f\n", W_to_c);
-      fprintf(Logfile, "Calculated s/c is %.4f \n", S_to_c);
-      fprintf(Logfile, "Calculated heat conversion factor is %f \n", Heat_cf);
-      fprintf(Logfile, "Calculated mass fractions of water and filler ");
-      fprintf(Logfile, "are %.4f  and %.4f \n", Mass_water, Mass_fill);
+      fprintf(Logfile, "\nCalculated w/c is %.4f", W_to_c);
+      fprintf(Logfile, "\nCalculated s/c is %.4f", S_to_c);
+      fprintf(Logfile, "\nCalculated heat conversion factor is %f", Heat_cf);
+      fprintf(Logfile, "\nCalculated mass fractions of water and filler ");
+      fprintf(Logfile, "are %.4f  and %.4f", Mass_water, Mass_fill);
     }
   }
 
@@ -6181,7 +6516,7 @@ void dissolve(int cycle) {
     if ((fpout01 = fopen("SfumeEffect.csv", "w")) == NULL) {
       if (Verbose_flag > 0) {
         fprintf(Logfile,
-                "\nWARNING:  Could not open SfumeEffect.csv to write header\n");
+                "\nWARNING:  Could not open SfumeEffect.csv to write header");
       }
     } else {
       fprintf(fpout01,
@@ -6207,10 +6542,10 @@ void dissolve(int cycle) {
              1000.0);
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "\nChs_new = %f\n", Chs_new);
+    fprintf(Logfile, "\nChs_new = %f", Chs_new);
   if (((Water_left + Water_off) < 0) && (Sealed == 1)) {
     if (Verbose_flag > 1)
-      fprintf(Logfile, "All water consumed at cycle %d \n", Cyccnt);
+      fprintf(Logfile, "\nAll water consumed at cycle %d", Cyccnt);
     fflush(Logfile);
     freeallmem();
     bailout("dissolve", "Normal exit");
@@ -6320,7 +6655,7 @@ void dissolve(int cycle) {
 
       Soluble[ETTR] = 1;
       if (Verbose_flag > 1)
-        fprintf(Logfile, "Ettringite is soluble beginning at cycle %d \n",
+        fprintf(Logfile, "\nEttringite is soluble beginning at cycle %d",
                 cycle);
 
       /* Identify all new soluble ettringite */
@@ -6450,10 +6785,10 @@ void dissolve(int cycle) {
    ***/
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "Count[DIFFCH] = %d, Chcrit = %f, Disbase[CH] = %f\n",
+    fprintf(Logfile, "\nCount[DIFFCH] = %d, Chcrit = %f, Disbase[CH] = %f",
             Count[DIFFCH], Chcrit, Disbase[CH]);
   if (Verbose_flag > 1)
-    fprintf(Logfile, "CH dissolution probability changes from %f ",
+    fprintf(Logfile, "\nCH dissolution probability changes from %f ",
             Disprob[CH]);
   Disprob[CH] *=
       ((A0_CHSOL - (A1_CHSOL * Temp_cur_b)) / (A0_CHSOL - (A1_CHSOL * 25.0)));
@@ -6469,7 +6804,7 @@ void dissolve(int cycle) {
   }
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "to %f \n", Disprob[CH]);
+    fprintf(Logfile, "to %f", Disprob[CH]);
 
   /***
    *    Adjust solubility of ASG and CAS2 phases
@@ -6625,7 +6960,7 @@ void dissolve(int cycle) {
     fprintf(Logfile, "\n        resfact = %f dfact = %f\n", resfact, dfact);
     fprintf(Logfile, "\n        A0_CHSOL = %f", A0_CHSOL);
     fprintf(Logfile, " A1_CHSOL = %f", A1_CHSOL);
-    fprintf(Logfile, " Temp_cur_b = %f\n\n", Temp_cur_b);
+    fprintf(Logfile, " Temp_cur_b = %f\n", Temp_cur_b);
     fflush(Logfile);
   }
 
@@ -6643,7 +6978,7 @@ void dissolve(int cycle) {
   if ((fpout01 = fopen("SfumeEffect.csv", "a")) == NULL) {
     if (Verbose_flag > 0) {
       fprintf(Logfile, "\nWARNING:  Could not open");
-      fprintf(Logfile, " SfumeEffect.csv for writing\n");
+      fprintf(Logfile, " SfumeEffect.csv for writing");
     }
   } else {
     fprintf(fpout01, "\n%f,%f,%f,%f,%f,%f,%f", (double)Count[CSH],
@@ -6718,7 +7053,7 @@ void dissolve(int cycle) {
   }
 
   if (Verbose_flag > 1)
-    fprintf(Logfile, "Silicate probabilities: %f %f\n", Disprob[C3S],
+    fprintf(Logfile, "\nSilicate probabilities: %f %f", Disprob[C3S],
             Disprob[C2S]);
 
   /***
@@ -6834,7 +7169,7 @@ void dissolve(int cycle) {
 
     satsquared = Saturation * Saturation;
     if (Verbose_flag > 1)
-      fprintf(Logfile, "\nsaturation = %f\n", Saturation);
+      fprintf(Logfile, "\nsaturation = %f", Saturation);
     Disprob[C3S] *= satsquared;
     Disprob[C3S] *= satsquared;
     Disprob[C3S] *= satsquared;
@@ -6945,17 +7280,18 @@ void dissolve(int cycle) {
   } /* Done reducing dissolutions based on saturation */
 
   if (Verbose_flag > 2) {
-    fprintf(Logfile, "Silicate and aluminate probabilities: ");
+    fprintf(Logfile, "\nSilicate and aluminate probabilities: ");
     fprintf(Logfile, "%f %f ", Disprob[C3S], Disprob[C2S]);
     fprintf(Logfile, "%f %f %f %f %f\n", Disprob[C3A], Disprob[OC3A],
             Disprob[C4AF], Disprob[GYPSUM], Disprob[HEMIHYD]);
     fprintf(Logfile,
-            "Cs_acc is %f and Ca_acc is %f Sulf_cur is %d Sulf_conc is %f\n",
+            "\nCs_acc is %f and Ca_acc is %f Sulf_cur is %d Sulf_conc is %f",
             Cs_acc, Ca_acc, Sulf_cur, Sulf_conc);
-    fprintf(Logfile,
-            "Pfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 "
-            "is %f\n",
-            Pfract, Totfract, Tfractw05, Pfractw05);
+    fprintf(
+        Logfile,
+        "\nPfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 "
+        "is %f",
+        Pfract, Totfract, Tfractw05, Pfractw05);
   }
 
   /***
@@ -7387,11 +7723,11 @@ void dissolve(int cycle) {
                   calcz = calcy - 1.0;
                   calcy = 1.0;
                   if (Verbose_flag > 0) {
-                    fprintf(Logfile, "WARNING:  Problem of not ");
+                    fprintf(Logfile, "\nWARNING:  Problem of not ");
                     fprintf(Logfile, "creating enough pozzolanic ");
                     fprintf(Logfile, "CSH during CSH conversion");
                     fprintf(Logfile, "\nCurrent binder temperature");
-                    fprintf(Logfile, "is %f C\n", Temp_cur_b);
+                    fprintf(Logfile, "is %f C", Temp_cur_b);
                   }
                 }
 
@@ -8073,10 +8409,10 @@ void dissolve(int cycle) {
   */
 
   if ((ncshgo != 0) && (Verbose_flag > 2))
-    fprintf(Logfile, "CSH dissolved is %d \n", ncshgo);
+    fprintf(Logfile, "\nCSH dissolved is %d", ncshgo);
 
   if ((npchext > 0) && (Verbose_flag > 2))
-    fprintf(Logfile, "Extra CH required is %d at cycle %d \n", npchext, cycle);
+    fprintf(Logfile, "\nExtra CH required is %d at cycle %d", npchext, cycle);
 
   /***
    *    Now add in the extra diffusing species for dissolution
@@ -8087,7 +8423,7 @@ void dissolve(int cycle) {
 
   ncshext = cshrand;
   if ((cshrand != 0) && (Verbose_flag > 2))
-    fprintf(Logfile, "cshrand is %d \n", cshrand);
+    fprintf(Logfile, "\ncshrand is %d", cshrand);
 
   /***
    *    Extra diffusing CH, Gypsum, C3A, and SO4 are added at totally random
@@ -8315,7 +8651,7 @@ void dissolve(int cycle) {
   */
 
   if (Verbose_flag > 2) {
-    fprintf(Logfile, "Dissolved- %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+    fprintf(Logfile, "\nDissolved- %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
             Count[DIFFCSH], Count[DIFFCH], Count[DIFFGYP], Count[DIFFC3A],
             Count[DIFFFH3], Count[DIFFETTR], Count[DIFFAS], Count[DIFFCAS2],
             Count[DIFFCACL2], Count[DIFFCACO3], Count[DIFFGYP], Count[DIFFHEM],
@@ -8869,9 +9205,9 @@ void measuresurf(void) {
 
   Surffract = (float)Scntcement / (float)Scnttotal;
   if (Verbose_flag > 1) {
-    fprintf(Logfile, "Cement surface count is %d \n", Scntcement);
-    fprintf(Logfile, "Total surface count is %d \n", Scnttotal);
-    fprintf(Logfile, "Surface fraction is %f \n", Surffract);
+    fprintf(Logfile, "\nCement surface count is %d", Scntcement);
+    fprintf(Logfile, "\nTotal surface count is %d", Scnttotal);
+    fprintf(Logfile, "\nSurface fraction is %f", Surffract);
     fflush(Logfile);
   }
 }
@@ -8901,16 +9237,15 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
   float calFileSaysTimeShouldBe, uncorrectedTime_step, recip_Tdiff;
 
   if (Verbose_flag > 2)
-    fprintf(Logfile, "\nCurDataLine = %d, NDataLines = %d\n", CurDataLine,
+    fprintf(Logfile, "\nCurDataLine = %d, NDataLines = %d", CurDataLine,
             NDataLines);
   if (CurDataLine < NDataLines) {
     /* Use linear interpolation of the measured data to get the current time
      */
     for (i = CurDataLine; (i < NDataLines) && (h_interp_factor < 0.0); i++) {
       if (Verbose_flag > 2)
-        fprintf(Logfile,
-                "\ndval = %f, DataValue[%d] = %f, DataValue[%d] = %f\n", dval,
-                i - 1, DataValue[i - 1], i, DataValue[i]);
+        fprintf(Logfile, "\ndval = %f, DataValue[%d] = %f, DataValue[%d] = %f",
+                dval, i - 1, DataValue[i - 1], i, DataValue[i]);
       if ((dval >= DataValue[i - 1]) && (dval <= DataValue[i])) {
         h_interp_factor =
             (dval - DataValue[i - 1]) / (DataValue[i] - DataValue[i - 1]);
@@ -8948,7 +9283,7 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
           fprintf(Logfile, "\n**recip_Tdiff = %f", recip_Tdiff);
           fprintf(Logfile, "\n**act_nrg = %f, CalKrate = %f", act_nrg,
                   CalKrate);
-          fprintf(Logfile, "\n**Time_step = %f, Time_cur = %f\n", Time_step,
+          fprintf(Logfile, "\n**Time_step = %f, Time_cur = %f", Time_step,
                   Time_cur);
           fprintf(Logfile, "\n**dval = %f", dval);
           fprintf(Logfile, "\n**DataValue[%d] = %f, DataValue[%d] = %f", i - 1,
@@ -8956,10 +9291,10 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
           fprintf(Logfile, "\n**DataTime[%d] = %f, DataTime[%d] = %f", i - 1,
                   DataTime[i - 1], i, DataTime[i]);
           fprintf(Logfile, "\n**h_interp_factor = %f", h_interp_factor);
-          fprintf(Logfile,
-                  "\n**TimeHistory[%d] = %f and TimeHistory[%d] = %f\n", Cyccnt,
-                  TimeHistory[Cyccnt], Cyccnt - 1, TimeHistory[Cyccnt - 1]);
-          fprintf(Logfile, "\n**Time_cur = %f\n", Time_cur);
+          fprintf(Logfile, "\n**TimeHistory[%d] = %f and TimeHistory[%d] = %f",
+                  Cyccnt, TimeHistory[Cyccnt], Cyccnt - 1,
+                  TimeHistory[Cyccnt - 1]);
+          fprintf(Logfile, "\n**Time_cur = %f", Time_cur);
         }
         fflush(Logfile);
         *previousUncorrectedTime = calFileSaysTimeShouldBe;
@@ -8976,7 +9311,7 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
       CurDataLine = NDataLines + 1;
 
       if (Verbose_flag > 1)
-        fprintf(Logfile, "\nNo more useful %s data for calibration\n",
+        fprintf(Logfile, "\nNo more useful %s data for calibration",
                 typestring);
       fflush(Logfile);
     }
@@ -9002,19 +9337,19 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
       fprintf(stderr, "ERROR: Time step is %f at cycle = %d\n", Time_step,
               Cyccnt);
       fprintf(Logfile, "\n\n****\n");
-      fprintf(Logfile, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+      fprintf(Logfile, "\nERROR: Time step is %f at cycle = %d", Time_step,
               Cyccnt);
-      fprintf(Logfile, "       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0],
+      fprintf(Logfile, "\n       Bvec[0] = %f , Bvec[1] = %f", Bvec[0],
               Bvec[1]);
-      fprintf(stderr, "****\n\n");
-      fprintf(Logfile, "****\n\n");
+      fprintf(stderr, "\n****\n");
+      fprintf(Logfile, "\n****\n");
       freeallmem();
       bailout("disrealnew", "Problem with time extrapolation from calorimetry");
       exit(1);
     }
     TimeHistory[Cyccnt] = TimeHistory[Cyccnt - 1] + Time_step;
     if (Verbose_flag > 2) {
-      fprintf(Logfile, "\nQuadratic fit is %g n*n + %g n + %g\n", Bvec[0],
+      fprintf(Logfile, "\nQuadratic fit is %g n*n + %g n + %g", Bvec[0],
               Bvec[1], Bvec[2]);
     }
   } else {
@@ -9028,16 +9363,16 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
     CalKrate = exp(-(act_nrg * recip_Tdiff));
     Time_step = (2.0 * Bvec[0] * (float)((Cyccnt - 1)) + (Bvec[1])) / CalKrate;
     if (Time_step <= 0.0) {
-      fprintf(stderr, "\n\n****\n");
-      fprintf(stderr, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+      fprintf(stderr, "\n\n****");
+      fprintf(stderr, "\nERROR: Time step is %f at cycle = %d", Time_step,
               Cyccnt);
-      fprintf(Logfile, "\n\n****\n");
-      fprintf(Logfile, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+      fprintf(Logfile, "\n****");
+      fprintf(Logfile, "\nERROR: Time step is %f at cycle = %d", Time_step,
               Cyccnt);
-      fprintf(Logfile, "       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0],
+      fprintf(Logfile, "\n       Bvec[0] = %f , Bvec[1] = %f", Bvec[0],
               Bvec[1]);
-      fprintf(stderr, "****\n\n");
-      fprintf(Logfile, "****\n\n");
+      fprintf(stderr, "\n****\n");
+      fprintf(Logfile, "\n****\n");
       freeallmem();
       bailout("disrealnew", "Problem with time extrapolation from calorimetry");
       exit(1);
@@ -9106,16 +9441,16 @@ void createfittocycles(void) {
 
     /* No quadratic fit was found; default to linear fit with warning */
     if (Verbose_flag > 0) {
-      fprintf(Logfile, "WARNING: No quadratic fit could be found to the "
-                       "measurement data!\n");
+      fprintf(Logfile, "\nWARNING: No quadratic fit could be found to the "
+                       "measurement data!");
+      fprintf(Logfile, "\n         This likely is caused by terminating the "
+                       "measurements\n");
+      fprintf(Logfile, "         too soon.");
       fprintf(
           Logfile,
-          "         This likely is caused by terminating the measurements\n");
-      fprintf(Logfile, "         too soon.\n\n");
-      fprintf(Logfile,
-              "         Defaulting to a LINEAR fit, which may not yield good "
-              "results\n");
-      fprintf(Logfile, "         at later times.\n\n");
+          "\n\n         Defaulting to a LINEAR fit, which may not yield good "
+          "results");
+      fprintf(Logfile, "         at later times.");
     }
     increment = 20;
     numpoints = 3.0;
@@ -9298,7 +9633,7 @@ void freeallmem(void) {
       fprintf(Logfile, "\nFreed all ants except Headant... ");
     free(Headant);
     if (Verbose_flag > 2)
-      fprintf(Logfile, "freed Headant\n");
+      fprintf(Logfile, "freed Headant");
   }
 
   if (Headks) {
@@ -9324,7 +9659,7 @@ void freeallmem(void) {
       fprintf(Logfile, "\nFreed all ks except Headks... ");
     free(Headks);
     if (Verbose_flag > 2)
-      fprintf(Logfile, "freed Headks\n");
+      fprintf(Logfile, "freed Headks");
   }
 
   if (Headnas) {
@@ -9350,7 +9685,7 @@ void freeallmem(void) {
       fprintf(Logfile, "\nFreed all nas except Headnas... ");
     free(Headnas);
     if (Verbose_flag > 2)
-      fprintf(Logfile, "freed Headnas\n");
+      fprintf(Logfile, "freed Headnas");
   }
 
   return;

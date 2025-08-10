@@ -1,0 +1,1911 @@
+
+Made it into genmicEnter random number seed value (a negative integer) 
+-8283 
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+2 
+Enter X dimension of system 
+100
+Enter Y dimension of system 
+100
+Enter Z dimension of system 
+100
+Enter system resolution (micrometers per pixel) 
+1.00
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+6 
+
+Placing one-pixel slab at x = 50
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+3 
+Add all SPHERES (0), all REAL-SHAPE (1), or MIXED (2)  particles? 0
+Enter the binder SOLID volume fraction: 
+0.335500
+Enter the binder WATER volume fraction: 
+0.423000
+Enter number of solid binder phases to add: 
+5
+Enter phase id to add: 
+7
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.024963
+Will need to enter 11042 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 7 particles in size class 0: 
+0.101701
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 7 particles in size class 1: 
+0.064643
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 7 particles in size class 2: 
+0.051680
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 7 particles in size class 3: 
+0.042599
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 7 particles in size class 4: 
+0.037104
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 7 particles in size class 5: 
+0.034073
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 7 particles in size class 6: 
+0.031783
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 7 particles in size class 7: 
+0.030358
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 7 particles in size class 8: 
+0.029224
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 7 particles in size class 9: 
+0.028276
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 7 particles in size class 10: 
+0.027073
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 7 particles in size class 11: 
+0.026186
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 7 particles in size class 12: 
+0.025534
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 7 particles in size class 13: 
+0.024119
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 7 particles in size class 14: 
+0.023514
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 7 particles in size class 15: 
+0.022354
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 7 particles in size class 16: 
+0.021628
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 7 particles in size class 17: 
+0.020418
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 7 particles in size class 18: 
+0.020098
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 7 particles in size class 19: 
+0.018311
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 7 particles in size class 20: 
+0.018311
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 7 particles in size class 21: 
+0.016884
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 7 particles in size class 22: 
+0.016081
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 7 particles in size class 23: 
+0.016081
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 7 particles in size class 24: 
+0.014240
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 7 particles in size class 25: 
+0.013786
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 7 particles in size class 26: 
+0.013786
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 7 particles in size class 27: 
+0.012421
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 7 particles in size class 28: 
+0.011495
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 7 particles in size class 29: 
+0.011495
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 7 particles in size class 30: 
+0.011495
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 7 particles in size class 31: 
+0.163248
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 0
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 1
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 1
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 2
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 2
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 5
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 8
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 30
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 89
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 1123
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 4685
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 1803
+Extra pixels (cumulative) = 1803
+Target pixels in size class 1 = 127
+Extra pixels (cumulative) = 1930
+Target pixels in size class 2 = 127
+Extra pixels (cumulative) = 2057
+Target pixels in size class 3 = 127
+Extra pixels (cumulative) = 2184
+Target pixels in size class 4 = 137
+Extra pixels (cumulative) = 2321
+Target pixels in size class 5 = 152
+Extra pixels (cumulative) = 2473
+Target pixels in size class 6 = 152
+Extra pixels (cumulative) = 2625
+Target pixels in size class 7 = 157
+Extra pixels (cumulative) = 2782
+Target pixels in size class 8 = 178
+Extra pixels (cumulative) = 2960
+Target pixels in size class 9 = 178
+Extra pixels (cumulative) = 3138
+Target pixels in size class 10 = 186
+Extra pixels (cumulative) = 3324
+Target pixels in size class 11 = 202
+Extra pixels (cumulative) = 3526
+Target pixels in size class 12 = 202
+Extra pixels (cumulative) = 3728
+Target pixels in size class 13 = 222
+Extra pixels (cumulative) = 3950
+Reduced number of particles in size class 13 by 1
+Target pixels in size class 14 = 225
+Extra pixels (cumulative) = 480
+Target pixels in size class 15 = 239
+Extra pixels (cumulative) = 719
+Target pixels in size class 16 = 247
+Extra pixels (cumulative) = 966
+Target pixels in size class 17 = 260
+Extra pixels (cumulative) = 1226
+Target pixels in size class 18 = 266
+Extra pixels (cumulative) = 1492
+Target pixels in size class 19 = 282
+Extra pixels (cumulative) = 1774
+Reduced number of particles in size class 19 by 1
+Target pixels in size class 20 = 289
+Extra pixels (cumulative) = 874
+Target pixels in size class 21 = 299
+Extra pixels (cumulative) = 1173
+Reduced number of particles in size class 21 by 1
+Target pixels in size class 22 = 312
+Extra pixels (cumulative) = 746
+Reduced number of particles in size class 22 by 1
+Target pixels in size class 23 = 323
+Extra pixels (cumulative) = 8
+Target pixels in size class 24 = 335
+Extra pixels (cumulative) = -17
+Target pixels in size class 25 = 351
+Extra pixels (cumulative) = -24
+Target pixels in size class 26 = 376
+Extra pixels (cumulative) = 32
+Target pixels in size class 27 = 410
+Extra pixels (cumulative) = 37
+Target pixels in size class 28 = 470
+Extra pixels (cumulative) = 59
+Reduced number of particles in size class 28 by 1
+Target pixels in size class 29 = 571
+Extra pixels (cumulative) = 4
+Target pixels in size class 30 = 714
+Extra pixels (cumulative) = 6
+Enter phase id to add: 
+1
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.885857
+Will need to enter 391833 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 1 particles in size class 0: 
+0.101701
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 1 particles in size class 1: 
+0.064643
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 1 particles in size class 2: 
+0.051680
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 1 particles in size class 3: 
+0.042599
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 1 particles in size class 4: 
+0.037104
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 1 particles in size class 5: 
+0.034073
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 1 particles in size class 6: 
+0.031783
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 1 particles in size class 7: 
+0.030358
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 1 particles in size class 8: 
+0.029224
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 1 particles in size class 9: 
+0.028276
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 1 particles in size class 10: 
+0.027073
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 1 particles in size class 11: 
+0.026186
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 1 particles in size class 12: 
+0.025534
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 1 particles in size class 13: 
+0.024119
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 1 particles in size class 14: 
+0.023514
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 1 particles in size class 15: 
+0.022354
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 1 particles in size class 16: 
+0.021628
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 1 particles in size class 17: 
+0.020418
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 1 particles in size class 18: 
+0.020098
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 1 particles in size class 19: 
+0.018311
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 1 particles in size class 20: 
+0.018311
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 1 particles in size class 21: 
+0.016884
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 1 particles in size class 22: 
+0.016081
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 1 particles in size class 23: 
+0.016081
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 1 particles in size class 24: 
+0.014240
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 1 particles in size class 25: 
+0.013786
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 1 particles in size class 26: 
+0.013786
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 1 particles in size class 27: 
+0.012421
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 1 particles in size class 28: 
+0.011495
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 1 particles in size class 29: 
+0.011495
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 1 particles in size class 30: 
+0.011495
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 1 particles in size class 31: 
+0.163248
+Number of particles of diameter 32.000000 = 3
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 1
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 1
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 1
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 1
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 1
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 1
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 1
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 2
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 2
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 2
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 3
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 3
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 5
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 5
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 8
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 9
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 14
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 16
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 29
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 33
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 70
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 83
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 179
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 298
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 1066
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 3166
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 39850
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 373340
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 63966
+Extra pixels (cumulative) = 7998
+Target pixels in size class 1 = 4504
+Extra pixels (cumulative) = 12502
+Target pixels in size class 2 = 4504
+Extra pixels (cumulative) = 17006
+Reduced number of particles in size class 2 by 1
+Target pixels in size class 3 = 4504
+Extra pixels (cumulative) = 6102
+Target pixels in size class 4 = 4867
+Extra pixels (cumulative) = 10969
+Target pixels in size class 5 = 5402
+Extra pixels (cumulative) = 5976
+Target pixels in size class 6 = 5402
+Extra pixels (cumulative) = 1234
+Target pixels in size class 7 = 5580
+Extra pixels (cumulative) = -1403
+Target pixels in size class 8 = 6301
+Extra pixels (cumulative) = -3246
+Target pixels in size class 9 = 6301
+Extra pixels (cumulative) = -3348
+Target pixels in size class 10 = 6616
+Extra pixels (cumulative) = -3004
+Target pixels in size class 11 = 7175
+Extra pixels (cumulative) = -774
+Target pixels in size class 12 = 7175
+Extra pixels (cumulative) = -3151
+Target pixels in size class 13 = 7875
+Extra pixels (cumulative) = -2666
+Target pixels in size class 14 = 8000
+Extra pixels (cumulative) = -1754
+Target pixels in size class 15 = 8474
+Extra pixels (cumulative) = -939
+Target pixels in size class 16 = 8759
+Extra pixels (cumulative) = 284
+Target pixels in size class 17 = 9213
+Extra pixels (cumulative) = 542
+Target pixels in size class 18 = 9451
+Extra pixels (cumulative) = 1313
+Target pixels in size class 19 = 10005
+Extra pixels (cumulative) = 1806
+Reduced number of particles in size class 19 by 1
+Target pixels in size class 20 = 10261
+Extra pixels (cumulative) = 1086
+Target pixels in size class 21 = 10608
+Extra pixels (cumulative) = 1348
+Reduced number of particles in size class 21 by 1
+Target pixels in size class 22 = 11079
+Extra pixels (cumulative) = 936
+Reduced number of particles in size class 22 by 1
+Target pixels in size class 23 = 11451
+Extra pixels (cumulative) = 434
+Reduced number of particles in size class 23 by 1
+Target pixels in size class 24 = 11895
+Extra pixels (cumulative) = 60
+Target pixels in size class 25 = 12454
+Extra pixels (cumulative) = -16
+Target pixels in size class 26 = 13351
+Extra pixels (cumulative) = 55
+Target pixels in size class 27 = 14539
+Extra pixels (cumulative) = 95
+Reduced number of particles in size class 27 by 1
+Target pixels in size class 28 = 16692
+Extra pixels (cumulative) = 18
+Target pixels in size class 29 = 20250
+Extra pixels (cumulative) = 14
+Target pixels in size class 30 = 25329
+Extra pixels (cumulative) = 15
+Reduced number of particles in size class 30 by 1
+Enter phase id to add: 
+8
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.028919
+Will need to enter 12792 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 8 particles in size class 0: 
+0.101701
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 8 particles in size class 1: 
+0.064643
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 8 particles in size class 2: 
+0.051680
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 8 particles in size class 3: 
+0.042599
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 8 particles in size class 4: 
+0.037104
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 8 particles in size class 5: 
+0.034073
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 8 particles in size class 6: 
+0.031783
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 8 particles in size class 7: 
+0.030358
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 8 particles in size class 8: 
+0.029224
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 8 particles in size class 9: 
+0.028276
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 8 particles in size class 10: 
+0.027073
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 8 particles in size class 11: 
+0.026186
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 8 particles in size class 12: 
+0.025534
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 8 particles in size class 13: 
+0.024119
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 8 particles in size class 14: 
+0.023514
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 8 particles in size class 15: 
+0.022354
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 8 particles in size class 16: 
+0.021628
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 8 particles in size class 17: 
+0.020418
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 8 particles in size class 18: 
+0.020098
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 8 particles in size class 19: 
+0.018311
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 8 particles in size class 20: 
+0.018311
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 8 particles in size class 21: 
+0.016884
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 8 particles in size class 22: 
+0.016081
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 8 particles in size class 23: 
+0.016081
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 8 particles in size class 24: 
+0.014240
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 8 particles in size class 25: 
+0.013786
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 8 particles in size class 26: 
+0.013786
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 8 particles in size class 27: 
+0.012421
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 8 particles in size class 28: 
+0.011495
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 8 particles in size class 29: 
+0.011495
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 8 particles in size class 30: 
+0.011495
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 8 particles in size class 31: 
+0.163248
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 1
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 1
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 1
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 2
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 3
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 6
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 10
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 35
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 103
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 1301
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 6095
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 2088
+Extra pixels (cumulative) = 2088
+Target pixels in size class 1 = 147
+Extra pixels (cumulative) = 2235
+Target pixels in size class 2 = 147
+Extra pixels (cumulative) = 2382
+Target pixels in size class 3 = 147
+Extra pixels (cumulative) = 2529
+Target pixels in size class 4 = 159
+Extra pixels (cumulative) = 2688
+Target pixels in size class 5 = 176
+Extra pixels (cumulative) = 2864
+Target pixels in size class 6 = 176
+Extra pixels (cumulative) = 3040
+Target pixels in size class 7 = 182
+Extra pixels (cumulative) = 3222
+Target pixels in size class 8 = 206
+Extra pixels (cumulative) = 3428
+Target pixels in size class 9 = 206
+Extra pixels (cumulative) = 3634
+Target pixels in size class 10 = 216
+Extra pixels (cumulative) = 3850
+Target pixels in size class 11 = 234
+Extra pixels (cumulative) = 4084
+Target pixels in size class 12 = 234
+Extra pixels (cumulative) = 4318
+Target pixels in size class 13 = 257
+Extra pixels (cumulative) = 4575
+Reduced number of particles in size class 13 by 1
+Target pixels in size class 14 = 261
+Extra pixels (cumulative) = 1141
+Target pixels in size class 15 = 277
+Extra pixels (cumulative) = 1418
+Target pixels in size class 16 = 286
+Extra pixels (cumulative) = 1704
+Target pixels in size class 17 = 301
+Extra pixels (cumulative) = 2005
+Reduced number of particles in size class 17 by 1
+Target pixels in size class 18 = 309
+Extra pixels (cumulative) = 523
+Target pixels in size class 19 = 327
+Extra pixels (cumulative) = 850
+Target pixels in size class 20 = 335
+Extra pixels (cumulative) = 1185
+Reduced number of particles in size class 20 by 1
+Target pixels in size class 21 = 346
+Extra pixels (cumulative) = 443
+Target pixels in size class 22 = 362
+Extra pixels (cumulative) = 133
+Target pixels in size class 23 = 374
+Extra pixels (cumulative) = 118
+Target pixels in size class 24 = 388
+Extra pixels (cumulative) = 146
+Target pixels in size class 25 = 407
+Extra pixels (cumulative) = 195
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 436
+Extra pixels (cumulative) = -28
+Target pixels in size class 27 = 475
+Extra pixels (cumulative) = -39
+Target pixels in size class 28 = 545
+Extra pixels (cumulative) = -54
+Target pixels in size class 29 = 661
+Extra pixels (cumulative) = -58
+Reduced number of particles in size class 29 by -3
+Target pixels in size class 30 = 827
+Extra pixels (cumulative) = 2
+Enter phase id to add: 
+9
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.002261
+Will need to enter 1000 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 9 particles in size class 0: 
+0.101701
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 9 particles in size class 1: 
+0.064643
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 9 particles in size class 2: 
+0.051680
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 9 particles in size class 3: 
+0.042599
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 9 particles in size class 4: 
+0.037104
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 9 particles in size class 5: 
+0.034073
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 9 particles in size class 6: 
+0.031783
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 9 particles in size class 7: 
+0.030358
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 9 particles in size class 8: 
+0.029224
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 9 particles in size class 9: 
+0.028276
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 9 particles in size class 10: 
+0.027073
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 9 particles in size class 11: 
+0.026186
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 9 particles in size class 12: 
+0.025534
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 9 particles in size class 13: 
+0.024119
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 9 particles in size class 14: 
+0.023514
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 9 particles in size class 15: 
+0.022354
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 9 particles in size class 16: 
+0.021628
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 9 particles in size class 17: 
+0.020418
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 9 particles in size class 18: 
+0.020098
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 9 particles in size class 19: 
+0.018311
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 9 particles in size class 20: 
+0.018311
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 9 particles in size class 21: 
+0.016884
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 9 particles in size class 22: 
+0.016081
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 9 particles in size class 23: 
+0.016081
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 9 particles in size class 24: 
+0.014240
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 9 particles in size class 25: 
+0.013786
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 9 particles in size class 26: 
+0.013786
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 9 particles in size class 27: 
+0.012421
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 9 particles in size class 28: 
+0.011495
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 9 particles in size class 29: 
+0.011495
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 9 particles in size class 30: 
+0.011495
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 9 particles in size class 31: 
+0.163248
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 0
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 0
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 0
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 0
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 0
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 0
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 0
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 0
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 0
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 1
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 3
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 8
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 102
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 279
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 163
+Extra pixels (cumulative) = 163
+Target pixels in size class 1 = 11
+Extra pixels (cumulative) = 174
+Target pixels in size class 2 = 11
+Extra pixels (cumulative) = 185
+Target pixels in size class 3 = 11
+Extra pixels (cumulative) = 196
+Target pixels in size class 4 = 12
+Extra pixels (cumulative) = 208
+Target pixels in size class 5 = 14
+Extra pixels (cumulative) = 222
+Target pixels in size class 6 = 14
+Extra pixels (cumulative) = 236
+Target pixels in size class 7 = 14
+Extra pixels (cumulative) = 250
+Target pixels in size class 8 = 16
+Extra pixels (cumulative) = 266
+Target pixels in size class 9 = 16
+Extra pixels (cumulative) = 282
+Target pixels in size class 10 = 17
+Extra pixels (cumulative) = 299
+Target pixels in size class 11 = 18
+Extra pixels (cumulative) = 317
+Target pixels in size class 12 = 18
+Extra pixels (cumulative) = 335
+Target pixels in size class 13 = 20
+Extra pixels (cumulative) = 355
+Target pixels in size class 14 = 20
+Extra pixels (cumulative) = 375
+Target pixels in size class 15 = 22
+Extra pixels (cumulative) = 397
+Target pixels in size class 16 = 22
+Extra pixels (cumulative) = 419
+Target pixels in size class 17 = 24
+Extra pixels (cumulative) = 443
+Target pixels in size class 18 = 24
+Extra pixels (cumulative) = 467
+Target pixels in size class 19 = 26
+Extra pixels (cumulative) = 493
+Target pixels in size class 20 = 26
+Extra pixels (cumulative) = 519
+Target pixels in size class 21 = 27
+Extra pixels (cumulative) = 546
+Target pixels in size class 22 = 28
+Extra pixels (cumulative) = 574
+Target pixels in size class 23 = 29
+Extra pixels (cumulative) = 603
+Reduced number of particles in size class 23 by 1
+Target pixels in size class 24 = 30
+Extra pixels (cumulative) = 244
+Target pixels in size class 25 = 32
+Extra pixels (cumulative) = 276
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 34
+Extra pixels (cumulative) = 131
+Target pixels in size class 27 = 37
+Extra pixels (cumulative) = 168
+Reduced number of particles in size class 27 by 2
+Target pixels in size class 28 = 43
+Extra pixels (cumulative) = -7
+Target pixels in size class 29 = 52
+Extra pixels (cumulative) = -12
+Target pixels in size class 30 = 65
+Extra pixels (cumulative) = -11
+Reduced number of particles in size class 30 by -1
+Enter phase id to add: 
+33
+Enter volume fraction of this phase (total BINDER SOLID basis): 
+0.058000
+Will need to enter 25655 pixels of this phase...
+Enter number of size classes for this phase (max is 500): 
+32
+Enter diameter of size class 0 in micrometers (integer values only): 
+1
+Enter volume fraction of phase 33 particles in size class 0: 
+0.070795
+Enter diameter of size class 1 in micrometers (integer values only): 
+2
+Enter volume fraction of phase 33 particles in size class 1: 
+0.062251
+Enter diameter of size class 2 in micrometers (integer values only): 
+3
+Enter volume fraction of phase 33 particles in size class 2: 
+0.059134
+Enter diameter of size class 3 in micrometers (integer values only): 
+4
+Enter volume fraction of phase 33 particles in size class 3: 
+0.050176
+Enter diameter of size class 4 in micrometers (integer values only): 
+5
+Enter volume fraction of phase 33 particles in size class 4: 
+0.042244
+Enter diameter of size class 5 in micrometers (integer values only): 
+6
+Enter volume fraction of phase 33 particles in size class 5: 
+0.037283
+Enter diameter of size class 6 in micrometers (integer values only): 
+7
+Enter volume fraction of phase 33 particles in size class 6: 
+0.033598
+Enter diameter of size class 7 in micrometers (integer values only): 
+8
+Enter volume fraction of phase 33 particles in size class 7: 
+0.031597
+Enter diameter of size class 8 in micrometers (integer values only): 
+9
+Enter volume fraction of phase 33 particles in size class 8: 
+0.030274
+Enter diameter of size class 9 in micrometers (integer values only): 
+10
+Enter volume fraction of phase 33 particles in size class 9: 
+0.029351
+Enter diameter of size class 10 in micrometers (integer values only): 
+11
+Enter volume fraction of phase 33 particles in size class 10: 
+0.028376
+Enter diameter of size class 11 in micrometers (integer values only): 
+12
+Enter volume fraction of phase 33 particles in size class 11: 
+0.027689
+Enter diameter of size class 12 in micrometers (integer values only): 
+13
+Enter volume fraction of phase 33 particles in size class 12: 
+0.027180
+Enter diameter of size class 13 in micrometers (integer values only): 
+14
+Enter volume fraction of phase 33 particles in size class 13: 
+0.026051
+Enter diameter of size class 14 in micrometers (integer values only): 
+15
+Enter volume fraction of phase 33 particles in size class 14: 
+0.025521
+Enter diameter of size class 15 in micrometers (integer values only): 
+16
+Enter volume fraction of phase 33 particles in size class 15: 
+0.024508
+Enter diameter of size class 16 in micrometers (integer values only): 
+17
+Enter volume fraction of phase 33 particles in size class 16: 
+0.023809
+Enter diameter of size class 17 in micrometers (integer values only): 
+18
+Enter volume fraction of phase 33 particles in size class 17: 
+0.022644
+Enter diameter of size class 18 in micrometers (integer values only): 
+19
+Enter volume fraction of phase 33 particles in size class 18: 
+0.022304
+Enter diameter of size class 19 in micrometers (integer values only): 
+20
+Enter volume fraction of phase 33 particles in size class 19: 
+0.020404
+Enter diameter of size class 20 in micrometers (integer values only): 
+21
+Enter volume fraction of phase 33 particles in size class 20: 
+0.020404
+Enter diameter of size class 21 in micrometers (integer values only): 
+22
+Enter volume fraction of phase 33 particles in size class 21: 
+0.018750
+Enter diameter of size class 22 in micrometers (integer values only): 
+23
+Enter volume fraction of phase 33 particles in size class 22: 
+0.017820
+Enter diameter of size class 23 in micrometers (integer values only): 
+24
+Enter volume fraction of phase 33 particles in size class 23: 
+0.017820
+Enter diameter of size class 24 in micrometers (integer values only): 
+25
+Enter volume fraction of phase 33 particles in size class 24: 
+0.015554
+Enter diameter of size class 25 in micrometers (integer values only): 
+26
+Enter volume fraction of phase 33 particles in size class 25: 
+0.014994
+Enter diameter of size class 26 in micrometers (integer values only): 
+27
+Enter volume fraction of phase 33 particles in size class 26: 
+0.014994
+Enter diameter of size class 27 in micrometers (integer values only): 
+28
+Enter volume fraction of phase 33 particles in size class 27: 
+0.013273
+Enter diameter of size class 28 in micrometers (integer values only): 
+29
+Enter volume fraction of phase 33 particles in size class 28: 
+0.012107
+Enter diameter of size class 29 in micrometers (integer values only): 
+30
+Enter volume fraction of phase 33 particles in size class 29: 
+0.012107
+Enter diameter of size class 30 in micrometers (integer values only): 
+31
+Enter volume fraction of phase 33 particles in size class 30: 
+0.012107
+Enter diameter of size class 31 in micrometers (integer values only): 
+32
+Enter volume fraction of phase 33 particles in size class 31: 
+0.134883
+Number of particles of diameter 32.000000 = 0
+Volume of each particle of diameter 32.000000 = 18656
+Number of particles of diameter 31.000000 = 0
+Volume of each particle of diameter 31.000000 = 15515
+Number of particles of diameter 30.000000 = 0
+Volume of each particle of diameter 30.000000 = 15408
+Number of particles of diameter 29.000000 = 0
+Volume of each particle of diameter 29.000000 = 12893
+Number of particles of diameter 28.000000 = 0
+Volume of each particle of diameter 28.000000 = 12712
+Number of particles of diameter 27.000000 = 0
+Volume of each particle of diameter 27.000000 = 10395
+Number of particles of diameter 26.000000 = 0
+Volume of each particle of diameter 26.000000 = 10144
+Number of particles of diameter 25.000000 = 0
+Volume of each particle of diameter 25.000000 = 8217
+Number of particles of diameter 24.000000 = 0
+Volume of each particle of diameter 24.000000 = 8144
+Number of particles of diameter 23.000000 = 0
+Volume of each particle of diameter 23.000000 = 6403
+Number of particles of diameter 22.000000 = 0
+Volume of each particle of diameter 22.000000 = 6272
+Number of particles of diameter 21.000000 = 0
+Volume of each particle of diameter 21.000000 = 4945
+Number of particles of diameter 20.000000 = 0
+Volume of each particle of diameter 20.000000 = 4776
+Number of particles of diameter 19.000000 = 0
+Volume of each particle of diameter 19.000000 = 3695
+Number of particles of diameter 18.000000 = 0
+Volume of each particle of diameter 18.000000 = 3544
+Number of particles of diameter 17.000000 = 0
+Volume of each particle of diameter 17.000000 = 2553
+Number of particles of diameter 16.000000 = 0
+Volume of each particle of diameter 16.000000 = 2512
+Number of particles of diameter 15.000000 = 0
+Volume of each particle of diameter 15.000000 = 1791
+Number of particles of diameter 14.000000 = 0
+Volume of each particle of diameter 14.000000 = 1736
+Number of particles of diameter 13.000000 = 1
+Volume of each particle of diameter 13.000000 = 1189
+Number of particles of diameter 12.000000 = 1
+Volume of each particle of diameter 12.000000 = 1088
+Number of particles of diameter 11.000000 = 1
+Volume of each particle of diameter 11.000000 = 739
+Number of particles of diameter 10.000000 = 1
+Volume of each particle of diameter 10.000000 = 672
+Number of particles of diameter 9.000000 = 2
+Volume of each particle of diameter 9.000000 = 389
+Number of particles of diameter 8.000000 = 2
+Volume of each particle of diameter 8.000000 = 360
+Number of particles of diameter 7.000000 = 5
+Volume of each particle of diameter 7.000000 = 179
+Number of particles of diameter 6.000000 = 6
+Volume of each particle of diameter 6.000000 = 160
+Number of particles of diameter 5.000000 = 13
+Volume of each particle of diameter 5.000000 = 81
+Number of particles of diameter 4.000000 = 23
+Volume of each particle of diameter 4.000000 = 56
+Number of particles of diameter 3.000000 = 80
+Volume of each particle of diameter 3.000000 = 19
+Number of particles of diameter 2.000000 = 200
+Volume of each particle of diameter 2.000000 = 8
+Number of particles of diameter 1.000000 = 1816
+Volume of each particle of diameter 1.000000 = 1
+Total pixels based on PDF is 14318
+Making adjustments of particle numbers now...
+Target pixels in size class 0 = 3460
+Extra pixels (cumulative) = 3460
+Target pixels in size class 1 = 311
+Extra pixels (cumulative) = 3771
+Target pixels in size class 2 = 311
+Extra pixels (cumulative) = 4082
+Target pixels in size class 3 = 311
+Extra pixels (cumulative) = 4393
+Target pixels in size class 4 = 341
+Extra pixels (cumulative) = 4734
+Target pixels in size class 5 = 385
+Extra pixels (cumulative) = 5119
+Target pixels in size class 6 = 385
+Extra pixels (cumulative) = 5504
+Target pixels in size class 7 = 399
+Extra pixels (cumulative) = 5903
+Target pixels in size class 8 = 457
+Extra pixels (cumulative) = 6360
+Target pixels in size class 9 = 457
+Extra pixels (cumulative) = 6817
+Reduced number of particles in size class 9 by 1
+Target pixels in size class 10 = 481
+Extra pixels (cumulative) = 895
+Target pixels in size class 11 = 523
+Extra pixels (cumulative) = 1418
+Target pixels in size class 12 = 523
+Extra pixels (cumulative) = 1941
+Target pixels in size class 13 = 572
+Extra pixels (cumulative) = 2513
+Target pixels in size class 14 = 581
+Extra pixels (cumulative) = 3094
+Target pixels in size class 15 = 611
+Extra pixels (cumulative) = 3705
+Reduced number of particles in size class 15 by 1
+Target pixels in size class 16 = 629
+Extra pixels (cumulative) = 1781
+Target pixels in size class 17 = 655
+Extra pixels (cumulative) = 2436
+Reduced number of particles in size class 17 by 1
+Target pixels in size class 18 = 668
+Extra pixels (cumulative) = 1313
+Target pixels in size class 19 = 697
+Extra pixels (cumulative) = 821
+Target pixels in size class 20 = 710
+Extra pixels (cumulative) = 443
+Target pixels in size class 21 = 728
+Extra pixels (cumulative) = 432
+Target pixels in size class 22 = 753
+Extra pixels (cumulative) = 513
+Target pixels in size class 23 = 777
+Extra pixels (cumulative) = 512
+Reduced number of particles in size class 23 by 1
+Target pixels in size class 24 = 811
+Extra pixels (cumulative) = 214
+Target pixels in size class 25 = 862
+Extra pixels (cumulative) = 181
+Reduced number of particles in size class 25 by 1
+Target pixels in size class 26 = 956
+Extra pixels (cumulative) = -2
+Target pixels in size class 27 = 1084
+Extra pixels (cumulative) = 29
+Target pixels in size class 28 = 1287
+Extra pixels (cumulative) = 28
+Target pixels in size class 29 = 1517
+Extra pixels (cumulative) = 25
+Reduced number of particles in size class 29 by 1
+Target pixels in size class 30 = 1597
+Extra pixels (cumulative) = 3
+Enter dispersion factor (separation distance in pixels) for spheres (0-2)
+0 corresponds to totally random placement
+0 
+Enter probability for gypsum particles on a random particle basis (0.0-1.0) 
+0.000000 
+Enter probability for hemihydrate form of gypsum (0.0-1.0)
+0.000000
+Enter probability for anhydrite form of gypsum (0.0-1.0)
+0.000000
+Going to place 3 particles of phase 1, size 16.000000
+Going to place 1 particles of phase 1, size 15.000000
+Going to place 1 particles of phase 1, size 13.500000
+Going to place 1 particles of phase 1, size 13.000000
+Going to place 1 particles of phase 1, size 12.500000
+Going to place 1 particles of phase 1, size 12.000000
+Going to place 1 particles of phase 1, size 11.500000
+Going to place 1 particles of phase 33, size 11.500000
+Going to place 1 particles of phase 1, size 11.000000
+Going to place 1 particles of phase 1, size 10.500000
+Going to place 2 particles of phase 1, size 10.000000
+Going to place 1 particles of phase 7, size 9.500000
+Going to place 1 particles of phase 8, size 9.500000
+Going to place 2 particles of phase 1, size 9.500000
+Going to place 2 particles of phase 1, size 9.000000
+
+Cannot place a particle with center at 50
+Going to place 3 particles of phase 1, size 8.500000
+Going to place 1 particles of phase 33, size 8.500000
+Going to place 3 particles of phase 1, size 8.000000
+Going to place 5 particles of phase 1, size 7.500000
+Going to place 1 particles of phase 8, size 7.500000
+Going to place 1 particles of phase 33, size 7.500000
+Going to place 5 particles of phase 1, size 7.000000
+Going to place 1 particles of phase 7, size 6.500000
+Going to place 9 particles of phase 1, size 6.500000
+Going to place 1 particles of phase 33, size 6.500000
+Going to place 9 particles of phase 1, size 6.000000
+Going to place 1 particles of phase 8, size 6.000000
+Going to place 1 particles of phase 33, size 6.000000
+Going to place 15 particles of phase 1, size 5.500000
+Going to place 1 particles of phase 7, size 5.500000
+Going to place 1 particles of phase 33, size 5.500000
+Going to place 1 particles of phase 7, size 5.000000
+Going to place 17 particles of phase 1, size 5.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 8, size 5.000000
+Going to place 1 particles of phase 33, size 5.000000
+Going to place 1 particles of phase 9, size 4.500000
+Going to place 30 particles of phase 1, size 4.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 7, size 4.500000
+Going to place 1 particles of phase 8, size 4.500000
+Going to place 3 particles of phase 33, size 4.500000
+Going to place 1 particles of phase 7, size 4.000000
+Going to place 33 particles of phase 1, size 4.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 8, size 4.000000
+Going to place 2 particles of phase 33, size 4.000000
+Going to place 3 particles of phase 8, size 3.500000
+
+Cannot place a particle with center at 50
+Going to place 70 particles of phase 1, size 3.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 1 particles of phase 9, size 3.500000
+Going to place 2 particles of phase 7, size 3.500000
+Going to place 6 particles of phase 33, size 3.500000
+Going to place 2 particles of phase 7, size 3.000000
+Going to place 83 particles of phase 1, size 3.000000
+
+Cannot place a particle with center at 50
+Going to place 3 particles of phase 8, size 3.000000
+Going to place 6 particles of phase 33, size 3.000000
+Going to place 2 particles of phase 9, size 2.500000
+
+Cannot place a particle with center at 50
+Going to place 6 particles of phase 8, size 2.500000
+Going to place 180 particles of phase 1, size 2.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 5 particles of phase 7, size 2.500000
+Going to place 13 particles of phase 33, size 2.500000
+Going to place 9 particles of phase 7, size 2.000000
+
+Cannot place a particle with center at 50
+Going to place 298 particles of phase 1, size 2.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 10 particles of phase 8, size 2.000000
+Going to place 1 particles of phase 9, size 2.000000
+Going to place 23 particles of phase 33, size 2.000000
+
+Cannot place a particle with center at 50
+Going to place 32 particles of phase 8, size 1.500000
+Going to place 1066 particles of phase 1, size 1.500000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 3 particles of phase 9, size 1.500000
+Going to place 30 particles of phase 7, size 1.500000
+Going to place 81 particles of phase 33, size 1.500000
+Going to place 3167 particles of phase 1, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 7 particles of phase 9, size 1.000000
+Going to place 103 particles of phase 8, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 89 particles of phase 7, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+Going to place 200 particles of phase 33, size 1.000000
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+
+Cannot place a particle with center at 50
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+9 
+Enter path/root name of cement correlation files
+C:\Users\jwbullard\Desktop\vcctl\usr\tamu\MyMix01\cement152
+
+Done with distributing clinker phases.  Freeing memory now. 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+11 
+
+Adding 0 of phase 0
+Adding 39857 of phase 1
+Adding 0 of phase 2
+Adding 0 of phase 3
+Adding 0 of phase 4
+Adding 0 of phase 5
+Adding 0 of phase 6
+Adding 1129 of phase 7
+Adding 1302 of phase 8
+Adding 101 of phase 9
+Adding 0 of phase 10
+Adding 0 of phase 11
+Adding 0 of phase 12
+Adding 0 of phase 13
+Adding 0 of phase 14
+Adding 0 of phase 15
+Adding 0 of phase 16
+Adding 0 of phase 17
+Adding 0 of phase 18
+Adding 0 of phase 19
+Adding 0 of phase 20
+Adding 0 of phase 21
+Adding 0 of phase 22
+Adding 0 of phase 23
+Adding 0 of phase 24
+Adding 0 of phase 25
+Adding 0 of phase 26
+Adding 0 of phase 27
+Adding 0 of phase 28
+Adding 0 of phase 29
+Adding 0 of phase 30
+Adding 0 of phase 31
+Adding 0 of phase 32
+Adding 1819 of phase 33
+Adding 0 of phase 34
+Adding 0 of phase 35
+Adding 0 of phase 36
+Adding 0 of phase 37
+Adding 0 of phase 38
+Adding 0 of phase 39
+Adding 0 of phase 40
+Adding 0 of phase 41
+Adding 0 of phase 42
+Adding 0 of phase 43
+Adding 0 of phase 44
+Adding 0 of phase 45
+Adding 0 of phase 46
+Adding 0 of phase 47
+Adding 0 of phase 48
+Adding 0 of phase 49
+Adding 0 of phase 50
+Adding 0 of phase 51
+Adding 0 of phase 52
+Adding 0 of phase 53
+Adding 0 of phase 54
+Adding 0 of phase 55
+Adding 0 of phase 56
+Adding 0 of phase 57
+Adding 0 of phase 58
+Adding 0 of phase 59
+Adding 0 of phase 60
+Adding 0 of phase 61
+Adding 0 of phase 62
+Adding 0 of phase 63
+Adding 0 of phase 64 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+10 
+Enter name of file for final microstructure image
+C:\Users\jwbullard\Desktop\vcctl\usr\tamu\MyMix01\MyMix01.img
+Enter name of file to save particle IDs to 
+C:\Users\jwbullard\Desktop\vcctl\usr\tamu\MyMix01\MyMix01.pimg
+ 
+ Input User Choice 
+1) Exit 
+2) Specify system size 
+3) Add particles (cement,gypsum, pozzolans, etc.) to microstructure 
+4) Flocculate system by reducing number of particle clusters 
+5) Measure global phase fractions 
+6) Add an aggregate to the microstructure 
+7) Measure single phase connectivity (pores or solids) 
+8) Measure phase fractions vs. distance from aggregate surface 
+9) Distribute clinker phases 
+10) Output current microstructure to file 
+11) Add one-pixel particles to microstructure 
+12) Distribute Fly Ash Phases 
+1 

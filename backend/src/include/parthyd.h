@@ -39,7 +39,7 @@ int parthyd(void) {
     return (MEMERR);
   }
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("\nIn parthyd now.");
   for (ix = 0; ix < NPARTHYD; ix++) {
     nleft[ix] = norig[ix] = 0;
@@ -59,10 +59,10 @@ int parthyd(void) {
    *	and update counts
    ***/
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("NPARTHYD is %d", NPARTHYD);
   for (ix = 0; ix < Xsyssize; ix++) {
-    if (Verbose)
+    if (Verbose_flag == 2)
       printf("\tx = %d\n", ix);
     for (iy = 0; iy < Ysyssize; iy++) {
       for (iz = 0; iz < Zsyssize; iz++) {
@@ -76,11 +76,11 @@ int parthyd(void) {
               (valmic == NA2SO4)) {
 
             if (valpart >= mult1 * NPARTHYD) {
-              if (Verbose)
+              if (Verbose_flag == 2)
                 printf("\t\tReallocating nleft now... ");
               mult1++;
               nleft = (int *)realloc((int *)nleft, (size_t)(mult1 * NPARTHYD));
-              if (Verbose)
+              if (Verbose_flag == 2)
                 printf("... Done!\n");
               if (!nleft) {
                 printf("\n\nERROR in parthyd:  Could not reallocate space for "
@@ -102,11 +102,11 @@ int parthyd(void) {
               (valmicorig == NA2SO4)) {
 
             if (valpart >= mult2 * NPARTHYD) {
-              if (Verbose)
+              if (Verbose_flag == 2)
                 printf("\t\tReallocating norig now... ");
               mult2++;
               norig = (int *)realloc((int *)norig, (size_t)(mult2 * NPARTHYD));
-              if (Verbose)
+              if (Verbose_flag == 2)
                 printf("... Done!\n");
               if (!norig) {
                 printf("\n\nERROR in parthyd:  Could not reallocate space for "
@@ -125,7 +125,7 @@ int parthyd(void) {
 
   /* Output results to end of particle hydration file */
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("\nMain loop of parthyd concluded.");
   fflush(stdout);
   for (ix = 100; ix <= partmax; ix++) {

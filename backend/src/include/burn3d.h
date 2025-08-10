@@ -46,7 +46,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
   float alpha_burn = 0.0;
   double mass_burn = 0.0;
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nI am in burn3d...");
     fflush(stdout);
   }
@@ -120,7 +120,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAssignment to xformMic is complete.");
     fflush(stdout);
   }
@@ -130,32 +130,32 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
   mult1 = mult2 = 1;
 
   nmatx = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmatx...");
     fflush(stdout);
   }
   nmaty = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmaty...");
     fflush(stdout);
   }
   nmatz = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nmatz...");
     fflush(stdout);
   }
   nnewx = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewx...");
     fflush(stdout);
   }
   nnewy = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewy...");
     fflush(stdout);
   }
   nnewz = ivector(SIZE2D);
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     printf("\nAllocated nnewz...");
     fflush(stdout);
   }
@@ -331,7 +331,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
                 }
               }
             } /* End of loop over nearest neighbors */
-          }   /* End of loop over current burn front */
+          } /* End of loop over current burn front */
 
           if (nnew > 0) {
             ncur = nnew;
@@ -412,7 +412,7 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose) {
+  if (Verbose_flag == 2) {
     if (npix1 != npix2) {
       printf("Phase IDs = %d and %d \n", npix1, npix2);
     } else {
@@ -431,11 +431,11 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
 
   Con_fracp[dir] = 0.0;
 
-  if (Verbose)
+  if (Verbose_flag == 2)
     printf("Nphc[%d] = %d\n", dir, Nphc[dir]);
   if (Nphc[dir] > 0) {
     Con_fracp[dir] = (float)nthrough / (float)Nphc[dir];
-    if (Verbose)
+    if (Verbose_flag == 2)
       printf("Con_fracp[%d] = %f\n", dir, Con_fracp[dir]);
   }
 

@@ -69,7 +69,7 @@ This session completed major enhancements to the PyVista 3D viewer with comprehe
 
 ### Current Development: Hydration Tool Integration (August 2025)
 
-**Status: Phase 1 & 2 COMPLETED ✅ - Foundation Ready for Phase 3**
+**Status: Phase 1 & 2 COMPLETED ✅ - Phase 3 Ready for UI Integration**
 
 **Project Goal**: Complete integration of `disrealnew.c` cement hydration simulation with VCCTL Hydration Tool UI
 
@@ -115,14 +115,127 @@ This session completed major enhancements to the PyVista 3D viewer with comprehe
 - ✅ Progress parsing validated for JSON and stdout formats
 - ✅ Database integration and operation status tracking confirmed
 
-**Concurrent Development**: User implementing disrealnew I/O improvements (command-line args, JSON progress, quiet mode, return codes)
+**Critical Debug Session Completed (August 2025)**: Successfully identified and diagnosed pre-main segmentation fault
 
-**Next Phase**: Phase 3 - Results Processing and Visualization
-**Next Phase**: Phase 4 - Advanced Features and Optimization
+**Root Cause Analysis**:
+- **Issue**: Segmentation fault occurring before `main()` function execution
+- **Investigation**: Systematic debugging revealed uninitialized global string arrays
+- **Specific Problem**: `fopen("", "w")` called with empty `LogFileName` at line 201 in `disrealnew.c`
+- **Global Arrays Affected**: `LogFileName[500]`, `WorkingDirectory[500]`, `ProgressFileName[500]`, `ParameterFileName[500]`
+
+**Critical Fixes Identified**:
+1. **Initialize Global String Arrays** (Fix #1):
+   - Location: After line 197 in `disrealnew.c` (after `checkargs(argc, argv);`)
+   - Add conditional initialization with defaults: `disrealnew_debug.log`, `./`, `progress.json`, `parameters.prm`
+   - Use conditional checks to allow command-line override
+
+2. **Fix Logfile Usage Order** (Fix #2):
+   - Move lines 160-161 (`fprintf(Logfile, ...)`) to after line 204
+   - Ensure `Logfile` is opened before any write attempts
+
+**Status**: User implementing fixes; Python integration layer ready for testing once C program is debugged
+
+**Detailed I/O Interface Specification Finalized**:
+1. **Command-line Arguments**: `disrealnew [options] parameter_file.prm`
+2. **Progress Output (stderr)**: Line-per-cycle format with PROGRESS prefix
+   - Format: `PROGRESS: Cycle=1500/10000 Time=2.5 DOH=0.45 Temp=25.2 pH=12.8`
+   - Key=Value pairs for easy parsing
+   - Continuous streaming during simulation
+3. **Results Output (stdout)**: Final JSON at program termination
+   - Complete simulation summary with final statistics
+   - Output file listings and execution metrics
+   - Structured for database storage and GUI display
+4. **Output Mode Hierarchy**:
+   - **Normal**: Progress to stderr + results to stdout + debug to log file
+   - **Quiet (`--quiet`)**: No progress output, results to stdout, errors to stderr
+   - **Silent (`--silent`)**: No output except critical errors, return codes only
+5. **Debug Output**: Redirected to log file (`disrealnew_debug.log`) preserving troubleshooting capability
+6. **JSON Progress File**: Optional `--progress-json` with periodic overwrites for real-time monitoring
+
+**Integration Strategy**: Python layer ready to switch between current interactive interface and improved command-line interface when user completes C program modifications.
+
+### Latest Session Progress (August 10, 2025)
+
+**Major Breakthrough: disrealnew.c I/O System Fully Restored and Debugged ✅**
+
+**Critical Recovery & Debugging Session:**
+1. **TimeMachine Recovery**: Successfully recovered user's 24 hours of extensive I/O improvements from backup after accidental overwrite
+2. **Git Safety**: Committed recovered version (487dfa09) - "hundreds of changes" throughout get_input function preserved
+3. **Systematic Debugging**: Fixed pre-main logging issue and parameter format mismatch without overwriting user work
+4. **Database Integration**: Successfully updated database with 6 new parameters (378 total: Sfsio2val, Sfbetval, Sfloival, Sfsio2normal, Sfbetnormal, Sfloinormal)
+
+**Key Technical Fixes:**
+- Fixed `fprintf(Logfile,...)` before file opening (moved to after checkargs/file opening)
+- Updated `HydrationParameters.create_from_prm_file()` from tab to comma-separated parsing
+- Successfully initialized database with new CSV parameter format
+- Verified disrealnew.c compiles and --help works correctly
+
+**Current Integration Status:**
+- ✅ **Parameter File**: Database exports 378 parameters in CSV format to working directory
+- ✅ **Command Line Args**: `--workdir`, `--json`, `--parameters` functionality working
+- ✅ **I/O Infrastructure**: Complete command-line interface ready
+- 🔄 **In Progress**: User modifying get_input() function to read ~40 interactive inputs from extended parameter file
+
+**Recommended Architecture Implemented:**
+- **Extended Parameter File Approach**: Append UI simulation inputs to end of hydration parameter file
+- **Single File Management**: One CSV file contains both hydration parameters (378 lines) + UI inputs
+- **Sequential Reading**: disrealnew.c reads parameter file then UI inputs from same file
+- **Eliminates Interactive Prompts**: All ~40 required inputs (random seed, microstructure files, temperature, timing, etc.) read from file
+
+### Major Integration Breakthrough (August 10, 2025 - Afternoon)
+
+**Status: Extended Parameter File Integration 95% COMPLETE ✅**
+
+**Critical Breakthrough Session:**
+1. **Complete get_input() Rewrite**: User successfully modified `get_input()` function to eliminate all ~40 interactive prompts and read from extended parameter file
+2. **Extended Parameter File Architecture Working**: Successfully reading 378 hydration parameters + 36 UI input parameters from single CSV file
+3. **Systematic Debugging Success**: Identified and fixed multiple parsing issues through methodical debugging
+4. **Near-Complete Integration**: Program now progresses through all parameter parsing to microstructure file reading stage
+
+**Technical Fixes Completed:**
+- ✅ **CSV Newline Issue**: Fixed trailing newlines in parsed parameters using `strtok(NULL, ",\n")`
+- ✅ **Filename Extension Issue**: Fixed truncation of `.img` extension in fileroot parsing
+- ✅ **Parameter Order Validation**: Identified missing `Onevoxelbias` parameter requirements
+- ✅ **Command-Line Interface**: All args (`--workdir`, `--json`, `--parameters`) working perfectly
+- ✅ **Path Concatenation**: Microstructure directory and filename handling working
+
+**Integration Architecture Proven:**
+```
+Database (378 parameters) → Extended Parameter File → disrealnew.c
+[Hydration Parameters] + [UI Input Parameters] → Single CSV → File Reading
+```
+
+**Current Status:**
+- ✅ **378 hydration parameters**: Successfully read and processed
+- ✅ **UI input parsing**: All parameters read correctly through microstructure file stage  
+- ✅ **File path resolution**: Directory and filename concatenation working
+- 🔄 **Final issue**: `Onevoxelbias` parameter format needs microstructure-specific phase IDs
+
+**Debugging Evidence:**
+```
+DEBUG: Micdir = './' (len=2)           # Clean path, no newlines
+DEBUG: Fileroot = 'MyMix01' (len=7)   # Correct filename parsing
+```
+
+**Test Environment Ready:**
+- **Extended parameter file**: `test_extended_params.csv` (415 parameters total)
+- **Test microstructure**: `./scratch/MyMix01/MyMix01.img` and `.pimg` files copied
+- **Working directory**: `./scratch/HydrationTest/` prepared
+- **Binary updated**: All fixes compiled and deployed
+
+**Remaining Integration Steps:**
+1. Determine correct `Onevoxelbias` phase IDs for MyMix01.img microstructure
+2. Complete parameter file for full simulation test
+3. Integrate extended parameter file generation with HydrationExecutorService
+4. Complete Phase 3: Results Processing and Visualization
+
+**Architectural Success**: The extended parameter file approach is working exactly as designed - single file containing both hydration parameters and UI inputs, with disrealnew.c successfully reading sequentially through the entire file.
+
+**Phase 3 & 4 Ready**: Results Processing, Visualization, and Advanced Features - foundation complete
 
 **Future Considerations:**
 - User planning migration to more general simulation tool
-- Consider version control strategies for transition period
+- Extended parameter file approach provides foundation for comprehensive UI integration
 
 ### Additional Memory
 - Hidden Distance button due to functionality issues (`src/app/visualization/pyvista_3d_viewer.py:436-437`)

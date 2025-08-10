@@ -68,8 +68,8 @@ ui:
   tree_indent: 20
   use_dark_theme: false
   use_opengl: false
-  window_height: 1295
+  window_height: 800
   window_maximized: false
-  window_position_x: 313
-  window_position_y: 207
+  window_position_x: 186
+  window_position_y: 107
   window_width: 2339

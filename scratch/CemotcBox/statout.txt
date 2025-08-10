@@ -1,0 +1,58 @@
+MICROSTRUCTURE VOLUME & SURFACE AREA ANALYSIS
+============================================================
+
+Total Solid Volume: 4.9e+05 μm³
+Total Pore Volume: 8.4e+05 μm²
+Total Voxels: 120
+Voxel Size: 1.000 x 1.000 x 1.000 μm³
+
+PHASE BREAKDOWN:
+----------------------------------------
+
+POROSITY (Phase  0):
+ Volume: 7.1e+05 μm³
+ Surface Area: 0 μm²
+ Specific Surface Area: 0 μm⁻¹
+ Voxel Count: 708241
+ Volume Fraction: 1.4402
+ Volume Percentage: 144.02 %
+
+C3S (Phase  1):
+ Volume: 3e+05 μm³
+ Surface Area: 4.3e+05 μm²
+ Specific Surface Area: 1.5 μm⁻¹
+ Voxel Count: 295463
+ Volume Fraction: 0.6008
+ Volume Percentage: 60.08 %
+
+C2S (Phase  2):
+ Volume: 1.2e+05 μm³
+ Surface Area: 2.4e+05 μm²
+ Specific Surface Area: 2.1 μm⁻¹
+ Voxel Count: 116004
+ Volume Fraction: 0.2359
+ Volume Percentage: 23.59 %
+
+C3A (Phase  3):
+ Volume: 3.7e+04 μm³
+ Surface Area: 8.1e+04 μm²
+ Specific Surface Area: 2.2 μm⁻¹
+ Voxel Count: 36824
+ Volume Fraction: 0.0749
+ Volume Percentage: 7.49 %
+
+C4AF (Phase  4):
+ Volume: 2.6e+04 μm³
+ Surface Area: 5.9e+04 μm²
+ Specific Surface Area: 2.3 μm⁻¹
+ Voxel Count: 25955
+ Volume Fraction: 0.0528
+ Volume Percentage: 5.28 %
+
+SFUME (Phase 10):
+ Volume: 1.8e+04 μm³
+ Surface Area: 2.4e+04 μm²
+ Specific Surface Area: 1.4 μm⁻¹
+ Voxel Count: 17513
+ Volume Fraction: 0.0356
+ Volume Percentage: 3.56 %

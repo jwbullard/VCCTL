@@ -1,0 +1,26 @@
+24,34d23
+< #include "include/vcctl.h"
+< #include <ctype.h>
+< #include <getopt.h>
+< #include <math.h>
+< #include <stdio.h>
+< #include <stdlib.h>
+< #include <string.h>
+< #include <time.h>
+< 
+< #include "include/properties.h"
+< 
+245a235
+> int Verbose;
+262,268d251
+< 
+< /* Command line argument data */
+< int Verbose_flag;
+< char ProgressFileName[500];
+< char WorkingDirectory[500];
+< char ParameterFileName[500];
+< char LogFileName[500];
+272a256
+> int Verbose;
+589d572
+< FILE *Logfile;

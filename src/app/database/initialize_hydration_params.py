@@ -34,9 +34,9 @@ def initialize_hydration_parameters(database_service: DatabaseService = None):
             container = get_service_container()
             database_service = container.database_service
         
-        # Path to default.prm file
+        # Path to parameters.csv file
         project_root = Path(__file__).parent.parent.parent.parent
-        default_prm_path = project_root / "backend" / "examples" / "default.prm"
+        default_prm_path = project_root / "parameters.csv"
         
         if not default_prm_path.exists():
             raise FileNotFoundError(f"Default parameters file not found: {default_prm_path}")

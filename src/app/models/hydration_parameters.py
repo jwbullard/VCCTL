@@ -114,7 +114,7 @@ class HydrationParameters(Base):
                 if not line:  # Skip empty lines
                     continue
                 
-                parts = line.split('\t')
+                parts = line.split(',')
                 if len(parts) >= 2:
                     param_name = parts[0]
                     param_value_str = parts[1]

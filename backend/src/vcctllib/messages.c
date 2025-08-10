@@ -22,10 +22,10 @@
  *	16 March 2004
  ******************************************************************************/
 void bailout(char *name, char *msg) {
-  printf("\nERROR in %s:", name);
-  printf("\n\t%s", msg);
-  printf("\n\tExiting now.\n");
-  fflush(stdout);
+  fprintf(stderr, "\nERROR in %s:", name);
+  fprintf(stderr, "\n\t%s", msg);
+  fprintf(stderr, "\n\tExiting now.\n");
+  fflush(stderr);
   return;
 }
 
@@ -50,9 +50,9 @@ void bailout(char *name, char *msg) {
  *	16 March 2004
  ******************************************************************************/
 void warning(char *name, char *msg) {
-  printf("\nWARNING in %s:", name);
-  printf("\n\t%s", msg);
-  printf("\n\tCheck integrity of output files\n");
-  fflush(stdout);
+  fprintf(stderr, "\nWARNING in %s:", name);
+  fprintf(stderr, "\n\t%s", msg);
+  fprintf(stderr, "\n\tCheck integrity of output files\n");
+  fflush(stderr);
   return;
 }
