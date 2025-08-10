@@ -21,6 +21,17 @@
  *
  *******************************************************/
 
+#include "include/vcctl.h"
+#include <ctype.h>
+#include <getopt.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "include/properties.h"
+
 /***
  *	Pre-processor defines
  ***/
@@ -232,7 +243,6 @@ struct Alksulf {
 
 size_t Antsize, Togosize, Alksulfsize;
 
-int Verbose;
 int AggTempEffect = 1;
 
 /***
@@ -250,10 +260,16 @@ short int ***Cshage = NULL;
 short int ***Faces = NULL;
 float *CustomImageTime = NULL;
 
+/* Command line argument data */
+int Verbose_flag;
+char ProgressFileName[500];
+char WorkingDirectory[500];
+char ParameterFileName[500];
+char LogFileName[500];
+
 /* Arrays for keeping track of surface deactivation */
 
 short int ***Deactivated = NULL;
-int Verbose;
 int *Startflag = NULL;
 int *Stopflag = NULL;
 int *Deactphaselist = NULL;
@@ -570,6 +586,7 @@ char Filesep;
 
 /* File pointers */
 FILE *Imageindexfile, *Datafile, *Movfile, *Micfile, *Parfile;
+FILE *Logfile;
 
 /* Special directories */
 char Micdir[MAXSTRING], Outputdir[MAXSTRING];

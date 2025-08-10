@@ -81,16 +81,12 @@
  *******************************************************/
 #include "disrealnew.h"
 #include "include/vcctl.h"
-#include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /***
  *    Function declarations
  ***/
-void checkargs(int argc, char *argv[]);
+int checkargs(int argc, char *argv[]);
+void printHelp(void);
 int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
               float *pnucfh3, float *pscalefh3, float *pnucgyp,
               float *pscalegyp, int *nmovstep);
@@ -117,6 +113,7 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
                  char *typestring);
 void createfittocycles(void);
 void freeallmem(void);
+char *rfc8601_timespec(struct timespec *tv);
 
 /***
  *    Supplementary programs
@@ -126,7 +123,6 @@ void freeallmem(void);
 #include "include/hydrealnew.h" /* hydration execution */
 #include "include/pHpred.h"     /* pore solution pH prediction */
 #include "include/parthyd.h"    /* particle hydration assessment */
-#include "include/properties.h" /* Physical properties of the phases */
 
 int main(int argc, char *argv[]) {
   int ntimes, valin, nmovstep;
@@ -140,10 +136,29 @@ int main(int argc, char *argv[]) {
   float act_nrg, recip_Tdiff, tmod, smod;
   float dval, previousUncorrectedTime;
   double gfloat, space, mass_cement, mass_cem_now, mass_cur, kpozz;
+  double time_spent;
   char typestring[MAXSTRING];
   char strsuff[MAXSTRING], strsuffa[MAXSTRING], strsuffb[MAXSTRING];
   char buff[MAXSTRING], instring[MAXSTRING];
+  char commachar;
+  char *rfc8601;
+  time_t current_time;
+  clock_t begin, end;
+  struct tm *local_time;
+  struct timespec tv;
   FILE *outfile, *thfile;
+
+  /* Get the simulation start time */
+
+  begin = clock();
+  current_time = time(NULL);
+
+  /* Get the local time using the current time */
+  local_time = localtime(&current_time);
+
+  /* Display the local time */
+  fprintf(Logfile, "=== BEGIN DISREALNEW SIMULATION ===");
+  fprintf(Logfile, "\nStart time: %s\n\n", asctime(local_time));
 
   /* Initialize global arrays */
 
@@ -182,16 +197,15 @@ int main(int argc, char *argv[]) {
 
   checkargs(argc, argv);
 
-  /*
-      printf("Enter name of progress file: \n");
-      read_string(instring,sizeof(instring));
-      sprintf(Progfilename,"%s",instring);
-  */
+  /* Open the log file and keep it open throughout */
+  if ((Logfile = fopen(LogFileName, "w")) == NULL) {
+    fprintf(stderr, "\nERROR:  Could not open disrealnew.log\n\n");
+    exit(1);
+  }
 
-  printf("\nExecuting disrealnew now...\n");
   if (get_input(&pnucch, &pscalech, &pnuchg, &pscalehg, &pnucfh3, &pscalefh3,
                 &pnucgyp, &pscalegyp, &nmovstep)) {
-    printf("\nForced to exit prematurely\n");
+    fprintf(stderr, "\nForced to exit prematurely\n\n");
     exit(1);
   }
 
@@ -204,7 +218,7 @@ int main(int argc, char *argv[]) {
    ***/
 
   if (Adiaflag == 2) {
-    sprintf(buff, "%stemphist.dat", Outputdir);
+    sprintf(buff, "%stemperature_history.csv", WorkingDirectory);
     thfile = filehandler("disrealnew", buff, "READ");
     if (!thfile) {
       freeallmem();
@@ -212,14 +226,16 @@ int main(int argc, char *argv[]) {
     }
     fscanf(thfile, "%s", instring);
     thtimelo = atof(instring);
+    fscanf(thfile, "%c", &commachar);
     fscanf(thfile, "%s", instring);
     thtimehi = atof(instring);
+    fscanf(thfile, "%c", &commachar);
     fscanf(thfile, "%s", instring);
     thtemplo = atof(instring);
+    fscanf(thfile, "%c", &commachar);
     fscanf(thfile, "%s", instring);
     thtemphi = atof(instring);
-    if (Verbose)
-      printf("%f %f %f %f\n", thtimelo, thtimehi, thtemplo, thtemphi);
+    fscanf(thfile, "%c", &commachar);
   }
 
   /***
@@ -287,8 +303,8 @@ int main(int argc, char *argv[]) {
   if (LOI_factor < 1.0)
     LOI_factor = 1.0;
 
-  if (Verbose)
-    printf("\n01. Psfume = %f", Psfume);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "\n01. Psfume = %f", Psfume);
 
   Pamsil = PAMSIL * (kpozz / Krate);
 
@@ -315,8 +331,8 @@ int main(int argc, char *argv[]) {
   if (PCSHseednuc > 1.0)
     PCSHseednuc = 1.0;
 
-  printf("\nProbability of CSH growing on a seed in solution = %f",
-         PCSHseednuc);
+  fprintf(Logfile, "\nProbability of CSH growing on a seed in solution = %f",
+          PCSHseednuc);
 
   /* Add CSH one-pixel particles randomly throughout the pore solution */
 
@@ -346,22 +362,13 @@ int main(int argc, char *argv[]) {
        ((Icyc <= Ncyc) && (Alpha_cur < Alpha_max) && (Time_cur < End_time));
        Icyc++) {
 
-    /* Write progress to progress file */
-
-    /*
-            Fprog = filehandler("genmic",Progfilename,"WRITE");
-            fprintf(Fprog,"%d\t%d",Icyc,Ncyc);
-            fclose(Fprog);
-    */
-
-    if (Verbose) {
-      printf("\nCycle %d\n", Icyc);
-      printf("Binder Temp = %f", Temp_cur_b);
+    if (Verbose_flag > 1) {
+      fprintf(Logfile, "\nCycle %d", Icyc);
+      fprintf(Logfile, "\nBinder Temp = %f", Temp_cur_b);
       if (Mass_agg > 0.0) {
-        printf("; Aggregate Temp = %f\n", Temp_cur_agg);
+        fprintf(Logfile, "; Aggregate Temp = %f", Temp_cur_agg);
       } else {
         Temp_cur_agg = Temp_cur_b;
-        printf("\n");
       }
     }
 
@@ -411,21 +418,25 @@ int main(int argc, char *argv[]) {
       } else {
         smod = 1.0;
       }
-      printf("\n\n\n******SulftoC3A = %f", SulftoC3A);
-      printf("\n\n\n******Just changed Molarvcsh from %f ", Molarv[CSH]);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\n\n\n******SulftoC3A = %f", SulftoC3A);
+        fprintf(Logfile, "\n******Just changed Molarvcsh from %f ",
+                Molarv[CSH]);
+      }
       Molarv[CSH] += (Molarvcshcoeff_sulf * smod);
-      printf("to %f ***************\n\n\n", Molarv[CSH]);
-      fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "to %f ***************\n\n", Molarv[CSH]);
+      }
     }
 
-    if (Verbose) {
-      printf("Number dissolved this pass- %d ", Nmade);
-      printf("total diffusing- %d \n", Ngoing);
+    if (Verbose_flag > 1) {
+      fprintf(Logfile, "\nNumber dissolved this pass- %d ", Nmade);
+      fprintf(Logfile, "total diffusing- %d", Ngoing);
 
       if (Icyc == 1) {
-        printf("Ncsbar is %d   Netbar is %d \n", Ncsbar, Netbar);
+        fprintf(Logfile, "\nNcsbar is %d   Netbar is %d", Ncsbar, Netbar);
       }
-      fflush(stdout);
+      fflush(Logfile);
     }
 
     hydrate(cycflag, ntimes, pnucch, pscalech, pnuchg, pscalehg, pnucfh3,
@@ -588,10 +599,10 @@ int main(int argc, char *argv[]) {
         thtemplo = atof(instring);
         fscanf(thfile, "%s", instring);
         thtemphi = atof(instring);
-        if (Verbose) {
-          printf("New temperature history values : \n");
-          printf("%f %f ", thtimelo, thtimehi);
-          printf("%f %f\n", thtemplo, thtemphi);
+        if (Verbose_flag > 1) {
+          fprintf(Logfile, "\nNew temperature history values : ");
+          fprintf(Logfile, "\n%f %f ", thtimelo, thtimehi);
+          fprintf(Logfile, "%f %f", thtemplo, thtemphi);
         }
       }
 
@@ -655,17 +666,18 @@ int main(int argc, char *argv[]) {
      *    (Knudsen model)
      ***/
 
-    if (Verbose)
-      printf("\nIcyc = %d AND Cyccnt = %d\n", Icyc, Cyccnt);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\nIcyc = %d AND Cyccnt = %d", Icyc, Cyccnt);
     if (Cyccnt > 1) {
       switch (TimeCalibrationMethod) {
       case CALORIMETRIC:
         dval = Heat_new * Heat_cf;
         sprintf(typestring, "calorimetric");
         if (dval < DataValue[0]) {
-          if (Verbose)
-            printf("\ndval = %f, DataValue[0] = %f, DataValue[1] = %f\n", dval,
-                   DataValue[0], DataValue[1]);
+          if (Verbose_flag > 1)
+            fprintf(Logfile,
+                    "\n\ndval = %f, DataValue[0] = %f, DataValue[1] = %f", dval,
+                    DataValue[0], DataValue[1]);
           TimeHistory[Cyccnt] = DataTime[0];
         } else {
           findnewtime(dval, act_nrg, &previousUncorrectedTime, typestring);
@@ -677,9 +689,10 @@ int main(int argc, char *argv[]) {
           dval = 0.00001;
         sprintf(typestring, "chemical shrinkage");
         if (dval < DataValue[0]) {
-          if (Verbose)
-            printf("\ndval = %f, DataValue[0] = %f, DataValue[1] = %f\n", dval,
-                   DataValue[0], DataValue[1]);
+          if (Verbose_flag > 1)
+            fprintf(Logfile,
+                    "\ndval = %f, DataValue[0] = %f, DataValue[1] = %f", dval,
+                    DataValue[0], DataValue[1]);
           TimeHistory[Cyccnt] = DataTime[0];
         } else {
           findnewtime(dval, act_nrg, &previousUncorrectedTime, typestring);
@@ -712,12 +725,12 @@ int main(int argc, char *argv[]) {
       gfloat = (double)((0.68 * Alpha_cur) / (0.32 * Alpha_cur + W_to_c));
     }
 
-    if (Verbose)
-      printf("Entering pHpred");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "\nEntering pHpred");
     pHpred();
-    if (Verbose) {
-      printf("Returned from call to pHpred");
-      fflush(stdout);
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "\nReturned from call to pHpred");
+      fflush(Logfile);
     }
 
     /***
@@ -736,14 +749,14 @@ int main(int argc, char *argv[]) {
 
       NextBurnTime = Time_cur + Burntimefreq;
 
-      if (Verbose) {
-        printf("\nGoing to check percolation of porosity in X... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\nGoing to check percolation of porosity in X... ");
+        fflush(Logfile);
       }
       Porefl1 = burn3d(((int)POROSITY), ((int)CRACKP), 1, 0, 0);
-      if (Verbose) {
-        printf("Done!\n");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "Done!");
+        fflush(Logfile);
       }
       if (Porefl1 == -1) {
         freeallmem();
@@ -751,14 +764,14 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
       /* Burn across y */
-      if (Verbose) {
-        printf("\nGoing to check percolation of porosity in Y... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\n\nGoing to check percolation of porosity in Y... ");
+        fflush(Logfile);
       }
       Porefl2 = burn3d(((int)POROSITY), ((int)CRACKP), 0, 1, 0);
-      if (Verbose) {
-        printf("Done!\n");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "Done!");
+        fflush(Logfile);
       }
       if (Porefl2 == -1) {
         freeallmem();
@@ -766,14 +779,14 @@ int main(int argc, char *argv[]) {
         exit(1);
       }
       /* Burn across z */
-      if (Verbose) {
-        printf("\nGoing to check percolation of porosity in Z... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\n\nGoing to check percolation of porosity in Z... ");
+        fflush(Logfile);
       }
       Porefl3 = burn3d(((int)POROSITY), ((int)CRACKP), 0, 0, 1);
-      if (Verbose) {
-        printf("Done!\n");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "Done!");
+        fflush(Logfile);
       }
       if (Porefl3 == -1) {
         freeallmem();
@@ -792,22 +805,24 @@ int main(int argc, char *argv[]) {
                           Water_off = Water_left;
                           Pore_off = Countkeep;
                           Sealed = 1;
-                          if (Verbose) printf("Switching to self-desiccating at
-         cycle %d \n",Cyccnt);
+                          if (Verbose_flag == 2) fprintf(Logfile,"Switching to
+         self-desiccating at cycle %d \n",Cyccnt);
                       }
                   } else {
                        if ((Porefl1 == 0) && (Crackorient == 1) && (!Sealed)) {
                            Water_off = Water_left;
                            Pore_off = Countkeep;
                            Sealed = 1;
-                           if (Verbose) printf("Switching to self-desiccating at
-         cycle %d \n",Cyccnt); } else if ((Porefl2 == 0) && (Crackorient == 2)
+                           if (Verbose_flag == 2) fprintf(Logfile,"Switching to
+         self-desiccating at cycle %d \n",Cyccnt); } else if ((Porefl2 == 0) &&
+         (Crackorient == 2)
          && (!Sealed)) { Water_off = Water_left; Pore_off = Countkeep; Sealed =
-         1; if (Verbose) printf("Switching to self-desiccating at cycle %d
+         1; if (Verbose_flag == 2) fprintf(Logfile,"Switching to
+         self-desiccating at cycle %d
          \n",Cyccnt); } else if ((Porefl3 == 0) && (Crackorient == 3) &&
          (!Sealed)) { Water_off = Water_left; Pore_off = Countkeep; Sealed = 1;
-                           if (Verbose) printf("Switching to self-desiccating at
-         cycle %d \n",Cyccnt);
+                           if (Verbose_flag == 2) fprintf(Logfile,"Switching to
+         self-desiccating at cycle %d \n",Cyccnt);
                        }
                   }
       */
@@ -819,24 +834,26 @@ int main(int argc, char *argv[]) {
 
       NextSetTime = Time_cur + Settimefreq;
 
-      if (Verbose) {
-        printf("\nGoing to check percolation of solids in X... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\n\nGoing to check percolation of solids in X... ");
+        fflush(Logfile);
       }
       Sf1 = burnset(1, 0, 0); /* Burn across x */
-      if (Verbose) {
-        printf("Done!\nGoing to check percolation of solids in Y... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile,
+                "Done!\nGoing to check percolation of solids in Y... ");
+        fflush(Logfile);
       }
       Sf2 = burnset(0, 1, 0); /* Burn across y */
-      if (Verbose) {
-        printf("Done!\nGoing to check percolation of solids in Z... ");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile,
+                "Done!\nGoing to check percolation of solids in Z... ");
+        fflush(Logfile);
       }
       Sf3 = burnset(0, 0, 1); /* Burn across z */
-      if (Verbose) {
-        printf("Done!");
-        fflush(stdout);
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "Done!");
+        fflush(Logfile);
       }
 
       Setflag = Sf1 * Sf2 * Sf3;
@@ -874,20 +891,20 @@ int main(int argc, char *argv[]) {
        *    effective system size
        ***/
 
-      if (Verbose) {
-        printf("\nPreparing to place a crack in the microstructure.");
-        printf("\n\tCrack width = %d", Crackwidth);
-        printf("\n\tX size currently is %d", Xsyssize);
-        printf("\n\tY size currently is %d", Ysyssize);
-        printf("\n\tZ size currently is %d", Zsyssize);
-        fflush(stdout);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nPreparing to place a crack in the microstructure.");
+        fprintf(Logfile, "\n\tCrack width = %d", Crackwidth);
+        fprintf(Logfile, "\n\tX size currently is %d", Xsyssize);
+        fprintf(Logfile, "\n\tY size currently is %d", Ysyssize);
+        fprintf(Logfile, "\n\tZ size currently is %d", Zsyssize);
+        fflush(Logfile);
       }
       addcrack();
-      if (Verbose) {
-        printf("\n\tAfter cracking, X size is %d", Xsyssize);
-        printf("\n\tAfter cracking, Y size is %d", Ysyssize);
-        printf("\n\tAfter cracking, Z size is %d", Zsyssize);
-        fflush(stdout);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\n\tAfter cracking, X size is %d", Xsyssize);
+        fprintf(Logfile, "\n\tAfter cracking, Y size is %d", Ysyssize);
+        fprintf(Logfile, "\n\tAfter cracking, Z size is %d", Zsyssize);
+        fflush(Logfile);
       }
 
       for (k = 0; k < NPHASES; k++)
@@ -906,11 +923,13 @@ int main(int argc, char *argv[]) {
        ***/
 
       Syspix = Xsyssize * Ysyssize * Zsyssize;
-      if (Verbose)
-        printf("\n\tSyspix changes from %d to %d", Syspix_orig, Syspix);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\n\tSyspix changes from %d to %d", Syspix_orig,
+                Syspix);
       Sizemag = ((float)Syspix) / (pow(((double)(DEFAULTSYSTEMSIZE)), 3.0));
-      if (Verbose)
-        printf("\n\tSizemag changes from %f to %f", Sizemag_orig, Sizemag);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\n\tSizemag changes from %f to %f", Sizemag_orig,
+                Sizemag);
       Isizemag = (int)(Sizemag + 0.5);
 
       Heat_cf *= ((double)Syspix) / ((double)Syspix_orig);
@@ -937,8 +956,8 @@ int main(int argc, char *argv[]) {
       /*
 
       if ((Sealed) && (!Sealed_after_crack)) {
-          if (Verbose) printf("\nSwitching to saturated conditions after
-      cracking.\n");
+          if (Verbose_flag > 1) fprintf(Logfile,"\nSwitching to saturated
+      conditions after cracking.\n");
       }
       Sealed = Sealed_after_crack;
       */
@@ -964,44 +983,51 @@ int main(int argc, char *argv[]) {
 
     /* Output movie microstructure if one is desired */
 
-    fflush(stdout);
+    fflush(Logfile);
     if ((MovieFrameFreq > 0.0) && (Time_cur >= NextMovieTime)) {
-      printf("\nMaking movie frame");
-      fflush(stdout);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nMaking movie frame");
+        fflush(Logfile);
+      }
       NextMovieTime = Time_cur + MovieFrameFreq;
       /* Check to see if movie file has been created already */
       Movfile = filehandler("disrealnew", Moviename, "READ_NOFAIL");
       if (!Movfile) {
-        printf("\nMovie file not found.  Creating it now...");
-        fflush(stdout);
+        if (Verbose_flag > 1) {
+          fprintf(Logfile, "\nMovie file not found.  Creating it now...");
+          fflush(Logfile);
+        }
         Movfile = filehandler("disrealnew", Moviename, "WRITE");
         if (!Movfile) {
+          bailout("disrealnew", "Could not create movie file");
           freeallmem();
           exit(1);
         }
-        printf("Success.");
-        fflush(stdout);
+        if (Verbose_flag > 1) {
+          fprintf(Logfile, " Success.");
+          fflush(Logfile);
+        }
 
         fprintf(Movfile, "%s ", VERSIONSTRING);
-        fprintf(Movfile, "%s\n", VERSIONNUMBER);
+        fprintf(Movfile, "%s", VERSIONNUMBER);
         if (Crackorient == 1 || Crackorient == 2) {
-          fprintf(Movfile, "%s ", XSIZESTRING);
-          fprintf(Movfile, "%d\n", Xsyssize);
-          fprintf(Movfile, "%s ", YSIZESTRING);
-          fprintf(Movfile, "%d\n", Ysyssize);
+          fprintf(Movfile, "\n%s ", XSIZESTRING);
+          fprintf(Movfile, "%d", Xsyssize);
+          fprintf(Movfile, "\n%s ", YSIZESTRING);
+          fprintf(Movfile, "%d", Ysyssize);
         }
         if (Crackorient == 3) {
-          fprintf(Movfile, "%s ", XSIZESTRING);
-          fprintf(Movfile, "%d\n", Xsyssize);
-          fprintf(Movfile, "%s ", YSIZESTRING);
-          fprintf(Movfile, "%d\n", Zsyssize);
+          fprintf(Movfile, "\n%s ", XSIZESTRING);
+          fprintf(Movfile, "%d", Xsyssize);
+          fprintf(Movfile, "\n%s ", YSIZESTRING);
+          fprintf(Movfile, "%d", Zsyssize);
         }
-        fprintf(Movfile, "%s ", IMGRESSTRING);
-        fprintf(Movfile, "%4.2f\n", Res);
+        fprintf(Movfile, "\n%s ", IMGRESSTRING);
+        fprintf(Movfile, "%4.2f", Res);
 
       } else {
-        printf("\nMovie file exists.  Appending to it...");
-        fflush(stdout);
+        fprintf(Logfile, "\nMovie file exists.  Appending to it...");
+        fflush(Logfile);
         fclose(Movfile);
         Movfile = filehandler("disrealnew", Moviename, "APPEND");
         if (!Movfile) {
@@ -1018,20 +1044,23 @@ int main(int argc, char *argv[]) {
       if (Crackorient == 1 || Crackorient == 2) {
         for (iy = 0; iy < Ysyssize; iy++) {
           for (ix = 0; ix < Xsyssize; ix++) {
-            fprintf(Movfile, "%d\n", (int)Mic[ix][iy][50]);
+            fprintf(Movfile, "\n%d", (int)Mic[ix][iy][50]);
           }
         }
       } else {
         for (iz = 0; iz < Zsyssize; iz++) {
           for (ix = 0; ix < Xsyssize; ix++) {
-            fprintf(Movfile, "%d\n", (int)Mic[ix][50][iz]);
+            fprintf(Movfile, "\n%d", (int)Mic[ix][50][iz]);
           }
         }
       }
 
       fclose(Movfile);
-      printf("\nMade movie frame successfully and closed movie file");
-      fflush(stdout);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile,
+                "\nMade movie frame successfully and closed movie file");
+        fflush(Logfile);
+      }
     }
 
     /***
@@ -1043,8 +1072,8 @@ int main(int argc, char *argv[]) {
          (Time_cur >= CustomImageTime[customentry])) ||
         ((Alpha_cur > 0.0) && (Time_cur >= NextImageTime))) {
 
-      if (Verbose)
-        printf("Writing microstructure image");
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\nWriting microstructure image");
       customentry++;
 
       NextImageTime = Time_cur + OutTimefreq;
@@ -1052,7 +1081,7 @@ int main(int argc, char *argv[]) {
       sprintf(strsuffb, "%1d%1d", Adiaflag, Sealed);
       strcpy(strsuff, strsuffa);
       strcat(strsuff, strsuffb);
-      sprintf(Micname, "%s%s.img.", Outputdir, Fileroot);
+      sprintf(Micname, "%s%s.img.", WorkingDirectory, Fileroot);
       strcat(Micname, strsuff);
 
       Micfile = filehandler("disrealnew", Micname, "WRITE");
@@ -1070,7 +1099,7 @@ int main(int argc, char *argv[]) {
         freeallmem();
         exit(1);
       }
-      fprintf(Imageindexfile, "%f\t%s\n", Time_cur, Micname);
+      fprintf(Imageindexfile, "\n%f\t%s", Time_cur, Micname);
       fclose(Imageindexfile);
 
       if (write_imgheader(Micfile, Xsyssize, Ysyssize, Zsyssize, Res)) {
@@ -1164,21 +1193,27 @@ int main(int argc, char *argv[]) {
               break;
             }
 
-            fprintf(Micfile, "%d\n", pixtmp);
+            fprintf(Micfile, "\n%d", pixtmp);
 
           } /* End of loop in z */
         } /* End of loop in y */
       } /* End of loop in x */
 
       fclose(Micfile);
+    }
 
-      /* With microstructure now written, calculate pore size distribution */
-      printf("\nCalculating pore size distribution now...");
-      if (calcporedist3d(Micname)) {
-        printf(
-            "\nThere was a problem calculating the pore size distribution.\n");
+    /* With microstructure now written, calculate pore size distribution */
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "\nCalculating pore size distribution now...");
+    }
+    if (calcporedist3d(Micname)) {
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nWARNING: There was a problem calculating the "
+                         "pore size distribution.");
       }
-      printf("Done calculating pore size distribution.\n");
+      if (Verbose_flag > 2) {
+        fprintf(Logfile, "\nDone calculating pore size distribution.");
+      }
     }
 
     /* Attempt to open master data file */
@@ -1188,7 +1223,7 @@ int main(int argc, char *argv[]) {
       freeallmem();
       exit(1);
     }
-    fprintf(Datafile, "%d,%.4f,%.4f,%.4f,", Cyccnt - 1, Time_cur, Alpha_cur,
+    fprintf(Datafile, "\n%d,%.4f,%.4f,%.4f,", Cyccnt - 1, Time_cur, Alpha_cur,
             Alpha_fa_cur);
     fprintf(Datafile, "%.4f,%.4f,%.4f,", (Heat_new * Heat_cf), Temp_cur_b,
             Gsratio2);
@@ -1239,9 +1274,38 @@ int main(int argc, char *argv[]) {
             ((float)Count[GYPSUMS] / (float)Syspix));
     fprintf(Datafile, "%.4f,%.4f,", ((float)Count[ABSGYP] / (float)Syspix),
             ((float)Count[AFMC] / (float)Syspix));
-    fprintf(Datafile, "%.4f,%.4f\n", ((float)Count[INERTAGG] / (float)Syspix),
+    fprintf(Datafile, "%.4f,%.4f", ((float)Count[INERTAGG] / (float)Syspix),
             ((float)Count[EMPTYP] / (float)Syspix));
     fclose(Datafile);
+
+    /* Always create a JSON with progress every ten cycles */
+    if (Icyc % 10 == 0) {
+      Datafile = filehandler("disrealnew", ProgressFileName, "WRITE");
+      if (!Datafile) {
+        freeallmem();
+        exit(1);
+      }
+      fprintf(Datafile, "json {");
+      fprintf(Datafile, "\"cycle\": %d, \"time_hours\": %.2f,", Icyc, Time_cur);
+      fprintf(Datafile,
+              " \"degree_of_hydration\": %.2f, \"timestamp\": ", Alpha_cur);
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(Datafile, "\"%s\"}", rfc8601);
+      fclose(Datafile);
+      free(rfc8601);
+    }
+
+    /* Print progress data to stderr if not in quiet or silent mode */
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nPROGRESS: Cycle=%d/%d Time=%f DOH=%f Temp=%f pH=%f",
+              Icyc, Ncyc, Time_cur, Alpha_cur, Temp_cur_b, PH_cur);
+      fflush(stderr);
+    }
 
   } /*    End of loop over all hydration cycles */
 
@@ -1269,7 +1333,7 @@ int main(int argc, char *argv[]) {
     freeallmem();
     exit(1);
   }
-  fprintf(Imageindexfile, "%f\t%s\n", Time_cur, Fileoname);
+  fprintf(Imageindexfile, "\n%f\t%s", Time_cur, Fileoname);
   fclose(Imageindexfile);
 
   if (write_imgheader(outfile, Xsyssize, Ysyssize, Zsyssize, Res)) {
@@ -1282,14 +1346,17 @@ int main(int argc, char *argv[]) {
   for (ix = 0; ix < Xsyssize; ix++) {
     for (iy = 0; iy < Ysyssize; iy++) {
       for (iz = 0; iz < Zsyssize; iz++) {
-        fprintf(outfile, "%d\n", (int)Mic[ix][iy][iz]);
+        fprintf(outfile, "\n%d", (int)Mic[ix][iy][iz]);
       }
     }
   }
   fclose(outfile);
 
   if (calcporedist3d(Fileoname)) {
-    printf("\nThere was a problem calculating the pore size distribution.\n");
+    if (Verbose_flag > 1) {
+      fprintf(Logfile,
+              "\nThere was a problem calculating the pore size distribution.");
+    }
   }
 
   /***
@@ -1334,8 +1401,9 @@ int main(int argc, char *argv[]) {
     Sf3 = burnset(0, 0, 1); /* Burn across z */
 
     Setflag = Sf1 * Sf2 * Sf3;
-    if (Verbose)
-      printf("\nSetflag = %d", Setflag);
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "\nSetflag = %d", Setflag);
+    }
   }
 
   /* Output last lines of heat and chemical shrinkage files */
@@ -1367,9 +1435,9 @@ int main(int argc, char *argv[]) {
 
   /* Final call to pHpred */
 
-  if (Verbose) {
-    printf("\nMaking final call to pHpred...");
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "\nMaking final call to pHpred...");
+    fflush(Logfile);
   }
   pHpred();
 
@@ -1380,7 +1448,7 @@ int main(int argc, char *argv[]) {
     freeallmem();
     exit(1);
   }
-  fprintf(Datafile, "%d,%.4f,%.4f,%.4f,", Cyccnt - 1, Time_cur, Alpha_cur,
+  fprintf(Datafile, "\n%d,%.4f,%.4f,%.4f,", Cyccnt - 1, Time_cur, Alpha_cur,
           Alpha_fa_cur);
   fprintf(Datafile, "%.4f,%.4f,%.4f,", (Heat_new * Heat_cf), Temp_cur_b,
           Gsratio2);
@@ -1431,21 +1499,61 @@ int main(int argc, char *argv[]) {
           ((float)Count[GYPSUMS] / (float)Syspix));
   fprintf(Datafile, "%.4f,%.4f,", ((float)Count[ABSGYP] / (float)Syspix),
           ((float)Count[AFMC] / (float)Syspix));
-  fprintf(Datafile, "%.4f,%.4f\n", ((float)Count[INERTAGG] / (float)Syspix),
+  fprintf(Datafile, "%.4f,%.4f", ((float)Count[INERTAGG] / (float)Syspix),
           ((float)Count[EMPTYP] / (float)Syspix));
   fclose(Datafile);
 
   /* Attempt to open time history file */
 
-  Datafile = filehandler("disrealnew", "TimeHistory.dat", "WRITE");
+  Datafile = filehandler("disrealnew", "time_history.csv", "WRITE");
   if (!Datafile) {
     freeallmem();
     exit(1);
   }
-  for (i = 0; i < Cyccnt; i++) {
-    fprintf(Datafile, "%d %f\n", i, TimeHistory[i]);
+  i = 0;
+  fprintf(Datafile, "%d,%f", i, TimeHistory[i]);
+  for (i = 1; i < Cyccnt; i++) {
+    fprintf(Datafile, "\n%d,%f", i, TimeHistory[i]);
   }
   fclose(Datafile);
+
+  /* Write finish time to the log file */
+  /* Get the local time using the current time */
+  end = clock();
+  current_time = time(NULL);
+  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+  local_time = localtime(&current_time);
+
+  /* Display the local time */
+  fprintf(Logfile, "\nEnd time: %s", asctime(local_time));
+  fprintf(Logfile, "\nElapsed time: %.3f", time_spent);
+  fprintf(Logfile, "\n\n=== END DISREALNEW SIMULATION ===");
+
+  /* Write simulation results to stdout in JSON format */
+  if (Verbose_flag > 0) {
+    fprintf(stdout, "\n{");
+    fprintf(stdout, "\n\t\"status\": \"completed\",");
+    fprintf(stdout, "\n\t\"final_doh\": %.3f,", Alpha_cur);
+    fprintf(stdout, "\n\t\"final_temp\": %.2f,", Temp_cur_b);
+    fprintf(stdout, "\n\t\"final_ph\": %.2f,", PH_cur);
+    fprintf(stdout, "\n\t\"output_files\": [");
+    fprintf(stdout, "\n\t\t\"%s\",", Datafilename);
+    /* All microstructure file names here in a loop */
+    fprintf(stdout, "\n\t\t\"%s\",", Fileoname);
+    fprintf(stdout, "\n\t\t\"%s\",", Imageindexname);
+    Movfile = filehandler("disrealnew", Moviename, "READ_NOFAIL");
+    if (Movfile) {
+      fprintf(stdout, "\n\t\t\"%s\",", Moviename);
+    }
+    fprintf(stdout, "\n\t\t\"%sphases_final.csv\",", WorkingDirectory);
+    /* Keep listing the files created */
+    fprintf(stdout, "\n\t\t\"%stemperature_history.csv\"", WorkingDirectory);
+    fprintf(stdout, "\n\t\t\"%sTimeHistory.csv\"", WorkingDirectory);
+    fprintf(stdout, "\n\t],");
+    fprintf(stdout, "\n\t\"execution_time\":%.3f", time_spent);
+    fprintf(stdout, "\n}");
+  }
 
   freeallmem();
   return (0);
@@ -1462,16 +1570,120 @@ int main(int argc, char *argv[]) {
  *    Calls:        no routines
  *    Called by:    main program
  ***/
-void checkargs(int argc, char *argv[]) {
-  register unsigned int i;
+int checkargs(int argc, char **argv) {
+  int wellformed = 0; /* 0 = false, 1 = true */
+  char *jsonname, *wdirname, *pfilename;
+  char buff[MAXSTRING];
 
-  /* Is verbose output requested? */
+  strcpy(ParameterFileName, "");
+  strcpy(WorkingDirectory, "");
+  strcpy(ProgressFileName, "");
 
-  Verbose = 0;
-  for (i = 1; i < argc; i++) {
-    if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--verbose")))
-      Verbose = 1;
+  if (argc < 3) {
+    wellformed = 0;
   }
+
+  // Many of the variables here are defined in the getopts.h system header
+  // file Can define more options here if we want
+
+  /* Default verbosity */
+  Verbose_flag = 2;
+
+  static struct option long_opts[] = {
+      /* These options set a flag */
+      {"verbose", no_argument, &Verbose_flag, 3},
+      {"quiet", no_argument, &Verbose_flag, 1},
+      {"silent", no_argument, &Verbose_flag, 0},
+      /* These options don't set a flag */
+      {"json", required_argument, 0, 'j'},
+      {"workdir", required_argument, 0, 'w'},
+      {"parameters", required_argument, 0, 'p'},
+      {"help", no_argument, 0, 'h'},
+      {NULL, 0, 0, 0}};
+
+  int opt_char;
+  int option_index;
+
+  while ((opt_char = getopt_long(argc, argv, "j:w:p:h", long_opts,
+                                 &option_index)) != -1) {
+    switch (opt_char) {
+    case (0):
+      if (long_opts[option_index].flag != 0) {
+        break;
+      }
+    /* -j or --json */
+    case (int)('j'):
+      wellformed = 1;
+      jsonname = optarg;
+      strcpy(ProgressFileName, jsonname);
+      break;
+    // -w or --workdir
+    case (int)('w'):
+      wdirname = optarg;
+      strcpy(WorkingDirectory, wdirname);
+      break;
+    // -p or --parameters
+    case (int)('p'):
+      pfilename = optarg;
+      strcpy(ParameterFileName, pfilename);
+      break;
+    // -h or --help
+    case (int)('h'):
+      wellformed = 0;
+      break;
+    case (int)('?'):
+      wellformed = 0;
+      break;
+    default:
+      wellformed = 0;
+      break;
+    }
+  }
+
+  if (wellformed != 1 || strlen(ProgressFileName) == 0 ||
+      strlen(ParameterFileName) == 0 || strlen(WorkingDirectory) == 0) {
+    printHelp();
+    return (1);
+  }
+
+  sprintf(LogFileName, "%sdisrealnew.log", WorkingDirectory);
+  strcpy(buff, ParameterFileName);
+  sprintf(ParameterFileName, "%s%s", WorkingDirectory, buff);
+  strcpy(buff, ProgressFileName);
+  sprintf(ProgressFileName, "%s%s", WorkingDirectory, buff);
+
+  return (0);
+}
+
+/***
+ *    printHelp
+ *
+ *     Prints a usage message for the program
+ *
+ *     Arguments:    none
+ *     Returns:    0 if okay, nonzero otherwise
+ *
+ *    Calls:        no routines
+ *    Called by:    checkargs
+ ***/
+void printHelp(void) {
+  fprintf(stderr,
+          "\n\nUsage: disrealnew [-h,--help] [-q,--quiet | -s,--silent]\n");
+  fprintf(stderr, "      -j,--json progress.json -w,--workdir "
+                  "working_directory -p,--parameters parameter_file\n\n");
+  fprintf(stderr, "    progress.json is the name of the progress file for UI "
+                  "processing (required)\n");
+  fprintf(stderr, "    working_directory is the path to the folder that will "
+                  "hold all simulation results (required)\n");
+  fprintf(stderr, "    parameter_file is the name of the file that holds all "
+                  "the hydration model parameters (required) \n\n");
+  fprintf(stderr, "Normal mode: Print progress updates to stderr and end point "
+                  "results to stdout\n");
+  fprintf(stderr, "Quiet mode: Print only end point results to stdout, no "
+                  "progress updates to stderr\n");
+  fprintf(stderr, "Silent mode: Suppress all output except critical errors "
+                  "to stderr\n\n");
+  return;
 }
 
 /***
@@ -1495,9 +1707,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   int newx, newy, newz;
   int nadd;
   char ch, imgfile[MAXSTRING], pimgfile[MAXSTRING];
-  char buff[MAXSTRING], prmname[MAXSTRING], custcycfile[MAXSTRING];
+  char buff[MAXSTRING], custcycfile[MAXSTRING];
   char name[MAXSTRING], answer[MAXSTRING], calfilename[MAXSTRING];
-  char buff1[MAXSTRING], buff2[MAXSTRING], instring[MAXSTRING];
+  char buff1[MAXSTRING], buff2[MAXSTRING];
+  char *instring;
   float dfrac, dends, dterm, bias, pc3a, b_estimate;
   float newver, newres;
   FILE *fimgfile, *fpimgfile, *fprmfile, *fcofile, *fcalfile;
@@ -1507,43 +1720,43 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    and some other variables that are phase-specific.
    ***/
 
-  if (Verbose)
-    printf("\tAllocating Disprob ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\tAllocating Disprob ...");
   Disprob = fvector(NSPHASES + 1);
   if (!Disprob) {
     bailout("disrealnew", "Could not allocate memory for Disprob");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Disbase ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Disbase ...");
   Disbase = fvector(NSPHASES + 1);
   if (!Disbase) {
     bailout("disrealnew", "Could not allocate memory for Disbase");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Discoeff ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Discoeff ...");
   Discoeff = fvector(NSPHASES + 1);
   if (!Discoeff) {
     bailout("disrealnew", "Could not allocate memory for Discoeff");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Soluble ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Soluble ...");
   Soluble = ivector(NSPHASES + 1);
   if (!Soluble) {
     bailout("disrealnew", "Could not allocate memory for Soluble");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Creates ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Creates ...");
   Creates = ivector(NSPHASES + 1);
   if (!Creates) {
     bailout("disrealnew", "Could not allocate memory for Creates");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Onepixelbias ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Onepixelbias ...");
   Onepixelbias = fvector(NSPHASES + 1);
   if (!Onepixelbias) {
     bailout("disrealnew", "Could not allocate memory for Onepixelbias");
@@ -1555,57 +1768,57 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    and stop flags for each phase in the system.
    ***/
 
-  if (Verbose)
-    printf("  done\n\tAllocating Startflag ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "  done\n\tAllocating Startflag ...");
   Startflag = ivector(NSPHASES + 1);
   if (!Startflag) {
     bailout("disrealnew", "Could not allocate memory for Startflag");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Stopflag ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Stopflag ...");
   Stopflag = ivector(NSPHASES + 1);
   if (!Stopflag) {
     bailout("disrealnew", "Could not allocate memory for Stopflag");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactphaselist ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactphaselist ...");
   Deactphaselist = ivector(NSPHASES + 1);
   if (!Deactphaselist) {
     bailout("disrealnew", "Could not allocate memory for Deactphaselist");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactfrac ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactfrac ...");
   Deactfrac = fvector(NSPHASES + 1);
   if (!Deactfrac) {
     bailout("disrealnew", "Could not allocate memory for Deactfrac");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Reactfrac ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Reactfrac ...");
   Reactfrac = fvector(NSPHASES + 1);
   if (!Reactfrac) {
     bailout("disrealnew", "Could not allocate memory for Reactfrac");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactinit ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactinit ...");
   Deactinit = fvector(NSPHASES + 1);
   if (!Deactinit) {
     bailout("disrealnew", "Could not allocate memory for Deactinit");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactends ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactends ...");
   Deactends = fvector(NSPHASES + 1);
   if (!Deactends) {
     bailout("disrealnew", "Could not allocate memory for Deactends");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactterm ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactterm ...");
   Deactterm = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
@@ -1617,15 +1830,15 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    of pH on solubility of each phase in the system.
    ***/
 
-  if (Verbose)
-    printf("  done\n\tAllocating PHsulfcoeff ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "  done\n\tAllocating PHsulfcoeff ...");
   PHsulfcoeff = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating PHfactor ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating PHfactor ...");
   PHfactor = fvector(NSPHASES + 1);
   if (!Deactterm) {
     bailout("disrealnew", "Could not allocate memory for Deactterm");
@@ -1638,486 +1851,587 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    nucleation probabilities, etc.
    ***/
 
-  printf("Enter name of file containing hydration parameters\n");
-  read_string(prmname, sizeof(prmname));
-  printf("%s\n", prmname);
-  fflush(stdout);
-
-  fprmfile = filehandler("disrealnew", prmname, "READ");
+  fprmfile = filehandler("disrealnew", ParameterFileName, "READ");
   if (!fprmfile) {
     return (1);
   }
 
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   Cubesize = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, Cubesize);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, Cubesize);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CUBEMIN = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, CUBEMIN);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, CUBEMIN);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   PSFUME = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, PSFUME);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, PSFUME);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SF_SiO2_val = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_SiO2_val);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SF_SiO2_val);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SF_BET_val = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_BET_val);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SF_BET_val);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SF_LOI_val = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_LOI_val);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SF_LOI_val);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SF_SiO2_normal = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_SiO2_normal);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SF_SiO2_normal);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SF_BET_normal = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_BET_normal);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SF_BET_normal);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
-  SF_LOI_normal = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SF_LOI_normal);
-  if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
-    return (1);
-  }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   PAMSIL = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, PAMSIL);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, PAMSIL);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   MAXTRIES = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, MAXTRIES);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, MAXTRIES);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISBIAS = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISBIAS);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISBIAS);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disbias = DISBIAS;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMIN = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMIN);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMIN);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin = DISMIN;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMIN2 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMIN2);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMIN2);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin2 = DISMIN2;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMINSLAG = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMINSLAG);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMINSLAG);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disminslag = DISMINSLAG;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMINASG = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMINASG);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMINASG);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Disminasg = DISMINASG;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMINCAS2 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMINCAS2);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMINCAS2);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismincas2 = DISMINCAS2;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMIN_C3A_0 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMIN_C3A_0);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMIN_C3A_0);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin_c3a = DISMIN_C3A_0;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISMIN_C4AF_0 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, DISMIN_C4AF_0);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, DISMIN_C4AF_0);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
   Dismin_c4af = DISMIN_C4AF_0;
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DK2SO4MAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DK2SO4MAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DK2SO4MAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DNA2SO4MAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DNA2SO4MAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DNA2SO4MAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DETTRMAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DETTRMAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DETTRMAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DGYPMAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DGYPMAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DGYPMAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DCACO3MAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DCACO3MAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DCACO3MAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DCACL2MAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DCACL2MAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DCACL2MAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DCAS2MAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DCAS2MAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DCAS2MAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DASMAX = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DASMAX);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DASMAX);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CHCRIT = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, CHCRIT);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, CHCRIT);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pnucch = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pnucch);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pnucch);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pscalech = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pscalech);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pscalech);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pnucgyp = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pnucgyp);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pnucgyp);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pscalegyp = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pscalegyp);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pscalegyp);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pnuchg = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pnuchg);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pnuchg);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pscalehg = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pscalehg);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pscalehg);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pnucfh3 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pnucfh3);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pnucfh3);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   *pscalefh3 = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, *pscalefh3);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, *pscalefh3);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   C3AH6CRIT = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, C3AH6CRIT);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, C3AH6CRIT);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CSHSCALE = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, CSHSCALE);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, CSHSCALE);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   C3AH6_SCALE = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, C3AH6_SCALE);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, C3AH6_SCALE);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   C3AH6GROW = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, C3AH6GROW);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, C3AH6GROW);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CHGROW = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, CHGROW);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, CHGROW);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CHGROWAGG = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, CHGROWAGG);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, CHGROWAGG);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   ETTRGROW = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, ETTRGROW);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, ETTRGROW);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   C3AETTR = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, C3AETTR);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, C3AETTR);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   C3AGYP = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, C3AGYP);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, C3AGYP);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SOLIDC3AGYP = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SOLIDC3AGYP);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SOLIDC3AGYP);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SOLIDC4AFGYP = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SOLIDC4AFGYP);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SOLIDC4AFGYP);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   AGRATE = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, AGRATE);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, AGRATE);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   PCSH2CSH = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, PCSH2CSH);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, PCSH2CSH);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   A0_CHSOL = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, A0_CHSOL);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, A0_CHSOL);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   A1_CHSOL = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, A1_CHSOL);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, A1_CHSOL);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   WCSCALE = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, WCSCALE);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, WCSCALE);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   DISTLOCCSH = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, DISTLOCCSH);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, DISTLOCCSH);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   NEIGHBORS = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, NEIGHBORS);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, NEIGHBORS);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   WN = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, WN);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, WN);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   WCHSH = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, WCHSH);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, WCHSH);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   MAXDIFFSTEPS = atoi(instring);
-  if (Verbose)
-    printf("%s %d\n", name, MAXDIFFSTEPS);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %d\n", name, MAXDIFFSTEPS);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   PDIFFCSH = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, PDIFFCSH);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, PDIFFCSH);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
@@ -2126,12 +2440,14 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    Currently not used by program
    ***/
 
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   Gypabsprob = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, Gypabsprob);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, Gypabsprob);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
@@ -2140,30 +2456,36 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    Used in pHpred function
    ***/
 
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   CSH_Porosity = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, CSH_Porosity);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, CSH_Porosity);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   POZZCSH_Porosity = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, POZZCSH_Porosity);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, POZZCSH_Porosity);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
-  fscanf(fprmfile, "%s %s", name, instring);
+  fread_string(fprmfile, buff1);
+  instring = strtok(buff1, ",");
+  instring = strtok(NULL, ",");
   SLAGCSH_Porosity = atof(instring);
-  if (Verbose)
-    printf("%s %f\n", name, SLAGCSH_Porosity);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "%s %f\n", name, SLAGCSH_Porosity);
   if (feof(fprmfile)) {
-    printf("Premature end of parameter file!!\n");
+    fprintf(Logfile, "Premature end of parameter file!!\n");
     return (1);
   }
 
@@ -2192,7 +2514,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   y = 1;
 
   for (k = POROSITY; k <= NSPHASES; k++) {
-    if (Verbose) {
+    if (Verbose_flag > 1) {
       switch (k) {
       case POROSITY:
         strcpy(buff, "POROSITY");
@@ -2321,67 +2643,81 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
     PHfactor[k] = 1.0;
 
-    fscanf(fprmfile, "%s %s", name, instring);
+    fread_string(fprmfile, buff1);
+    instring = strtok(buff1, ",");
+    instring = strtok(NULL, ",");
     Discoeff[k] = atof(instring);
-    if (Verbose) {
-      printf("\n%s:\n", buff);
-      printf("\t%s %f\n", name, Discoeff[k]);
+    if (Verbose_flag > 1) {
+      fprintf(Logfile, "\n%s:\n", buff);
+      fprintf(Logfile, "\t%s %f\n", name, Discoeff[k]);
     }
     if (feof(fprmfile)) {
-      printf("Premature end of parameter file!!\n");
+      fprintf(Logfile, "Premature end of parameter file!!\n");
       return (1);
     }
     for (i = x; i <= y; i++) {
       for (j = 0; j < 3; j++) {
-        fscanf(fprmfile, "%s %s", name, instring);
+        fread_string(fprmfile, buff1);
+        instring = strtok(buff1, ",");
+        instring = strtok(NULL, ",");
         FitpH[k][i][j] = atof(instring);
-        if (Verbose)
-          printf("\t%s %f\n", name, FitpH[k][i][j]);
+        if (Verbose_flag > 1)
+          fprintf(Logfile, "\t%s %f\n", name, FitpH[k][i][j]);
         if (feof(fprmfile)) {
-          printf("Premature end of parameter file!!\n");
+          fprintf(Logfile, "Premature end of parameter file!!\n");
           return (1);
         }
       }
     }
-    fscanf(fprmfile, "%s %s", name, instring);
+    fread_string(fprmfile, buff1);
+    instring = strtok(buff1, ",");
+    instring = strtok(NULL, ",");
     PHsulfcoeff[k] = atof(instring);
-    if (Verbose)
-      printf("\t%s %f\n", name, PHsulfcoeff[k]);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\t%s %f\n", name, PHsulfcoeff[k]);
     if (feof(fprmfile)) {
-      printf("Premature end of parameter file!!\n");
+      fprintf(Logfile, "Premature end of parameter file!!\n");
       return (1);
     }
     if (k == CSH) {
-      fscanf(fprmfile, "%s %s", name, instring);
+      fread_string(fprmfile, buff1);
+      instring = strtok(buff1, ",");
+      instring = strtok(NULL, ",");
       Molarvcshcoeff_T = atof(instring);
-      if (Verbose)
-        printf("\t%s %f\n", name, Molarvcshcoeff_T);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\t%s %f\n", name, Molarvcshcoeff_T);
       if (feof(fprmfile)) {
-        printf("Premature end of parameter file!!\n");
+        fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
-      fscanf(fprmfile, "%s %s", name, instring);
+      fread_string(fprmfile, buff1);
+      instring = strtok(buff1, ",");
+      instring = strtok(NULL, ",");
       Watercshcoeff_T = atof(instring);
-      if (Verbose)
-        printf("\t%s %f\n", name, Watercshcoeff_T);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\t%s %f\n", name, Watercshcoeff_T);
       if (feof(fprmfile)) {
-        printf("Premature end of parameter file!!\n");
+        fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
-      fscanf(fprmfile, "%s %s", name, instring);
+      fread_string(fprmfile, buff1);
+      instring = strtok(buff1, ",");
+      instring = strtok(NULL, ",");
       Molarvcshcoeff_pH = atof(instring);
-      if (Verbose)
-        printf("\t%s %f\n", name, Molarvcshcoeff_pH);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\t%s %f\n", name, Molarvcshcoeff_pH);
       if (feof(fprmfile)) {
-        printf("Premature end of parameter file!!\n");
+        fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
-      fscanf(fprmfile, "%s %s", name, instring);
+      fread_string(fprmfile, buff1);
+      instring = strtok(buff1, ",");
+      instring = strtok(NULL, ",");
       Watercshcoeff_pH = atof(instring);
-      if (Verbose)
-        printf("\t%s %f\n", name, Watercshcoeff_pH);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\t%s %f\n", name, Watercshcoeff_pH);
       if (feof(fprmfile)) {
-        printf("Premature end of parameter file!!\n");
+        fprintf(Logfile, "Premature end of parameter file!!\n");
         return (1);
       }
       Molarvcshcoeff_sulf = -10.0;
@@ -2399,50 +2735,46 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    simulation in question
    ***/
 
-  printf("Enter random number seed \n");
+  fprintf(Logfile, "Enter random number seed \n");
   read_string(instring, sizeof(instring));
   Iseed = atoi(instring);
   if (Iseed > 0)
     Iseed = (-1 * Iseed);
-  printf("%d\n", Iseed);
+  fprintf(Logfile, "%d\n", Iseed);
   Seed = (&Iseed);
 
-  if (Verbose)
-    printf("Dissolution bias is set at %f \n", DISBIAS);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "Dissolution bias is set at %f \n", DISBIAS);
 
   /***
    *    Open file and read in original cement
    *    particle microstructure
    ***/
 
-  printf("Enter name of directory containing initial microstructure files\n");
-  printf("Be sure to include final file separator:  ");
+  fprintf(Logfile,
+          "Enter name of directory containing initial microstructure files\n");
+  fprintf(Logfile, "Be sure to include final file separator:  ");
   read_string(Micdir, sizeof(Micdir));
   Filesep = Micdir[strlen(Micdir) - 1];
   if ((Filesep != '/') && (Filesep != '\\')) {
-    printf("\nNo final file separator found.  Using /");
+    fprintf(Logfile, "\nNo final file separator found.  Using /");
     Filesep = '/';
   }
-  printf("%s\n", Micdir);
-  printf("Enter name of file from which the initial ");
-  printf("microstructure will be read\n");
+  fprintf(Logfile, "%s\n", Micdir);
+  fprintf(Logfile, "Enter name of file from which the initial ");
+  fprintf(Logfile, "microstructure will be read\n");
   read_string(name, sizeof(name));
-  printf("%s\n", name);
+  fprintf(Logfile, "%s\n", name);
   nlen = strcspn(name, ".");
   strncpy(Fileroot, name, nlen);
   sprintf(imgfile, "%s%s", Micdir, name);
-  if (Verbose)
-    printf("nlen is %d and Fileroot is now %s \n", nlen, Fileroot);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "nlen is %d and Fileroot is now %s \n", nlen, Fileroot);
 
-  printf("\nEnter name of particle image file:  ");
+  fprintf(Logfile, "\nEnter name of particle image file:  ");
   read_string(name, sizeof(name));
-  printf("%s\n", name);
+  fprintf(Logfile, "%s\n", name);
   sprintf(pimgfile, "%s%s", Micdir, name);
-
-  printf("\nEnter name of directory to store OUTPUT files\n");
-  printf("Be sure to include final file separator:  ");
-  read_string(Outputdir, sizeof(Outputdir));
-  printf("%s\n", Outputdir);
 
   /***
    *    Assign various physical properties of phases
@@ -2450,49 +2782,50 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
   assign_properties();
 
-  printf("Enter fraction of C3A that is to be orthorhombic ");
-  printf("instead of cubic: ");
+  fprintf(Logfile, "Enter fraction of C3A that is to be orthorhombic ");
+  fprintf(Logfile, "instead of cubic: ");
   read_string(instring, sizeof(instring));
   Oc3afrac = atof(instring);
-  printf("%f\n", Oc3afrac);
+  fprintf(Logfile, "%f\n", Oc3afrac);
 
-  printf("Enter number of seeds for CSH nucleation per um3 of mix water: ");
+  fprintf(Logfile,
+          "Enter number of seeds for CSH nucleation per um3 of mix water: ");
   read_string(instring, sizeof(instring));
   Csh_seeds = atof(instring);
-  printf("%f\n", Csh_seeds);
+  fprintf(Logfile, "%f\n", Csh_seeds);
 
-  printf("Enter aging time in days: ");
+  fprintf(Logfile, "Enter aging time in days: ");
   read_string(instring, sizeof(instring));
   End_time = atof(instring);
-  printf("\n%f \n", End_time);
+  fprintf(Logfile, "\n%f \n", End_time);
   End_time *= 24.0; /* Convert days to hours */
 
-  printf("Place a crack (y or n)? [n] ");
+  fprintf(Logfile, "Place a crack (y or n)? [n] ");
   read_string(answer, sizeof(answer));
-  printf("%s\n", answer);
+  fprintf(Logfile, "%s\n", answer);
   if (strlen(answer) < 1) {
     strcpy(answer, "n");
   }
 
   if (toupper(answer[0]) == 'Y') {
-    printf("\nEnter total crack width (in pixels): ");
+    fprintf(Logfile, "\nEnter total crack width (in pixels): ");
     read_string(instring, sizeof(instring));
     Crackwidth = atoi(instring);
-    printf("%d", Crackwidth);
-    printf("\nEnter time at which to crack (in h): ");
+    fprintf(Logfile, "%d", Crackwidth);
+    fprintf(Logfile, "\nEnter time at which to crack (in h): ");
     read_string(instring, sizeof(instring));
     Cracktime = atof(instring);
-    printf("%f", Cracktime);
-    printf("\nEnter orientation of crack as follows:");
-    printf("\n\t 1 = parallel to yz plane");
-    printf("\n\t 2 = parallel to xz plane");
-    printf("\n\t 3 = parallel to xy plane");
-    printf("\nOrientation: ");
+    fprintf(Logfile, "%f", Cracktime);
+    fprintf(Logfile, "\nEnter orientation of crack as follows:");
+    fprintf(Logfile, "\n\t 1 = parallel to yz plane");
+    fprintf(Logfile, "\n\t 2 = parallel to xz plane");
+    fprintf(Logfile, "\n\t 3 = parallel to xy plane");
+    fprintf(Logfile, "\nOrientation: ");
     read_string(instring, sizeof(instring));
     Crackorient = atoi(instring);
     if (Crackorient > 3)
       Crackorient = 3;
-    printf("%d\n", Crackorient);
+    fprintf(Logfile, "%d\n", Crackorient);
 
   } else {
     Crackwidth = 0;
@@ -2500,16 +2833,17 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Crackorient = 1;
   }
 
-  printf("Customize times for outputting microstructure (y or n)? [n] ");
+  fprintf(Logfile,
+          "Customize times for outputting microstructure (y or n)? [n] ");
   read_string(answer, sizeof(answer));
-  printf("%s\n", answer);
+  fprintf(Logfile, "%s\n", answer);
   if (strlen(answer) < 1) {
     strcpy(answer, "n");
   }
 
   if (toupper(answer[0]) == 'Y') {
     Tcustomoutputentries = 0;
-    sprintf(custcycfile, "%scustomoutput.dat", Outputdir);
+    sprintf(custcycfile, "%scustomoutput.dat", WorkingDirectory);
     fcofile = filehandler("disrealnew", custcycfile, "READ");
     if (!fcofile) {
       freeallmem();
@@ -2541,10 +2875,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
 
   } else {
     CustomImageTime = NULL;
-    printf("Output hydrating microstructure every ____ hours: ");
+    fprintf(Logfile, "Output hydrating microstructure every ____ hours: ");
     read_string(instring, sizeof(instring));
     OutTimefreq = atof(instring);
-    printf("\n%f\n", OutTimefreq);
+    fprintf(Logfile, "\n%f\n", OutTimefreq);
   }
 
   /****
@@ -2571,14 +2905,14 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     exit(1);
   }
 
-  if (Verbose) {
-    printf("\nDone reading image header...\n");
-    printf("\tVersion = %f\n", Version);
-    printf("\tX size = %d\n", Xsyssize_orig);
-    printf("\tY size = %d\n", Ysyssize_orig);
-    printf("\tZ size = %d\n", Ysyssize_orig);
-    printf("\tResolution = %f\n", Res);
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "\nDone reading image header...\n");
+    fprintf(Logfile, "\tVersion = %f\n", Version);
+    fprintf(Logfile, "\tX size = %d\n", Xsyssize_orig);
+    fprintf(Logfile, "\tY size = %d\n", Ysyssize_orig);
+    fprintf(Logfile, "\tZ size = %d\n", Ysyssize_orig);
+    fprintf(Logfile, "\tResolution = %f\n", Res);
+    fflush(Logfile);
   }
 
   Xsyssize = Xsyssize_orig;
@@ -2588,8 +2922,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   Syspix = Xsyssize * Ysyssize * Zsyssize;
   Syspix_orig = Syspix;
   Sizemag = ((float)Syspix) / (pow(((double)(DEFAULTSYSTEMSIZE)), 3.0));
-  if (Verbose)
-    printf("\nSizemag = %f", Sizemag);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "\nSizemag = %f", Sizemag);
   Sizemag_orig = Sizemag;
   Isizemag = (int)(Sizemag + 0.5);
   Isizemag_orig = Isizemag;
@@ -2606,9 +2940,9 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    (See disrealnew.h for their declaration)
    ***/
 
-  if (Verbose)
-    printf("\tAllocating Mic with dimensions %d %d %d...", Xsyssize, Ysyssize,
-           Zsyssize);
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\tAllocating Mic with dimensions %d %d %d...", Xsyssize,
+            Ysyssize, Zsyssize);
   Mic = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Mic) {
     freeallmem();
@@ -2616,8 +2950,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Mic array");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Micorig ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Micorig ...");
 
   Micorig = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micorig) {
@@ -2626,8 +2960,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Micorig array");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Micpart ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Micpart ...");
 
   Micpart = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micpart) {
@@ -2636,8 +2970,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Micpart array");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Cshage ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Cshage ...");
 
   Cshage = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Cshage) {
@@ -2646,8 +2980,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Cshage array");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n\tAllocating Deactivated ...");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, " done\n\tAllocating Deactivated ...");
 
   Deactivated = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Deactivated) {
@@ -2656,8 +2990,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Deactivated array");
     return (1);
   }
-  if (Verbose)
-    printf(" done\n");
+  if (Verbose_flag > 1)
+    fprintf(Logfile, " done\n");
 
   Cshscale = CSHSCALE * Sizemag;
   C3ah6_scale = C3AH6_SCALE * Sizemag;
@@ -2685,8 +3019,8 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   Ysyssize = Ysyssize_orig;
   Zsyssize = Zsyssize_orig;
 
-  if (Verbose)
-    printf("\nPreparing to read image file ...");
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "\nPreparing to read image file ...");
   for (ix = 0; ix < Xsyssize; ix++) {
     for (iy = 0; iy < Ysyssize; iy++) {
       for (iz = 0; iz < Zsyssize; iz++) {
@@ -2716,15 +3050,15 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   } /* End of loop in ix */
 
   fclose(fimgfile);
-  if (Verbose)
-    printf(" done\n");
+  if (Verbose_flag > 1)
+    fprintf(Logfile, " done\n");
 
   /* Now read in particle IDs from file */
 
   fpimgfile = filehandler("disrealnew", pimgfile, "READ");
   if (!fpimgfile) {
-    printf("\nCould not open fpimgfile: %s. Exiting ...", pimgfile);
-    fflush(stdout);
+    fprintf(Logfile, "\nCould not open fpimgfile: %s. Exiting ...", pimgfile);
+    fflush(Logfile);
     freeallmem();
     exit(1);
   }
@@ -2736,8 +3070,9 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    ***/
 
   if (read_imgheader(fpimgfile, &newver, &newx, &newy, &newz, &newres)) {
-    printf("\nTrouble reading header of fpimgfile: %s. Exiting ...", pimgfile);
-    fflush(stdout);
+    fprintf(Logfile, "\nTrouble reading header of fpimgfile: %s. Exiting ...",
+            pimgfile);
+    fflush(Logfile);
     fclose(fpimgfile);
     freeallmem();
     bailout("disrealnew", "Error reading image header");
@@ -2758,30 +3093,30 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   fclose(fpimgfile);
 
   if (Version != newver) {
-    printf("WARNING: Some files were created with differing\n");
-    printf("\tVCCTL software versions.  This may create a");
-    printf("\tconflict.");
+    fprintf(Logfile, "WARNING: Some files were created with differing\n");
+    fprintf(Logfile, "\tVCCTL software versions.  This may create a");
+    fprintf(Logfile, "\tconflict.");
   }
   if (Xsyssize != newx) {
-    printf("Xsyssize = %d, New x size = %d", Xsyssize, newx);
-    fflush(stdout);
+    fprintf(Logfile, "Xsyssize = %d, New x size = %d", Xsyssize, newx);
+    fflush(Logfile);
     freeallmem();
     bailout("disrealnew", "Incompatible size declarations");
     exit(1);
   }
 
   if (Ysyssize != newy) {
-    printf("Ysyssize = %d, New y size = %d", Ysyssize, newy);
-    fflush(stdout);
+    fprintf(Logfile, "Ysyssize = %d, New y size = %d", Ysyssize, newy);
+    fflush(Logfile);
     freeallmem();
-    printf("Ysyssize = %d, New y size = %d", Ysyssize, newy);
+    fprintf(Logfile, "Ysyssize = %d, New y size = %d", Ysyssize, newy);
     bailout("disrealnew", "Incompatible size declarations");
     exit(1);
   }
 
   if (Zsyssize != newz) {
-    printf("Zsyssize = %d, New y size = %d", Ysyssize, newy);
-    fflush(stdout);
+    fprintf(Logfile, "Zsyssize = %d, New y size = %d", Ysyssize, newy);
+    fflush(Logfile);
     freeallmem();
     bailout("disrealnew", "Incompatible size declarations");
     exit(1);
@@ -2797,64 +3132,65 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    addition of one-pixel particles by the user.
    ***/
 
-  printf("Enter number of one pixel particles to add (-1 to quit) \n");
-  fflush(stdout);
+  fprintf(Logfile,
+          "Enter number of one pixel particles to add (-1 to quit) \n");
+  fflush(Logfile);
   read_string(instring, sizeof(instring));
   nadd = atoi(instring);
-  printf("%d\n", nadd);
+  fprintf(Logfile, "%d\n", nadd);
 
   while (nadd >= 0) {
 
     onepixfloc = 0; /* No flocculation of one-pixel particles */
     /*
-    printf("Should these particles flocculate ");
-    printf("to surfaces? No (0) or Yes (1): ");
+    fprintf(Logfile,"Should these particles flocculate ");
+    fprintf(Logfile,"to surfaces? No (0) or Yes (1): ");
     read_string(instring,sizeof(instring));
     onepixfloc = atoi(instring);
     */
 
-    printf("Enter dissolution bias for these one pixel particles\n");
+    fprintf(Logfile, "Enter dissolution bias for these one pixel particles\n");
     read_string(instring, sizeof(instring));
     bias = atof(instring);
-    printf("%f\n", bias);
+    fprintf(Logfile, "%f\n", bias);
 
-    printf("Enter phase to add \n");
-    if (Verbose) {
-      printf("\tC3S %d\n", C3S);
-      printf("\tC2S %d\n", C2S);
-      printf("\tC3A %d\n", C3A);
-      printf("\tC4AF %d\n", C4AF);
-      printf("\tGYPSUM %d\n", GYPSUM);
-      printf("\tHEMIHYD %d\n", HEMIHYD);
-      printf("\tANHYDRITE %d\n", ANHYDRITE);
-      printf("\tSILICA FUME %d\n", SFUME);
-      printf("\tINERT %d\n", INERT);
-      printf("\tSLAG %d\n", SLAG);
-      printf("\tASG %d\n", ASG);
-      printf("\tCAS2 %d\n", CAS2);
-      printf("\tAMORPHOUS SILICA %d\n", AMSIL);
-      printf("\tCH %d\n", CH);
-      printf("\tCSH %d\n", CSH);
-      printf("\tC3AH6 %d\n", C3AH6);
-      printf("\tEttringite %d\n", ETTR);
-      printf("\tStable Ettringite from C4AF %d\n", ETTRC4AF);
-      printf("\tAFM %d\n", AFM);
-      printf("\tFH3 %d\n", FH3);
-      printf("\tPOZZCSH %d\n", POZZCSH);
-      printf("\tSLAGCSH %d\n", SLAGCSH);
-      printf("\tCACL2 %d\n", CACL2);
-      printf("\tFriedels salt %d\n", FRIEDEL);
-      printf("\tStratlingite %d\n", STRAT);
-      printf("\tCalcium carbonate %d\n", CACO3);
-      printf("\tAFmc %d\n", AFMC);
-      printf("\tBrucite %d\n", BRUCITE);
-      printf("\tMS %d\n", MS);
-      printf("\tFree Lime %d\n", FREELIME);
+    fprintf(Logfile, "Enter phase to add \n");
+    if (Verbose_flag > 1) {
+      fprintf(Logfile, "\tC3S %d\n", C3S);
+      fprintf(Logfile, "\tC2S %d\n", C2S);
+      fprintf(Logfile, "\tC3A %d\n", C3A);
+      fprintf(Logfile, "\tC4AF %d\n", C4AF);
+      fprintf(Logfile, "\tGYPSUM %d\n", GYPSUM);
+      fprintf(Logfile, "\tHEMIHYD %d\n", HEMIHYD);
+      fprintf(Logfile, "\tANHYDRITE %d\n", ANHYDRITE);
+      fprintf(Logfile, "\tSILICA FUME %d\n", SFUME);
+      fprintf(Logfile, "\tINERT %d\n", INERT);
+      fprintf(Logfile, "\tSLAG %d\n", SLAG);
+      fprintf(Logfile, "\tASG %d\n", ASG);
+      fprintf(Logfile, "\tCAS2 %d\n", CAS2);
+      fprintf(Logfile, "\tAMORPHOUS SILICA %d\n", AMSIL);
+      fprintf(Logfile, "\tCH %d\n", CH);
+      fprintf(Logfile, "\tCSH %d\n", CSH);
+      fprintf(Logfile, "\tC3AH6 %d\n", C3AH6);
+      fprintf(Logfile, "\tEttringite %d\n", ETTR);
+      fprintf(Logfile, "\tStable Ettringite from C4AF %d\n", ETTRC4AF);
+      fprintf(Logfile, "\tAFM %d\n", AFM);
+      fprintf(Logfile, "\tFH3 %d\n", FH3);
+      fprintf(Logfile, "\tPOZZCSH %d\n", POZZCSH);
+      fprintf(Logfile, "\tSLAGCSH %d\n", SLAGCSH);
+      fprintf(Logfile, "\tCACL2 %d\n", CACL2);
+      fprintf(Logfile, "\tFriedels salt %d\n", FRIEDEL);
+      fprintf(Logfile, "\tStratlingite %d\n", STRAT);
+      fprintf(Logfile, "\tCalcium carbonate %d\n", CACO3);
+      fprintf(Logfile, "\tAFmc %d\n", AFMC);
+      fprintf(Logfile, "\tBrucite %d\n", BRUCITE);
+      fprintf(Logfile, "\tMS %d\n", MS);
+      fprintf(Logfile, "\tFree Lime %d\n", FREELIME);
     }
 
     read_string(instring, sizeof(instring));
     phtodo = atoi(instring);
-    printf("%d \n", phtodo);
+    fprintf(Logfile, "%d \n", phtodo);
 
     if ((phtodo < 0) || (phtodo > NSPHASES)) {
       freeallmem();
@@ -2867,81 +3203,81 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     if (nadd > 0)
       addrand(phtodo, nadd, onepixfloc);
 
-    printf("Enter number of one pixel particles ");
-    printf("to add (-1 to quit) \n");
+    fprintf(Logfile, "Enter number of one pixel particles ");
+    fprintf(Logfile, "to add (-1 to quit) \n");
     read_string(instring, sizeof(instring));
     nadd = atoi(instring);
-    printf("%d\n", nadd);
+    fprintf(Logfile, "%d\n", nadd);
   }
 
-  fflush(stdout);
+  fflush(Logfile);
 
   /***
    *    Parameters for adiabatic temperature rise calculation
    ***/
 
-  printf("Enter the initial temperature of binder ");
-  printf("in degrees Celsius \n");
+  fprintf(Logfile, "Enter the initial temperature of binder ");
+  fprintf(Logfile, "in degrees Celsius \n");
   read_string(instring, sizeof(instring));
   Temp_0 = atof(instring);
-  printf("%f \n", Temp_0);
+  fprintf(Logfile, "%f \n", Temp_0);
   Temp_cur_b = Temp_0;
 
-  printf("Hydration under 0) isothermal, 1) adiabatic ");
-  printf("or 2) programmed temperature history conditions \n");
+  fprintf(Logfile, "Hydration under 0) isothermal, 1) adiabatic ");
+  fprintf(Logfile, "or 2) programmed temperature history conditions \n");
   read_string(instring, sizeof(instring));
   Adiaflag = atoi(instring);
-  printf("%d \n", Adiaflag);
+  fprintf(Logfile, "%d \n", Adiaflag);
   AggTempEffect = 1;
   if ((Adiaflag == 0) || (Mass_agg * Cp_agg <= 0.0) ||
       (fabs(Temp_0_agg - Temp_0) < 0.5) || (U_coeff_agg <= 0.0))
     AggTempEffect = 0;
 
-  printf("Enter the ambient temperature ");
-  printf("in degrees Celsius \n");
+  fprintf(Logfile, "Enter the ambient temperature ");
+  fprintf(Logfile, "in degrees Celsius \n");
   read_string(instring, sizeof(instring));
   T_ambient = atof(instring);
-  printf("%f \n", T_ambient);
+  fprintf(Logfile, "%f \n", T_ambient);
 
-  printf("Enter the overall heat transfer coefficient ");
-  printf("in J/g/C/s \n");
+  fprintf(Logfile, "Enter the overall heat transfer coefficient ");
+  fprintf(Logfile, "in J/g/C/s \n");
   read_string(instring, sizeof(instring));
   U_coeff = atof(instring);
-  printf("%f \n", U_coeff);
+  fprintf(Logfile, "%f \n", U_coeff);
 
-  printf("Enter apparent activation energy for hydration ");
-  printf("in kJ/mole \n");
+  fprintf(Logfile, "Enter apparent activation energy for hydration ");
+  fprintf(Logfile, "in kJ/mole \n");
   read_string(instring, sizeof(instring));
   E_act = atof(instring);
-  printf("%f \n", E_act);
+  fprintf(Logfile, "%f \n", E_act);
 
-  printf("Enter apparent activation energy for pozzolanic ");
-  printf("reactions in kJ/mole \n");
+  fprintf(Logfile, "Enter apparent activation energy for pozzolanic ");
+  fprintf(Logfile, "reactions in kJ/mole \n");
   read_string(instring, sizeof(instring));
   E_act_pozz = atof(instring);
-  printf("%f \n", E_act_pozz);
+  fprintf(Logfile, "%f \n", E_act_pozz);
 
-  printf("Enter apparent activation energy for slag ");
-  printf("reactions in kJ/mole \n");
+  fprintf(Logfile, "Enter apparent activation energy for slag ");
+  fprintf(Logfile, "reactions in kJ/mole \n");
   read_string(instring, sizeof(instring));
   E_act_slag = atof(instring);
-  printf("%f \n", E_act_slag);
+  fprintf(Logfile, "%f \n", E_act_slag);
 
-  printf("Calibrate time using beta factor (0), ");
-  printf("early-age calorimetry data (1), or ");
-  printf("early-age chemical shrinkage data (2): ");
+  fprintf(Logfile, "Calibrate time using beta factor (0), ");
+  fprintf(Logfile, "early-age calorimetry data (1), or ");
+  fprintf(Logfile, "early-age chemical shrinkage data (2): ");
   read_string(instring, sizeof(instring));
   TimeCalibrationMethod = atoi(instring);
   if (TimeCalibrationMethod == BETAFACTOR) {
-    printf("\nEnter kinetic factor to convert cycles ");
-    printf("to time at 25 C \n");
+    fprintf(Logfile, "\nEnter kinetic factor to convert cycles ");
+    fprintf(Logfile, "to time at 25 C \n");
     read_string(instring, sizeof(instring));
     Beta = atof(instring);
-    printf("%f \n", Beta);
+    fprintf(Logfile, "%f \n", Beta);
   } else {
-    printf("\nEnter file name for early-age data: ");
+    fprintf(Logfile, "\nEnter file name for early-age data: ");
     read_string(name, sizeof(name));
-    printf("\n%s \n", name);
+    fprintf(Logfile, "\n%s \n", name);
     sprintf(calfilename, "%s", name);
 
     /***
@@ -3018,16 +3354,16 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     } while (ch != '\n' && !feof(fcalfile));
 
     i = 0;
-    if (Verbose)
-      printf("\nNDataLines = %d", NDataLines);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\nNDataLines = %d", NDataLines);
     while ((i < NDataLines) && !feof(fcalfile)) {
       fscanf(fcalfile, "%s %s", buff1, buff2);
       if (i == 0) {
         DataTime[i] = atof(buff1);
         DataValue[i] = atof(buff2);
-        if (Verbose) {
-          printf("\nDataTime[%d] = %f, ", i, DataTime[i]);
-          printf("DataValue[%d] = %f\n", i, DataValue[i]);
+        if (Verbose_flag > 1) {
+          fprintf(Logfile, "\nDataTime[%d] = %f, ", i, DataTime[i]);
+          fprintf(Logfile, "DataValue[%d] = %f\n", i, DataValue[i]);
         }
         i++;
       } else {
@@ -3042,10 +3378,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     NDataLines = i;
 
     fclose(fcalfile);
-    printf("Enter temperature at which calibration data ");
-    printf("were obtained (in deg C): ");
+    fprintf(Logfile, "Enter temperature at which calibration data ");
+    fprintf(Logfile, "were obtained (in deg C): ");
     read_string(buff, sizeof(buff));
-    printf("%s \n", buff);
+    fprintf(Logfile, "%s \n", buff);
     DataMeasuredAtTemperature = atof(buff);
   }
 
@@ -3065,9 +3401,9 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Cracktime = End_time + 100.0;
   if (CustomImageTime != NULL) {
     OutTimefreq = End_time + 1.0;
-    printf("\nSetting DOH frequency for outputting ");
-    printf("microstructure = %f\n", OutTimefreq);
-    fflush(stdout);
+    fprintf(Logfile, "\nSetting DOH frequency for outputting ");
+    fprintf(Logfile, "microstructure = %f\n", OutTimefreq);
+    fflush(Logfile);
   }
 
   /***
@@ -3098,97 +3434,98 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     exit(1);
   }
 
-  printf("Enter maximum degree of hydration to achieve ");
-  printf("before terminating \n");
+  fprintf(Logfile, "Enter maximum degree of hydration to achieve ");
+  fprintf(Logfile, "before terminating \n");
   read_string(instring, sizeof(instring));
   Alpha_max = atof(instring);
-  printf("%f \n", Alpha_max);
+  fprintf(Logfile, "%f \n", Alpha_max);
 
-  printf("Do you wish hydration under 0) saturated ");
-  printf("or 1) sealed conditions \n");
+  fprintf(Logfile, "Do you wish hydration under 0) saturated ");
+  fprintf(Logfile, "or 1) sealed conditions \n");
   read_string(instring, sizeof(instring));
   Sealed = atoi(instring);
-  printf("%d \n", Sealed);
+  fprintf(Logfile, "%d \n", Sealed);
 
   Sealed_after_crack = Sealed;
 
   *pscalech *= Sizemag;
-  if (Verbose) {
-    printf("Nuc. prob. and scale factor for CH nucleation \n");
-    printf("%f %f \n", *pnucch, *pscalech);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "Nuc. prob. and scale factor for CH nucleation \n");
+    fprintf(Logfile, "%f %f \n", *pnucch, *pscalech);
   }
 
   *pscalegyp *= Sizemag;
-  if (Verbose) {
-    printf("Nuc. prob. and scale factor for gypsum nucleation \n");
-    printf("%f %f \n", *pnucgyp, *pscalegyp);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "Nuc. prob. and scale factor for gypsum nucleation \n");
+    fprintf(Logfile, "%f %f \n", *pnucgyp, *pscalegyp);
   }
 
   *pscalehg *= Sizemag;
-  if (Verbose) {
-    printf("Nuc. prob. and scale factor for C3AH6 nucleation \n");
-    printf("%f %f \n", *pnuchg, *pscalehg);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "Nuc. prob. and scale factor for C3AH6 nucleation \n");
+    fprintf(Logfile, "%f %f \n", *pnuchg, *pscalehg);
   }
 
   *pscalefh3 *= Sizemag;
-  if (Verbose) {
-    printf("Nuc. prob. and scale factor for FH3 nucleation \n");
-    printf("%f %f \n", *pnucfh3, *pscalefh3);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "Nuc. prob. and scale factor for FH3 nucleation \n");
+    fprintf(Logfile, "%f %f \n", *pnucfh3, *pscalefh3);
   }
 
-  printf("Enter time frequency for checking pore ");
-  printf("space percolation (in h): ");
+  fprintf(Logfile, "Enter time frequency for checking pore ");
+  fprintf(Logfile, "space percolation (in h): ");
   read_string(instring, sizeof(instring));
   Burntimefreq = atof(instring);
-  printf("\n%f\n", Burntimefreq);
+  fprintf(Logfile, "\n%f\n", Burntimefreq);
 
-  printf("Enter time frequency for checking percolation ");
-  printf("of solids (set) (in h): ");
+  fprintf(Logfile, "Enter time frequency for checking percolation ");
+  fprintf(Logfile, "of solids (set) (in h): ");
   read_string(instring, sizeof(instring));
   Settimefreq = atof(instring);
-  printf("\n%f\n", Settimefreq);
+  fprintf(Logfile, "\n%f\n", Settimefreq);
 
-  printf("Enter time frequency for checking hydration ");
-  printf("of particles (in h): ");
+  fprintf(Logfile, "Enter time frequency for checking hydration ");
+  fprintf(Logfile, "of particles (in h): ");
   read_string(instring, sizeof(instring));
   Phydtimefreq = atof(instring);
-  printf("\n%f\n", Phydtimefreq);
+  fprintf(Logfile, "\n%f\n", Phydtimefreq);
 
-  printf("Enter mass fraction of aggregate in concrete \n");
+  fprintf(Logfile, "Enter mass fraction of aggregate in concrete \n");
   read_string(buff, sizeof(buff));
-  printf("%s \n", buff);
+  fprintf(Logfile, "%s \n", buff);
   Mass_agg = (double)(atof(buff));
 
-  printf("Enter initial temperature of aggregate in concrete \n");
+  fprintf(Logfile, "Enter initial temperature of aggregate in concrete \n");
   read_string(instring, sizeof(instring));
   Temp_0_agg = atof(instring);
-  printf("%f \n", Temp_0_agg);
+  fprintf(Logfile, "%f \n", Temp_0_agg);
   Temp_cur_agg = Temp_0_agg;
 
-  printf("Enter heat transfer coefficient between aggregate and binder \n");
+  fprintf(Logfile,
+          "Enter heat transfer coefficient between aggregate and binder \n");
   read_string(instring, sizeof(instring));
   U_coeff_agg = atof(instring);
-  printf("%f \n", U_coeff_agg);
+  fprintf(Logfile, "%f \n", U_coeff_agg);
 
-  printf("CSH to pozzolanic CSH 0) prohibited or 1) allowed \n");
+  fprintf(Logfile, "CSH to pozzolanic CSH 0) prohibited or 1) allowed \n");
   read_string(instring, sizeof(instring));
   Csh2flag = atoi(instring);
-  printf("%d \n", Csh2flag);
+  fprintf(Logfile, "%d \n", Csh2flag);
 
-  printf("CH precipitation on aggregate surfaces ");
-  printf("0) prohibited or 1) allowed \n");
+  fprintf(Logfile, "CH precipitation on aggregate surfaces ");
+  fprintf(Logfile, "0) prohibited or 1) allowed \n");
   read_string(instring, sizeof(instring));
   Chflag = atoi(instring);
-  printf("%d \n", Chflag);
+  fprintf(Logfile, "%d \n", Chflag);
 
-  printf("Output hydration movie frame every ____ hours: ");
+  fprintf(Logfile, "Output hydration movie frame every ____ hours: ");
   read_string(instring, sizeof(instring));
   MovieFrameFreq = atof(instring);
   if (MovieFrameFreq > End_time)
     MovieFrameFreq = End_time + 1.0;
   if (MovieFrameFreq <= 0.0)
     MovieFrameFreq = End_time + 1.0;
-  printf("\n%f \n", MovieFrameFreq);
+  fprintf(Logfile, "\n%f \n", MovieFrameFreq);
 
   *nmovstep = 1;
   if ((MovieFrameFreq > 0.0) && (MovieFrameFreq < 1.0)) {
@@ -3215,19 +3552,19 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Stopflag[i] = 0;
   }
 
-  printf("Enter phase id of surface to deactivate (-1 to quit) \n");
+  fprintf(Logfile, "Enter phase id of surface to deactivate (-1 to quit) \n");
   read_string(instring, sizeof(instring));
   dphase = atoi(instring);
-  printf("%d\n", dphase);
+  fprintf(Logfile, "%d\n", dphase);
 
   Numdeact = 0;
   while (dphase != -1) {
     deactphase = dphase;
 
-    printf("Enter fraction of surface to deactivate \n");
+    fprintf(Logfile, "Enter fraction of surface to deactivate \n");
     read_string(instring, sizeof(instring));
     dfrac = atof(instring);
-    printf("%f\n", dfrac);
+    fprintf(Logfile, "%f\n", dfrac);
     Deactfrac[deactphase] = dfrac;
 
     Deactphaselist[Numdeact] = deactphase;
@@ -3239,21 +3576,21 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
       exit(1);
     }
 
-    printf("Time to implement deactivation (in hours)\n");
+    fprintf(Logfile, "Time to implement deactivation (in hours)\n");
     read_string(instring, sizeof(instring));
     Deactinit[deactphase] = atof(instring);
-    printf("%f\n", Deactinit[deactphase]);
+    fprintf(Logfile, "%f\n", Deactinit[deactphase]);
 
-    printf("Time to begin reactivation (in hours)\n");
+    fprintf(Logfile, "Time to begin reactivation (in hours)\n");
     read_string(instring, sizeof(instring));
     dends = atof(instring);
-    printf("%f\n", dends);
+    fprintf(Logfile, "%f\n", dends);
     Deactends[deactphase] = dends;
 
-    printf("Time of full reactivation (in hours)\n");
+    fprintf(Logfile, "Time of full reactivation (in hours)\n");
     read_string(instring, sizeof(instring));
     dterm = atof(instring);
-    printf("%f\n", dterm);
+    fprintf(Logfile, "%f\n", dterm);
     Deactterm[deactphase] = dterm;
 
     if (dterm == dends) {
@@ -3262,17 +3599,17 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
       Reactfrac[deactphase] = 1.0 / (dterm - dends + 1);
     }
 
-    printf("Enter phase id of surface to deactivate (-1 to quit) \n");
+    fprintf(Logfile, "Enter phase id of surface to deactivate (-1 to quit) \n");
     read_string(instring, sizeof(instring));
     dphase = atoi(instring);
-    printf("%d\n", dphase);
+    fprintf(Logfile, "%d\n", dphase);
   }
 
-  printf("Does pH influence hydration kinetics ");
-  printf("0) no or 1) yes \n");
+  fprintf(Logfile, "Does pH influence hydration kinetics ");
+  fprintf(Logfile, "0) no or 1) yes \n");
   read_string(instring, sizeof(instring));
   PHactive = atoi(instring);
-  printf("%d\n", PHactive);
+  fprintf(Logfile, "%d\n", PHactive);
 
   /***
    *    Set possibility of topochemical conversion of silicates
@@ -3284,7 +3621,7 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    Vol. 98, No. 3, pp. 251-255 (2001).
    ***/
 
-  fflush(stdout);
+  fflush(Logfile);
   return (status);
 }
 
@@ -3389,10 +3726,11 @@ void init(void) {
      *    Disprob[x] - probability of dissolution (relative diss. rate)
      ***/
 
-    if (Verbose)
-      printf("\nSetting Disbase[%d]: resfact = %f, Discoeff[%d] = %f, DISBIAS "
-             "= %f",
-             i, resfact, i, Discoeff[i], DISBIAS);
+    if (Verbose_flag > 2)
+      fprintf(Logfile,
+              "\nSetting Disbase[%d]: resfact = %f, Discoeff[%d] = %f, DISBIAS "
+              "= %f",
+              i, resfact, i, Discoeff[i], DISBIAS);
     Disprob[i] = Disbase[i] = resfact * Discoeff[i] / DISBIAS;
 
     switch (i) {
@@ -3690,7 +4028,7 @@ void init(void) {
    *    convert them to fractions from percentages
    ***/
 
-  sprintf(buff, "%salkalichar.dat", Outputdir);
+  sprintf(buff, "%salkalichar.dat", WorkingDirectory);
   alkalifile = filehandler("disrealnew", buff, "READ");
   if (!alkalifile) {
     freeallmem();
@@ -3722,7 +4060,7 @@ void init(void) {
   Sodiumhydrox /= 100.0;
   Potassiumhydrox /= 100.0;
 
-  sprintf(buff, "%salkaliflyash.dat", Outputdir);
+  sprintf(buff, "%salkaliflyash.dat", WorkingDirectory);
   alkalifile = filehandler("disrealnew", buff, "READ_NOFAIL");
   if (!alkalifile) {
     Totfasodium = 0.0;
@@ -3747,7 +4085,7 @@ void init(void) {
 
   /* Read in values for slag characteristics */
 
-  sprintf(buff, "%sslagchar.dat", Outputdir);
+  sprintf(buff, "%sslagchar.dat", WorkingDirectory);
   slagfile = filehandler("disrealnew", buff, "READ");
   if (!slagfile) {
     freeallmem();
@@ -3831,15 +4169,17 @@ void init(void) {
   P5slag = Slagc3a * Molarv[C3A] / Molarv[SLAG];
   if (P5slag > 1.0) {
     P5slag = 1.0;
-    printf("WARNING:  C3A/slag value exceeded 1.0.  ");
-    printf("Resetting to 1.0 \n");
+    if (Verbose_flag > 0) {
+      fprintf(Logfile, "WARNING:  C3A/slag value exceeded 1.0.  ");
+      fprintf(Logfile, "Resetting to 1.0 \n");
+    }
   }
-  if (Verbose) {
-    printf("\nP1slag = %f", P1slag);
-    printf("\nP2slag = %f", P2slag);
-    printf("\nP3slag = %f", P3slag);
-    printf("\nP4slag = %f", P4slag);
-    printf("\nP5slag = %f", P5slag);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "\nP1slag = %f", P1slag);
+    fprintf(Logfile, "\nP2slag = %f", P2slag);
+    fprintf(Logfile, "\nP3slag = %f", P3slag);
+    fprintf(Logfile, "\nP4slag = %f", P4slag);
+    fprintf(Logfile, "\nP5slag = %f", P5slag);
   }
 
   /***
@@ -3904,12 +4244,12 @@ int initialize_output_files(void) {
   strcpy(strsuff, strsuffa);
   strcat(strsuff, strsuffb);
 
-  numchar = strlen(Outputdir);
+  numchar = strlen(WorkingDirectory);
   for (i = 0; i < (numchar - 1); i++) {
-    outputdirnosep[i] = Outputdir[i];
+    outputdirnosep[i] = WorkingDirectory[i];
   }
   outputdirnosep[numchar - 1] = '\0';
-  sepchar = Outputdir[numchar - 1];
+  sepchar = WorkingDirectory[numchar - 1];
 
   /* Tokenize the string outputdirnosep */
 
@@ -3926,27 +4266,27 @@ int initialize_output_files(void) {
   }
   p = &outputdirnosep[i];
   strcpy(dfileroot, p);
-  if (Verbose) {
-    printf("\nOutputdir is: %s", Outputdir);
-    printf("\noutputdirnosep is: %s", outputdirnosep);
-    printf("\nSeparation character is %c", sepchar);
-    printf("Number of separation characters is %d", numsep);
-    printf("\n\ndfileroot is: %s\n\n", dfileroot);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "\nWorkingDirectory is: %s", WorkingDirectory);
+    fprintf(Logfile, "\noutputdirnosep is: %s", outputdirnosep);
+    fprintf(Logfile, "\nSeparation character is %c", sepchar);
+    fprintf(Logfile, "Number of separation characters is %d", numsep);
+    fprintf(Logfile, "\n\ndfileroot is: %s\n\n", dfileroot);
   }
 
-  /* sprintf(Datafilename,"%s%s.data",Outputdir,dfileroot); */
-  sprintf(Datafilename, "%s%s.csv", Outputdir, dfileroot);
-  sprintf(Imageindexname, "%simage_index.txt", Outputdir);
+  /* sprintf(Datafilename,"%s%s.data",WorkingDirectory,dfileroot); */
+  sprintf(Datafilename, "%s%s.csv", WorkingDirectory, dfileroot);
+  sprintf(Imageindexname, "%simage_index.txt", WorkingDirectory);
 
-  sprintf(Moviename, "%s%s.mov", Outputdir, dfileroot);
+  sprintf(Moviename, "%s%s.mov", WorkingDirectory, dfileroot);
   /* strcat(Moviename,strsuff); */
 
-  sprintf(Parname, "%s%s.params", Outputdir, dfileroot);
+  sprintf(Parname, "%s%s.params", WorkingDirectory, dfileroot);
 
-  sprintf(Fileoname, "%s%s.img", Outputdir, dfileroot);
+  sprintf(Fileoname, "%s%s.img", WorkingDirectory, dfileroot);
   strcat(Fileoname, strsuff);
 
-  sprintf(Phrname, "%s%s.phr", Outputdir, dfileroot);
+  sprintf(Phrname, "%s%s.phr", WorkingDirectory, dfileroot);
   strcat(Phrname, strsuff);
 
   /* Store parameters input in parameter file */
@@ -3976,10 +4316,10 @@ void manage_deactivation_behavior(void) {
         Startflag[j] == 0) {
 
       Startflag[j] = 1;
-      if (Verbose) {
-        printf("\nDeactivating now at time %f...", Time_cur);
-        printf(" phase %d\n", j);
-        printf("\tFraction to deactivate is %f\n", Deactfrac[j]);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nDeactivating now at time %f...", Time_cur);
+        fprintf(Logfile, " phase %d\n", j);
+        fprintf(Logfile, "\tFraction to deactivate is %f\n", Deactfrac[j]);
       }
       performdeactivation(j, Deactfrac[j]);
     }
@@ -3993,13 +4333,14 @@ void manage_deactivation_behavior(void) {
 
       if (Time_cur == Deactterm[j]) {
         Stopflag[j] = 1;
-        if (Verbose) {
-          printf("\nTerminating deactivation for phase %d \nat time %f\n", j,
-                 Time_cur);
+        if (Verbose_flag > 1) {
+          fprintf(Logfile,
+                  "\nTerminating deactivation for phase %d \nat time %f\n", j,
+                  Time_cur);
         }
-      } else if (Verbose) {
-        printf("\nPartially reactivating for phase %d \nat time %f\n", j,
-               Time_cur);
+      } else if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nPartially reactivating for phase %d \nat time %f\n",
+                j, Time_cur);
       }
 
       performreactivation(j, Reactfrac[j], Stopflag[j]);
@@ -4008,9 +4349,10 @@ void manage_deactivation_behavior(void) {
                Stopflag[j] == 0) {
 
       Stopflag[j] = 1;
-      if (Verbose)
-        printf("\nTerminating deactivation for phase %d \nat time %f\n", j,
-               Time_cur);
+      if (Verbose_flag > 1)
+        fprintf(Logfile,
+                "\nTerminating deactivation for phase %d \nat time %f\n", j,
+                Time_cur);
     }
   }
 
@@ -4295,8 +4637,8 @@ void resetcrackpores(void) {
 /***
  *    countphase
  *
- *       Scan microstructure and determine the number of voxels of a particular
- *phase
+ *       Scan microstructure and determine the number of voxels of a
+ *particular phase
  *
  *     Arguments:    int phid (phase id to check)
  *
@@ -4813,8 +5155,8 @@ void extslagcsh(int xpres, int ypres, int zpres) {
     action = 0;
 
     sump *= moveone(&xchr, &ychr, &zchr, &action, sump);
-    if (!action && (Verbose == 1))
-      printf("Error in value of action in extpozz \n");
+    if (!action && (Verbose_flag > 1))
+      fprintf(Logfile, "Error in value of action in extpozz \n");
 
     check = Mic[xchr][ychr][zchr];
 
@@ -5058,27 +5400,35 @@ void dissolve(int cycle) {
 
     if (Totsodium < na2omintotmass) {
       /*
-      printf("\nWARNING:  Prescribed total mass of Na2O ");
-      printf("\n\tin alkali characteristics file is less ");
-      printf("\n\tthan is consistent with the mass of ");
-      printf("\n\tNA2SO4 in the microstructure.");
-      printf("\n\n\tResetting Totsodium variable to be ")'
-      printf("\n\tconsistent... Totsodium is now \n");
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"\nWARNING:  Prescribed total mass of Na2O ");
+      fprintf(Logfile,"\n\tin alkali characteristics file is less ");
+      fprintf(Logfile,"\n\tthan is consistent with the mass of ");
+      fprintf(Logfile,"\n\tNA2SO4 in the microstructure.");
+      fprintf(Logfile,"\n\n\tResetting Totsodium variable to be ")'
+      fprintf(Logfile,"\n\tconsistent... Totsodium is now \n");
+      }
       Totsodium = na2omintotmass;
-      printf("%f \n",Totsodium);
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"%f \n",Totsodium);
+      }
       */
     }
 
     if (Totpotassium < k2omintotmass) {
       /*
-      printf("\nWARNING:  Prescribed total mass of K2O ");
-      printf("\n\tin alkali characteristics file is less ");
-      printf("\n\tthan is consistent with the mass of ");
-      printf("\n\tK2SO4 in the microstructure.");
-      printf("\n\n\tResetting Totpotassium variable to be ")'
-      printf("\n\tconsistent... Totpotassium is now \n");
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"\nWARNING:  Prescribed total mass of K2O ");
+      fprintf(Logfile,"\n\tin alkali characteristics file is less ");
+      fprintf(Logfile,"\n\tthan is consistent with the mass of ");
+      fprintf(Logfile,"\n\tK2SO4 in the microstructure.");
+      fprintf(Logfile,"\n\n\tResetting Totpotassium variable to be ")'
+      fprintf(Logfile,"\n\tconsistent... Totpotassium is now \n");
+      }
       Totpotassium = k2omintotmass;
-      printf("%f \n",Totpotassium);
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"%f \n",Totpotassium);
+      }
       */
     }
 
@@ -5090,27 +5440,35 @@ void dissolve(int cycle) {
 
     if (Rssodium < na2omintotmass) {
       /*
-      printf("\nWARNING:  Prescribed mass of readily soluble Na2O ");
-      printf("\n\tin alkali characteristics file is less ");
-      printf("\n\tthan is consistent with the mass of ");
-      printf("\n\tNA2SO4 in the microstructure.");
-      printf("\n\n\tResetting Rssodium variable to be ")'
-      printf("\n\tconsistent... Rssodium is now \n");
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"\nWARNING:  Prescribed mass of readily soluble Na2O ");
+      fprintf(Logfile,"\n\tin alkali characteristics file is less ");
+      fprintf(Logfile,"\n\tthan is consistent with the mass of ");
+      fprintf(Logfile,"\n\tNA2SO4 in the microstructure.");
+      fprintf(Logfile,"\n\n\tResetting Rssodium variable to be ")'
+      fprintf(Logfile,"\n\tconsistent... Rssodium is now \n");
+      }
       Rssodium = na2omintotmass;
-      printf("%f \n",Rssodium);
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"%f \n",Rssodium);
+      }
       */
     }
 
     if (Rspotassium < k2omintotmass) {
       /*
-      printf("\nWARNING:  Prescribed mass of readily soluble K2O ");
-      printf("\n\tin alkali characteristics file is less ");
-      printf("\n\tthan is consistent with the mass of ");
-      printf("\n\tK2SO4 in the microstructure.");
-      printf("\n\n\tResetting Rspotassium variable to be ")'
-      printf("\n\tconsistent... Rspotassium is now \n");
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"\nWARNING:  Prescribed mass of readily soluble K2O ");
+      fprintf(Logfile,"\n\tin alkali characteristics file is less ");
+      fprintf(Logfile,"\n\tthan is consistent with the mass of ");
+      fprintf(Logfile,"\n\tK2SO4 in the microstructure.");
+      fprintf(Logfile,"\n\n\tResetting Rspotassium variable to be ")'
+      fprintf(Logfile,"\n\tconsistent... Rspotassium is now \n");
+      }
       Rspotassium = k2omintotmass;
-      printf("%f \n",Rspotassium);
+      if (Verbose_flag > 0) {
+      fprintf(Logfile,"%f \n",Rspotassium);
+      }
       */
     }
 
@@ -5290,12 +5648,12 @@ void dissolve(int cycle) {
                  (double)Count[CACL2] * Specgrav[CACL2]) /
                 tot_mass;
 
-    if (Verbose) {
-      printf("Calculated w/c is %.4f\n", W_to_c);
-      printf("Calculated s/c is %.4f \n", S_to_c);
-      printf("Calculated heat conversion factor is %f \n", Heat_cf);
-      printf("Calculated mass fractions of water and filler ");
-      printf("are %.4f  and %.4f \n", Mass_water, Mass_fill);
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "Calculated w/c is %.4f\n", W_to_c);
+      fprintf(Logfile, "Calculated s/c is %.4f \n", S_to_c);
+      fprintf(Logfile, "Calculated heat conversion factor is %f \n", Heat_cf);
+      fprintf(Logfile, "Calculated mass fractions of water and filler ");
+      fprintf(Logfile, "are %.4f  and %.4f \n", Mass_water, Mass_fill);
     }
   }
 
@@ -5329,7 +5687,7 @@ void dissolve(int cycle) {
    ***/
 
   ctest = Count[DIFFGYP];
-  fflush(stdout);
+  fflush(Logfile);
 
   if ((float)ctest > (2.5 * (double)(Count[DIFFC3A] + Count[DIFFC4A]))) {
     ctest = 2.5 * (double)(Count[DIFFC3A] + Count[DIFFC4A]);
@@ -5821,7 +6179,10 @@ void dissolve(int cycle) {
     fclose(Datafile);
 
     if ((fpout01 = fopen("SfumeEffect.csv", "w")) == NULL) {
-      printf("\nWARNING:  Could not open SfumeEffect.csv to write header\n");
+      if (Verbose_flag > 0) {
+        fprintf(Logfile,
+                "\nWARNING:  Could not open SfumeEffect.csv to write header\n");
+      }
     } else {
       fprintf(fpout01,
               "CSH,TOTCSH,Cs_acc,Psfume,dface,Cshscale,Disprob[C3S]\n");
@@ -5845,12 +6206,12 @@ void dissolve(int cycle) {
   Chs_new = ((double)(Count[EMPTYP] + Count[POROSITY] - Water_left) * Heat_cf /
              1000.0);
 
-  if (Verbose)
-    printf("\nChs_new = %f\n", Chs_new);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "\nChs_new = %f\n", Chs_new);
   if (((Water_left + Water_off) < 0) && (Sealed == 1)) {
-    if (Verbose)
-      printf("All water consumed at cycle %d \n", Cyccnt);
-    fflush(stdout);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "All water consumed at cycle %d \n", Cyccnt);
+    fflush(Logfile);
     freeallmem();
     bailout("dissolve", "Normal exit");
     exit(1);
@@ -5958,8 +6319,9 @@ void dissolve(int cycle) {
         ((Temp_cur_b >= 70.0) || (Count[AFM] > 0) || (fact < 0.25))) {
 
       Soluble[ETTR] = 1;
-      if (Verbose)
-        printf("Ettringite is soluble beginning at cycle %d \n", cycle);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "Ettringite is soluble beginning at cycle %d \n",
+                cycle);
 
       /* Identify all new soluble ettringite */
 
@@ -6087,11 +6449,12 @@ void dissolve(int cycle) {
    *    and adjust based on availability of pozzolan
    ***/
 
-  if (Verbose)
-    printf("Count[DIFFCH] = %d, Chcrit = %f, Disbase[CH] = %f\n", Count[DIFFCH],
-           Chcrit, Disbase[CH]);
-  if (Verbose)
-    printf("CH dissolution probability changes from %f ", Disprob[CH]);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "Count[DIFFCH] = %d, Chcrit = %f, Disbase[CH] = %f\n",
+            Count[DIFFCH], Chcrit, Disbase[CH]);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "CH dissolution probability changes from %f ",
+            Disprob[CH]);
   Disprob[CH] *=
       ((A0_CHSOL - (A1_CHSOL * Temp_cur_b)) / (A0_CHSOL - (A1_CHSOL * 25.0)));
 
@@ -6105,8 +6468,8 @@ void dissolve(int cycle) {
     }
   }
 
-  if (Verbose)
-    printf("to %f \n", Disprob[CH]);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "to %f \n", Disprob[CH]);
 
   /***
    *    Adjust solubility of ASG and CAS2 phases
@@ -6249,21 +6612,21 @@ void dissolve(int cycle) {
   if (Count[SFUME] >= (0.05 * (double)(Syspix))) {
     dfact /= LOI_factor;
   }
-  if (Verbose) {
-    printf("\n****Modifying dissolution probabilities : ");
-    printf("\n    tdisfact = %f and Cs_acc = %f", tdisfact, Cs_acc);
-    printf("\n    Psfume = %f", Psfume);
-    printf("\n    fact = %f", fact);
-    printf("\n        Count[CSH] = %d", Count[CSH]);
-    printf(" Tfractw04 = %f", Tfractw04);
-    printf(" Cshscale = %f", Cshscale);
-    printf("\n        Surffract = %f", Surffract);
-    printf(" Totfract = %f\n", Totfract);
-    printf("\n        resfact = %f dfact = %f\n", resfact, dfact);
-    printf("\n        A0_CHSOL = %f", A0_CHSOL);
-    printf(" A1_CHSOL = %f", A1_CHSOL);
-    printf(" Temp_cur_b = %f\n\n", Temp_cur_b);
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "\n****Modifying dissolution probabilities : ");
+    fprintf(Logfile, "\n    tdisfact = %f and Cs_acc = %f", tdisfact, Cs_acc);
+    fprintf(Logfile, "\n    Psfume = %f", Psfume);
+    fprintf(Logfile, "\n    fact = %f", fact);
+    fprintf(Logfile, "\n        Count[CSH] = %d", Count[CSH]);
+    fprintf(Logfile, " Tfractw04 = %f", Tfractw04);
+    fprintf(Logfile, " Cshscale = %f", Cshscale);
+    fprintf(Logfile, "\n        Surffract = %f", Surffract);
+    fprintf(Logfile, " Totfract = %f\n", Totfract);
+    fprintf(Logfile, "\n        resfact = %f dfact = %f\n", resfact, dfact);
+    fprintf(Logfile, "\n        A0_CHSOL = %f", A0_CHSOL);
+    fprintf(Logfile, " A1_CHSOL = %f", A1_CHSOL);
+    fprintf(Logfile, " Temp_cur_b = %f\n\n", Temp_cur_b);
+    fflush(Logfile);
   }
 
   Disprob[C3S] = (resfact * DISMIN) + (dfact * Disbase[C3S]);
@@ -6278,8 +6641,10 @@ void dissolve(int cycle) {
   }
 
   if ((fpout01 = fopen("SfumeEffect.csv", "a")) == NULL) {
-    printf("\nWARNING:  Could not open");
-    printf(" SfumeEffect.csv for writing\n");
+    if (Verbose_flag > 0) {
+      fprintf(Logfile, "\nWARNING:  Could not open");
+      fprintf(Logfile, " SfumeEffect.csv for writing\n");
+    }
   } else {
     fprintf(fpout01, "\n%f,%f,%f,%f,%f,%f,%f", (double)Count[CSH],
             (double)(Count[CSH] + Count[POZZCSH]), Cs_acc, Psfume, dfact,
@@ -6352,8 +6717,9 @@ void dissolve(int cycle) {
     Disprob[ASG] *= pow((Dasmax / ((double)Count[DIFFAS])), 2.0);
   }
 
-  if (Verbose)
-    printf("Silicate probabilities: %f %f\n", Disprob[C3S], Disprob[C2S]);
+  if (Verbose_flag > 1)
+    fprintf(Logfile, "Silicate probabilities: %f %f\n", Disprob[C3S],
+            Disprob[C2S]);
 
   /***
    *    ASSUME that aluminate dissolution controlled by formation
@@ -6467,8 +6833,8 @@ void dissolve(int cycle) {
      ***/
 
     satsquared = Saturation * Saturation;
-    if (Verbose)
-      printf("\nsaturation = %f\n", Saturation);
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\nsaturation = %f\n", Saturation);
     Disprob[C3S] *= satsquared;
     Disprob[C3S] *= satsquared;
     Disprob[C3S] *= satsquared;
@@ -6578,16 +6944,18 @@ void dissolve(int cycle) {
 
   } /* Done reducing dissolutions based on saturation */
 
-  if (Verbose) {
-    printf("Silicate and aluminate probabilities: ");
-    printf("%f %f ", Disprob[C3S], Disprob[C2S]);
-    printf("%f %f %f %f %f\n", Disprob[C3A], Disprob[OC3A], Disprob[C4AF],
-           Disprob[GYPSUM], Disprob[HEMIHYD]);
-    printf("Cs_acc is %f and Ca_acc is %f Sulf_cur is %d Sulf_conc is %f\n",
-           Cs_acc, Ca_acc, Sulf_cur, Sulf_conc);
-    printf("Pfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 "
-           "is %f\n",
-           Pfract, Totfract, Tfractw05, Pfractw05);
+  if (Verbose_flag > 2) {
+    fprintf(Logfile, "Silicate and aluminate probabilities: ");
+    fprintf(Logfile, "%f %f ", Disprob[C3S], Disprob[C2S]);
+    fprintf(Logfile, "%f %f %f %f %f\n", Disprob[C3A], Disprob[OC3A],
+            Disprob[C4AF], Disprob[GYPSUM], Disprob[HEMIHYD]);
+    fprintf(Logfile,
+            "Cs_acc is %f and Ca_acc is %f Sulf_cur is %d Sulf_conc is %f\n",
+            Cs_acc, Ca_acc, Sulf_cur, Sulf_conc);
+    fprintf(Logfile,
+            "Pfract is %f and Totfract is %f and Tfractw05 is %f and Pfractw05 "
+            "is %f\n",
+            Pfract, Totfract, Tfractw05, Pfractw05);
   }
 
   /***
@@ -6719,8 +7087,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nEntering Main dissolve loop, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]); fflush(stdout);
+  if (Verbose_flag > 1) fprintf(Logfile,"\nEntering Main dissolve loop,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]); fflush(Logfile);
   */
 
   for (zl = 0; zl < Zsyssize; zl++) {
@@ -6824,44 +7193,49 @@ void dissolve(int cycle) {
              ***/
 
             /*
-            if (Verbose) {
+            if (Verbose_flag > 2) {
                 if (phid == C3S) {
-                    printf("\nDissolving C3S: pdis = %f\tdisprob = ",pdis);
-                    if (Micpart[xl][yl][zl] == 0) {
-                        printf("%f",Onepixelbias[phid] * PHfactor[phid] *
-            Disprob[phid]); } else { printf("%f",PHfactor[phid] *
+                    fprintf(Logfile,"\nDissolving C3S: pdis = %f\tdisprob =
+            ",pdis); if (Micpart[xl][yl][zl] == 0) {
+                        fprintf(Logfile,"%f",Onepixelbias[phid] *
+            PHfactor[phid]
+            * Disprob[phid]); } else { fprintf(Logfile,"%f",PHfactor[phid] *
             Disprob[phid]);
                     }
                 } else if (phid == C2S) {
-                    printf("\nDissolving C2S: pdis = %f\tdisprob = ",pdis);
-                    if (Micpart[xl][yl][zl] == 0) {
-                        printf("%f",Onepixelbias[phid] * PHfactor[phid] *
-            Disprob[phid]); } else { printf("%f",PHfactor[phid] *
+                    fprintf(Logfile,"\nDissolving C2S: pdis = %f\tdisprob =
+            ",pdis); if (Micpart[xl][yl][zl] == 0) {
+                        fprintf(Logfile,"%f",Onepixelbias[phid] *
+            PHfactor[phid]
+            * Disprob[phid]); } else { fprintf(Logfile,"%f",PHfactor[phid] *
             Disprob[phid]);
                     }
                 } else if (phid == C3A) {
-                    printf("\nDissolving C3A: pdis = %f\tdisprob = ",pdis);
-                    if (Micpart[xl][yl][zl] == 0) {
-                        printf("%f",Onepixelbias[phid] * PHfactor[phid] *
-            Disprob[phid]); } else { printf("%f",PHfactor[phid] *
+                    fprintf(Logfile,"\nDissolving C3A: pdis = %f\tdisprob =
+            ",pdis); if (Micpart[xl][yl][zl] == 0) {
+                        fprintf(Logfile,"%f",Onepixelbias[phid] *
+            PHfactor[phid]
+            * Disprob[phid]); } else { fprintf(Logfile,"%f",PHfactor[phid] *
             Disprob[phid]);
                     }
                 } else if (phid == C4AF) {
-                    printf("\nDissolving C4AF: pdis = %f\tdisprob = ",pdis);
-                    if (Micpart[xl][yl][zl] == 0) {
-                        printf("%f",Onepixelbias[phid] * PHfactor[phid] *
-            Disprob[phid]); } else { printf("%f",PHfactor[phid] *
+                    fprintf(Logfile,"\nDissolving C4AF: pdis = %f\tdisprob =
+            ",pdis); if (Micpart[xl][yl][zl] == 0) {
+                        fprintf(Logfile,"%f",Onepixelbias[phid] *
+            PHfactor[phid]
+            * Disprob[phid]); } else { fprintf(Logfile,"%f",PHfactor[phid] *
             Disprob[phid]);
                     }
                 } else if (phid == GYPSUM) {
-                    printf("\nDissolving GYPSUM: pdis = %f\tdisprob = ",pdis);
-                    if (Micpart[xl][yl][zl] == 0) {
-                        printf("%f",Onepixelbias[phid] * PHfactor[phid] *
-            Disprob[phid]); } else { printf("%f",PHfactor[phid] *
+                    fprintf(Logfile,"\nDissolving GYPSUM: pdis = %f\tdisprob =
+            ",pdis); if (Micpart[xl][yl][zl] == 0) {
+                        fprintf(Logfile,"%f",Onepixelbias[phid] *
+            PHfactor[phid]
+            * Disprob[phid]); } else { fprintf(Logfile,"%f",PHfactor[phid] *
             Disprob[phid]);
                     }
                 }
-                fflush(stdout);
+                fflush(Logfile);
             }
             */
 
@@ -7012,12 +7386,12 @@ void dissolve(int cycle) {
                 if (calcy > 1.0) {
                   calcz = calcy - 1.0;
                   calcy = 1.0;
-                  if (Verbose) {
-                    printf("WARNING:  Problem of not ");
-                    printf("creating enough pozzolanic ");
-                    printf("CSH during CSH conversion");
-                    printf("\nCurrent binder temperature");
-                    printf("is %f C\n", Temp_cur_b);
+                  if (Verbose_flag > 0) {
+                    fprintf(Logfile, "WARNING:  Problem of not ");
+                    fprintf(Logfile, "creating enough pozzolanic ");
+                    fprintf(Logfile, "CSH during CSH conversion");
+                    fprintf(Logfile, "\nCurrent binder temperature");
+                    fprintf(Logfile, "is %f C\n", Temp_cur_b);
                   }
                 }
 
@@ -7159,8 +7533,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nLeaving Main dissolve loop, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]); fflush(stdout);
+  if (Verbose_flag > 1) fprintf(Logfile,"\nLeaving Main dissolve loop,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]); fflush(Logfile);
   */
 
   /***
@@ -7198,14 +7573,14 @@ void dissolve(int cycle) {
   nnaspix -= (Nasulfinit - Count[NA2SO4]);
 
   /*
-  if (Verbose) {
-        printf("\n***Ksulfinit = %d Count[K2SO4] = %d",Ksulfinit,Count[K2SO4]);
-      printf("\n***Releasedk = %f Totpotassium = %f",Releasedk,Totpotassium);
-      printf("\n***nkspix = %d",nkspix);
-      printf("\n***Nasulfinit = %d Count[NA2SO4] =
-  %d",Nasulfinit,Count[NA2SO4]); printf("\n***Releasedna = %f Totsodium =
-  %f",Releasedna,Totsodium); printf("\n***nnaspix = %d",nnaspix);
-      fflush(stdout);
+  if (Verbose_flag > 2) {
+        fprintf(Logfile,"\n***Ksulfinit = %d Count[K2SO4] =
+  %d",Ksulfinit,Count[K2SO4]); fprintf(Logfile,"\n***Releasedk = %f
+  Totpotassium = %f",Releasedk,Totpotassium); fprintf(Logfile,"\n***nkspix =
+  %d",nkspix); fprintf(Logfile,"\n***Nasulfinit = %d Count[NA2SO4] =
+  %d",Nasulfinit,Count[NA2SO4]); fprintf(Logfile,"\n***Releasedna = %f
+  Totsodium = %f",Releasedna,Totsodium); fprintf(Logfile,"\n***nnaspix =
+  %d",nnaspix); fflush(Logfile);
   }
   */
 
@@ -7263,8 +7638,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nEntering loop for ksulf list, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nEntering loop for ksulf list,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   /***
@@ -7340,8 +7716,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nEntering loop for nasulf list, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nEntering loop for nasulf list,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   if (nnaspix < Count[NA2SO4] && nnaspix > 0) {
@@ -7408,8 +7785,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nLeaving loop for nasulf list, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nLeaving loop for nasulf list,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   /***
@@ -7417,7 +7795,7 @@ void dissolve(int cycle) {
    ***/
 
   /*
-  if (Verbose) printf("\ntotks = %d",totks);
+  if (Verbose_flag > 2) fprintf(Logfile,"\ntotks = %d",totks);
   */
   while (nkspix > 0 && totks > 0) {
     skipnodes = (int)((float)totks * ran1(Seed));
@@ -7524,8 +7902,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nFinished processing ksulf list, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nFinished processing ksulf list,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   /***
@@ -7545,8 +7924,8 @@ void dissolve(int cycle) {
   }
 
   /*
-  if (Verbose) printf("\nFinished processing ksulf ants, step 2, in
-  dissolve...\nnnaspix = %d, totnas = %d\n",nnaspix,totnas);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nFinished processing ksulf ants,
+  step 2, in dissolve...\nnnaspix = %d, totnas = %d\n",nnaspix,totnas);
   */
 
   while (nnaspix > 0 && totnas > 0) {
@@ -7654,8 +8033,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nFinished processing nasulf list, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nFinished processing nasulf list,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   /***
@@ -7685,18 +8065,18 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) {
-      printf("\nFinished resetting nasulf ids, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]); printf("\nEligible
-  gypsum count = %d\n",gct);
+  if (Verbose_flag > 2) {
+      fprintf(Logfile,"\nFinished resetting nasulf ids, Count[DIFFSO4] = %d,
+  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  fprintf(Logfile,"\nEligible gypsum count = %d\n",gct);
   }
   */
 
-  if ((ncshgo != 0) && (Verbose == 1))
-    printf("CSH dissolved is %d \n", ncshgo);
+  if ((ncshgo != 0) && (Verbose_flag > 2))
+    fprintf(Logfile, "CSH dissolved is %d \n", ncshgo);
 
-  if ((npchext > 0) && (Verbose == 1))
-    printf("Extra CH required is %d at cycle %d \n", npchext, cycle);
+  if ((npchext > 0) && (Verbose_flag > 2))
+    fprintf(Logfile, "Extra CH required is %d at cycle %d \n", npchext, cycle);
 
   /***
    *    Now add in the extra diffusing species for dissolution
@@ -7706,8 +8086,8 @@ void dissolve(int cycle) {
    ***/
 
   ncshext = cshrand;
-  if ((cshrand != 0) && (Verbose == 1))
-    printf("cshrand is %d \n", cshrand);
+  if ((cshrand != 0) && (Verbose_flag > 2))
+    fprintf(Logfile, "cshrand is %d \n", cshrand);
 
   /***
    *    Extra diffusing CH, Gypsum, C3A, and SO4 are added at totally random
@@ -7828,8 +8208,9 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nGetting ready to add DIFFSO4, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nGetting ready to add DIFFSO4,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
   nso4ext = (Discount[K2SO4] + Discount[NA2SO4]);
@@ -7928,16 +8309,17 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) printf("\nFinished adding DIFFSO4, Count[DIFFSO4] = %d,
-  Count[NA2SO4] = %d ...\n",Count[DIFFSO4],Count[NA2SO4]);
+  if (Verbose_flag > 2) fprintf(Logfile,"\nFinished adding DIFFSO4,
+  Count[DIFFSO4] = %d, Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]);
   */
 
-  if (Verbose) {
-    printf("Dissolved- %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-           Count[DIFFCSH], Count[DIFFCH], Count[DIFFGYP], Count[DIFFC3A],
-           Count[DIFFFH3], Count[DIFFETTR], Count[DIFFAS], Count[DIFFCAS2],
-           Count[DIFFCACL2], Count[DIFFCACO3], Count[DIFFGYP], Count[DIFFHEM],
-           Count[DIFFANH], Count[DIFFSO4]);
+  if (Verbose_flag > 2) {
+    fprintf(Logfile, "Dissolved- %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+            Count[DIFFCSH], Count[DIFFCH], Count[DIFFGYP], Count[DIFFC3A],
+            Count[DIFFFH3], Count[DIFFETTR], Count[DIFFAS], Count[DIFFCAS2],
+            Count[DIFFCACL2], Count[DIFFCACO3], Count[DIFFGYP], Count[DIFFHEM],
+            Count[DIFFANH], Count[DIFFSO4]);
   }
 
   /***
@@ -7972,10 +8354,11 @@ void dissolve(int cycle) {
       }
   }
 
-  if (Verbose) {
-      printf("\nEnd of dissolve cycle, Count[DIFFSO4] = %d, Count[NA2SO4] = %d
-  ...\n",Count[DIFFSO4],Count[NA2SO4]); printf("C3AH6 dissolved- %d with prob.
-  of %f \n",nhgd,Disprob[C3AH6]);
+  if (Verbose_flag > 1) {
+      fprintf(Logfile,"\nEnd of dissolve cycle, Count[DIFFSO4] = %d,
+  Count[NA2SO4] = %d
+  ...\n",Count[DIFFSO4],Count[NA2SO4]); fprintf(Logfile,"C3AH6 dissolved- %d
+  with prob. of %f \n",nhgd,Disprob[C3AH6]);
   }
   */
 }
@@ -8177,8 +8560,8 @@ void addcrack(void) {
 
   case 1: /* Crack in x direction (yz plane) */
 
-    if (Verbose)
-      printf("\n\t\tCracking in yz plane...");
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\n\t\tCracking in yz plane...");
 
     start = (Xsyssize / 2) - 1;
 
@@ -8219,8 +8602,8 @@ void addcrack(void) {
 
   case 2: /* Crack in y direction (xz plane) */
 
-    if (Verbose)
-      printf("\n\t\tCracking in xz plane...");
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\n\t\tCracking in xz plane...");
 
     start = (Ysyssize / 2) - 1;
 
@@ -8247,18 +8630,18 @@ void addcrack(void) {
      *    Microstructure is displaced, now move all the ants
      ***/
 
-    if (Verbose) {
-      printf("\n\t\t\tPreparing to move ants now ...");
-      fflush(stdout);
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "\n\t\t\tPreparing to move ants now ...");
+      fflush(Logfile);
     }
     while (ant != NULL) {
       if (ant->y > start)
         ant->y += Crackwidth;
       ant = ant->nextant;
     }
-    if (Verbose) {
-      printf(" done");
-      fflush(stdout);
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, " done");
+      fflush(Logfile);
     }
 
     /*** Finally, change the y dimension ***/
@@ -8269,8 +8652,8 @@ void addcrack(void) {
 
   case 3: /* Crack in z direction (xy plane) */
 
-    if (Verbose)
-      printf("\n\t\tCracking in xy plane...");
+    if (Verbose_flag > 1)
+      fprintf(Logfile, "\n\t\tCracking in xy plane...");
 
     start = (Zsyssize / 2) - 1;
 
@@ -8379,13 +8762,14 @@ void calcT(double mass) {
   }
 
   /*
-      printf("\nIN CALCT:  AggTempEffect = %d",AggTempEffect);
-      printf("\n\tMass = %f\tMass_agg = %f\n\tCp_b = %f\tCp_agg =
-     %f",mass,Mass_agg,Cp_b,Cp_agg); printf("\n\tTbo = %f\tTao = %f\n\tdtime =
-     %f\tfact = %f",Tbo,Tao,Time_step,fact); printf("\n\tdg = %f\tdTagg =
-     %f\tdTb = %f",dg,dTagg,dTb); printf("\n\tTemp_cur_b = %f\tTemp_cur_agg =
-     %f",Temp_cur_b,Temp_cur_agg); printf("\n\tU_coeff = %f\tU_coeff_agg =
-     %f\n",U_coeff,U_coeff_agg);
+      fprintf(Logfile,"\nIN CALCT:  AggTempEffect = %d",AggTempEffect);
+      fprintf(Logfile,"\n\tMass = %f\tMass_agg = %f\n\tCp_b = %f\tCp_agg =
+     %f",mass,Mass_agg,Cp_b,Cp_agg); fprintf(Logfile,"\n\tTbo = %f\tTao =
+     %f\n\tdtime = %f\tfact = %f",Tbo,Tao,Time_step,fact);
+     fprintf(Logfile,"\n\tdg = %f\tdTagg = %f\tdTb = %f",dg,dTagg,dTb);
+     fprintf(Logfile,"\n\tTemp_cur_b = %f\tTemp_cur_agg =
+     %f",Temp_cur_b,Temp_cur_agg); fprintf(Logfile,"\n\tU_coeff =
+     %f\tU_coeff_agg = %f\n",U_coeff,U_coeff_agg);
   */
 
   return;
@@ -8484,28 +8868,28 @@ void measuresurf(void) {
   }
 
   Surffract = (float)Scntcement / (float)Scnttotal;
-  if (Verbose) {
-    printf("Cement surface count is %d \n", Scntcement);
-    printf("Total surface count is %d \n", Scnttotal);
-    printf("Surface fraction is %f \n", Surffract);
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(Logfile, "Cement surface count is %d \n", Scntcement);
+    fprintf(Logfile, "Total surface count is %d \n", Scnttotal);
+    fprintf(Logfile, "Surface fraction is %f \n", Surffract);
+    fflush(Logfile);
   }
 }
 
 /***
  *    findnewtime
  *
- *    Search experimental kinetic data (calorimetric or chemical shrinkage) for
- *    a match to the current time.  If the experimental data end before the
+ *    Search experimental kinetic data (calorimetric or chemical shrinkage)
+ *for a match to the current time.  If the experimental data end before the
  *current time is reached, use a generalized quadratic fit procedure to end of
  *    experimental data and extrapolate to later times
  *
  *    Arguments:  float dval is the simulated heat or chemical shrinkage
- *                float act_nrg is the activation energy for temperature change
- *effects float *previousUncorrectedTime is a pointer to the address holding the
- *previous time before any temperature corrections are applied string
- **typestring identifies whether the data are calorimetric or chemical shrinkage
- *    Returns:    Nothing
+ *                float act_nrg is the activation energy for temperature
+ *change effects float *previousUncorrectedTime is a pointer to the address
+ *holding the previous time before any temperature corrections are applied
+ *string *typestring identifies whether the data are calorimetric or chemical
+ *shrinkage Returns:    Nothing
  *
  *    Called by:    main
  *
@@ -8516,14 +8900,17 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
   float h_interp_factor = -1.0;
   float calFileSaysTimeShouldBe, uncorrectedTime_step, recip_Tdiff;
 
-  if (Verbose)
-    printf("\nCurDataLine = %d, NDataLines = %d\n", CurDataLine, NDataLines);
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nCurDataLine = %d, NDataLines = %d\n", CurDataLine,
+            NDataLines);
   if (CurDataLine < NDataLines) {
-    /* Use linear interpolation of the measured data to get the current time */
+    /* Use linear interpolation of the measured data to get the current time
+     */
     for (i = CurDataLine; (i < NDataLines) && (h_interp_factor < 0.0); i++) {
-      /* if (Verbose) */ printf(
-          "\ndval = %f, DataValue[%d] = %f, DataValue[%d] = %f\n", dval, i - 1,
-          DataValue[i - 1], i, DataValue[i]);
+      if (Verbose_flag > 2)
+        fprintf(Logfile,
+                "\ndval = %f, DataValue[%d] = %f, DataValue[%d] = %f\n", dval,
+                i - 1, DataValue[i - 1], i, DataValue[i]);
       if ((dval >= DataValue[i - 1]) && (dval <= DataValue[i])) {
         h_interp_factor =
             (dval - DataValue[i - 1]) / (DataValue[i] - DataValue[i - 1]);
@@ -8548,72 +8935,87 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
         Time_step = uncorrectedTime_step / CalKrate;
         TimeHistory[Cyccnt] = TimeHistory[Cyccnt - 1] + Time_step;
         Time_cur = TimeHistory[Cyccnt];
-        printf("\n**calFileSaysTimeShouldBe = %f, previousUncorrectedTime = %f",
-               calFileSaysTimeShouldBe, *previousUncorrectedTime);
-        printf("\n**uncorrectedTime_step = %f", uncorrectedTime_step);
-        printf("\n**Temp_cur_b = %f, DataMeasuredAtTemperature = %f",
-               Temp_cur_b, DataMeasuredAtTemperature);
-        printf("\n**recip_Tdiff = %f", recip_Tdiff);
-        printf("\n**act_nrg = %f, CalKrate = %f", act_nrg, CalKrate);
-        printf("\n**Time_step = %f, Time_cur = %f\n", Time_step, Time_cur);
-        /* if (Verbose) { */
-        printf("\n**dval = %f", dval);
-        printf("\n**DataValue[%d] = %f, DataValue[%d] = %f", i - 1,
-               DataValue[i - 1], i, DataValue[i]);
-        printf("\n**DataTime[%d] = %f, DataTime[%d] = %f", i - 1,
-               DataTime[i - 1], i, DataTime[i]);
-        printf("\n**h_interp_factor = %f", h_interp_factor);
-        printf("\n**TimeHistory[%d] = %f and TimeHistory[%d] = %f\n", Cyccnt,
-               TimeHistory[Cyccnt], Cyccnt - 1, TimeHistory[Cyccnt - 1]);
-        printf("\n**Time_cur = %f\n", Time_cur);
-        /* } */
-        fflush(stdout);
+        if (Verbose_flag > 2) {
+          fprintf(Logfile,
+                  "\n**calFileSaysTimeShouldBe = %f, previousUncorrectedTime "
+                  "= %f",
+                  calFileSaysTimeShouldBe, *previousUncorrectedTime);
+          fprintf(Logfile, "\n**uncorrectedTime_step = %f",
+                  uncorrectedTime_step);
+          fprintf(Logfile,
+                  "\n**Temp_cur_b = %f, DataMeasuredAtTemperature = %f",
+                  Temp_cur_b, DataMeasuredAtTemperature);
+          fprintf(Logfile, "\n**recip_Tdiff = %f", recip_Tdiff);
+          fprintf(Logfile, "\n**act_nrg = %f, CalKrate = %f", act_nrg,
+                  CalKrate);
+          fprintf(Logfile, "\n**Time_step = %f, Time_cur = %f\n", Time_step,
+                  Time_cur);
+          fprintf(Logfile, "\n**dval = %f", dval);
+          fprintf(Logfile, "\n**DataValue[%d] = %f, DataValue[%d] = %f", i - 1,
+                  DataValue[i - 1], i, DataValue[i]);
+          fprintf(Logfile, "\n**DataTime[%d] = %f, DataTime[%d] = %f", i - 1,
+                  DataTime[i - 1], i, DataTime[i]);
+          fprintf(Logfile, "\n**h_interp_factor = %f", h_interp_factor);
+          fprintf(Logfile,
+                  "\n**TimeHistory[%d] = %f and TimeHistory[%d] = %f\n", Cyccnt,
+                  TimeHistory[Cyccnt], Cyccnt - 1, TimeHistory[Cyccnt - 1]);
+          fprintf(Logfile, "\n**Time_cur = %f\n", Time_cur);
+        }
+        fflush(Logfile);
         *previousUncorrectedTime = calFileSaysTimeShouldBe;
         CurDataLine = i;
       }
     }
 
-    if (h_interp_factor < 0.0) { /* h_interp_factor never calculated; < 0 is the
-                                    initialized nonsense value */
+    if (h_interp_factor < 0.0) { /* h_interp_factor never calculated; < 0 is
+                                    the initialized nonsense value */
 
       /*  We have just now run past the useful experimental data for time
        * calibration */
 
       CurDataLine = NDataLines + 1;
 
-      /* if (Verbose) */ printf("\nNo more useful %s data for calibration\n",
-                                typestring);
-      fflush(stdout);
+      if (Verbose_flag > 1)
+        fprintf(Logfile, "\nNo more useful %s data for calibration\n",
+                typestring);
+      fflush(Logfile);
+    }
 
-      /* Now need to estimate Beta for the remaining iterations   */
-      /* Estimate with the most recent time history data          */
-      /* Use a quadratic regression over the last NTOTAKE points  */
+    /* Now need to estimate Beta for the remaining iterations   */
+    /* Estimate with the most recent time history data          */
+    /* Use a quadratic regression over the last NTOTAKE points  */
 
-      createfittocycles();
+    createfittocycles();
 
-      /* Now, the vector Bvec contains the coefficients of the best-fit */
-      /* quadratic equation for mapping */
+    /* Now, the vector Bvec contains the coefficients of the best-fit */
+    /* quadratic equation for mapping */
 
-      /* We record the simulation temperature at which the calorimetry data */
-      /* ended, because any further adjustments in the quadratic fit due */
-      /* to temperature change should be referenced to the temperature */
-      /* at which the fit was made */
+    /* We record the simulation temperature at which the calorimetry data */
+    /* ended, because any further adjustments in the quadratic fit due */
+    /* to temperature change should be referenced to the temperature */
+    /* at which the fit was made */
 
-      DataFinalTemperature = Temp_cur_b;
-      Time_step = (2.0 * Bvec[0] * (float)((Cyccnt - 1)) + (Bvec[1]));
-      if (Time_step <= 0.0) {
-        printf("\n\n****\n");
-        printf("ERROR: Time step is %f at cycle = %d\n", Time_step, Cyccnt);
-        printf("       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0], Bvec[1]);
-        printf("****\n\n");
-        freeallmem();
-        bailout("disrealnew",
-                "Problem with time extrapolation from calorimetry");
-        exit(1);
-      }
-      TimeHistory[Cyccnt] = TimeHistory[Cyccnt - 1] + Time_step;
-      /* if (Verbose) */ printf("\nQuadratic fit is %g n*n + %g n + %g\n",
-                                Bvec[0], Bvec[1], Bvec[2]);
+    DataFinalTemperature = Temp_cur_b;
+    Time_step = (2.0 * Bvec[0] * (float)((Cyccnt - 1)) + (Bvec[1]));
+    if (Time_step <= 0.0) {
+      fprintf(stderr, "\n\n****\n");
+      fprintf(stderr, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+              Cyccnt);
+      fprintf(Logfile, "\n\n****\n");
+      fprintf(Logfile, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+              Cyccnt);
+      fprintf(Logfile, "       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0],
+              Bvec[1]);
+      fprintf(stderr, "****\n\n");
+      fprintf(Logfile, "****\n\n");
+      freeallmem();
+      bailout("disrealnew", "Problem with time extrapolation from calorimetry");
+      exit(1);
+    }
+    TimeHistory[Cyccnt] = TimeHistory[Cyccnt - 1] + Time_step;
+    if (Verbose_flag > 2) {
+      fprintf(Logfile, "\nQuadratic fit is %g n*n + %g n + %g\n", Bvec[0],
+              Bvec[1], Bvec[2]);
     }
   } else {
 
@@ -8626,10 +9028,16 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
     CalKrate = exp(-(act_nrg * recip_Tdiff));
     Time_step = (2.0 * Bvec[0] * (float)((Cyccnt - 1)) + (Bvec[1])) / CalKrate;
     if (Time_step <= 0.0) {
-      printf("\n\n****\n");
-      printf("ERROR: Time step is %f at cycle = %d\n", Time_step, Cyccnt);
-      printf("       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0], Bvec[1]);
-      printf("****\n\n");
+      fprintf(stderr, "\n\n****\n");
+      fprintf(stderr, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+              Cyccnt);
+      fprintf(Logfile, "\n\n****\n");
+      fprintf(Logfile, "ERROR: Time step is %f at cycle = %d\n", Time_step,
+              Cyccnt);
+      fprintf(Logfile, "       Bvec[0] = %f , Bvec[1] = %f\n", Bvec[0],
+              Bvec[1]);
+      fprintf(stderr, "****\n\n");
+      fprintf(Logfile, "****\n\n");
       freeallmem();
       bailout("disrealnew", "Problem with time extrapolation from calorimetry");
       exit(1);
@@ -8645,8 +9053,8 @@ void findnewtime(float dval, float act_nrg, float *previousUncorrectedTime,
  *    createfittocycles
  *
  *    Use second-order Lagrange interpolation to fit a quadratic form to the
- *most recent data for time versus cycles, enabling one to extrapolate to later
- *times
+ *most recent data for time versus cycles, enabling one to extrapolate to
+ *later times
  *
  *    Arguments:  none
  *    Returns:    Nothing
@@ -8697,14 +9105,18 @@ void createfittocycles(void) {
   if (Bvec[0] < 0.0) {
 
     /* No quadratic fit was found; default to linear fit with warning */
-    printf(
-        "WARNING: No quadratic fit could be found to the measurement data!\n");
-    printf("         This likely is caused by terminating the measurements\n");
-    printf("         too soon.\n\n");
-    printf("         Defaulting to a LINEAR fit, which may not yield good "
-           "results\n");
-    printf("         at later times.\n\n");
-
+    if (Verbose_flag > 0) {
+      fprintf(Logfile, "WARNING: No quadratic fit could be found to the "
+                       "measurement data!\n");
+      fprintf(
+          Logfile,
+          "         This likely is caused by terminating the measurements\n");
+      fprintf(Logfile, "         too soon.\n\n");
+      fprintf(Logfile,
+              "         Defaulting to a LINEAR fit, which may not yield good "
+              "results\n");
+      fprintf(Logfile, "         at later times.\n\n");
+    }
     increment = 20;
     numpoints = 3.0;
 
@@ -8754,112 +9166,112 @@ void freeallmem(void) {
 
   if (Mic)
     free_cbox(Mic, Xsyssize, Ysyssize);
-  if (Verbose)
-    printf("\nFreed cbox Mic");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed cbox Mic");
   if (Micorig)
     free_cbox(Micorig, Xsyssize, Ysyssize);
-  if (Verbose)
-    printf("\nFreed cbox Micorig");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed cbox Micorig");
   if (Micpart)
     free_sibox(Micpart, Xsyssize, Ysyssize);
-  if (Verbose)
-    printf("\nFreed sibox Micpart");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed sibox Micpart");
   if (Cshage)
     free_sibox(Cshage, Xsyssize, Ysyssize);
-  if (Verbose)
-    printf("\nFreed sibox Cshage");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed sibox Cshage");
   if (Deactivated)
     free_sibox(Deactivated, Xsyssize, Ysyssize);
-  if (Verbose)
-    printf("\nFreed sibox Deactivated");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed sibox Deactivated");
   if (Startflag)
     free_ivector(Startflag);
-  if (Verbose)
-    printf("\nFreed ivector Startflag");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed ivector Startflag");
   if (Stopflag)
     free_ivector(Stopflag);
-  if (Verbose)
-    printf("\nFreed ivector Stopflag");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed ivector Stopflag");
   if (Deactphaselist)
     free_ivector(Deactphaselist);
-  if (Verbose)
-    printf("\nFreed ivector Deactphaselist");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed ivector Deactphaselist");
   if (Deactfrac)
     free_fvector(Deactfrac);
-  if (Verbose)
-    printf("\nFreed fvector Deactfrac");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Deactfrac");
   if (Reactfrac)
     free_fvector(Reactfrac);
-  if (Verbose)
-    printf("\nFreed fvector Reactfrac");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Reactfrac");
   if (Deactinit)
     free_fvector(Deactinit);
-  if (Verbose)
-    printf("\nFreed fvector Deactinit");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Deactinit");
   if (Deactends)
     free_fvector(Deactends);
-  if (Verbose)
-    printf("\nFreed fvector Deactends");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Deactends");
   if (Deactterm)
     free_fvector(Deactterm);
-  if (Verbose)
-    printf("\nFreed fvector Deactterm");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Deactterm");
   if (Molarvcsh)
     free_fvector(Molarvcsh);
-  if (Verbose)
-    printf("\nFreed fvector Molarvcsh");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Molarvcsh");
   if (Watercsh)
     free_fvector(Watercsh);
-  if (Verbose)
-    printf("\nFreed fvector Watercsh");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Watercsh");
   if (Disprob)
     free_fvector(Disprob);
-  if (Verbose)
-    printf("\nFreed fvector Disprob");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Disprob");
   if (Disbase)
     free_fvector(Disbase);
-  if (Verbose)
-    printf("\nFreed fvector Disbase");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Disbase");
   if (Discoeff)
     free_fvector(Discoeff);
-  if (Verbose)
-    printf("\nFreed fvector Discoeff");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Discoeff");
   if (Soluble)
     free_ivector(Soluble);
-  if (Verbose)
-    printf("\nFreed ivector Soluble");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed ivector Soluble");
   if (Creates)
     free_ivector(Creates);
-  if (Verbose)
-    printf("\nFreed ivector Creates");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed ivector Creates");
   if (Onepixelbias)
     free_fvector(Onepixelbias);
-  if (Verbose)
-    printf("\nFreed fvector Onepixelbias");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector Onepixelbias");
   if (PHsulfcoeff)
     free_fvector(PHsulfcoeff);
-  if (Verbose)
-    printf("\nFreed fvector PHsulfcoeff");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector PHsulfcoeff");
   if (PHfactor)
     free_fvector(PHfactor);
-  if (Verbose)
-    printf("\nFreed fvector PHfactor");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector PHfactor");
   if (CustomImageTime)
     free_fvector(CustomImageTime);
-  if (Verbose)
-    printf("\nFreed fvector CustomImageTime");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector CustomImageTime");
   if (DataTime)
     free_fvector(DataTime);
-  if (Verbose)
-    printf("\nFreed fvector DataTime");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector DataTime");
   if (DataValue)
     free_fvector(DataValue);
-  if (Verbose)
-    printf("\nFreed fvector DataValue");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector DataValue");
   if (TimeHistory)
     free_fvector(TimeHistory);
-  if (Verbose)
-    printf("\nFreed fvector TimeHistory");
+  if (Verbose_flag > 2)
+    fprintf(Logfile, "\nFreed fvector TimeHistory");
 
   /*** Now free the ants ***/
 
@@ -8882,11 +9294,11 @@ void freeallmem(void) {
       curant = curant->nextant;
       free(antgone);
     }
-    if (Verbose)
-      printf("\nFreed all ants except Headant... ");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "\nFreed all ants except Headant... ");
     free(Headant);
-    if (Verbose)
-      printf("freed Headant\n");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "freed Headant\n");
   }
 
   if (Headks) {
@@ -8908,11 +9320,11 @@ void freeallmem(void) {
       curas = curas->nextas;
       free(asgone);
     }
-    if (Verbose)
-      printf("\nFreed all ks except Headks... ");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "\nFreed all ks except Headks... ");
     free(Headks);
-    if (Verbose)
-      printf("freed Headks\n");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "freed Headks\n");
   }
 
   if (Headnas) {
@@ -8934,12 +9346,42 @@ void freeallmem(void) {
       curas = curas->nextas;
       free(asgone);
     }
-    if (Verbose)
-      printf("\nFreed all nas except Headnas... ");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "\nFreed all nas except Headnas... ");
     free(Headnas);
-    if (Verbose)
-      printf("freed Headnas\n");
+    if (Verbose_flag > 2)
+      fprintf(Logfile, "freed Headnas\n");
   }
 
   return;
+}
+
+char *rfc8601_timespec(struct timespec *tv) {
+  char time_str[127];
+  double fractional_seconds;
+  int milliseconds;
+  struct tm tm; // our "broken down time"
+  char *rfc8601;
+
+  rfc8601 = malloc(256);
+
+  memset(&tm, 0, sizeof(struct tm));
+  sprintf(time_str, "%ld UTC", tv->tv_sec);
+
+  // convert our timespec into broken down time
+  strptime(time_str, "%s %U", &tm);
+
+  // do the math to convert nanoseconds to integer milliseconds
+  fractional_seconds = (double)tv->tv_nsec;
+  fractional_seconds /= 1e6;
+  fractional_seconds = round(fractional_seconds);
+  milliseconds = (int)fractional_seconds;
+
+  // print date and time without milliseconds
+  strftime(time_str, sizeof(time_str), "%Y-%m-%dT%H:%M:%S", &tm);
+
+  // add on the fractional seconds and Z for the UTC Timezone
+  sprintf(rfc8601, "%s.%dZ", time_str, milliseconds);
+
+  return rfc8601;
 }
