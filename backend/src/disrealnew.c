@@ -1649,11 +1649,18 @@ int checkargs(int argc, char **argv) {
     return (1);
   }
 
-  sprintf(LogFileName, "%sdisrealnew.log", WorkingDirectory);
+  sprintf(LogFileName, "%s%sdisrealnew.log", WorkingDirectory, PATH_SEPARATOR);
   strcpy(buff, ParameterFileName);
-  sprintf(ParameterFileName, "%s%s", WorkingDirectory, buff);
+  sprintf(ParameterFileName, "%s%s%s", WorkingDirectory, PATH_SEPARATOR, buff);
   strcpy(buff, ProgressFileName);
-  sprintf(ProgressFileName, "%s%s", WorkingDirectory, buff);
+  sprintf(ProgressFileName, "%s%s%s", WorkingDirectory, PATH_SEPARATOR, buff);
+  /*
+  printf("\n\nLogfile name = %s", LogFileName);
+  printf("\nParameterFile name = %s", ParameterFileName);
+  printf("\nProgressFile name = %s\n\n", ProgressFileName);
+  fflush(stdout);
+  exit(1);
+  */
 
   return (0);
 }
@@ -2840,8 +2847,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
             strlen(Fileroot));
     fprintf(Logfile, "\nEnter name of file from which the initial ");
     fprintf(Logfile, "\nmicrostructure will be read: %s", name);
+    fflush(Logfile);
     if (Verbose_flag > 1)
-      fprintf(Logfile, "\nnlen is %d and Fileroot is now %s ", nlen, Fileroot);
+      fprintf(stderr, "\nnlen is %d and Fileroot is now %s ", nlen, Fileroot);
+    fflush(Logfile);
+    fflush(stderr);
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected Fileroot",
@@ -2856,7 +2866,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     name = strtok(NULL, ",\n");
     fprintf(Logfile, "\nEnter name of particle image file:  ");
     fprintf(Logfile, "%s", name);
+    fflush(Logfile);
     sprintf(pimgfile, "%s%s", Micdir, name);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nDEBUG: Particle image file = '%s' (len=%zu)\n",
+              pimgfile, strlen(pimgfile));
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected Pimgfile",
@@ -2878,6 +2894,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Oc3afrac = atof(instring);
     fprintf(Logfile, "\nEnter fraction of C3A that is to be orthorhombic ");
     fprintf(Logfile, "\ninstead of cubic: %f", Oc3afrac);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nOc3afrac = %f", Oc3afrac);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected Oc3afrac",
@@ -2895,6 +2915,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
         Logfile,
         "\nEnter number of seeds for CSH nucleation per um3 of mix water: %f",
         Csh_seeds);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Csh_seeds);
+      fflush(stderr);
+    }
   } else {
     fprintf(
         stderr,
@@ -2911,6 +2935,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     End_time = atof(instring);
     fprintf(Logfile, "\nEnter aging time in days: %f", End_time);
     End_time *= 24.0; /* Convert days to hours */
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, End_time);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected End_time",
@@ -2924,8 +2952,12 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   if (!strcmp(name, "Place_crack")) {
     instring = strtok(NULL, ",\n");
     fprintf(Logfile, "\nPlace a crack (y or n)? [n]: %s", instring);
-    if (strlen(answer) < 1) {
-      strcpy(answer, "n");
+    if (strlen(instring) < 1) {
+      strcpy(instring, "n");
+    }
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %s", name, instring);
+      fflush(stderr);
     }
   } else {
     fprintf(stderr,
@@ -2942,6 +2974,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     instring = strtok(NULL, ",\n");
     Crackwidth = atoi(instring);
     fprintf(Logfile, "\nEnter total crack width (in pixels): %d", Crackwidth);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Crackwidth);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -2957,6 +2993,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     instring = strtok(NULL, ",\n");
     Cracktime = atof(instring);
     fprintf(Logfile, "\nEnter time at which to crack (in h): %f", Cracktime);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Cracktime);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -2979,6 +3019,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile, "\n\t 3 = parallel to xy plane");
     fprintf(Logfile, "\nOrientation: ");
     fprintf(Logfile, "%d", Crackorient);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Crackorient);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -2997,6 +3041,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
             instring);
     if (strlen(instring) < 1) {
       strcpy(instring, "n");
+    }
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %s", name, instring);
+      fflush(stderr);
     }
   } else {
     fprintf(stderr,
@@ -3050,6 +3098,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     OutTimefreq = atof(instring);
     fprintf(Logfile, "\nOutput hydrating microstructure every ____ hours: %f",
             OutTimefreq);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, OutTimefreq);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3091,6 +3143,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile, "\n\tZ size = %d", Ysyssize_orig);
     fprintf(Logfile, "\n\tResolution = %f", Res);
     fflush(Logfile);
+    fprintf(stderr, "\nDone reading image header... ");
+    fprintf(stderr, "\n\tVersion = %f", Version);
+    fprintf(stderr, "\n\tX size = %d", Xsyssize_orig);
+    fprintf(stderr, "\n\tY size = %d", Ysyssize_orig);
+    fprintf(stderr, "\n\tZ size = %d", Ysyssize_orig);
+    fprintf(stderr, "\n\tResolution = %f", Res);
+    fflush(stderr);
   }
 
   Xsyssize = Xsyssize_orig;
@@ -3118,9 +3177,13 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
    *    (See disrealnew.h for their declaration)
    ***/
 
-  if (Verbose_flag > 2)
+  if (Verbose_flag > 2) {
     fprintf(Logfile, "\nAllocating Mic with dimensions %d %d %d...", Xsyssize,
             Ysyssize, Zsyssize);
+    fprintf(stderr, "\nAllocating Mic with dimensions %d %d %d...", Xsyssize,
+            Ysyssize, Zsyssize);
+    fflush(stderr);
+  }
   Mic = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Mic) {
     freeallmem();
@@ -3128,8 +3191,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Mic array");
     return (1);
   }
-  if (Verbose_flag > 2)
-    fprintf(Logfile, " done\nAllocating Micorig ...");
+  if (Verbose_flag > 2) {
+    fprintf(stderr, " done\nAllocating Micorig ...");
+    fflush(stderr);
+  }
 
   Micorig = cbox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micorig) {
@@ -3138,8 +3203,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Micorig array");
     return (1);
   }
-  if (Verbose_flag > 2)
+  if (Verbose_flag > 2) {
     fprintf(Logfile, " done\nAllocating Micpart ...");
+    fprintf(stderr, " done\nAllocating Micpart ...");
+    fflush(stderr);
+  }
 
   Micpart = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Micpart) {
@@ -3148,8 +3216,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Micpart array");
     return (1);
   }
-  if (Verbose_flag > 2)
+  if (Verbose_flag > 2) {
     fprintf(Logfile, " done\nAllocating Cshage ...");
+    fprintf(stderr, " done\nAllocating Cshage ...");
+    fflush(stderr);
+  }
 
   Cshage = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Cshage) {
@@ -3158,8 +3229,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Cshage array");
     return (1);
   }
-  if (Verbose_flag > 2)
+  if (Verbose_flag > 2) {
     fprintf(Logfile, " done\nAllocating Deactivated ...");
+    fprintf(stderr, " done\nAllocating Deactivated ...");
+    fflush(stderr);
+  }
 
   Deactivated = sibox(Xsyssize, Ysyssize, Zsyssize);
   if (!Deactivated) {
@@ -3168,8 +3242,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     bailout("disrealnew", "Could not allocate memory for Deactivated array");
     return (1);
   }
-  if (Verbose_flag > 1)
+  if (Verbose_flag > 2) {
     fprintf(Logfile, " done");
+    fprintf(stderr, " done");
+    fflush(stderr);
+  }
 
   Cshscale = CSHSCALE * Sizemag;
   C3ah6_scale = C3AH6_SCALE * Sizemag;
@@ -3228,8 +3305,11 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   } /* End of loop in ix */
 
   fclose(fimgfile);
-  if (Verbose_flag > 1)
-    fprintf(Logfile, " done");
+  if (Verbose_flag > 2) {
+    fprintf(Logfile, "\nDone reading microstructure image");
+    fprintf(stderr, "\nDone reading microstructure image");
+    fflush(stderr);
+  }
 
   /* Now read in particle IDs from file */
 
@@ -3269,6 +3349,12 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
   }
 
   fclose(fpimgfile);
+
+  if (Verbose_flag > 2) {
+    fprintf(Logfile, "\nDone reading particle image");
+    fprintf(stderr, "\nDone reading particle image");
+    fflush(stderr);
+  }
 
   if (Version != newver) {
     fprintf(Logfile, "\nWARNING: Some files were created with differing");
@@ -3315,25 +3401,38 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
       if (phtodo > 0 && phtodo < NSPHASES) {
         Onepixelbias[phtodo] = bias;
       }
-      fprintf(Logfile, "\nOne-voxel bias for phase %d = %f", phtodo, bias);
-      fflush(Logfile);
+      if (Verbose_flag > 1) {
+        fprintf(Logfile, "\nOne-voxel bias for phase %d = %f", phtodo, bias);
+        fflush(Logfile);
+        fprintf(stderr, "\nOne-voxel bias for phase %d = %f", phtodo, bias);
+        fflush(stderr);
+      }
     }
   } while (!strcmp(name, "Onevoxelbias"));
 
-  fflush(Logfile);
+  /***
+   * After exiting this loop, the name variable will already hold the next
+   * line's parameter name, which should be Temp_0
+   ***/
 
   /***
    *    Parameters for adiabatic temperature rise calculation
    ***/
 
+  /*
   fread_string(fprmfile, buff1);
   name = strtok(buff1, ",");
+  */
   if (!strcmp(name, "Temp_0")) {
     instring = strtok(NULL, ",\n");
     Temp_0 = atof(instring);
     fprintf(Logfile, "\nEnter the initial temperature of binder ");
     fprintf(Logfile, "in degrees Celsius: %f", Temp_0);
     Temp_cur_b = Temp_0;
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Temp_0);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3355,6 +3454,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     if ((Adiaflag == 0) || (Mass_agg * Cp_agg <= 0.0) ||
         (fabs(Temp_0_agg - Temp_0) < 0.5) || (U_coeff_agg <= 0.0))
       AggTempEffect = 0;
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Adiaflag);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3371,6 +3474,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     T_ambient = atof(instring);
     fprintf(Logfile, "\nEnter the ambient temperature ");
     fprintf(Logfile, "in degrees Celsius: %f", T_ambient);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, T_ambient);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3387,6 +3494,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     U_coeff = atof(instring);
     fprintf(Logfile, "\nEnter the overall heat transfer coefficient ");
     fprintf(Logfile, "in J/g/C/s: %f", U_coeff);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, U_coeff);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3403,6 +3514,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     E_act = atof(instring);
     fprintf(Logfile, "\nEnter apparent activation energy for hydration ");
     fprintf(Logfile, "in kJ/mole: %f", E_act);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, E_act);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3420,6 +3535,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile,
             "\nEnter apparent activation energy for pozzolanic reaction ");
     fprintf(Logfile, "in kJ/mole: %f", E_act_pozz);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, E_act_pozz);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3436,6 +3555,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     E_act_slag = atof(instring);
     fprintf(Logfile, "\nEnter apparent activation energy for slag reactions ");
     fprintf(Logfile, "in kJ/mole: %f", E_act_slag);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, E_act_slag);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3454,6 +3577,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile, "\n\tearly-age calorimetry data (1), or ");
     fprintf(Logfile, "\n\tearly-age chemical shrinkage data (2): %d",
             TimeCalibrationMethod);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, TimeCalibrationMethod);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3470,6 +3597,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Beta = atof(instring);
     fprintf(Logfile, "\nEnter kinetic factor to convert cycles ");
     fprintf(Logfile, "to time at 25 C: %f", Beta);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Beta);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3485,6 +3616,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     instring = strtok(NULL, ",\n");
     fprintf(Logfile, "\nEnter file name for early-age data: %s", instring);
     sprintf(calfilename, "%s", instring);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %s", name, calfilename);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3615,6 +3750,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     DataMeasuredAtTemperature = atof(instring);
     fprintf(Logfile, "\nEnter temperature at which calibration data ");
     fprintf(Logfile, "were obtained (in deg C): %f", DataMeasuredAtTemperature);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, DataMeasuredAtTemperature);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3631,6 +3770,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile, "\nSetting DOH frequency for outputting ");
     fprintf(Logfile, "microstructure = %f", OutTimefreq);
     fflush(Logfile);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nOutTimefreq = %f", OutTimefreq);
+      fflush(stderr);
+    }
   }
 
   /***
@@ -3668,6 +3811,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Alpha_max = atof(instring);
     fprintf(Logfile, "\nEnter maximum degree of hydration to achieve ");
     fprintf(Logfile, "before terminating: %f", Alpha_max);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Alpha_max);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3684,6 +3831,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Sealed = atoi(instring);
     fprintf(Logfile, "\nDo you wish hydration under 0) saturated ");
     fprintf(Logfile, "or 1) sealed conditions: %d", Sealed);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Sealed);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3726,6 +3877,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Burntimefreq = atof(instring);
     fprintf(Logfile, "\nEnter time frequency for checking pore ");
     fprintf(Logfile, "space percolation (in h): %f", Burntimefreq);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Burntimefreq);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3742,6 +3897,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Settimefreq = atof(instring);
     fprintf(Logfile, "\nEnter time frequency for checking percolation  ");
     fprintf(Logfile, "of solids [set] (in h): %f", Settimefreq);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Settimefreq);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3758,6 +3917,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Phydtimefreq = atof(instring);
     fprintf(Logfile, "\nEnter time frequency for checking hydration  ");
     fprintf(Logfile, "of particles (in h): %f", Phydtimefreq);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Phydtimefreq);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3774,6 +3937,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Mass_agg = (double)(atof(instring));
     fprintf(Logfile, "\nEnter mass fraction of aggregate in concrete: %f",
             Mass_agg);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Mass_agg);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3791,6 +3958,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile, "\nEnter initial temperature of aggregate in concrete: %f",
             Temp_0_agg);
     Temp_cur_agg = Temp_0_agg;
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, Temp_0_agg);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3808,6 +3979,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     fprintf(Logfile,
             "\nEnter the overall heat transfer coefficient in J/g/C/s: %f",
             U_coeff_agg);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, U_coeff_agg);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3824,6 +3999,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Csh2flag = atoi(instring);
     fprintf(Logfile, "\nCSH to pozzolanic CSH 0) prohibited or 1) allowed: %d",
             Csh2flag);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Csh2flag);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3840,6 +4019,10 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
     Chflag = atoi(instring);
     fprintf(Logfile, "\nCH precipitation on aggregate surfaces ");
     fprintf(Logfile, "0) prohibited or 1) allowed: %d", Chflag);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, Chflag);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -3860,12 +4043,15 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
       MovieFrameFreq = End_time + 1.0;
     fprintf(Logfile, "\nOutput hydration movie frame every ____ hours: %f",
             MovieFrameFreq);
-
     *nmovstep = 1;
     if ((MovieFrameFreq > 0.0) && (MovieFrameFreq < 1.0)) {
       *nmovstep = (int)(End_time / MovieFrameFreq);
       if (*nmovstep < 1)
         *nmovstep = 1;
+    }
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %f", name, MovieFrameFreq);
+      fflush(stderr);
     }
   } else {
     fprintf(stderr,
@@ -3926,17 +4112,33 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
         fprintf(Logfile, "\nDeactivate phase %d: %f,%f,%f,%f,%f", dphase, dfrac,
                 deactinit, deactends, deactterm, reactfrac);
         fflush(Logfile);
+        if (Verbose_flag > 1) {
+          fprintf(stderr, "\n%s = %d: %f,%f,%f,%f,%f", name, dphase, dfrac,
+                  deactinit, deactends, deactterm, reactfrac);
+          fflush(stderr);
+        }
       }
     }
   } while (!strcmp(name, "Deactivate"));
 
+  /**
+   * At this point, name already contains the next parameter name which should
+   * be PHactive
+   **/
+
+  /*
   fread_string(fprmfile, buff1);
   name = strtok(buff1, ",");
+  */
   if (!strcmp(name, "PHactive")) {
     instring = strtok(NULL, ",\n");
     PHactive = atoi(instring);
     fprintf(Logfile, "\nDoes pH influence hydration kinetics? ");
     fprintf(Logfile, "0) no or 1) yes: %d", PHactive);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\n%s = %d", name, PHactive);
+      fflush(stderr);
+    }
   } else {
     fprintf(stderr,
             "\nERROR: Unexpected parameter order: got %s but expected "
@@ -4364,7 +4566,7 @@ void init(void) {
    *    convert them to fractions from percentages
    ***/
 
-  sprintf(buff, "%salkalichar.dat", WorkingDirectory);
+  sprintf(buff, "%s%salkalichar.dat", WorkingDirectory, PATH_SEPARATOR);
   alkalifile = filehandler("disrealnew", buff, "READ");
   if (!alkalifile) {
     freeallmem();

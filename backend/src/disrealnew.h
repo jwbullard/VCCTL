@@ -21,6 +21,12 @@
  *
  *******************************************************/
 
+#ifdef _WIN32
+#define PATH_SEPARATOR "\\"
+#else
+#define PATH_SEPARATOR "/"
+#endif
+
 #include "include/vcctl.h"
 #include <ctype.h>
 #include <getopt.h>

@@ -9,6 +9,7 @@ time controls, temperature profiles, aging modes, and progress monitoring.
 import gi
 import logging
 import math
+import os
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
 
@@ -23,6 +24,7 @@ from app.services.hydration_service import (
     HydrationParameters, TemperatureProfile, TemperaturePoint, 
     AgingMode, SimulationStatus, SimulationProgress
 )
+from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
 from app.visualization import create_visualization_manager, HydrationPlotWidget
 
 
@@ -37,6 +39,7 @@ class HydrationPanel(Gtk.Box):
         self.logger = logging.getLogger('VCCTL.HydrationPanel')
         self.service_container = get_service_container()
         self.hydration_service = self.service_container.hydration_service
+        self.bridge_service = MicrostructureHydrationBridge()
         
         # Initialize visualization manager
         self.plot_manager, self.plot_exporter = create_visualization_manager(main_window)
@@ -47,6 +50,8 @@ class HydrationPanel(Gtk.Box):
         self.current_temperature_profile = None
         self.simulation_running = False
         self.progress_update_timeout = None
+        self.selected_microstructure = None
+        self.current_operation_name = None
         
         # Temperature profile editing
         self.temp_profile_points = []
@@ -57,6 +62,9 @@ class HydrationPanel(Gtk.Box):
         
         # Load default parameters
         self._load_default_parameters()
+        
+        # Initialize time calibration mode display
+        self._on_aging_mode_changed(self.aging_time_radio)
         
         # Register for simulation progress updates
         self.hydration_service.add_progress_callback(self._on_simulation_progress)
@@ -123,11 +131,17 @@ class HydrationPanel(Gtk.Box):
         scrolled.set_vexpand(True)
         
         # Main content box
-        content_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         content_box.set_margin_top(15)
         content_box.set_margin_bottom(15)
         content_box.set_margin_left(15)
         content_box.set_margin_right(15)
+        
+        # Microstructure selection section (full width at top)
+        self._create_microstructure_selection_section(content_box)
+        
+        # Parameter sections in horizontal layout
+        params_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
         
         # Left column: Time and cycles parameters
         left_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
@@ -135,20 +149,69 @@ class HydrationPanel(Gtk.Box):
         
         self._create_time_parameters_section(left_column)
         self._create_aging_mode_section(left_column)
-        self._create_convergence_section(left_column)
+        self._create_curing_conditions_section(left_column)
         
         # Right column: Temperature profile and advanced parameters
         right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         right_column.set_size_request(450, -1)
         
-        self._create_temperature_profile_section(right_column)
         self._create_output_settings_section(right_column)
+        self._create_advanced_settings_section(right_column)
         
-        content_box.pack_start(left_column, False, False, 0)
-        content_box.pack_start(right_column, True, True, 0)
+        params_box.pack_start(left_column, False, False, 0)
+        params_box.pack_start(right_column, True, True, 0)
+        
+        content_box.pack_start(params_box, True, True, 0)
         
         scrolled.add(content_box)
         self.pack_start(scrolled, True, True, 0)
+    
+    def _create_microstructure_selection_section(self, parent: Gtk.Box) -> None:
+        """Create microstructure selection section."""
+        frame = Gtk.Frame(label="Initial Microstructure")
+        frame.get_style_context().add_class("card")
+        
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox.set_margin_top(15)
+        vbox.set_margin_bottom(15)
+        vbox.set_margin_left(15)
+        vbox.set_margin_right(15)
+        
+        # Description
+        desc_label = Gtk.Label()
+        desc_label.set_markup('<span size="small">Select the initial microstructure image created by the Mix Design Tool</span>')
+        desc_label.set_halign(Gtk.Align.START)
+        desc_label.get_style_context().add_class("dim-label")
+        vbox.pack_start(desc_label, False, False, 0)
+        
+        # Microstructure selection
+        selection_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        microstructure_label = Gtk.Label("Microstructure:")
+        microstructure_label.set_halign(Gtk.Align.START)
+        selection_box.pack_start(microstructure_label, False, False, 0)
+        
+        self.microstructure_combo = Gtk.ComboBoxText()
+        self.microstructure_combo.set_tooltip_text("Select initial microstructure from Mix Design operations")
+        selection_box.pack_start(self.microstructure_combo, True, True, 0)
+        
+        self.refresh_button = Gtk.Button(label="Refresh")
+        self.refresh_button.set_tooltip_text("Refresh list of available microstructures")
+        selection_box.pack_start(self.refresh_button, False, False, 0)
+        
+        vbox.pack_start(selection_box, False, False, 0)
+        
+        # Microstructure info
+        self.microstructure_info_label = Gtk.Label("No microstructure selected")
+        self.microstructure_info_label.set_halign(Gtk.Align.START)
+        self.microstructure_info_label.get_style_context().add_class("dim-label")
+        vbox.pack_start(self.microstructure_info_label, False, False, 0)
+        
+        frame.add(vbox)
+        parent.pack_start(frame, False, False, 0)
+        
+        # Populate microstructure list
+        self._refresh_microstructure_list()
     
     def _create_time_parameters_section(self, parent: Gtk.Box) -> None:
         """Create time and cycles parameters section."""
@@ -211,8 +274,8 @@ class HydrationPanel(Gtk.Box):
         parent.pack_start(frame, False, False, 0)
     
     def _create_aging_mode_section(self, parent: Gtk.Box) -> None:
-        """Create aging mode selection section."""
-        frame = Gtk.Frame(label="Aging Mode")
+        """Create time calibration mode selection section."""
+        frame = Gtk.Frame(label="Time Calibration Mode")
         frame.get_style_context().add_class("card")
         
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -221,92 +284,141 @@ class HydrationPanel(Gtk.Box):
         vbox.set_margin_left(15)
         vbox.set_margin_right(15)
         
-        # Aging mode radio buttons
-        self.aging_time_radio = Gtk.RadioButton.new_with_label(None, "Time-based")
-        self.aging_time_radio.set_tooltip_text("Age based on simulation time")
+        # Time calibration mode radio buttons with inline parameters
+        
+        # Knudsen parabolic option with time conversion factor
+        self.aging_time_radio = Gtk.RadioButton.new_with_label(None, "Knudsen parabolic")
+        self.aging_time_radio.set_tooltip_text("Use Knudsen parabolic law for hydration kinetics")
         vbox.pack_start(self.aging_time_radio, False, False, 0)
         
+        # Time conversion factor (directly under Knudsen parabolic)
+        time_factor_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        time_factor_box.set_margin_left(25)  # Indent to show it belongs to Knudsen parabolic
+        
+        time_factor_label = Gtk.Label("Time Conversion Factor (h⁻²):")
+        time_factor_label.set_halign(Gtk.Align.START)
+        time_factor_box.pack_start(time_factor_label, False, False, 0)
+        
+        self.time_conversion_spin = Gtk.SpinButton.new_with_range(0.0001, 1.0, 0.0001)
+        self.time_conversion_spin.set_digits(5)
+        self.time_conversion_spin.set_value(0.00045)  # Default for Knudsen parabolic
+        self.time_conversion_spin.set_tooltip_text("Time conversion factor for Knudsen parabolic law (units: h⁻²)")
+        time_factor_box.pack_start(self.time_conversion_spin, False, False, 0)
+        
+        vbox.pack_start(time_factor_box, False, False, 0)
+        
+        # Calorimetry-based option
         self.aging_calorimetry_radio = Gtk.RadioButton.new_with_label_from_widget(
             self.aging_time_radio, "Calorimetry-based")
-        self.aging_calorimetry_radio.set_tooltip_text("Age based on heat release")
+        self.aging_calorimetry_radio.set_tooltip_text("Calibrate hydration kinetics based on measured heat release data")
         vbox.pack_start(self.aging_calorimetry_radio, False, False, 0)
         
+        # File chooser (for calorimetry and shrinkage modes)
+        file_chooser_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        file_chooser_box.set_margin_left(25)  # Indent to show it belongs to file-based modes
+        
+        self.data_file_label = Gtk.Label("Data File:")
+        self.data_file_label.set_halign(Gtk.Align.START)
+        file_chooser_box.pack_start(self.data_file_label, False, False, 0)
+        
+        self.data_file_button = Gtk.FileChooserButton("Select calibration data file", Gtk.FileChooserAction.OPEN)
+        self.data_file_button.set_tooltip_text("Select experimental data file for calibration")
+        
+        # Set up file filters
+        file_filter = Gtk.FileFilter()
+        file_filter.set_name("Data files")
+        file_filter.add_pattern("*.txt")
+        file_filter.add_pattern("*.csv")
+        file_filter.add_pattern("*.dat")
+        self.data_file_button.add_filter(file_filter)
+        
+        all_filter = Gtk.FileFilter()
+        all_filter.set_name("All files")
+        all_filter.add_pattern("*")
+        self.data_file_button.add_filter(all_filter)
+        
+        file_chooser_box.pack_start(self.data_file_button, True, True, 0)
+        
+        vbox.pack_start(file_chooser_box, False, False, 0)
+        
+        # Chemical Shrinkage-based option (shares file chooser with calorimetry)
         self.aging_shrinkage_radio = Gtk.RadioButton.new_with_label_from_widget(
             self.aging_time_radio, "Chemical Shrinkage-based")
-        self.aging_shrinkage_radio.set_tooltip_text("Age based on chemical shrinkage measurements")
+        self.aging_shrinkage_radio.set_tooltip_text("Calibrate hydration kinetics based on measured chemical shrinkage data")
         vbox.pack_start(self.aging_shrinkage_radio, False, False, 0)
-        
-        # Aging parameters
-        aging_params_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        
-        aging_param_label = Gtk.Label("Target Value:")
-        aging_param_label.set_halign(Gtk.Align.START)
-        aging_params_box.pack_start(aging_param_label, False, False, 0)
-        
-        self.aging_target_spin = Gtk.SpinButton.new_with_range(0.1, 1000.0, 0.1)
-        self.aging_target_spin.set_digits(2)
-        self.aging_target_spin.set_value(28.0)  # 28 days default
-        self.aging_target_spin.set_tooltip_text("Target value for aging (days, J/g, or shrinkage %)")
-        aging_params_box.pack_start(self.aging_target_spin, False, False, 0)
-        
-        vbox.pack_start(aging_params_box, False, False, 0)
         
         frame.add(vbox)
         parent.pack_start(frame, False, False, 0)
+        
+        # Set default mode and initialize display
+        self.aging_time_radio.set_active(True)  # Default to Knudsen parabolic
     
-    def _create_convergence_section(self, parent: Gtk.Box) -> None:
-        """Create convergence criteria section."""
-        frame = Gtk.Frame(label="Convergence Criteria")
+    def _create_curing_conditions_section(self, parent: Gtk.Box) -> None:
+        """Create curing conditions section."""
+        frame = Gtk.Frame(label="Curing Conditions")
         frame.get_style_context().add_class("card")
         
-        grid = Gtk.Grid()
-        grid.set_row_spacing(10)
-        grid.set_column_spacing(10)
-        grid.set_margin_top(15)
-        grid.set_margin_bottom(15)
-        grid.set_margin_left(15)
-        grid.set_margin_right(15)
-        
-        # Tolerance
-        tolerance_label = Gtk.Label("Tolerance:")
-        tolerance_label.set_halign(Gtk.Align.START)
-        tolerance_label.set_tooltip_text("Convergence tolerance for each cycle")
-        grid.attach(tolerance_label, 0, 0, 1, 1)
-        
-        self.tolerance_spin = Gtk.SpinButton.new_with_range(1e-9, 1e-3, 1e-9)
-        self.tolerance_spin.set_digits(9)
-        self.tolerance_spin.set_value(1e-6)
-        grid.attach(self.tolerance_spin, 1, 0, 1, 1)
-        
-        # Max iterations per cycle
-        max_iter_label = Gtk.Label("Max Iterations/Cycle:")
-        max_iter_label.set_halign(Gtk.Align.START)
-        max_iter_label.set_tooltip_text("Maximum iterations per hydration cycle")
-        grid.attach(max_iter_label, 0, 1, 1, 1)
-        
-        self.max_iter_spin = Gtk.SpinButton.new_with_range(10, 1000, 10)
-        self.max_iter_spin.set_value(100)
-        grid.attach(self.max_iter_spin, 1, 1, 1, 1)
-        
-        frame.add(grid)
-        parent.pack_start(frame, False, False, 0)
-    
-    def _create_temperature_profile_section(self, parent: Gtk.Box) -> None:
-        """Create temperature profile section."""
-        frame = Gtk.Frame(label="Temperature Profile")
-        frame.get_style_context().add_class("card")
-        
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         vbox.set_margin_top(15)
         vbox.set_margin_bottom(15)
         vbox.set_margin_left(15)
         vbox.set_margin_right(15)
         
-        # Profile selection
-        profile_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        # Thermal conditions section
+        thermal_label = Gtk.Label()
+        thermal_label.set_markup('<span weight="bold">Thermal Conditions</span>')
+        thermal_label.set_halign(Gtk.Align.START)
+        vbox.pack_start(thermal_label, False, False, 0)
         
-        profile_label = Gtk.Label("Profile:")
-        profile_box.pack_start(profile_label, False, False, 0)
+        # Initial temperature
+        temp_grid = Gtk.Grid()
+        temp_grid.set_row_spacing(10)
+        temp_grid.set_column_spacing(10)
+        temp_grid.set_margin_left(15)
+        
+        temp_label = Gtk.Label("Initial Temperature (°C):")
+        temp_label.set_halign(Gtk.Align.START)
+        temp_label.set_tooltip_text("Starting temperature for the hydration simulation")
+        temp_grid.attach(temp_label, 0, 0, 1, 1)
+        
+        self.initial_temp_spin = Gtk.SpinButton.new_with_range(-10.0, 80.0, 0.1)
+        self.initial_temp_spin.set_digits(1)
+        self.initial_temp_spin.set_value(25.0)
+        self.initial_temp_spin.set_tooltip_text("Typical range: 5°C to 50°C for concrete curing")
+        temp_grid.attach(self.initial_temp_spin, 1, 0, 1, 1)
+        
+        vbox.pack_start(temp_grid, False, False, 0)
+        
+        # Thermal condition mode
+        thermal_mode_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        thermal_mode_box.set_margin_left(15)
+        
+        self.isothermal_radio = Gtk.RadioButton.new_with_label(None, "Isothermal")
+        self.isothermal_radio.set_tooltip_text("Temperature remains constant throughout simulation")
+        thermal_mode_box.pack_start(self.isothermal_radio, False, False, 0)
+        
+        self.adiabatic_radio = Gtk.RadioButton.new_with_label_from_widget(
+            self.isothermal_radio, "Adiabatic")
+        self.adiabatic_radio.set_tooltip_text("No heat exchange with environment - temperature rises due to hydration heat")
+        thermal_mode_box.pack_start(self.adiabatic_radio, False, False, 0)
+        
+        # Set default to isothermal
+        self.isothermal_radio.set_active(True)
+        
+        vbox.pack_start(thermal_mode_box, False, False, 0)
+        
+        # Temperature profile selection
+        profile_grid = Gtk.Grid()
+        profile_grid.set_row_spacing(10)
+        profile_grid.set_column_spacing(10)
+        profile_grid.set_margin_left(15)
+        
+        profile_label = Gtk.Label("Temperature Profile:")
+        profile_label.set_halign(Gtk.Align.START)
+        profile_label.set_tooltip_text("Temperature variation during hydration simulation")
+        profile_grid.attach(profile_label, 0, 0, 1, 1)
+        
+        profile_selection_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
         self.profile_combo = Gtk.ComboBoxText()
         self.profile_combo.append("custom", "Custom")
@@ -317,49 +429,55 @@ class HydrationPanel(Gtk.Box):
             self.profile_combo.append(name.lower().replace(" ", "_"), name)
         
         self.profile_combo.set_active(0)
-        profile_box.pack_start(self.profile_combo, True, True, 0)
+        self.profile_combo.set_tooltip_text("Select temperature profile for simulation")
+        profile_selection_box.pack_start(self.profile_combo, True, True, 0)
         
         self.edit_profile_button = Gtk.Button(label="Edit")
         self.edit_profile_button.set_tooltip_text("Edit temperature profile")
-        profile_box.pack_start(self.edit_profile_button, False, False, 0)
+        profile_selection_box.pack_start(self.edit_profile_button, False, False, 0)
         
-        vbox.pack_start(profile_box, False, False, 0)
+        profile_grid.attach(profile_selection_box, 1, 0, 1, 1)
         
-        # TEMPORARILY DISABLE HYDRATION PLOT TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
-        # Temperature profile plot
-        # self.hydration_plot_widget = HydrationPlotWidget(self.plot_manager)
-        # # Ensure minimum valid size for plot widget  
-        # self.hydration_plot_widget.set_size_request(max(400, 400), max(250, 200))
-        # vbox.pack_start(self.hydration_plot_widget, True, True, 0)
-        
-        # Create placeholder for hydration plot instead of actual widget
-        plot_placeholder = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        plot_placeholder.set_size_request(400, 200)
-        
-        # Add informational label
-        info_label = Gtk.Label()
-        info_label.set_markup('<span size="large">Hydration Plot</span>')
-        info_label.set_halign(Gtk.Align.CENTER)
-        plot_placeholder.pack_start(info_label, True, True, 0)
-        
-        enable_button = Gtk.Button(label="Enable Plot Widget")
-        enable_button.set_tooltip_text("Click to enable the hydration plot widget")
-        plot_placeholder.pack_start(enable_button, False, False, 0)
-        
-        vbox.pack_start(plot_placeholder, True, True, 0)
-        
-        # Store reference for potential later activation
-        self.hydration_plot_widget = None
-        self.plot_placeholder = plot_placeholder
+        vbox.pack_start(profile_grid, False, False, 0)
         
         # Profile summary
         self.profile_summary_label = Gtk.Label()
         self.profile_summary_label.set_halign(Gtk.Align.START)
         self.profile_summary_label.get_style_context().add_class("dim-label")
+        self.profile_summary_label.set_margin_left(15)
         vbox.pack_start(self.profile_summary_label, False, False, 0)
         
+        # Separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        vbox.pack_start(separator, False, False, 5)
+        
+        # Moisture conditions section
+        moisture_label = Gtk.Label()
+        moisture_label.set_markup('<span weight="bold">Moisture Conditions</span>')
+        moisture_label.set_halign(Gtk.Align.START)
+        vbox.pack_start(moisture_label, False, False, 0)
+        
+        # Moisture condition mode
+        moisture_mode_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        moisture_mode_box.set_margin_left(15)
+        
+        self.saturated_radio = Gtk.RadioButton.new_with_label(None, "Saturated")
+        self.saturated_radio.set_tooltip_text("Sample remains water-saturated throughout simulation")
+        moisture_mode_box.pack_start(self.saturated_radio, False, False, 0)
+        
+        self.sealed_radio = Gtk.RadioButton.new_with_label_from_widget(
+            self.saturated_radio, "Sealed")
+        self.sealed_radio.set_tooltip_text("No moisture exchange - water content remains constant")
+        moisture_mode_box.pack_start(self.sealed_radio, False, False, 0)
+        
+        # Set default to sealed
+        self.sealed_radio.set_active(True)
+        
+        vbox.pack_start(moisture_mode_box, False, False, 0)
+        
         frame.add(vbox)
-        parent.pack_start(frame, True, True, 0)
+        parent.pack_start(frame, False, False, 0)
+    
     
     def _create_output_settings_section(self, parent: Gtk.Box) -> None:
         """Create output settings section."""
@@ -391,6 +509,314 @@ class HydrationPanel(Gtk.Box):
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)
+    
+    def _create_advanced_settings_section(self, parent: Gtk.Box) -> None:
+        """Create advanced settings section with expandable controls."""
+        # Use Gtk.Expander for collapsible section
+        expander = Gtk.Expander(label="Advanced Settings")
+        expander.set_tooltip_text("Advanced simulation parameters (normally not needed)")
+        expander.get_style_context().add_class("card")
+        expander.set_expanded(False)  # Collapsed by default
+        
+        # Main content box
+        content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
+        content_box.set_margin_top(10)
+        content_box.set_margin_bottom(15)
+        content_box.set_margin_left(15)
+        content_box.set_margin_right(15)
+        
+        # Simulation Control Section
+        sim_label = Gtk.Label()
+        sim_label.set_markup('<span weight="bold">Simulation Control</span>')
+        sim_label.set_halign(Gtk.Align.START)
+        content_box.pack_start(sim_label, False, False, 0)
+        
+        sim_grid = Gtk.Grid()
+        sim_grid.set_row_spacing(8)
+        sim_grid.set_column_spacing(10)
+        sim_grid.set_margin_left(15)
+        
+        # Random Seed
+        seed_label = Gtk.Label("Random Seed:")
+        seed_label.set_halign(Gtk.Align.START)
+        seed_label.set_tooltip_text("Negative integer for reproducible simulations")
+        sim_grid.attach(seed_label, 0, 0, 1, 1)
+        
+        self.random_seed_spin = Gtk.SpinButton.new_with_range(-999999, -1, 1)
+        self.random_seed_spin.set_value(-12345)
+        self.random_seed_spin.set_tooltip_text("Random seed for simulation (negative integer)")
+        sim_grid.attach(self.random_seed_spin, 1, 0, 1, 1)
+        
+        # C3A fraction
+        c3a_label = Gtk.Label("C3A Fraction:")
+        c3a_label.set_halign(Gtk.Align.START)
+        c3a_label.set_tooltip_text("Fraction of C3A in cement (0.0-1.0)")
+        sim_grid.attach(c3a_label, 0, 1, 1, 1)
+        
+        self.c3a_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
+        self.c3a_fraction_spin.set_digits(3)
+        self.c3a_fraction_spin.set_value(0.0)
+        self.c3a_fraction_spin.set_tooltip_text("C3A fraction (default 0.0)")
+        sim_grid.attach(self.c3a_fraction_spin, 1, 1, 1, 1)
+        
+        # CSH Seeds
+        csh_label = Gtk.Label("CSH Seeds (cm⁻³):")
+        csh_label.set_halign(Gtk.Align.START)
+        csh_label.set_tooltip_text("Number of CSH nucleation seeds per cubic cm")
+        sim_grid.attach(csh_label, 0, 2, 1, 1)
+        
+        self.csh_seeds_spin = Gtk.SpinButton.new_with_range(0.0, 1000.0, 0.1)
+        self.csh_seeds_spin.set_digits(1)
+        self.csh_seeds_spin.set_value(0.0)
+        self.csh_seeds_spin.set_tooltip_text("CSH nucleation seeds (default 0.0 cm⁻³)")
+        sim_grid.attach(self.csh_seeds_spin, 1, 2, 1, 1)
+        
+        # Alpha max
+        alpha_label = Gtk.Label("Alpha Max:")
+        alpha_label.set_halign(Gtk.Align.START)
+        alpha_label.set_tooltip_text("Maximum degree of hydration (0.0-1.0)")
+        sim_grid.attach(alpha_label, 0, 3, 1, 1)
+        
+        self.alpha_max_spin = Gtk.SpinButton.new_with_range(0.1, 1.0, 0.01)
+        self.alpha_max_spin.set_digits(2)
+        self.alpha_max_spin.set_value(1.0)
+        self.alpha_max_spin.set_tooltip_text("Maximum degree of hydration (default 1.0)")
+        sim_grid.attach(self.alpha_max_spin, 1, 3, 1, 1)
+        
+        content_box.pack_start(sim_grid, False, False, 0)
+        
+        # Activation Energies Section
+        energy_label = Gtk.Label()
+        energy_label.set_markup('<span weight="bold">Activation Energies (kJ/mol)</span>')
+        energy_label.set_halign(Gtk.Align.START)
+        content_box.pack_start(energy_label, False, False, 0)
+        
+        energy_grid = Gtk.Grid()
+        energy_grid.set_row_spacing(8)
+        energy_grid.set_column_spacing(10)
+        energy_grid.set_margin_left(15)
+        
+        # Cement activation energy
+        e_act_label = Gtk.Label("Cement E_act:")
+        e_act_label.set_halign(Gtk.Align.START)
+        energy_grid.attach(e_act_label, 0, 0, 1, 1)
+        
+        self.e_act_spin = Gtk.SpinButton.new_with_range(10.0, 100.0, 0.1)
+        self.e_act_spin.set_digits(1)
+        self.e_act_spin.set_value(40.0)
+        self.e_act_spin.set_tooltip_text("Activation energy for cement hydration (default 40.0 kJ/mol)")
+        energy_grid.attach(self.e_act_spin, 1, 0, 1, 1)
+        
+        # Pozzolan activation energy
+        e_act_pozz_label = Gtk.Label("Pozzolan E_act:")
+        e_act_pozz_label.set_halign(Gtk.Align.START)
+        energy_grid.attach(e_act_pozz_label, 0, 1, 1, 1)
+        
+        self.e_act_pozz_spin = Gtk.SpinButton.new_with_range(10.0, 150.0, 0.1)
+        self.e_act_pozz_spin.set_digits(1)
+        self.e_act_pozz_spin.set_value(83.1)
+        self.e_act_pozz_spin.set_tooltip_text("Activation energy for pozzolan reaction (default 83.1 kJ/mol)")
+        energy_grid.attach(self.e_act_pozz_spin, 1, 1, 1, 1)
+        
+        # Slag activation energy
+        e_act_slag_label = Gtk.Label("Slag E_act:")
+        e_act_slag_label.set_halign(Gtk.Align.START)
+        energy_grid.attach(e_act_slag_label, 0, 2, 1, 1)
+        
+        self.e_act_slag_spin = Gtk.SpinButton.new_with_range(10.0, 100.0, 0.1)
+        self.e_act_slag_spin.set_digits(1)
+        self.e_act_slag_spin.set_value(50.0)
+        self.e_act_slag_spin.set_tooltip_text("Activation energy for slag reaction (default 50.0 kJ/mol)")
+        energy_grid.attach(self.e_act_slag_spin, 1, 2, 1, 1)
+        
+        content_box.pack_start(energy_grid, False, False, 0)
+        
+        # Output Frequencies Section
+        output_label = Gtk.Label()
+        output_label.set_markup('<span weight="bold">Output Frequencies (hours)</span>')
+        output_label.set_halign(Gtk.Align.START)
+        content_box.pack_start(output_label, False, False, 0)
+        
+        output_grid = Gtk.Grid()
+        output_grid.set_row_spacing(8)
+        output_grid.set_column_spacing(10)
+        output_grid.set_margin_left(15)
+        
+        # Burn time frequency
+        burn_label = Gtk.Label("Burn Frequency:")
+        burn_label.set_halign(Gtk.Align.START)
+        output_grid.attach(burn_label, 0, 0, 1, 1)
+        
+        self.burn_freq_spin = Gtk.SpinButton.new_with_range(0.1, 24.0, 0.1)
+        self.burn_freq_spin.set_digits(2)
+        self.burn_freq_spin.set_value(1.0)
+        self.burn_freq_spin.set_tooltip_text("Frequency for burning calculations (default 1.0 h)")
+        output_grid.attach(self.burn_freq_spin, 1, 0, 1, 1)
+        
+        # Setting time frequency
+        set_label = Gtk.Label("Setting Frequency:")
+        set_label.set_halign(Gtk.Align.START)
+        output_grid.attach(set_label, 0, 1, 1, 1)
+        
+        self.set_freq_spin = Gtk.SpinButton.new_with_range(0.1, 24.0, 0.1)
+        self.set_freq_spin.set_digits(2)
+        self.set_freq_spin.set_value(0.25)
+        self.set_freq_spin.set_tooltip_text("Frequency for setting time calculations (default 0.25 h)")
+        output_grid.attach(self.set_freq_spin, 1, 1, 1, 1)
+        
+        # Physical properties frequency
+        phyd_label = Gtk.Label("Physical Props Frequency:")
+        phyd_label.set_halign(Gtk.Align.START)
+        output_grid.attach(phyd_label, 0, 2, 1, 1)
+        
+        self.phyd_freq_spin = Gtk.SpinButton.new_with_range(0.1, 24.0, 0.1)
+        self.phyd_freq_spin.set_digits(2)
+        self.phyd_freq_spin.set_value(2.0)
+        self.phyd_freq_spin.set_tooltip_text("Frequency for physical properties calculations (default 2.0 h)")
+        output_grid.attach(self.phyd_freq_spin, 1, 2, 1, 1)
+        
+        # Movie frame frequency
+        movie_label = Gtk.Label("Movie Frame Frequency:")
+        movie_label.set_halign(Gtk.Align.START)
+        output_grid.attach(movie_label, 0, 3, 1, 1)
+        
+        self.movie_freq_spin = Gtk.SpinButton.new_with_range(1.0, 168.0, 1.0)
+        self.movie_freq_spin.set_digits(1)
+        self.movie_freq_spin.set_value(72.0)
+        self.movie_freq_spin.set_tooltip_text("Frequency for movie frame output (default 72.0 h)")
+        output_grid.attach(self.movie_freq_spin, 1, 3, 1, 1)
+        
+        content_box.pack_start(output_grid, False, False, 0)
+        
+        # Phase Control Section
+        phase_label = Gtk.Label()
+        phase_label.set_markup('<span weight="bold">Phase Control</span>')
+        phase_label.set_halign(Gtk.Align.START)
+        content_box.pack_start(phase_label, False, False, 0)
+        
+        phase_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        phase_box.set_margin_left(15)
+        
+        self.csh2_flag_check = Gtk.CheckButton(label="Enable CSH Type 2")
+        self.csh2_flag_check.set_active(True)
+        self.csh2_flag_check.set_tooltip_text("Enable CSH Type 2 formation (default enabled)")
+        phase_box.pack_start(self.csh2_flag_check, False, False, 0)
+        
+        self.ch_flag_check = Gtk.CheckButton(label="Enable CH Formation")
+        self.ch_flag_check.set_active(True)
+        self.ch_flag_check.set_tooltip_text("Enable calcium hydroxide formation (default enabled)")
+        phase_box.pack_start(self.ch_flag_check, False, False, 0)
+        
+        self.ph_active_check = Gtk.CheckButton(label="Enable pH Calculations")
+        self.ph_active_check.set_active(True)
+        self.ph_active_check.set_tooltip_text("Enable pH calculations (default enabled)")
+        phase_box.pack_start(self.ph_active_check, False, False, 0)
+        
+        content_box.pack_start(phase_box, False, False, 0)
+        
+        # Database Parameters Section
+        db_label = Gtk.Label()
+        db_label.set_markup('<span weight="bold">Database Parameters (378 parameters)</span>')
+        db_label.set_halign(Gtk.Align.START)
+        content_box.pack_start(db_label, False, False, 0)
+        
+        # Parameters viewer with search
+        params_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        params_box.set_margin_left(15)
+        
+        # Search entry
+        search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        search_label = Gtk.Label("Search:")
+        search_label.set_halign(Gtk.Align.START)
+        search_box.pack_start(search_label, False, False, 0)
+        
+        self.param_search_entry = Gtk.SearchEntry()
+        self.param_search_entry.set_placeholder_text("Filter parameters...")
+        self.param_search_entry.connect('search-changed', self._on_param_search_changed)
+        search_box.pack_start(self.param_search_entry, True, True, 0)
+        
+        # Refresh button to reload from database
+        refresh_params_btn = Gtk.Button(label="Refresh")
+        refresh_params_btn.set_tooltip_text("Reload parameters from database")
+        refresh_params_btn.connect('clicked', self._on_refresh_params_clicked)
+        search_box.pack_start(refresh_params_btn, False, False, 0)
+        
+        params_box.pack_start(search_box, False, False, 0)
+        
+        # Scrolled window for parameters table
+        params_scrolled = Gtk.ScrolledWindow()
+        params_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        params_scrolled.set_size_request(400, 300)  # Fixed height to prevent excessive expansion
+        
+        # TreeView for parameters
+        self.params_store = Gtk.ListStore(str, str, str)  # name, value, type
+        self.params_tree = Gtk.TreeView(model=self.params_store)
+        self.params_tree.set_tooltip_text("Double-click to edit parameter values")
+        
+        # Name column
+        name_renderer = Gtk.CellRendererText()
+        name_column = Gtk.TreeViewColumn("Parameter Name", name_renderer, text=0)
+        name_column.set_resizable(True)
+        name_column.set_min_width(200)
+        name_column.set_sort_column_id(0)
+        self.params_tree.append_column(name_column)
+        
+        # Value column (editable)
+        value_renderer = Gtk.CellRendererText()
+        value_renderer.set_property("editable", True)
+        value_renderer.connect("edited", self._on_param_value_edited)
+        value_column = Gtk.TreeViewColumn("Value", value_renderer, text=1)
+        value_column.set_resizable(True)
+        value_column.set_min_width(100)
+        value_column.set_sort_column_id(1)
+        self.params_tree.append_column(value_column)
+        
+        # Type column
+        type_renderer = Gtk.CellRendererText()
+        type_column = Gtk.TreeViewColumn("Type", type_renderer, text=2)
+        type_column.set_resizable(True)
+        type_column.set_min_width(80)
+        type_column.set_sort_column_id(2)
+        self.params_tree.append_column(type_column)
+        
+        # Enable sorting
+        self.params_store.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        
+        params_scrolled.add(self.params_tree)
+        params_box.pack_start(params_scrolled, True, True, 0)
+        
+        # Export/Import buttons
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        export_btn = Gtk.Button(label="Export to CSV")
+        export_btn.set_tooltip_text("Export parameters to CSV file")
+        export_btn.connect('clicked', self._on_export_params_clicked)
+        button_box.pack_start(export_btn, False, False, 0)
+        
+        import_btn = Gtk.Button(label="Import from CSV")
+        import_btn.set_tooltip_text("Import parameters from CSV file")
+        import_btn.connect('clicked', self._on_import_params_clicked)
+        button_box.pack_start(import_btn, False, False, 0)
+        
+        reset_btn = Gtk.Button(label="Reset to Defaults")
+        reset_btn.set_tooltip_text("Reset all parameters to default values")
+        reset_btn.connect('clicked', self._on_reset_params_clicked)
+        button_box.pack_start(reset_btn, False, False, 0)
+        
+        params_box.pack_start(button_box, False, False, 0)
+        
+        content_box.pack_start(params_box, True, True, 0)
+        
+        # Store for tracking parameter changes
+        self.modified_params = {}
+        
+        # Load initial parameters
+        self._load_database_parameters()
+        
+        # Add content to expander
+        expander.add(content_box)
+        parent.pack_start(expander, False, False, 0)
     
     def _create_simulation_controls(self) -> None:
         """Create simulation control buttons."""
@@ -571,15 +997,23 @@ class HydrationPanel(Gtk.Box):
         self.timestep_spin.connect('value-changed', self._on_parameter_changed)
         self.max_time_spin.connect('value-changed', self._on_parameter_changed)
         
-        # Aging mode signals
+        # Time calibration mode signals
         self.aging_time_radio.connect('toggled', self._on_aging_mode_changed)
         self.aging_calorimetry_radio.connect('toggled', self._on_aging_mode_changed)
         self.aging_shrinkage_radio.connect('toggled', self._on_aging_mode_changed)
-        self.aging_target_spin.connect('value-changed', self._on_parameter_changed)
+        self.data_file_button.connect('file-set', self._on_parameter_changed)
+        self.time_conversion_spin.connect('value-changed', self._on_parameter_changed)
         
-        # Convergence signals
-        self.tolerance_spin.connect('value-changed', self._on_parameter_changed)
-        self.max_iter_spin.connect('value-changed', self._on_parameter_changed)
+        # Curing conditions signals
+        self.initial_temp_spin.connect('value-changed', self._on_parameter_changed)
+        self.isothermal_radio.connect('toggled', self._on_parameter_changed)
+        self.adiabatic_radio.connect('toggled', self._on_parameter_changed)
+        self.saturated_radio.connect('toggled', self._on_parameter_changed)
+        self.sealed_radio.connect('toggled', self._on_parameter_changed)
+        
+        # Microstructure selection signals
+        self.microstructure_combo.connect('changed', self._on_microstructure_changed)
+        self.refresh_button.connect('clicked', self._on_refresh_clicked)
         
         # Temperature profile signals
         self.profile_combo.connect('changed', self._on_profile_changed)
@@ -588,6 +1022,22 @@ class HydrationPanel(Gtk.Box):
         # Output settings signals
         self.save_interval_spin.connect('value-changed', self._on_parameter_changed)
         self.save_intermediate_check.connect('toggled', self._on_parameter_changed)
+        
+        # Advanced settings signals
+        self.random_seed_spin.connect('value-changed', self._on_parameter_changed)
+        self.c3a_fraction_spin.connect('value-changed', self._on_parameter_changed)
+        self.csh_seeds_spin.connect('value-changed', self._on_parameter_changed)
+        self.alpha_max_spin.connect('value-changed', self._on_parameter_changed)
+        self.e_act_spin.connect('value-changed', self._on_parameter_changed)
+        self.e_act_pozz_spin.connect('value-changed', self._on_parameter_changed)
+        self.e_act_slag_spin.connect('value-changed', self._on_parameter_changed)
+        self.burn_freq_spin.connect('value-changed', self._on_parameter_changed)
+        self.set_freq_spin.connect('value-changed', self._on_parameter_changed)
+        self.phyd_freq_spin.connect('value-changed', self._on_parameter_changed)
+        self.movie_freq_spin.connect('value-changed', self._on_parameter_changed)
+        self.csh2_flag_check.connect('toggled', self._on_parameter_changed)
+        self.ch_flag_check.connect('toggled', self._on_parameter_changed)
+        self.ph_active_check.connect('toggled', self._on_parameter_changed)
         
         # Control signals
         self.validate_button.connect('clicked', self._on_validate_clicked)
@@ -612,20 +1062,29 @@ class HydrationPanel(Gtk.Box):
         self._clear_validation()
     
     def _on_aging_mode_changed(self, radio) -> None:
-        """Handle aging mode change."""
+        """Handle time calibration mode change."""
         if not radio.get_active():
             return
         
-        # Update target spin button tooltip based on mode
+        # Show/hide appropriate parameter controls based on mode
         if self.aging_time_radio.get_active():
-            self.aging_target_spin.set_tooltip_text("Target age in days")
-            self.aging_target_spin.set_value(28.0)
+            # Knudsen parabolic mode - show time conversion factor, hide file chooser
+            self.time_conversion_spin.get_parent().show()
+            self.data_file_button.get_parent().hide()
+            
         elif self.aging_calorimetry_radio.get_active():
-            self.aging_target_spin.set_tooltip_text("Target heat release in J/g")
-            self.aging_target_spin.set_value(300.0)
+            # Calorimetry mode - hide time conversion factor, show file chooser
+            self.time_conversion_spin.get_parent().hide() 
+            self.data_file_button.get_parent().show()
+            self.data_file_label.set_text("Calorimetry Data File:")
+            self.data_file_button.set_tooltip_text("Select isothermal microcalorimetry data file for calibration")
+            
         elif self.aging_shrinkage_radio.get_active():
-            self.aging_target_spin.set_tooltip_text("Target chemical shrinkage (%)")
-            self.aging_target_spin.set_value(5.0)
+            # Chemical shrinkage mode - hide time conversion factor, show file chooser
+            self.time_conversion_spin.get_parent().hide()
+            self.data_file_button.get_parent().show()
+            self.data_file_label.set_text("Shrinkage Data File:")
+            self.data_file_button.set_tooltip_text("Select chemical shrinkage data file for calibration")
     
     def _on_profile_changed(self, combo) -> None:
         """Handle temperature profile selection change."""
@@ -640,6 +1099,31 @@ class HydrationPanel(Gtk.Box):
                 self._update_temperature_plot()
                 self._update_profile_summary()
     
+    def _on_microstructure_changed(self, combo) -> None:
+        """Handle microstructure selection change."""
+        microstructure_id = combo.get_active_id()
+        
+        if microstructure_id:
+            # Store selected microstructure info
+            self.selected_microstructure = {
+                'operation_name': microstructure_id,
+                'img_file': f"./Operations/{microstructure_id}/{microstructure_id}.img",
+                'pimg_file': f"./Operations/{microstructure_id}/{microstructure_id}.pimg"
+            }
+            
+            # Update info display
+            self._update_microstructure_info()
+            self._clear_validation()  # Parameters need re-validation with new microstructure
+            
+        else:
+            self.selected_microstructure = None
+            self.microstructure_info_label.set_text("No microstructure selected")
+    
+    def _on_refresh_clicked(self, button) -> None:
+        """Handle refresh microstructure list button click."""
+        self._refresh_microstructure_list()
+        self._update_status("Microstructure list refreshed")
+    
     def _on_edit_profile_clicked(self, button) -> None:
         """Handle edit temperature profile button click."""
         # TODO: Open temperature profile editor dialog
@@ -648,6 +1132,26 @@ class HydrationPanel(Gtk.Box):
     def _on_validate_clicked(self, button) -> None:
         """Handle validate parameters button click."""
         try:
+            # Check microstructure selection first
+            if not self.selected_microstructure:
+                self._update_status("Please select a microstructure first")
+                self.start_button.set_sensitive(False)
+                return
+            
+            # Verify microstructure files exist
+            img_file = self.selected_microstructure['img_file']
+            pimg_file = self.selected_microstructure['pimg_file']
+            
+            if not os.path.exists(img_file):
+                self._update_status(f"Microstructure image file not found: {os.path.basename(img_file)}")
+                self.start_button.set_sensitive(False)
+                return
+            
+            if not os.path.exists(pimg_file):
+                self._update_status(f"Microstructure phase image file not found: {os.path.basename(pimg_file)}")
+                self.start_button.set_sensitive(False)
+                return
+            
             # Get current parameters
             params = self._get_current_parameters()
             
@@ -666,7 +1170,44 @@ class HydrationPanel(Gtk.Box):
             
             if validation['is_valid']:
                 self.current_params = params
-                self._update_status("Parameters validated - ready to start simulation")
+                
+                # Generate extended parameter file with curing conditions
+                try:
+                    from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
+                    bridge = MicrostructureHydrationBridge()
+                    
+                    # Create operation name for hydration simulation
+                    operation_name = f"Hydration_{self.selected_microstructure['operation_name']}"
+                    
+                    # Get curing conditions
+                    curing_conditions = self.get_curing_conditions()
+                    
+                    # Get time calibration settings
+                    time_calibration_settings = self.get_time_calibration_settings()
+                    
+                    # Get advanced settings
+                    advanced_settings = self.get_advanced_settings()
+                    
+                    # Get database parameter modifications
+                    db_param_modifications = self.get_database_parameter_modifications()
+                    
+                    # Generate extended parameter file
+                    param_file = bridge.generate_extended_parameter_file(
+                        operation_name, 
+                        self.selected_microstructure['operation_name'],
+                        curing_conditions,
+                        time_calibration_settings,
+                        advanced_settings,
+                        db_param_modifications
+                    )
+                    
+                    self._update_status(f"Parameters validated - extended parameter file generated: {param_file}")
+                    self.logger.info(f"Generated parameter file: {param_file}")
+                    
+                except Exception as e:
+                    self.logger.error(f"Failed to generate parameter file: {e}")
+                    self._update_status("Parameters validated but failed to generate parameter file")
+                
             else:
                 self._update_status("Parameter validation failed - check errors")
             
@@ -679,24 +1220,145 @@ class HydrationPanel(Gtk.Box):
     def _on_start_clicked(self, button) -> None:
         """Handle start simulation button click."""
         try:
-            if not self.current_params:
-                self._update_status("Please validate parameters first")
+            # Validate microstructure selection
+            selected_microstructure = self._get_selected_microstructure()
+            if not selected_microstructure:
+                self._update_status("Please select a microstructure first")
                 return
             
-            # Get microstructure data (placeholder)
-            microstructure_data = {}  # Would come from microstructure panel
+            # Collect all UI settings
+            curing_conditions = self._collect_curing_conditions()
+            time_calibration = self._collect_time_calibration_settings()
+            advanced_settings = self._collect_advanced_settings()
+            db_modifications = self._collect_database_modifications()
             
-            # Start simulation
-            if self.hydration_service.start_simulation(self.current_params, microstructure_data):
+            # Generate operation name
+            operation_name = f"HydrationSim_{selected_microstructure['name']}_{self._get_timestamp()}"
+            
+            # Generate extended parameter file
+            param_file_path = self.bridge_service.generate_extended_parameter_file(
+                operation_name=operation_name,
+                microstructure_name=selected_microstructure['name'],
+                curing_conditions=curing_conditions,
+                time_calibration_settings=time_calibration,
+                advanced_settings=advanced_settings,
+                db_parameter_modifications=db_modifications
+            )
+            
+            # Start simulation using HydrationExecutorService
+            executor = self.service_container.hydration_executor_service
+            if executor.start_hydration_simulation(
+                operation_name=operation_name,
+                parameter_set_name="portland_cement_standard",
+                progress_callback=self._on_simulation_progress,
+                parameter_file_path=param_file_path
+            ):
                 self.simulation_running = True
+                self.current_operation_name = operation_name
                 self._update_simulation_controls(True)
                 self._start_progress_updates()
-                self._update_status("Simulation starting...")
-                self.logger.info("Hydration simulation started")
+                self._update_status(f"Simulation started: {operation_name}")
+                self.logger.info(f"Hydration simulation started: {operation_name}")
+            else:
+                self._update_status("Failed to start simulation")
             
         except Exception as e:
             self.logger.error(f"Failed to start simulation: {e}")
             self._update_status(f"Start error: {e}")
+    
+    def _get_selected_microstructure(self) -> Optional[Dict[str, Any]]:
+        """Get the currently selected microstructure."""
+        if hasattr(self, 'microstructure_combo') and self.microstructure_combo.get_active_text():
+            microstructure_name = self.microstructure_combo.get_active_text()
+            return {
+                'name': microstructure_name,
+                'path': f"./Operations/{microstructure_name}"
+            }
+        return None
+    
+    def _collect_curing_conditions(self) -> Dict[str, Any]:
+        """Collect curing conditions from UI."""
+        return {
+            'initial_temperature': self.initial_temp_spin.get_value(),
+            'thermal_mode': 'isothermal' if self.isothermal_radio.get_active() else 'adiabatic',
+            'moisture_mode': 'saturated' if self.saturated_radio.get_active() else 'sealed',
+            'temperature_profile': self.profile_combo.get_active_text() or 'Custom'
+        }
+    
+    def _collect_time_calibration_settings(self) -> Dict[str, Any]:
+        """Collect time calibration settings from UI."""
+        settings = {}
+        
+        if self.aging_time_radio.get_active():
+            settings['mode'] = 'knudsen'
+            settings['time_conversion_factor'] = self.time_conversion_spin.get_value()
+        elif self.aging_calorimetry_radio.get_active():
+            settings['mode'] = 'calorimetry'
+            settings['data_file'] = self.data_file_button.get_filename() or ""
+        else:  # chemical shrinkage
+            settings['mode'] = 'chemical_shrinkage'
+            settings['data_file'] = self.data_file_button.get_filename() or ""
+        
+        return settings
+    
+    def _collect_advanced_settings(self) -> Dict[str, Any]:
+        """Collect advanced settings from UI."""
+        return {
+            'max_cycles': int(self.cycles_spin.get_value()),
+            'time_step': self.timestep_spin.get_value(),
+            'random_seed': int(self.random_seed_spin.get_value()),
+            'c3a_fraction': self.c3a_fraction_spin.get_value(),
+            'csh_seeds': self.csh_seeds_spin.get_value(),
+            'alpha_max': self.alpha_max_spin.get_value(),
+            'e_act_cement': self.e_act_spin.get_value(),
+            'e_act_pozzolan': self.e_act_pozz_spin.get_value(),
+            'e_act_slag': self.e_act_slag_spin.get_value(),
+            'burn_frequency': self.burn_freq_spin.get_value(),
+            'set_frequency': self.set_freq_spin.get_value(),
+            'phyd_frequency': self.phyd_freq_spin.get_value(),
+            'movie_frequency': self.movie_freq_spin.get_value(),
+            'csh2_flag_enabled': self.csh2_flag_check.get_active(),
+            'ch_flag_enabled': self.ch_flag_check.get_active(),
+            'ph_active_enabled': self.ph_active_check.get_active()
+        }
+    
+    def _collect_database_modifications(self) -> Dict[str, Any]:
+        """Collect database parameter modifications from UI."""
+        if not hasattr(self, 'db_params_store'):
+            return {}
+        
+        modifications = {}
+        # Iterate through the TreeView store to find modified parameters
+        def collect_row(model, path, iter, data):
+            param_name = model.get_value(iter, 0)
+            param_value = model.get_value(iter, 1)
+            # You might want to track which ones were actually modified
+            # For now, we'll collect all visible parameters
+            modifications[param_name] = param_value
+        
+        self.db_params_store.foreach(collect_row, None)
+        return modifications
+    
+    def _get_timestamp(self) -> str:
+        """Get current timestamp for operation naming."""
+        from datetime import datetime
+        return datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    def _on_simulation_progress(self, operation_name: str, progress_data) -> None:
+        """Handle simulation progress updates."""
+        if progress_data:
+            # Handle both dict and HydrationProgress object formats
+            if hasattr(progress_data, 'get'):  # Dictionary format
+                cycle = progress_data.get('cycle', 0)
+                time_hours = progress_data.get('time_hours', 0.0)
+                doh = progress_data.get('degree_of_hydration', 0.0)
+            else:  # HydrationProgress object format
+                cycle = getattr(progress_data, 'cycle', 0)
+                time_hours = getattr(progress_data, 'time_hours', 0.0)
+                doh = getattr(progress_data, 'degree_of_hydration', 0.0)
+            
+            status_text = f"Cycle {cycle}, Time: {time_hours:.2f}h, DOH: {doh:.3f}"
+            GLib.idle_add(self._update_status, status_text)
     
     def _on_pause_clicked(self, button) -> None:
         """Handle pause simulation button click."""
@@ -706,12 +1368,19 @@ class HydrationPanel(Gtk.Box):
     def _on_stop_clicked(self, button) -> None:
         """Handle stop simulation button click."""
         try:
-            if self.hydration_service.stop_simulation():
-                self.simulation_running = False
-                self._update_simulation_controls(False)
-                self._stop_progress_updates()
-                self._update_status("Simulation stopped")
-                self.logger.info("Hydration simulation stopped")
+            if self.current_operation_name:
+                executor = self.service_container.hydration_executor_service
+                if executor.cancel_simulation(self.current_operation_name):
+                    self.simulation_running = False
+                    self.current_operation_name = None
+                    self._update_simulation_controls(False)
+                    self._stop_progress_updates()
+                    self._update_status("Simulation stopped")
+                    self.logger.info("Hydration simulation stopped")
+                else:
+                    self._update_status("Failed to stop simulation")
+            else:
+                self._update_status("No simulation running")
             
         except Exception as e:
             self.logger.error(f"Failed to stop simulation: {e}")
@@ -735,8 +1404,8 @@ class HydrationPanel(Gtk.Box):
                 "Default", "Default", [TemperaturePoint(0.0, 25.0)]
             ),
             aging_mode=aging_mode,
-            convergence_tolerance=self.tolerance_spin.get_value(),
-            max_iterations_per_cycle=int(self.max_iter_spin.get_value()),
+            convergence_tolerance=1e-6,  # Default value since disrealnew doesn't use convergence
+            max_iterations_per_cycle=100,  # Default value since disrealnew doesn't use iterations
             save_interval_cycles=int(self.save_interval_spin.get_value()),
             save_intermediate_results=self.save_intermediate_check.get_active()
         )
@@ -913,10 +1582,6 @@ class HydrationPanel(Gtk.Box):
         
         return True  # Continue timeout
     
-    def _on_simulation_progress(self, progress: SimulationProgress) -> None:
-        """Handle simulation progress updates (called from hydration service)."""
-        # Progress updates are handled by the periodic timeout
-        pass
     
     def _on_draw_temperature_plot(self, widget, cr) -> bool:
         """Draw temperature profile plot. (DEPRECATED: Now using matplotlib plot widget)"""
@@ -1044,6 +1709,92 @@ class HydrationPanel(Gtk.Box):
             self.logger.error(f"Failed to draw temperature plot: {e}")
             return False
     
+    def _refresh_microstructure_list(self) -> None:
+        """Refresh the list of available microstructures from Operations folder."""
+        try:
+            # Clear current list
+            self.microstructure_combo.remove_all()
+            
+            # Add empty option
+            self.microstructure_combo.append("", "-- Select Microstructure --")
+            
+            # Scan Operations folder for microstructures
+            operations_dir = "./Operations"
+            if not os.path.exists(operations_dir):
+                self.logger.warning("Operations folder not found")
+                self.microstructure_combo.set_active(0)
+                return
+            
+            microstructures = []
+            
+            for operation_name in os.listdir(operations_dir):
+                operation_path = os.path.join(operations_dir, operation_name)
+                
+                # Skip if not a directory
+                if not os.path.isdir(operation_path):
+                    continue
+                
+                # Check for required microstructure files
+                img_file = os.path.join(operation_path, f"{operation_name}.img")
+                pimg_file = os.path.join(operation_path, f"{operation_name}.pimg")
+                
+                if os.path.exists(img_file) and os.path.exists(pimg_file):
+                    # Get file modification time for sorting
+                    mod_time = os.path.getmtime(img_file)
+                    microstructures.append((operation_name, mod_time))
+            
+            # Sort by modification time (newest first)
+            microstructures.sort(key=lambda x: x[1], reverse=True)
+            
+            # Add to combo box
+            for operation_name, _ in microstructures:
+                self.microstructure_combo.append(operation_name, operation_name)
+            
+            self.microstructure_combo.set_active(0)  # Select the default empty option
+            
+            self.logger.info(f"Found {len(microstructures)} microstructures")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to refresh microstructure list: {e}")
+    
+    def _update_microstructure_info(self) -> None:
+        """Update microstructure info display."""
+        if not self.selected_microstructure:
+            self.microstructure_info_label.set_text("No microstructure selected")
+            return
+        
+        try:
+            operation_name = self.selected_microstructure['operation_name']
+            img_file = self.selected_microstructure['img_file']
+            
+            # Get file info
+            if os.path.exists(img_file):
+                stat = os.stat(img_file)
+                file_size = stat.st_size
+                mod_time = stat.st_mtime
+                
+                # Format size
+                if file_size > 1024 * 1024:
+                    size_str = f"{file_size / (1024 * 1024):.1f} MB"
+                elif file_size > 1024:
+                    size_str = f"{file_size / 1024:.1f} KB"
+                else:
+                    size_str = f"{file_size} bytes"
+                
+                # Format date
+                import time
+                date_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(mod_time))
+                
+                info_text = f"Operation: {operation_name} | Size: {size_str} | Modified: {date_str}"
+            else:
+                info_text = f"Operation: {operation_name} | File not found"
+            
+            self.microstructure_info_label.set_text(info_text)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to update microstructure info: {e}")
+            self.microstructure_info_label.set_text("Error reading microstructure info")
+    
     def _update_status(self, message: str) -> None:
         """Update status message."""
         self.status_label.set_text(message)
@@ -1053,14 +1804,93 @@ class HydrationPanel(Gtk.Box):
         """Get validated hydration parameters."""
         return self.current_params
     
+    def get_selected_microstructure(self) -> Optional[Dict[str, str]]:
+        """Get selected microstructure information."""
+        return self.selected_microstructure
+    
+    def get_curing_conditions(self) -> Dict[str, Any]:
+        """Get curing conditions from UI."""
+        return {
+            'initial_temperature_celsius': self.initial_temp_spin.get_value(),
+            'thermal_mode': 'isothermal' if self.isothermal_radio.get_active() else 'adiabatic',
+            'moisture_mode': 'saturated' if self.saturated_radio.get_active() else 'sealed'
+        }
+    
+    def get_time_calibration_settings(self) -> Dict[str, Any]:
+        """Get time calibration settings from UI."""
+        # Get calibration mode
+        if self.aging_time_radio.get_active():
+            calibration_mode = 'knudsen_parabolic'
+            calibration_value = self.time_conversion_spin.get_value()
+        elif self.aging_calorimetry_radio.get_active():
+            calibration_mode = 'calorimetry'
+            calibration_value = self.data_file_button.get_filename()  # Path to calorimetry data file
+        else:
+            calibration_mode = 'chemical_shrinkage'
+            calibration_value = self.data_file_button.get_filename()  # Path to shrinkage data file
+        
+        return {
+            'calibration_mode': calibration_mode,
+            'calibration_value': calibration_value,
+            'time_conversion_factor': self.time_conversion_spin.get_value()
+        }
+    
+    def get_advanced_settings(self) -> Dict[str, Any]:
+        """Get advanced settings from UI."""
+        return {
+            # Simulation Control
+            'random_seed': int(self.random_seed_spin.get_value()),
+            'c3a_fraction': self.c3a_fraction_spin.get_value(),
+            'csh_seeds': self.csh_seeds_spin.get_value(),
+            'alpha_max': self.alpha_max_spin.get_value(),
+            
+            # Activation Energies
+            'e_act_cement': self.e_act_spin.get_value(),
+            'e_act_pozzolan': self.e_act_pozz_spin.get_value(),
+            'e_act_slag': self.e_act_slag_spin.get_value(),
+            
+            # Output Frequencies
+            'burn_frequency': self.burn_freq_spin.get_value(),
+            'setting_frequency': self.set_freq_spin.get_value(),
+            'physical_frequency': self.phyd_freq_spin.get_value(),
+            'movie_frequency': self.movie_freq_spin.get_value(),
+            
+            # Phase Control
+            'csh2_flag': 1 if self.csh2_flag_check.get_active() else 0,
+            'ch_flag': 1 if self.ch_flag_check.get_active() else 0,
+            'ph_active': 1 if self.ph_active_check.get_active() else 0
+        }
+    
+    def set_curing_conditions(self, conditions: Dict[str, Any]) -> None:
+        """Set curing conditions in UI."""
+        try:
+            if 'initial_temperature_celsius' in conditions:
+                self.initial_temp_spin.set_value(conditions['initial_temperature_celsius'])
+            
+            if 'thermal_mode' in conditions:
+                if conditions['thermal_mode'] == 'isothermal':
+                    self.isothermal_radio.set_active(True)
+                else:
+                    self.adiabatic_radio.set_active(True)
+            
+            if 'moisture_mode' in conditions:
+                if conditions['moisture_mode'] == 'saturated':
+                    self.saturated_radio.set_active(True)
+                else:
+                    self.sealed_radio.set_active(True)
+            
+            self.logger.info("Curing conditions loaded")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to set curing conditions: {e}")
+            self._update_status(f"Error loading curing conditions: {e}")
+    
     def set_hydration_parameters(self, params: HydrationParameters) -> None:
         """Set hydration parameters in UI."""
         try:
             self.cycles_spin.set_value(params.total_cycles)
             self.timestep_spin.set_value(params.time_step_hours)
             self.max_time_spin.set_value(params.max_simulation_time_hours)
-            self.tolerance_spin.set_value(params.convergence_tolerance)
-            self.max_iter_spin.set_value(params.max_iterations_per_cycle)
             self.save_interval_spin.set_value(params.save_interval_cycles)
             self.save_intermediate_check.set_active(params.save_intermediate_results)
             
@@ -1083,6 +1913,262 @@ class HydrationPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to set hydration parameters: {e}")
             self._update_status(f"Error loading parameters: {e}")
+    
+    def _load_database_parameters(self) -> None:
+        """Load all parameters from database and populate the tree view."""
+        try:
+            from app.services.hydration_parameters_service import HydrationParametersService
+            
+            # Get hydration parameters service
+            hydration_service = HydrationParametersService(self.service_container.database_service)
+            
+            # Load default parameter set
+            params = hydration_service.get_parameter_set("portland_cement_standard")
+            if not params or not params.parameters:
+                self._update_status("No database parameters found")
+                return
+            
+            # Clear existing data
+            self.params_store.clear()
+            self.modified_params.clear()
+            
+            # Populate tree view
+            for param_name, param_value in params.parameters.items():
+                # Determine parameter type
+                param_type = "string"
+                if isinstance(param_value, (int, float)):
+                    if isinstance(param_value, int):
+                        param_type = "integer" 
+                    else:
+                        param_type = "float"
+                elif isinstance(param_value, bool):
+                    param_type = "boolean"
+                
+                # Add to tree store
+                self.params_store.append([param_name, str(param_value), param_type])
+            
+            self.logger.info(f"Loaded {len(params.parameters)} parameters from database")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load database parameters: {e}")
+            self._update_status(f"Error loading database parameters: {e}")
+    
+    def _on_param_search_changed(self, search_entry) -> None:
+        """Handle parameter search/filter."""
+        search_text = search_entry.get_text().lower()
+        
+        # Create filter model
+        filter_model = self.params_store.filter_new()
+        filter_model.set_visible_func(self._param_filter_func, search_text)
+        
+        # Update tree view with filtered model
+        self.params_tree.set_model(filter_model)
+    
+    def _param_filter_func(self, model, iter, search_text) -> bool:
+        """Filter function for parameter search."""
+        if not search_text:
+            return True
+        
+        param_name = model[iter][0].lower()
+        param_value = model[iter][1].lower()
+        
+        return search_text in param_name or search_text in param_value
+    
+    def _on_param_value_edited(self, renderer, path, new_text) -> None:
+        """Handle parameter value editing."""
+        try:
+            # Get the current model (might be filtered)
+            current_model = self.params_tree.get_model()
+            iter = current_model.get_iter(path)
+            
+            param_name = current_model[iter][0]
+            param_type = current_model[iter][2]
+            old_value = current_model[iter][1]
+            
+            # Validate new value based on type
+            validated_value = self._validate_param_value(new_text, param_type)
+            if validated_value is None:
+                self._update_status(f"Invalid {param_type} value: {new_text}")
+                return
+            
+            # Update model
+            current_model[iter][1] = str(validated_value)
+            
+            # Track modification
+            self.modified_params[param_name] = validated_value
+            
+            self.logger.info(f"Parameter {param_name} changed from {old_value} to {validated_value}")
+            self._update_status(f"Modified parameter: {param_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to edit parameter: {e}")
+            self._update_status(f"Error editing parameter: {e}")
+    
+    def _validate_param_value(self, value_str: str, param_type: str):
+        """Validate parameter value based on its type."""
+        try:
+            if param_type == "integer":
+                return int(value_str)
+            elif param_type == "float":
+                return float(value_str)
+            elif param_type == "boolean":
+                if value_str.lower() in ['true', '1', 'yes', 'on']:
+                    return True
+                elif value_str.lower() in ['false', '0', 'no', 'off']:
+                    return False
+                else:
+                    return None
+            else:  # string
+                return value_str
+        except ValueError:
+            return None
+    
+    def _on_refresh_params_clicked(self, button) -> None:
+        """Handle refresh parameters button click."""
+        self._load_database_parameters()
+        self._update_status("Parameters refreshed from database")
+    
+    def _on_export_params_clicked(self, button) -> None:
+        """Handle export parameters to CSV."""
+        try:
+            dialog = Gtk.FileChooserDialog(
+                title="Export Parameters to CSV",
+                parent=self.get_toplevel(),
+                action=Gtk.FileChooserAction.SAVE
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_SAVE, Gtk.ResponseType.OK
+            )
+            
+            # Add CSV filter
+            filter_csv = Gtk.FileFilter()
+            filter_csv.set_name("CSV files")
+            filter_csv.add_pattern("*.csv")
+            dialog.add_filter(filter_csv)
+            
+            # Set default filename
+            dialog.set_current_name("hydration_parameters.csv")
+            
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                filename = dialog.get_filename()
+                
+                # Export all parameters to CSV
+                with open(filename, 'w', newline='') as csvfile:
+                    import csv
+                    writer = csv.writer(csvfile)
+                    writer.writerow(['Parameter Name', 'Value', 'Type'])  # Header
+                    
+                    # Iterate through all parameters in store
+                    def export_row(model, path, iter, writer):
+                        param_name = model[iter][0]
+                        param_value = model[iter][1]
+                        param_type = model[iter][2]
+                        writer.writerow([param_name, param_value, param_type])
+                        return False
+                    
+                    self.params_store.foreach(export_row, writer)
+                
+                self._update_status(f"Parameters exported to: {filename}")
+                self.logger.info(f"Exported parameters to {filename}")
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to export parameters: {e}")
+            self._update_status(f"Error exporting parameters: {e}")
+    
+    def _on_import_params_clicked(self, button) -> None:
+        """Handle import parameters from CSV."""
+        try:
+            dialog = Gtk.FileChooserDialog(
+                title="Import Parameters from CSV", 
+                parent=self.get_toplevel(),
+                action=Gtk.FileChooserAction.OPEN
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+            )
+            
+            # Add CSV filter
+            filter_csv = Gtk.FileFilter()
+            filter_csv.set_name("CSV files")
+            filter_csv.add_pattern("*.csv")
+            dialog.add_filter(filter_csv)
+            
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                filename = dialog.get_filename()
+                
+                # Import parameters from CSV
+                import csv
+                imported_count = 0
+                
+                with open(filename, 'r') as csvfile:
+                    reader = csv.reader(csvfile)
+                    header = next(reader, None)  # Skip header
+                    
+                    for row in reader:
+                        if len(row) >= 2:
+                            param_name = row[0]
+                            param_value = row[1]
+                            param_type = row[2] if len(row) > 2 else "string"
+                            
+                            # Validate and convert value
+                            validated_value = self._validate_param_value(param_value, param_type)
+                            if validated_value is not None:
+                                # Update parameter in tree store
+                                def update_param(model, path, iter, data):
+                                    param_name, validated_value = data
+                                    if model[iter][0] == param_name:
+                                        model[iter][1] = str(validated_value)
+                                        self.modified_params[param_name] = validated_value
+                                        return True
+                                    return False
+                                
+                                self.params_store.foreach(update_param, (param_name, validated_value))
+                                imported_count += 1
+                
+                self._update_status(f"Imported {imported_count} parameters from: {filename}")
+                self.logger.info(f"Imported {imported_count} parameters from {filename}")
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to import parameters: {e}")
+            self._update_status(f"Error importing parameters: {e}")
+    
+    def _on_reset_params_clicked(self, button) -> None:
+        """Handle reset parameters to defaults."""
+        try:
+            # Confirmation dialog
+            dialog = Gtk.MessageDialog(
+                parent=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text="Reset all parameters to defaults?"
+            )
+            dialog.format_secondary_text(
+                "This will discard all parameter modifications and reload defaults from the database."
+            )
+            
+            response = dialog.run()
+            dialog.destroy()
+            
+            if response == Gtk.ResponseType.YES:
+                self._load_database_parameters()
+                self._update_status("Parameters reset to defaults")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to reset parameters: {e}")
+            self._update_status(f"Error resetting parameters: {e}")
+    
+    def get_database_parameter_modifications(self) -> Dict[str, Any]:
+        """Get any modifications made to database parameters."""
+        return self.modified_params.copy()
     
     def cleanup(self) -> None:
         """Cleanup resources when panel is destroyed."""

@@ -19,6 +19,8 @@ from app.services.mix_service import MixService
 from app.services.aggregate_service import AggregateService
 from app.services.microstructure_service import MicrostructureService
 from app.services.hydration_service import HydrationService
+from app.services.hydration_executor_service import HydrationExecutorService
+from app.services.hydration_parameters_service import HydrationParametersService
 from app.services.grading_service import GradingService
 from app.services.directories_service import DirectoriesService
 from app.services.file_operations_service import FileOperationsService
@@ -68,6 +70,8 @@ class ServiceContainer:
         self._aggregate_service = None
         self._microstructure_service = None
         self._hydration_service = None
+        self._hydration_executor_service = None
+        self._hydration_parameters_service = None
         self._grading_service = None
         
         self._initialized = True
@@ -196,6 +200,25 @@ class ServiceContainer:
             self._hydration_service = HydrationService(self.db_service)
             self.logger.debug("Hydration service created")
         return self._hydration_service
+    
+    @property
+    def hydration_parameters_service(self) -> HydrationParametersService:
+        """Get hydration parameters service instance."""
+        if self._hydration_parameters_service is None:
+            self._hydration_parameters_service = HydrationParametersService(self.db_service)
+            self.logger.debug("Hydration parameters service created")
+        return self._hydration_parameters_service
+    
+    @property
+    def hydration_executor_service(self) -> HydrationExecutorService:
+        """Get hydration executor service instance."""
+        if self._hydration_executor_service is None:
+            self._hydration_executor_service = HydrationExecutorService(
+                self.db_service,
+                self.hydration_parameters_service
+            )
+            self.logger.debug("Hydration executor service created")
+        return self._hydration_executor_service
     
     @property
     def grading_service(self) -> GradingService:

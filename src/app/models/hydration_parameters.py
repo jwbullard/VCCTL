@@ -82,6 +82,38 @@ class HydrationParameters(Base):
         
         return "\n".join(lines)
     
+    def export_to_csv_format(self) -> str:
+        """
+        Export parameters to CSV format (comma-separated name,value pairs).
+        
+        Returns:
+            String content ready to write to a .csv file
+        """
+        if not self.parameters:
+            return ""
+        
+        lines = []
+        for param_name, value in self.parameters.items():
+            lines.append(f"{param_name},{value}")
+        
+        return "\n".join(lines)
+    
+    def export_to_csv_lines(self) -> list:
+        """
+        Export parameters as list of CSV lines.
+        
+        Returns:
+            List of CSV lines (name,value format)
+        """
+        if not self.parameters:
+            return []
+        
+        lines = []
+        for param_name, value in self.parameters.items():
+            lines.append(f"{param_name},{value}")
+        
+        return lines
+    
     def export_to_file(self, filepath: str):
         """
         Export parameters to a .prm file.

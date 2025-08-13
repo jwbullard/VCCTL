@@ -107,7 +107,8 @@ class HydrationExecutorService:
         
     def start_hydration_simulation(self, operation_name: str, 
                                  parameter_set_name: str = "portland_cement_standard",
-                                 progress_callback: Optional[Callable] = None) -> bool:
+                                 progress_callback: Optional[Callable] = None,
+                                 parameter_file_path: Optional[str] = None) -> bool:
         """
         Start a hydration simulation for the given operation.
         
@@ -115,6 +116,7 @@ class HydrationExecutorService:
             operation_name: Name of the operation
             parameter_set_name: Name of parameter set to use
             progress_callback: Optional callback for progress updates
+            parameter_file_path: Optional path to extended parameter file (overrides parameter_set_name)
             
         Returns:
             True if simulation started successfully, False otherwise
@@ -128,14 +130,14 @@ class HydrationExecutorService:
                 return False
             
             # Prepare operation directory and files
-            if not self._prepare_simulation_environment(operation_name, parameter_set_name):
+            if not self._prepare_simulation_environment(operation_name, parameter_set_name, parameter_file_path):
                 return False
             
             # Update operation status in database
             self._update_operation_status(operation_name, OperationStatus.RUNNING)
             
             # Start the simulation process
-            simulation_info = self._start_disrealnew_process(operation_name)
+            simulation_info = self._start_disrealnew_process(operation_name, parameter_file_path)
             if not simulation_info:
                 self._update_operation_status(operation_name, OperationStatus.ERROR)
                 return False
@@ -215,7 +217,7 @@ class HydrationExecutorService:
             return self.active_simulations[operation_name].get('progress')
         return None
     
-    def _prepare_simulation_environment(self, operation_name: str, parameter_set_name: str) -> bool:
+    def _prepare_simulation_environment(self, operation_name: str, parameter_set_name: str, parameter_file_path: Optional[str] = None) -> bool:
         """
         Prepare the simulation environment including directories and parameter files.
         
@@ -227,10 +229,16 @@ class HydrationExecutorService:
             True if preparation successful, False otherwise
         """
         try:
-            # Export hydration parameters to operation directory
-            param_file = self.hydration_params_service.export_to_operation_directory(
-                operation_name, parameter_set_name
-            )
+            # Use custom parameter file if provided, otherwise export from database
+            if parameter_file_path:
+                param_file = Path(parameter_file_path)
+                if not param_file.exists():
+                    raise FileNotFoundError(f"Custom parameter file not found: {parameter_file_path}")
+            else:
+                # Export hydration parameters to operation directory
+                param_file = self.hydration_params_service.export_to_operation_directory(
+                    operation_name, parameter_set_name
+                )
             
             # Verify disrealnew binary exists
             if not self.disrealnew_binary.exists():
@@ -253,7 +261,7 @@ class HydrationExecutorService:
             self.logger.error(f"Failed to prepare simulation environment for '{operation_name}': {e}")
             return False
     
-    def _start_disrealnew_process(self, operation_name: str) -> Optional[Dict[str, Any]]:
+    def _start_disrealnew_process(self, operation_name: str, parameter_file_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Start the disrealnew process.
         
@@ -265,18 +273,21 @@ class HydrationExecutorService:
         """
         try:
             operation_dir = self.project_root / "Operations" / operation_name
-            param_file = operation_dir / f"{operation_name}_hydration_parameters.prm"
+            if parameter_file_path:
+                # Use absolute path for the parameter file
+                param_file = Path(parameter_file_path).resolve()
+            else:
+                param_file = operation_dir / f"{operation_name}_hydration_parameters.prm"
             
             # Prepare command
             if self.json_progress_support:
-                # Future improved I/O interface
-                progress_file = operation_dir / "progress.json"
+                # Future improved I/O interface - use relative paths to avoid path issues
                 cmd = [
                     str(self.disrealnew_binary),
-                    "--workdir", str(operation_dir),
-                    "--progress-json", str(progress_file),
+                    "--workdir", ".",
+                    "--json", "progress.json",
                     "--quiet",
-                    str(param_file)
+                    "--parameters", param_file.name
                 ]
             else:
                 # Current interface - interactive mode with stdin redirection
@@ -298,7 +309,7 @@ class HydrationExecutorService:
                     stderr=open(stderr_log, 'w'),
                     text=True
                 )
-                progress_file_path = str(progress_file)
+                progress_file_path = str(operation_dir / "progress.json")
             else:
                 # Current: Interactive mode with parameter file input via stdin
                 process = subprocess.Popen(
