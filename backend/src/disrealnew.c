@@ -4598,7 +4598,7 @@ void init(void) {
   Sodiumhydrox /= 100.0;
   Potassiumhydrox /= 100.0;
 
-  sprintf(buff, "%salkaliflyash.dat", WorkingDirectory);
+  sprintf(buff, "%s%salkaliflyash.dat", WorkingDirectory, PATH_SEPARATOR);
   alkalifile = filehandler("disrealnew", buff, "READ_NOFAIL");
   if (!alkalifile) {
     Totfasodium = 0.0;
