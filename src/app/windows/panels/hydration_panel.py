@@ -10,6 +10,7 @@ import gi
 import logging
 import math
 import os
+import time
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
 
@@ -26,6 +27,202 @@ from app.services.hydration_service import (
 )
 from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
 from app.visualization import create_visualization_manager, HydrationPlotWidget
+
+
+class TemperatureProfileDialog(Gtk.Dialog):
+    """Dialog for editing temperature profiles."""
+    
+    def __init__(self, parent, profile: TemperatureProfile):
+        """Initialize the temperature profile dialog."""
+        super().__init__(
+            title="Temperature Profile Editor",
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
+        )
+        
+        # Store the original profile
+        self.original_profile = profile
+        self.profile = TemperatureProfile(
+            name=profile.name,
+            description=profile.description,
+            points=[TemperaturePoint(p.time_hours, p.temperature_celsius) for p in profile.points]
+        )
+        
+        # Dialog buttons
+        self.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        save_button = self.add_button("Save", Gtk.ResponseType.ACCEPT)
+        save_button.set_tooltip_text("Save profile to database for future use")
+        self.add_button("OK", Gtk.ResponseType.OK)
+        
+        # Set dialog size
+        self.set_size_request(600, 500)
+        self.set_resizable(True)
+        
+        # Setup UI
+        self._setup_ui()
+        
+        # Populate with current data
+        self._populate_data()
+    
+    def _setup_ui(self):
+        """Setup the dialog UI."""
+        content_area = self.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_border_width(10)
+        
+        # Profile name and description
+        header_grid = Gtk.Grid()
+        header_grid.set_row_spacing(8)
+        header_grid.set_column_spacing(10)
+        
+        # Name entry
+        name_label = Gtk.Label("Profile Name:")
+        name_label.set_halign(Gtk.Align.START)
+        header_grid.attach(name_label, 0, 0, 1, 1)
+        
+        self.name_entry = Gtk.Entry()
+        self.name_entry.set_hexpand(True)
+        header_grid.attach(self.name_entry, 1, 0, 1, 1)
+        
+        # Description entry
+        desc_label = Gtk.Label("Description:")
+        desc_label.set_halign(Gtk.Align.START)
+        header_grid.attach(desc_label, 0, 1, 1, 1)
+        
+        self.description_entry = Gtk.Entry()
+        self.description_entry.set_hexpand(True)
+        header_grid.attach(self.description_entry, 1, 1, 1, 1)
+        
+        content_area.pack_start(header_grid, False, False, 0)
+        
+        # Temperature points section
+        points_label = Gtk.Label()
+        points_label.set_markup("<b>Temperature Points</b>")
+        points_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(points_label, False, False, 0)
+        
+        # Points list with scrolling
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_vexpand(True)
+        
+        # Create list store and tree view
+        # Columns: Time (hours), Temperature (°C)
+        self.points_store = Gtk.ListStore(float, float)
+        self.points_view = Gtk.TreeView(model=self.points_store)
+        
+        # Time column
+        time_renderer = Gtk.CellRendererSpin()
+        time_renderer.set_property("editable", True)
+        time_renderer.set_property("adjustment", Gtk.Adjustment(0, 0, 8760, 0.1, 1, 0))  # 0-365 days
+        time_renderer.set_property("digits", 1)
+        time_renderer.connect("edited", self._on_time_edited)
+        
+        time_column = Gtk.TreeViewColumn("Time (hours)", time_renderer, text=0)
+        time_column.set_min_width(120)
+        self.points_view.append_column(time_column)
+        
+        # Temperature column
+        temp_renderer = Gtk.CellRendererSpin()
+        temp_renderer.set_property("editable", True)
+        temp_renderer.set_property("adjustment", Gtk.Adjustment(25, -20, 100, 0.1, 1, 0))
+        temp_renderer.set_property("digits", 1)
+        temp_renderer.connect("edited", self._on_temperature_edited)
+        
+        temp_column = Gtk.TreeViewColumn("Temperature (°C)", temp_renderer, text=1)
+        temp_column.set_min_width(140)
+        self.points_view.append_column(temp_column)
+        
+        scrolled.add(self.points_view)
+        content_area.pack_start(scrolled, True, True, 0)
+        
+        # Buttons for adding/removing points
+        button_box = Gtk.ButtonBox(orientation=Gtk.Orientation.HORIZONTAL)
+        button_box.set_layout(Gtk.ButtonBoxStyle.START)
+        button_box.set_spacing(5)
+        
+        add_button = Gtk.Button(label="Add Point")
+        add_button.connect("clicked", self._on_add_point)
+        button_box.add(add_button)
+        
+        remove_button = Gtk.Button(label="Remove Point")
+        remove_button.connect("clicked", self._on_remove_point)
+        button_box.add(remove_button)
+        
+        content_area.pack_start(button_box, False, False, 0)
+        
+        self.show_all()
+    
+    def _populate_data(self):
+        """Populate the dialog with current profile data."""
+        self.name_entry.set_text(self.profile.name)
+        self.description_entry.set_text(self.profile.description)
+        
+        # Add points to the list
+        for point in self.profile.points:
+            self.points_store.append([point.time_hours, point.temperature_celsius])
+    
+    def _on_time_edited(self, renderer, path, new_text):
+        """Handle time cell editing."""
+        try:
+            new_time = float(new_text)
+            if new_time >= 0:
+                iter = self.points_store.get_iter(path)
+                self.points_store.set_value(iter, 0, new_time)
+                self._update_profile_from_ui()
+        except ValueError:
+            pass  # Invalid input, ignore
+    
+    def _on_temperature_edited(self, renderer, path, new_text):
+        """Handle temperature cell editing."""
+        try:
+            new_temp = float(new_text)
+            iter = self.points_store.get_iter(path)
+            self.points_store.set_value(iter, 1, new_temp)
+            self._update_profile_from_ui()
+        except ValueError:
+            pass  # Invalid input, ignore
+    
+    def _on_add_point(self, button):
+        """Add a new temperature point."""
+        # Find a good default time (after the last point)
+        last_time = 0.0
+        for row in self.points_store:
+            if row[0] > last_time:
+                last_time = row[0]
+        
+        new_time = last_time + 24.0  # Add 24 hours
+        self.points_store.append([new_time, 25.0])
+        self._update_profile_from_ui()
+    
+    def _on_remove_point(self, button):
+        """Remove selected temperature point."""
+        selection = self.points_view.get_selection()
+        model, iter = selection.get_selected()
+        
+        if iter and len(self.points_store) > 1:  # Keep at least one point
+            model.remove(iter)
+            self._update_profile_from_ui()
+    
+    def _update_profile_from_ui(self):
+        """Update the profile from UI data."""
+        # Update basic info
+        self.profile.name = self.name_entry.get_text()
+        self.profile.description = self.description_entry.get_text()
+        
+        # Update points
+        points = []
+        for row in self.points_store:
+            points.append(TemperaturePoint(row[0], row[1]))
+        
+        # Sort by time
+        points.sort(key=lambda p: p.time_hours)
+        self.profile.points = points
+    
+    def get_profile(self) -> TemperatureProfile:
+        """Get the edited profile."""
+        self._update_profile_from_ui()
+        return self.profile
 
 
 class HydrationPanel(Gtk.Box):
@@ -53,6 +250,10 @@ class HydrationPanel(Gtk.Box):
         self.selected_microstructure = None
         self.current_operation_name = None
         
+        # Progress tracking from HydrationExecutorService
+        self.latest_progress = None
+        self.simulation_start_time = None
+        
         # Temperature profile editing
         self.temp_profile_points = []
         
@@ -68,6 +269,9 @@ class HydrationPanel(Gtk.Box):
         
         # Register for simulation progress updates
         self.hydration_service.add_progress_callback(self._on_simulation_progress)
+        
+        # Initialize thermal mode UI state now that all elements are created
+        self._on_thermal_mode_changed(self.isothermal_radio)
         
         self.logger.info("Hydration panel initialized")
     
@@ -226,49 +430,28 @@ class HydrationPanel(Gtk.Box):
         grid.set_margin_left(15)
         grid.set_margin_right(15)
         
-        # Total cycles
-        cycles_label = Gtk.Label("Total Cycles:")
-        cycles_label.set_halign(Gtk.Align.START)
-        cycles_label.set_tooltip_text("Number of hydration cycles to simulate")
-        grid.attach(cycles_label, 0, 0, 1, 1)
+        # Max DOH (moved from Advanced Settings)
+        max_doh_label = Gtk.Label("Max DOH:")
+        max_doh_label.set_halign(Gtk.Align.START)
+        max_doh_label.set_tooltip_text("Maximum degree of hydration (0.0-1.0)")
+        grid.attach(max_doh_label, 0, 0, 1, 1)
         
-        self.cycles_spin = Gtk.SpinButton.new_with_range(100, 100000, 100)
-        self.cycles_spin.set_value(2000)
-        self.cycles_spin.set_tooltip_text("More cycles = longer simulation time but better accuracy")
-        grid.attach(self.cycles_spin, 1, 0, 1, 1)
-        
-        # Time step
-        timestep_label = Gtk.Label("Time Step (hours):")
-        timestep_label.set_halign(Gtk.Align.START)
-        timestep_label.set_tooltip_text("Time increment per cycle")
-        grid.attach(timestep_label, 0, 1, 1, 1)
-        
-        self.timestep_spin = Gtk.SpinButton.new_with_range(0.0001, 1.0, 0.0001)
-        self.timestep_spin.set_digits(4)
-        self.timestep_spin.set_value(0.001)
-        self.timestep_spin.set_tooltip_text("Smaller time steps increase accuracy but computation time")
-        grid.attach(self.timestep_spin, 1, 1, 1, 1)
+        self.alpha_max_spin = Gtk.SpinButton.new_with_range(0.1, 1.0, 0.01)
+        self.alpha_max_spin.set_digits(2)
+        self.alpha_max_spin.set_value(1.0)
+        self.alpha_max_spin.set_tooltip_text("Maximum degree of hydration (default 1.0)")
+        grid.attach(self.alpha_max_spin, 1, 0, 1, 1)
         
         # Maximum simulation time
         max_time_label = Gtk.Label("Max Time (hours):")
         max_time_label.set_halign(Gtk.Align.START)
         max_time_label.set_tooltip_text("Maximum simulation time limit")
-        grid.attach(max_time_label, 0, 2, 1, 1)
+        grid.attach(max_time_label, 0, 1, 1, 1)
         
         self.max_time_spin = Gtk.SpinButton.new_with_range(1.0, 8760.0, 1.0)
         self.max_time_spin.set_value(168.0)  # 7 days
         self.max_time_spin.set_tooltip_text("Simulation stops when this time is reached")
-        grid.attach(self.max_time_spin, 1, 2, 1, 1)
-        
-        # Calculated total time
-        calc_time_label = Gtk.Label("Calculated Time:")
-        calc_time_label.set_halign(Gtk.Align.START)
-        grid.attach(calc_time_label, 0, 3, 1, 1)
-        
-        self.calc_time_label = Gtk.Label("2.0 hours")
-        self.calc_time_label.set_halign(Gtk.Align.START)
-        self.calc_time_label.get_style_context().add_class("monospace")
-        grid.attach(self.calc_time_label, 1, 3, 1, 1)
+        grid.attach(self.max_time_spin, 1, 1, 1, 1)
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)
@@ -402,6 +585,11 @@ class HydrationPanel(Gtk.Box):
         self.adiabatic_radio.set_tooltip_text("No heat exchange with environment - temperature rises due to hydration heat")
         thermal_mode_box.pack_start(self.adiabatic_radio, False, False, 0)
         
+        self.temperature_profile_radio = Gtk.RadioButton.new_with_label_from_widget(
+            self.isothermal_radio, "Temperature Profile")
+        self.temperature_profile_radio.set_tooltip_text("Use custom temperature profile during simulation")
+        thermal_mode_box.pack_start(self.temperature_profile_radio, False, False, 0)
+        
         # Set default to isothermal
         self.isothermal_radio.set_active(True)
         
@@ -423,8 +611,8 @@ class HydrationPanel(Gtk.Box):
         self.profile_combo = Gtk.ComboBoxText()
         self.profile_combo.append("custom", "Custom")
         
-        # Add predefined profiles
-        profiles = self.hydration_service.get_predefined_temperature_profiles()
+        # Add all profiles (predefined + custom)
+        profiles = self.hydration_service.get_all_temperature_profiles()
         for name, profile in profiles.items():
             self.profile_combo.append(name.lower().replace(" ", "_"), name)
         
@@ -492,20 +680,47 @@ class HydrationPanel(Gtk.Box):
         grid.set_margin_left(15)
         grid.set_margin_right(15)
         
-        # Save interval
-        save_interval_label = Gtk.Label("Save Interval (cycles):")
+        # Save 3D microstructure interval
+        save_interval_label = Gtk.Label("Save 3D microstructure every")
         save_interval_label.set_halign(Gtk.Align.START)
-        save_interval_label.set_tooltip_text("Save results every N cycles")
+        save_interval_label.set_tooltip_text("Save 3D microstructure snapshots at specified intervals")
         grid.attach(save_interval_label, 0, 0, 1, 1)
         
-        self.save_interval_spin = Gtk.SpinButton.new_with_range(1, 1000, 1)
-        self.save_interval_spin.set_value(100)
-        grid.attach(self.save_interval_spin, 1, 0, 1, 1)
+        # Create horizontal box for spinbox and "hours" label
+        save_interval_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
-        # Save intermediate results
-        self.save_intermediate_check = Gtk.CheckButton(label="Save Intermediate Results")
-        self.save_intermediate_check.set_tooltip_text("Save detailed results at each interval")
-        grid.attach(self.save_intermediate_check, 0, 1, 2, 1)
+        self.save_interval_spin = Gtk.SpinButton.new_with_range(0.1, 168.0, 0.1)
+        self.save_interval_spin.set_digits(1)
+        self.save_interval_spin.set_value(72.0)
+        self.save_interval_spin.set_tooltip_text("Time interval for saving 3D microstructure snapshots")
+        save_interval_box.pack_start(self.save_interval_spin, False, False, 0)
+        
+        hours_label = Gtk.Label("hours")
+        hours_label.set_halign(Gtk.Align.START)
+        save_interval_box.pack_start(hours_label, False, False, 0)
+        
+        grid.attach(save_interval_box, 1, 0, 1, 1)
+        
+        # Movie frame frequency
+        movie_label = Gtk.Label("Save movie frame every")
+        movie_label.set_halign(Gtk.Align.START)
+        movie_label.set_tooltip_text("Time interval for saving movie frames showing simulation progress")
+        grid.attach(movie_label, 0, 1, 1, 1)
+        
+        # Create horizontal box for movie spinbox and "hours" label
+        movie_interval_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
+        self.movie_freq_spin = Gtk.SpinButton.new_with_range(0.1, 168.0, 0.1)
+        self.movie_freq_spin.set_digits(1)
+        self.movie_freq_spin.set_value(72.0)
+        self.movie_freq_spin.set_tooltip_text("Time interval for saving movie frames")
+        movie_interval_box.pack_start(self.movie_freq_spin, False, False, 0)
+        
+        movie_hours_label = Gtk.Label("hours")
+        movie_hours_label.set_halign(Gtk.Align.START)
+        movie_interval_box.pack_start(movie_hours_label, False, False, 0)
+        
+        grid.attach(movie_interval_box, 1, 1, 1, 1)
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)
@@ -548,15 +763,15 @@ class HydrationPanel(Gtk.Box):
         sim_grid.attach(self.random_seed_spin, 1, 0, 1, 1)
         
         # C3A fraction
-        c3a_label = Gtk.Label("C3A Fraction:")
+        c3a_label = Gtk.Label("Orth. C3A Fraction:")
         c3a_label.set_halign(Gtk.Align.START)
-        c3a_label.set_tooltip_text("Fraction of C3A in cement (0.0-1.0)")
+        c3a_label.set_tooltip_text("Fraction of orthorhombic C3A in cement (0.0-1.0)")
         sim_grid.attach(c3a_label, 0, 1, 1, 1)
         
         self.c3a_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
         self.c3a_fraction_spin.set_digits(3)
         self.c3a_fraction_spin.set_value(0.0)
-        self.c3a_fraction_spin.set_tooltip_text("C3A fraction (default 0.0)")
+        self.c3a_fraction_spin.set_tooltip_text("Orthorhombic C3A fraction (default 0.0)")
         sim_grid.attach(self.c3a_fraction_spin, 1, 1, 1, 1)
         
         # CSH Seeds
@@ -571,17 +786,6 @@ class HydrationPanel(Gtk.Box):
         self.csh_seeds_spin.set_tooltip_text("CSH nucleation seeds (default 0.0 cm⁻³)")
         sim_grid.attach(self.csh_seeds_spin, 1, 2, 1, 1)
         
-        # Alpha max
-        alpha_label = Gtk.Label("Alpha Max:")
-        alpha_label.set_halign(Gtk.Align.START)
-        alpha_label.set_tooltip_text("Maximum degree of hydration (0.0-1.0)")
-        sim_grid.attach(alpha_label, 0, 3, 1, 1)
-        
-        self.alpha_max_spin = Gtk.SpinButton.new_with_range(0.1, 1.0, 0.01)
-        self.alpha_max_spin.set_digits(2)
-        self.alpha_max_spin.set_value(1.0)
-        self.alpha_max_spin.set_tooltip_text("Maximum degree of hydration (default 1.0)")
-        sim_grid.attach(self.alpha_max_spin, 1, 3, 1, 1)
         
         content_box.pack_start(sim_grid, False, False, 0)
         
@@ -674,17 +878,6 @@ class HydrationPanel(Gtk.Box):
         self.phyd_freq_spin.set_value(2.0)
         self.phyd_freq_spin.set_tooltip_text("Frequency for physical properties calculations (default 2.0 h)")
         output_grid.attach(self.phyd_freq_spin, 1, 2, 1, 1)
-        
-        # Movie frame frequency
-        movie_label = Gtk.Label("Movie Frame Frequency:")
-        movie_label.set_halign(Gtk.Align.START)
-        output_grid.attach(movie_label, 0, 3, 1, 1)
-        
-        self.movie_freq_spin = Gtk.SpinButton.new_with_range(1.0, 168.0, 1.0)
-        self.movie_freq_spin.set_digits(1)
-        self.movie_freq_spin.set_value(72.0)
-        self.movie_freq_spin.set_tooltip_text("Frequency for movie frame output (default 72.0 h)")
-        output_grid.attach(self.movie_freq_spin, 1, 3, 1, 1)
         
         content_box.pack_start(output_grid, False, False, 0)
         
@@ -993,8 +1186,6 @@ class HydrationPanel(Gtk.Box):
     def _connect_signals(self) -> None:
         """Connect UI signals."""
         # Parameter change signals
-        self.cycles_spin.connect('value-changed', self._on_parameter_changed)
-        self.timestep_spin.connect('value-changed', self._on_parameter_changed)
         self.max_time_spin.connect('value-changed', self._on_parameter_changed)
         
         # Time calibration mode signals
@@ -1006,8 +1197,9 @@ class HydrationPanel(Gtk.Box):
         
         # Curing conditions signals
         self.initial_temp_spin.connect('value-changed', self._on_parameter_changed)
-        self.isothermal_radio.connect('toggled', self._on_parameter_changed)
-        self.adiabatic_radio.connect('toggled', self._on_parameter_changed)
+        self.isothermal_radio.connect('toggled', self._on_thermal_mode_changed)
+        self.adiabatic_radio.connect('toggled', self._on_thermal_mode_changed)
+        self.temperature_profile_radio.connect('toggled', self._on_thermal_mode_changed)
         self.saturated_radio.connect('toggled', self._on_parameter_changed)
         self.sealed_radio.connect('toggled', self._on_parameter_changed)
         
@@ -1021,7 +1213,6 @@ class HydrationPanel(Gtk.Box):
         
         # Output settings signals
         self.save_interval_spin.connect('value-changed', self._on_parameter_changed)
-        self.save_intermediate_check.connect('toggled', self._on_parameter_changed)
         
         # Advanced settings signals
         self.random_seed_spin.connect('value-changed', self._on_parameter_changed)
@@ -1048,17 +1239,35 @@ class HydrationPanel(Gtk.Box):
     def _load_default_parameters(self) -> None:
         """Load default parameters."""
         # Load default temperature profile (constant 25°C)
-        profiles = self.hydration_service.get_predefined_temperature_profiles()
+        profiles = self.hydration_service.get_all_temperature_profiles()
         self.current_temperature_profile = profiles.get("Constant 25°C")
         
-        self._update_calculated_values()
         self._update_temperature_plot()
         self._update_profile_summary()
         self._update_status("Ready - configure parameters and click Validate")
     
     def _on_parameter_changed(self, widget) -> None:
         """Handle parameter change."""
-        self._update_calculated_values()
+        self._clear_validation()
+    
+    def _on_thermal_mode_changed(self, radio) -> None:
+        """Handle thermal mode change."""
+        if not radio.get_active():
+            return
+        
+        # Enable/disable initial temperature based on thermal mode
+        if self.temperature_profile_radio.get_active():
+            # Temperature profile mode - disable initial temperature
+            self.initial_temp_spin.set_sensitive(False)
+            self.profile_combo.set_sensitive(True)
+            self.edit_profile_button.set_sensitive(True)
+        else:
+            # Isothermal or adiabatic mode - enable initial temperature
+            self.initial_temp_spin.set_sensitive(True)
+            # Optionally disable profile controls (or leave enabled for reference)
+            self.profile_combo.set_sensitive(False)
+            self.edit_profile_button.set_sensitive(False)
+        
         self._clear_validation()
     
     def _on_aging_mode_changed(self, radio) -> None:
@@ -1091,7 +1300,7 @@ class HydrationPanel(Gtk.Box):
         profile_id = combo.get_active_id()
         
         if profile_id and profile_id != "custom":
-            profiles = self.hydration_service.get_predefined_temperature_profiles()
+            profiles = self.hydration_service.get_all_temperature_profiles()
             profile_name = combo.get_active_text()
             
             if profile_name in profiles:
@@ -1126,8 +1335,141 @@ class HydrationPanel(Gtk.Box):
     
     def _on_edit_profile_clicked(self, button) -> None:
         """Handle edit temperature profile button click."""
-        # TODO: Open temperature profile editor dialog
-        self._update_status("Temperature profile editor not yet implemented")
+        try:
+            # Get current profile or create new one
+            current_profile = self.current_temperature_profile
+            if not current_profile:
+                from app.services.hydration_service import TemperatureProfile, TemperaturePoint
+                current_profile = TemperatureProfile(
+                    name="Custom Profile",
+                    description="User-defined temperature profile",
+                    points=[TemperaturePoint(0.0, 25.0)]
+                )
+            
+            # Open temperature profile editor dialog
+            dialog = TemperatureProfileDialog(self.get_toplevel(), current_profile)
+            
+            while True:
+                response = dialog.run()
+                
+                if response == Gtk.ResponseType.OK:
+                    # Get the modified profile
+                    modified_profile = dialog.get_profile()
+                    
+                    # Update current profile
+                    self.current_temperature_profile = modified_profile
+                    
+                    # Update UI
+                    self._update_temperature_plot()
+                    self._update_profile_summary()
+                    self._update_status("Temperature profile updated")
+                    break
+                    
+                elif response == Gtk.ResponseType.ACCEPT:  # Save button
+                    # Save profile to database
+                    modified_profile = dialog.get_profile()
+                    if self._save_temperature_profile(modified_profile):
+                        # Continue dialog for more editing if desired
+                        self._update_status(f"Temperature profile '{modified_profile.name}' saved to database")
+                        continue
+                    else:
+                        # Save failed, continue dialog
+                        continue
+                else:
+                    # Cancel or close
+                    break
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to open temperature profile editor: {e}")
+            self._update_status(f"Error opening profile editor: {e}")
+    
+    def _save_temperature_profile(self, profile: TemperatureProfile) -> bool:
+        """
+        Save a temperature profile to the database and update UI.
+        
+        Args:
+            profile: TemperatureProfile to save
+            
+        Returns:
+            True if save successful, False otherwise
+        """
+        try:
+            # Get temperature profile service
+            profile_service = self.hydration_service.get_temperature_profile_service()
+            if not profile_service:
+                self._show_error_dialog("Save Error", "Temperature profile service not available")
+                return False
+            
+            # Validate profile name
+            if not profile.name or not profile.name.strip():
+                self._show_error_dialog("Save Error", "Profile name cannot be empty")
+                return False
+            
+            # Check if profile already exists
+            existing_profile = profile_service.get_profile(profile.name)
+            if existing_profile:
+                # Show confirmation dialog
+                dialog = Gtk.MessageDialog(
+                    parent=self.get_toplevel(),
+                    flags=Gtk.DialogFlags.MODAL,
+                    message_type=Gtk.MessageType.QUESTION,
+                    buttons=Gtk.ButtonsType.YES_NO,
+                    text=f"Profile '{profile.name}' already exists. Overwrite?"
+                )
+                response = dialog.run()
+                dialog.destroy()
+                
+                if response != Gtk.ResponseType.YES:
+                    return False
+            
+            # Save the profile
+            saved_profile = profile_service.save_profile(profile, overwrite=True)
+            if saved_profile:
+                # Refresh the dropdown menu
+                self._refresh_profile_dropdown()
+                self.logger.info(f"Saved temperature profile: {profile.name}")
+                return True
+            else:
+                self._show_error_dialog("Save Error", "Failed to save temperature profile")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Failed to save temperature profile: {e}")
+            self._show_error_dialog("Save Error", f"Failed to save profile: {e}")
+            return False
+    
+    def _refresh_profile_dropdown(self) -> None:
+        """Refresh the temperature profile dropdown with latest profiles."""
+        try:
+            # Get all profiles (predefined + custom)
+            all_profiles = self.hydration_service.get_all_temperature_profiles()
+            
+            # Clear and repopulate dropdown
+            self.profile_combo.remove_all()
+            for profile_name in sorted(all_profiles.keys()):
+                self.profile_combo.append_text(profile_name)
+            
+            # Set to current profile if it exists
+            if self.current_temperature_profile and self.current_temperature_profile.name in all_profiles:
+                self.profile_combo.set_active_id(self.current_temperature_profile.name)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to refresh profile dropdown: {e}")
+    
+    def _show_error_dialog(self, title: str, message: str) -> None:
+        """Show an error dialog."""
+        dialog = Gtk.MessageDialog(
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text=title
+        )
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
     
     def _on_validate_clicked(self, button) -> None:
         """Handle validate parameters button click."""
@@ -1192,13 +1534,15 @@ class HydrationPanel(Gtk.Box):
                     db_param_modifications = self.get_database_parameter_modifications()
                     
                     # Generate extended parameter file
+                    max_time = self.max_time_spin.get_value()
                     param_file = bridge.generate_extended_parameter_file(
                         operation_name, 
                         self.selected_microstructure['operation_name'],
                         curing_conditions,
                         time_calibration_settings,
                         advanced_settings,
-                        db_param_modifications
+                        db_param_modifications,
+                        max_time
                     )
                     
                     self._update_status(f"Parameters validated - extended parameter file generated: {param_file}")
@@ -1236,13 +1580,15 @@ class HydrationPanel(Gtk.Box):
             operation_name = f"HydrationSim_{selected_microstructure['name']}_{self._get_timestamp()}"
             
             # Generate extended parameter file
+            max_time = self.max_time_spin.get_value()
             param_file_path = self.bridge_service.generate_extended_parameter_file(
                 operation_name=operation_name,
                 microstructure_name=selected_microstructure['name'],
                 curing_conditions=curing_conditions,
                 time_calibration_settings=time_calibration,
                 advanced_settings=advanced_settings,
-                db_parameter_modifications=db_modifications
+                db_parameter_modifications=db_modifications,
+                max_time_hours=max_time
             )
             
             # Start simulation using HydrationExecutorService
@@ -1251,10 +1597,13 @@ class HydrationPanel(Gtk.Box):
                 operation_name=operation_name,
                 parameter_set_name="portland_cement_standard",
                 progress_callback=self._on_simulation_progress,
-                parameter_file_path=param_file_path
+                parameter_file_path=param_file_path,
+                max_time_hours=max_time
             ):
                 self.simulation_running = True
                 self.current_operation_name = operation_name
+                self.simulation_start_time = time.time()
+                self.latest_progress = None
                 self._update_simulation_controls(True)
                 self._start_progress_updates()
                 self._update_status(f"Simulation started: {operation_name}")
@@ -1278,12 +1627,29 @@ class HydrationPanel(Gtk.Box):
     
     def _collect_curing_conditions(self) -> Dict[str, Any]:
         """Collect curing conditions from UI."""
-        return {
-            'initial_temperature': self.initial_temp_spin.get_value(),
-            'thermal_mode': 'isothermal' if self.isothermal_radio.get_active() else 'adiabatic',
+        # Determine thermal mode
+        if self.isothermal_radio.get_active():
+            thermal_mode = 'isothermal'
+        elif self.adiabatic_radio.get_active():
+            thermal_mode = 'adiabatic'
+        else:  # temperature_profile_radio.get_active()
+            thermal_mode = 'temperature_profile'
+        
+        conditions = {
+            'initial_temperature_celsius': self.initial_temp_spin.get_value(),
+            'thermal_mode': thermal_mode,
             'moisture_mode': 'saturated' if self.saturated_radio.get_active() else 'sealed',
             'temperature_profile': self.profile_combo.get_active_text() or 'Custom'
         }
+        
+        # Add temperature profile data if using temperature profile mode
+        if thermal_mode == 'temperature_profile' and self.current_temperature_profile:
+            # Convert TemperatureProfile points to the format expected by bridge service
+            profile_data = [(point.time_hours, point.temperature_celsius) 
+                          for point in self.current_temperature_profile.points]
+            conditions['temperature_profile_data'] = profile_data
+            
+        return conditions
     
     def _collect_time_calibration_settings(self) -> Dict[str, Any]:
         """Collect time calibration settings from UI."""
@@ -1304,8 +1670,6 @@ class HydrationPanel(Gtk.Box):
     def _collect_advanced_settings(self) -> Dict[str, Any]:
         """Collect advanced settings from UI."""
         return {
-            'max_cycles': int(self.cycles_spin.get_value()),
-            'time_step': self.timestep_spin.get_value(),
             'random_seed': int(self.random_seed_spin.get_value()),
             'c3a_fraction': self.c3a_fraction_spin.get_value(),
             'csh_seeds': self.csh_seeds_spin.get_value(),
@@ -1314,12 +1678,13 @@ class HydrationPanel(Gtk.Box):
             'e_act_pozzolan': self.e_act_pozz_spin.get_value(),
             'e_act_slag': self.e_act_slag_spin.get_value(),
             'burn_frequency': self.burn_freq_spin.get_value(),
-            'set_frequency': self.set_freq_spin.get_value(),
-            'phyd_frequency': self.phyd_freq_spin.get_value(),
+            'setting_frequency': self.set_freq_spin.get_value(),
+            'physical_frequency': self.phyd_freq_spin.get_value(),
             'movie_frequency': self.movie_freq_spin.get_value(),
-            'csh2_flag_enabled': self.csh2_flag_check.get_active(),
-            'ch_flag_enabled': self.ch_flag_check.get_active(),
-            'ph_active_enabled': self.ph_active_check.get_active()
+            'save_interval_hours': self.save_interval_spin.get_value(),  # Output Settings
+            'csh2_flag': 1 if self.csh2_flag_check.get_active() else 0,
+            'ch_flag': 1 if self.ch_flag_check.get_active() else 0,
+            'ph_active': 1 if self.ph_active_check.get_active() else 0
         }
     
     def _collect_database_modifications(self) -> Dict[str, Any]:
@@ -1346,7 +1711,10 @@ class HydrationPanel(Gtk.Box):
     
     def _on_simulation_progress(self, operation_name: str, progress_data) -> None:
         """Handle simulation progress updates."""
-        if progress_data:
+        if progress_data and operation_name == self.current_operation_name:
+            # Store latest progress for UI updates
+            self.latest_progress = progress_data
+            
             # Handle both dict and HydrationProgress object formats
             if hasattr(progress_data, 'get'):  # Dictionary format
                 cycle = progress_data.get('cycle', 0)
@@ -1373,6 +1741,8 @@ class HydrationPanel(Gtk.Box):
                 if executor.cancel_simulation(self.current_operation_name):
                     self.simulation_running = False
                     self.current_operation_name = None
+                    self.simulation_start_time = None
+                    self.latest_progress = None
                     self._update_simulation_controls(False)
                     self._stop_progress_updates()
                     self._update_status("Simulation stopped")
@@ -1397,8 +1767,8 @@ class HydrationPanel(Gtk.Box):
             aging_mode = AgingMode.CHEMICAL_SHRINKAGE
         
         return HydrationParameters(
-            total_cycles=int(self.cycles_spin.get_value()),
-            time_step_hours=self.timestep_spin.get_value(),
+            total_cycles=2000,  # Default value since field removed
+            time_step_hours=0.001,  # Default value since field removed
             max_simulation_time_hours=self.max_time_spin.get_value(),
             temperature_profile=self.current_temperature_profile or TemperatureProfile(
                 "Default", "Default", [TemperaturePoint(0.0, 25.0)]
@@ -1407,14 +1777,15 @@ class HydrationPanel(Gtk.Box):
             convergence_tolerance=1e-6,  # Default value since disrealnew doesn't use convergence
             max_iterations_per_cycle=100,  # Default value since disrealnew doesn't use iterations
             save_interval_cycles=int(self.save_interval_spin.get_value()),
-            save_intermediate_results=self.save_intermediate_check.get_active()
+            save_intermediate_results=False  # Removed from UI
         )
     
     def _update_calculated_values(self) -> None:
         """Update calculated values display."""
         try:
-            cycles = self.cycles_spin.get_value()
-            time_step = self.timestep_spin.get_value()
+            # Use default values since Total Cycles and Time Step fields were removed
+            cycles = 2000  # Default total cycles
+            time_step = 0.001  # Default time step
             
             total_time = cycles * time_step
             
@@ -1426,7 +1797,7 @@ class HydrationPanel(Gtk.Box):
                 days = total_time / 24
                 time_text = f"{days:.1f} days"
             
-            self.calc_time_label.set_text(time_text)
+            # calc_time_label removed from UI
             
         except Exception as e:
             self.logger.error(f"Failed to update calculated values: {e}")
@@ -1526,57 +1897,119 @@ class HydrationPanel(Gtk.Box):
     
     def _update_progress_display(self) -> bool:
         """Update progress display (called periodically)."""
-        progress = self.hydration_service.get_simulation_progress()
-        
-        if not progress:
+        if not self.simulation_running or not self.current_operation_name:
             return True  # Continue timeout
         
-        # Update progress bar
-        self.overall_progress.set_fraction(progress.progress_fraction)
-        self.overall_progress.set_text(f"{progress.progress_percentage:.1f}%")
+        # Calculate elapsed time
+        elapsed_seconds = 0
+        if self.simulation_start_time:
+            elapsed_seconds = time.time() - self.simulation_start_time
+            elapsed_h = int(elapsed_seconds // 3600)
+            elapsed_m = int((elapsed_seconds % 3600) // 60)
+            elapsed_s = int(elapsed_seconds % 60)
+            self.elapsed_time_label.set_text(f"{elapsed_h:02d}:{elapsed_m:02d}:{elapsed_s:02d}")
         
-        # Update operation label
-        self.operation_label.set_text(progress.current_operation)
-        
-        # Update time displays
-        elapsed_seconds = progress.elapsed_real_time_seconds
-        elapsed_h = int(elapsed_seconds // 3600)
-        elapsed_m = int((elapsed_seconds % 3600) // 60)
-        elapsed_s = int(elapsed_seconds % 60)
-        self.elapsed_time_label.set_text(f"{elapsed_h:02d}:{elapsed_m:02d}:{elapsed_s:02d}")
-        
-        remaining_seconds = progress.estimated_remaining_seconds
-        if remaining_seconds > 0:
-            remaining_h = int(remaining_seconds // 3600)
-            remaining_m = int((remaining_seconds % 3600) // 60)
-            remaining_s = int(remaining_seconds % 60)
-            self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
+        # Use latest progress from HydrationExecutorService
+        progress = self.latest_progress
+        if progress:
+            # Handle both dict and object formats
+            if hasattr(progress, 'get'):  # Dictionary format
+                cycle = progress.get('cycle', 0)
+                max_cycles = progress.get('max_cycles', 2000)
+                time_hours = progress.get('time_hours', 0.0)
+                doh = progress.get('degree_of_hydration', 0.0)
+                temperature = progress.get('temperature_celsius', 25.0)
+                ph = progress.get('ph', 12.5)
+                heat_cumulative = progress.get('heat_cumulative', 0.0)
+                percent_complete = progress.get('percent_complete', 0.0)
+            else:  # HydrationProgress object format
+                cycle = getattr(progress, 'cycle', 0)
+                max_cycles = getattr(progress, 'max_cycles', 2000)
+                time_hours = getattr(progress, 'time_hours', 0.0)
+                doh = getattr(progress, 'degree_of_hydration', 0.0)
+                temperature = getattr(progress, 'temperature_celsius', 25.0)
+                ph = getattr(progress, 'ph', 12.5)
+                heat_cumulative = getattr(progress, 'heat_cumulative', 0.0)
+                percent_complete = getattr(progress, 'percent_complete', 0.0)
+            
+            # Update progress bar - use time-based calculation for accuracy
+            if percent_complete > 0:
+                # Use the calculated percent_complete from HydrationExecutorService
+                progress_fraction = percent_complete / 100.0
+                self.overall_progress.set_fraction(progress_fraction)
+                self.overall_progress.set_text(f"{percent_complete:.1f}%")
+            else:
+                # Fallback: calculate from time vs max_time (more accurate than cycles)
+                max_time_hours = self.max_time_spin.get_value() if hasattr(self, 'max_time_spin') else 168.0
+                if time_hours > 0 and max_time_hours > 0:
+                    progress_percentage = min((time_hours / max_time_hours) * 100.0, 100.0)
+                    progress_fraction = progress_percentage / 100.0
+                    self.overall_progress.set_fraction(progress_fraction)
+                    self.overall_progress.set_text(f"{progress_percentage:.1f}%")
+                else:
+                    self.overall_progress.set_fraction(0.0)
+                    self.overall_progress.set_text("0.0%")
+            
+            # Update operation label
+            self.operation_label.set_text(f"Running simulation - Cycle {cycle}/{max_cycles}")
+            
+            # Calculate remaining time estimate
+            if cycle > 0 and elapsed_seconds > 0:
+                cycles_per_second = cycle / elapsed_seconds
+                remaining_cycles = max_cycles - cycle
+                remaining_seconds = remaining_cycles / cycles_per_second if cycles_per_second > 0 else 0
+                
+                if remaining_seconds > 0:
+                    remaining_h = int(remaining_seconds // 3600)
+                    remaining_m = int((remaining_seconds % 3600) // 60)
+                    remaining_s = int(remaining_seconds % 60)
+                    self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
+                    
+                    # Update rate
+                    self.rate_label.set_text(f"{cycles_per_second:.2f} cycles/s")
+                else:
+                    self.remaining_time_label.set_text("--:--:--")
+                    self.rate_label.set_text("-- cycles/s")
+            else:
+                self.remaining_time_label.set_text("--:--:--")
+                self.rate_label.set_text("-- cycles/s")
+            
+            # Update hydration metrics
+            self.doh_value_label.set_text(f"{doh:.3f}")
+            # Convert heat from kJ/kg to J/g (divide by 1000)
+            heat_j_per_g = heat_cumulative / 1000.0 if heat_cumulative > 0 else 0.0
+            self.heat_value_label.set_text(f"{heat_j_per_g:.1f}")
+            # Chemical shrinkage - estimate based on degree of hydration
+            # Typical value: 0.063 mL/g of cement at full hydration
+            chemical_shrinkage = doh * 0.063 if doh > 0 else 0.0
+            self.shrinkage_value_label.set_text(f"{chemical_shrinkage:.3f}")
         else:
+            # No progress data yet, show initial state
+            self.overall_progress.set_fraction(0.0)
+            self.overall_progress.set_text("0.0%")
+            self.operation_label.set_text("Starting simulation...")
             self.remaining_time_label.set_text("--:--:--")
-        
-        # Update rate
-        if progress.cycles_per_second > 0:
-            self.rate_label.set_text(f"{progress.cycles_per_second:.2f} cycles/s")
-        else:
             self.rate_label.set_text("-- cycles/s")
+            
+            # Reset hydration metrics to initial values
+            self.doh_value_label.set_text("0.000")
+            self.heat_value_label.set_text("0.0")
+            self.shrinkage_value_label.set_text("0.000")
         
-        # Update hydration metrics
-        self.doh_value_label.set_text(f"{progress.degree_of_hydration:.3f}")
-        self.heat_value_label.set_text(f"{progress.heat_released_j_per_g:.1f}")
-        self.shrinkage_value_label.set_text(f"{progress.chemical_shrinkage:.3f}")
-        
-        # Check if simulation is finished
-        if progress.status in [SimulationStatus.COMPLETED, SimulationStatus.FAILED, SimulationStatus.CANCELLED]:
+        # Check if simulation process is still running
+        executor = self.service_container.hydration_executor_service
+        if self.current_operation_name not in executor.active_simulations:
+            # Simulation has finished
             self.simulation_running = False
             self._update_simulation_controls(False)
             self._stop_progress_updates()
+            self._update_status("Simulation completed")
             
-            if progress.status == SimulationStatus.COMPLETED:
-                self._update_status("Simulation completed successfully")
-            elif progress.status == SimulationStatus.FAILED:
-                self._update_status(f"Simulation failed: {progress.last_error}")
-            else:
-                self._update_status("Simulation cancelled")
+            # Final update with last known values
+            if progress:
+                self.operation_label.set_text("Simulation completed")
+                self.remaining_time_label.set_text("00:00:00")
+                self.rate_label.set_text("-- cycles/s")
             
             return False  # Stop timeout
         
@@ -1810,9 +2243,17 @@ class HydrationPanel(Gtk.Box):
     
     def get_curing_conditions(self) -> Dict[str, Any]:
         """Get curing conditions from UI."""
+        # Determine thermal mode
+        if self.isothermal_radio.get_active():
+            thermal_mode = 'isothermal'
+        elif self.adiabatic_radio.get_active():
+            thermal_mode = 'adiabatic'
+        else:  # temperature_profile_radio.get_active()
+            thermal_mode = 'temperature_profile'
+            
         return {
             'initial_temperature_celsius': self.initial_temp_spin.get_value(),
-            'thermal_mode': 'isothermal' if self.isothermal_radio.get_active() else 'adiabatic',
+            'thermal_mode': thermal_mode,
             'moisture_mode': 'saturated' if self.saturated_radio.get_active() else 'sealed'
         }
     
@@ -1870,8 +2311,10 @@ class HydrationPanel(Gtk.Box):
             if 'thermal_mode' in conditions:
                 if conditions['thermal_mode'] == 'isothermal':
                     self.isothermal_radio.set_active(True)
-                else:
+                elif conditions['thermal_mode'] == 'adiabatic':
                     self.adiabatic_radio.set_active(True)
+                else:  # temperature_profile
+                    self.temperature_profile_radio.set_active(True)
             
             if 'moisture_mode' in conditions:
                 if conditions['moisture_mode'] == 'saturated':
@@ -1888,11 +2331,10 @@ class HydrationPanel(Gtk.Box):
     def set_hydration_parameters(self, params: HydrationParameters) -> None:
         """Set hydration parameters in UI."""
         try:
-            self.cycles_spin.set_value(params.total_cycles)
-            self.timestep_spin.set_value(params.time_step_hours)
+            # Note: Total cycles and timestep fields were removed from UI
             self.max_time_spin.set_value(params.max_simulation_time_hours)
             self.save_interval_spin.set_value(params.save_interval_cycles)
-            self.save_intermediate_check.set_active(params.save_intermediate_results)
+            # save_intermediate_check removed from UI
             
             # Set aging mode
             if params.aging_mode == AgingMode.TIME:

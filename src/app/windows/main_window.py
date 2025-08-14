@@ -56,6 +56,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self.set_title("VCCTL - Virtual Cement and Concrete Testing Laboratory")
         self.set_default_size(1200, 800)
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_resizable(True)
         
         try:
             # Setup the UI

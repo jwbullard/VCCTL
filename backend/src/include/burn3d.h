@@ -46,9 +46,9 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
   float alpha_burn = 0.0;
   double mass_burn = 0.0;
 
-  if (Verbose_flag == 2) {
-    printf("\nI am in burn3d...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: I am in burn3d...");
+    fflush(stderr);
   }
 
   /* Initialize local arrays */
@@ -102,10 +102,10 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
 
   xformMic = ibox(dimensions[0], dimensions[1], dimensions[2]);
   if (!xformMic) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for xformMic.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for xformMic.");
+    fprintf(stderr, " Exiting now.");
+    fflush(stderr);
     return (MEMERR);
   }
 
@@ -120,9 +120,9 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose_flag == 2) {
-    printf("\nAssignment to xformMic is complete.");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Assignment to xformMic is complete.");
+    fflush(stderr);
   }
 
   nmatx = nmaty = nmatz = NULL;
@@ -130,68 +130,64 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
   mult1 = mult2 = 1;
 
   nmatx = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmatx...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmatx...");
+    fflush(stderr);
   }
   nmaty = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmaty...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmaty...");
+    fflush(stderr);
   }
   nmatz = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmatz...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmatz...");
+    fflush(stderr);
   }
   nnewx = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewx...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewx...");
+    fflush(stderr);
   }
   nnewy = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewy...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewy...");
+    fflush(stderr);
   }
   nnewz = ivector(SIZE2D);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewz...");
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewz...");
     fflush(stdout);
   }
 
   if (!nmatx) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmatx.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nmatx. Exiting now.");
+    fflush(stderr);
     free_ibox(xformMic, dimensions[0], dimensions[1]);
     return (MEMERR);
   }
   if (!nmaty) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmaty.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nmaty. Exiting now.");
+    fflush(stderr);
     free_ivector(nmatx);
     free_ibox(xformMic, dimensions[0], dimensions[1]);
     return (MEMERR);
   }
   if (!nmatz) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nmatz.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nmatz. Exiting now.");
+    fflush(stderr);
     free_ivector(nmaty);
     free_ivector(nmatx);
     free_ibox(xformMic, dimensions[0], dimensions[1]);
     return (MEMERR);
   }
   if (!nnewx) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nnewx.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nnewx. Exiting now.");
+    fflush(stderr);
     free_ivector(nmatz);
     free_ivector(nmaty);
     free_ivector(nmatx);
@@ -199,10 +195,9 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nnewy) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for nnewy.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nnewy. Exiting now.");
+    fflush(stderr);
     free_ivector(nnewx);
     free_ivector(nmatz);
     free_ivector(nmaty);
@@ -211,10 +206,9 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nnewz) {
-    printf("\nERROR in burn3d:");
-    printf("\n\tCould not allocate space for newz.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burn3d:");
+    fprintf(stderr, " Could not allocate space for nnewz. Exiting now.");
+    fflush(stderr);
     free_ivector(nnewy);
     free_ivector(nnewx);
     free_ivector(nmatz);
@@ -412,15 +406,16 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose_flag == 2) {
+  if (Verbose_flag > 1) {
     if (npix1 != npix2) {
-      printf("Phase IDs = %d and %d \n", npix1, npix2);
+      fprintf(stderr, "\nDEBUG: Phase IDs = %d and %d", npix1, npix2);
     } else {
-      printf("Phase ID = %d \n", npix1);
+      fprintf(stderr, "\nDEBUG: Phase ID = %d", npix1);
     }
-    printf("Number accessible from first surface = %d \n", ntop);
-    printf("Number contained in through pathways= %d \n", nthrough);
-    fflush(stdout);
+    fprintf(stderr, "\nDEBUG: Number accessible from first surface = %d", ntop);
+    fprintf(stderr, "\nDEBUG: Number contained in through pathways= %d",
+            nthrough);
+    fflush(stderr);
   }
 
   mass_burn += (double)(Specgrav[C3S] * Count[C3S]);
@@ -431,12 +426,16 @@ int burn3d(int npix1, int npix2, int d1, int d2, int d3) {
 
   Con_fracp[dir] = 0.0;
 
-  if (Verbose_flag == 2)
-    printf("Nphc[%d] = %d\n", dir, Nphc[dir]);
+  if (Verbose_flag > 1) {
+    fprintf(stderr, "\nNphc[%d] = %d", dir, Nphc[dir]);
+    fflush(stderr);
+  }
   if (Nphc[dir] > 0) {
     Con_fracp[dir] = (float)nthrough / (float)Nphc[dir];
-    if (Verbose_flag == 2)
-      printf("Con_fracp[%d] = %f\n", dir, Con_fracp[dir]);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nCon_fracp[%d] = %f", dir, Con_fracp[dir]);
+      fflush(stderr);
+    }
   }
 
   if (nthrough > 0)

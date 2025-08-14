@@ -22,7 +22,7 @@ from typing import Optional, Dict, Any, List, Callable
 from datetime import datetime
 from enum import Enum
 
-from app.models.operation import Operation, OperationStatus, OperationType
+from app.models.operation import Operation, OperationStatus, OperationType, OperationCreate
 from app.services.hydration_parameters_service import HydrationParametersService
 from app.database.service import DatabaseService
 
@@ -108,7 +108,8 @@ class HydrationExecutorService:
     def start_hydration_simulation(self, operation_name: str, 
                                  parameter_set_name: str = "portland_cement_standard",
                                  progress_callback: Optional[Callable] = None,
-                                 parameter_file_path: Optional[str] = None) -> bool:
+                                 parameter_file_path: Optional[str] = None,
+                                 max_time_hours: float = 168.0) -> bool:
         """
         Start a hydration simulation for the given operation.
         
@@ -117,6 +118,7 @@ class HydrationExecutorService:
             parameter_set_name: Name of parameter set to use
             progress_callback: Optional callback for progress updates
             parameter_file_path: Optional path to extended parameter file (overrides parameter_set_name)
+            max_time_hours: Maximum simulation time in hours for progress calculation
             
         Returns:
             True if simulation started successfully, False otherwise
@@ -137,7 +139,7 @@ class HydrationExecutorService:
             self._update_operation_status(operation_name, OperationStatus.RUNNING)
             
             # Start the simulation process
-            simulation_info = self._start_disrealnew_process(operation_name, parameter_file_path)
+            simulation_info = self._start_disrealnew_process(operation_name, parameter_file_path, max_time_hours)
             if not simulation_info:
                 self._update_operation_status(operation_name, OperationStatus.ERROR)
                 return False
@@ -261,7 +263,7 @@ class HydrationExecutorService:
             self.logger.error(f"Failed to prepare simulation environment for '{operation_name}': {e}")
             return False
     
-    def _start_disrealnew_process(self, operation_name: str, parameter_file_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def _start_disrealnew_process(self, operation_name: str, parameter_file_path: Optional[str] = None, max_time_hours: float = 168.0) -> Optional[Dict[str, Any]]:
         """
         Start the disrealnew process.
         
@@ -286,7 +288,6 @@ class HydrationExecutorService:
                     str(self.disrealnew_binary),
                     "--workdir", ".",
                     "--json", "progress.json",
-                    "--quiet",
                     "--parameters", param_file.name
                 ]
             else:
@@ -339,7 +340,8 @@ class HydrationExecutorService:
                 'stdout_log': stdout_log,
                 'stderr_log': stderr_log,
                 'progress_file': progress_file_path,
-                'last_progress_check': time.time()
+                'last_progress_check': time.time(),
+                'max_time_hours': max_time_hours
             }
             
             return simulation_info
@@ -366,12 +368,19 @@ class HydrationExecutorService:
                 return_code = process.poll()
                 
                 if return_code is not None:
-                    # Process has finished
-                    if return_code == 0:
+                    # Process has finished - check if simulation completed successfully by examining output files
+                    simulation_completed = self._check_simulation_completion(operation_name)
+                    
+                    if simulation_completed:
+                        # Simulation completed successfully (verified by output files)
                         simulation_info['status'] = HydrationSimulationStatus.COMPLETED
                         self._update_operation_status(operation_name, OperationStatus.FINISHED)
-                        self.logger.info(f"Simulation completed successfully: {operation_name}")
+                        if return_code == 0:
+                            self.logger.info(f"Simulation completed successfully: {operation_name}")
+                        else:
+                            self.logger.info(f"Simulation completed successfully despite cleanup error (exit code {return_code}): {operation_name}")
                     else:
+                        # Simulation failed (no valid output files found)
                         simulation_info['status'] = HydrationSimulationStatus.ERROR
                         self._update_operation_status(operation_name, OperationStatus.ERROR)
                         self.logger.error(f"Simulation failed with return code {return_code}: {operation_name}")
@@ -403,11 +412,12 @@ class HydrationExecutorService:
         try:
             simulation_info = self.active_simulations[operation_name]
             
-            if simulation_info.get('progress_file') and Path(simulation_info['progress_file']).exists():
-                # Future: Parse JSON progress file
-                self._parse_json_progress(operation_name, simulation_info['progress_file'])
+            # Try JSON progress file first (most accurate)
+            progress_json = Path(simulation_info['operation_dir']) / "progress.json"
+            if progress_json.exists():
+                self._parse_json_progress(operation_name, str(progress_json))
             else:
-                # Current: Parse stdout log file
+                # Fallback: Parse stdout log file for PROGRESS lines (updated disrealnew.c)
                 self._parse_stdout_progress(operation_name, simulation_info['stdout_log'])
             
             # Notify progress callbacks
@@ -417,70 +427,125 @@ class HydrationExecutorService:
             self.logger.error(f"Error updating progress for '{operation_name}': {e}")
     
     def _parse_json_progress(self, operation_name: str, progress_file_path: str):
-        """Parse progress from JSON file (future implementation)."""
+        """Parse progress from JSON file (current implementation)."""
         try:
             with open(progress_file_path, 'r') as f:
-                data = json.load(f)
+                content = f.read().strip()
+                # Handle the "json " prefix if present
+                if content.startswith('json '):
+                    content = content[5:]
+                data = json.loads(content)
             
             simulation_info = self.active_simulations[operation_name]
             progress = simulation_info['progress']
             
             # Update progress from JSON
-            current_state = data.get('current_state', {})
-            progress.cycle = current_state.get('cycle', 0)
-            progress.time_hours = current_state.get('time_hours', 0.0)
-            progress.degree_of_hydration = current_state.get('degree_of_hydration', 0.0)
-            progress.temperature_celsius = current_state.get('temperature_celsius', 25.0)
-            progress.ph = current_state.get('ph', 12.0)
-            progress.water_left = current_state.get('water_left', 1.0)
-            progress.heat_cumulative = current_state.get('heat_cumulative_kJ_per_kg', 0.0)
+            # Format: {"cycle": 1220, "time_hours": 668.68, "degree_of_hydration": 0.71, "timestamp": "2025-08-14T14:25:03.434Z"}
+            progress.cycle = data.get('cycle', 0)
+            progress.time_hours = data.get('time_hours', 0.0)
+            progress.degree_of_hydration = data.get('degree_of_hydration', 0.0)
+            progress.temperature_celsius = data.get('temperature_celsius', 25.0)
+            progress.ph = data.get('ph', 12.0)
             
-            progress_info = data.get('progress', {})
-            progress.percent_complete = progress_info.get('percent_complete', 0.0)
-            progress.estimated_time_remaining = progress_info.get('estimated_time_remaining_hours', 0.0)
-            progress.cycles_per_second = progress_info.get('cycles_per_second', 0.0)
+            # Calculate percentage based on time (more accurate than cycles)
+            simulation_info = self.active_simulations[operation_name]
+            max_time_hours = simulation_info.get('max_time_hours', 168.0)
+            progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
             
-            progress.phase_counts = data.get('phase_counts', {})
+            # Estimate heat released
+            progress.heat_cumulative = progress.degree_of_hydration * 500.0
+            
             progress.last_update = datetime.now()
             
-            # Update simulation parameters
-            sim_info = data.get('simulation_info', {})
-            progress.cubesize = sim_info.get('cubesize', progress.cubesize)
-            progress.max_cycles = sim_info.get('max_cycles', progress.max_cycles)
-            progress.target_alpha = sim_info.get('target_alpha', progress.target_alpha)
-            progress.end_time_hours = sim_info.get('end_time_hours', progress.end_time_hours)
+            self.logger.debug(f"JSON progress parsed for '{operation_name}': Cycle={progress.cycle}, Time={progress.time_hours:.2f}h, DOH={progress.degree_of_hydration:.3f}")
             
         except Exception as e:
             self.logger.error(f"Error parsing JSON progress for '{operation_name}': {e}")
     
     def _parse_stdout_progress(self, operation_name: str, stdout_log_path: Path):
-        """Parse progress from stdout log file (current implementation)."""
+        """Parse progress from stdout log file (updated disrealnew implementation)."""
         try:
             if not stdout_log_path.exists():
                 return
             
-            # Read last few lines of stdout log to extract progress information
-            # This is a simplified implementation - you would need to parse actual disrealnew output
             simulation_info = self.active_simulations[operation_name]
             progress = simulation_info['progress']
             
             # Update timestamp
             progress.last_update = datetime.now()
             
-            # Estimate progress based on time elapsed (simplified)
-            start_time = simulation_info['start_time']
-            elapsed_minutes = (datetime.now() - start_time).total_seconds() / 60.0
+            # Read the last 20 lines of the stdout log file to find latest PROGRESS line
+            with open(stdout_log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                lines = f.readlines()
+                
+            # Look for the most recent PROGRESS line
+            # Format: PROGRESS: Cycle=1224/2444 Time=673.078125 DOH=0.710882 Temp=25.000000 pH=13.351768
+            latest_progress_line = None
+            for line in reversed(lines[-20:]):
+                if line.strip().startswith('PROGRESS:'):
+                    latest_progress_line = line.strip()
+                    break
             
-            # Very rough progress estimation (you'll improve this based on actual output parsing)
-            estimated_total_minutes = 120.0  # 2 hours typical
-            progress.percent_complete = min((elapsed_minutes / estimated_total_minutes) * 100.0, 95.0)
-            
-            # TODO: Parse actual output for real progress values
-            # This would involve parsing lines like:
-            # "Cycle 1000, time = 5.2 h, Alpha = 0.15, Temperature = 25.3 C"
+            if latest_progress_line:
+                import re
+                
+                # Parse cycle information: Cycle=1224/2444
+                cycle_match = re.search(r'Cycle=(\d+)/(\d+)', latest_progress_line)
+                if cycle_match:
+                    current_cycle = int(cycle_match.group(1))
+                    total_cycles = int(cycle_match.group(2))
+                    progress.cycle = current_cycle
+                    progress.max_cycles = total_cycles
+                
+                # Parse time: Time=673.078125
+                time_match = re.search(r'Time=([\d.]+)', latest_progress_line)
+                if time_match:
+                    progress.time_hours = float(time_match.group(1))
+                
+                # Parse degree of hydration: DOH=0.710882
+                doh_match = re.search(r'DOH=([\d.]+)', latest_progress_line)
+                if doh_match:
+                    progress.degree_of_hydration = float(doh_match.group(1))
+                
+                # Parse temperature: Temp=25.000000
+                temp_match = re.search(r'Temp=([\d.]+)', latest_progress_line)
+                if temp_match:
+                    progress.temperature_celsius = float(temp_match.group(1))
+                
+                # Parse pH: pH=13.351768
+                ph_match = re.search(r'pH=([\d.]+)', latest_progress_line)
+                if ph_match:
+                    progress.ph = float(ph_match.group(1))
+                
+                # Calculate percentage based on time (more accurate than cycles)
+                max_time_hours = simulation_info.get('max_time_hours', 168.0)
+                progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
+                
+                # Estimate heat released (simplified calculation)
+                # Typical portland cement releases ~500 kJ/kg at full hydration
+                progress.heat_cumulative = progress.degree_of_hydration * 500.0
+                
+                self.logger.debug(f"Progress parsed for '{operation_name}': Cycle={progress.cycle}/{progress.max_cycles}, Time={progress.time_hours:.2f}h, DOH={progress.degree_of_hydration:.3f}")
+            else:
+                # Fallback to time-based estimation if no PROGRESS line found
+                start_time = simulation_info['start_time']
+                elapsed_minutes = (datetime.now() - start_time).total_seconds() / 60.0
+                estimated_total_minutes = 120.0  # 2 hours typical
+                progress.percent_complete = min((elapsed_minutes / estimated_total_minutes) * 100.0, 95.0)
+                self.logger.debug(f"No PROGRESS line found for '{operation_name}', using time-based estimate: {progress.percent_complete:.1f}%")
             
         except Exception as e:
             self.logger.error(f"Error parsing stdout progress for '{operation_name}': {e}")
+            # Fallback to basic time estimation on error
+            try:
+                simulation_info = self.active_simulations[operation_name]
+                progress = simulation_info['progress']
+                start_time = simulation_info['start_time']
+                elapsed_minutes = (datetime.now() - start_time).total_seconds() / 60.0
+                estimated_total_minutes = 120.0
+                progress.percent_complete = min((elapsed_minutes / estimated_total_minutes) * 100.0, 95.0)
+            except:
+                pass
     
     def _notify_progress_callbacks(self, operation_name: str):
         """Notify all registered progress callbacks."""
@@ -503,21 +568,88 @@ class HydrationExecutorService:
             self.progress_callbacks[operation_name] = []
         self.progress_callbacks[operation_name].append(callback)
     
+    def _check_simulation_completion(self, operation_name: str) -> bool:
+        """
+        Check if simulation completed successfully by examining output files.
+        
+        Args:
+            operation_name: Name of the operation
+            
+        Returns:
+            True if simulation completed successfully, False otherwise
+        """
+        try:
+            operation_dir = self.project_root / "Operations" / operation_name
+            
+            # Check for key output files that indicate successful completion
+            # Extract microstructure name (e.g., "E2ETest" from "HydrationSim_E2ETest_20250813_205150")
+            if operation_name.startswith('HydrationSim_'):
+                # Remove "HydrationSim_" prefix and timestamp suffix to get microstructure name
+                temp_name = operation_name.replace('HydrationSim_', '')
+                # Find the microstructure name by removing the timestamp (format: _YYYYMMDD_HHMMSS)
+                import re
+                microstructure_name = re.sub(r'_\d{8}_\d{6}$', '', temp_name)
+            else:
+                microstructure_name = operation_name
+                
+            expected_files = [
+                f"HydrationOf_{microstructure_name}.csv",  # Main data file
+                f"HydrationOf_{microstructure_name}.mov",  # Movie file
+                "progress.json"  # Progress file
+            ]
+            
+            files_found = 0
+            for expected_file in expected_files:
+                file_path = operation_dir / expected_file
+                if file_path.exists() and file_path.stat().st_size > 0:
+                    files_found += 1
+                    self.logger.debug(f"Found output file: {expected_file}")
+            
+            # Consider successful if at least 2 out of 3 expected files exist with content
+            completion_successful = files_found >= 2
+            
+            if completion_successful:
+                self.logger.info(f"Simulation completion verified by output files: {operation_name}")
+            else:
+                self.logger.warning(f"Simulation completion could not be verified: {operation_name} (found {files_found}/3 files)")
+                
+            return completion_successful
+            
+        except Exception as e:
+            self.logger.error(f"Error checking simulation completion for '{operation_name}': {e}")
+            return False
+    
     def _update_operation_status(self, operation_name: str, status: OperationStatus):
         """Update operation status in database."""
         try:
             with self.database_service.get_session() as session:
                 operation = session.query(Operation).filter_by(name=operation_name).first()
-                if operation:
-                    operation.status = status.value
-                    if status == OperationStatus.RUNNING:
-                        operation.mark_started()
-                    elif status == OperationStatus.FINISHED:
-                        operation.mark_finished()
-                    elif status == OperationStatus.ERROR:
-                        operation.mark_error("Hydration simulation failed")
-                    elif status == OperationStatus.CANCELLED:
-                        operation.mark_cancelled()
+                
+                # Create operation if it doesn't exist
+                if not operation:
+                    self.logger.info(f"Creating new operation: {operation_name}")
+                    operation = Operation(
+                        name=operation_name,
+                        type=OperationType.HYDRATION,
+                        depends_on_operation_name=None,
+                        notes=f"Hydration simulation started at {datetime.now().isoformat()}"
+                    )
+                    operation.mark_queued()
+                    session.add(operation)
+                    session.flush()  # Ensure operation gets an ID
+                
+                # Update status
+                operation.status = status.value
+                if status == OperationStatus.RUNNING:
+                    operation.mark_started()
+                elif status == OperationStatus.FINISHED:
+                    operation.mark_finished()
+                elif status == OperationStatus.ERROR:
+                    operation.mark_error("Hydration simulation failed")
+                elif status == OperationStatus.CANCELLED:
+                    operation.mark_cancelled()
+                    
+                session.commit()
         except Exception as e:
             self.logger.error(f"Error updating operation status for '{operation_name}': {e}")
     

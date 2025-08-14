@@ -70,6 +70,6 @@ ui:
   use_opengl: false
   window_height: 800
   window_maximized: false
-  window_position_x: 186
-  window_position_y: 107
+  window_position_x: 119
+  window_position_y: 90
   window_width: 2339

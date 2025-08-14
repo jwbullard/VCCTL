@@ -208,7 +208,8 @@ class MicrostructureHydrationBridge:
                                        curing_conditions: Dict[str, Any],
                                        time_calibration_settings: Dict[str, Any] = None,
                                        advanced_settings: Dict[str, Any] = None,
-                                       db_parameter_modifications: Dict[str, Any] = None) -> str:
+                                       db_parameter_modifications: Dict[str, Any] = None,
+                                       max_time_hours: float = 168.0) -> str:
         """
         Generate complete extended parameter file for disrealnew.c.
         
@@ -219,6 +220,7 @@ class MicrostructureHydrationBridge:
             time_calibration_settings: Dict with time calibration mode and parameters
             advanced_settings: Dict with advanced simulation parameters
             db_parameter_modifications: Dict with user modifications to database parameters
+            max_time_hours: Maximum simulation time in hours for End_time parameter
             
         Returns:
             Path to generated parameter file
@@ -252,7 +254,7 @@ class MicrostructureHydrationBridge:
             
             # Generate UI simulation parameters with curing conditions, time calibration, and advanced settings
             ui_parameters = self._generate_ui_simulation_parameters(
-                microstructure_name, curing_conditions, time_calibration_settings, advanced_settings
+                microstructure_name, curing_conditions, time_calibration_settings, advanced_settings, max_time_hours, operation_name
             )
             
             # Create operation directory
@@ -297,7 +299,9 @@ class MicrostructureHydrationBridge:
     def _generate_ui_simulation_parameters(self, microstructure_name: str, 
                                          curing_conditions: Dict[str, Any],
                                          time_calibration_settings: Dict[str, Any] = None,
-                                         advanced_settings: Dict[str, Any] = None) -> List[str]:
+                                         advanced_settings: Dict[str, Any] = None,
+                                         max_time_hours: float = 168.0,
+                                         operation_name: str = None) -> List[str]:
         """
         Generate UI simulation parameters including curing conditions, time calibration, and advanced settings.
         
@@ -306,6 +310,7 @@ class MicrostructureHydrationBridge:
             curing_conditions: Dict with thermal and moisture settings
             time_calibration_settings: Dict with time calibration mode and parameters
             advanced_settings: Dict with advanced simulation parameters
+            max_time_hours: Maximum simulation time in hours
             
         Returns:
             List of parameter lines for disrealnew.c
@@ -316,7 +321,21 @@ class MicrostructureHydrationBridge:
         moisture_mode = curing_conditions.get('moisture_mode', 'sealed')
         
         # Map thermal mode to Adiaflag
-        adiaflag = 0 if thermal_mode == 'isothermal' else 1
+        if thermal_mode == 'isothermal':
+            adiaflag = 0
+        elif thermal_mode == 'adiabatic':
+            adiaflag = 1
+        else:  # temperature_profile
+            # For temperature profile, use isothermal flag but temperature will be handled by profile
+            adiaflag = 0  # Could be 1 depending on profile requirements
+            
+            # Generate temperature profile CSV file if profile data is provided
+            temperature_profile_data = curing_conditions.get('temperature_profile_data')
+            if temperature_profile_data and operation_name:
+                # Create operation directory to store the temperature profile file
+                operation_dir = f"./Operations/{operation_name}"
+                os.makedirs(operation_dir, exist_ok=True)
+                self._generate_temperature_profile_csv(temperature_profile_data, operation_dir)
         
         # Map moisture mode to Sealed flag  
         sealed_flag = 1 if moisture_mode == 'sealed' else 0
@@ -364,6 +383,7 @@ class MicrostructureHydrationBridge:
             setting_frequency = advanced_settings.get('setting_frequency', 0.25)
             physical_frequency = advanced_settings.get('physical_frequency', 2.0)
             movie_frequency = advanced_settings.get('movie_frequency', 72.0)
+            save_interval_hours = advanced_settings.get('save_interval_hours', 72.0)
             csh2_flag = advanced_settings.get('csh2_flag', 1)
             ch_flag = advanced_settings.get('ch_flag', 1)
             ph_active = advanced_settings.get('ph_active', 1)
@@ -380,6 +400,7 @@ class MicrostructureHydrationBridge:
             setting_frequency = 0.25
             physical_frequency = 2.0
             movie_frequency = 72.0
+            save_interval_hours = 72.0
             csh2_flag = 1
             ch_flag = 1
             ph_active = 1
@@ -393,13 +414,13 @@ class MicrostructureHydrationBridge:
             f"Pimgfile,{microstructure_name}.pimg",
             f"Oc3afrac,{c3a_fraction}",
             f"Csh_seeds,{csh_seeds}",
-            "End_time,28.0",
+            f"End_time,{max_time_hours / 24.0:.1f}",
             "Place_crack,n",
             "Crackwidth,0",
             "Cracktime,0.0", 
             "Crackorient,0",
             "Customize_times,n",
-            "Outtimefreq,72.0",
+            f"Outtimefreq,{save_interval_hours}",
             
             # NOTE: Onevoxelbias parameters are inserted here by caller
             
@@ -722,7 +743,7 @@ class MicrostructureHydrationBridge:
         """
         try:
             # Try to get metadata for the microstructure
-            metadata = self.get_metadata(microstructure_name)
+            metadata = self.load_microstructure_metadata(microstructure_name)
             
             if metadata and metadata.materials:
                 # Find cement and fly ash materials
@@ -944,3 +965,33 @@ class MicrostructureHydrationBridge:
             'additional_param1': 0.000,          # Additional parameter 1
             'additional_param2': 1.000           # Additional parameter 2
         }
+    
+    def _generate_temperature_profile_csv(self, temperature_profile_data: List[Tuple[float, float]], operation_dir: str) -> None:
+        """
+        Generate temperature_profile.csv file for disrealnew.c.
+        
+        The file format required by disrealnew.c is:
+        time_start,time_finish,temperature_start,temperature_finish
+        
+        Args:
+            temperature_profile_data: List of (time_hours, temperature_celsius) tuples
+            operation_dir: Directory where the CSV file should be created
+        """
+        try:
+            csv_file_path = os.path.join(operation_dir, "temperature_profile.csv")
+            
+            with open(csv_file_path, 'w') as f:
+                # Convert point data to interval data required by disrealnew.c
+                for i in range(len(temperature_profile_data) - 1):
+                    time_start = temperature_profile_data[i][0]
+                    temp_start = temperature_profile_data[i][1]
+                    time_finish = temperature_profile_data[i + 1][0]
+                    temp_finish = temperature_profile_data[i + 1][1]
+                    
+                    f.write(f"{time_start:.1f},{time_finish:.1f},{temp_start:.1f},{temp_finish:.1f}\n")
+            
+            self.logger.info(f"Generated temperature profile CSV with {len(temperature_profile_data) - 1} intervals: {csv_file_path}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to generate temperature profile CSV: {e}")
+            raise

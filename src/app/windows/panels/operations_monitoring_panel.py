@@ -1312,8 +1312,26 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Update operation status information by checking real processes."""
         current_time = datetime.now()
         
+        # Periodically refresh operations from database 
+        # More frequent updates if we have running operations, less frequent otherwise
+        if not hasattr(self, '_last_db_refresh'):
+            self._last_db_refresh = current_time
+        
+        # Check if we have any running operations
+        has_running_ops = any(op.status in ['running', 'pending'] for op in self.operations.values())
+        refresh_interval = 10 if has_running_ops else 30  # 10 seconds if running ops, 30 seconds otherwise
+        
+        time_since_refresh = (current_time - self._last_db_refresh).total_seconds()
+        if time_since_refresh >= refresh_interval:
+            self._refresh_operations_from_database()
+            self._last_db_refresh = current_time
+        
         # Update existing operations based on actual process status
         for operation in self.operations.values():
+            # Skip process monitoring for database-sourced operations (they don't have process info)
+            if hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database':
+                continue
+                
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
                 # Check if process is still running
                 if not operation.is_process_running():
@@ -1734,7 +1752,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Clear time fields
         self.operation_start_time_value.set_text("Various")
         self.operation_duration_value.set_text("Various")
-        self.operation_estimated_completion_value.set_text("Various")
+        self.operation_eta_value.set_text("Various")
     
     def _clear_operation_details(self) -> None:
         """Clear operation details display when no operations are selected."""
@@ -1743,7 +1761,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.operation_status_value.set_text("-")
         self.operation_start_time_value.set_text("-")
         self.operation_duration_value.set_text("-")
-        self.operation_estimated_completion_value.set_text("-")
+        self.operation_eta_value.set_text("-")
         
         # Clear progress bars
         self.overall_progress.set_fraction(0.0)
@@ -1842,16 +1860,44 @@ class OperationsMonitoringPanel(Gtk.Box):
                     output_dir = None
                     if hasattr(operation, 'metadata') and isinstance(operation.metadata, dict):
                         output_dir = operation.metadata.get('output_dir', '')
+                        operation_source = operation.metadata.get('source', '')
+                    else:
+                        operation_source = ''
+                    
+                    # For database operations (hydration simulations), construct the folder path
+                    if operation_source == 'database' and not output_dir:
+                        # Operations folder is typically Operations/{operation_name}
+                        project_root = Path(__file__).parent.parent.parent.parent
+                        operations_dir = project_root / "Operations"
+                        potential_folder = operations_dir / operation.name
+                        if potential_folder.exists():
+                            output_dir = str(potential_folder)
+                            self.logger.info(f"Found operation folder for {operation.name}: {output_dir}")
+                    
+                    # Delete from database if it's a database-sourced operation (like hydration simulations)
+                    if operation_source == 'database':
+                        try:
+                            operation_service = self.service_container.operation_service
+                            operation_service.delete(operation.name)
+                            self.logger.info(f"Deleted operation from database: {operation.name}")
+                        except Exception as e:
+                            self.logger.warning(f"Failed to delete operation from database: {operation.name}: {e}")
                     
                     # Delete the operation from memory
                     if operation_id in self.operations:
                         del self.operations[operation_id]
                     
                     # Delete the associated folder if it exists
-                    if output_dir and Path(output_dir).exists():
-                        import shutil
-                        shutil.rmtree(output_dir)
-                        self.logger.info(f"Deleted operation folder: {output_dir}")
+                    if output_dir:
+                        folder_path = Path(output_dir)
+                        if folder_path.exists():
+                            import shutil
+                            shutil.rmtree(output_dir)
+                            self.logger.info(f"Deleted operation folder: {output_dir}")
+                        else:
+                            self.logger.warning(f"Operation folder not found: {output_dir}")
+                    else:
+                        self.logger.warning(f"No output directory found for operation: {operation.name}")
                     
                     deleted_count += 1
                     
@@ -1898,6 +1944,10 @@ class OperationsMonitoringPanel(Gtk.Box):
         cleaned_count = 0
         
         for operation in list(self.operations.values()):
+            # Skip cleanup for database-sourced operations (they don't have process info)
+            if hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database':
+                continue
+                
             # Check running/paused operations for stale processes
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
                 self.logger.info(f"Checking running operation {operation.id}: {operation.name}")
@@ -3648,45 +3698,196 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.logger.error(f"Failed to save operations to file: {e}", exc_info=True)
     
     def _load_operations_from_file(self) -> None:
-        """Load operations from JSON file."""
+        """Load operations from JSON file and database."""
+        # First load from file (existing operations)
         try:
             self.logger.info(f"Attempting to load operations from {self.operations_file}")
             
-            if not self.operations_file.exists():
-                self.logger.info("No operations history file found - starting fresh")
-                return
-            
-            with open(self.operations_file, 'r') as f:
-                data = json.load(f)
-            
-            self.logger.info(f"Found operations file with {len(data.get('operations', {}))} operations")
-            
-            # Load operations
-            operations_data = data.get('operations', {})
-            for op_id, op_data in operations_data.items():
-                try:
-                    operation = Operation.from_dict(op_data)
-                    self.operations[op_id] = operation
-                except Exception as e:
-                    self.logger.warning(f"Failed to load operation {op_id}: {e}")
-            
-            # Restore operation counter
-            self.operation_counter = data.get('operation_counter', 0)
-            
-            self.logger.info(f"Successfully loaded {len(self.operations)} operations from {self.operations_file}")
-            
-            # Update UI with loaded operations
-            if self.operations:
-                self._update_operations_list()
-                self._update_performance_metrics()
-                # Refresh results analysis with loaded data
-                try:
-                    self._refresh_results_analysis()
-                except Exception as e:
-                    self.logger.warning(f"Error refreshing results analysis on load: {e}")
+            if self.operations_file.exists():
+                with open(self.operations_file, 'r') as f:
+                    data = json.load(f)
+                
+                self.logger.info(f"Found operations file with {len(data.get('operations', {}))} operations")
+                
+                # Load operations from file
+                operations_data = data.get('operations', {})
+                for op_id, op_data in operations_data.items():
+                    try:
+                        operation = Operation.from_dict(op_data)
+                        self.operations[op_id] = operation
+                    except Exception as e:
+                        self.logger.warning(f"Failed to load operation {op_id}: {e}")
+                
+                # Restore operation counter
+                self.operation_counter = data.get('operation_counter', 0)
+                
+                self.logger.info(f"Successfully loaded {len(self.operations)} operations from file")
+            else:
+                self.logger.info("No operations history file found")
             
         except Exception as e:
             self.logger.error(f"Failed to load operations from file: {e}", exc_info=True)
+        
+        # Then load from database (recent operations like hydration simulations)
+        try:
+            self.logger.info("Loading operations from database...")
+            operation_service = self.service_container.operation_service
+            
+            # Get all operations from database
+            db_operations = operation_service.get_all()
+            self.logger.info(f"Found {len(db_operations)} operations in database")
+            
+            # Convert database operations to UI operations
+            for db_op in db_operations:
+                try:
+                    ui_operation = self._convert_db_operation_to_ui_operation(db_op)
+                    
+                    # Only add if not already loaded from file
+                    if ui_operation.id not in self.operations:
+                        self.operations[ui_operation.id] = ui_operation
+                        self.logger.debug(f"Added database operation: {ui_operation.name}")
+                    else:
+                        # Update status if the database version is more recent
+                        existing = self.operations[ui_operation.id]
+                        # Use start time for comparison since Operation model doesn't have 'updated' field
+                        db_time = db_op.start or db_op.queue
+                        existing_time = existing.start_time
+                        if db_time and existing_time and db_time > existing_time:
+                            existing.status = ui_operation.status
+                            existing.progress = ui_operation.progress
+                            existing.end_time = ui_operation.end_time
+                            self.logger.debug(f"Updated operation status: {ui_operation.name} -> {ui_operation.status.value}")
+                        else:
+                            # Just update the status to be safe
+                            existing.status = ui_operation.status
+                            existing.progress = ui_operation.progress
+                            existing.end_time = ui_operation.end_time
+                            
+                except Exception as e:
+                    self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
+            
+            self.logger.info(f"Total operations loaded: {len(self.operations)}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load operations from database: {e}", exc_info=True)
+        
+        # Update UI with all loaded operations
+        if self.operations:
+            self._update_operations_list()
+            self._update_performance_metrics()
+            # Refresh results analysis with loaded data
+            try:
+                self._refresh_results_analysis()
+            except Exception as e:
+                self.logger.warning(f"Error refreshing results analysis on load: {e}")
+    
+    def _convert_db_operation_to_ui_operation(self, db_op) -> Operation:
+        """Convert database Operation to UI Operation format."""
+        from app.models.operation import OperationStatus as DBOperationStatus, OperationType as DBOperationType
+        
+        # Map database status to UI status
+        status_mapping = {
+            DBOperationStatus.QUEUED.value: OperationStatus.PENDING,
+            DBOperationStatus.RUNNING.value: OperationStatus.RUNNING,  
+            DBOperationStatus.FINISHED.value: OperationStatus.COMPLETED,
+            DBOperationStatus.ERROR.value: OperationStatus.FAILED,
+            DBOperationStatus.CANCELLED.value: OperationStatus.CANCELLED,
+        }
+        
+        # Map database type to UI type
+        type_mapping = {
+            DBOperationType.HYDRATION.value: OperationType.HYDRATION_SIMULATION,
+            DBOperationType.MICROSTRUCTURE.value: OperationType.MICROSTRUCTURE_GENERATION,
+            DBOperationType.ANALYSIS.value: OperationType.PROPERTY_CALCULATION,
+            DBOperationType.EXPORT.value: OperationType.FILE_OPERATION,
+            DBOperationType.IMPORT.value: OperationType.FILE_OPERATION,
+        }
+        
+        # Convert status and type
+        ui_status = status_mapping.get(db_op.status, OperationStatus.PENDING)
+        ui_type = type_mapping.get(db_op.type, OperationType.BATCH_OPERATION)
+        
+        # Calculate progress (simplified - can be enhanced)
+        progress = 0.0
+        if ui_status == OperationStatus.COMPLETED:
+            progress = 1.0
+        elif ui_status == OperationStatus.RUNNING:
+            progress = 0.5  # Rough estimate
+        
+        # Create UI operation
+        return Operation(
+            id=db_op.name,  # Use name as ID
+            name=db_op.name,
+            operation_type=ui_type,
+            status=ui_status,
+            progress=progress,
+            start_time=db_op.start,
+            end_time=db_op.finish,
+            paused_time=None,
+            estimated_duration=None,
+            current_step="",
+            total_steps=0,
+            completed_steps=0,
+            cpu_usage=0.0,
+            memory_usage=0.0,
+            disk_usage=0.0,
+            error_message=None,  # Operation model doesn't have error_message field
+            log_entries=[],
+            metadata={"source": "database", "output_directory": f"Operations/{db_op.name}"}
+        )
+    
+    def _refresh_operations_from_database(self) -> None:
+        """Refresh operations from database to pick up new operations."""
+        try:
+            self.logger.debug("Refreshing operations from database...")
+            operation_service = self.service_container.operation_service
+            
+            # Get all operations from database
+            db_operations = operation_service.get_all()
+            
+            # Convert database operations to UI operations
+            new_operations_count = 0
+            for db_op in db_operations:
+                try:
+                    ui_operation = self._convert_db_operation_to_ui_operation(db_op)
+                    
+                    # Only add if not already loaded
+                    if ui_operation.id not in self.operations:
+                        self.operations[ui_operation.id] = ui_operation
+                        new_operations_count += 1
+                        self.logger.info(f"Added new database operation: {ui_operation.name}")
+                    else:
+                        # Update status of existing operations from database
+                        existing = self.operations[ui_operation.id]
+                        status_changed = False
+                        
+                        # Compare status (handle both enum and string values)
+                        existing_status = existing.status.value if hasattr(existing.status, 'value') else str(existing.status)
+                        new_status = ui_operation.status.value if hasattr(ui_operation.status, 'value') else str(ui_operation.status)
+                        
+                        if existing_status != new_status:
+                            existing.status = ui_operation.status
+                            existing.progress = ui_operation.progress
+                            existing.end_time = ui_operation.end_time
+                            status_changed = True
+                            self.logger.info(f"Updated operation status: {ui_operation.name} -> {new_status}")
+                        
+                        # Also check if progress or end_time changed without status change
+                        if not status_changed and (existing.progress != ui_operation.progress or existing.end_time != ui_operation.end_time):
+                            existing.progress = ui_operation.progress
+                            existing.end_time = ui_operation.end_time
+                            self.logger.debug(f"Updated operation details: {ui_operation.name}")
+                            
+                except Exception as e:
+                    self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
+            
+            if new_operations_count > 0:
+                self.logger.info(f"Added {new_operations_count} new operations from database")
+                # Trigger UI update for new operations
+                GLib.idle_add(self._update_operations_list)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to refresh operations from database: {e}")
     
     def _save_operations_periodically(self) -> None:
         """Save operations periodically (called from monitoring loop)."""

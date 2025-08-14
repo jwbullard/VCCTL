@@ -275,6 +275,35 @@ class HydrationService:
         """Get predefined temperature profiles."""
         return self._predefined_profiles.copy()
     
+    def get_temperature_profile_service(self):
+        """Get temperature profile service for database operations."""
+        try:
+            from app.services.temperature_profile_service import TemperatureProfileService
+            return TemperatureProfileService(self.db_service)
+        except Exception as e:
+            self.logger.error(f"Failed to get temperature profile service: {e}")
+            return None
+    
+    def get_all_temperature_profiles(self) -> Dict[str, TemperatureProfile]:
+        """Get all temperature profiles (predefined + custom from database)."""
+        try:
+            profiles = self._predefined_profiles.copy()
+            
+            # Add custom profiles from database
+            profile_service = self.get_temperature_profile_service()
+            if profile_service:
+                profile_list = profile_service.list_profiles()
+                for profile_info in profile_list:
+                    if not profile_info['is_predefined']:  # Only add custom profiles
+                        profile = profile_service.get_profile(profile_info['name'])
+                        if profile:
+                            profiles[profile.name] = profile
+            
+            return profiles
+        except Exception as e:
+            self.logger.error(f"Failed to get all temperature profiles: {e}")
+            return self._predefined_profiles.copy()
+    
     def create_temperature_profile(self, name: str, description: str, 
                                  points: List[Tuple[float, float]]) -> TemperatureProfile:
         """Create a custom temperature profile."""

@@ -386,8 +386,8 @@ int movecsh(int xcur, int ycur, int zcur, int finalstep, int cycorig) {
   }
 
   if (!action) {
-    printf("\nERROR in movecsh:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in movecsh: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -634,8 +634,8 @@ void extfh3(int xpres, int ypres, int zpres, int *poreid) {
     multf = moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extfh3:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extfh3: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -779,8 +779,8 @@ int extettr(int xpres, int ypres, int zpres, int etype, int *poreid) {
     multf = moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extettr:");
-      printf("\n\tValue of newact is %d", newact);
+      fprintf(stderr, "\nERROR in extettr: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -1047,8 +1047,8 @@ void extgyps(int xpres, int ypres, int zpres, int *poreid) {
     multf = moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("ERROR in extgyps:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extgyps: Value of newact is %d", newact);
+      fflush(stdout);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -1186,8 +1186,8 @@ int moveanh(int xcur, int ycur, int zcur, int finalstep, float nucprgyp) {
     sumback = moveone(&xnew, &ynew, &znew, &action, sumin);
 
     if (!action) {
-      printf("\nERROR in moveanh:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in moveanh: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -1568,8 +1568,8 @@ int movehem(int xcur, int ycur, int zcur, int finalstep, float nucprgyp) {
     sumback = moveone(&xnew, &ynew, &znew, &action, sumin);
 
     if (!action) {
-      printf("\nERROR in movehem:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in movehem: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -1939,8 +1939,8 @@ int moveso4(int xcur, int ycur, int zcur, int finalstep, float nucprgyp) {
     sumback = moveone(&xnew, &ynew, &znew, &action, sumin);
 
     if (!action) {
-      printf("\nERROR in moveso4:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in moveso4: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -2037,8 +2037,8 @@ int extfriedel(int xpres, int ypres, int zpres, int *poreid) {
     multf = moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extfriedel:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extfriedel: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -2168,8 +2168,8 @@ int extstrat(int xpres, int ypres, int zpres, int *poreid) {
     multf = moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extstrat:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extstrat: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -2303,8 +2303,8 @@ int movegyp(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("ERROR in movegyp:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in movegyp: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -2678,8 +2678,8 @@ int movecacl2(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("ERROR in movecacl2:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in movecacl2: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -2988,8 +2988,8 @@ int movecas2(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("\nERROR in movecas2:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in movecas2: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -3328,8 +3328,8 @@ int moveas(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("\nERROR in moveas:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in moveas: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -3528,8 +3528,8 @@ int movecaco3(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("\nERROR in movecaco3:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in movecaco3: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -3685,8 +3685,8 @@ void extafm(int xpres, int ypres, int zpres, int *poreid) {
     sump *= moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extafm:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extafm: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -3816,8 +3816,8 @@ int moveettr(int xcur, int ycur, int zcur, int finalstep) {
   sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
   if (!action) {
-    printf("\nERROR in moveettr:");
-    printf("\n\tValue of action is %d\n", action);
+    fprintf(stderr, "\nERROR in moveettr: Value of action is %d", action);
+    fflush(stderr);
   }
 
   check = Mic[xnew][ynew][znew];
@@ -4037,8 +4037,8 @@ void extpozz(int xpres, int ypres, int zpres, int *poreid) {
     sump *= moveone(&xchr, &ychr, &zchr, &newact, sump);
 
     if (!newact) {
-      printf("\nERROR in extpozz:");
-      printf("\n\tValue of newact is %d\n", newact);
+      fprintf(stderr, "\nERROR in extpozz: Value of newact is %d", newact);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -4174,8 +4174,8 @@ int movefh3(int xcur, int ycur, int zcur, int finalstep, float nucprob) {
     sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
     if (!action) {
-      printf("\nERROR in movefh3:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in movefh3: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -4275,8 +4275,8 @@ int movech(int xcur, int ycur, int zcur, int finalstep, float nucprob) {
     sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
 
     if (!action) {
-      printf("\nERROR in movech:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in movech: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -4469,8 +4469,8 @@ void extc3ah6(int xpres, int ypres, int zpres, int *poreid) {
     sump *= moveone(&xchr, &ychr, &zchr, &action, sump);
 
     if (!action) {
-      printf("\nERROR in extc3ah6:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in extc3ah6: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xchr][ychr][zchr];
@@ -4623,8 +4623,8 @@ int movec3a(int xcur, int ycur, int zcur, int finalstep, float nucprob) {
     sumold = 1;
     sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
     if (!action) {
-      printf("\nERROR in movec3a:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in movec3a: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -5342,8 +5342,8 @@ int movec4a(int xcur, int ycur, int zcur, int finalstep, float nucprob) {
     sumold = 1;
     sumgarb = moveone(&xnew, &ynew, &znew, &action, sumold);
     if (!action) {
-      printf("\nERROR in movec4a:");
-      printf("\n\tValue of action is %d\n", action);
+      fprintf(stderr, "\nERROR in movec4a: Value of action is %d", action);
+      fflush(stderr);
     }
 
     check = Mic[xnew][ynew][znew];
@@ -6138,8 +6138,8 @@ void hydrate(int fincyc, int stepmax, float chpar1, float chpar2, float hgpar1,
           reactf = movecaco3(xpl, ypl, zpl, termflag);
           break;
         default:
-          printf("ERROR in hydrate:");
-          printf("\n\tID of phase is %d\n", phpl);
+          fprintf(stderr, "\nERROR in hydrate: ID of phase is %d", phpl);
+          fflush(stderr);
           break;
         }
 

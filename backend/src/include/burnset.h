@@ -86,9 +86,9 @@ int burnset(int d1, int d2, int d3) {
    *	pathway to surface #2
    ***/
 
-  if (Verbose_flag == 2) {
-    printf("\nIn burnset: d1 = %d, d2 = %d, d3 = %d", d1, d2, d3);
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nIn burnset: d1 = %d, d2 = %d, d3 = %d", d1, d2, d3);
+    fflush(stderr);
   }
 
   /***
@@ -101,10 +101,9 @@ int burnset(int d1, int d2, int d3) {
   xformMic = NULL;
   xformMic = ibox(dimensions[0], dimensions[1], dimensions[2]);
   if (!xformMic) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for xformMic.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for xformMic. Exiting now.");
+    fflush(stderr);
     return (MEMERR);
   }
 
@@ -118,9 +117,9 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose_flag == 2) {
-    printf("\nAssignment to xformMic is complete.");
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(stderr, "\nDEBUG: Assignment to xformMic is complete.");
+    fflush(stderr);
   }
 
   /*  Allocate memory for transformed Micpart array */
@@ -128,10 +127,9 @@ int burnset(int d1, int d2, int d3) {
   xformMicpart = NULL;
   xformMicpart = ibox(dimensions[0], dimensions[1], dimensions[2]);
   if (!xformMicpart) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for xformMicpart.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for xformMicpart. Exiting now.");
+    fflush(stderr);
     if (xformMic)
       free_ibox(xformMic, dimensions[0], dimensions[1]);
     return (MEMERR);
@@ -147,9 +145,9 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose_flag == 2) {
-    printf("\nAssignment to xformMicpart is complete.");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Assignment to xformMicpart is complete.");
+    fflush(stderr);
   }
 
   /*  Allocate memory for transformed newmat array */
@@ -157,10 +155,9 @@ int burnset(int d1, int d2, int d3) {
   newmat = NULL;
   newmat = ibox(dimensions[0], dimensions[1], dimensions[2]);
   if (!newmat) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for newmat.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for newmat. Exiting now.");
+    fflush(stderr);
     if (xformMicpart)
       free_ibox(xformMicpart, dimensions[0], dimensions[1]);
     if (xformMic)
@@ -178,55 +175,54 @@ int burnset(int d1, int d2, int d3) {
       }
     }
   }
-  if (Verbose_flag == 2) {
-    printf("\nAssignment to newmat is complete.");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Assignment to newmat is complete.");
+    fflush(stderr);
   }
 
   nmatx = nmaty = nmatz = NULL;
   nnewx = nnewy = nnewz = NULL;
 
-  if (Verbose_flag == 2) {
-    printf("\nI am in burnset...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: I am in burnset...");
+    fflush(stderr);
   }
 
   nmatx = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmatx...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmatx...");
+    fflush(stderr);
   }
   nmaty = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmaty...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmaty...");
+    fflush(stderr);
   }
   nmatz = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nmatz...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nmatz...");
+    fflush(stderr);
   }
   nnewx = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewx...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewx...");
+    fflush(stderr);
   }
   nnewy = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewy...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewy...");
+    fflush(stderr);
   }
   nnewz = ivector(SIZESET);
-  if (Verbose_flag == 2) {
-    printf("\nAllocated nnewz...");
-    fflush(stdout);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Allocated nnewz...");
+    fflush(stderr);
   }
 
   if (!nmatx) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for nmatx.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nmatx. Exiting now.");
+    fflush(stderr);
     if (xformMicpart)
       free_ibox(xformMicpart, dimensions[0], dimensions[1]);
     if (xformMic != NULL)
@@ -234,10 +230,9 @@ int burnset(int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nmaty) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for nmaty.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nmaty. Exiting now.");
+    fflush(stderr);
     free_ivector(nmatx);
     if (xformMicpart)
       free_ibox(xformMicpart, dimensions[0], dimensions[1]);
@@ -246,10 +241,9 @@ int burnset(int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nmatz) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for nmatz.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nmatz. Exiting now.");
+    fflush(stderr);
     free_ivector(nmaty);
     free_ivector(nmatx);
     if (xformMicpart)
@@ -259,10 +253,9 @@ int burnset(int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nnewx) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for nnewx.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nnewx. Exiting now.");
+    fflush(stderr);
     free_ivector(nmatz);
     free_ivector(nmaty);
     free_ivector(nmatx);
@@ -273,10 +266,9 @@ int burnset(int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nnewy) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for nnewy.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nnewy. Exiting now.");
+    fflush(stderr);
     free_ivector(nnewx);
     free_ivector(nmatz);
     free_ivector(nmaty);
@@ -288,10 +280,9 @@ int burnset(int d1, int d2, int d3) {
     return (MEMERR);
   }
   if (!nnewz) {
-    printf("\nERROR in burnset:");
-    printf("\n\tCould not allocate space for newz.");
-    printf("\n\tExiting now.");
-    fflush(stdout);
+    fprintf(stderr, "\nERROR in burnset:");
+    fprintf(stderr, " Could not allocate space for nnewz. Exiting now.");
+    fflush(stderr);
     free_ivector(nnewy);
     free_ivector(nnewx);
     free_ivector(nmatz);
@@ -306,9 +297,9 @@ int burnset(int d1, int d2, int d3) {
 
   ntop = nthrough = setyet = 0;
 
-  if (Verbose_flag == 2) {
-    printf("\nAll memory allocation went okay...");
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(stderr, "\nDEBUG: All memory allocation went okay...");
+    fflush(stderr);
   }
 
   /***
@@ -321,9 +312,9 @@ int burnset(int d1, int d2, int d3) {
 
   for (k = 0; k < dimensions[2]; k++) {
     for (j = 0; j < dimensions[1]; j++) {
-      if (Verbose_flag == 2 && dir == 1) {
-        printf("\nLoop j,k = %d,%d", j, k);
-        fflush(stdout);
+      if (Verbose_flag > 2 && dir == 1) {
+        fprintf(stderr, "\nDEBUG: Loop j,k = %d,%d", j, k);
+        fflush(stderr);
       }
 
       igood = ncur = ntot = 0;
@@ -440,11 +431,10 @@ int burnset(int d1, int d2, int d3) {
                   nnew++;
 
                   if (nnew >= SIZESET) {
-                    printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %d ", nnew);
-                    printf("must be less than ");
-                    printf("%d\n", SIZESET);
-                    fflush(stdout);
+                    fprintf(stderr, "\nERROR in burnset:");
+                    fprintf(stderr, "Size of nnew %d must be less than %d",
+                            nnew, SIZESET);
+                    fflush(stderr);
                   }
 
                   nnewx[nnew] = x1;
@@ -483,11 +473,10 @@ int burnset(int d1, int d2, int d3) {
                   nnew++;
 
                   if (nnew >= SIZESET) {
-                    printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %d ", nnew);
-                    printf("must be less than ");
-                    printf("%d\n", SIZESET);
-                    fflush(stdout);
+                    fprintf(stderr, "\nERROR in burnset:");
+                    fprintf(stderr, "Size of nnew %d must be less than %d",
+                            nnew, SIZESET);
+                    fflush(stderr);
                   }
 
                   nnewx[nnew] = x1;
@@ -539,11 +528,10 @@ int burnset(int d1, int d2, int d3) {
                   nnew++;
 
                   if (nnew >= SIZESET) {
-                    printf("\nERROR in burnset:");
-                    printf("\n\tSize of nnew %d ", nnew);
-                    printf("must be less than ");
-                    printf("%d\n", SIZESET);
-                    fflush(stdout);
+                    fprintf(stderr, "\nERROR in burnset:");
+                    fprintf(stderr, "Size of nnew %d must be less than %d",
+                            nnew, SIZESET);
+                    fflush(stderr);
                   }
 
                   nnewx[nnew] = x1;
@@ -610,11 +598,11 @@ int burnset(int d1, int d2, int d3) {
     }
   }
 
-  if (Verbose_flag == 2) {
-    printf("Phase ID= Solid Phases \n");
-    printf("Number accessible from first surface = %d \n", ntop);
-    printf("Number contained in through pathways= %d \n", nthrough);
-    fflush(stdout);
+  if (Verbose_flag > 1) {
+    fprintf(stderr, "\nDEBUG: Phase ID= Solid Phases");
+    fprintf(stderr, "\n\tNumber accessible from first surface = %d", ntop);
+    fprintf(stderr, "\n\tNumber contained in through pathways= %d", nthrough);
+    fflush(stderr);
   }
 
   mass_burn += (double)(Specgrav[C3S] * Count[C3S]);
@@ -632,12 +620,17 @@ int burnset(int d1, int d2, int d3) {
   count_solid += Count[C3AH6] + Count[ETTRC4AF] + Count[SFUME];
   count_solid += Count[AMSIL] + Count[ASG] + Count[SLAG] + Count[CAS2];
 
-  if (Verbose_flag == 2)
-    printf("Count solids = %d\n", count_solid);
+  if (Verbose_flag > 1) {
+    fprintf(stderr, "\nDEBUG: Count solids = %d", count_solid);
+    fflush(stderr);
+  }
+
   if (count_solid > 0) {
     Con_fracs[dir] = (float)nthrough / (float)count_solid;
-    if (Verbose_flag == 2)
-      printf("Con_fracs[%d] = %f\n", dir, Con_fracs[dir]);
+    if (Verbose_flag > 1) {
+      fprintf(stderr, "\nDEBUGF: Con_fracs[%d] = %f", dir, Con_fracs[dir]);
+      fflush(stderr);
+    }
   }
 
   tvar = Time_cur + (2.0 * (float)(Cyccnt)-1.0) * (Beta / Krate);

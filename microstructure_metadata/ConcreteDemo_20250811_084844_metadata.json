@@ -1,0 +1,63 @@
+{
+  "operation_name": "ConcreteDemo_20250811_084844",
+  "microstructure_file": "./scratch/ConcreteDemo_20250811_084844/ConcreteDemo_20250811_084844.img",
+  "system_size": 100,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement140",
+      "material_type": "cement",
+      "volume_fraction": 0.35,
+      "mass_fraction": 0.55,
+      "specific_gravity": 3.15,
+      "psd_parameters": {
+        "psd_mode": "rosin_rammler",
+        "psd_d50": 15.0,
+        "psd_n": 1.1,
+        "psd_dmax": 75.0
+      }
+    },
+    {
+      "phase_id": 2,
+      "material_name": "silica_fume_950d",
+      "material_type": "silica_fume",
+      "volume_fraction": 0.03,
+      "mass_fraction": 0.08,
+      "specific_gravity": 2.2,
+      "psd_parameters": {
+        "psd_mode": "log_normal",
+        "psd_median": 0.15,
+        "psd_spread": 1.8
+      }
+    },
+    {
+      "phase_id": 3,
+      "material_name": "fly_ash_class_f",
+      "material_type": "fly_ash",
+      "volume_fraction": 0.05,
+      "mass_fraction": 0.12,
+      "specific_gravity": 2.38,
+      "psd_parameters": {
+        "psd_mode": "rosin_rammler",
+        "psd_d50": 18.0,
+        "psd_n": 0.9,
+        "psd_dmax": 100.0
+      }
+    },
+    {
+      "phase_id": 4,
+      "material_name": "fine_aggregate_ottawa",
+      "material_type": "aggregate",
+      "volume_fraction": 0.25,
+      "mass_fraction": 0.25,
+      "specific_gravity": 2.65,
+      "psd_parameters": {
+        "psd_mode": "fuller_thompson",
+        "psd_dmax": 600.0,
+        "psd_exponent": 0.5
+      }
+    }
+  ],
+  "generation_timestamp": "2025-08-11T13:48:44.294624"
+}

@@ -256,8 +256,10 @@ void pHpred(void) {
   Conckplus = 0.0;
   Concohminus = 0.0;
 
-  if (Verbose_flag == 2)
-    printf("\nIn pHpred...");
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: In pHpred...");
+    fflush(stderr);
+  }
 
   /* Update CH activity product based on current system temperature */
   /* Factors derived from fitting CH solubility vs. temperature */
@@ -442,13 +444,18 @@ void pHpred(void) {
 
   /* Do the following loop while Syngenite is precipitating */
 
-  if (Verbose_flag == 2)
-    printf("\nConckplus and Concnaplus are %f and %f", Conckplus, Concnaplus);
+  if (Verbose_flag > 2) {
+    fprintf(stderr, "\nDEBUG: Conckplus and Concnaplus are %f and %f",
+            Conckplus, Concnaplus);
+    fflush(stderr);
+  }
 
   do {
 
-    if (Verbose_flag == 2)
-      printf("\nIn syngenite precipitation loop.");
+    if (Verbose_flag > 2) {
+      fprintf(stderr, "\nDEBUG: In syngenite precipitation loop.");
+      fflush(stderr);
+    }
     /***
      *	Now compute the activities (estimated)
      *	of Ca++ and OH-
@@ -457,21 +464,23 @@ void pHpred(void) {
     ActivityCa = ActivityOH = ActivitySO4 = ActivityK = 1.0;
     Inew = 0.0;
 
-    if (Verbose_flag == 2) {
-      printf("\nConcnaplus = %f", Concnaplus);
-      printf("\nConckplus = %f", Conckplus);
-      printf("\nIs ettringite soluble? ");
+    if (Verbose_flag > 2) {
+      fprintf(stderr, "\nDEBUG: Concnaplus = %f, Conckplus = %f", Concnaplus,
+              Conckplus);
+      fprintf(stderr, "\nDEBUG: Is ettringite soluble? ");
       if (!Soluble[ETTR]) {
-        printf("NO (ETTR is %d)\n", ETTR);
+        fprintf(stderr, "NO (ETTR is %d)", ETTR);
       } else {
-        printf("YES (ETTR is %d)\n", ETTR);
+        fprintf(stderr, "YES (ETTR is %d)", ETTR);
       }
-      fflush(stdout);
+      fflush(stderr);
     }
     if (((Concnaplus + Conckplus) > 0.0) && (!Soluble[ETTR])) {
 
-      if (Verbose_flag == 2)
-        printf("\nEttringite not soluble.");
+      if (Verbose_flag > 2) {
+        fprintf(stderr, "\nDEBUG: Ettringite not soluble.");
+        fflush(stderr);
+      }
 
       /* Factor of 1000 to convert from M to mmol/L */
 
@@ -588,12 +597,17 @@ void pHpred(void) {
          *	electoneutrality
          ***/
 
-        if (Verbose_flag == 2)
-          printf("\nHoping to print out the roots now\n");
+        if (Verbose_flag > 2) {
+          fprintf(stderr, "\nDEBUG: Hoping to print out the roots now");
+          fflush(stderr);
+        }
         for (j = 1; j <= 4; j++) {
 
-          if (Verbose_flag == 2)
-            printf("pH root %d is (%f,%f)\n", j, roots[j].r, roots[j].i);
+          if (Verbose_flag > 2) {
+            fprintf(stderr, "\n\tpH root %d is (%f,%f)", j, roots[j].r,
+                    roots[j].i);
+            fflush(stderr);
+          }
 
           if (((roots[j].i) == 0.0) && ((roots[j].r) > 0.0)) {
 
@@ -627,14 +641,19 @@ void pHpred(void) {
 
       } /* end of while loop for Istrength-Inew */
       if (nt >= 10000) {
-        printf("\npHpred was caught in an infinite loop with insoluble "
-               "ettringite.");
-        fflush(stdout);
+        fprintf(stderr,
+                "\nERROR: pHpred was caught in an infinite loop with insoluble "
+                "ettringite.");
+        fflush(stderr);
       }
 
     } else {
-      if (Verbose_flag == 2)
-        printf("\nEttringite is soluble or alkali concentration is zero.");
+      if (Verbose_flag > 2) {
+        fprintf(
+            stderr,
+            "\nDEBUG: Ettringite is soluble or alkali concentration is zero.");
+        fflush(stderr);
+      }
 
       /* Factor of 1000 to convert from M to mmol/L */
 
@@ -717,9 +736,9 @@ void pHpred(void) {
 
       } /* end of while loop for Istrength-Inew */
       if (nt >= 10000) {
-        printf(
-            "\npHpred was caught in an infinite loop with soluble ettringite.");
-        fflush(stdout);
+        fprintf(stderr, "\nERROR: pHpred was caught in an infinite loop with "
+                        "soluble ettringite.");
+        fflush(stderr);
       }
     }
 
@@ -735,8 +754,11 @@ void pHpred(void) {
 
       if (test_precip > KspSyngenite) {
 
-        if (Verbose_flag == 2)
-          printf("Syngenite precipitating at cycle %d\n", Cyccnt);
+        if (Verbose_flag > 2) {
+          fprintf(stderr, "\nDEBUG: Syngenite precipitating at cycle %d",
+                  Cyccnt);
+          fflush(stderr);
+        }
         syngen_change = syn_old = 1;
 
         /***
@@ -798,8 +820,10 @@ void pHpred(void) {
 
   /* End of syngenite precipitation loop */
 
-  if (Verbose_flag == 2)
-    printf("\nDone with syngenite precipitation.");
+  if (Verbose_flag == 2) {
+    fprintf(stderr, "\nDEBUG: Done with syngenite precipitation.");
+    fflush(stderr);
+  }
 
   if (Concohminus < (0.0000001)) {
 

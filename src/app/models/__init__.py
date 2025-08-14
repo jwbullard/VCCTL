@@ -21,6 +21,7 @@ from app.models.db_file import DbFile, DbFileCreate, DbFileUpdate, DbFileRespons
 from app.models.aggregate_sieve import AggregateSieve, AggregateSieveCreate, AggregateSieveUpdate, AggregateSieveResponse, SieveType
 from app.models.mix_design import MixDesign, MixDesignCreate, MixDesignUpdate, MixDesignResponse, MixDesignComponentData, MixDesignPropertiesData
 from app.models.hydration_parameters import HydrationParameters
+from app.models.temperature_profile import TemperatureProfileDB
 
 # Export all models for easy importing
 __all__ = [
@@ -39,6 +40,7 @@ __all__ = [
     'AggregateSieve',
     'MixDesign',
     'HydrationParameters',
+    'TemperatureProfileDB',
     
     # Pydantic Create Models
     'CementCreate',
@@ -110,6 +112,7 @@ def get_all_models():
         AggregateSieve,
         MixDesign,
         HydrationParameters,
+        TemperatureProfileDB,
     ]
 
 
@@ -128,6 +131,7 @@ def get_model_by_name(model_name: str):
         'operation': Operation,
         'mix_design': MixDesign,
         'hydration_parameters': HydrationParameters,
+        'temperature_profile': TemperatureProfileDB,
     }
     return model_map.get(model_name.lower())
 

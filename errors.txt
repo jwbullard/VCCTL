@@ -1,199 +1,254 @@
 /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
   warnings.warn(
-2025-08-07 10:06:40,164 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
-2025-08-07 10:06:40,228 - VCCTL - INFO - Application startup
-2025-08-07 10:06:40,229 - VCCTL - INFO - Application activated
-2025-08-07 10:06:40,229 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
-2025-08-07 10:06:40,235 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
-2025-08-07 10:06:40,246 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-08-07 10:06:40,246 - VCCTL.ThemeManager - INFO - Theme manager initialized
-2025-08-07 10:06:40,247 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
-2025-08-07 10:06:40,248 - VCCTL.AccessibilityManager - INFO - Screen reader detected
-2025-08-07 10:06:40,248 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
-2025-08-07 10:06:40,248 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
-2025-08-07 10:06:40,248 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-08-07 10:06:40,248 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-08-07 10:06:40,248 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-08-07 10:06:40,248 - VCCTL.UIPolish - INFO - UI Polish manager initialized
-2025-08-07 10:06:40,532 - VCCTL.Database - INFO - Database engine created successfully
-2025-08-07 10:06:40,535 - VCCTL.Database - INFO - All database tables created successfully
-2025-08-07 10:06:40,535 - VCCTL.Database - INFO - Database initialized successfully
-2025-08-07 10:06:40,535 - VCCTL.Database - INFO - Session maker created successfully
-2025-08-07 10:06:40,550 - VCCTL.MaterialTable - INFO - Loaded 58 materials
-2025-08-07 10:06:40,550 - VCCTL.MaterialTable - INFO - Material table initialized
-2025-08-07 10:06:40,553 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
-2025-08-07 10:06:40,553 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma157
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
-2025-08-07 10:06:40,553 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
-2025-08-07 10:06:40,554 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
-2025-08-07 10:06:40,561 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-08-07 10:06:40,561 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
-2025-08-07 10:06:40,562 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-08-07 10:06:40,744 - VCCTL.PyVistaViewer3D - INFO - PyVista headless plotter created successfully
-2025-08-07 10:06:40,746 - VCCTL.PyVistaViewer3D - INFO - PyVista 3D viewer initialized
-2025-08-07 10:06:40,747 - VCCTL.MicrostructurePanel - INFO - PyVista 3D viewer initialized automatically
-2025-08-07 10:06:40,747 - VCCTL.MicrostructurePanel - INFO - Microstructure panel initialized
-2025-08-07 10:06:40,747 - VCCTL.HydrationService - INFO - Hydration service initialized
-2025-08-07 10:06:40,747 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-08-07 10:06:40,750 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
-2025-08-07 10:06:40,757 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config
-2025-08-07 10:06:40,757 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
-2025-08-07 10:06:40,757 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
-2025-08-07 10:06:40,766 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
-2025-08-07 10:06:40,767 - VCCTL.FileBrowser - INFO - File browser widget initialized
-2025-08-07 10:06:40,769 - VCCTL.FileManagementPanel - INFO - File management panel initialized
-2025-08-07 10:06:40,772 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Found 8 total items in Operations directory
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Found 7 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'MisDesignSaveTest_copy', 'ProcessControl']
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
-2025-08-07 10:06:40,773 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 11 files
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
-2025-08-07 10:06:40,774 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
-2025-08-07 10:06:40,775 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
-2025-08-07 10:06:40,775 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 7 operations
-2025-08-07 10:06:40,775 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-08-07 10:06:40,775 - VCCTL.OperationsMonitoringPanel - INFO - Adding 7 operations to display
-2025-08-07 10:06:40,776 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+2025-08-14 17:22:34,856 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-08-14 17:22:34,929 - VCCTL - INFO - Application startup
+2025-08-14 17:22:34,930 - VCCTL - INFO - Application activated
+2025-08-14 17:22:34,930 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-08-14 17:22:34,936 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-08-14 17:22:34,949 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-14 17:22:34,949 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-08-14 17:22:34,949 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-08-14 17:22:34,949 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-08-14 17:22:34,950 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-08-14 17:22:34,950 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-08-14 17:22:34,950 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-14 17:22:34,950 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-14 17:22:34,950 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-14 17:22:34,950 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-08-14 17:22:35,248 - VCCTL.Database - INFO - Database engine created successfully
+2025-08-14 17:22:35,250 - VCCTL.Database - INFO - All database tables created successfully
+2025-08-14 17:22:35,250 - VCCTL.Database - INFO - Initializing default database data...
+2025-08-14 17:22:35,250 - VCCTL.Database - INFO - Session maker created successfully
+2025-08-14 17:22:35,258 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-08-14 17:22:35,258 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-08-14 17:22:35,258 - VCCTL.Database - INFO - Database initialized successfully
+2025-08-14 17:22:35,269 - VCCTL.MaterialTable - INFO - Loaded 58 materials
+2025-08-14 17:22:35,269 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-08-14 17:22:35,271 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
+2025-08-14 17:22:35,272 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma157
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-08-14 17:22:35,272 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-08-14 17:22:35,273 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-08-14 17:22:35,281 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-08-14 17:22:35,281 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-08-14 17:22:35,281 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-08-14 17:22:35,482 - VCCTL.PyVistaViewer3D - INFO - PyVista headless plotter created successfully
+2025-08-14 17:22:35,485 - VCCTL.PyVistaViewer3D - INFO - PyVista 3D viewer initialized
+2025-08-14 17:22:35,485 - VCCTL.MicrostructurePanel - INFO - PyVista 3D viewer initialized automatically
+2025-08-14 17:22:35,485 - VCCTL.MicrostructurePanel - INFO - Microstructure panel initialized
+2025-08-14 17:22:35,485 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-08-14 17:22:35,486 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-08-14 17:22:35,486 - VCCTL.HydrationPanel - INFO - Found 7 microstructures
+2025-08-14 17:22:35,509 - VCCTL.HydrationService - ERROR - Failed to get temperature profile service: Can't instantiate abstract class TemperatureProfileService with abstract methods create, delete, get_all, get_by_name, update
+2025-08-14 17:22:35,517 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
+2025-08-14 17:22:35,518 - VCCTL.HydrationService - ERROR - Failed to get temperature profile service: Can't instantiate abstract class TemperatureProfileService with abstract methods create, delete, get_all, get_by_name, update
+2025-08-14 17:22:35,518 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-08-14 17:22:35,524 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config
+2025-08-14 17:22:35,525 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-08-14 17:22:35,525 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-08-14 17:22:35,528 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-08-14 17:22:35,529 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-08-14 17:22:35,532 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Found 16 total items in Operations directory
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Found 15 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'E2ETest', 'HydrationSim_E2ETest_20250814_122433', 'HydrationSim_E2ETest_20250814_153645', 'HydrationSim_E2ETest_20250814_154640', 'HydrationSim_E2ETest_20250814_170316', 'Hydration_E2ETest', 'MisDesignSaveTest_copy', 'ProcessControl', 'TestHydrationExecution', 'TestHydrationOp']
+2025-08-14 17:22:35,535 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 12 files
+2025-08-14 17:22:35,536 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: E2ETest
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for E2ETest with 12 files
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_122433
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_122433 with 27 files
+2025-08-14 17:22:35,537 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_153645
+2025-08-14 17:22:35,538 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_153645 with 27 files
+2025-08-14 17:22:35,538 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_154640
+2025-08-14 17:22:35,538 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_154640 with 27 files
+2025-08-14 17:22:35,538 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_170316
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_170316 with 28 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_E2ETest
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_E2ETest with 11 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationExecution
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationExecution with 1 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationOp
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationOp with 1 files
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 15 operations
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-08-14 17:22:35,539 - VCCTL.OperationsMonitoringPanel - INFO - Adding 15 operations to display
+2025-08-14 17:22:35,542 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-2025-08-07 10:06:40,777 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-08-07 10:06:40,781 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-08-07 10:06:40,781 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:06:40,781 - VCCTL.OperationsMonitoringPanel - INFO - Found operations file with 3 operations
-2025-08-07 10:06:40,781 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 3 operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:06:40,782 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
-2025-08-07 10:06:40,782 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
-2025-08-07 10:06:40,782 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:06:40,782 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:06:40,892 - VCCTL.MainWindow - INFO - Main window initialized
-2025-08-07 10:06:50,318 - VCCTL.MicrostructurePanel - INFO - Loading microstructure: 120x100x100 voxels, resolution: 1.0
-2025-08-07 10:06:50,445 - VCCTL.MicrostructurePanel - INFO - Reshaped voxel data to: (120, 100, 100)
-2025-08-07 10:06:50,448 - VCCTL.MicrostructurePanel - INFO - Found phases: [ 0  1  2  3  4 10]
-2025-08-07 10:06:51,471 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-08-07 10:06:51,471 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-08-07 10:06:51,645 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-08-07 10:06:51,645 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-08-07 10:06:51,704 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-08-07 10:06:51,724 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-08-07 10:06:51,766 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-08-07 10:06:51,766 - VCCTL.PyVistaViewer3D - INFO - Loaded voxel data: (120, 100, 100), 6 phases
-2025-08-07 10:06:51,768 - VCCTL.MicrostructurePanel - INFO - Successfully loaded microstructure from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/CemotcBox/CemotcBox.img
-2025-08-07 10:06:53,428 - VCCTL.PyVistaViewer3D - INFO - Phase controls panel opened with data
-2025-08-07 10:07:06,798 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-08-07 10:07:06,798 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-08-07 10:07:06,801 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-08-07 10:07:06,801 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-08-07 10:07:06,843 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-08-07 10:07:06,892 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-08-07 10:07:06,927 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-08-07 10:07:06,927 - VCCTL.PyVistaViewer3D - INFO - Rendering mode changed to: points
-2025-08-07 10:07:10,280 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 1681.196615104427, 'current_memory_mb': 1222.75}
-2025-08-07 10:07:16,602 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-08-07 10:07:16,602 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-08-07 10:07:16,605 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-08-07 10:07:16,605 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-08-07 10:07:16,646 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-08-07 10:07:16,669 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-08-07 10:07:16,703 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-08-07 10:07:16,703 - VCCTL.PyVistaViewer3D - INFO - Set phase 1 opacity to 0.10 (10%)
-2025-08-07 10:07:23,966 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-08-07 10:07:23,966 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-08-07 10:07:23,972 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-08-07 10:07:23,972 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-08-07 10:07:24,017 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-08-07 10:07:24,065 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-08-07 10:07:24,099 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-08-07 10:07:24,099 - VCCTL.PyVistaViewer3D - INFO - Rendering mode changed to: volume
-2025-08-07 10:07:32,548 - VCCTL.PyVistaViewer3D - INFO - Phase controls panel hidden
-2025-08-07 10:07:39,786 - VCCTL.PyVistaViewer3D - INFO - Manual memory cleanup triggered
-2025-08-07 10:07:40,303 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 840.183570493621, 'current_memory_mb': 1222.5}
-2025-08-07 10:07:41,097 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-08-07 10:07:41,097 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-08-07 10:07:41,102 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-08-07 10:07:41,102 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-08-07 10:07:41,147 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-08-07 10:07:41,173 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-08-07 10:07:41,206 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-08-07 10:07:41,207 - VCCTL.PyVistaViewer3D - INFO - Manual memory cleanup completed
-2025-08-07 10:07:42,960 - VCCTL.PyVistaViewer3D - INFO - Starting volume and surface area analysis
-2025-08-07 10:07:42,961 - VCCTL.PyVistaViewer3D - INFO - === ATTEMPTING C STAT3D INTEGRATION ===
-2025-08-07 10:07:43,172 - VCCTL.PyVistaViewer3D - INFO - Executing: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/stat3d /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/tmpql5rvuci.img /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/CemotcBox/CemotcBox_PhaseData.txt
-2025-08-07 10:07:43,256 - VCCTL.PyVistaViewer3D - INFO - Read 1366 characters from output file
-2025-08-07 10:07:43,256 - VCCTL.PyVistaViewer3D - INFO - stat3d returned 1366 characters of output
-2025-08-07 10:07:43,256 - VCCTL.PyVistaViewer3D - INFO - stat3d output preview: MICROSTRUCTURE VOLUME & SURFACE AREA ANALYSIS
-============================================================
+2025-08-14 17:22:35,543 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-14 17:22:35,550 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-08-14 17:22:35,550 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:22:35,550 - VCCTL.OperationsMonitoringPanel - INFO - Found operations file with 7 operations
+2025-08-14 17:22:35,550 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 7 operations from file
+2025-08-14 17:22:35,550 - VCCTL.OperationsMonitoringPanel - INFO - Loading operations from database...
+2025-08-14 17:22:35,551 - VCCTL.OperationService - INFO - Operation service initialized
+2025-08-14 17:22:35,552 - VCCTL.OperationsMonitoringPanel - INFO - Found 4 operations in database
+2025-08-14 17:22:35,552 - VCCTL.OperationsMonitoringPanel - INFO - Total operations loaded: 7
+2025-08-14 17:22:35,553 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-08-14 17:22:35,553 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-08-14 17:22:35,553 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 7 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:22:35,553 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 7 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:22:35,674 - VCCTL.MainWindow - INFO - Main window initialized
+2025-08-14 17:23:04,980 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 513.5922720278622, 'current_memory_mb': 645.984375}
+2025-08-14 17:23:35,007 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 258.7562640016016, 'current_memory_mb': 648.03125}
+2025-08-14 17:24:05,043 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 174.37254349950217, 'current_memory_mb': 650.828125}
+2025-08-14 17:24:34,117 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
+2025-08-14 17:24:34,117 - app.services.microstructure_hydration_bridge - ERROR - Failed to calculate one-voxel bias: No metadata found for microstructure: E2ETest
+2025-08-14 17:24:34,117 - app.services.microstructure_hydration_bridge - WARNING - Using default one-voxel bias values
+2025-08-14 17:24:34,131 - app.services.microstructure_hydration_bridge - INFO - Copied 8 microstructure files from E2ETest to ./Operations/Hydration_E2ETest
+2025-08-14 17:24:34,132 - app.services.microstructure_hydration_bridge - INFO - Generated extended parameter file with 418 parameters: ./Operations/Hydration_E2ETest/Hydration_E2ETest_extended_parameters.csv
+2025-08-14 17:24:34,132 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
+2025-08-14 17:24:34,132 - app.services.microstructure_hydration_bridge - WARNING - No metadata found for microstructure E2ETest, using default alkali data
+2025-08-14 17:24:34,132 - app.services.microstructure_hydration_bridge - INFO - Generated alkali files: alkalichar.dat only (no fly ash)
+2025-08-14 17:24:34,133 - app.services.microstructure_hydration_bridge - INFO - Generated slag characteristics file: slagchar.dat
+2025-08-14 17:24:34,133 - VCCTL.HydrationPanel - INFO - Generated parameter file: ./Operations/Hydration_E2ETest/Hydration_E2ETest_extended_parameters.csv
+2025-08-14 17:24:34,133 - VCCTL.HydrationPanel - INFO - Parameter validation completed
+2025-08-14 17:24:35,076 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 131.36770208125859, 'current_memory_mb': 652.015625}
+2025-08-14 17:24:36,517 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
+2025-08-14 17:24:36,517 - app.services.microstructure_hydration_bridge - ERROR - Failed to calculate one-voxel bias: No metadata found for microstructure: E2ETest
+2025-08-14 17:24:36,517 - app.services.microstructure_hydration_bridge - WARNING - Using default one-voxel bias values
+2025-08-14 17:24:36,525 - app.services.microstructure_hydration_bridge - INFO - Copied 8 microstructure files from E2ETest to ./Operations/HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,526 - app.services.microstructure_hydration_bridge - INFO - Generated extended parameter file with 418 parameters: ./Operations/HydrationSim_E2ETest_20250814_172436/HydrationSim_E2ETest_20250814_172436_extended_parameters.csv
+2025-08-14 17:24:36,526 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
+2025-08-14 17:24:36,526 - app.services.microstructure_hydration_bridge - WARNING - No metadata found for microstructure E2ETest, using default alkali data
+2025-08-14 17:24:36,526 - app.services.microstructure_hydration_bridge - INFO - Generated alkali files: alkalichar.dat only (no fly ash)
+2025-08-14 17:24:36,526 - app.services.microstructure_hydration_bridge - INFO - Generated slag characteristics file: slagchar.dat
+2025-08-14 17:24:36,526 - VCCTL.HydrationExecutor - INFO - Starting hydration simulation for operation: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,527 - VCCTL.HydrationExecutor - INFO - Environment prepared for operation: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,527 - VCCTL.HydrationExecutor - INFO -   Parameter file: Operations/HydrationSim_E2ETest_20250814_172436/HydrationSim_E2ETest_20250814_172436_extended_parameters.csv
+2025-08-14 17:24:36,527 - VCCTL.HydrationExecutor - INFO -   Working directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,528 - VCCTL.HydrationExecutor - INFO - Creating new operation: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,531 - VCCTL.HydrationExecutor - INFO - Starting disrealnew process: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/disrealnew --workdir . --json progress.json --parameters HydrationSim_E2ETest_20250814_172436_extended_parameters.csv
+2025-08-14 17:24:36,543 - VCCTL.HydrationExecutor - INFO - Starting simulation monitoring for: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,543 - VCCTL.HydrationExecutor - INFO - Hydration simulation started successfully: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:24:36,544 - VCCTL.HydrationPanel - INFO - Hydration simulation started: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:25:05,106 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 109.12744797598202, 'current_memory_mb': 662.125}
+2025-08-14 17:25:06,228 - VCCTL.OperationsMonitoringPanel - INFO - Added new database operation: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:25:06,228 - VCCTL.OperationsMonitoringPanel - INFO - Added 1 new operations from database
+2025-08-14 17:25:35,131 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 90.92907980868571, 'current_memory_mb': 662.09375}
+2025-08-14 17:26:05,155 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 78.68167588361571, 'current_memory_mb': 664.6875}
+2025-08-14 17:26:35,180 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 68.84809538078733, 'current_memory_mb': 664.6875}
+2025-08-14 17:26:36,582 - VCCTL.HydrationExecutor - INFO - Simulation completion verified by output files: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:26:36,583 - VCCTL.HydrationExecutor - INFO - Simulation completed successfully: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:26:36,583 - VCCTL.HydrationExecutor - INFO - Cleaned up simulation resources for: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:26:36,583 - VCCTL.HydrationExecutor - INFO - Simulation monitoring ended for: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:26:36,620 - VCCTL.OperationsMonitoringPanel - INFO - Updated operation status: HydrationSim_E2ETest_20250814_172436 -> completed
+2025-08-14 17:27:05,209 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 62.128824834956745, 'current_memory_mb': 668.875}
+2025-08-14 17:27:35,878 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 8 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:27:35,880 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 8 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:27:35,880 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-14 17:27:35,900 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-08-14 17:31:44,228 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_E2ETest_20250814_122433
+2025-08-14 17:31:44,229 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_E2ETest_20250814_153645
+2025-08-14 17:31:44,229 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_E2ETest_20250814_154640
+2025-08-14 17:31:44,230 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_E2ETest_20250814_170316
+2025-08-14 17:31:44,230 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:31:44,231 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Found 17 total items in Operations directory
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Found 16 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'E2ETest', 'HydrationSim_E2ETest_20250814_122433', 'HydrationSim_E2ETest_20250814_153645', 'HydrationSim_E2ETest_20250814_154640', 'HydrationSim_E2ETest_20250814_170316', 'HydrationSim_E2ETest_20250814_172436', 'Hydration_E2ETest', 'MisDesignSaveTest_copy', 'ProcessControl', 'TestHydrationExecution', 'TestHydrationOp']
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
+2025-08-14 17:31:44,232 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 12 files
+2025-08-14 17:31:44,233 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
+2025-08-14 17:31:44,234 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
+2025-08-14 17:31:44,234 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: E2ETest
+2025-08-14 17:31:44,234 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for E2ETest with 12 files
+2025-08-14 17:31:44,234 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_122433
+2025-08-14 17:31:44,235 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_122433 with 27 files
+2025-08-14 17:31:44,235 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_153645
+2025-08-14 17:31:44,235 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_153645 with 27 files
+2025-08-14 17:31:44,235 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_154640
+2025-08-14 17:31:44,236 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_154640 with 27 files
+2025-08-14 17:31:44,236 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_170316
+2025-08-14 17:31:44,236 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_170316 with 28 files
+2025-08-14 17:31:44,236 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_172436
+2025-08-14 17:31:44,237 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_172436 with 35 files
+2025-08-14 17:31:44,237 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_E2ETest
+2025-08-14 17:31:44,237 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_E2ETest with 11 files
+2025-08-14 17:31:44,237 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationExecution
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationExecution with 1 files
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationOp
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationOp with 1 files
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 16 operations
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-08-14 17:31:44,238 - VCCTL.OperationsMonitoringPanel - INFO - Adding 16 operations to display
+2025-08-14 17:31:44,243 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-Total Volume: 1200000.00 μm³ (1200000 voxels)
-Total Solid Volume: 491759.00 μm³ (1200000 vox...
-2025-08-07 10:07:50,427 - VCCTL.PyVistaViewer3D - INFO - Volume and surface area analysis completed using C stat3d program
-2025-08-07 10:08:10,351 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 604.1790531601679, 'current_memory_mb': 1288.59375}
-2025-08-07 10:08:40,470 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 454.24702132731056, 'current_memory_mb': 1290.984375}
-2025-08-07 10:09:10,497 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 364.02368244068003, 'current_memory_mb': 1293.0625}
-2025-08-07 10:09:40,543 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 303.3676465151817, 'current_memory_mb': 1293.015625}
-2025-08-07 10:09:57,424 - VCCTL - INFO - Quitting application
-2025-08-07 10:09:57,424 - VCCTL - INFO - Application shutdown
-2025-08-07 10:09:57,424 - VCCTL.MainWindow - INFO - Cleaning up main window resources
-2025-08-07 10:09:57,424 - VCCTL.OperationsMonitoringPanel - INFO - Starting operations monitoring panel cleanup...
-2025-08-07 10:09:57,644 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring stopped
-2025-08-07 10:09:57,644 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:09:57,645 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 3 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-07 10:09:57,645 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel cleanup completed - saved 3 operations
-2025-08-07 10:09:59,646 - VCCTL.PerformanceMonitor - INFO - Performance monitoring stopped
-2025-08-07 10:09:59,648 - VCCTL.PerformanceMonitor - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1754579399.json
-2025-08-07 10:09:59,648 - VCCTL.MainWindow - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1754579399.json
-2025-08-07 10:09:59,657 - VCCTL.ConfigManager - INFO - Configuration saved successfully
-2025-08-07 10:09:59,661 - VCCTL.ConfigManager - INFO - Configuration saved successfully
+2025-08-14 17:31:47,196 - VCCTL.OperationsMonitoringPanel - INFO - === Starting force cleanup of stale operations ===
+2025-08-14 17:31:47,196 - VCCTL.OperationsMonitoringPanel - INFO - Force cleanup completed: no stale operations found
+2025-08-14 17:32:36,234 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:32:36,235 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
+2025-08-14 17:32:36,235 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-14 17:32:36,247 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed

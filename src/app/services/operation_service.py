@@ -637,3 +637,85 @@ class OperationService(BaseService[Operation, OperationCreate, OperationUpdate])
         except Exception as e:
             self.logger.error(f"Failed to get operation by name {name}: {e}")
             return None
+    
+    # Implement required abstract methods from BaseService
+    
+    def get_all(self) -> List[Operation]:
+        """Get all operations."""
+        try:
+            with self.db_service.get_session() as session:
+                return session.query(Operation).all()
+        except Exception as e:
+            self.logger.error(f"Failed to get all operations: {e}")
+            raise ServiceError(f"Failed to get all operations: {e}")
+    
+    def create(self, create_data) -> Operation:
+        """Create a new operation."""
+        try:
+            with self.db_service.get_session() as session:
+                # Handle both Operation objects and OperationCreate objects
+                if isinstance(create_data, Operation):
+                    operation = create_data
+                else:
+                    # Assume it's OperationCreate or similar
+                    operation = Operation(
+                        name=create_data.name,
+                        type=create_data.type,
+                        depends_on_operation_name=getattr(create_data, 'depends_on_operation_name', None),
+                        notes=getattr(create_data, 'notes', None)
+                    )
+                    if hasattr(create_data, 'state_data') and create_data.state_data:
+                        operation.state_data = create_data.state_data
+                    operation.mark_queued()
+                
+                session.add(operation)
+                session.commit()
+                session.refresh(operation)
+                return operation
+        except Exception as e:
+            self.logger.error(f"Failed to create operation: {e}")
+            raise ServiceError(f"Failed to create operation: {e}")
+    
+    def update(self, name: str, update_data) -> Operation:
+        """Update an existing operation."""
+        try:
+            with self.db_service.get_session() as session:
+                operation = session.query(Operation).filter_by(name=name).first()
+                if not operation:
+                    raise NotFoundError(f"Operation '{name}' not found")
+                
+                # Handle both Operation objects and update data objects
+                if isinstance(update_data, Operation):
+                    # Copy fields from the update operation
+                    operation.status = update_data.status
+                    operation.start = update_data.start
+                    operation.finish = update_data.finish
+                    operation.error_message = update_data.error_message
+                    operation.state_data = update_data.state_data
+                else:
+                    # Handle update data object
+                    for field, value in update_data.__dict__.items():
+                        if hasattr(operation, field):
+                            setattr(operation, field, value)
+                
+                session.commit()
+                session.refresh(operation)
+                return operation
+        except Exception as e:
+            self.logger.error(f"Failed to update operation {name}: {e}")
+            raise ServiceError(f"Failed to update operation: {e}")
+    
+    def delete(self, name: str) -> bool:
+        """Delete an operation."""
+        try:
+            with self.db_service.get_session() as session:
+                operation = session.query(Operation).filter_by(name=name).first()
+                if not operation:
+                    raise NotFoundError(f"Operation '{name}' not found")
+                
+                session.delete(operation)
+                session.commit()
+                return True
+        except Exception as e:
+            self.logger.error(f"Failed to delete operation {name}: {e}")
+            raise ServiceError(f"Failed to delete operation: {e}")
