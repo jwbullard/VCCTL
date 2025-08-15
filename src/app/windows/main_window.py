@@ -57,6 +57,8 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self.set_default_size(1200, 800)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_resizable(True)
+        # Allow horizontal resizing with reasonable minimum sizes
+        self.set_size_request(800, 600)
         
         try:
             # Setup the UI

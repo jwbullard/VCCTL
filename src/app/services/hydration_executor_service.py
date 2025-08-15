@@ -452,6 +452,13 @@ class HydrationExecutorService:
             max_time_hours = simulation_info.get('max_time_hours', 168.0)
             progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
             
+            # Calculate remaining time based on current simulation time vs target
+            if progress.time_hours > 0 and progress.percent_complete < 100.0:
+                remaining_time_hours = max_time_hours - progress.time_hours
+                progress.estimated_time_remaining = max(remaining_time_hours, 0.0)
+            else:
+                progress.estimated_time_remaining = 0.0
+            
             # Estimate heat released
             progress.heat_cumulative = progress.degree_of_hydration * 500.0
             
@@ -520,6 +527,13 @@ class HydrationExecutorService:
                 # Calculate percentage based on time (more accurate than cycles)
                 max_time_hours = simulation_info.get('max_time_hours', 168.0)
                 progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
+                
+                # Calculate remaining time based on current simulation time vs target
+                if progress.time_hours > 0 and progress.percent_complete < 100.0:
+                    remaining_time_hours = max_time_hours - progress.time_hours
+                    progress.estimated_time_remaining = max(remaining_time_hours, 0.0)
+                else:
+                    progress.estimated_time_remaining = 0.0
                 
                 # Estimate heat released (simplified calculation)
                 # Typical portland cement releases ~500 kJ/kg at full hydration

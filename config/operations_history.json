@@ -72,14 +72,14 @@
         "genmic_path": "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/genmic"
       }
     },
-    "HydrationSim_E2ETest_20250814_172436": {
-      "id": "HydrationSim_E2ETest_20250814_172436",
-      "name": "HydrationSim_E2ETest_20250814_172436",
+    "HydrationSim_E2ETest_20250815_094224": {
+      "id": "HydrationSim_E2ETest_20250815_094224",
+      "name": "HydrationSim_E2ETest_20250815_094224",
       "operation_type": "hydration_simulation",
       "status": "completed",
       "progress": 1.0,
-      "start_time": "2025-08-14T22:24:36.530154",
-      "end_time": "2025-08-14T22:26:36.582984",
+      "start_time": "2025-08-15T14:42:24.156545",
+      "end_time": "2025-08-15T14:43:54.201776",
       "paused_time": null,
       "estimated_duration": null,
       "current_step": "",
@@ -92,10 +92,10 @@
       "log_entries": [],
       "metadata": {
         "source": "database",
-        "output_directory": "Operations/HydrationSim_E2ETest_20250814_172436"
+        "output_directory": "Operations/HydrationSim_E2ETest_20250815_094224"
       }
     }
   },
   "operation_counter": 42,
-  "saved_at": "2025-08-14T17:32:36.234331"
+  "saved_at": "2025-08-15T09:50:55.741875"
 }

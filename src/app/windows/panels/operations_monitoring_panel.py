@@ -1859,12 +1859,13 @@ class OperationsMonitoringPanel(Gtk.Box):
                     # Get the operation folder path from metadata
                     output_dir = None
                     if hasattr(operation, 'metadata') and isinstance(operation.metadata, dict):
-                        output_dir = operation.metadata.get('output_dir', '')
+                        # Check both output_dir and output_directory keys
+                        output_dir = operation.metadata.get('output_dir') or operation.metadata.get('output_directory', '')
                         operation_source = operation.metadata.get('source', '')
                     else:
                         operation_source = ''
                     
-                    # For database operations (hydration simulations), construct the folder path
+                    # For database operations (hydration simulations), construct the folder path if not already set
                     if operation_source == 'database' and not output_dir:
                         # Operations folder is typically Operations/{operation_name}
                         project_root = Path(__file__).parent.parent.parent.parent
@@ -1873,6 +1874,12 @@ class OperationsMonitoringPanel(Gtk.Box):
                         if potential_folder.exists():
                             output_dir = str(potential_folder)
                             self.logger.info(f"Found operation folder for {operation.name}: {output_dir}")
+                    
+                    # For database operations, also check if output_directory gives us a relative path to make absolute
+                    if operation_source == 'database' and output_dir and not Path(output_dir).is_absolute():
+                        project_root = Path(__file__).parent.parent.parent.parent
+                        output_dir = str(project_root / output_dir)
+                        self.logger.info(f"Made absolute path for {operation.name}: {output_dir}")
                     
                     # Delete from database if it's a database-sourced operation (like hydration simulations)
                     if operation_source == 'database':
