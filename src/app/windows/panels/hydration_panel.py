@@ -349,7 +349,6 @@ class HydrationPanel(Gtk.Box):
         
         # Left column: Time and cycles parameters
         left_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        left_column.set_size_request(350, -1)
         
         self._create_time_parameters_section(left_column)
         self._create_aging_mode_section(left_column)
@@ -357,7 +356,6 @@ class HydrationPanel(Gtk.Box):
         
         # Right column: Temperature profile and advanced parameters
         right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        right_column.set_size_request(450, -1)
         
         self._create_output_settings_section(right_column)
         self._create_advanced_settings_section(right_column)
@@ -1500,8 +1498,46 @@ class HydrationPanel(Gtk.Box):
             # Validate parameters
             validation = self.hydration_service.validate_hydration_parameters(params)
             
-            # Estimate computation time
-            estimate = self.hydration_service.estimate_simulation_time(params)
+            # Estimate computation time (include microstructure info for size-based scaling)
+            microstructure_info = None
+            if self.selected_microstructure:
+                print(f"DEBUG_MICRO: selected_microstructure keys: {list(self.selected_microstructure.keys())}")
+                print(f"DEBUG_MICRO: selected_microstructure data: {self.selected_microstructure}")
+                
+                # Try to read actual cube size from the ASCII microstructure file
+                actual_cubesize = 100  # default
+                img_file = self.selected_microstructure.get('img_file')
+                if img_file and os.path.exists(img_file):
+                    try:
+                        # Read cube size from ASCII header (X_Size, Y_Size, Z_Size lines)
+                        with open(img_file, 'r') as f:
+                            lines = f.readlines()[:10]  # Read first 10 lines to find size info
+                            x_size = y_size = z_size = 100  # defaults
+                            
+                            for line in lines:
+                                line = line.strip()
+                                if line.startswith('X_Size:'):
+                                    x_size = int(line.split(':')[1].strip())
+                                elif line.startswith('Y_Size:'):
+                                    y_size = int(line.split(':')[1].strip())
+                                elif line.startswith('Z_Size:'):
+                                    z_size = int(line.split(':')[1].strip())
+                            
+                            # Assume cubic (should all be same, but use max to be safe)
+                            actual_cubesize = max(x_size, y_size, z_size)
+                            print(f"DEBUG_MICRO: Read cube size from ASCII file: {x_size}x{y_size}x{z_size} -> {actual_cubesize}")
+                    except Exception as e:
+                        print(f"DEBUG_MICRO: Failed to read cube size from {img_file}: {e}")
+                
+                microstructure_info = {
+                    'cubesize': actual_cubesize,
+                    'voxel_count': actual_cubesize ** 3,
+                    'name': self.selected_microstructure.get('operation_name', 'Unknown')
+                }
+                print(f"DEBUG_MICRO: microstructure_info created: {microstructure_info}")
+            else:
+                print("DEBUG_MICRO: No microstructure selected")
+            estimate = self.hydration_service.estimate_simulation_time(params, microstructure_info)
             
             # Update displays
             self._update_validation_display(validation)
@@ -1953,25 +1989,57 @@ class HydrationPanel(Gtk.Box):
             # Update operation label
             self.operation_label.set_text(f"Running simulation - Cycle {cycle}/{max_cycles}")
             
-            # Calculate remaining time estimate
+            # Use remaining time from progress data (time-based, not cycle-based)
+            try:
+                # Debug: Print what we have in latest_progress
+                if self.latest_progress:
+                    print(f"DEBUG: latest_progress exists, estimated_time_remaining = {getattr(self.latest_progress, 'estimated_time_remaining', 'NOT FOUND')}")
+                else:
+                    print("DEBUG: latest_progress is None")
+                
+                if (self.latest_progress and 
+                    hasattr(self.latest_progress, 'estimated_time_remaining') and 
+                    self.latest_progress.estimated_time_remaining is not None):
+                    
+                    remaining_hours = float(self.latest_progress.estimated_time_remaining)
+                    print(f"DEBUG: Using time-based remaining time: {remaining_hours} hours")
+                    if remaining_hours > 0:
+                        remaining_seconds_total = remaining_hours * 3600
+                        remaining_h = int(remaining_seconds_total // 3600)
+                        remaining_m = int((remaining_seconds_total % 3600) // 60)
+                        remaining_s = int(remaining_seconds_total % 60)
+                        print(f"DEBUG: Conversion: {remaining_hours}h -> {remaining_seconds_total:.1f}s -> {remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
+                        self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
+                    else:
+                        print(f"DEBUG: remaining_hours <= 0, showing 00:00:00")
+                        self.remaining_time_label.set_text("00:00:00")
+                else:
+                    # Fallback to cycle-based calculation if progress data is not available
+                    print(f"DEBUG: Using cycle-based fallback calculation")
+                    if cycle > 0 and elapsed_seconds > 0:
+                        cycles_per_second = cycle / elapsed_seconds
+                        remaining_cycles = max_cycles - cycle
+                        remaining_seconds = remaining_cycles / cycles_per_second if cycles_per_second > 0 else 0
+                        print(f"DEBUG: Cycle-based: {remaining_cycles} remaining cycles, {cycles_per_second:.2f} cycles/s, {remaining_seconds:.0f} seconds remaining")
+                        if remaining_seconds > 0:
+                            remaining_h = int(remaining_seconds // 3600)
+                            remaining_m = int((remaining_seconds % 3600) // 60)
+                            remaining_s = int(remaining_seconds % 60)
+                            self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
+                        else:
+                            self.remaining_time_label.set_text("--:--:--")
+                    else:
+                        self.remaining_time_label.set_text("--:--:--")
+            except Exception as e:
+                # Log error and fallback to showing unknown time
+                print(f"Error calculating remaining time: {e}")
+                self.remaining_time_label.set_text("--:--:--")
+            
+            # Update rate using cycles if available
             if cycle > 0 and elapsed_seconds > 0:
                 cycles_per_second = cycle / elapsed_seconds
-                remaining_cycles = max_cycles - cycle
-                remaining_seconds = remaining_cycles / cycles_per_second if cycles_per_second > 0 else 0
-                
-                if remaining_seconds > 0:
-                    remaining_h = int(remaining_seconds // 3600)
-                    remaining_m = int((remaining_seconds % 3600) // 60)
-                    remaining_s = int(remaining_seconds % 60)
-                    self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
-                    
-                    # Update rate
-                    self.rate_label.set_text(f"{cycles_per_second:.2f} cycles/s")
-                else:
-                    self.remaining_time_label.set_text("--:--:--")
-                    self.rate_label.set_text("-- cycles/s")
+                self.rate_label.set_text(f"{cycles_per_second:.2f} cycles/s")
             else:
-                self.remaining_time_label.set_text("--:--:--")
                 self.rate_label.set_text("-- cycles/s")
             
             # Update hydration metrics

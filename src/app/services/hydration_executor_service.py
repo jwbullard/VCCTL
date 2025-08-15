@@ -447,17 +447,41 @@ class HydrationExecutorService:
             progress.temperature_celsius = data.get('temperature_celsius', 25.0)
             progress.ph = data.get('ph', 12.0)
             
-            # Calculate percentage based on time (more accurate than cycles)
-            simulation_info = self.active_simulations[operation_name]
-            max_time_hours = simulation_info.get('max_time_hours', 168.0)
-            progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
+            # Calculate percentage based on degree of hydration progress (most accurate)
+            # Hydration typically targets 80% degree of hydration (0.8)
+            target_alpha = progress.target_alpha if hasattr(progress, 'target_alpha') else 0.8
+            doh_progress = min((progress.degree_of_hydration / target_alpha) * 100.0, 100.0)
             
-            # Calculate remaining time based on current simulation time vs target
-            if progress.time_hours > 0 and progress.percent_complete < 100.0:
-                remaining_time_hours = max_time_hours - progress.time_hours
-                progress.estimated_time_remaining = max(remaining_time_hours, 0.0)
+            # Also calculate cycle-based progress as fallback
+            cycle_progress = 0.0
+            if progress.max_cycles > 0:
+                cycle_progress = min((progress.cycle / progress.max_cycles) * 100.0, 100.0)
+            
+            # Use the higher of the two progress indicators (more accurate)
+            progress.percent_complete = max(doh_progress, cycle_progress)
+            
+            # Calculate remaining time based on wall-clock time and progress
+            # Note: progress.time_hours is simulation time (hydration process time)
+            # We need to estimate wall-clock remaining time based on actual elapsed time
+            if progress.percent_complete > 0 and progress.percent_complete < 100.0:
+                # Calculate wall-clock elapsed time
+                start_time = simulation_info.get('start_time', datetime.now())
+                elapsed_real_seconds = (datetime.now() - start_time).total_seconds()
+                
+                self.logger.debug(f"DEBUG_TIME_JSON: percent_complete={progress.percent_complete:.2f}%, elapsed_real_seconds={elapsed_real_seconds:.1f}")
+                
+                # Estimate remaining wall-clock time based on progress
+                if elapsed_real_seconds > 10:  # Reduced threshold for faster feedback
+                    estimated_total_seconds = elapsed_real_seconds * (100.0 / progress.percent_complete)
+                    remaining_seconds = max(estimated_total_seconds - elapsed_real_seconds, 0)
+                    progress.estimated_time_remaining = remaining_seconds / 3600.0  # Convert to hours
+                    self.logger.debug(f"DEBUG_TIME_JSON: estimated_total_seconds={estimated_total_seconds:.1f}, remaining_seconds={remaining_seconds:.1f}, remaining_hours={progress.estimated_time_remaining:.3f}")
+                else:
+                    progress.estimated_time_remaining = 0.0  # Too early to estimate
+                    self.logger.debug(f"DEBUG_TIME_JSON: Too early to estimate (< 10 seconds)")
             else:
                 progress.estimated_time_remaining = 0.0
+                self.logger.debug(f"DEBUG_TIME_JSON: Not estimating - percent_complete={progress.percent_complete:.2f}%")
             
             # Estimate heat released
             progress.heat_cumulative = progress.degree_of_hydration * 500.0
@@ -524,16 +548,41 @@ class HydrationExecutorService:
                 if ph_match:
                     progress.ph = float(ph_match.group(1))
                 
-                # Calculate percentage based on time (more accurate than cycles)
-                max_time_hours = simulation_info.get('max_time_hours', 168.0)
-                progress.percent_complete = min((progress.time_hours / max_time_hours) * 100.0, 100.0)
+                # Calculate percentage based on degree of hydration progress (most accurate)
+                # Hydration typically targets 80% degree of hydration (0.8)
+                target_alpha = progress.target_alpha if hasattr(progress, 'target_alpha') else 0.8
+                doh_progress = min((progress.degree_of_hydration / target_alpha) * 100.0, 100.0)
                 
-                # Calculate remaining time based on current simulation time vs target
-                if progress.time_hours > 0 and progress.percent_complete < 100.0:
-                    remaining_time_hours = max_time_hours - progress.time_hours
-                    progress.estimated_time_remaining = max(remaining_time_hours, 0.0)
+                # Also calculate cycle-based progress as fallback
+                cycle_progress = 0.0
+                if progress.max_cycles > 0:
+                    cycle_progress = min((progress.cycle / progress.max_cycles) * 100.0, 100.0)
+                
+                # Use the higher of the two progress indicators (more accurate)
+                progress.percent_complete = max(doh_progress, cycle_progress)
+                
+                # Calculate remaining time based on wall-clock time and progress
+                # Note: progress.time_hours is simulation time (hydration process time)
+                # We need to estimate wall-clock remaining time based on actual elapsed time
+                if progress.percent_complete > 0 and progress.percent_complete < 100.0:
+                    # Calculate wall-clock elapsed time
+                    start_time = simulation_info.get('start_time', datetime.now())
+                    elapsed_real_seconds = (datetime.now() - start_time).total_seconds()
+                    
+                    self.logger.debug(f"DEBUG_TIME: percent_complete={progress.percent_complete:.2f}%, elapsed_real_seconds={elapsed_real_seconds:.1f}")
+                    
+                    # Estimate remaining wall-clock time based on progress
+                    if elapsed_real_seconds > 10:  # Reduced threshold for faster feedback
+                        estimated_total_seconds = elapsed_real_seconds * (100.0 / progress.percent_complete)
+                        remaining_seconds = max(estimated_total_seconds - elapsed_real_seconds, 0)
+                        progress.estimated_time_remaining = remaining_seconds / 3600.0  # Convert to hours
+                        self.logger.debug(f"DEBUG_TIME: estimated_total_seconds={estimated_total_seconds:.1f}, remaining_seconds={remaining_seconds:.1f}, remaining_hours={progress.estimated_time_remaining:.3f}")
+                    else:
+                        progress.estimated_time_remaining = 0.0  # Too early to estimate
+                        self.logger.debug(f"DEBUG_TIME: Too early to estimate (< 10 seconds)")
                 else:
                     progress.estimated_time_remaining = 0.0
+                    self.logger.debug(f"DEBUG_TIME: Not estimating - percent_complete={progress.percent_complete:.2f}%")
                 
                 # Estimate heat released (simplified calculation)
                 # Typical portland cement releases ~500 kJ/kg at full hydration

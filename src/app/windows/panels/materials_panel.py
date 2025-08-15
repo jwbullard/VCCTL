@@ -252,7 +252,6 @@ class MaterialsPanel(Gtk.Box):
         
         # Details panel container
         details_frame = Gtk.Frame()
-        details_frame.set_size_request(300, -1)
         details_frame.get_style_context().add_class("view")
         
         # Details content

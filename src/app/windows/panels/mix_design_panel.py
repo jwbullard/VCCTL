@@ -180,7 +180,6 @@ class MixDesignPanel(Gtk.Box):
         
         # Left column: Mix composition (existing)
         left_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        left_column.set_size_request(450, -1)
         
         left_frame = Gtk.Frame(label="Cement Paste Components")
         self._create_composition_section(left_frame)
@@ -191,7 +190,6 @@ class MixDesignPanel(Gtk.Box):
         
         # Middle column: System parameters and advanced options
         middle_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        middle_column.set_size_request(400, -1)
         
         self._create_system_parameters_section(middle_column)
         self._create_flocculation_section(middle_column)
@@ -199,7 +197,6 @@ class MixDesignPanel(Gtk.Box):
         
         # Right column: Properties and calculations
         right_column = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
-        right_column.set_size_request(400, -1)
         
         right_frame = Gtk.Frame(label="Mix Properties & Calculations")
         self._create_properties_section(right_frame)

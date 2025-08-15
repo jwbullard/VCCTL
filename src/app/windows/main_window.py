@@ -57,8 +57,10 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self.set_default_size(1200, 800)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_resizable(True)
-        # Allow horizontal resizing with reasonable minimum sizes
-        self.set_size_request(800, 600)
+        
+        # Force remove any window manager constraints that might prevent horizontal resizing
+        # This is a GTK3-specific fix for some window managers that restrict resizing
+        self.connect('realize', self._on_window_realized)
         
         try:
             # Setup the UI
@@ -80,6 +82,21 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
                 context={'component': 'main_window', 'phase': 'initialization'},
                 user_message="Failed to initialize the main window. The application may not function properly."
             )
+    
+    def _on_window_realized(self, window):
+        """Called when the window is realized - force enable proper resizing."""
+        try:
+            # Force remove any size constraints that might prevent horizontal resizing
+            window_gdk = window.get_window()
+            if window_gdk:
+                # Set minimum size but allow unlimited maximum
+                geometry = Gdk.Geometry()
+                geometry.min_width = 400  # Allow much smaller minimum width
+                geometry.min_height = 300  # Allow smaller minimum height
+                # Don't set max_width/max_height to allow unlimited resizing
+                window_gdk.set_geometry_hints(geometry, Gdk.WindowHints.MIN_SIZE)
+        except Exception as e:
+            self.logger.warning(f"Could not set window geometry hints: {e}")
     
     def _setup_ui(self) -> None:
         """Setup the main window UI components."""

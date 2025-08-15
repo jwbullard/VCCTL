@@ -361,7 +361,7 @@ class HydrationService:
             if params.max_iterations_per_cycle < 50:
                 validation_result['warnings'].append("Low iteration limit may prevent convergence")
             
-            # Estimate computation requirements
+            # Estimate computation requirements (without microstructure info in validation)
             estimated_time = self.estimate_simulation_time(params)
             if estimated_time['estimated_hours'] > 24:
                 validation_result['warnings'].append(f"Long simulation time (~{estimated_time['estimated_hours']:.1f} hours)")
@@ -373,35 +373,53 @@ class HydrationService:
             validation_result['is_valid'] = False
             return validation_result
     
-    def estimate_simulation_time(self, params: HydrationParameters) -> Dict[str, float]:
-        """Estimate simulation computation time."""
+    def estimate_simulation_time(self, params: HydrationParameters, microstructure_info: Optional[Dict] = None) -> Dict[str, float]:
+        """Estimate simulation computation time using baseline approach."""
         try:
-            # Empirical time estimation (would need calibration)
-            base_time_per_cycle_seconds = 0.1  # Base time per cycle
+            print(f"DEBUG_EST: Starting baseline estimation with microstructure_info={microstructure_info}")
             
-            # Adjust for time step (smaller steps take longer)
-            time_step_factor = max(1.0, 0.001 / params.time_step_hours)
+            # Baseline: 3 minutes for 100³ microstructure with 168 hours max time
+            baseline_minutes = 3.0
+            baseline_cube_size = 100.0
+            baseline_max_time_hours = 168.0
             
-            # Adjust for convergence tolerance (tighter tolerance takes longer)
-            tolerance_factor = max(1.0, 1e-6 / params.convergence_tolerance)
+            # Get microstructure size
+            cube_size = 100.0  # Default
+            if microstructure_info and 'cubesize' in microstructure_info:
+                cube_size = float(microstructure_info['cubesize'])
+                print(f"DEBUG_EST: Using cube size from microstructure_info: {cube_size}")
             
-            # Adjust for temperature variation (more complex profiles take longer)
-            temp_points = len(params.temperature_profile.points)
-            temp_factor = 1.0 + 0.1 * max(0, temp_points - 1)
+            # Get max time (try both parameter locations)
+            max_time_hours = baseline_max_time_hours
+            if hasattr(params, 'max_time_hours'):
+                max_time_hours = params.max_time_hours
+            elif hasattr(params, 'max_simulation_time_hours'):
+                max_time_hours = params.max_simulation_time_hours
+            print(f"DEBUG_EST: Using max time: {max_time_hours} hours")
             
-            # Calculate total time
-            total_seconds = (params.total_cycles * base_time_per_cycle_seconds * 
-                           time_step_factor * tolerance_factor * temp_factor)
+            # Calculate scaling factors
+            size_factor = (cube_size / baseline_cube_size) ** 2.2
+            time_duration_factor = (max_time_hours / baseline_max_time_hours) ** 0.5
+            
+            # Calculate final estimate
+            estimated_minutes = baseline_minutes * size_factor * time_duration_factor
+            estimated_seconds = estimated_minutes * 60.0
+            
+            print(f"DEBUG_EST: Baseline calculation:")
+            print(f"  Cube size: {cube_size} (factor: {size_factor:.3f})")
+            print(f"  Max time: {max_time_hours}h (factor: {time_duration_factor:.3f})")
+            print(f"  Final estimate: {estimated_minutes:.1f} minutes")
             
             return {
-                'estimated_seconds': total_seconds,
-                'estimated_minutes': total_seconds / 60,
-                'estimated_hours': total_seconds / 3600,
+                'estimated_seconds': estimated_seconds,
+                'estimated_minutes': estimated_minutes,
+                'estimated_hours': estimated_seconds / 3600,
                 'cycles': params.total_cycles,
                 'complexity_factors': {
-                    'time_step': time_step_factor,
-                    'tolerance': tolerance_factor,
-                    'temperature': temp_factor
+                    'microstructure_size': size_factor,
+                    'time_duration': time_duration_factor,
+                    'cube_size': cube_size,
+                    'max_time_hours': max_time_hours
                 }
             }
             
