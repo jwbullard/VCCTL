@@ -388,6 +388,25 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
+        # View 3D Results button
+        self.view_3d_button = Gtk.ToolButton()
+        self.view_3d_button.set_icon_name("applications-graphics")
+        self.view_3d_button.set_label("3D Results")
+        self.view_3d_button.set_tooltip_text("View 3D microstructure evolution from hydration simulation results")
+        self.view_3d_button.connect('clicked', self._on_view_3d_results_clicked)
+        toolbar.insert(self.view_3d_button, -1)
+        
+        # Plot Data button
+        self.plot_data_button = Gtk.ToolButton()
+        self.plot_data_button.set_icon_name("applications-science")
+        self.plot_data_button.set_label("Plot Data")
+        self.plot_data_button.set_tooltip_text("Create plots from simulation data CSV files")
+        self.plot_data_button.connect('clicked', self._on_plot_data_clicked)
+        toolbar.insert(self.plot_data_button, -1)
+        
+        # Separator
+        toolbar.insert(Gtk.SeparatorToolItem(), -1)
+        
         # Settings button
         self.settings_button = Gtk.ToolButton()
         self.settings_button.set_icon_name("preferences-system")
@@ -438,6 +457,23 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             # Delete button: Enabled if selection exists and selected operation is not running
             self.delete_button.set_sensitive(has_selection and not selected_is_running)
+            
+            # 3D Results button: Enabled if selected operation is a completed hydration simulation
+            selected_is_hydration_completed = (
+                selected_operation and 
+                selected_operation.status == OperationStatus.COMPLETED and
+                selected_operation.type in [OperationType.HYDRATION_SIMULATION, 'HYDRATION_SIMULATION'] and
+                self._has_3d_results(selected_operation)
+            ) if has_selection else False
+            self.view_3d_button.set_sensitive(selected_is_hydration_completed)
+            
+            # Plot Data button: Enabled if selected operation has CSV data
+            selected_has_csv_data = (
+                selected_operation and 
+                selected_operation.status == OperationStatus.COMPLETED and
+                self._has_csv_data(selected_operation)
+            ) if has_selection else False
+            self.plot_data_button.set_sensitive(selected_has_csv_data)
             
             # Refresh and Settings: Always enabled (should work even during running operations)
             self.refresh_button.set_sensitive(True)
@@ -1862,13 +1898,17 @@ class OperationsMonitoringPanel(Gtk.Box):
                         # Check both output_dir and output_directory keys
                         output_dir = operation.metadata.get('output_dir') or operation.metadata.get('output_directory', '')
                         operation_source = operation.metadata.get('source', '')
+                        self.logger.info(f"DEBUG: Operation {operation.name} metadata: {operation.metadata}")
+                        self.logger.info(f"DEBUG: output_dir={output_dir}, operation_source={operation_source}")
                     else:
                         operation_source = ''
+                        self.logger.info(f"DEBUG: Operation {operation.name} has no metadata")
                     
                     # For database operations (hydration simulations), construct the folder path if not already set
                     if operation_source == 'database' and not output_dir:
                         # Operations folder is typically Operations/{operation_name}
-                        project_root = Path(__file__).parent.parent.parent.parent
+                        # From panels/operations_monitoring_panel.py: parent = windows, parent = app, parent = src, parent = vcctl-gtk
+                        project_root = Path(__file__).parent.parent.parent.parent.parent
                         operations_dir = project_root / "Operations"
                         potential_folder = operations_dir / operation.name
                         if potential_folder.exists():
@@ -1877,7 +1917,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                     
                     # For database operations, also check if output_directory gives us a relative path to make absolute
                     if operation_source == 'database' and output_dir and not Path(output_dir).is_absolute():
-                        project_root = Path(__file__).parent.parent.parent.parent
+                        # From panels/operations_monitoring_panel.py: parent = windows, parent = app, parent = src, parent = vcctl-gtk
+                        project_root = Path(__file__).parent.parent.parent.parent.parent
                         output_dir = str(project_root / output_dir)
                         self.logger.info(f"Made absolute path for {operation.name}: {output_dir}")
                     
@@ -1897,10 +1938,15 @@ class OperationsMonitoringPanel(Gtk.Box):
                     # Delete the associated folder if it exists
                     if output_dir:
                         folder_path = Path(output_dir)
+                        self.logger.info(f"DEBUG: Attempting to delete folder: {output_dir}")
+                        self.logger.info(f"DEBUG: Folder exists: {folder_path.exists()}")
                         if folder_path.exists():
-                            import shutil
-                            shutil.rmtree(output_dir)
-                            self.logger.info(f"Deleted operation folder: {output_dir}")
+                            try:
+                                import shutil
+                                shutil.rmtree(output_dir)
+                                self.logger.info(f"Successfully deleted operation folder: {output_dir}")
+                            except Exception as delete_error:
+                                self.logger.error(f"Failed to delete folder {output_dir}: {delete_error}")
                         else:
                             self.logger.warning(f"Operation folder not found: {output_dir}")
                     else:
@@ -3917,6 +3963,111 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self._refresh_results_analysis()
             except Exception as e:
                 self.logger.warning(f"Error refreshing results analysis: {e}")
+
+    def _has_3d_results(self, operation) -> bool:
+        """Check if operation has 3D microstructure results from hydration simulation."""
+        try:
+            if not operation.output_dir:
+                return False
+            
+            output_path = Path(operation.output_dir)
+            if not output_path.exists():
+                return False
+            
+            # Look for time-series microstructure files (*.img.XXXh.XX.XXX)
+            img_files = list(output_path.glob("*.img.*h.*.*"))
+            
+            # Also check for final hydrated microstructure (HydrationOf_*.img.*.*)
+            final_img_files = list(output_path.glob("HydrationOf_*.img.*.*"))
+            
+            return len(img_files) > 0 or len(final_img_files) > 0
+            
+        except Exception as e:
+            self.logger.error(f"Error checking for 3D results: {e}")
+            return False
+    
+    def _has_csv_data(self, operation) -> bool:
+        """Check if operation has CSV data files for plotting."""
+        try:
+            if not operation.output_dir:
+                return False
+            
+            output_path = Path(operation.output_dir)
+            if not output_path.exists():
+                return False
+            
+            # Look for CSV files (data tables from simulations)
+            csv_files = list(output_path.glob("*.csv"))
+            
+            return len(csv_files) > 0
+            
+        except Exception as e:
+            self.logger.error(f"Error checking for CSV data: {e}")
+            return False
+
+    def _on_view_3d_results_clicked(self, button) -> None:
+        """Handle View 3D Results button click."""
+        selected_operation = self._get_selected_operation()
+        if not selected_operation:
+            return
+        
+        try:
+            # Import here to avoid circular imports
+            from app.windows.dialogs.hydration_results_viewer import HydrationResultsViewer
+            
+            # Create and show the 3D results viewer dialog
+            viewer = HydrationResultsViewer(
+                parent=self.get_toplevel(),
+                operation=selected_operation
+            )
+            viewer.run()
+            viewer.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Error opening 3D results viewer: {e}")
+            # Show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Opening 3D Results"
+            )
+            dialog.format_secondary_text(f"Failed to open 3D results viewer: {e}")
+            dialog.run()
+            dialog.destroy()
+
+    def _on_plot_data_clicked(self, button) -> None:
+        """Handle Plot Data button click."""
+        selected_operation = self._get_selected_operation()
+        if not selected_operation:
+            return
+        
+        try:
+            # Import here to avoid circular imports
+            from app.windows.dialogs.data_plotter import DataPlotter
+            
+            # Create and show the data plotting dialog
+            plotter = DataPlotter(
+                parent=self.get_toplevel(),
+                operation=selected_operation
+            )
+            plotter.run()
+            plotter.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Error opening data plotter: {e}")
+            # Show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Opening Data Plotter"
+            )
+            dialog.format_secondary_text(f"Failed to open data plotter: {e}")
+            dialog.run()
+            dialog.destroy()
 
 
 # Register the widget

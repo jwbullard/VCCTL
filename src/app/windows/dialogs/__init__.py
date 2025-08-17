@@ -19,6 +19,8 @@ from .file_operations_dialog import (
     show_export_dialog, show_batch_export_dialog
 )
 from .export_dialog import ExportDialog, show_export_dialog as show_advanced_export_dialog
+from .hydration_results_viewer import HydrationResultsViewer
+from .data_plotter import DataPlotter
 
 __all__ = [
     'MaterialDialogBase',
@@ -35,5 +37,7 @@ __all__ = [
     'show_export_dialog',
     'show_batch_export_dialog',
     'ExportDialog',
-    'show_advanced_export_dialog'
+    'show_advanced_export_dialog',
+    'HydrationResultsViewer',
+    'DataPlotter'
 ]
