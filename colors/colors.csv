@@ -10,15 +10,31 @@ Phase,id,Phase,name,Red,Green,Blue
 8,Hemihydrate,255,240,86
 9,Anhydrite,255,255,128
 10,Sfume,40,173,75
-11,Inert Filler,100,100,255
+11,Inert Filler,238,174,238
 12,Slag,255,165,0
-13,Fly Ash,255,192,65
-16,Brucite,26,100,26
-17,Hydrotalcite,0,200,200
+13,Aggregate,255,192,65
+14,ASG,255,165,0
+15,CAS2,0,0,128
+16,Silica(am),26,100,26
+17,FA-C3A,64,64,64
+18,Generic Flyash,64,64,64
 19,Portlandite,7,72,142
 20,CSH,245,222,179
+21,C3AH6,150,150,0
 22,AFt,127,0,255
+23,AFt-Fe,127,0,255
 24,AFm,244,70,203
+25,FH3,64,128,128
+26,Pozzolanic CSH,174,237,237
+27,Slag CSH,128,250,128
+28,CaCl2,255,170,128
+29,Friedel Salt,255,0,255
+30,Straetlingite,64,64,0
+31,Secondary Gypsum,255,255,0
+32,Absorbed Gypsum,255,255,0
 33,CACO3,0,204,0
 34,AFmc,250,198,220
+35,Brucite,26,103,26
+36,Free lime,128,255,0
+37,Orth. C3A,178,178,178
 55,Void,0,0,0

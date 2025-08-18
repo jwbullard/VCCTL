@@ -41,14 +41,15 @@ class DataPlotter(Gtk.Dialog):
         # UI components
         self.file_combo = None
         self.x_combo = None
-        self.y_combo = None
+        self.y_liststore = None
+        self.y_treeview = None
         self.plot_type_combo = None
         self.figure = None
         self.canvas = None
         self.info_label = None
         
-        # Dialog setup
-        self.set_default_size(900, 600)
+        # Dialog setup - larger default size to accommodate wider plots
+        self.set_default_size(1200, 700)
         self.set_modal(True)
         
         # Add standard dialog buttons
@@ -57,6 +58,9 @@ class DataPlotter(Gtk.Dialog):
         # Initialize UI
         self._setup_ui()
         self._load_csv_files()
+        
+        # Show all widgets
+        self.show_all()
         
     def _setup_ui(self) -> None:
         """Set up the user interface."""
@@ -67,21 +71,23 @@ class DataPlotter(Gtk.Dialog):
         content_area.set_margin_top(10)
         content_area.set_margin_bottom(10)
         
-        # Create main layout - controls on left, plot on right
-        main_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        content_area.pack_start(main_hbox, True, True, 0)
+        # Create main layout using Paned widget for better control
+        main_paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        main_paned.set_wide_handle(True)
+        main_paned.set_position(280)  # Set initial position of divider
+        content_area.pack_start(main_paned, True, True, 0)
         
         # Create controls panel (left side)
-        self._create_controls_panel(main_hbox)
+        self._create_controls_panel(main_paned)
         
         # Create plot area (right side)
-        self._create_plot_area(main_hbox)
+        self._create_plot_area(main_paned)
         
-    def _create_controls_panel(self, parent: Gtk.Box) -> None:
+    def _create_controls_panel(self, parent: Gtk.Paned) -> None:
         """Create the controls panel."""
         controls_frame = Gtk.Frame(label="Plot Controls")
-        controls_frame.set_size_request(250, -1)
-        parent.pack_start(controls_frame, False, False, 0)
+        controls_frame.set_size_request(280, -1)  # Fixed width
+        parent.pack1(controls_frame, False, False)  # pack1 = left side, no resize, no shrink
         
         controls_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         controls_vbox.set_margin_left(10)
@@ -114,14 +120,45 @@ class DataPlotter(Gtk.Dialog):
         self.x_combo.connect('changed', self._on_variable_changed)
         controls_vbox.pack_start(self.x_combo, False, False, 0)
         
-        # Y-axis variable
-        y_label = Gtk.Label("Y-axis Variable:")
+        # Y-axis variables (multi-select)
+        y_label = Gtk.Label("Y-axis Variables:")
         y_label.set_halign(Gtk.Align.START)
         controls_vbox.pack_start(y_label, False, False, 0)
         
-        self.y_combo = Gtk.ComboBoxText()
-        self.y_combo.connect('changed', self._on_variable_changed)
-        controls_vbox.pack_start(self.y_combo, False, False, 0)
+        # Create scrolled window for Y variables list
+        y_scrolled = Gtk.ScrolledWindow()
+        y_scrolled.set_size_request(-1, 120)
+        y_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        controls_vbox.pack_start(y_scrolled, False, False, 0)
+        
+        # Create list store and tree view for Y variables
+        self.y_liststore = Gtk.ListStore(bool, str, str)  # selected, display_name, column_name
+        self.y_treeview = Gtk.TreeView(model=self.y_liststore)
+        
+        # Add checkbox column
+        checkbox_renderer = Gtk.CellRendererToggle()
+        checkbox_renderer.connect("toggled", self._on_y_variable_toggled)
+        checkbox_column = Gtk.TreeViewColumn("", checkbox_renderer, active=0)
+        self.y_treeview.append_column(checkbox_column)
+        
+        # Add variable name column
+        text_renderer = Gtk.CellRendererText()
+        name_column = Gtk.TreeViewColumn("Variable", text_renderer, text=1)
+        self.y_treeview.append_column(name_column)
+        
+        y_scrolled.add(self.y_treeview)
+        
+        # Add select/deselect all buttons
+        y_button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        controls_vbox.pack_start(y_button_box, False, False, 0)
+        
+        select_all_button = Gtk.Button(label="Select All")
+        select_all_button.connect('clicked', self._on_select_all_y_clicked)
+        y_button_box.pack_start(select_all_button, True, True, 0)
+        
+        deselect_all_button = Gtk.Button(label="Deselect All")
+        deselect_all_button.connect('clicked', self._on_deselect_all_y_clicked)
+        y_button_box.pack_start(deselect_all_button, True, True, 0)
         
         # Plot type
         type_label = Gtk.Label("Plot Type:")
@@ -165,15 +202,16 @@ class DataPlotter(Gtk.Dialog):
         self.data_info_label.set_line_wrap(True)
         info_frame.add(self.data_info_label)
         
-    def _create_plot_area(self, parent: Gtk.Box) -> None:
+    def _create_plot_area(self, parent: Gtk.Paned) -> None:
         """Create the matplotlib plot area."""
         plot_frame = Gtk.Frame(label="Plot")
-        parent.pack_start(plot_frame, True, True, 0)
+        parent.pack2(plot_frame, True, True)  # pack2 = right side, resize, shrink
         
-        # Create matplotlib figure
-        self.figure = Figure(figsize=(8, 6), dpi=100)
+        # Create matplotlib figure with larger initial size
+        self.figure = Figure(figsize=(10, 7), dpi=100)
         self.canvas = FigureCanvas(self.figure)
-        self.canvas.set_size_request(400, 300)
+        # Set minimum size - Paned widget will handle expansion
+        self.canvas.set_size_request(500, 400)
         
         plot_frame.add(self.canvas)
         
@@ -185,14 +223,38 @@ class DataPlotter(Gtk.Dialog):
         ax.set_xticks([])
         ax.set_yticks([])
         
+        # Make sure canvas is visible
+        self.canvas.show()
+        
     def _load_csv_files(self) -> None:
         """Load all CSV files from the operation directory."""
         try:
-            if not self.operation or not self.operation.output_dir:
-                self.logger.error("No operation or output directory specified")
+            if not self.operation:
+                self.logger.error("No operation specified")
                 return
             
-            output_path = Path(self.operation.output_dir)
+            # Get output directory from operation metadata
+            output_dir = None
+            if hasattr(self.operation, 'output_dir') and self.operation.output_dir:
+                output_dir = self.operation.output_dir
+            elif hasattr(self.operation, 'metadata') and self.operation.metadata:
+                output_dir = self.operation.metadata.get('output_directory')
+                if not output_dir:
+                    output_dir = self.operation.metadata.get('output_dir')
+            
+            if not output_dir:
+                # Try to construct from operation name
+                project_root = Path(__file__).parent.parent.parent.parent
+                operations_dir = project_root / "Operations"
+                potential_folder = operations_dir / self.operation.name
+                if potential_folder.exists():
+                    output_dir = str(potential_folder)
+            
+            if not output_dir:
+                self.logger.error("No output directory found for operation")
+                return
+            
+            output_path = Path(output_dir)
             if not output_path.exists():
                 self.logger.error(f"Output directory does not exist: {output_path}")
                 return
@@ -234,16 +296,59 @@ class DataPlotter(Gtk.Dialog):
             
             # Clear and populate variable dropdowns
             self.x_combo.remove_all()
-            self.y_combo.remove_all()
+            self.y_liststore.clear()
             
             for column in self.current_columns:
                 self.x_combo.append_text(column)
-                self.y_combo.append_text(column)
+                # Add to Y variables list (unselected by default)
+                self.y_liststore.append([False, column, column])
             
-            # Set reasonable defaults
-            if len(self.current_columns) >= 2:
-                self.x_combo.set_active(0)  # First column (often time)
-                self.y_combo.set_active(1)  # Second column
+            # Set reasonable defaults - prefer "time(h)" for X-axis
+            time_column_index = -1
+            for i, column in enumerate(self.current_columns):
+                if column.lower() in ['time(h)', 'time', 'time_h', 'time_hours']:
+                    time_column_index = i
+                    break
+            
+            if time_column_index >= 0:
+                # Found time column, use it as X-axis
+                self.x_combo.set_active(time_column_index)
+                # Select preferred Y variable (Alpha_mass first, then first non-time column)
+                alpha_mass_selected = False
+                for i, column in enumerate(self.current_columns):
+                    if column == 'Alpha_mass':
+                        iter_var = self.y_liststore.iter_nth_child(None, i)
+                        if iter_var:
+                            self.y_liststore.set_value(iter_var, 0, True)
+                            alpha_mass_selected = True
+                            break
+                
+                # If Alpha_mass not found, select first non-time column
+                if not alpha_mass_selected:
+                    for i, column in enumerate(self.current_columns):
+                        if i != time_column_index:
+                            iter_var = self.y_liststore.iter_nth_child(None, i)
+                            if iter_var:
+                                self.y_liststore.set_value(iter_var, 0, True)
+                                break
+            elif len(self.current_columns) >= 2:
+                # Fall back to first column as X-axis
+                self.x_combo.set_active(0)
+                # Select Alpha_mass if available, otherwise second column
+                alpha_mass_selected = False
+                for i, column in enumerate(self.current_columns):
+                    if column == 'Alpha_mass':
+                        iter_var = self.y_liststore.iter_nth_child(None, i)
+                        if iter_var:
+                            self.y_liststore.set_value(iter_var, 0, True)
+                            alpha_mass_selected = True
+                            break
+                
+                if not alpha_mass_selected:
+                    # Select second column as default Y variable
+                    iter_second = self.y_liststore.iter_nth_child(None, 1)
+                    if iter_second:
+                        self.y_liststore.set_value(iter_second, 0, True)
             elif len(self.current_columns) == 1:
                 self.x_combo.set_active(0)
                 
@@ -278,6 +383,35 @@ class DataPlotter(Gtk.Dialog):
         # Could add preview or validation here if needed
         pass
     
+    def _on_y_variable_toggled(self, renderer, path) -> None:
+        """Handle Y variable checkbox toggle."""
+        try:
+            iter = self.y_liststore.get_iter(path)
+            current_value = self.y_liststore.get_value(iter, 0)
+            self.y_liststore.set_value(iter, 0, not current_value)
+        except Exception as e:
+            self.logger.error(f"Error toggling Y variable: {e}")
+    
+    def _on_select_all_y_clicked(self, button) -> None:
+        """Select all Y variables."""
+        try:
+            iter = self.y_liststore.get_iter_first()
+            while iter:
+                self.y_liststore.set_value(iter, 0, True)
+                iter = self.y_liststore.iter_next(iter)
+        except Exception as e:
+            self.logger.error(f"Error selecting all Y variables: {e}")
+    
+    def _on_deselect_all_y_clicked(self, button) -> None:
+        """Deselect all Y variables."""
+        try:
+            iter = self.y_liststore.get_iter_first()
+            while iter:
+                self.y_liststore.set_value(iter, 0, False)
+                iter = self.y_liststore.iter_next(iter)
+        except Exception as e:
+            self.logger.error(f"Error deselecting all Y variables: {e}")
+    
     def _on_create_plot_clicked(self, button) -> None:
         """Handle create plot button click."""
         try:
@@ -286,20 +420,21 @@ class DataPlotter(Gtk.Dialog):
                 return
             
             x_index = self.x_combo.get_active()
-            y_index = self.y_combo.get_active()
             plot_type_index = self.plot_type_combo.get_active()
             
             if x_index < 0:
                 self._show_error("Please select an X-axis variable.")
                 return
-                
-            if y_index < 0 and plot_type_index != 3:  # Histogram doesn't need Y
-                self._show_error("Please select a Y-axis variable.")
+            
+            # Get selected Y variables
+            selected_y_vars = self._get_selected_y_variables()
+            
+            if len(selected_y_vars) == 0 and plot_type_index != 3:  # Histogram doesn't need Y
+                self._show_error("Please select at least one Y-axis variable.")
                 return
             
             # Get selected variables
             x_var = self.current_columns[x_index]
-            y_var = self.current_columns[y_index] if y_index >= 0 else None
             
             # Clear previous plot
             self.figure.clear()
@@ -311,36 +446,68 @@ class DataPlotter(Gtk.Dialog):
             
             x_data = self.current_data[x_var]
             
-            if plot_type == "Line Plot" and y_var:
-                y_data = self.current_data[y_var]
-                ax.plot(x_data, y_data, linewidth=2)
-                ax.set_ylabel(y_var)
+            if plot_type == "Line Plot" and selected_y_vars:
+                # Plot multiple lines with different colors
+                colors = plt.cm.tab10(np.linspace(0, 1, len(selected_y_vars)))
+                for i, y_var in enumerate(selected_y_vars):
+                    y_data = self.current_data[y_var]
+                    ax.plot(x_data, y_data, linewidth=2, color=colors[i], label=y_var)
+                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax.set_ylabel("Value")
                 
-            elif plot_type == "Scatter Plot" and y_var:
-                y_data = self.current_data[y_var]
-                ax.scatter(x_data, y_data, alpha=0.6)
-                ax.set_ylabel(y_var)
+            elif plot_type == "Scatter Plot" and selected_y_vars:
+                # Plot multiple scatter series with different colors
+                colors = plt.cm.tab10(np.linspace(0, 1, len(selected_y_vars)))
+                for i, y_var in enumerate(selected_y_vars):
+                    y_data = self.current_data[y_var]
+                    ax.scatter(x_data, y_data, alpha=0.6, color=colors[i], label=y_var)
+                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax.set_ylabel("Value")
                 
-            elif plot_type == "Bar Plot" and y_var:
-                y_data = self.current_data[y_var]
-                # For bar plots, limit data points to avoid overcrowding
-                if len(x_data) > 50:
-                    # Sample data
-                    indices = np.linspace(0, len(x_data)-1, 50, dtype=int)
-                    x_data = x_data.iloc[indices]
-                    y_data = y_data.iloc[indices]
-                ax.bar(range(len(x_data)), y_data)
-                ax.set_xticks(range(0, len(x_data), max(1, len(x_data)//10)))
-                ax.set_xticklabels([f"{x:.2f}" for i, x in enumerate(x_data) if i % max(1, len(x_data)//10) == 0], rotation=45)
-                ax.set_ylabel(y_var)
+            elif plot_type == "Bar Plot" and selected_y_vars:
+                # For multiple Y variables, create grouped bar plot
+                if len(selected_y_vars) == 1:
+                    y_var = selected_y_vars[0]
+                    y_data = self.current_data[y_var]
+                    # For bar plots, limit data points to avoid overcrowding
+                    if len(x_data) > 50:
+                        indices = np.linspace(0, len(x_data)-1, 50, dtype=int)
+                        x_data = x_data.iloc[indices]
+                        y_data = y_data.iloc[indices]
+                    ax.bar(range(len(x_data)), y_data)
+                    ax.set_xticks(range(0, len(x_data), max(1, len(x_data)//10)))
+                    ax.set_xticklabels([f"{x:.2f}" for i, x in enumerate(x_data) if i % max(1, len(x_data)//10) == 0], rotation=45)
+                    ax.set_ylabel(y_var)
+                else:
+                    # Multiple Y variables - grouped bars
+                    n_vars = len(selected_y_vars)
+                    bar_width = 0.8 / n_vars
+                    x_positions = np.arange(min(len(x_data), 20))  # Limit to 20 data points for readability
+                    
+                    colors = plt.cm.tab10(np.linspace(0, 1, n_vars))
+                    for i, y_var in enumerate(selected_y_vars):
+                        y_data = self.current_data[y_var].iloc[:len(x_positions)]
+                        ax.bar(x_positions + i * bar_width, y_data, bar_width, 
+                              color=colors[i], label=y_var, alpha=0.8)
+                    
+                    ax.set_xticks(x_positions + bar_width * (n_vars - 1) / 2)
+                    ax.set_xticklabels([f"{x:.2f}" for x in x_data.iloc[:len(x_positions)]], rotation=45)
+                    ax.legend()
+                    ax.set_ylabel("Value")
                 
             elif plot_type == "Histogram (Y only)":
-                if y_var:
-                    y_data = self.current_data[y_var]
-                    ax.hist(y_data, bins=30, alpha=0.7, edgecolor='black')
-                    ax.set_xlabel(y_var)
+                if selected_y_vars:
+                    # Plot multiple histograms with transparency
+                    colors = plt.cm.tab10(np.linspace(0, 1, len(selected_y_vars)))
+                    for i, y_var in enumerate(selected_y_vars):
+                        y_data = self.current_data[y_var]
+                        ax.hist(y_data, bins=30, alpha=0.5, edgecolor='black', 
+                               color=colors[i], label=y_var)
+                    ax.legend()
+                    ax.set_xlabel("Value")
                     ax.set_ylabel("Frequency")
                 else:
+                    # Fall back to X variable histogram
                     ax.hist(x_data, bins=30, alpha=0.7, edgecolor='black')
                     ax.set_xlabel(x_var)
                     ax.set_ylabel("Frequency")
@@ -349,18 +516,44 @@ class DataPlotter(Gtk.Dialog):
             if plot_type != "Histogram (Y only)":
                 ax.set_xlabel(x_var)
             
-            ax.set_title(f"{plot_type}: {y_var or x_var} vs {x_var}" if plot_type != "Histogram (Y only)" else f"Histogram: {y_var or x_var}")
+            # Create title based on number of Y variables
+            if len(selected_y_vars) > 1:
+                y_names = ", ".join(selected_y_vars[:3])
+                if len(selected_y_vars) > 3:
+                    y_names += f" (and {len(selected_y_vars) - 3} more)"
+                title = f"{plot_type}: {y_names} vs {x_var}" if plot_type != "Histogram (Y only)" else f"Histogram: {y_names}"
+            elif len(selected_y_vars) == 1:
+                title = f"{plot_type}: {selected_y_vars[0]} vs {x_var}" if plot_type != "Histogram (Y only)" else f"Histogram: {selected_y_vars[0]}"
+            else:
+                title = f"Histogram: {x_var}"
+            
+            ax.set_title(title)
             ax.grid(True, alpha=0.3)
             
             # Adjust layout and refresh
             self.figure.tight_layout()
             self.canvas.draw()
             
-            self.logger.info(f"Created {plot_type}: {x_var} vs {y_var}")
+            self.logger.info(f"Created {plot_type} with {len(selected_y_vars)} Y variables: {selected_y_vars}")
             
         except Exception as e:
             self.logger.error(f"Error creating plot: {e}")
             self._show_error(f"Failed to create plot: {e}")
+    
+    def _get_selected_y_variables(self) -> List[str]:
+        """Get list of selected Y variables."""
+        selected_vars = []
+        try:
+            iter = self.y_liststore.get_iter_first()
+            while iter:
+                if self.y_liststore.get_value(iter, 0):  # If selected
+                    var_name = self.y_liststore.get_value(iter, 2)  # Column name
+                    selected_vars.append(var_name)
+                iter = self.y_liststore.iter_next(iter)
+        except Exception as e:
+            self.logger.error(f"Error getting selected Y variables: {e}")
+        
+        return selected_vars
     
     def _on_clear_plot_clicked(self, button) -> None:
         """Handle clear plot button click."""

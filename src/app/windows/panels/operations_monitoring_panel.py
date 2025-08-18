@@ -391,8 +391,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         # View 3D Results button
         self.view_3d_button = Gtk.ToolButton()
         self.view_3d_button.set_icon_name("applications-graphics")
-        self.view_3d_button.set_label("3D Results")
+        self.view_3d_button.set_label("View 3D Results")
         self.view_3d_button.set_tooltip_text("View 3D microstructure evolution from hydration simulation results")
+        self.view_3d_button.set_is_important(True)  # Force label to show
         self.view_3d_button.connect('clicked', self._on_view_3d_results_clicked)
         toolbar.insert(self.view_3d_button, -1)
         
@@ -401,6 +402,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.plot_data_button.set_icon_name("applications-science")
         self.plot_data_button.set_label("Plot Data")
         self.plot_data_button.set_tooltip_text("Create plots from simulation data CSV files")
+        self.plot_data_button.set_is_important(True)  # Force label to show
         self.plot_data_button.connect('clicked', self._on_plot_data_clicked)
         toolbar.insert(self.plot_data_button, -1)
         
@@ -462,7 +464,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             selected_is_hydration_completed = (
                 selected_operation and 
                 selected_operation.status == OperationStatus.COMPLETED and
-                selected_operation.type in [OperationType.HYDRATION_SIMULATION, 'HYDRATION_SIMULATION'] and
+                (selected_operation.operation_type == OperationType.HYDRATION_SIMULATION or 
+                 selected_operation.operation_type == 'hydration_simulation') and
                 self._has_3d_results(selected_operation)
             ) if has_selection else False
             self.view_3d_button.set_sensitive(selected_is_hydration_completed)
@@ -3967,10 +3970,24 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _has_3d_results(self, operation) -> bool:
         """Check if operation has 3D microstructure results from hydration simulation."""
         try:
-            if not operation.output_dir:
+            # Check for output_dir in metadata or try to construct from operation name
+            output_dir = None
+            if hasattr(operation, 'output_dir') and operation.output_dir:
+                output_dir = operation.output_dir
+            elif hasattr(operation, 'metadata') and operation.metadata and 'output_directory' in operation.metadata:
+                output_dir = operation.metadata['output_directory']
+            else:
+                # Try to construct from operation name
+                project_root = Path(__file__).parent.parent.parent.parent
+                operations_dir = project_root / "Operations"
+                potential_folder = operations_dir / operation.name
+                if potential_folder.exists():
+                    output_dir = str(potential_folder)
+            
+            if not output_dir:
                 return False
             
-            output_path = Path(operation.output_dir)
+            output_path = Path(output_dir)
             if not output_path.exists():
                 return False
             
@@ -3989,10 +4006,24 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _has_csv_data(self, operation) -> bool:
         """Check if operation has CSV data files for plotting."""
         try:
-            if not operation.output_dir:
+            # Check for output_dir in metadata or try to construct from operation name
+            output_dir = None
+            if hasattr(operation, 'output_dir') and operation.output_dir:
+                output_dir = operation.output_dir
+            elif hasattr(operation, 'metadata') and operation.metadata and 'output_directory' in operation.metadata:
+                output_dir = operation.metadata['output_directory']
+            else:
+                # Try to construct from operation name
+                project_root = Path(__file__).parent.parent.parent.parent
+                operations_dir = project_root / "Operations"
+                potential_folder = operations_dir / operation.name
+                if potential_folder.exists():
+                    output_dir = str(potential_folder)
+            
+            if not output_dir:
                 return False
             
-            output_path = Path(operation.output_dir)
+            output_path = Path(output_dir)
             if not output_path.exists():
                 return False
             
