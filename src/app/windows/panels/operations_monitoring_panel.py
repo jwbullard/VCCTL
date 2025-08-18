@@ -460,15 +460,13 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Delete button: Enabled if selection exists and selected operation is not running
             self.delete_button.set_sensitive(has_selection and not selected_is_running)
             
-            # 3D Results button: Enabled if selected operation is a completed hydration simulation
-            selected_is_hydration_completed = (
-                selected_operation and 
-                selected_operation.status == OperationStatus.COMPLETED and
-                (selected_operation.operation_type == OperationType.HYDRATION_SIMULATION or 
-                 selected_operation.operation_type == 'hydration_simulation') and
-                self._has_3d_results(selected_operation)
-            ) if has_selection else False
-            self.view_3d_button.set_sensitive(selected_is_hydration_completed)
+            # 3D Results button: Enabled if selected operation is a completed operation with 3D results
+            selected_has_3d_results = False
+            if has_selection and selected_operation:
+                is_completed = selected_operation.status == OperationStatus.COMPLETED
+                has_3d = self._has_3d_results(selected_operation)
+                selected_has_3d_results = is_completed and has_3d
+            self.view_3d_button.set_sensitive(selected_has_3d_results)
             
             # Plot Data button: Enabled if selected operation has CSV data
             selected_has_csv_data = (
@@ -928,7 +926,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         tree_frame = Gtk.Frame(label="Operations Directory")
         tree_scrolled = Gtk.ScrolledWindow()
         tree_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        tree_scrolled.set_size_request(300, 400)
+        tree_scrolled.set_size_request(200, 400)  # Reduced width to allow narrower windows
         
         # Create file tree store: Name, Path, Type, Size, Modified
         self.files_store = Gtk.TreeStore(str, str, str, str, str)
@@ -986,7 +984,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         # File preview area
         preview_scrolled = Gtk.ScrolledWindow()
         preview_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        preview_scrolled.set_size_request(300, 300)
+        preview_scrolled.set_size_request(200, 300)  # Reduced width to allow narrower windows
         
         self.file_preview = Gtk.TextView()
         self.file_preview.set_editable(False)
@@ -1984,6 +1982,11 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Force a thorough update of all operations
         self._force_cleanup_stale_operations()
+        
+        # RELOAD OPERATIONS FROM ALL SOURCES (including filesystem scan)
+        self.logger.info("=== REFRESH: Reloading operations from all sources ===")
+        self._load_operations_from_file()
+        
         self._update_operations()
         self._update_ui()
         
@@ -3801,7 +3804,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     # Only add if not already loaded from file
                     if ui_operation.id not in self.operations:
                         self.operations[ui_operation.id] = ui_operation
-                        self.logger.debug(f"Added database operation: {ui_operation.name}")
+                        self.logger.info(f"Added database operation: {ui_operation.name} (type: {ui_operation.operation_type}, status: {ui_operation.status})")
                     else:
                         # Update status if the database version is more recent
                         existing = self.operations[ui_operation.id]
@@ -3826,6 +3829,67 @@ class OperationsMonitoringPanel(Gtk.Box):
             
         except Exception as e:
             self.logger.error(f"Failed to load operations from database: {e}", exc_info=True)
+        
+        # Finally scan Operations directory for filesystem operations (microstructures)
+        try:
+            self.logger.info("Scanning Operations directory for filesystem operations...")
+            operations_dir = Path(__file__).parent.parent.parent.parent.parent / "Operations"
+            
+            if operations_dir.exists():
+                added_count = 0
+                for operation_folder in operations_dir.iterdir():
+                    if operation_folder.is_dir():
+                        operation_name = operation_folder.name
+                        
+                        # Skip if already loaded from file or database
+                        existing_ops = [op.name for op in self.operations.values()]
+                        if operation_name in existing_ops:
+                            continue
+                        
+                        # Check if this looks like a microstructure operation
+                        img_files = list(operation_folder.glob("*.img"))
+                        pimg_files = list(operation_folder.glob("*.pimg"))
+                        genmic_files = list(operation_folder.glob("genmic_input_*.txt"))
+                        
+                        if img_files or pimg_files or genmic_files:
+                            # Create operation from filesystem data
+                            operation_id = f"fs_{operation_name}"
+                            
+                            # Determine operation type
+                            if any(f.name.endswith('.h.') for f in operation_folder.glob("*.img.*")):
+                                op_type = OperationType.HYDRATION_SIMULATION
+                            else:
+                                op_type = OperationType.MICROSTRUCTURE_GENERATION
+                            
+                            # Get modification time
+                            mod_time = datetime.fromtimestamp(operation_folder.stat().st_mtime)
+                            
+                            # Create operation object  
+                            operation = Operation(
+                                id=operation_id,
+                                name=operation_name,
+                                operation_type=op_type,
+                                status=OperationStatus.COMPLETED,  # Use proper enum
+                                progress=100.0,
+                                start_time=mod_time,
+                                end_time=mod_time,
+                                metadata={
+                                    'source': 'filesystem',
+                                    'output_directory': str(operation_folder),
+                                    'img_files': len(img_files),
+                                    'pimg_files': len(pimg_files)
+                                }
+                            )
+                            
+                            self.operations[operation_id] = operation
+                            added_count += 1
+                
+                self.logger.info(f"Filesystem scan complete. Added {added_count} operations. Total: {len(self.operations)}")
+            else:
+                self.logger.warning("Operations directory not found")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to scan Operations directory: {e}", exc_info=True)
         
         # Update UI with all loaded operations
         if self.operations:
@@ -3968,7 +4032,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self.logger.warning(f"Error refreshing results analysis: {e}")
 
     def _has_3d_results(self, operation) -> bool:
-        """Check if operation has 3D microstructure results from hydration simulation."""
+        """Check if operation has 3D microstructure results (.img files)."""
         try:
             # Check for output_dir in metadata or try to construct from operation name
             output_dir = None
@@ -3978,7 +4042,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 output_dir = operation.metadata['output_directory']
             else:
                 # Try to construct from operation name
-                project_root = Path(__file__).parent.parent.parent.parent
+                project_root = Path(__file__).parent.parent.parent.parent.parent
                 operations_dir = project_root / "Operations"
                 potential_folder = operations_dir / operation.name
                 if potential_folder.exists():
@@ -3991,13 +4055,18 @@ class OperationsMonitoringPanel(Gtk.Box):
             if not output_path.exists():
                 return False
             
-            # Look for time-series microstructure files (*.img.XXXh.XX.XXX)
-            img_files = list(output_path.glob("*.img.*h.*.*"))
+            # Look for any .img files (both hydration time-series and regular microstructures)
+            # Time-series hydration files (*.img.XXXh.XX.XXX)
+            hydration_img_files = list(output_path.glob("*.img.*h.*.*"))
             
-            # Also check for final hydrated microstructure (HydrationOf_*.img.*.*)
+            # Final hydrated microstructures (HydrationOf_*.img.*.*)
             final_img_files = list(output_path.glob("HydrationOf_*.img.*.*"))
             
-            return len(img_files) > 0 or len(final_img_files) > 0
+            # Regular microstructure files (*.img)
+            regular_img_files = list(output_path.glob("*.img"))
+            
+            # Return true if any .img files exist
+            return len(hydration_img_files) > 0 or len(final_img_files) > 0 or len(regular_img_files) > 0
             
         except Exception as e:
             self.logger.error(f"Error checking for 3D results: {e}")

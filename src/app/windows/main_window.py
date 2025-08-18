@@ -54,13 +54,14 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         
         # Window properties
         self.set_title("VCCTL - Virtual Cement and Concrete Testing Laboratory")
-        self.set_default_size(1200, 800)
+        self.set_default_size(900, 600)  # 1.5 aspect ratio with resizable layout
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_resizable(True)
         
-        # Force remove any window manager constraints that might prevent horizontal resizing
+        # Force remove any window manager constraints that might prevent resizing
         # This is a GTK3-specific fix for some window managers that restrict resizing
         self.connect('realize', self._on_window_realized)
+        self.connect('configure-event', self._on_window_configure)
         
         try:
             # Setup the UI
@@ -86,17 +87,34 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
     def _on_window_realized(self, window):
         """Called when the window is realized - force enable proper resizing."""
         try:
-            # Force remove any size constraints that might prevent horizontal resizing
+            # Force remove any size constraints that might prevent resizing
             window_gdk = window.get_window()
             if window_gdk:
                 # Set minimum size but allow unlimited maximum
                 geometry = Gdk.Geometry()
-                geometry.min_width = 400  # Allow much smaller minimum width
-                geometry.min_height = 300  # Allow smaller minimum height
+                geometry.min_width = 300  # Allow very small minimum width for narrowing
+                geometry.min_height = 200  # Allow smaller minimum height
                 # Don't set max_width/max_height to allow unlimited resizing
                 window_gdk.set_geometry_hints(geometry, Gdk.WindowHints.MIN_SIZE)
+                
+                # Ensure proper resize mode
+                window_gdk.set_type_hint(Gdk.WindowTypeHint.NORMAL)
         except Exception as e:
             self.logger.warning(f"Could not set window geometry hints: {e}")
+    
+    def _on_window_configure(self, window, event):
+        """Handle window resize events to ensure proper layout updates."""
+        try:
+            # Force layout recalculation for all panels when window is resized
+            if hasattr(self, 'notebook'):
+                for page_num in range(self.notebook.get_n_pages()):
+                    page = self.notebook.get_nth_page(page_num)
+                    if page:
+                        page.queue_resize()
+            return False  # Continue normal processing
+        except Exception as e:
+            self.logger.warning(f"Error handling window configure event: {e}")
+            return False
     
     def _setup_ui(self) -> None:
         """Setup the main window UI components."""
@@ -300,11 +318,11 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self._create_home_tab()
         self._create_materials_tab()         # WORKING - contains aggregate data (now FIXED)
         self._create_mix_design_tab()        # RE-ENABLED - aggregate names fixed
-        self._create_microstructure_tab()    # RE-ENABLED - 3D viewer working
-        self._create_hydration_tab()         # RE-ENABLED - plot widgets working
+        # self._create_microstructure_tab()    # REMOVED - use Operations Panel for all microstructure viewing
+        self._create_hydration_tab()         # RE-ENABLED - not the width issue
         self._create_file_management_tab()   # RE-ENABLED - testing file operations
         self._create_operations_tab()        # RE-ENABLED - testing monitoring panel
-        self._create_results_tab()           # RE-ENABLED - testing results visualization
+        # self._create_results_tab()           # REMOVED - not needed
         
         # Pack notebook into main container
         main_vbox.pack_start(self.notebook, True, True, 0)
@@ -374,8 +392,8 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
             
             if window_state:
                 # Set window size
-                width = window_state.get('width', 1200)
-                height = window_state.get('height', 800)
+                width = window_state.get('width', 900)
+                height = window_state.get('height', 600)
                 self.set_default_size(width, height)
                 
                 # Set window position
@@ -392,7 +410,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         except Exception as e:
             self.logger.warning(f"Could not load window state: {e}")
             # Use defaults
-            self.set_default_size(1200, 800)
+            self.set_default_size(900, 600)
     
     def _save_window_state(self) -> None:
         """Save current window state."""

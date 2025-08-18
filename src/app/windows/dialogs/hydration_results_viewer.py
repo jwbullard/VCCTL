@@ -60,6 +60,10 @@ class HydrationResultsViewer(Gtk.Dialog):
         # Add standard dialog buttons
         self.add_button("Close", Gtk.ResponseType.CLOSE)
         
+        # Connect cleanup handlers to prevent segfault
+        self.connect('delete-event', self._on_delete_event)
+        self.connect('response', self._on_response)
+        
         # Initialize UI
         self._setup_ui()
         self._load_microstructure_files()
@@ -296,6 +300,8 @@ class HydrationResultsViewer(Gtk.Dialog):
                 preload_thread.start()
             else:
                 self.preloading_complete = True
+                # For single microstructures, update status immediately
+                self._update_preloading_status_complete()
                 
         except Exception as e:
             self.logger.error(f"Error starting preloading: {e}")
@@ -678,6 +684,64 @@ class HydrationResultsViewer(Gtk.Dialog):
             dialog.format_secondary_text(f"Failed to export view: {e}")
             dialog.run()
             dialog.destroy()
+    
+    def _on_delete_event(self, widget, event):
+        """Handle window close event with proper PyVista cleanup."""
+        try:
+            self._cleanup_pyvista()
+            # For modal dialogs, we need to allow destruction to let run() return
+            # but clean up PyVista first
+            return False  # Allow normal destruction
+        except Exception as e:
+            self.logger.error(f"Error in delete event handler: {e}")
+            # If cleanup fails, still allow destruction to prevent hanging
+            return False
+    
+    def _on_response(self, dialog, response_id):
+        """Handle dialog response (Close button clicked)."""
+        if response_id == Gtk.ResponseType.CLOSE:
+            self._cleanup_pyvista()
+            # Let the default response handling proceed (which will destroy the dialog)
+    
+    def _cleanup_pyvista(self):
+        """Clean up PyVista viewer to prevent segfaults."""
+        try:
+            self.logger.info("Starting PyVista cleanup...")
+            
+            # First disable all UI interactions to prevent further calls to PyVista
+            if hasattr(self, 'time_slider') and self.time_slider:
+                self.time_slider.set_sensitive(False)
+            
+            # Clear cached data first to free memory
+            if hasattr(self, 'cached_voxel_data'):
+                self.cached_voxel_data.clear()
+            if hasattr(self, 'cached_phase_meshes'):
+                self.cached_phase_meshes.clear()
+            
+            # Now try to cleanup PyVista safely with minimum operations
+            if hasattr(self, 'pyvista_viewer') and self.pyvista_viewer:
+                try:
+                    # Try to clear any active plots/meshes first
+                    if hasattr(self.pyvista_viewer, 'plotter') and self.pyvista_viewer.plotter:
+                        self.pyvista_viewer.plotter.clear()
+                    
+                    # Try to call cleanup if it exists  
+                    if hasattr(self.pyvista_viewer, 'cleanup'):
+                        self.pyvista_viewer.cleanup()
+                        
+                except Exception as cleanup_error:
+                    # Don't let PyVista cleanup errors stop us
+                    self.logger.warning(f"PyVista cleanup method failed (continuing anyway): {cleanup_error}")
+                
+                # Clear reference regardless of cleanup success/failure
+                self.pyvista_viewer = None
+                self.logger.info("PyVista viewer reference cleared")
+            
+            self.logger.info("PyVista cleanup completed")
+                
+        except Exception as e:
+            # If cleanup fails, just log it and continue - don't let it crash the app
+            self.logger.warning(f"Error during PyVista cleanup (ignoring): {e}")
     
 
 
