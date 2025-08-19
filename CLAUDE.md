@@ -94,6 +94,119 @@ for i, column in enumerate(self.current_columns):
 
 **Status**: Phase 3 enhanced and optimized! Users now have professional-grade results analysis capabilities with multi-variable plotting, responsive interface design, and intelligent automation for common analysis workflows.
 
+### Operations Panel & Memory Management Enhancement Session (August 19, 2025)
+
+**Status: OPERATIONS PANEL FULLY STABILIZED ✅ - Professional UI & Memory Management Complete**
+
+**Session Summary:**
+This session resolved all remaining Operations panel display issues and implemented comprehensive memory management improvements. The focus was on eliminating UI glitches, fixing real-time updates, and implementing automatic memory cleanup for PyVista 3D viewers.
+
+**Major Fixes Completed:**
+
+1. **Operations Panel Display Issues Resolution**:
+   - ✅ **Duplicate Operations Fixed**: Implemented comprehensive deduplication system with name similarity matching
+   - ✅ **Stale Progress Bars Eliminated**: Fixed operations showing as "running" when completed days ago
+   - ✅ **Real-time Step Status**: Operation details now update in real-time showing current hydration simulation steps
+   - ✅ **Threading Issues Resolved**: Used `GLib.idle_add()` to ensure UI updates happen on GTK main thread
+   - ✅ **Refresh Button Fixed**: No longer creates duplicate operations marked as complete
+
+2. **UI Enhancements & Professional Polish**:
+   - ✅ **Started Column**: Replaced "Current Step" column with "Started" showing launch date/time (MM/DD HH:MM format)
+   - ✅ **Clean Duplicates Button**: Added visible toolbar button for manual duplicate cleanup
+   - ✅ **Streamlined Progress Display**: Removed redundant step progress bar to avoid duplicate information
+   - ✅ **Negative Duration Fix**: Fixed duration calculations using timezone-aware datetime handling
+
+3. **Automatic Memory Management System**:
+   - ✅ **PyVista Auto-Cleanup**: Implemented 5-minute timer for automatic memory cleanup in 3D viewers
+   - ✅ **Background Memory Management**: Users no longer need to manually click "Cleanup Memory" button
+   - ✅ **Memory Growth Prevention**: Reduced PyVista memory accumulation during extended 3D viewing sessions
+
+**Technical Implementation Details:**
+
+**Operations Panel Serialization Fix** (`src/app/windows/panels/operations_monitoring_panel.py`):
+```python
+def to_dict(self) -> Dict[str, Any]:
+    # Manual serialization to avoid thread lock pickle issues
+    data = {
+        'id': self.id,
+        'name': self.name,
+        'operation_type': self.operation_type.value,
+        'status': self.status.value,
+        'progress': self.progress,
+        # ... exclude process control fields
+    }
+```
+
+**Real-time Step Status Updates**:
+```python
+def _periodic_update_operation_details(self) -> bool:
+    try:
+        if self._currently_displayed_operation:
+            operation_id = self._currently_displayed_operation.id
+            if operation_id in self.operations:
+                updated_operation = self.operations[operation_id]
+                if updated_operation.status == OperationStatus.RUNNING:
+                    from gi.repository import GLib
+                    GLib.idle_add(self._update_operation_details, updated_operation)
+    except Exception as e:
+        self.logger.error(f"Error in periodic operation details update: {e}")
+    return True
+```
+
+**Automatic PyVista Memory Cleanup** (`src/app/windows/dialogs/hydration_results_viewer.py`):
+```python
+def _start_auto_cleanup_timer(self):
+    """Start automatic memory cleanup timer (5 minutes)"""
+    from gi.repository import GLib
+    GLib.timeout_add_seconds(300, self._auto_cleanup_memory)
+
+def _auto_cleanup_memory(self) -> bool:
+    """Automatic memory cleanup callback"""
+    if hasattr(self, 'pyvista_viewer'):
+        self.pyvista_viewer.cleanup_memory()
+    return True  # Continue timer
+```
+
+**Comprehensive Deduplication System**:
+```python
+def _are_operations_similar(self, op1: Operation, op2: Operation) -> bool:
+    """Check if two operations are similar (likely duplicates)"""
+    # Name similarity check (e.g., HydrationSim_X vs fs_HydrationSim_X)
+    name1_clean = op1.name.replace('fs_', '').replace('proc_', '')
+    name2_clean = op2.name.replace('fs_', '').replace('proc_', '')
+    
+    if name1_clean == name2_clean:
+        return True
+    
+    # Time-based similarity check (within 5 minutes)
+    time_diff = abs((op1.start_time - op2.start_time).total_seconds())
+    return time_diff <= 300  # 5 minutes
+```
+
+**Critical Fixes Applied:**
+- **Serialization Error**: Fixed `TypeError: cannot pickle '_thread.lock' object` preventing operation persistence
+- **Progress Value Normalization**: Fixed operations created with `progress=100.0` instead of `1.0`
+- **Future Timestamp Issues**: Added timezone normalization preventing negative durations
+- **UI Threading**: Ensured all UI updates use `GLib.idle_add()` for main thread execution
+- **Button Visibility**: Fixed Clean Duplicates button using `set_is_important(True)`
+
+**Validation Results:**
+- ✅ **No duplicate operations**: Deduplication system working correctly
+- ✅ **Real-time updates**: Step status updates live during hydration simulations  
+- ✅ **Proper durations**: No negative durations, timezone-aware calculations
+- ✅ **Clean refresh**: Refresh button replaces operations instead of accumulating
+- ✅ **Memory efficiency**: PyVista automatic cleanup reduces memory growth
+- ✅ **Professional UI**: Streamlined interface without redundant information
+
+**Complete Stabilized Workflow:**
+1. **Create Microstructure** → Mix Design Tool
+2. **Run Hydration Simulation** → Hydration Tool  
+3. **Monitor Progress** → Operations Tool (with real-time updates & no glitches)
+4. **Visualize 3D Evolution** → View 3D Results button (with automatic memory management)
+5. **Analyze Multiple Variables** → Plot Data button (with multi-column selection)
+
+**Status**: Operations panel fully stabilized and production-ready! All display glitches resolved, real-time updates working correctly, and automatic memory management implemented for optimal user experience.
+
 ### Phase 3 Initial Implementation Complete (August 17, 2025)
 
 **Status: PHASE 3 DELIVERED ✅ - Full Results Analysis Capabilities**

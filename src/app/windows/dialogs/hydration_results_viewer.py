@@ -47,6 +47,13 @@ class HydrationResultsViewer(Gtk.Dialog):
         self.cached_phase_meshes: Dict[int, Any] = {}  # index -> pre-built phase meshes
         self.preloading_complete = False
         
+        # Cleanup flag to prevent double cleanup
+        self.cleanup_performed = False
+        
+        # Track when dialog was hidden for automatic memory cleanup
+        self.hidden_time = None
+        self.auto_cleanup_timer = None
+        
         # UI components
         self.pyvista_viewer = None
         self.time_slider = None
@@ -67,13 +74,18 @@ class HydrationResultsViewer(Gtk.Dialog):
         # Initialize UI
         self._setup_ui()
         self._load_microstructure_files()
-        self._load_initial_microstructure()
+    
+    def show_all(self):
+        """Override show_all to cancel auto cleanup timer when dialog becomes visible."""
+        self._cancel_auto_cleanup_timer()
+        super().show_all()
         
-        # Start preloading other microstructures in background
-        self._start_preloading()
-        
-        # Show all widgets
-        self.show_all()
+        # Only load if not already loaded
+        if not hasattr(self, '_initial_loaded') or not self._initial_loaded:
+            self._load_initial_microstructure()
+            # Start preloading other microstructures in background
+            self._start_preloading()
+            self._initial_loaded = True
         
     def _setup_ui(self) -> None:
         """Set up the user interface."""
@@ -686,26 +698,35 @@ class HydrationResultsViewer(Gtk.Dialog):
             dialog.destroy()
     
     def _on_delete_event(self, widget, event):
-        """Handle window close event with proper PyVista cleanup."""
+        """Handle window close event - hide instead of destroy to avoid PyVista segfault."""
         try:
-            self._cleanup_pyvista()
-            # For modal dialogs, we need to allow destruction to let run() return
-            # but clean up PyVista first
-            return False  # Allow normal destruction
+            self.logger.info("Window close requested - hiding dialog instead of destroying")
+            self.hide()
+            self._start_auto_cleanup_timer()
+            # Return True to prevent default destroy behavior
+            return True
         except Exception as e:
             self.logger.error(f"Error in delete event handler: {e}")
-            # If cleanup fails, still allow destruction to prevent hanging
+            # If hiding fails, allow destruction to prevent hanging
             return False
     
     def _on_response(self, dialog, response_id):
         """Handle dialog response (Close button clicked)."""
         if response_id == Gtk.ResponseType.CLOSE:
-            self._cleanup_pyvista()
-            # Let the default response handling proceed (which will destroy the dialog)
+            self.logger.info("Close button clicked - hiding dialog instead of destroying")
+            self.hide()
+            self._start_auto_cleanup_timer()
+            # Don't let default response handling proceed to avoid destruction
     
     def _cleanup_pyvista(self):
         """Clean up PyVista viewer to prevent segfaults."""
+        # Prevent double cleanup
+        if self.cleanup_performed:
+            self.logger.info("PyVista cleanup already performed, skipping")
+            return
+            
         try:
+            self.cleanup_performed = True
             self.logger.info("Starting PyVista cleanup...")
             
             # First disable all UI interactions to prevent further calls to PyVista
@@ -742,6 +763,79 @@ class HydrationResultsViewer(Gtk.Dialog):
         except Exception as e:
             # If cleanup fails, just log it and continue - don't let it crash the app
             self.logger.warning(f"Error during PyVista cleanup (ignoring): {e}")
+            # Still mark as performed to prevent retry
+            self.cleanup_performed = True
+    
+    def _start_auto_cleanup_timer(self):
+        """Start timer for automatic memory cleanup of hidden dialogs."""
+        try:
+            import time
+            from gi.repository import GLib
+            
+            self.hidden_time = time.time()
+            
+            # Cancel existing timer if any
+            if self.auto_cleanup_timer:
+                GLib.source_remove(self.auto_cleanup_timer)
+            
+            # Start timer for 5 minutes (300 seconds)
+            self.auto_cleanup_timer = GLib.timeout_add_seconds(
+                300,  # 5 minutes
+                self._auto_cleanup_memory
+            )
+            
+            self.logger.info("Started automatic memory cleanup timer (5 minutes)")
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to start auto cleanup timer: {e}")
+    
+    def _auto_cleanup_memory(self):
+        """Automatically clean up memory from hidden dialogs (safe cleanup only)."""
+        try:
+            self.logger.info("Starting automatic memory cleanup for hidden dialog...")
+            
+            # Only clear cached data - this is safe and frees the most memory
+            cache_cleared = False
+            
+            if hasattr(self, 'cached_voxel_data') and self.cached_voxel_data:
+                data_count = len(self.cached_voxel_data)
+                self.cached_voxel_data.clear()
+                self.logger.info(f"Cleared {data_count} cached voxel datasets")
+                cache_cleared = True
+            
+            if hasattr(self, 'cached_phase_meshes') and self.cached_phase_meshes:
+                mesh_count = len(self.cached_phase_meshes)
+                self.cached_phase_meshes.clear()
+                self.logger.info(f"Cleared {mesh_count} cached phase meshes")
+                cache_cleared = True
+            
+            if cache_cleared:
+                self.logger.info("Automatic memory cleanup completed - cached data cleared")
+            else:
+                self.logger.info("Automatic memory cleanup - no cached data to clear")
+            
+            # Clear the timer reference
+            self.auto_cleanup_timer = None
+            
+            # Return False to stop the timer from repeating
+            return False
+            
+        except Exception as e:
+            self.logger.warning(f"Error during automatic memory cleanup: {e}")
+            # Clear timer reference even if cleanup failed
+            self.auto_cleanup_timer = None
+            return False
+    
+    def _cancel_auto_cleanup_timer(self):
+        """Cancel the automatic cleanup timer if dialog is shown again."""
+        try:
+            if self.auto_cleanup_timer:
+                from gi.repository import GLib
+                GLib.source_remove(self.auto_cleanup_timer)
+                self.auto_cleanup_timer = None
+                self.logger.info("Cancelled automatic memory cleanup timer")
+        except Exception as e:
+            self.logger.warning(f"Error cancelling auto cleanup timer: {e}")
     
 
 

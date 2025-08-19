@@ -213,25 +213,44 @@ class Operation:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert operation to dictionary for JSON serialization."""
-        data = asdict(self)
-        
-        # Remove process-related fields that shouldn't be serialized
-        for field_name in ['process', 'pid', 'working_directory', 'command_line', 
-                          'stdout_file', 'stderr_file', 'stdout_handle', 'stderr_handle']:
-            data.pop(field_name, None)
+        # Manual serialization to avoid thread lock pickle issues
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'operation_type': self.operation_type.value,
+            'status': self.status.value,
+            'progress': self.progress,
+            'current_step': self.current_step,
+            'total_steps': self.total_steps,
+            'completed_steps': self.completed_steps,
+            'cpu_usage': self.cpu_usage,
+            'memory_usage': self.memory_usage,
+            'disk_usage': self.disk_usage,
+            'error_message': self.error_message,
+            'metadata': self.metadata.copy() if self.metadata else {}
+        }
         
         # Convert datetime objects to ISO strings
         if self.start_time:
             data['start_time'] = self.start_time.isoformat()
+        else:
+            data['start_time'] = None
+            
         if self.end_time:
             data['end_time'] = self.end_time.isoformat()
+        else:
+            data['end_time'] = None
+            
         if self.paused_time:
             data['paused_time'] = self.paused_time.isoformat()
+        else:
+            data['paused_time'] = None
+            
         if self.estimated_duration:
             data['estimated_duration'] = self.estimated_duration.total_seconds()
-        # Convert enums to strings
-        data['operation_type'] = self.operation_type.value
-        data['status'] = self.status.value
+        else:
+            data['estimated_duration'] = None
+            
         return data
     
     @classmethod
@@ -316,6 +335,13 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Start monitoring
         self._start_monitoring()
         
+        # Initialize operation details tracking
+        self._currently_displayed_operation = None
+        
+        # Start periodic updates for operation details refresh
+        from gi.repository import GLib
+        GLib.timeout_add_seconds(5, self._periodic_update_operation_details)
+        
         self.logger.info("Operations monitoring panel initialized")
     
     def _setup_ui(self) -> None:
@@ -384,6 +410,15 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.refresh_button.set_tooltip_text("Update operation status and check for new operations in the Operations folder")
         self.refresh_button.connect('clicked', self._on_refresh_clicked)
         toolbar.insert(self.refresh_button, -1)
+        
+        # Clean Duplicates button
+        self.clean_duplicates_button = Gtk.ToolButton()
+        self.clean_duplicates_button.set_icon_name("edit-clear")
+        self.clean_duplicates_button.set_label("Clean Duplicates")
+        self.clean_duplicates_button.set_tooltip_text("Remove duplicate operations from the list")
+        self.clean_duplicates_button.set_is_important(True)  # Force label to show
+        self.clean_duplicates_button.connect('clicked', self._on_clean_duplicates_clicked)
+        toolbar.insert(self.clean_duplicates_button, -1)
         
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
@@ -476,8 +511,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             ) if has_selection else False
             self.plot_data_button.set_sensitive(selected_has_csv_data)
             
-            # Refresh and Settings: Always enabled (should work even during running operations)
+            # Refresh, Clean Duplicates, and Settings: Always enabled
             self.refresh_button.set_sensitive(True)
+            self.clean_duplicates_button.set_sensitive(True)
             self.settings_button.set_sensitive(True)
             
         except Exception as e:
@@ -500,7 +536,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Create the operations list view."""
         list_frame = Gtk.Frame(label="Active Operations")
         
-        # Create list store: ID, Name, Type, Status, Progress, Duration, Actions
+        # Create list store: ID, Name, Type, Status, Progress, Duration, Started, Resources
         self.operations_store = Gtk.ListStore(
             str,    # Operation ID
             str,    # Name
@@ -508,7 +544,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             str,    # Status
             float,  # Progress (0-100)
             str,    # Duration
-            str,    # Current Step
+            str,    # Started (date/time)
             str     # Resource Usage
         )
         
@@ -524,7 +560,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             ("Status", 3, 80),        # Column 3: Status
             ("Progress", 4, 100),     # Column 4: Progress
             ("Duration", 5, 80),      # Column 5: Duration
-            ("Current Step", 6, 150), # Column 6: Current Step
+            ("Started", 6, 120),      # Column 6: Started (date/time)
             ("Resources", 7, 100)     # Column 7: Resources
         ]
         
@@ -640,15 +676,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.overall_progress.set_text("0%")
         progress_box.pack_start(self.overall_progress, False, False, 0)
         
-        # Step progress
-        self.step_progress_label = Gtk.Label("Step: Not started")
-        self.step_progress_label.set_halign(Gtk.Align.START)
-        progress_box.pack_start(self.step_progress_label, False, False, 0)
-        
-        self.step_progress = Gtk.ProgressBar()
-        self.step_progress.set_show_text(True)
-        self.step_progress.set_text("0/0")
-        progress_box.pack_start(self.step_progress, False, False, 0)
+        # Note: Step progress removed to avoid duplicate information with Current Step field above
         
         progress_frame.add(progress_box)
         tab_box.pack_start(progress_frame, False, False, 0)
@@ -1461,6 +1489,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                             operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
                         else:
                             operation.current_step = f"{step_desc}..."
+        
+        # Synchronize with active hydration simulations to get detailed progress
+        self._sync_with_active_hydration_simulations()
     
     def _update_ui(self) -> None:
         """Update the UI with current data."""
@@ -1525,6 +1556,13 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             resource_str = f"CPU: {operation.cpu_usage:.1f}% MEM: {operation.memory_usage:.0f}MB"
             
+            # Format start time for display
+            start_time_str = ""
+            if operation.start_time:
+                start_time_str = operation.start_time.strftime("%m/%d %H:%M")
+            else:
+                start_time_str = "Not started"
+            
             # Get meaningful operation name from metadata
             meaningful_name = self._get_meaningful_operation_name(operation)
             
@@ -1535,7 +1573,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 operation.status.value.title(),                                # Column 3: Status
                 operation.progress_percentage,                                  # Column 4: Progress
                 duration_str,                                                   # Column 5: Duration
-                operation.current_step,                                         # Column 6: Current Step
+                start_time_str,                                                 # Column 6: Started (date/time)
                 resource_str                                                    # Column 7: Resources
             ]
         
@@ -1732,20 +1770,97 @@ class OperationsMonitoringPanel(Gtk.Box):
         else:
             self.operation_eta_value.set_text("Unknown")
         
-        self.operation_step_value.set_text(operation.current_step or "Not started")
+        # Enhanced current step display with better fallbacks
+        self.logger.info(f"STEP_DEBUG: Operation {operation.name}, current_step='{operation.current_step}', status={operation.status}")
+        if operation.current_step:
+            self.logger.info(f"STEP_DEBUG: Setting step text to: '{operation.current_step}'")
+            self.operation_step_value.set_text(operation.current_step)
+        elif operation.status == OperationStatus.RUNNING:
+            if operation.operation_type == OperationType.HYDRATION_SIMULATION:
+                # For running hydration simulations, show a more informative message
+                if operation.start_time:
+                    elapsed = datetime.now() - operation.start_time
+                    elapsed_hours = elapsed.total_seconds() / 3600.0
+                    
+                    # Check if this is a real active simulation by looking at the hydration service
+                    try:
+                        hydration_service = self.service_container.hydration_executor_service
+                        active_sims = hydration_service.active_simulations
+                        sim_name = operation.name
+                        
+                        self.logger.info(f"DEBUG: Checking active simulations for '{sim_name}'")
+                        self.logger.info(f"DEBUG: Active simulations: {list(active_sims.keys())}")
+                        
+                        # Try to find matching simulation with flexible naming
+                        matching_sim_info = None
+                        for active_sim_name, sim_info in active_sims.items():
+                            self.logger.info(f"DEBUG: Comparing '{sim_name}' with active sim '{active_sim_name}'")
+                            if (sim_name == active_sim_name or 
+                                sim_name in active_sim_name or 
+                                active_sim_name in sim_name):
+                                matching_sim_info = sim_info
+                                self.logger.info(f"DEBUG: Found matching simulation: {active_sim_name}")
+                                break
+                        
+                        if matching_sim_info and 'progress' in matching_sim_info:
+                            progress_data = matching_sim_info['progress']
+                            self.logger.info(f"DEBUG: Progress data type: {type(progress_data)}")
+                            if hasattr(progress_data, 'cycle') and hasattr(progress_data, 'time_hours'):
+                                cycle = progress_data.cycle
+                                time_h = progress_data.time_hours
+                                doh = getattr(progress_data, 'degree_of_hydration', 0.0)
+                                step_text = f"Cycle {cycle}, Time: {time_h:.2f}h, DOH: {doh:.3f}"
+                                self.logger.info(f"DEBUG: Setting step text to: {step_text}")
+                                self.operation_step_value.set_text(step_text)
+                            else:
+                                fallback_text = f"Hydration simulation running ({elapsed_hours:.1f}h elapsed)"
+                                self.logger.info(f"DEBUG: No cycle/time data, using fallback: {fallback_text}")
+                                self.operation_step_value.set_text(fallback_text)
+                        else:
+                            fallback_text = f"Hydration simulation running ({elapsed_hours:.1f}h elapsed)"
+                            self.logger.info(f"DEBUG: No matching simulation found, using fallback: {fallback_text}")
+                            self.operation_step_value.set_text(fallback_text)
+                    except Exception as e:
+                        self.logger.error(f"Error checking active simulations for step display: {e}")
+                        fallback_text = f"Hydration simulation running ({elapsed_hours:.1f}h elapsed)"
+                        self.operation_step_value.set_text(fallback_text)
+                else:
+                    self.operation_step_value.set_text("Hydration simulation in progress")
+            else:
+                self.operation_step_value.set_text("Operation in progress")
+        elif operation.status == OperationStatus.COMPLETED:
+            self.operation_step_value.set_text("Process completed")
+        elif operation.status == OperationStatus.FAILED:
+            self.operation_step_value.set_text("Operation failed")
+        elif operation.status == OperationStatus.CANCELLED:
+            self.operation_step_value.set_text("Operation cancelled")
+        elif operation.status == OperationStatus.PENDING:
+            self.operation_step_value.set_text("Queued for execution")
+        else:
+            self.operation_step_value.set_text("Not started")
+        
+        # Store the currently displayed operation for periodic updates
+        self._currently_displayed_operation = operation
+        
+        # Force immediate UI update for step status as backup
+        if operation.status == OperationStatus.RUNNING and operation.current_step:
+            from gi.repository import GLib
+            def force_step_update():
+                try:
+                    self.operation_step_value.set_text(operation.current_step)
+                    self.logger.info(f"FORCE_UPDATE: Set step to '{operation.current_step}'")
+                    return False  # Don't repeat
+                except Exception as e:
+                    self.logger.error(f"FORCE_UPDATE error: {e}")
+                    return False
+            GLib.timeout_add(100, force_step_update)  # Update after 100ms
         self.operation_progress_value.set_text(f"{operation.progress_percentage:.1f}%")
         
         # Update progress bars
         self.overall_progress.set_fraction(operation.progress)
-        self.overall_progress.set_text(f"{operation.progress_percentage:.1f}%")
         
-        if operation.total_steps > 0:
-            step_fraction = operation.completed_steps / operation.total_steps
-            self.step_progress.set_fraction(step_fraction)
-            self.step_progress.set_text(f"{operation.completed_steps}/{operation.total_steps}")
-        else:
-            self.step_progress.set_fraction(0.0)
-            self.step_progress.set_text("0/0")
+        # Note: Step progress updates removed - information now shown in Current Step field above
+        self.overall_progress.set_text(f"{operation.progress_percentage:.1f}%")
     
     def _update_multiple_operation_details(self, operations: List[Operation]) -> None:
         """Update operation details display for multiple selected operations."""
@@ -1985,9 +2100,16 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # RELOAD OPERATIONS FROM ALL SOURCES (including filesystem scan)
         self.logger.info("=== REFRESH: Reloading operations from all sources ===")
+        
+        # Clear existing operations to prevent accumulation of duplicates
+        operations_count_before = len(self.operations)
+        self.operations.clear()
+        self.logger.info(f"Cleared {operations_count_before} existing operations before reload")
+        
+        # Load operations from all sources without calling _update_operations which would double-load
         self._load_operations_from_file()
         
-        self._update_operations()
+        # Only update UI, don't call _update_operations to avoid duplicate loading
         self._update_ui()
         
         # Count active operations for status feedback
@@ -1995,6 +2117,50 @@ class OperationsMonitoringPanel(Gtk.Box):
                           if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED])
         
         self._update_status(f"Refresh complete. {active_count} active operations.")
+    
+    def _on_clean_duplicates_clicked(self, button: Gtk.Button) -> None:
+        """Handle clean duplicates button click."""
+        self._update_status("Cleaning duplicate operations...")
+        
+        # Count operations before cleanup
+        operations_before = len(self.operations)
+        
+        # Force validation to remove duplicates
+        self._validate_operations_data()
+        
+        # Update UI to reflect changes
+        self._update_ui()
+        
+        # Report results
+        operations_after = len(self.operations)
+        removed_count = operations_before - operations_after
+        
+        if removed_count > 0:
+            self._update_status(f"Cleaned {removed_count} duplicate operations. {operations_after} operations remaining.")
+        else:
+            self._update_status("No duplicate operations found.")
+    
+    def _periodic_update_operation_details(self) -> bool:
+        """Periodically update the operation details if one is currently displayed."""
+        try:
+            self.logger.info("PERIODIC_UPDATE: _periodic_update_operation_details called")
+            if self._currently_displayed_operation:
+                self.logger.info(f"PERIODIC_UPDATE: Currently displayed operation: {self._currently_displayed_operation.name}")
+                # Find the current version of this operation
+                operation_id = self._currently_displayed_operation.id
+                if operation_id in self.operations:
+                    updated_operation = self.operations[operation_id]
+                    # Only update if it's still running to avoid unnecessary UI updates
+                    if updated_operation.status == OperationStatus.RUNNING:
+                        # Ensure UI update happens on main thread
+                        from gi.repository import GLib
+                        GLib.idle_add(self._update_operation_details, updated_operation)
+                        self.logger.debug(f"Refreshed operation details for: {updated_operation.name}")
+        except Exception as e:
+            self.logger.error(f"Error in periodic operation details update: {e}")
+        
+        # Return True to continue the periodic updates
+        return True
     
     def _force_cleanup_stale_operations(self) -> None:
         """Force cleanup of stale operations by thoroughly checking process status."""
@@ -3841,9 +4007,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                     if operation_folder.is_dir():
                         operation_name = operation_folder.name
                         
-                        # Skip if already loaded from file or database
-                        existing_ops = [op.name for op in self.operations.values()]
-                        if operation_name in existing_ops:
+                        # Skip if already loaded from file or database (check by name and type)
+                        existing_ops = [(op.name, op.operation_type) for op in self.operations.values()]
+                        op_type_to_check = OperationType.HYDRATION_SIMULATION if any(f.name.endswith('.h.') for f in operation_folder.glob("*.img.*")) else OperationType.MICROSTRUCTURE_GENERATION
+                        if (operation_name, op_type_to_check) in existing_ops:
+                            self.logger.debug(f"Skipping duplicate filesystem operation: {operation_name} ({op_type_to_check.value})")
                             continue
                         
                         # Check if this looks like a microstructure operation
@@ -3855,11 +4023,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                             # Create operation from filesystem data
                             operation_id = f"fs_{operation_name}"
                             
-                            # Determine operation type
-                            if any(f.name.endswith('.h.') for f in operation_folder.glob("*.img.*")):
-                                op_type = OperationType.HYDRATION_SIMULATION
-                            else:
-                                op_type = OperationType.MICROSTRUCTURE_GENERATION
+                            # Use the type we already determined
+                            op_type = op_type_to_check
                             
                             # Get modification time
                             mod_time = datetime.fromtimestamp(operation_folder.stat().st_mtime)
@@ -3870,7 +4035,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                                 name=operation_name,
                                 operation_type=op_type,
                                 status=OperationStatus.COMPLETED,  # Use proper enum
-                                progress=100.0,
+                                progress=1.0,
                                 start_time=mod_time,
                                 end_time=mod_time,
                                 metadata={
@@ -3883,6 +4048,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                             
                             self.operations[operation_id] = operation
                             added_count += 1
+                            self.logger.info(f"Added filesystem operation: {operation_name} (ID: {operation_id}, Type: {op_type.value})")
                 
                 self.logger.info(f"Filesystem scan complete. Added {added_count} operations. Total: {len(self.operations)}")
             else:
@@ -3890,6 +4056,12 @@ class OperationsMonitoringPanel(Gtk.Box):
                 
         except Exception as e:
             self.logger.error(f"Failed to scan Operations directory: {e}", exc_info=True)
+        
+        # Clean up any data inconsistencies
+        self._validate_operations_data()
+        
+        # Synchronize with active hydration simulations
+        self._sync_with_active_hydration_simulations()
         
         # Update UI with all loaded operations
         if self.operations:
@@ -3927,12 +4099,44 @@ class OperationsMonitoringPanel(Gtk.Box):
         ui_status = status_mapping.get(db_op.status, OperationStatus.PENDING)
         ui_type = type_mapping.get(db_op.type, OperationType.BATCH_OPERATION)
         
-        # Calculate progress (simplified - can be enhanced)
+        # Calculate progress and default current step
         progress = 0.0
+        current_step = ""
+        
         if ui_status == OperationStatus.COMPLETED:
             progress = 1.0
+            current_step = "Process completed"
         elif ui_status == OperationStatus.RUNNING:
             progress = 0.5  # Rough estimate
+            # Set a meaningful default step for running operations
+            if ui_type == OperationType.HYDRATION_SIMULATION:
+                current_step = "Hydration simulation in progress..."
+            else:
+                current_step = "Operation in progress..."
+        elif ui_status == OperationStatus.PENDING:
+            current_step = "Queued for execution"
+        elif ui_status == OperationStatus.FAILED:
+            current_step = "Operation failed"
+        elif ui_status == OperationStatus.CANCELLED:
+            current_step = "Operation cancelled"
+        
+        # Fix timezone-aware datetime issues that cause negative durations
+        start_time = db_op.start
+        end_time = db_op.finish
+        
+        # Ensure times are timezone-naive and reasonable
+        if start_time:
+            # If start_time is timezone-aware, convert to naive
+            if start_time.tzinfo is not None:
+                start_time = start_time.replace(tzinfo=None)
+            # If start_time is in the future (more than 1 minute), adjust it
+            now = datetime.now()
+            if start_time > now + timedelta(minutes=1):
+                self.logger.warning(f"Database operation {db_op.name} has future start_time {start_time}, adjusting to current time")
+                start_time = now
+        
+        if end_time and end_time.tzinfo is not None:
+            end_time = end_time.replace(tzinfo=None)
         
         # Create UI operation
         return Operation(
@@ -3941,11 +4145,11 @@ class OperationsMonitoringPanel(Gtk.Box):
             operation_type=ui_type,
             status=ui_status,
             progress=progress,
-            start_time=db_op.start,
-            end_time=db_op.finish,
+            start_time=start_time,
+            end_time=end_time,
             paused_time=None,
             estimated_duration=None,
-            current_step="",
+            current_step=current_step,
             total_steps=0,
             completed_steps=0,
             cpu_usage=0.0,
@@ -4003,6 +4207,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             if new_operations_count > 0:
                 self.logger.info(f"Added {new_operations_count} new operations from database")
+                # Validate data consistency after adding new operations
+                self._validate_operations_data()
                 # Trigger UI update for new operations
                 GLib.idle_add(self._update_operations_list)
                 
@@ -4120,8 +4326,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                 parent=self.get_toplevel(),
                 operation=selected_operation
             )
-            viewer.run()
-            viewer.destroy()
+            # Show the dialog but don't run() since it will hide instead of destroy
+            viewer.show_all()
             
         except Exception as e:
             self.logger.error(f"Error opening 3D results viewer: {e}")
@@ -4168,6 +4374,227 @@ class OperationsMonitoringPanel(Gtk.Box):
             dialog.format_secondary_text(f"Failed to open data plotter: {e}")
             dialog.run()
             dialog.destroy()
+
+    def _sync_with_active_hydration_simulations(self) -> None:
+        """Synchronize operations panel with active hydration simulations."""
+        try:
+            # Get hydration executor service
+            hydration_service = self.service_container.hydration_executor_service
+            
+            # Get active simulations info (access the full dictionary)
+            active_sims = hydration_service.active_simulations
+            
+            if active_sims:
+                self.logger.debug(f"Found {len(active_sims)} active hydration simulations: {list(active_sims.keys())}")
+            
+            for sim_name, sim_info in active_sims.items():
+                # Find corresponding operation in our list
+                matching_op = None
+                self.logger.debug(f"Looking for operation matching simulation '{sim_name}'")
+                
+                for op_id, operation in self.operations.items():
+                    self.logger.debug(f"  Checking operation: name='{operation.name}', type={operation.operation_type}, status={operation.status}")
+                    # Check for exact name match or if operation name contains simulation name
+                    name_match = (operation.name == sim_name or 
+                                sim_name in operation.name or 
+                                operation.name in sim_name)
+                    
+                    if (name_match and 
+                        operation.operation_type == OperationType.HYDRATION_SIMULATION and
+                        operation.status == OperationStatus.RUNNING):
+                        matching_op = operation
+                        self.logger.debug(f"  ✓ Found matching operation: {operation.name}")
+                        break
+                
+                if matching_op:
+                    # Update operation with latest simulation progress
+                    progress_data = sim_info.get('progress')
+                    self.logger.debug(f"Found matching operation for '{sim_name}', progress_data: {type(progress_data)}")
+                    if progress_data:
+                        # Update progress percentage
+                        if hasattr(progress_data, 'percent_complete'):
+                            matching_op.progress = progress_data.percent_complete / 100.0
+                        
+                        # Update current step with detailed information
+                        if hasattr(progress_data, 'cycle') and hasattr(progress_data, 'time_hours'):
+                            cycle = progress_data.cycle
+                            time_h = progress_data.time_hours
+                            doh = getattr(progress_data, 'degree_of_hydration', 0.0)
+                            matching_op.current_step = f"Cycle {cycle}, Time: {time_h:.2f}h, DOH: {doh:.3f}"
+                        else:
+                            matching_op.current_step = "Hydration simulation in progress..."
+                        
+                        # Update estimated remaining time
+                        if hasattr(progress_data, 'estimated_time_remaining'):
+                            remaining_hours = progress_data.estimated_time_remaining
+                            if remaining_hours and remaining_hours > 0:
+                                matching_op.estimated_duration = timedelta(hours=remaining_hours)
+                        
+                        self.logger.debug(f"Synchronized hydration operation {sim_name}: {matching_op.progress:.1%} complete, step: {matching_op.current_step}")
+                else:
+                    self.logger.warning(f"No matching operation found for active simulation '{sim_name}'")
+                    self.logger.debug(f"Available operations: {[(op.name, op.operation_type, op.status) for op in self.operations.values()]}")
+                        
+        except Exception as e:
+            self.logger.error(f"Error syncing with active hydration simulations: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+
+    def _validate_operations_data(self) -> None:
+        """Validate and fix operations data consistency to prevent display glitches."""
+        try:
+            self.logger.debug("Validating operations data consistency...")
+            changes_made = False
+            
+            for operation_id, operation in self.operations.items():
+                # Fix progress values for completed operations
+                if operation.status == OperationStatus.COMPLETED and operation.progress != 1.0:
+                    old_progress = operation.progress
+                    operation.progress = 1.0
+                    self.logger.info(f"Fixed completed operation progress: {operation.name} ({old_progress} -> 1.0)")
+                    changes_made = True
+                
+                # Fix progress values for failed/cancelled operations
+                if operation.status in [OperationStatus.FAILED, OperationStatus.CANCELLED] and operation.progress > 1.0:
+                    old_progress = operation.progress
+                    operation.progress = min(operation.progress / 100.0, 1.0) if operation.progress > 1.0 else operation.progress
+                    self.logger.info(f"Fixed failed/cancelled operation progress: {operation.name} ({old_progress} -> {operation.progress})")
+                    changes_made = True
+                
+                # Ensure running operations don't exceed 100% progress
+                if operation.status == OperationStatus.RUNNING and operation.progress > 1.0:
+                    old_progress = operation.progress
+                    operation.progress = min(operation.progress / 100.0, 0.99)  # Cap at 99% for running
+                    self.logger.info(f"Fixed running operation progress: {operation.name} ({old_progress} -> {operation.progress})")
+                    changes_made = True
+                
+                # Fix pending operations with non-zero progress
+                if operation.status == OperationStatus.PENDING and operation.progress > 0.0:
+                    old_progress = operation.progress
+                    operation.progress = 0.0
+                    self.logger.info(f"Fixed pending operation progress: {operation.name} ({old_progress} -> 0.0)")
+                    changes_made = True
+            
+            # Enhanced duplicate detection and removal
+            self.logger.debug(f"Starting duplicate detection on {len(self.operations)} operations")
+            
+            # Group operations by name+type to find all instances
+            operation_groups = {}  # (name, operation_type) -> [operation_ids]
+            
+            for operation_id, operation in self.operations.items():
+                key = (operation.name, operation.operation_type)
+                if key not in operation_groups:
+                    operation_groups[key] = []
+                operation_groups[key].append(operation_id)
+            
+            # Find and resolve duplicates
+            duplicates_to_remove = []
+            
+            for key, operation_ids in operation_groups.items():
+                if len(operation_ids) > 1:
+                    name, op_type = key
+                    self.logger.warning(f"Found {len(operation_ids)} duplicate operations for '{name}' ({op_type.value})")
+                    
+                    # Sort by preference: database > newer start_time > alphabetical ID
+                    operations_with_ids = [(op_id, self.operations[op_id]) for op_id in operation_ids]
+                    
+                    def sort_key(item):
+                        op_id, operation = item
+                        # Primary: database source (lower number = higher priority)
+                        source_priority = 0 if (hasattr(operation, 'metadata') and 
+                                              operation.metadata and 
+                                              operation.metadata.get('source') == 'database') else 1
+                        # Secondary: newer start time (negative for descending order)
+                        time_priority = -(operation.start_time.timestamp() if operation.start_time else 0)
+                        # Tertiary: operation ID for consistency
+                        return (source_priority, time_priority, op_id)
+                    
+                    sorted_ops = sorted(operations_with_ids, key=sort_key)
+                    
+                    # Keep the first (highest priority) operation, remove the rest
+                    keep_id, keep_op = sorted_ops[0]
+                    for op_id, operation in sorted_ops[1:]:
+                        duplicates_to_remove.append(op_id)
+                        source = getattr(operation, 'metadata', {}).get('source', 'unknown') if hasattr(operation, 'metadata') else 'unknown'
+                        self.logger.info(f"Marking duplicate for removal: {operation.name} (ID: {op_id}, source: {source})")
+                    
+                    keep_source = getattr(keep_op, 'metadata', {}).get('source', 'unknown') if hasattr(keep_op, 'metadata') else 'unknown'
+                    self.logger.info(f"Keeping operation: {keep_op.name} (ID: {keep_id}, source: {keep_source})")
+            
+            # Also check for operations with similar names (handles filesystem vs database naming)
+            name_similarity_groups = {}  # normalized_name -> [operation_ids]
+            
+            for operation_id, operation in self.operations.items():
+                # Normalize the name by removing common prefixes/suffixes
+                normalized_name = operation.name
+                if normalized_name.startswith('fs_'):
+                    normalized_name = normalized_name[3:]  # Remove 'fs_' prefix
+                if normalized_name.startswith('HydrationSim_'):
+                    # Extract the base name part for hydration simulations
+                    base_name = normalized_name.replace('HydrationSim_', '')
+                    # If it has a timestamp, remove it to match filesystem names
+                    if '_202508' in base_name:  # Assuming 2025/08 format
+                        base_name = base_name.split('_202508')[0]
+                    normalized_name = base_name
+                
+                if normalized_name not in name_similarity_groups:
+                    name_similarity_groups[normalized_name] = []
+                name_similarity_groups[normalized_name].append(operation_id)
+            
+            # Find operations that should be considered duplicates based on similar names
+            for normalized_name, operation_ids in name_similarity_groups.items():
+                if len(operation_ids) > 1:
+                    # Check if these operations have different types (hydration vs microstructure)
+                    types_in_group = set()
+                    for op_id in operation_ids:
+                        if op_id in self.operations:  # Make sure it hasn't been removed already
+                            types_in_group.add(self.operations[op_id].operation_type)
+                    
+                    # Only merge if they have the same operation type
+                    if len(types_in_group) == 1:
+                        op_type = list(types_in_group)[0]
+                        self.logger.warning(f"Found {len(operation_ids)} similar operations for base name '{normalized_name}' ({op_type.value})")
+                        
+                        # Use the same sorting logic as above
+                        similar_ops = [(op_id, self.operations[op_id]) for op_id in operation_ids if op_id in self.operations]
+                        
+                        if len(similar_ops) > 1:
+                            def sort_key(item):
+                                op_id, operation = item
+                                source_priority = 0 if (hasattr(operation, 'metadata') and 
+                                                      operation.metadata and 
+                                                      operation.metadata.get('source') == 'database') else 1
+                                time_priority = -(operation.start_time.timestamp() if operation.start_time else 0)
+                                return (source_priority, time_priority, op_id)
+                            
+                            sorted_similar = sorted(similar_ops, key=sort_key)
+                            
+                            # Keep the first, remove the rest
+                            keep_id, keep_op = sorted_similar[0]
+                            for op_id, operation in sorted_similar[1:]:
+                                if op_id not in duplicates_to_remove:  # Don't double-add
+                                    duplicates_to_remove.append(op_id)
+                                    source = getattr(operation, 'metadata', {}).get('source', 'unknown') if hasattr(operation, 'metadata') else 'unknown'
+                                    self.logger.info(f"Marking similar operation for removal: {operation.name} (ID: {op_id}, source: {source})")
+            
+            # Remove duplicate operations
+            for duplicate_id in duplicates_to_remove:
+                if duplicate_id in self.operations:
+                    removed_op = self.operations.pop(duplicate_id)
+                    self.logger.info(f"Removed duplicate operation: {removed_op.name}")
+                    changes_made = True
+            
+            if changes_made:
+                # Save the cleaned data
+                self._save_operations_to_file()
+                # Update the UI
+                GLib.idle_add(self._update_operations_list)
+                self.logger.info("Operations data validation completed with changes - UI updated")
+            else:
+                self.logger.debug("Operations data validation completed - no changes needed")
+                
+        except Exception as e:
+            self.logger.error(f"Error during operations data validation: {e}")
 
 
 # Register the widget
