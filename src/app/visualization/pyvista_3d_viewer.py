@@ -716,9 +716,10 @@ class PyVistaViewer3D(Gtk.Box):
                 phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
                 
                 # Create structured grid
+                # PyVista ImageData expects dimensions as (nx, ny, nz) and data in C-order
                 grid = pv.ImageData(dimensions=phase_mask.shape)
                 grid.spacing = self.voxel_size  # Set physical spacing
-                grid.point_data['phase'] = phase_mask.flatten(order='F')
+                grid.point_data['phase'] = phase_mask.flatten(order='C')
                 
                 # Store mesh object
                 self.mesh_objects[phase_id] = grid

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
 
 from app.services.service_container import get_service_container
+from app.utils.icon_utils import create_button_with_icon
 from app.services.microstructure_service import MicrostructureParams, PhaseType
 from app.visualization import create_visualization_manager, Microstructure3DViewer, PyVistaViewer3D
 
@@ -137,6 +138,8 @@ class MicrostructurePanel(Gtk.Box):
         # Create PyVista viewer directly (simplified UX - no more Enable button needed)
         self.current_viewer_type = 'pyvista'
         self.pyvista_3d_viewer = PyVistaViewer3D()
+        # TEMP FIX: Set size request to prevent excessive width
+        self.pyvista_3d_viewer.set_size_request(400, 300)
         vbox.pack_start(self.pyvista_3d_viewer, True, True, 0)
         self.logger.info("PyVista 3D viewer initialized automatically")
         
@@ -147,18 +150,18 @@ class MicrostructurePanel(Gtk.Box):
         # Preview controls
         preview_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
-        self.load_img_button = Gtk.Button(label="Load .img File")
+        self.load_img_button = create_button_with_icon("Load .img File", "document-open", 16)
         self.load_img_button.set_tooltip_text("Load genmic.c output file (.img)")
         preview_controls.pack_start(self.load_img_button, True, True, 0)
         
-        self.preview_button = Gtk.Button(label="Generate Preview")
+        self.preview_button = create_button_with_icon("Generate Preview", "48-cube", 16)
         self.preview_button.set_tooltip_text("Generate 3D microstructure preview")
         # Initially hidden since PyVista is default and loads data automatically
         self.preview_button.set_visible(False)
         self.preview_button.set_no_show_all(True)  # Prevent show_all() from making it visible
         preview_controls.pack_start(self.preview_button, True, True, 0)
         
-        self.export_preview_button = Gtk.Button(label="Export")
+        self.export_preview_button = create_button_with_icon("Export", "document-export", 16)
         self.export_preview_button.set_tooltip_text("Export preview as image")
         self.export_preview_button.set_sensitive(False)
         preview_controls.pack_start(self.export_preview_button, False, False, 0)
@@ -698,8 +701,8 @@ class MicrostructurePanel(Gtk.Box):
                 # Convert to numpy array and reshape
                 voxel_data = np.array(voxel_values, dtype=np.uint8)
                 
-                # Reshape assuming C-order (standard numpy order: Z varies fastest)
-                # Since current file is 100x100x100, ordering doesn't affect visualization
+                # VCCTL data is stored with z varying fastest, then y, then x
+                # This matches NumPy's default C-order where last dimension varies fastest
                 voxel_data = voxel_data.reshape((x_size, y_size, z_size))
                 
                 self.logger.info(f"Reshaped voxel data to: {voxel_data.shape}")
