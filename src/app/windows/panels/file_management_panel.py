@@ -25,6 +25,7 @@ from app.windows.dialogs import (
 )
 from app.utils.batch_file_operations import BatchFileOperationManager, BatchOperationType
 from app.utils.file_history import FileHistoryManager, ChangeType
+from app.utils.icon_utils import set_tool_button_custom_icon
 
 
 class FileManagementPanel(Gtk.Box):
@@ -96,19 +97,22 @@ class FileManagementPanel(Gtk.Box):
         """Create the file operations toolbar."""
         toolbar = Gtk.Toolbar()
         toolbar.set_style(Gtk.ToolbarStyle.BOTH_HORIZ)
+        toolbar.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
         
         # Import operations
         import_button = Gtk.ToolButton()
-        import_button.set_icon_name("document-open")
+        set_tool_button_custom_icon(import_button, "48-file-upload", 24)
         import_button.set_label("Import")
         import_button.set_tooltip_text("Import material files")
+        import_button.set_is_important(True)
         import_button.connect('clicked', self._on_import_clicked)
         toolbar.insert(import_button, -1)
         
         batch_import_button = Gtk.ToolButton()
-        batch_import_button.set_icon_name("document-open-recent")
+        set_tool_button_custom_icon(batch_import_button, "48-file-upload", 24)
         batch_import_button.set_label("Batch Import")
         batch_import_button.set_tooltip_text("Import multiple files from directory")
+        batch_import_button.set_is_important(True)
         batch_import_button.connect('clicked', self._on_batch_import_clicked)
         toolbar.insert(batch_import_button, -1)
         
@@ -117,16 +121,18 @@ class FileManagementPanel(Gtk.Box):
         
         # Export operations
         export_button = Gtk.ToolButton()
-        export_button.set_icon_name("document-save")
+        set_tool_button_custom_icon(export_button, "48-file-download-1", 24)
         export_button.set_label("Export")
         export_button.set_tooltip_text("Export selected material")
+        export_button.set_is_important(True)
         export_button.connect('clicked', self._on_export_clicked)
         toolbar.insert(export_button, -1)
         
         batch_export_button = Gtk.ToolButton()
-        batch_export_button.set_icon_name("document-save-as")
+        set_tool_button_custom_icon(batch_export_button, "48-file-download", 24)
         batch_export_button.set_label("Batch Export")
         batch_export_button.set_tooltip_text("Export multiple materials")
+        batch_export_button.set_is_important(True)
         batch_export_button.connect('clicked', self._on_batch_export_clicked)
         toolbar.insert(batch_export_button, -1)
         
@@ -135,16 +141,18 @@ class FileManagementPanel(Gtk.Box):
         
         # File operations
         validate_button = Gtk.ToolButton()
-        validate_button.set_icon_name("dialog-question")
+        set_tool_button_custom_icon(validate_button, "48-badge-check-2", 24)
         validate_button.set_label("Validate")
         validate_button.set_tooltip_text("Validate selected files")
+        validate_button.set_is_important(True)
         validate_button.connect('clicked', self._on_validate_clicked)
         toolbar.insert(validate_button, -1)
         
         convert_button = Gtk.ToolButton()
-        convert_button.set_icon_name("document-properties")
+        set_tool_button_custom_icon(convert_button, "48-filter", 24)
         convert_button.set_label("Convert")
         convert_button.set_tooltip_text("Convert file formats")
+        convert_button.set_is_important(True)
         convert_button.connect('clicked', self._on_convert_clicked)
         toolbar.insert(convert_button, -1)
         
@@ -153,16 +161,18 @@ class FileManagementPanel(Gtk.Box):
         
         # History operations
         history_button = Gtk.ToolButton()
-        history_button.set_icon_name("document-open-recent")
+        set_tool_button_custom_icon(history_button, "48-history", 24)
         history_button.set_label("History")
         history_button.set_tooltip_text("View file history")
+        history_button.set_is_important(True)
         history_button.connect('clicked', self._on_history_clicked)
         toolbar.insert(history_button, -1)
         
         cleanup_button = Gtk.ToolButton()
-        cleanup_button.set_icon_name("edit-clear")
+        set_tool_button_custom_icon(cleanup_button, "48-trash-xmark", 24)
         cleanup_button.set_label("Cleanup")
         cleanup_button.set_tooltip_text("Clean up old file versions")
+        cleanup_button.set_is_important(True)
         cleanup_button.connect('clicked', self._on_cleanup_clicked)
         toolbar.insert(cleanup_button, -1)
         
@@ -170,8 +180,8 @@ class FileManagementPanel(Gtk.Box):
     
     def _create_content_area(self) -> None:
         """Create the main content area."""
-        # Create horizontal paned layout
-        paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+        # TEMP FIX: Changed from horizontal to vertical layout to fix window width
+        paned = Gtk.Paned(orientation=Gtk.Orientation.VERTICAL)
         
         # Create file browser (left side)
         self._create_file_browser(paned)
@@ -185,12 +195,24 @@ class FileManagementPanel(Gtk.Box):
         """Create the file browser area."""
         browser_frame = Gtk.Frame(label="Project Files")
         
-        # Create file browser widget
+        # Create file browser widget - default to Operations folder on startup
+        initial_dir = None
         try:
-            config = self.service_container.config_manager
-            initial_dir = Path(config.directories.data_directory)
-        except:
+            # First preference: Operations folder in project root
+            project_root = Path(__file__).parent.parent.parent.parent
+            operations_dir = project_root / "Operations"
+            if operations_dir.exists() and operations_dir.is_dir():
+                initial_dir = operations_dir
+                self.logger.info(f"Defaulting to Operations folder: {operations_dir}")
+            else:
+                # Fallback to data directory from config
+                config = self.service_container.config_manager
+                initial_dir = Path(config.directories.data_directory)
+                self.logger.info(f"Operations folder not found, using data directory: {initial_dir}")
+        except Exception as e:
+            self.logger.warning(f"Failed to determine initial directory: {e}")
             initial_dir = Path.home()
+            self.logger.info(f"Using home directory as fallback: {initial_dir}")
         
         self.file_browser = FileBrowserWidget(self.main_window, show_hidden=False)
         self.file_browser.set_directory(initial_dir)

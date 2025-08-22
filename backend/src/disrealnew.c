@@ -1634,6 +1634,8 @@ int main(int argc, char *argv[]) {
   fprintf(Logfile, "\nEnd time: %s", asctime(local_time));
   fprintf(Logfile, "\nElapsed time: %.3f", time_spent);
   fprintf(Logfile, "\n\n=== END DISREALNEW SIMULATION ===");
+  fflush(Logfile);
+  fclose(Logfile);
 
   /* Write simulation results to stdout in JSON format */
   if (Verbose_flag > 0) {

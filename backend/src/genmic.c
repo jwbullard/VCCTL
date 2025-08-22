@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* Global variables for distrib3d return address workaround */
 jmp_buf distrib3d_jmpbuf;
@@ -387,8 +388,8 @@ int Wallpos = 50;
 /***
  *   File pointer for progress file
  ***/
-char Progfilename[MAXSTRING];
-FILE *Fprog;
+char LogFileName[MAXSTRING];
+FILE *Logfile;
 
 /***
  *    Function declarations
@@ -424,6 +425,7 @@ struct particle **particlepointervector(int size);
 void free_particlepointervector(struct particle **ps);
 void freegenmic(void);
 void freedistrib3d(void);
+char *rfc8601_timespec(struct timespec *tv);
 
 /***
  *    Function declarations for distrib3d function
@@ -452,10 +454,17 @@ int main(int argc, char *argv[]) {
   int fadchoice;
   int nseed;
   char instring[MAXSTRING];
-  register int ig, jg, kg;
+  char *rfc8601;
+  struct tm *local_time;
+  time_t current_time;
+  clock_t begin, end;
+  double time_spent = 0.0;
+  int ig, jg, kg;
 
-  printf("VCCTL_PROGRESS: INIT_START\n");
-  fflush(stdout);
+  /* Get the simulation start time */
+
+  begin = clock();
+  current_time = time(NULL);
 
   A = NULL;
   AA = NULL;
@@ -478,23 +487,29 @@ int main(int argc, char *argv[]) {
   /* Check command-line arguments */
   checkargs(argc, argv);
 
-  /*
-  printf("Enter name of progress file: \n");
-  read_string(instring,sizeof(instring));
-  sprintf(Progfilename,"%s",instring);
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",START_TASK,NUMTASKS);
-  fclose(Fprog);
-  */
+  /* Create log file and keep it open throughout */
+  sprintf(LogFileName, "genmic.log");
+  if ((Logfile = fopen(LogFileName, "w")) == NULL) {
+    fprintf(stderr, "\nERROR line 490:  Could not open %s\n\n", LogFileName);
+    fflush(stderr);
+    exit(1);
+  }
 
-  printf("Enter random number seed value (a negative integer) \n");
-  fflush(stdout);
+  local_time = localtime(&current_time);
+
+  /* Display the local time in the log */
+  fprintf(Logfile, "=== BEGIN GENMIC SIMULATION ===");
+  fprintf(Logfile, "\nStart time: %s", asctime(local_time));
+  fflush(Logfile);
+
+  fprintf(Logfile, "\nEnter random number seed value (a negative integer)");
+  fflush(Logfile);
   read_string(instring, sizeof(instring));
   nseed = atoi(instring);
   if (nseed > 0)
     nseed = (-1 * nseed);
-  printf("%d \n", nseed);
-  fflush(stdout);
+  fprintf(Logfile, "%d", nseed);
+  fflush(Logfile);
   Seed = (&nseed);
 
   /* Initialize counters and system parameters */
@@ -508,29 +523,32 @@ int main(int argc, char *argv[]) {
    ***/
 
   do {
-    printf(" \n Input User Choice \n");
-    printf("%d) Exit \n", EXIT);
-    printf("%d) Specify system size \n", SPECSIZE);
-    printf("%d) Add particles (cement,gypsum, ", ADDPART);
-    printf("pozzolans, etc.) to microstructure \n");
-    printf("%d) Flocculate system by reducing number ", FLOCC);
-    printf("of particle clusters \n");
-    printf("%d) Measure global phase fractions \n", MEASURE);
-    printf("%d) Add an aggregate to the microstructure \n", ADDAGG);
-    printf("%d) Measure single phase connectivity ", CONNECTIVITY);
-    printf("(pores or solids) \n");
-    printf("%d) Measure phase fractions vs. ", DISTFROMAGG);
-    printf("distance from aggregate surface \n");
-    printf("%d) Distribute clinker phases \n", DISTRIB);
-    printf("%d) Output current microstructure to file \n", OUTPUTMIC);
-    printf("%d) Add one-pixel particles to microstructure \n", ONEPIX);
-    printf("%d) Distribute Fly Ash Phases \n", DISTFA);
-    fflush(stdout);
+    fprintf(Logfile, "\nInput User Choice");
+    fprintf(Logfile, "\n  %d) Exit", EXIT);
+    fprintf(Logfile, "\n  %d) Specify system size", SPECSIZE);
+    fprintf(Logfile, "\n  %d) Add particles (cement,gypsum, ", ADDPART);
+    fprintf(Logfile, "pozzolans, etc.) to microstructure");
+    fprintf(Logfile, "\n  %d) Flocculate system by reducing number ", FLOCC);
+    fprintf(Logfile, "of particle clusters");
+    fprintf(Logfile, "\n  %d) Measure global phase fractions", MEASURE);
+    fprintf(Logfile, "\n  %d) Add an aggregate to the microstructure", ADDAGG);
+    fprintf(Logfile, "\n  %d) Measure single phase connectivity ",
+            CONNECTIVITY);
+    fprintf(Logfile, "(pores or solids)");
+    fprintf(Logfile, "\n  %d) Measure phase fractions vs. ", DISTFROMAGG);
+    fprintf(Logfile, "distance from aggregate surface");
+    fprintf(Logfile, "\n  %d) Distribute clinker phases", DISTRIB);
+    fprintf(Logfile, "\n  %d) Output current microstructure to file",
+            OUTPUTMIC);
+    fprintf(Logfile, "\n %d) Add one-pixel particles to microstructure",
+            ONEPIX);
+    fprintf(Logfile, "\n %d) Distribute Fly Ash Phases", DISTFA);
+    fflush(Logfile);
 
     read_string(instring, sizeof(instring));
     userc = atoi(instring);
-    printf("%d \n", userc);
-    fflush(stdout);
+    fprintf(Logfile, "\n%d", userc);
+    fflush(Logfile);
 
     switch (userc) {
     case SPECSIZE:
@@ -539,47 +557,38 @@ int main(int argc, char *argv[]) {
         bailout("genmic", "Memory allocation error");
         exit(1);
       }
-      printf("VCCTL_PROGRESS: SPECSIZE_START\n");
-      fflush(stdout);
 
       /* Clear the 3-D system to all porosity to start */
 
-      for (kg = 0; kg < Zsyssize; kg++) {
+      for (ig = 0; ig < Xsyssize; ig++) {
         for (jg = 0; jg < Ysyssize; jg++) {
-          for (ig = 0; ig < Xsyssize; ig++) {
+          for (kg = 0; kg < Zsyssize; kg++) {
             Cement.val[getInt3dindex(Cement, ig, jg, kg)] = POROSITY;
             Cemreal.val[getInt3dindex(Cemreal, ig, jg, kg)] = POROSITY;
           }
         }
       }
+
+      fprintf(stdout, "GENMIC_PROGRESS: stage=initialization progress=0.05 "
+                      "message=System size configured");
+      fflush(stdout);
       break;
     case ADDPART:
-      printf("VCCTL_PROGRESS: ADDPART_START\n");
-      fflush(stdout);
       create();
-      /*
-      Fprog = filehandler("genmic",Progfilename,"WRITE");
-      fprintf(Fprog,"%d\t%d",PLACEPARTICLE_TASK,NUMTASKS);
-      fclose(Fprog);
-      */
       break;
     case FLOCC:
       if (Shape) {
-        printf("\nFloccing real shapes...\n");
+        fprintf(Logfile, "\nFloccing real shapes...\n");
       } else {
-        printf("\nFloccing spheres...\n");
+        fprintf(Logfile, "\nFloccing spheres...\n");
       }
-      fflush(stdout);
+      fflush(Logfile);
       makefloc();
       break;
     case MEASURE:
-      printf("VCCTL_PROGRESS: MEASURE_START\n");
-      fflush(stdout);
       measure();
       break;
     case ADDAGG:
-      printf("VCCTL_PROGRESS: ADDAGG_START\n");
-      fflush(stdout);
       Simwall = 1;
       Wallpos = (int)(Xsyssize / 2);
       for (kg = 0; kg < Zsyssize; kg++) {
@@ -603,51 +612,56 @@ int main(int argc, char *argv[]) {
       if (Aggsize != 0) {
         measagg();
       } else {
-        printf("No aggregate present. \n");
+        fprintf(Logfile, "No aggregate present. \n");
       }
       break;
     case DISTRIB:
       /* Set up longjmp target for distrib3d return address workaround */
-      printf("VCCTL_PROGRESS: DISTRIB_START\n");
+      fprintf(stdout, "\nGENMIC_PROGRESS: stage=correlation_analysis "
+                      "progress=0.65 message=Distributing phases");
       fflush(stdout);
       distrib3d_success = 0;
       if (setjmp(distrib3d_jmpbuf) == 0) {
         /* First time - call distrib3d normally */
         if (distrib3d()) {
-          printf("\nFailure in function distrib3d.  Exiting.\n\n");
+          fprintf(Logfile, "\nFailure in function distrib3d.  Exiting.\n\n");
           freegenmic();
           exit(1);
         }
         /* Normal return path (should not reach here due to return address
          * corruption) */
-        printf("\n=== DEBUG: Reached normal return path (unexpected) ===");
-        fflush(stdout);
+        fprintf(Logfile,
+                "\n=== DEBUG: Reached normal return path (unexpected) ===");
+        fflush(Logfile);
       } else {
         /* longjmp target - distrib3d used longjmp to return */
-        printf("\n=== DEBUG: Returned via longjmp, success = %d ===",
-               distrib3d_success);
-        fflush(stdout);
+        fprintf(Logfile, "\n=== DEBUG: Returned via longjmp, success = %d ===",
+                distrib3d_success);
+        fflush(Logfile);
         if (!distrib3d_success) {
-          printf(
+          fprintf(
+              Logfile,
               "\nFailure in function distrib3d (via longjmp).  Exiting.\n\n");
           freegenmic();
           exit(1);
         }
       }
       /* distrib3d() already called freedistrib3d() internally before longjmp */
-      printf(
+      fprintf(
+          Logfile,
           "\n=== DEBUG: DISTRIB case completed, continuing to next menu ===");
-      fflush(stdout);
+      fflush(Logfile);
       /* Check to see that the correct number of C3S pixels is there */
       break;
     case DISTFA:
-      printf(
+      fprintf(
+          Logfile,
           "\nDistribute fly ash on particle basis (0) or pixel basis (1)?  ");
       read_string(instring, sizeof(instring));
       fadchoice = atoi(instring);
-      printf("%d\n", fadchoice);
+      fprintf(Logfile, "%d\n", fadchoice);
       if (distfa(fadchoice)) {
-        printf("\nFailure in function distfa.  Exiting.\n\n");
+        fprintf(Logfile, "\nFailure in function distfa.  Exiting.\n\n");
         freedistrib3d();
         freegenmic();
         exit(1);
@@ -655,15 +669,15 @@ int main(int argc, char *argv[]) {
       /* Check to see that the correct number of C3S pixels is there */
       break;
     case OUTPUTMIC:
-      printf("VCCTL_PROGRESS: OUTPUTMIC_START\n");
+      fprintf(stdout, "\nGENMIC_PROGRESS: stage=output_generation "
+                      "progress=0.85 message=Writing output files");
       fflush(stdout);
       outmic();
       break;
     case ONEPIX:
-      printf("VCCTL_PROGRESS: ONEPIX_START\n");
-      fflush(stdout);
       if (addonepixels()) {
-        printf("\nFailure in adding one-pixel particles.  Exiting.\n\n");
+        fprintf(Logfile,
+                "\nFailure in adding one-pixel particles.  Exiting.\n\n");
         freedistrib3d();
         freegenmic();
         exit(1);
@@ -675,9 +689,24 @@ int main(int argc, char *argv[]) {
 
   } while (userc != EXIT);
 
-  freegenmic();
-  printf("VCCTL_PROGRESS: COMPLETE\n");
+  /* Write finish time to the log file */
+  /* Get the local time using the current time */
+  end = clock();
+  current_time = time(NULL);
+  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  local_time = localtime(&current_time);
+
+  /* Display the local time */
+  fprintf(Logfile, "\nEnd time: %s", asctime(local_time));
+  fprintf(Logfile, "\nElapsed time: %.3f", time_spent);
+  fprintf(Logfile, "\n\n=== END GENMIC SIMULATION ===");
+  fflush(Logfile);
+  fclose(Logfile);
+
+  fprintf(stdout, "\nGENMIC_PROGRESS: stage=complete progress=1.00 "
+                  "message=Generation complete");
   fflush(stdout);
+  freegenmic();
   return (0);
 }
 
@@ -721,21 +750,21 @@ int getsystemsize(void) {
   Xsyssize = Ysyssize = Zsyssize = 0;
   Res = 0.0;
 
-  printf("Enter X dimension of system \n");
+  fprintf(Logfile, "Enter X dimension of system \n");
   read_string(instring, sizeof(instring));
   Xsyssize = atoi(instring);
   BoxXsize = (int)(0.75 * Xsyssize);
-  printf("%d\n", Xsyssize);
-  printf("Enter Y dimension of system \n");
+  fprintf(Logfile, "%d\n", Xsyssize);
+  fprintf(Logfile, "Enter Y dimension of system \n");
   read_string(instring, sizeof(instring));
   Ysyssize = atoi(instring);
   BoxYsize = (int)(0.75 * Ysyssize);
-  printf("%d\n", Ysyssize);
-  printf("Enter Z dimension of system \n");
+  fprintf(Logfile, "%d\n", Ysyssize);
+  fprintf(Logfile, "Enter Z dimension of system \n");
   read_string(instring, sizeof(instring));
   Zsyssize = atoi(instring);
   BoxZsize = (int)(0.75 * Zsyssize);
-  printf("%d\n", Zsyssize);
+  fprintf(Logfile, "%d\n", Zsyssize);
 
   if ((Xsyssize <= 0) || (Xsyssize > MAXSIZE) || (Ysyssize <= 0) ||
       (Ysyssize > MAXSIZE) || (Zsyssize <= 0) || (Zsyssize > MAXSIZE)) {
@@ -744,10 +773,10 @@ int getsystemsize(void) {
     exit(1);
   }
 
-  printf("Enter system resolution (micrometers per pixel) \n");
+  fprintf(Logfile, "Enter system resolution (micrometers per pixel) \n");
   read_string(instring, sizeof(instring));
   Res = atof(instring);
-  printf("%4.2f\n", Res);
+  fprintf(Logfile, "%4.2f\n", Res);
   if ((Res < HIGHRES - TINY) && (Res > LOWRES + TINY)) {
     bailout("genmic", "Bad value for system resolution");
     exit(1);
@@ -819,7 +848,10 @@ int checksphere(int xin, int yin, int zin, int diam, int wflg, int phasein,
   float dist, xdist, ydist, zdist, ftmp;
 
   if ((Simwall) && (wflg == Check) && (xin == Wallpos)) {
-    printf("\nCannot place a particle with center at %d\n", Wallpos);
+    if (Verbose) {
+      fprintf(Logfile, "\nCannot place a particle with center at %d\n",
+              Wallpos);
+    }
     return (1);
   }
 
@@ -950,14 +982,14 @@ int checkpart(int xin, int yin, int zin, int nxp, int nyp, int nzp, int vol,
   nofits = 0; /* Flag indicating if placement is possible */
 
   if (Verbose) {
-    printf("\nIn Checkpart, Vol = %d, wflg = %d, phase = %d", vol, wflg,
-           phase2);
-    fflush(stdout);
+    fprintf(Logfile, "\nIn Checkpart, Vol = %d, wflg = %d, phase = %d", vol,
+            wflg, phase2);
+    fflush(Logfile);
   }
 
   if ((Simwall) && (wflg == Check) && (xin == Wallpos)) {
-    printf("\nCannot place a particle with center at %d\n", Wallpos);
-    fflush(stdout);
+    fprintf(Logfile, "\nCannot place a particle with center at %d\n", Wallpos);
+    fflush(Logfile);
     return (1);
   }
 
@@ -1090,8 +1122,10 @@ int image(int *nxp, int *nyp, int *nzp) {
   zc = (0.50 * (*nzp)) + 0.01;
 
   if (Verbose)
-    printf("\nEntering first image loop: nxp = %d, nyp= %d, nzp = %d, Nnn = %d",
-           *nxp, *nyp, *nzp, Nnn);
+    fprintf(
+        Logfile,
+        "\nEntering first image loop: nxp = %d, nyp= %d, nzp = %d, Nnn = %d",
+        *nxp, *nyp, *nzp, Nnn);
 
   for (k = 1; k <= *nzp; k++) {
     for (j = 1; j <= *nyp; j++) {
@@ -1346,8 +1380,8 @@ int adjustvol(int diff, int nxp, int nyp, int nzp) {
             numsp++;
 #ifdef DEBUG
             if (numsp == 9999) {
-              printf("\nThis is why... numsp = 9999");
-              fflush(stdout);
+              fprintf(Logfile, "\nThis is why... numsp = 9999");
+              fflush(Logfile);
             }
 #endif
           }
@@ -1378,8 +1412,9 @@ int adjustvol(int diff, int nxp, int nyp, int nzp) {
   }
 
 #ifdef DEBUG
-  printf("\nIn adjustvol, diff = %d and num surf pix = %d", diff, numsp);
-  fflush(stdout);
+  fprintf(Logfile, "\nIn adjustvol, diff = %d and num surf pix = %d", diff,
+          numsp);
+  fflush(Logfile);
 #endif
 
   count = 0;
@@ -1391,8 +1426,8 @@ int adjustvol(int diff, int nxp, int nyp, int nzp) {
 
     choice = (int)(numsp * ran1(Seed));
 #ifdef DEBUG
-    printf("\n\tIn adjustvol random choice = %d", choice);
-    fflush(stdout);
+    fprintf(Logfile, "\n\tIn adjustvol random choice = %d", choice);
+    fflush(Logfile);
 #endif
 
     if (choice > numsp)
@@ -1417,8 +1452,8 @@ int adjustvol(int diff, int nxp, int nyp, int nzp) {
     sp[numsp - 1].z = 0;
     numsp--;
 #ifdef DEBUG
-    printf("\n\t\tcount = %d and numsp = %d", count, numsp);
-    fflush(stdout);
+    fprintf(Logfile, "\n\t\tcount = %d and numsp = %d", count, numsp);
+    fflush(Logfile);
 #endif
   }
 
@@ -1620,21 +1655,39 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
   int m, n, i, j, k, ii, jj, x, y, z, ig, tries, na, foundpart;
   int phnow, nofit, n1, nxp, nyp, nzp, nnxp, nnyp, nnzp, partc, extpix,
       pcount[10];
-  int numpershape, nump;
+  int numpershape, nump, done, total_particles_to_place, numchunk;
   int klow, khigh, mp, pixfrac, numlines, numitems, toobig;
   int absdiff, oldabsdiff, diam, darg, numpix, shapetype, dispdist;
   int cx, cy, cz;
   int jg, numpartplaced, vol;
   float rx, ry, rz, testgyp, typegyp, frad, aa1, aa2;
   float vol1, ratio[10], saveratio, volume, volumecalc, v1;
+  float fraction_progress = 0.10;
   float maxrx, maxry, maxrz;
   /* float length,width; */
   double factor, theta, phi, cosbeta, sinbeta, alpha, gamma, beta, total, abc;
   double realnum;
   fcomplex r1, ddd, icmplx;
   char buff[MAXSTRING], filename[MAXSTRING], scratchname[MAXSTRING];
+  char *name, *newstring;
   struct lineitem line[MAXLINES];
   FILE *anmfile, *geomfile, *fscratch;
+
+  /* Determine how many total particles should be placed */
+  total_particles_to_place = 0;
+  for (ig = 0; ig < numgen; ig++) {
+    total_particles_to_place += numeach[ig];
+  }
+
+  /* Divide the total number to place into five chunks */
+  numchunk = total_particles_to_place / 100;
+
+  /* Print progress message */
+  fprintf(stdout,
+          "\nGENMIC_PROGRESS: stage=particle_placement progress=%.2f "
+          "message=Placing particles",
+          fraction_progress);
+  fflush(stdout);
 
   nnxp = nnyp = nnzp = n1 = 0;
   x = y = z = 0;
@@ -1653,8 +1706,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
     dispdist = Dispdist;
     phnow = pheach[ig]; /* phase for this class */
-    printf("Going to place %d particles of phase %d, radius %f\n", numeach[ig],
-           phnow, sizeeach[ig]);
+    fprintf(Logfile, "Going to place %d particles of phase %d, radius %f\n",
+            numeach[ig], phnow, sizeeach[ig]);
 
     if (Phase_shape[phnow].shapetype == SPHERES || sizeeach[ig] < 1.0) {
       shapetype = SPHERES;
@@ -1673,7 +1726,17 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
       /* loop for each sphere in this size class */
 
       for (jg = 0; jg < numeach[ig]; jg++) {
+
         tries = 0;
+        if (((numpartplaced + 1) % numchunk) == 0) {
+          fraction_progress += (0.55 * ((float)(numpartplaced) /
+                                        (float)(total_particles_to_place)));
+          fprintf(stdout,
+                  "\nGENMIC_PROGRESS: stage=particle_placement progress=%.2f "
+                  "message=Placing particles",
+                  fraction_progress);
+          fflush(stdout);
+        }
 
         /* Stop after MAXTRIES random tries */
         do {
@@ -1694,24 +1757,26 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
           darg = diam + (2 * dispdist);
           nofit = checksphere(x, y, z, darg, Check, Npart + 1, 0);
           if ((tries > MAXTRIES) && (dispdist > 0)) {
-            printf("\nAble to place %d particles ", jg);
-            printf("out of %d needed before reducing dispersion distance ",
-                   numeach[ig]);
+            fprintf(Logfile, "\nAble to place %d particles ", jg);
+            fprintf(Logfile,
+                    "out of %d needed before reducing dispersion distance ",
+                    numeach[ig]);
             tries = 0;
             dispdist--;
-            printf("to %d\n", dispdist);
+            fprintf(Logfile, "to %d\n", dispdist);
           }
 
           if (tries > MAXTRIES) {
-            printf("Could not place sphere %d\n", Npart);
-            printf("\tafter %d random attempts\n\n", MAXTRIES);
-            printf("\nTotal number spheres desired in this bin was %d",
-                   numeach[ig]);
-            printf("\nActual number _placed  in this bin was %d", jg);
-            printf("\nWas working on bin %d out of %d\n", ig, numgen);
+            fprintf(Logfile, "Could not place sphere %d\n", Npart);
+            fprintf(Logfile, "\tafter %d random attempts\n\n", MAXTRIES);
+            fprintf(Logfile,
+                    "\nTotal number spheres desired in this bin was %d",
+                    numeach[ig]);
+            fprintf(Logfile, "\nActual number _placed  in this bin was %d", jg);
+            fprintf(Logfile, "\nWas working on bin %d out of %d\n", ig, numgen);
 
             warning("genmic", "Could not place a sphere");
-            fflush(stdout);
+            fflush(Logfile);
             return (jg);
           }
         } while (nofit);
@@ -1720,15 +1785,15 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
         Npart++;
         if (Npart > Npartc) {
-          printf("Too many spheres being generated \n");
-          printf("\tUser needs to increase value of NPARTC\n");
-          printf("\tat top of C-code\n\n");
-          printf("\nTotal number spheres desired in this bin was %d",
-                 numeach[ig]);
-          printf("\nActual number _placed  in this bin was %d", jg);
-          printf("\nWas working on bin %d out of %d\n", ig, numgen);
+          fprintf(Logfile, "Too many spheres being generated \n");
+          fprintf(Logfile, "\tUser needs to increase value of NPARTC\n");
+          fprintf(Logfile, "\tat top of C-code\n\n");
+          fprintf(Logfile, "\nTotal number spheres desired in this bin was %d",
+                  numeach[ig]);
+          fprintf(Logfile, "\nActual number _placed  in this bin was %d", jg);
+          fprintf(Logfile, "\nWas working on bin %d out of %d\n", ig, numgen);
           warning("genmic", "Too many spheres");
-          fflush(stdout);
+          fflush(Logfile);
           return (jg);
         }
 
@@ -1738,7 +1803,7 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
         if (!Particle[Npart]) {
           freegenmic();
           bailout("genmic", "Memory allocation error");
-          fflush(stdout);
+          fflush(Logfile);
           exit(1);
         }
 
@@ -1834,9 +1899,9 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
     case REALSHAPE:
 
       if (Verbose)
-        printf("\nPlacing REAL shapes now...");
+        fprintf(Logfile, "\nPlacing REAL shapes now...");
 
-      sprintf(filename, "%s%s%c%s-geom.dat", Phase_shape[phnow].pathroot,
+      sprintf(filename, "%s%s%c%s-geom.csv", Phase_shape[phnow].pathroot,
               Phase_shape[phnow].shapeset, Filesep,
               Phase_shape[phnow].shapeset);
 
@@ -1850,61 +1915,172 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
       fread_string(geomfile, buff);
 
       if (Verbose)
-        printf("\nReading each line of the geom file...");
-      fflush(stdout);
+        fprintf(Logfile, "\nReading each line of the geom file...");
+      fflush(Logfile);
 
-      i = 0;
-      while (!feof(geomfile) && i < MAXLINES) {
-        fscanf(geomfile, "%s", buff);
-        strcpy(line[i].name, buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].xlow = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].xhi = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].ylow = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].yhi = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].zlow = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].zhi = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].volume = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].surfarea = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].nsurfarea = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].diam = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].Itrace = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].Nnn = atoi(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].NGC = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].length = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].width = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].thickness = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].nlength = atof(buff);
-        fscanf(geomfile, "%s", buff);
-        line[i].nwidth = atof(buff);
+      i = done = 0;
+      while ((!feof(geomfile)) && (i < MAXLINES) && (done == 0)) {
+        fread_string(geomfile, buff);
+        name = strtok(buff, ",");
+        fprintf(Logfile, "\ni = %d, name = %s", i, name);
+        fflush(Logfile);
+        strcpy(line[i].name, name);
+        newstring = strtok(NULL, ",");
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].xlow = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].xhi = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].ylow = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].yhi = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].zlow = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].zhi = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].volume = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].surfarea = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].nsurfarea = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].diam = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].Itrace = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].Nnn = atoi(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].NGC = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].length = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].width = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].thickness = atof(newstring);
+          newstring = strtok(NULL, ",");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].nlength = atof(newstring);
+          newstring = strtok(NULL, ",\n");
+        } else {
+          done = 1;
+        }
+        if (newstring != NULL) {
+          fprintf(Logfile, "\ni = %d, newstring = %s", i, newstring);
+          fflush(Logfile);
+          line[i].nwidth = atof(newstring);
+        } else {
+          done = 1;
+        }
         i++;
 
         /* Line scanned in now */
       }
 
       if (Verbose)
-        printf(" Done!\n");
-      fflush(stdout);
+        fprintf(Logfile, " Done!\n");
+      fflush(Logfile);
 
       /* All lines scanned */
 
-      numitems = i;
+      numitems = i - 1;
       numlines = numitems - 1;
       fclose(geomfile);
 
@@ -1921,14 +2097,15 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
       numpartplaced = 0;
 
       if (Verbose)
-        printf("Entering main loop for size class %d, need %d of them...", ig,
-               numeach[ig]);
-      fflush(stdout);
+        fprintf(Logfile,
+                "Entering main loop for size class %d, need %d of them...", ig,
+                numeach[ig]);
+      fflush(Logfile);
       for (jg = 0; jg < numeach[ig]; jg++) {
 
         if (Verbose)
-          printf("\n\t%d of %d", jg, numeach[ig]);
-        fflush(stdout);
+          fprintf(Logfile, "\n\t%d of %d", jg, numeach[ig]);
+        fflush(Logfile);
 
         foundpart = 1;
         toobig = 0;
@@ -1942,8 +2119,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               foundpart = 1;
 
               if (Verbose) {
-                printf("\n\tNeed to choose a new shape...");
-                fflush(stdout);
+                fprintf(Logfile, "\n\tNeed to choose a new shape...");
+                fflush(Logfile);
               }
 
               /***
@@ -1961,14 +2138,14 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               sprintf(filename, "%s%s%c%s", Phase_shape[phnow].pathroot,
                       Phase_shape[phnow].shapeset, Filesep, line[n1].name);
               if (Verbose)
-                printf(" %s", filename);
-              fflush(stdout);
+                fprintf(Logfile, " %s", filename);
+              fflush(Logfile);
 
               anmfile = filehandler("genmic", filename, "READ");
 
               if (Verbose)
-                printf(" !!");
-              fflush(stdout);
+                fprintf(Logfile, " !!");
+              fflush(Logfile);
 
               if (!anmfile) {
                 freegenmic();
@@ -1976,10 +2153,10 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               }
 
               if (Verbose)
-                printf("Opened %s ; size = %d\n", line[n1].name, vol);
-              printf("Using particle shape %s; size = %d\n", line[n1].name,
-                     vol);
-              fflush(stdout);
+                fprintf(Logfile, "Opened %s ; size = %d\n", line[n1].name, vol);
+              fprintf(Logfile, "Using particle shape %s; size = %d\n",
+                      line[n1].name, vol);
+              fflush(Logfile);
 
               /***
                *    Nnn is how many y's are to be used
@@ -2000,8 +2177,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               }
 
               if (Verbose)
-                printf("\nRead anms");
-              fflush(stdout);
+                fprintf(Logfile, "\nRead anms");
+              fflush(Logfile);
               fclose(anmfile);
 
               /***
@@ -2147,11 +2324,11 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
             volume *= factor;
             vol1 = volume;
 #ifdef DEBUG
-            printf("\nComputed volume = %f ", vol1);
-            printf("Tabulated = %f ", line[n1].volume);
-            printf("saveratio = %f ", saveratio);
-            printf("partc = %d", partc);
-            fflush(stdout);
+            fprintf(Logfile, "\nComputed volume = %f ", vol1);
+            fprintf(Logfile, "Tabulated = %f ", line[n1].volume);
+            fprintf(Logfile, "saveratio = %f ", saveratio);
+            fprintf(Logfile, "partc = %d", partc);
+            fflush(Logfile);
 #endif
 
             na = 0;
@@ -2205,11 +2382,11 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               }
 
 #ifdef DEBUG
-              printf("\nna = %d", na);
-              printf("\ntarget volume = %d", vol);
-              printf("\ncomputed volume = %f", vol1);
-              printf("\nratio = %f", ratio[na]);
-              fflush(stdout);
+              fprintf(Logfile, "\nna = %d", na);
+              fprintf(Logfile, "\ntarget volume = %d", vol);
+              fprintf(Logfile, "\ncomputed volume = %f", vol1);
+              fprintf(Logfile, "\nratio = %f", ratio[na]);
+              fflush(Logfile);
 #endif
 
               /* Digitize the particles all over again */
@@ -2237,7 +2414,7 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
                 partc = image(&nxp, &nyp, &nzp);
                 if (partc == 0) {
                   if (Verbose)
-                    printf("\nCurrent particle too big.");
+                    fprintf(Logfile, "\nCurrent particle too big.");
                   toobig = 1;
                   foundpart = 0;
                 } else {
@@ -2249,9 +2426,9 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
                 foundpart = 0;
               }
 #ifdef DEBUG
-              printf("\nAfter image function, nominal particle ");
-              printf("size %d, actual %d", vol, partc);
-              fflush(stdout);
+              fprintf(Logfile, "\nAfter image function, nominal particle ");
+              fprintf(Logfile, "size %d, actual %d", vol, partc);
+              fflush(Logfile);
 #endif
               saveratio = ratio[na];
               na++;
@@ -2260,8 +2437,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
             if (!toobig && foundpart) {
 #ifdef DEBUG
-              printf("\nDone scaling the anms");
-              fflush(stdout);
+              fprintf(Logfile, "\nDone scaling the anms");
+              fflush(Logfile);
 #endif
 
               /***
@@ -2272,16 +2449,17 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
               if (partc != vol) {
 #ifdef DEBUG
-                printf("\nAdditional adjustment needed to match volume, partc "
-                       "= %d",
-                       partc);
-                fflush(stdout);
+                fprintf(Logfile,
+                        "\nAdditional adjustment needed to match volume, partc "
+                        "= %d",
+                        partc);
+                fflush(Logfile);
 #endif
                 extpix = adjustvol(vol - partc, nxp, nyp, nzp);
                 partc += extpix;
 #ifdef DEBUG
-                printf("\nAfter adjustment, partc = %d", partc);
-                fflush(stdout);
+                fprintf(Logfile, "\nAfter adjustment, partc = %d", partc);
+                fflush(Logfile);
 #endif
               }
 
@@ -2306,8 +2484,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
             } else {
 
 #ifdef DEBUG
-              printf("\nSomething wrong with this particle");
-              fflush(stdout);
+              fprintf(Logfile, "\nSomething wrong with this particle");
+              fflush(Logfile);
 #endif
               foundpart = 0;
             }
@@ -2357,11 +2535,12 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
            ***/
 
 #ifdef DEBUG
-          printf("\nAbout to go into checkpart...");
-          printf("\n\tx = %d y = %d z = %d", x, y, z);
-          printf("\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp, nnzp);
-          printf("\n\tvol = %d", vol);
-          fflush(stdout);
+          fprintf(Logfile, "\nAbout to go into checkpart...");
+          fprintf(Logfile, "\n\tx = %d y = %d z = %d", x, y, z);
+          fprintf(Logfile, "\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp,
+                  nnzp);
+          fprintf(Logfile, "\n\tvol = %d", vol);
+          fflush(Logfile);
 #endif
 
           nofit =
@@ -2374,14 +2553,15 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
           }
 
           if (tries > MAXTRIES) {
-            printf("Could not place particle %d\n", Npart);
-            printf("\tafter %d random attempts\n\n", MAXTRIES);
-            printf("\nTotal number spheres desired in this bin was %d",
-                   numeach[ig]);
-            printf("\nActual number _placed  in this bin was %d", jg);
-            printf("\nWas working on bin %d out of %d\n", ig, numgen);
+            fprintf(Logfile, "Could not place particle %d\n", Npart);
+            fprintf(Logfile, "\tafter %d random attempts\n\n", MAXTRIES);
+            fprintf(Logfile,
+                    "\nTotal number spheres desired in this bin was %d",
+                    numeach[ig]);
+            fprintf(Logfile, "\nActual number _placed  in this bin was %d", jg);
+            fprintf(Logfile, "\nWas working on bin %d out of %d\n", ig, numgen);
             warning("genmic", "Could not place a particle");
-            fflush(stdout);
+            fflush(Logfile);
             return (jg);
           }
 
@@ -2394,15 +2574,16 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
         Npart++;
         if (Npart > Npartc) {
-          printf("Too many particles being generated \n");
-          printf("\tUser needs to increase value of NPARTC\n");
-          printf("\tat top of C-code\n\n");
-          printf("\nNumber real-shape particles desired in this bin was %d",
-                 numeach[ig]);
-          printf("\nActual number _placed  in this bin was %d", jg);
-          printf("\nWas working on bin %d out of %d\n", ig, numgen);
+          fprintf(Logfile, "Too many particles being generated \n");
+          fprintf(Logfile, "\tUser needs to increase value of NPARTC\n");
+          fprintf(Logfile, "\tat top of C-code\n\n");
+          fprintf(Logfile,
+                  "\nNumber real-shape particles desired in this bin was %d",
+                  numeach[ig]);
+          fprintf(Logfile, "\nActual number _placed  in this bin was %d", jg);
+          fprintf(Logfile, "\nWas working on bin %d out of %d\n", ig, numgen);
           warning("genmic", "Too many particles");
-          fflush(stdout);
+          fflush(Logfile);
           return (jg);
         }
 
@@ -2412,7 +2593,7 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
         if (!Particle[Npart]) {
           freegenmic();
           bailout("genmic", "Memory allocation error");
-          fflush(stdout);
+          fflush(Logfile);
           exit(1);
         }
         Particle[Npart]->partid = Npart;
@@ -2452,11 +2633,12 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
               (vol > (Target_sulfate - N_sulfate)) || (vol > diam2vol(15.0))) {
 
 #ifdef DEBUG
-            printf("\nAbout to place a C3S particle...");
-            printf("\n\tx = %d y = %d z = %d", x, y, z);
-            printf("\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp, nnzp);
-            printf("\n\tvol = %d", vol);
-            fflush(stdout);
+            fprintf(Logfile, "\nAbout to place a C3S particle...");
+            fprintf(Logfile, "\n\tx = %d y = %d z = %d", x, y, z);
+            fprintf(Logfile, "\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp,
+                    nnzp);
+            fprintf(Logfile, "\n\tvol = %d", vol);
+            fflush(Logfile);
 #endif
             nump = checkpart(x, y, z, nnxp, nnyp, nnzp, vol, Npart + 1, C3S,
                              Place);
@@ -2477,11 +2659,12 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
 
               N_anhydrite += vol;
 #ifdef DEBUG
-              printf("\nAbout to place a GYPSUM particle...");
-              printf("\n\tx = %d y = %d z = %d", x, y, z);
-              printf("\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp, nnzp);
-              printf("\n\tvol = %d", vol);
-              fflush(stdout);
+              fprintf(Logfile, "\nAbout to place a GYPSUM particle...");
+              fprintf(Logfile, "\n\tx = %d y = %d z = %d", x, y, z);
+              fprintf(Logfile, "\n\tnnxp = %d nnyp = %d nnzp = %d", nnxp, nnyp,
+                      nnzp);
+              fprintf(Logfile, "\n\tvol = %d", vol);
+              fflush(Logfile);
 #endif
               nump = checkpart(x, y, z, nnxp, nnyp, nnzp, vol, Npart + 1,
                                ANHYDRITE, Place);
@@ -2511,7 +2694,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
           }
 
           if (Verbose)
-            printf("\nN_total = %d and N_target = %d", N_total, N_target);
+            fprintf(Logfile, "\nN_total = %d and N_target = %d", N_total,
+                    N_target);
 
         } else {
 
@@ -2560,10 +2744,12 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
         }
       }
       if (Verbose) {
-        printf("\nNumber real-shape particles desired in this bin was %d",
-               numeach[ig]);
-        printf("\nNumber real-shape particles _placed  in this bin was %d\n",
-               numpartplaced);
+        fprintf(Logfile,
+                "\nNumber real-shape particles desired in this bin was %d",
+                numeach[ig]);
+        fprintf(Logfile,
+                "\nNumber real-shape particles _placed  in this bin was %d\n",
+                numpartplaced);
       }
 
       break;
@@ -2585,8 +2771,8 @@ int genparticles(int numgen, int *numeach, float *sizeeach, int *pheach) {
             }
         }
     }
-    printf("... Total pixels of %d is now %d\n",phnow,totpix);
-    fflush(stdout);
+   fprintf(Logfile,"... Total pixels of %d is now %d\n",phnow,totpix);
+    fflush(Logfile);
     */
   }
 
@@ -2646,10 +2832,11 @@ void create(void) {
   if (Zsyssize < Minsyssize)
     Minsyssize = Zsyssize;
 
-  printf("Add all SPHERES (0), all REAL-SHAPE (1), or MIXED (2)  particles? ");
+  fprintf(Logfile,
+          "Add all SPHERES (0), all REAL-SHAPE (1), or MIXED (2)  particles? ");
   read_string(instring, sizeof(instring));
   Shape = atoi(instring);
-  printf("%d\n", Shape);
+  fprintf(Logfile, "%d\n", Shape);
 
   /***
    *       We must zero all the shapetype values (assume all are spheres).  We
@@ -2673,20 +2860,21 @@ void create(void) {
 
     /* At least some particles will have non-spherical shapes */
 
-    printf("Where is the default shape database directory? ");
-    printf("\n(Include final separator in path) ");
+    fprintf(Logfile, "Where is the default shape database directory? ");
+    fprintf(Logfile, "\n(Include final separator in path) ");
     read_string(buff, sizeof(buff));
     Filesep = buff[strlen(buff) - 1];
     if (Filesep != '/' && Filesep != '\\') {
-      printf("\nNo final file separator detected.  Using /");
+      fprintf(Logfile, "\nNo final file separator detected.  Using /");
       Filesep = '/';
     }
-    printf("%s\n", buff);
+    fprintf(Logfile, "%s\n", buff);
     sprintf(Pathroot, "%s", buff);
-    printf("Take cement shapes from what data set in this directory? ");
-    printf("\n(No file separator at beginning or end)");
+    fprintf(Logfile,
+            "Take cement shapes from what data set in this directory? ");
+    fprintf(Logfile, "\n(No file separator at beginning or end)");
     read_string(Shapeset, sizeof(Shapeset));
-    printf("%s\n", Shapeset);
+    fprintf(Logfile, "%s\n", Shapeset);
     if ((Shapeset[strlen(Shapeset) - 1] == '/') ||
         (Shapeset[strlen(Shapeset) - 1] == '\\')) {
       Shapeset[strlen(Shapeset) - 1] = '\0';
@@ -2778,64 +2966,71 @@ void create(void) {
       Volpart[i] = 0;
   }
 
-  printf("Enter the binder SOLID volume fraction: ");
+  fprintf(Logfile, "Enter the binder SOLID volume fraction: ");
   read_string(instring, sizeof(instring));
   binder_vfrac = atof(instring);
-  printf("\n%f\n", binder_vfrac);
-  printf("Enter the binder WATER volume fraction: ");
+  fprintf(Logfile, "\n%f\n", binder_vfrac);
+  fprintf(Logfile, "Enter the binder WATER volume fraction: ");
   read_string(instring, sizeof(instring));
   water_vfrac = atof(instring);
-  printf("\n%f\n", water_vfrac);
+  fprintf(Logfile, "\n%f\n", water_vfrac);
 
   binder_vfrac = (binder_vfrac) / (binder_vfrac + water_vfrac);
 
-  printf("Enter number of solid binder phases to add: ");
+  fprintf(Logfile, "Enter number of solid binder phases to add: ");
   read_string(instring, sizeof(instring));
   num_phases_to_add = atoi(instring);
-  printf("\n%d\n", num_phases_to_add);
+  fprintf(Logfile, "\n%d\n", num_phases_to_add);
   for (k = 0; k < num_phases_to_add; k++) {
-    printf("Enter phase id to add: ");
+    fprintf(Logfile, "Enter phase id to add: ");
     read_string(instring, sizeof(instring));
     phase_id = atoi(instring);
-    printf("\n%d\n", phase_id);
-    printf("Enter volume fraction of this phase (total BINDER SOLID basis): ");
+    fprintf(Logfile, "\n%d\n", phase_id);
+    fprintf(Logfile,
+            "Enter volume fraction of this phase (total BINDER SOLID basis): ");
     read_string(instring, sizeof(instring));
     Vol_frac[phase_id] = atof(instring);
-    printf("\n%f\n", Vol_frac[phase_id]);
+    fprintf(Logfile, "\n%f\n", Vol_frac[phase_id]);
 
     /* Convert to total VOLUME basis, binder + water system */
     Vol_frac[phase_id] *= binder_vfrac;
 
     target_phase_vox = (Vol_frac[phase_id] * (float)Binderpix) + 0.5;
-    printf("Will need to enter %d pixels of this phase...\n", target_phase_vox);
-    printf("Enter number of size classes for this phase (max is %d): ",
-           NUMSIZES);
+    fprintf(Logfile, "Will need to enter %d pixels of this phase...\n",
+            target_phase_vox);
+    fprintf(
+        Logfile,
+        "Enter number of size classes for this phase (max is %d): ", NUMSIZES);
     read_string(instring, sizeof(instring));
     Size_classes[phase_id] = atoi(instring);
     if (Size_classes[phase_id] >= NUMSIZES) {
-      printf("ERROR:  Number of size classes cannot exceed %d.  Exiting.\n\n",
-             NUMSIZES);
+      fprintf(stderr,
+              "\nERROR line 2990:  Number of size classes cannot exceed %d.  "
+              "Exiting.\n\n",
+              NUMSIZES);
       freegenmic();
       bailout("genmic", "Bad value for number of size classes");
       exit(1);
     }
-    printf("\n%d\n", Size_classes[phase_id]);
+    fprintf(Logfile, "\n%d\n", Size_classes[phase_id]);
     for (j = 0; j < Size_classes[phase_id]; j++) {
-      printf("Enter diameter of size class %d in micrometers (integer values "
-             "only): ",
-             j);
+      fprintf(Logfile,
+              "Enter diameter of size class %d in micrometers (integer values "
+              "only): ",
+              j);
       read_string(instring, sizeof(instring));
       Dinput[phase_id][j] = atof(instring);
-      printf("\n%d\n", (int)(Dinput[phase_id][j]));
+      fprintf(Logfile, "\n%d\n", (int)(Dinput[phase_id][j]));
       /* Convert diameter to pixel units */
       Dinput[phase_id][j] *= (1.0 / Res);
       /* Round to nearest integer */
       Dinput[phase_id][j] = (float)((int)(Dinput[phase_id][j] + 0.5));
-      printf("Enter volume fraction of phase %d particles in size class %d: ",
-             phase_id, j);
+      fprintf(Logfile,
+              "Enter volume fraction of phase %d particles in size class %d: ",
+              phase_id, j);
       read_string(instring, sizeof(instring));
       Pdf[phase_id][j] = atof(instring);
-      printf("\n%f\n", Pdf[phase_id][j]);
+      fprintf(Logfile, "\n%f\n", Pdf[phase_id][j]);
     }
 
     if (Shape == REALSHAPE) {
@@ -2850,19 +3045,20 @@ void create(void) {
       }
     } else if (Shape != SPHERES) {
       /* Some particles are real shape here */
-      printf("Spheres (0) or Real shapes (1)? ");
+      fprintf(Logfile, "Spheres (0) or Real shapes (1)? ");
       read_string(instring, sizeof(instring));
       shapevar = atoi(instring);
       if (shapevar == REALSHAPE) {
         Phase_shape[phase_id].shapetype = REALSHAPE;
-        printf("What is the shape path? ");
+        fprintf(Logfile, "What is the shape path? ");
         read_string(buff, sizeof(buff));
         Filesep = buff[strlen(buff) - 1];
-        printf("%s\n", buff);
+        fprintf(Logfile, "%s\n", buff);
         strcpy(Phase_shape[phase_id].pathroot, buff);
-        printf("Take cement shapes from what data set in this directory? ");
+        fprintf(Logfile,
+                "Take cement shapes from what data set in this directory? ");
         read_string(buff1, sizeof(buff1));
-        printf("%s\n", buff1);
+        fprintf(Logfile, "%s\n", buff1);
         strcpy(Phase_shape[phase_id].shapeset, buff1);
       }
     }
@@ -2931,27 +3127,28 @@ void create(void) {
                  (float)(Volpart[i])) +
                 0.5);
       total_phase_vox += numparts[phase_id][i] * Volpart[i];
-      printf("Number of particles of diameter %f = %d\n", Dinput[phase_id][i],
-             numparts[phase_id][i]);
-      printf("Volume of each particle of diameter %f = %d\n",
-             Dinput[phase_id][i], Volpart[i]);
+      fprintf(Logfile, "Number of particles of diameter %f = %d\n",
+              Dinput[phase_id][i], numparts[phase_id][i]);
+      fprintf(Logfile, "Volume of each particle of diameter %f = %d\n",
+              Dinput[phase_id][i], Volpart[i]);
     }
-    printf("Total pixels based on PDF is %d\n", total_phase_vox);
-    printf("Making adjustments of particle numbers now...\n");
+    fprintf(Logfile, "Total pixels based on PDF is %d\n", total_phase_vox);
+    fprintf(Logfile, "Making adjustments of particle numbers now...\n");
 
     extra_pixels = 0;
     for (i = 0; i < Size_classes[phase_id] - 1; i++) {
       target_vox_i = (int)(((float)(target_phase_vox)*Pdf[phase_id][i]) + 0.5);
-      printf("Target pixels in size class %d = %d\n", i, target_vox_i);
+      fprintf(Logfile, "Target pixels in size class %d = %d\n", i,
+              target_vox_i);
       extra_pixels += (target_vox_i - (numparts[phase_id][i] * Volpart[i]));
-      printf("Extra pixels (cumulative) = %d\n", extra_pixels);
+      fprintf(Logfile, "Extra pixels (cumulative) = %d\n", extra_pixels);
       if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
         delta_particles = (float)(extra_pixels) / (float)(Volpart[i]);
         numparts[phase_id][i] += delta_particles;
         total_phase_vox += (delta_particles * Volpart[i]);
         extra_pixels -= (delta_particles * Volpart[i]);
-        printf("Reduced number of particles in size class %d by %d\n", i,
-               delta_particles);
+        fprintf(Logfile, "Reduced number of particles in size class %d by %d\n",
+                i, delta_particles);
       }
     }
 
@@ -2976,21 +3173,22 @@ void create(void) {
         total_phase_vox += (Volpart[i] * numparts[phase_id][i]);
     }
 
-    printf("\n***************************************************************\n");
-    printf("    Targeted %d vox of phase %d, and will be adding %d vox\n",
-            target_phase_vox,phase_id,total_phase_vox);
-    printf("\n***************************************************************\n");
+   fprintf(Logfile,"\n***************************************************************\n");
+   fprintf(Logfile,"    Targeted %d vox of phase %d, and will be adding %d
+   vox\n", target_phase_vox,phase_id,total_phase_vox);
+   fprintf(Logfile,"\n***************************************************************\n");
 
     target_vox_i = 0;
     for (i = 0; i < Size_classes[phase_id]; i++) {
         target_vox_i = (float)(Volpart[i] * numparts[phase_id][i]);
-        printf("    Size class %2d, diam = %2d, target pdf = %.4f, target_vox_i
-    = %d\n", i, (int)(Dinput[phase_id][i]),Pdf[phase_id][i],target_vox_i);
+       fprintf(Logfile,"    Size class %2d, diam = %2d, target pdf = %.4f,
+   target_vox_i = %d\n", i,
+   (int)(Dinput[phase_id][i]),Pdf[phase_id][i],target_vox_i);
     }
-    printf("\n***************************************************************\n");
+   fprintf(Logfile,"\n***************************************************************\n");
     */
 
-    fflush(stdout);
+    fflush(Logfile);
   }
 
   /*  All phases are done, except possibly the fine portion of the aggregate
@@ -3000,11 +3198,12 @@ void create(void) {
     Vol_frac[INERTAGG] *= binder_vfrac; /* Converts to total VOLUME basis,
                                            binder + water system */
     target_phase_vox = (Vol_frac[INERTAGG] * (float)Binderpix) + 0.5;
-    printf("Will need to enter %d pixels of INERT AGGREGATE to binder...\n",
-           target_phase_vox);
-    printf("Number of size classes for INERTAGG phase is %d\n",
-           Size_classes[INERTAGG]);
-    fflush(stdout);
+    fprintf(Logfile,
+            "Will need to enter %d pixels of INERT AGGREGATE to binder...\n",
+            target_phase_vox);
+    fprintf(Logfile, "Number of size classes for INERTAGG phase is %d\n",
+            Size_classes[INERTAGG]);
+    fflush(Logfile);
 
     if (Shape == REALSHAPE) {
       /* All particles are real shape */
@@ -3079,27 +3278,28 @@ void create(void) {
                  (float)(Volpart[i])) +
                 0.5);
       total_phase_vox += numparts[INERTAGG][i] * Volpart[i];
-      printf("Number of particles of diameter %f = %d\n", Dinput[INERTAGG][i],
-             numparts[INERTAGG][i]);
-      printf("Volume of each particle of diameter %f = %d\n",
-             Dinput[INERTAGG][i], Volpart[i]);
+      fprintf(Logfile, "Number of particles of diameter %f = %d\n",
+              Dinput[INERTAGG][i], numparts[INERTAGG][i]);
+      fprintf(Logfile, "Volume of each particle of diameter %f = %d\n",
+              Dinput[INERTAGG][i], Volpart[i]);
     }
-    printf("Total pixels based on PDF is %d\n", total_phase_vox);
-    printf("Making adjustments of particle numbers now...\n");
+    fprintf(Logfile, "Total pixels based on PDF is %d\n", total_phase_vox);
+    fprintf(Logfile, "Making adjustments of particle numbers now...\n");
 
     extra_pixels = 0;
     for (i = 0; i < Size_classes[INERTAGG] - 1; i++) {
       target_vox_i = (int)(((float)(target_phase_vox)*Pdf[INERTAGG][i]) + 0.5);
-      printf("Target pixels in size class %d = %d\n", i, target_vox_i);
+      fprintf(Logfile, "Target pixels in size class %d = %d\n", i,
+              target_vox_i);
       extra_pixels += (target_vox_i - (numparts[INERTAGG][i] * Volpart[i]));
-      printf("Extra pixels (cumulative) = %d\n", extra_pixels);
+      fprintf(Logfile, "Extra pixels (cumulative) = %d\n", extra_pixels);
       if (Volpart[i] < (int)(fabs((float)extra_pixels))) {
         delta_particles = (float)(extra_pixels) / (float)(Volpart[i]);
         numparts[INERTAGG][i] += delta_particles;
         total_phase_vox += (delta_particles * Volpart[i]);
         extra_pixels -= (delta_particles * Volpart[i]);
-        printf("Reduced number of particles in size class %d by %d\n", i,
-               delta_particles);
+        fprintf(Logfile, "Reduced number of particles in size class %d by %d\n",
+                i, delta_particles);
       }
     }
 
@@ -3139,7 +3339,8 @@ void create(void) {
         } else {
           Onepixnum[i] = numparts[i][j];
           if (Verbose)
-            printf("\nOne-pix particles of phase %d = %d", i, Onepixnum[i]);
+            fprintf(Logfile, "\nOne-pix particles of phase %d = %d", i,
+                    Onepixnum[i]);
         }
       }
     }
@@ -3172,37 +3373,39 @@ void create(void) {
     }
   }
 
-  printf("Enter dispersion factor (separation distance ");
-  printf("in pixels) for spheres (0-2)\n");
-  printf("0 corresponds to totally random placement\n");
+  fprintf(Logfile, "Enter dispersion factor (separation distance ");
+  fprintf(Logfile, "in pixels) for spheres (0-2)\n");
+  fprintf(Logfile, "0 corresponds to totally random placement\n");
   read_string(instring, sizeof(instring));
   Dispdist = atoi(instring);
-  printf("%d \n", Dispdist);
+  fprintf(Logfile, "%d \n", Dispdist);
   if ((Dispdist < 0) || (Dispdist > 2)) {
     freegenmic();
     bailout("genmic", "Bad value for dispersion distance");
     exit(1);
   }
 
-  printf("Enter probability for gypsum particles ");
-  printf("on a random particle basis (0.0-1.0) \n");
+  fprintf(Logfile, "Enter probability for gypsum particles ");
+  fprintf(Logfile, "on a random particle basis (0.0-1.0) \n");
   read_string(instring, sizeof(instring));
   Probgyp = atof(instring);
-  printf("%f \n", Probgyp);
+  fprintf(Logfile, "%f \n", Probgyp);
   if ((Probgyp < -TINY) || (Probgyp > 1.0 + TINY)) {
     freegenmic();
     bailout("genmic", "Bad value for total gypsum probability");
     exit(1);
   }
 
-  printf("Enter probability for hemihydrate form of gypsum (0.0-1.0)\n");
+  fprintf(Logfile,
+          "Enter probability for hemihydrate form of gypsum (0.0-1.0)\n");
   read_string(instring, sizeof(instring));
   Probhem = atof(instring);
-  printf("%f\n", Probhem);
-  printf("Enter probability for anhydrite form of gypsum (0.0-1.0)\n");
+  fprintf(Logfile, "%f\n", Probhem);
+  fprintf(Logfile,
+          "Enter probability for anhydrite form of gypsum (0.0-1.0)\n");
   read_string(instring, sizeof(instring));
   Probanh = atof(instring);
-  printf("%f\n", Probanh);
+  fprintf(Logfile, "%f\n", Probanh);
   if ((Probhem < -TINY) || (Probhem > 1.0 + TINY) || (Probanh < -TINY) ||
       (Probanh > 1.0 + TINY) || ((Probanh + Probhem) > 1.0 + TINY + TINY)) {
 
@@ -3214,14 +3417,15 @@ void create(void) {
   if ((numsize > 0) && (numsize < (NUMSIZES + 1))) {
 
     if (Verbose) {
-      printf("Calculated information for ");
-      printf("each particle class (largest size 1st)\n");
-      printf("Phases are %d- Cement and (random) calcium ", C3S);
-      printf("sulfate, %d- C2S, %d- Gypsum, ", C2S, GYPSUM);
-      printf("%d- hemihydrate %d- anhydrite ", HEMIHYD, ANHYDRITE);
-      printf("%d- Silica fume, %d- Inert, ", SFUME, INERT);
-      printf("%d- Slag, %d- CaCO3 %d- Fly Ash, ", SLAG, CACO3, FLYASH);
-      printf("%d- Lime\n", FREELIME);
+      fprintf(Logfile, "Calculated information for ");
+      fprintf(Logfile, "each particle class (largest size 1st)\n");
+      fprintf(Logfile, "Phases are %d- Cement and (random) calcium ", C3S);
+      fprintf(Logfile, "sulfate, %d- C2S, %d- Gypsum, ", C2S, GYPSUM);
+      fprintf(Logfile, "%d- hemihydrate %d- anhydrite ", HEMIHYD, ANHYDRITE);
+      fprintf(Logfile, "%d- Silica fume, %d- Inert, ", SFUME, INERT);
+      fprintf(Logfile, "%d- Slag, %d- CaCO3 %d- Fly Ash, ", SLAG, CACO3,
+              FLYASH);
+      fprintf(Logfile, "%d- Lime\n", FREELIME);
     }
 
     Ntheta = Nphi = 0;
@@ -3231,10 +3435,12 @@ void create(void) {
       /* Convert sphere diameter to volume in pixels */
 
       if (Verbose) {
-        printf("Adding particles of effective diameter %d\n", (int)diam[ip]);
-        printf("Phase of these particles is %d \n", phase[ip]);
-        printf("Calculated number of these particles is %d\n", num[ip]);
-        fflush(stdout);
+        fprintf(Logfile, "Adding particles of effective diameter %d\n",
+                (int)diam[ip]);
+        fprintf(Logfile, "Phase of these particles is %d \n", phase[ip]);
+        fprintf(Logfile, "Calculated number of these particles is %d\n",
+                num[ip]);
+        fflush(Logfile);
       }
       Volpart[ip] = diam2vol(diam[ip]);
 
@@ -3257,10 +3463,10 @@ void create(void) {
     if (Target_total_lt15 > 0)
       Probgyp = (Target_sulfate / Target_total_lt15);
     if (Verbose) {
-      printf("\nTarget_sulfate = %d", Target_sulfate);
-      printf("\nTarget_anhydrite = %d", Target_anhydrite);
-      printf("\nTarget_hemi = %d", Target_hemi);
-      fflush(stdout);
+      fprintf(Logfile, "\nTarget_sulfate = %d", Target_sulfate);
+      fprintf(Logfile, "\nTarget_anhydrite = %d", Target_anhydrite);
+      fprintf(Logfile, "\nTarget_hemi = %d", Target_hemi);
+      fflush(Logfile);
     }
 
     /***
@@ -3268,15 +3474,15 @@ void create(void) {
      ***/
 
     if (Verbose) {
-      printf("\nGoing into genparticles now...");
-      fflush(stdout);
+      fprintf(Logfile, "\nGoing into genparticles now...");
+      fflush(Logfile);
     }
 
     /* We don't need the return value in this case */
     nplaced = genparticles(numsize, num, frad, phase);
     if (Verbose) {
-      printf("\nBack Out of genparticles now...");
-      fflush(stdout);
+      fprintf(Logfile, "\nBack Out of genparticles now...");
+      fflush(Logfile);
     }
 
     /*** Sanity check on pore voxels ***/
@@ -3290,7 +3496,7 @@ void create(void) {
             }
         }
     }
-    printf("\nTotal pore voxels now is %d",totpix);
+   fprintf(Logfile,"\nTotal pore voxels now is %d",totpix);
     */
   }
 
@@ -3446,12 +3652,12 @@ void makefloc(void) {
   /*  means that the routine will continue until every particle is */
   /*  attached to a floc */
 
-  printf("\nEnter the degree of flocculation desired (0.0 to 1.0): ");
-  fflush(stdout);
+  fprintf(Logfile, "\nEnter the degree of flocculation desired (0.0 to 1.0): ");
+  fflush(Logfile);
   read_string(instring, sizeof(instring));
   degfloc = atof(instring);
-  printf("%f\n", degfloc);
-  fflush(stdout);
+  fprintf(Logfile, "%f\n", degfloc);
+  fflush(Logfile);
   targetnumflocs = Npart;
   if (degfloc > 0.0) {
     targetnumflocs = (int)(((float)(Npart)) * (1.0 - degfloc));
@@ -3460,8 +3666,8 @@ void makefloc(void) {
     if (targetnumflocs < 1)
       targetnumflocs = 1;
   }
-  printf("Target number of flocs is %d\n", targetnumflocs);
-  fflush(stdout);
+  fprintf(Logfile, "Target number of flocs is %d\n", targetnumflocs);
+  fflush(Logfile);
 
   numflocs = Npart;
   while (numflocs > targetnumflocs) {
@@ -3580,12 +3786,14 @@ void makefloc(void) {
             Particle[flochit] = NULL;
             /*
             free_particlevector(Particle[index[blocked_by]]);
-            printf("\nMemory freeing was successful");
-            fflush(stdout);
+           fprintf(Logfile,"\nMemory freeing was successful");
+            fflush(Logfile);
             */
             if (Particle[flochit] != NULL) {
-              printf("\nWARNING: Hit floc was not erased from memory.");
-              fflush(stdout);
+              fprintf(
+                  stderr,
+                  "\nWARNING line 3775: Hit floc was not erased from memory.");
+              fflush(stderr);
               Particle[flochit] = NULL;
             }
             numflocs--;
@@ -3593,9 +3801,10 @@ void makefloc(void) {
         }
       }
     }
-    printf("\nNumber flocs deleted so far is %d and number of flocs is %d\n",
-           numdeleted, numflocs);
-    fflush(stdout);
+    fprintf(Logfile,
+            "\nNumber flocs deleted so far is %d and number of flocs is %d\n",
+            numdeleted, numflocs);
+    fflush(Logfile);
   }
 
   if (index)
@@ -3693,9 +3902,11 @@ void measure(void) {
           nfreelime++;
           break;
         default:
-          printf("\nWARNING:  Unidentifiable phase ID (%d) ", valph);
-          printf("encountered.\nPixel at location ");
-          printf("(%d,%d,%d)\n", i, j, k);
+          fprintf(stderr, "\nWARNING line 3885:  Unidentifiable phase ID (%d) ",
+                  valph);
+          fprintf(stderr, "encountered.\nPixel at location ");
+          fprintf(stderr, "(%d,%d,%d)\n", i, j, k);
+          fflush(stderr);
           break;
         }
       }
@@ -3705,19 +3916,19 @@ void measure(void) {
   /* Output results */
 
   if (Verbose) {
-    printf("\nPhase counts are: \n");
-    printf("\tPorosity = %d \n", npor);
-    printf("\tCement = %d \n", ncem);
-    printf("\tC2S = %d \n", nc2s);
-    printf("\tGypsum = %d \n", ngyp);
-    printf("\tAnhydrite = %d \n", nanh);
-    printf("\tHemihydrate = %d \n", nhem);
-    printf("\tSilica fume = %d \n", nsfume);
-    printf("\tInert = %d \n", ninert);
-    printf("\tSlag = %d \n", nslag);
-    printf("\tCaCO3 = %d \n", ncaco3);
-    printf("\tFly Ash = %d \n", nflyash);
-    printf("\tAggregate = %d \n", nagg);
+    fprintf(Logfile, "\nPhase counts are: \n");
+    fprintf(Logfile, "\tPorosity = %d \n", npor);
+    fprintf(Logfile, "\tCement = %d \n", ncem);
+    fprintf(Logfile, "\tC2S = %d \n", nc2s);
+    fprintf(Logfile, "\tGypsum = %d \n", ngyp);
+    fprintf(Logfile, "\tAnhydrite = %d \n", nanh);
+    fprintf(Logfile, "\tHemihydrate = %d \n", nhem);
+    fprintf(Logfile, "\tSilica fume = %d \n", nsfume);
+    fprintf(Logfile, "\tInert = %d \n", ninert);
+    fprintf(Logfile, "\tSlag = %d \n", nslag);
+    fprintf(Logfile, "\tCaCO3 = %d \n", ncaco3);
+    fprintf(Logfile, "\tFly Ash = %d \n", nflyash);
+    fprintf(Logfile, "\tAggregate = %d \n", nagg);
   }
 
   return;
@@ -3738,8 +3949,8 @@ void measure(void) {
 void measagg(void) {
   int phase[NPHASES], ptot, icnt, ixlo, ixhi, iy, iz, phid, idist;
 
-  printf("Distance  Porosity  Cement  C2S  Gypsum  Anhydrite ");
-  printf("Hemihydrate Pozzolan  Inert   Slag  CaCO3   Fly Ash\n");
+  fprintf(Logfile, "Distance  Porosity  Cement  C2S  Gypsum  Anhydrite ");
+  fprintf(Logfile, "Hemihydrate Pozzolan  Inert   Slag  CaCO3   Fly Ash\n");
 
   /* Increase distance from aggregate in increments of one */
 
@@ -3785,18 +3996,18 @@ void measagg(void) {
 
     /* Output results for this distance from surface */
 
-    printf("%d   ", idist);
-    printf("%d   ", phase[POROSITY]);
-    printf("%d    ", phase[C3S]);
-    printf("%d  ", phase[C2S]);
-    printf("%d  ", phase[GYPSUM]);
-    printf("%d ", phase[ANHYDRITE]);
-    printf("%d ", phase[HEMIHYD]);
-    printf("%d  ", phase[SFUME]);
-    printf("%d ", phase[INERT]);
-    printf("%d ", phase[SLAG]);
-    printf("%d ", phase[CACO3]);
-    printf("%d\n", phase[FLYASH]);
+    fprintf(Logfile, "%d   ", idist);
+    fprintf(Logfile, "%d   ", phase[POROSITY]);
+    fprintf(Logfile, "%d    ", phase[C3S]);
+    fprintf(Logfile, "%d  ", phase[C2S]);
+    fprintf(Logfile, "%d  ", phase[GYPSUM]);
+    fprintf(Logfile, "%d ", phase[ANHYDRITE]);
+    fprintf(Logfile, "%d ", phase[HEMIHYD]);
+    fprintf(Logfile, "%d  ", phase[SFUME]);
+    fprintf(Logfile, "%d ", phase[INERT]);
+    fprintf(Logfile, "%d ", phase[SLAG]);
+    fprintf(Logfile, "%d ", phase[CACO3]);
+    fprintf(Logfile, "%d\n", phase[FLYASH]);
   }
 
   return;
@@ -3840,14 +4051,14 @@ void connect(void) {
 
     freegenmic();
     bailout("genmic", "Memory allocation failure");
-    fflush(stdout);
+    fflush(Logfile);
     exit(1);
   }
 
-  printf("Enter phase to analyze 0) pores 1) Cement  \n");
+  fprintf(Logfile, "Enter phase to analyze 0) pores 1) Cement  \n");
   read_string(instring, sizeof(instring));
   npix = atoi(instring);
-  printf("%d \n", npix);
+  fprintf(Logfile, "%d \n", npix);
   if ((npix != POROSITY) && (npix != C3S)) {
     freegenmic();
     bailout("connect", "Bad ID to analyze connectivity");
@@ -3968,7 +4179,7 @@ void connect(void) {
                   nnew++;
 
                   if (nnew >= Maxburning) {
-                    printf("error in size of nnew \n");
+                    fprintf(Logfile, "error in size of nnew \n");
                   }
 
                   nnewx[nnew] = x1;
@@ -4009,9 +4220,9 @@ void connect(void) {
     }
   }
 
-  printf("Phase ID= %d \n", npix);
-  printf("Number accessible from top= %d \n", ntop);
-  printf("Number contained in through pathways= %d \n", nthrough);
+  fprintf(Logfile, "Phase ID= %d \n", npix);
+  fprintf(Logfile, "Number accessible from top= %d \n", ntop);
+  fprintf(Logfile, "Number contained in through pathways= %d \n", nthrough);
 
   /***
    *    Return the burnt sites to their original
@@ -4065,12 +4276,12 @@ void outmic(void) {
       }
     }
   }
-  printf("... Total pore voxels is now %d\n", totpix);
-  fflush(stdout);
+  fprintf(Logfile, "... Total pore voxels is now %d\n", totpix);
+  fflush(Logfile);
 
-  printf("Enter name of file for final microstructure image\n");
+  fprintf(Logfile, "Enter name of file for final microstructure image\n");
   read_string(filen, sizeof(filen));
-  printf("%s\n", filen);
+  fprintf(Logfile, "%s\n", filen);
 
   outfile = filehandler("genmic", filen, "WRITE");
   if (!outfile) {
@@ -4078,9 +4289,9 @@ void outmic(void) {
     exit(1);
   }
 
-  printf("Enter name of file to save particle IDs to \n");
+  fprintf(Logfile, "Enter name of file to save particle IDs to \n");
   read_string(filepart, sizeof(filepart));
-  printf("%s\n", filepart);
+  fprintf(Logfile, "%s\n", filepart);
 
   partfile = filehandler("genmic", filepart, "WRITE");
   if (!partfile) {
@@ -4119,9 +4330,11 @@ void outmic(void) {
     for (iy = 0; iy < Ysyssize; iy++) {
       for (iz = 0; iz < Zsyssize; iz++) {
         valout = Cemreal.val[getInt3dindex(Cemreal, ix, iy, iz)];
+        /*
         if (valout == (int)(INERTAGG)) {
           valout = (int)(POROSITY);
         }
+        */
         fprintf(outfile, "%d\n", valout);
         valout = Cement.val[getInt3dindex(Cement, ix, iy, iz)];
         if (valout == (int)(TMPAGGID)) {
@@ -4153,12 +4366,6 @@ void outmic(void) {
   fclose(infile);
   fflush(outfile);
   fclose(outfile);
-
-  /*
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",NUMTASKS,NUMTASKS);
-  fclose(Fprog);
-  */
 
   return;
 }
@@ -4429,35 +4636,35 @@ struct particle *particlevector(int numpix) {
 
 void free_particlevector(struct particle *ps) {
   if (ps != NULL) {
-    printf("\n\t\tFreeing floc ps now...");
-    fflush(stdout);
+    fprintf(Logfile, "\n\t\tFreeing floc ps now...");
+    fflush(Logfile);
     if (ps->xi != NULL) {
-      printf("\n\t\t\tFreeing floc ps->xi now... ");
-      fflush(stdout);
+      fprintf(Logfile, "\n\t\t\tFreeing floc ps->xi now... ");
+      fflush(Logfile);
       free(ps->xi);
-      printf("Done ");
-      fflush(stdout);
+      fprintf(Logfile, "Done ");
+      fflush(Logfile);
     }
     if (ps->yi != NULL) {
-      printf("\n\t\t\tFreeing floc ps->yi now... ");
-      fflush(stdout);
+      fprintf(Logfile, "\n\t\t\tFreeing floc ps->yi now... ");
+      fflush(Logfile);
       free(ps->yi);
-      printf("Done ");
-      fflush(stdout);
+      fprintf(Logfile, "Done ");
+      fflush(Logfile);
     }
     if (ps->zi != NULL) {
-      printf("\n\t\t\tFreeing floc ps->zi now... ");
-      fflush(stdout);
+      fprintf(Logfile, "\n\t\t\tFreeing floc ps->zi now... ");
+      fflush(Logfile);
       free(ps->zi);
-      printf("Done ");
-      fflush(stdout);
+      fprintf(Logfile, "Done ");
+      fflush(Logfile);
     }
     if (ps != NULL) {
-      printf("\n\t\t\tFreeing floc ps now... ");
-      fflush(stdout);
+      fprintf(Logfile, "\n\t\t\tFreeing floc ps now... ");
+      fflush(Logfile);
       free(ps);
-      printf("Done ");
-      fflush(stdout);
+      fprintf(Logfile, "Done ");
+      fflush(Logfile);
     }
   }
   ps = NULL;
@@ -4485,7 +4692,7 @@ struct particle **particlepointervector(int size) {
   particlesize = size * oneparticlesize;
   ps = (struct particle **)malloc(particlesize);
   if (!ps) {
-    printf("\n\nCould not allocate space for particlepointervector.");
+    fprintf(Logfile, "\n\nCould not allocate space for particlepointervector.");
     return (NULL);
   }
 
@@ -4548,13 +4755,13 @@ void free_particlepointervector(struct particle **ps) {
  *******************************************************/
 
 int distrib3d(void) {
-  printf("\n=== DEBUG: Entering distrib3d() ===");
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: Entering distrib3d() ===");
+  fflush(Logfile);
 
   /* Stack canary to detect corruption */
   const unsigned long stack_canary = 0xDEADBEEF;
-  printf("\n=== DEBUG: Stack canary set to 0x%lx ===", stack_canary);
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: Stack canary set to 0x%lx ===", stack_canary);
+  fflush(Logfile);
 
   int nskip[6]; /* number of lines to skip as header in corr. files */
   register int i, j, k;
@@ -4591,46 +4798,46 @@ int distrib3d(void) {
   for (i = 0; i < 6; i++)
     nskip[i] = 0;
 
-  printf("\n=== DEBUG: Variable initialization completed ===");
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: Variable initialization completed ===");
+  fflush(Logfile);
 
   /* Set up the correlation filenames */
 
-  printf("Enter path/root name of cement correlation files\n");
+  fprintf(Logfile, "Enter path/root name of cement correlation files\n");
   read_string(filecem, sizeof(filecem));
-  printf("%s\n", filecem);
-  fflush(stdout);
+  fprintf(Logfile, "%s\n", filecem);
+  fflush(Logfile);
 
   /* Use root names to build names of correlation files */
 
   sprintf(filesil, "%s", filecem);
   strcat(filesil, ".sil");
   if (Verbose)
-    printf("\n%s", filesil);
+    fprintf(Logfile, "\n%s", filesil);
 
   sprintf(filec3s, "%s", filecem);
   strcat(filec3s, ".c3s");
   if (Verbose)
-    printf("\n%s", filec3s);
-  fflush(stdout);
+    fprintf(Logfile, "\n%s", filec3s);
+  fflush(Logfile);
 
   sprintf(filealum, "%s", filecem);
   strcat(filealum, ".alu");
   if (Verbose)
-    printf("\n%s", filealum);
-  fflush(stdout);
+    fprintf(Logfile, "\n%s", filealum);
+  fflush(Logfile);
 
   sprintf(filek2so4, "%s", filecem);
   strcat(filek2so4, ".k2o");
   if (Verbose)
-    printf("\n%s", filek2so4);
-  fflush(stdout);
+    fprintf(Logfile, "\n%s", filek2so4);
+  fflush(Logfile);
   Verbose = 1;
   sprintf(filena2so4, "%s", filecem);
   strcat(filena2so4, ".n2o");
   if (Verbose)
-    printf("\n%s", filena2so4);
-  fflush(stdout);
+    fprintf(Logfile, "\n%s", filena2so4);
+  fflush(Logfile);
 
   /***
    *    Test to see whether we have the c3a correlation file
@@ -4669,11 +4876,11 @@ int distrib3d(void) {
    ***/
 
   if (Verbose)
-    printf("\nReading each correlation function file now... ");
-  fflush(stdout);
+    fprintf(Logfile, "\nReading each correlation function file now... ");
+  fflush(Logfile);
   for (i = 1; i <= 6; i++) {
     if (Verbose)
-      printf("\n%d: ", i);
+      fprintf(Logfile, "\n%d: ", i);
     switch (i) {
     case 1:
       strcpy(buff, filesil);
@@ -4696,7 +4903,7 @@ int distrib3d(void) {
     }
 
     if (Verbose)
-      printf("Trying to open file %s \n", buff);
+      fprintf(Logfile, "Trying to open file %s \n", buff);
     testfile = filehandler("distrib3d", buff, "READ_NOFAIL");
     if (!testfile) {
       if (i < 3) {
@@ -4705,10 +4912,10 @@ int distrib3d(void) {
         exit(1);
       } else if (i == 3) {
         alumdo = 0;
-        printf("=== No alu file detected, set alumdo = 0 \n");
-        fflush(stdout);
+        fprintf(Logfile, "=== No alu file detected, set alumdo = 0 \n");
+        fflush(Logfile);
       } else if (i == 4) {
-        printf("=== No k2o file detected, set k2so4do = 0 \n");
+        fprintf(Logfile, "=== No k2o file detected, set k2so4do = 0 \n");
         k2so4do = 0;
       }
     } else {
@@ -4746,7 +4953,7 @@ int distrib3d(void) {
     }
   }
   if (Verbose)
-    printf("Done.\n");
+    fprintf(Logfile, "Done.\n");
 
   /***
    *    Scan in the volume fractions and surface fractions
@@ -4762,14 +4969,14 @@ int distrib3d(void) {
     Volf[i] = volin;
     sumvol += volin;
     if (Verbose)
-      printf("%f\n", Volf[i]);
+      fprintf(Logfile, "%f\n", Volf[i]);
     read_string(instring, sizeof(instring));
     volin = atof(instring);
     Surff[i] = volin;
     sumarea += volin;
     if (Verbose)
-      printf("%f\n", Surff[i]);
-    fflush(stdout);
+      fprintf(Logfile, "%f\n", Surff[i]);
+    fflush(Logfile);
   }
 
   /* Normalize Volf and Surff */
@@ -4806,8 +5013,8 @@ int distrib3d(void) {
 
   allmem();
 
-  printf("\n=== DEBUG: Memory allocation completed ===");
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: Memory allocation completed ===");
+  fflush(Logfile);
 
   /* Initialize curvature to zero */
   for (k = 0; k < Zsyssize; k++) {
@@ -4818,8 +5025,8 @@ int distrib3d(void) {
     }
   }
 
-  printf("\n=== DEBUG: Curvature initialization completed ===");
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: Curvature initialization completed ===");
+  fflush(Logfile);
 
   /***
    *    First filtering between silicates and
@@ -4835,12 +5042,12 @@ int distrib3d(void) {
    ***/
 
   if (Verbose)
-    printf("Volin is %f", volin);
+    fprintf(Logfile, "Volin is %f", volin);
 
   if (volin < 1.0) {
 
-    printf("\n=== DEBUG: About to call first rand3d() ===");
-    fflush(stdout);
+    fprintf(Logfile, "\n=== DEBUG: About to call first rand3d() ===");
+    fflush(Logfile);
 
     if (rand3d(C3S, alumval, filesil, nskip[1], volin, R, Filter, S, Xr)) {
       freedistrib3d();
@@ -4848,22 +5055,24 @@ int distrib3d(void) {
       exit(1);
     }
 
-    printf("\n=== DEBUG: First rand3d() completed successfully ===");
-    fflush(stdout);
+    fprintf(Logfile, "\n=== DEBUG: First rand3d() completed successfully ===");
+    fflush(Logfile);
 
     /* Check stack canary after first rand3d */
     if (stack_canary != 0xDEADBEEF) {
-      printf("\n!!! STACK CORRUPTION DETECTED after first rand3d: canary = "
-             "0x%lx !!!",
-             stack_canary);
-      fflush(stdout);
+      fprintf(Logfile,
+              "\n!!! STACK CORRUPTION DETECTED after first rand3d: canary = "
+              "0x%lx !!!",
+              stack_canary);
+      fflush(Logfile);
     } else {
-      printf("\n=== DEBUG: Stack canary still intact after first rand3d ===");
-      fflush(stdout);
+      fprintf(Logfile,
+              "\n=== DEBUG: Stack canary still intact after first rand3d ===");
+      fflush(Logfile);
     }
 
     if (Verbose)
-      printf("\nOut of rand3d first time.");
+      fprintf(Logfile, "\nOut of rand3d first time.");
 
     /***
      *    First sintering.  Arrays volume and surface are defined
@@ -4872,7 +5081,7 @@ int distrib3d(void) {
 
     stat3d();
     if (Verbose)
-      printf("\nOut of stat3d first time.");
+      fprintf(Logfile, "\nOut of stat3d first time.");
 
     rdesire = (double)((Surff[C3S] + Surff[C2S]) *
                        (double)(Surface[C3S] + Surface[alumval]));
@@ -4886,7 +5095,7 @@ int distrib3d(void) {
      ***/
 
     if (Verbose)
-      printf("\nRdesire is %g\n", rdesire);
+      fprintf(Logfile, "\nRdesire is %g\n", rdesire);
     if (rdesire > 0.0) {
 
       /***
@@ -4915,29 +5124,23 @@ int distrib3d(void) {
                   (float)(Surface[C3S] + Surface[alumval]);
 
         if (Verbose)
-          printf("\nRdesire is %f\n", rdesire);
+          fprintf(Logfile, "\nRdesire is %f\n", rdesire);
         if (rdesire > 0.0) {
           rhtest = (6.0 / 4.0) * (float)(Volume[alumval]) / rdesire;
           sinter3d(alumval, C3S, rhtest);
           if (Verbose)
-            printf("\nOut of sinter3d: alumval,C3S\n");
+            fprintf(Logfile, "\nOut of sinter3d: alumval,C3S\n");
         }
       }
     }
   }
 
   if (Verbose) {
-    printf("\nOut of sinter3d.  Checking phase stats...");
+    fprintf(Logfile, "\nOut of sinter3d.  Checking phase stats...");
     stat3d();
-    printf("\nGetting ready to filter C2S from C3S.");
-    fflush(stdout);
+    fprintf(Logfile, "\nGetting ready to filter C2S from C3S.");
+    fflush(Logfile);
   }
-
-  /*
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",DIST_SILICATES_TASK,NUMTASKS);
-  fclose(Fprog);
-  */
 
   /***
    *    Second filtering between C3S and C2S; defines
@@ -4957,8 +5160,8 @@ int distrib3d(void) {
     volin = Volf[C3S] / (Volf[C3S] + Volf[C2S]);
 
     if (Verbose)
-      printf("\nVolin is %f", volin);
-    fflush(stdout);
+      fprintf(Logfile, "\nVolin is %f", volin);
+    fflush(Logfile);
 
     if (volin < 1.0 && volin > 0.0) {
 
@@ -4986,7 +5189,7 @@ int distrib3d(void) {
        ***/
 
       if (Verbose)
-        printf("\nRdesire is %f\n", rdesire);
+        fprintf(Logfile, "\nRdesire is %f\n", rdesire);
       if (rdesire > 0.0) {
 
         /***
@@ -5000,7 +5203,7 @@ int distrib3d(void) {
           rhtest = (6.0 / 4.0) * (float)(Volume[C3S]) / rdesire;
           sinter3d(C3S, C2S, rhtest);
           if (Verbose)
-            printf("\nOut of sinter3d: C3S,C2S");
+            fprintf(Logfile, "\nOut of sinter3d: C3S,C2S");
 
           /***
            *    ... Otherwise, the hydraulic radius for C3S is
@@ -5017,23 +5220,17 @@ int distrib3d(void) {
                     (float)(Surface[C3S] + Surface[C2S]);
 
           if (Verbose)
-            printf("\nRdesire is %f\n", rdesire);
+            fprintf(Logfile, "\nRdesire is %f\n", rdesire);
           if (rdesire > 0.0) {
             rhtest = (6.0 / 4.0) * (float)(Volume[C2S]) / rdesire;
             sinter3d(C2S, C3S, rhtest);
             if (Verbose)
-              printf("\nOut of sinter3d: C2S,C3S");
+              fprintf(Logfile, "\nOut of sinter3d: C2S,C3S");
           }
         }
       }
     }
   }
-
-  /*
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",DIST_C3S_TASK,NUMTASKS);
-  fclose(Fprog);
-  */
 
   /***
    *    Third filtering between aluminates and alkali sulfates defines
@@ -5052,7 +5249,7 @@ int distrib3d(void) {
             (Volf[C3A] + Volf[C4AF] + Volf[K2SO4] + Volf[NA2SO4]);
 
     if (Verbose)
-      printf("\nVolin is %f", volin);
+      fprintf(Logfile, "\nVolin is %f", volin);
 
     if (volin < 1.0 && volin > 0.0) {
 
@@ -5081,7 +5278,7 @@ int distrib3d(void) {
        ***/
 
       if (Verbose)
-        printf("\nRdesire is %f\n", rdesire);
+        fprintf(Logfile, "\nRdesire is %f\n", rdesire);
       if (rdesire > 0.0) {
 
         /***
@@ -5095,7 +5292,7 @@ int distrib3d(void) {
           rhtest = (6.0 / 4.0) * (float)(Volume[alumval]) / rdesire;
           sinter3d(alumval, K2SO4, rhtest);
           if (Verbose)
-            printf("\nOut of sinter3d: alumval,K2SO4");
+            fprintf(Logfile, "\nOut of sinter3d: alumval,K2SO4");
 
           /***
            *    ... Otherwise, the hydraulic radius for aluminates is
@@ -5114,23 +5311,17 @@ int distrib3d(void) {
               (float)(Surface[alumval] + Surface[K2SO4]);
 
           if (Verbose)
-            printf("\nRdesire is %f\n", rdesire);
+            fprintf(Logfile, "\nRdesire is %f\n", rdesire);
           if (rdesire > 0.0) {
             rhtest = (6.0 / 4.0) * (float)(Volume[K2SO4]) / rdesire;
             sinter3d(K2SO4, alumval, rhtest);
             if (Verbose)
-              printf("\nOut of sinter3d: K2SO4,alumval");
+              fprintf(Logfile, "\nOut of sinter3d: K2SO4,alumval");
           }
         }
       }
     }
   }
-
-  /*
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",DIST_ALUMINATES_TASK,NUMTASKS);
-  fclose(Fprog);
-  */
 
   /***
    *    Fourth filtering to define the
@@ -5151,7 +5342,7 @@ int distrib3d(void) {
      ***/
 
     if (Verbose)
-      printf("\nVolin is %f", volin);
+      fprintf(Logfile, "\nVolin is %f", volin);
     if (volin < 1.0 && volin > 0.0) {
 
       if (rand3d(K2SO4, NA2SO4, filek2so4, nskip[4], volin, R, Filter, S, Xr)) {
@@ -5169,7 +5360,7 @@ int distrib3d(void) {
 
       stat3d();
       if (Verbose)
-        printf("\nOut of stat3d");
+        fprintf(Logfile, "\nOut of stat3d");
       rdesire = (Surff[K2SO4] / (Surff[K2SO4] + Surff[NA2SO4])) *
                 (float)(Surface[K2SO4] + Surface[NA2SO4]);
 
@@ -5181,7 +5372,7 @@ int distrib3d(void) {
        ***/
 
       if (Verbose)
-        printf("\nRdesire is %f\n", rdesire);
+        fprintf(Logfile, "\nRdesire is %f\n", rdesire);
       if (rdesire > 0.0) {
 
         /***
@@ -5195,7 +5386,7 @@ int distrib3d(void) {
           rhtest = (6.0 / 4.0) * (float)(Volume[K2SO4]) / rdesire;
           sinter3d(K2SO4, NA2SO4, rhtest);
           if (Verbose)
-            printf("\nOut of sinter3d: K2SO4,NA2SO4");
+            fprintf(Logfile, "\nOut of sinter3d: K2SO4,NA2SO4");
 
           /***
            *    ... Otherwise, the hydraulic radius for K2SO4 is
@@ -5212,13 +5403,13 @@ int distrib3d(void) {
                     (float)(Surface[NA2SO4] + Surface[K2SO4]);
 
           if (Verbose)
-            printf("\nRdesire is %f\n", rdesire);
+            fprintf(Logfile, "\nRdesire is %f\n", rdesire);
           if (rdesire > 0.0) {
             rhtest = (6.0 / 4.0) * (float)(Volume[NA2SO4]) / rdesire;
             sinter3d(NA2SO4, K2SO4, rhtest);
             if (Verbose)
-              printf("\nOut of sinter3d: NA2SO4,K2SO4");
-            fflush(stdout);
+              fprintf(Logfile, "\nOut of sinter3d: NA2SO4,K2SO4");
+            fflush(Logfile);
           }
         }
       }
@@ -5243,7 +5434,7 @@ int distrib3d(void) {
    ***/
 
   if (Verbose)
-    printf("\nVolin is %f", volin);
+    fprintf(Logfile, "\nVolin is %f", volin);
   if (volin < 1.0 && volin > 0.0) {
 
     if (rand3d(alumval, alum2, filec34a, nskip[5], volin, R, Filter, S, Xr)) {
@@ -5261,7 +5452,7 @@ int distrib3d(void) {
 
     stat3d();
     if (Verbose)
-      printf("\nOut of stat3d");
+      fprintf(Logfile, "\nOut of stat3d");
 
     if (alumval == C4AF) {
 
@@ -5362,45 +5553,43 @@ int distrib3d(void) {
     }
   }
 
-  /*
-  Fprog = filehandler("genmic",Progfilename,"WRITE");
-  fprintf(Fprog,"%d\t%d",DIST_C3A_TASK,NUMTASKS);
-  fclose(Fprog);
-  */
-
-  printf("\nDone with distributing clinker phases.  Freeing memory now.");
-  fflush(stdout);
+  fprintf(Logfile,
+          "\nDone with distributing clinker phases.  Freeing memory now.");
+  fflush(Logfile);
 
   /* Free up the dynamically allocated memory */
 
   freedistrib3d();
 
-  printf("\n=== DEBUG: About to return from distrib3d() ===");
-  fflush(stdout);
+  fprintf(Logfile, "\n=== DEBUG: About to return from distrib3d() ===");
+  fflush(Logfile);
 
   /* Check stack canary before return */
   if (stack_canary != 0xDEADBEEF) {
-    printf("\n!!! STACK CORRUPTION DETECTED: canary = 0x%lx (expected "
-           "0xDEADBEEF) !!!",
-           stack_canary);
-    fflush(stdout);
+    fprintf(Logfile,
+            "\n!!! STACK CORRUPTION DETECTED: canary = 0x%lx (expected "
+            "0xDEADBEEF) !!!",
+            stack_canary);
+    fflush(Logfile);
   } else {
-    printf("\n=== DEBUG: Stack canary intact, safe to return ===");
-    fflush(stdout);
+    fprintf(Logfile, "\n=== DEBUG: Stack canary intact, safe to return ===");
+    fflush(Logfile);
   }
 
   /* WORKAROUND: Use longjmp instead of return to bypass corrupted return
    * address */
-  printf("\n=== DEBUG: Using longjmp to bypass return address corruption ===");
-  fflush(stdout);
+  fprintf(Logfile,
+          "\n=== DEBUG: Using longjmp to bypass return address corruption ===");
+  fflush(Logfile);
 
   /* Set global success flag and jump back to main */
   distrib3d_success = 1;
   longjmp(distrib3d_jmpbuf, 1);
 
   /* This line should never be reached */
-  printf("\n!!! ERROR: longjmp failed, trying normal return !!!");
-  fflush(stdout);
+  fprintf(stderr,
+          "\n!!! ERROR line 5568: longjmp failed, trying normal return !!!");
+  fflush(stderr);
   return (0);
 }
 
@@ -5498,9 +5687,9 @@ void phcount(void) {
     }
   }
 
-  printf("Pores are: %d \n", npore);
-  printf("Solids are: %d %d %d %d %d %d\n", nsolid[1], nsolid[2], nsolid[3],
-         nsolid[4], nsolid[5], nsolid[6]);
+  fprintf(Logfile, "Pores are: %d \n", npore);
+  fprintf(Logfile, "Solids are: %d %d %d %d %d %d\n", nsolid[1], nsolid[2],
+          nsolid[3], nsolid[4], nsolid[5], nsolid[6]);
 }
 
 /***
@@ -5600,9 +5789,9 @@ float rhcalc(int phin) {
 
   rhval = (float)(porc * 6.0 / (4.0 * (float)surfc));
   if (Verbose) {
-    printf("Phase area count is %d \n", porc);
-    printf("Phase surface count is %d \n", surfc);
-    printf("Hydraulic radius is %f \n", rhval);
+    fprintf(Logfile, "Phase area count is %d \n", porc);
+    fprintf(Logfile, "Phase surface count is %d \n", surfc);
+    fprintf(Logfile, "Hydraulic radius is %f \n", rhval);
   }
 
   return (rhval);
@@ -5812,7 +6001,7 @@ int procsol(int nsearch) {
   /* exceeds nsearch */
 
   if (Verbose)
-    printf("\nIn procsol now...");
+    fprintf(Logfile, "\nIn procsol now...");
   valfound = Nsph - 1;
   nsofar = stop = 0;
 
@@ -5851,7 +6040,7 @@ int procair(int nsearch) {
   /* exceeds nsearch */
 
   if (Verbose)
-    printf("\nIn procair now...");
+    fprintf(Logfile, "\nIn procair now...");
   valfound = nsofar = stop = 0;
 
   for (i = 0; ((i < Nsph) && (!stop)); i++) {
@@ -5893,7 +6082,7 @@ int movepix(int ntomove, int ph1, int ph2) {
   float pck, plsol, plair;
 
   if (Verbose)
-    printf("\nIn Movepix now...");
+    fprintf(Logfile, "\nIn Movepix now...");
   alldone = 0;
 
   /***
@@ -5964,7 +6153,8 @@ int movepix(int ntomove, int ph1, int ph2) {
   if (cmin >= cmax) {
     alldone = 1;
     if (Verbose)
-      printf("Stopping - at equilibrium \ncmin- %d  cmax- %d \n", cmin, cmax);
+      fprintf(Logfile, "Stopping - at equilibrium \ncmin- %d  cmax- %d \n",
+              cmin, cmax);
     return (alldone);
   }
 
@@ -6103,7 +6293,7 @@ int movepix(int ntomove, int ph1, int ph2) {
   } /* end of xloop */
 
   if (Verbose)
-    printf("ntot is %d \n", ntot);
+    fprintf(Logfile, "ntot is %d \n", ntot);
   return (alldone);
 }
 
@@ -6143,47 +6333,48 @@ void sinter3d(int ph1id, int ph2id, float rhtarget) {
   Nsph = maketemp(Tradius);
 
   if (Verbose) {
-    printf("Nsph is %d \n", Nsph);
-    printf("Checking stats for C3S...");
+    fprintf(Logfile, "Nsph is %d \n", Nsph);
+    fprintf(Logfile, "Checking stats for C3S...");
     stat3d();
-    fflush(stdout);
+    fflush(Logfile);
   }
 
   rflag = 0; /* always initialize system */
   if (!rflag) {
     if (Verbose)
-      printf("Entering sysinit now...");
+      fprintf(Logfile, "Entering sysinit now...");
     sysinit(ph1id, ph2id);
     if (Verbose)
-      printf("\nOut of sysinit now...");
+      fprintf(Logfile, "\nOut of sysinit now...");
   } else {
     sysscan(ph1id, ph2id);
   }
 
   i = 0;
   if (Verbose) {
-    printf("Entering rhcalc now...");
-    printf("Checking stats for C3S...");
+    fprintf(Logfile, "Entering rhcalc now...");
+    fprintf(Logfile, "Checking stats for C3S...");
     stat3d();
-    fflush(stdout);
+    fflush(Logfile);
   }
 
   rhnow = rhcalc(ph1id);
   if (Verbose)
-    printf("\nOut of rhcalc now...\nRhnow = %f, Rhtarget = %f\n", rhnow,
-           rhtarget);
+    fprintf(Logfile, "\nOut of rhcalc now...\nRhnow = %f, Rhtarget = %f\n",
+            rhnow, rhtarget);
   while ((rhnow < rhtarget) && (i < MAXCYC)) {
 
     i++;
     if (Verbose)
-      printf("Now: %f  Target: %f \nCycle: %d \n", rhnow, rhtarget, i);
+      fprintf(Logfile, "Now: %f  Target: %f \nCycle: %d \n", rhnow, rhtarget,
+              i);
     equilibrated = movepix(natonce, ph1id, ph2id);
 
     if (Verbose) {
-      printf("Out of movepix.");
-      printf("Checking stats for C3S...");
+      fprintf(Logfile, "Out of movepix.");
+      fprintf(Logfile, "Checking stats for C3S...");
       stat3d();
-      fflush(stdout);
+      fflush(Logfile);
     }
 
     /***
@@ -6208,15 +6399,15 @@ void sinter3d(int ph1id, int ph2id, float rhtarget) {
     avecurv1 = ((float)curvsum1) / ((float)pixsum1);
     avecurv2 = ((float)curvsum2) / ((float)pixsum2);
     if (Verbose)
-      printf("Ave. solid curvature: %f \nAve. air curvature: %f \n", avecurv1,
-             avecurv2);
+      fprintf(Logfile, "Ave. solid curvature: %f \nAve. air curvature: %f \n",
+              avecurv1, avecurv2);
 
     rhnow = rhcalc(ph1id);
     if (Verbose) {
-      printf("Out of rhcalc.");
-      printf("Checking stats for C3S...");
+      fprintf(Logfile, "Out of rhcalc.");
+      fprintf(Logfile, "Checking stats for C3S...");
       stat3d();
-      fflush(stdout);
+      fflush(Logfile);
     }
   }
 
@@ -6320,8 +6511,8 @@ void stat3d(void) {
   }
 
   if (Verbose) {
-    printf("Phase    Volume      Surface     Volume    Surface \n");
-    printf(" ID      count        count      fraction  fraction \n");
+    fprintf(Logfile, "Phase    Volume      Surface     Volume    Surface \n");
+    fprintf(Logfile, " ID      count        count      fraction  fraction \n");
 
     /* Only include clinker phases in surface area fraction calculation */
 
@@ -6330,16 +6521,16 @@ void stat3d(void) {
     voltot = Volume[C3S] + Volume[C2S] + Volume[C3A] + Volume[C4AF] +
              Volume[K2SO4] + Volume[NA2SO4];
 
-    printf("  %d    %8d     %8d  \n", POROSITY, Volume[POROSITY],
-           Surface[POROSITY]);
+    fprintf(Logfile, "  %d    %8d     %8d  \n", POROSITY, Volume[POROSITY],
+            Surface[POROSITY]);
 
     for (k = C3S; k <= NA2SO4; k++) {
-      printf("  %d    %8d     %8d     %.5f   %.5f\n", k, Volume[k], Surface[k],
-             (double)Volume[k] / (double)voltot,
-             (double)Surface[k] / (double)surftot);
+      fprintf(Logfile, "  %d    %8d     %8d     %.5f   %.5f\n", k, Volume[k],
+              Surface[k], (double)Volume[k] / (double)voltot,
+              (double)Surface[k] / (double)surftot);
     }
 
-    printf("Total  %8d     %8d\n\n\n", voltot, surftot);
+    fprintf(Logfile, "Total  %8d     %8d\n\n\n", voltot, surftot);
   }
 
   return;
@@ -6385,7 +6576,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
    ***/
 
   if (Verbose)
-    printf("\nEntering rand3d...\nVolin = %f", xpt);
+    fprintf(Logfile, "\nEntering rand3d...\nVolin = %f", xpt);
 
   i1 = i2 = i3 = 0;
 
@@ -6424,30 +6615,31 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   /* Now perform the convolution */
 
   if ((corrfile = fopen(filecorr, "r")) == NULL) {
-    printf("ERROR in distrib3d, fn. rand3d:\n");
-    printf("\n\tCannot open correlation function file");
-    printf("\n\tcalled %s.  Exiting now.", filecorr);
-    fflush(stdout);
+    fprintf(stderr, "ERROR line 6595 in distrib3d, fn. rand3d:\n");
+    fprintf(stderr, "\n\tCannot open correlation function file");
+    fprintf(stderr, "\n\tcalled %s.  Exiting now.", filecorr);
+    fflush(stderr);
     return (1);
   }
 
   /*** Skip over resolution information if it is given ***/
 
-  printf("\nIn rand3d, line 6032:  filecorr = %s, nskip = %d\n", filecorr,
-         nskip);
+  fprintf(Logfile, "\nIn rand3d, line 6032:  filecorr = %s, nskip = %d\n",
+          filecorr, nskip);
 
   for (i = 1; i <= nskip; i++) {
     fscanf(corrfile, "%s", buff);
   }
 
   fscanf(corrfile, "%s", instring);
-  printf("In rand3d, line 5969:  instring = %s\n", instring);
+  fprintf(Logfile, "In rand3d, line 5969:  instring = %s\n", instring);
   ido = atoi(instring);
-  printf("In rand3d, line 5971:  ido = %d\n", ido);
+  fprintf(Logfile, "In rand3d, line 5971:  ido = %d\n", ido);
 
   if (Verbose)
-    printf("\n\tNumber of points in correlation file is %d \n\tVolin %f\n", ido,
-           xpt);
+    fprintf(Logfile,
+            "\n\tNumber of points in correlation file is %d \n\tVolin %f\n",
+            ido, xpt);
 
   /***
    *    When reading in the correlation file, must make
@@ -6456,18 +6648,18 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
    *    as specified by global variable Res
    ***/
 
-  printf("In rand3d, line 5982, Fsize = %d\n", Fsize);
+  fprintf(Logfile, "In rand3d, line 5982, Fsize = %d\n", Fsize);
   for (i = 0; i < ido; i++) {
     fscanf(corrfile, "%s", instring);
-    printf("In rand3d, line 5985, i = %d of %d:  instring = %s\n", i, ido,
-           instring);
+    fprintf(Logfile, "In rand3d, line 5985, i = %d of %d:  instring = %s\n", i,
+            ido, instring);
     valin = atoi(instring);
-    printf("In rand3d, line 5987:  valin = %d\n", valin);
+    fprintf(Logfile, "In rand3d, line 5987:  valin = %d\n", valin);
     fscanf(corrfile, "%s", instring);
-    printf("In rand3d, line 5989, i = %d of %d:  instring = %s\n", i, ido,
-           instring);
+    fprintf(Logfile, "In rand3d, line 5989, i = %d of %d:  instring = %s\n", i,
+            ido, instring);
     val2 = atof(instring);
-    printf("In rand3d, line 5991:  val2 = %f\n", val2);
+    fprintf(Logfile, "In rand3d, line 5991:  val2 = %f\n", val2);
 
     /***
      *    valin is the radial distance in micrometers.
@@ -6514,7 +6706,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   s2 = ss * ss;
   sdiff = ss - s2;
   if (Verbose)
-    printf("\n\tss = %f  s2 = %f  sdiff = %f", ss, s2, sdiff);
+    fprintf(Logfile, "\n\tss = %f  s2 = %f  sdiff = %f", ss, s2, sdiff);
   for (i = 0; i < Fsize; i++) {
     iii = i * i;
     for (j = 0; j < Fsize; j++) {
@@ -6525,10 +6717,10 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
         r1 = (int)(radius);
         r2 = r1 + 1;
         if (s[r1] < 0.0) {
-          printf("ERROR in distrib3d, fn. rand3d:\n");
-          printf("\t%d and %d, %f and ", r1, r2, s[r1]);
-          printf("%f with xtmp of %f\n", s[r2], xtmp);
-          fflush(stdout);
+          fprintf(stderr, "ERROR line 6697 in distrib3d, fn. rand3d:\n");
+          fprintf(stderr, "\t%d and %d, %f and ", r1, r2, s[r1]);
+          fprintf(stderr, "%f with xtmp of %f\n", s[r2], xtmp);
+          fflush(stderr);
           return (3);
         }
 
@@ -6553,7 +6745,8 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   /* Now filter the image, maintaining periodic boundaries */
 
   if (Verbose)
-    printf("\n\tDone loading up the convolution matrix.\n\tVolin = %f", xpt);
+    fprintf(Logfile,
+            "\n\tDone loading up the convolution matrix.\n\tVolin = %f", xpt);
   resmax = 0.0;
   resmin = 1.0;
 
@@ -6601,7 +6794,8 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
 
   sect = (resmax - resmin) / ((float)Hsize_r);
   if (Verbose)
-    printf("\n\tDone filtering image.\n\tVolin = %f\n\tSect is %f", xpt, sect);
+    fprintf(Logfile, "\n\tDone filtering image.\n\tVolin = %f\n\tSect is %f",
+            xpt, sect);
 
   /***
    *    Now threshold the image by creating a histogram
@@ -6645,9 +6839,10 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   done = 0;
 
   if (Verbose) {
-    printf("\n\tDone thresholding first pass.\n\tVolin = %f, xtot = %d", xpt,
-           xtot);
-    printf("\n\tResmin = %f  Resmax = %f", resmin, resmax);
+    fprintf(Logfile,
+            "\n\tDone thresholding first pass.\n\tVolin = %f, xtot = %d", xpt,
+            xtot);
+    fprintf(Logfile, "\n\tResmin = %f  Resmax = %f", resmin, resmax);
   }
 
   /* Determine which bin to choose for correct thresholding */
@@ -6665,7 +6860,8 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   }
 
   if (Verbose)
-    printf("Critical volume fraction is %f\n\tVolin = %f", vcrit, xpt);
+    fprintf(Logfile, "Critical volume fraction is %f\n\tVolin = %f", vcrit,
+            xpt);
 
   for (k = 0; k < Zsyssize; k++) {
     for (j = 0; j < Ysyssize; j++) {
@@ -6682,7 +6878,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
   }
 
   if (Verbose)
-    printf("\n\tVolin = %f", xpt);
+    fprintf(Logfile, "\n\tVolin = %f", xpt);
   return (0);
 }
 
@@ -6727,13 +6923,14 @@ int addonepixels(void) {
   for (phtodo = 0; phtodo < NPHASES; phtodo++) {
 
     /*
-    printf("Should these particles flocculate to surfaces? No (0) or Yes (1):
+   fprintf(Logfile,"Should these particles flocculate to surfaces? No (0) or Yes
+   (1):
     "); read_string(instring,sizeof(instring)); onepixfloc = atoi(instring);
     */
     onepixfloc = 0;
 
     nadd = Onepixnum[phtodo];
-    printf("\nAdding %d of phase %d", nadd, phtodo);
+    fprintf(Logfile, "\nAdding %d of phase %d", nadd, phtodo);
 
     if (nadd > 0) {
 
@@ -6815,28 +7012,28 @@ int addonepixels(void) {
         for (i = C3S; (i <= NA2SO4) && (nleft > 0); i++) {
 
           if (Verbose) {
-            printf("\t%d pixels of ", target[i]);
+            fprintf(Logfile, "\t%d pixels of ", target[i]);
             switch (i) {
             case C3S:
-              printf("C3S\n");
+              fprintf(Logfile, "C3S\n");
               break;
             case C2S:
-              printf("C2S\n");
+              fprintf(Logfile, "C2S\n");
               break;
             case C3A:
-              printf("C3A\n");
+              fprintf(Logfile, "C3A\n");
               break;
             case C4AF:
-              printf("C4AF\n");
+              fprintf(Logfile, "C4AF\n");
               break;
             case K2SO4:
-              printf("K2SO4\n");
+              fprintf(Logfile, "K2SO4\n");
               break;
             case NA2SO4:
-              printf("NA2SO4\n");
+              fprintf(Logfile, "NA2SO4\n");
               break;
             default:
-              printf("unrecognized phase\n");
+              fprintf(Logfile, "unrecognized phase\n");
               break;
             }
           }
@@ -6849,9 +7046,11 @@ int addonepixels(void) {
             nplaced = genparticles(numsizes, &numeach, &sizeeach, &pheach);
             if (nplaced < numeach) {
               numeach -= (nplaced);
-              printf("\nCould not add all one-pixel particles dispersed.");
-              printf("\nAdding %d extra random locations to make up...",
-                     numeach);
+              fprintf(Logfile,
+                      "\nCould not add all one-pixel particles dispersed.");
+              fprintf(Logfile,
+                      "\nAdding %d extra random locations to make up...",
+                      numeach);
               addrand(i, numeach, onepixfloc, assignpartnum);
             }
           } else {
@@ -6999,40 +7198,40 @@ int addonepixels(void) {
         }
 
         if (Verbose)
-          printf("\nAdding %d fly ash pixels now...\n", tottarget);
+          fprintf(Logfile, "\nAdding %d fly ash pixels now...\n", tottarget);
         for (i = 0; (i < 6) && (nleft > 0); i++) {
 
           if (Verbose)
-            printf("\t%d pixels of ", target[i]);
+            fprintf(Logfile, "\t%d pixels of ", target[i]);
           switch (i) {
           case 0:
             if (Verbose)
-              printf("ASG\n");
+              fprintf(Logfile, "ASG\n");
             j = ASG;
             break;
           case 1:
             if (Verbose)
-              printf("CAS2\n");
+              fprintf(Logfile, "CAS2\n");
             j = CAS2;
             break;
           case 2:
             if (Verbose)
-              printf("FAC3A\n");
+              fprintf(Logfile, "FAC3A\n");
             j = FAC3A;
             break;
           case 3:
             if (Verbose)
-              printf("CACL2\n");
+              fprintf(Logfile, "CACL2\n");
             j = CACL2;
             break;
           case 4:
             if (Verbose)
-              printf("AMSIL\n");
+              fprintf(Logfile, "AMSIL\n");
             j = AMSIL;
             break;
           case 5:
             if (Verbose)
-              printf("ANHYDRITE\n");
+              fprintf(Logfile, "ANHYDRITE\n");
             j = ANHYDRITE;
             break;
           default:
@@ -7047,9 +7246,11 @@ int addonepixels(void) {
             nplaced = genparticles(numsizes, &numeach, &sizeeach, &pheach);
             if (nplaced < numeach) {
               numeach -= (nplaced);
-              printf("\nCould not add all one-pixel particles dispersed.");
-              printf("\nAdding %d extra random locations to make up...",
-                     numeach);
+              fprintf(Logfile,
+                      "\nCould not add all one-pixel particles dispersed.");
+              fprintf(Logfile,
+                      "\nAdding %d extra random locations to make up...",
+                      numeach);
               addrand(j, numeach, onepixfloc, assignpartnum);
             }
           } else {
@@ -7068,8 +7269,10 @@ int addonepixels(void) {
           nplaced = genparticles(numsizes, &numeach, &sizeeach, &pheach);
           if (nplaced < numeach) {
             numeach -= (nplaced);
-            printf("\nCould not add all one-pixel particles dispersed.");
-            printf("\nAdding %d extra random locations to make up...", numeach);
+            fprintf(Logfile,
+                    "\nCould not add all one-pixel particles dispersed.");
+            fprintf(Logfile, "\nAdding %d extra random locations to make up...",
+                    numeach);
             addrand(phtodo, numeach, 0, assignpartnum);
           }
         } else {
@@ -7258,22 +7461,22 @@ void freegenmic(void) {
   for (i = 0; i < NSPHASES; i++) {
     if (Verbose) {
       if (Phase_shape[i].xg) {
-        printf("\nFreeing Phase_shape[%d].xg vector...", i);
+        fprintf(Logfile, "\nFreeing Phase_shape[%d].xg vector...", i);
       } else {
-        printf("\nPhase_shape[%d].xg vector is freed already", i);
+        fprintf(Logfile, "\nPhase_shape[%d].xg vector is freed already", i);
       }
-      fflush(stdout);
+      fflush(Logfile);
     }
     if (Phase_shape[i].xg)
       free_fvector(Phase_shape[i].xg);
 
     if (Verbose) {
       if (Phase_shape[i].wg) {
-        printf("\nFreeing Phase_shape[%d].wg vector...", i);
+        fprintf(Logfile, "\nFreeing Phase_shape[%d].wg vector...", i);
       } else {
-        printf("\nPhase_shape[%d].wg vector is freed already", i);
+        fprintf(Logfile, "\nPhase_shape[%d].wg vector is freed already", i);
       }
-      fflush(stdout);
+      fflush(Logfile);
     }
     if (Phase_shape[i].wg)
       free_fvector(Phase_shape[i].wg);
@@ -7281,29 +7484,29 @@ void freegenmic(void) {
 
   if (Verbose) {
     if (Y) {
-      printf("\nFreeing Y complexmatrix...");
+      fprintf(Logfile, "\nFreeing Y complexmatrix...");
     } else {
-      printf("\nY complexmatrix is freed already");
+      fprintf(Logfile, "\nY complexmatrix is freed already");
     }
-    fflush(stdout);
+    fflush(Logfile);
   }
   if (Y)
     free_complexmatrix(Y, 0, Nnn, -Nnn, Nnn);
 
   if (Verbose) {
     if (A) {
-      printf("\nFreeing A complexmatrix...");
+      fprintf(Logfile, "\nFreeing A complexmatrix...");
     } else {
-      printf("\nA complexmatrix is freed already");
+      fprintf(Logfile, "\nA complexmatrix is freed already");
     }
-    fflush(stdout);
+    fflush(Logfile);
   }
   if (A)
     free_complexmatrix(A, 0, Nnn, -Nnn, Nnn);
 
   if (Verbose) {
-    printf("\nDone freeing all the memory I know about");
-    fflush(stdout);
+    fprintf(Logfile, "\nDone freeing all the memory I know about");
+    fflush(Logfile);
   }
 
   return;
@@ -7474,35 +7677,38 @@ int distfa(int fadchoice) {
   /* This is needed whether distributing among monophase particles */
   /*     or randomly on a pixel by pixel basis                     */
 
-  printf("Enter probability for fly ash to be aluminosilicate glass \n");
+  fprintf(Logfile,
+          "Enter probability for fly ash to be aluminosilicate glass \n");
   read_string(instring, sizeof(instring));
   probasg = atof(instring);
-  printf("%f\n", probasg);
+  fprintf(Logfile, "%f\n", probasg);
   Volf[ASG] = probasg;
-  printf("Enter probability for fly ash to be calcium aluminodisilicate \n");
+  fprintf(Logfile,
+          "Enter probability for fly ash to be calcium aluminodisilicate \n");
   read_string(instring, sizeof(instring));
   probcas2 = atof(instring);
-  printf("%f\n", probcas2);
+  fprintf(Logfile, "%f\n", probcas2);
   Volf[CAS2] = probcas2;
-  printf("Enter probability for fly ash to be tricalcium aluminate \n");
+  fprintf(Logfile,
+          "Enter probability for fly ash to be tricalcium aluminate \n");
   read_string(instring, sizeof(instring));
   probc3a = atof(instring);
-  printf("%f\n", probc3a);
+  fprintf(Logfile, "%f\n", probc3a);
   Volf[FAC3A] = probc3a;
-  printf("Enter probability for fly ash to be calcium chloride \n");
+  fprintf(Logfile, "Enter probability for fly ash to be calcium chloride \n");
   read_string(instring, sizeof(instring));
   probcacl2 = atof(instring);
-  printf("%f\n", probcacl2);
+  fprintf(Logfile, "%f\n", probcacl2);
   Volf[CACL2] = probcacl2;
-  printf("Enter probability for fly ash to be silica \n");
+  fprintf(Logfile, "Enter probability for fly ash to be silica \n");
   read_string(instring, sizeof(instring));
   probsio2 = atof(instring);
-  printf("%f\n", probsio2);
+  fprintf(Logfile, "%f\n", probsio2);
   Volf[AMSIL] = probsio2;
-  printf("Enter probability for fly ash to be anhydrite \n");
+  fprintf(Logfile, "Enter probability for fly ash to be anhydrite \n");
   read_string(instring, sizeof(instring));
   probanh = atof(instring);
-  printf("%f\n", probanh);
+  fprintf(Logfile, "%f\n", probanh);
   Volf[ANHYDRITE] = probanh;
 
   /* Determine goal counts for each phase */
@@ -7695,4 +7901,35 @@ int distfa(int fadchoice) {
     free(phase);
   }
   return (0);
+  /* GODZILLA */
+}
+
+char *rfc8601_timespec(struct timespec *tv) {
+  char time_str[127];
+  double fractional_seconds;
+  int milliseconds;
+  struct tm tm; // our "broken down time"
+  char *rfc8601;
+
+  rfc8601 = malloc(256);
+
+  memset(&tm, 0, sizeof(struct tm));
+  sprintf(time_str, "%ld UTC", tv->tv_sec);
+
+  // convert our timespec into broken down time
+  strptime(time_str, "%s %U", &tm);
+
+  // do the math to convert nanoseconds to integer milliseconds
+  fractional_seconds = (double)tv->tv_nsec;
+  fractional_seconds /= 1e6;
+  fractional_seconds = round(fractional_seconds);
+  milliseconds = (int)fractional_seconds;
+
+  // print date and time without milliseconds
+  strftime(time_str, sizeof(time_str), "%Y-%m-%dT%H:%M:%S", &tm);
+
+  // add on the fractional seconds and Z for the UTC Timezone
+  sprintf(rfc8601, "%s.%dZ", time_str, milliseconds);
+
+  return rfc8601;
 }

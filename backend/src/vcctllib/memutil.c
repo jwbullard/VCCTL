@@ -859,14 +859,17 @@ int Int3darray(Int3d *thing, size_t xsize, size_t ysize, size_t zsize) {
  *	All array indices are assumed to start with zero.
  *
  *	Arguments:	int number of elements in each dimension
- *	Returns:	Pointer to memory location of first element
+ *	Returns:	Pointer to memory location of first zlement
  *
  *	Calls:		no other routines
  *	Called by:	main routine
  *
  ***/
 size_t getInt3dindex(Int3d thing, size_t x, size_t y, size_t z) {
-  return ((z * thing.x * thing.y) + (y * thing.x) + x);
+  /* Assumes C-ordering */
+  /* return ((x * thing.y * thing.z) + (y * thing.z) + z); */
+  /* Assumes A-ordering */
+  return ((z * thing.y * thing.x) + (y * thing.x) + x);
 }
 
 /***
