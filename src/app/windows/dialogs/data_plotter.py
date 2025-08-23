@@ -262,7 +262,35 @@ class DataPlotter(Gtk.Dialog):
             # Find all CSV files
             csv_files = list(output_path.glob("*.csv"))
             
+            # Filter out unwanted CSV files
+            filtered_csv_files = []
             for csv_file in csv_files:
+                filename = csv_file.name
+                
+                # Skip extended parameter files (input data, not results)
+                if "_extended_parameters.csv" in filename:
+                    self.logger.debug(f"Skipping extended parameter file: {filename}")
+                    continue
+                
+                # Skip time_history.csv (not useful for plotting)
+                if filename == "time_history.csv":
+                    self.logger.debug(f"Skipping time_history file: {filename}")
+                    continue
+                
+                filtered_csv_files.append(csv_file)
+            
+            # Sort files to prioritize HydrationOf_*.csv files first
+            def sort_priority(csv_file):
+                filename = csv_file.name
+                if filename.startswith("HydrationOf_") and filename.endswith(".csv"):
+                    return (0, filename)  # Highest priority
+                else:
+                    return (1, filename)  # Lower priority
+            
+            filtered_csv_files.sort(key=sort_priority)
+            
+            # Add filtered files to dropdown
+            for csv_file in filtered_csv_files:
                 self.csv_files.append((csv_file.name, str(csv_file)))
                 self.file_combo.append_text(csv_file.name)
                 self.logger.info(f"Found CSV file: {csv_file.name}")

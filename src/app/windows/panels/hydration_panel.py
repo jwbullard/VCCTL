@@ -11,6 +11,7 @@ import logging
 import math
 import os
 import time
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
 
@@ -21,11 +22,14 @@ if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
 
 from app.services.service_container import get_service_container
+from app.utils.icon_utils import create_button_with_icon
 from app.services.hydration_service import (
     HydrationParameters, TemperatureProfile, TemperaturePoint, 
     AgingMode, SimulationStatus, SimulationProgress
 )
 from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
+from app.services.hydration_parameter_set_service import HydrationParameterSetService
+from app.models.hydration_parameter_set import HydrationParameterSetCreate, HydrationParameterSetUpdate
 from app.visualization import create_visualization_manager, HydrationPlotWidget
 
 
@@ -119,7 +123,7 @@ class TemperatureProfileDialog(Gtk.Dialog):
         time_renderer.connect("edited", self._on_time_edited)
         
         time_column = Gtk.TreeViewColumn("Time (hours)", time_renderer, text=0)
-        time_column.set_min_width(120)
+        time_column.set_min_width(100)  # Reduced to allow narrower windows
         self.points_view.append_column(time_column)
         
         # Temperature column
@@ -130,7 +134,7 @@ class TemperatureProfileDialog(Gtk.Dialog):
         temp_renderer.connect("edited", self._on_temperature_edited)
         
         temp_column = Gtk.TreeViewColumn("Temperature (°C)", temp_renderer, text=1)
-        temp_column.set_min_width(140)
+        temp_column.set_min_width(120)  # Reduced to allow narrower windows
         self.points_view.append_column(temp_column)
         
         scrolled.add(self.points_view)
@@ -245,6 +249,7 @@ class HydrationPanel(Gtk.Box):
         # Panel state
         self.current_params = None
         self.current_temperature_profile = None
+        self.current_profile = None
         self.simulation_running = False
         self.progress_update_timeout = None
         self.selected_microstructure = None
@@ -315,7 +320,7 @@ class HydrationPanel(Gtk.Box):
         
         # Description
         desc_label = Gtk.Label()
-        desc_label.set_markup('<span size="small">Configure hydration simulation parameters including time controls, temperature profiles, and aging modes.</span>')
+        desc_label.set_markup('<span size="small">Configure hydration simulation parameters including time controls and temperature profiles.</span>')
         desc_label.set_halign(Gtk.Align.START)
         desc_label.get_style_context().add_class("dim-label")
         header_box.pack_start(desc_label, False, False, 0)
@@ -397,7 +402,7 @@ class HydrationPanel(Gtk.Box):
         self.microstructure_combo.set_tooltip_text("Select initial microstructure from Mix Design operations")
         selection_box.pack_start(self.microstructure_combo, True, True, 0)
         
-        self.refresh_button = Gtk.Button(label="Refresh")
+        self.refresh_button = create_button_with_icon("Refresh", "refresh", 16)
         self.refresh_button.set_tooltip_text("Refresh list of available microstructures")
         selection_box.pack_start(self.refresh_button, False, False, 0)
         
@@ -527,6 +532,11 @@ class HydrationPanel(Gtk.Box):
             self.aging_time_radio, "Chemical Shrinkage-based")
         self.aging_shrinkage_radio.set_tooltip_text("Calibrate hydration kinetics based on measured chemical shrinkage data")
         vbox.pack_start(self.aging_shrinkage_radio, False, False, 0)
+        
+        # Add separator
+        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        vbox.pack_start(separator, False, False, 10)
+        
         
         frame.add(vbox)
         parent.pack_start(frame, False, False, 0)
@@ -660,6 +670,7 @@ class HydrationPanel(Gtk.Box):
         self.sealed_radio.set_active(True)
         
         vbox.pack_start(moisture_mode_box, False, False, 0)
+        
         
         frame.add(vbox)
         parent.pack_start(frame, False, False, 0)
@@ -903,7 +914,13 @@ class HydrationPanel(Gtk.Box):
         self.ph_active_check.set_tooltip_text("Enable pH calculations (default enabled)")
         phase_box.pack_start(self.ph_active_check, False, False, 0)
         
+        self.ettringite_check = Gtk.CheckButton(label="Enable Ettringite Formation")
+        self.ettringite_check.set_active(True)
+        self.ettringite_check.set_tooltip_text("Enable ettringite formation during hydration")
+        phase_box.pack_start(self.ettringite_check, False, False, 0)
+        
         content_box.pack_start(phase_box, False, False, 0)
+        
         
         # Database Parameters Section
         db_label = Gtk.Label()
@@ -938,7 +955,7 @@ class HydrationPanel(Gtk.Box):
         # Scrolled window for parameters table
         params_scrolled = Gtk.ScrolledWindow()
         params_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-        params_scrolled.set_size_request(400, 300)  # Fixed height to prevent excessive expansion
+        params_scrolled.set_size_request(250, 300)  # Reduced width to allow narrower windows
         
         # TreeView for parameters
         self.params_store = Gtk.ListStore(str, str, str)  # name, value, type
@@ -949,7 +966,7 @@ class HydrationPanel(Gtk.Box):
         name_renderer = Gtk.CellRendererText()
         name_column = Gtk.TreeViewColumn("Parameter Name", name_renderer, text=0)
         name_column.set_resizable(True)
-        name_column.set_min_width(200)
+        name_column.set_min_width(150)  # Reduced to allow narrower windows
         name_column.set_sort_column_id(0)
         self.params_tree.append_column(name_column)
         
@@ -980,17 +997,17 @@ class HydrationPanel(Gtk.Box):
         # Export/Import buttons
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
-        export_btn = Gtk.Button(label="Export to CSV")
+        export_btn = create_button_with_icon("Export to CSV", "export", 16)
         export_btn.set_tooltip_text("Export parameters to CSV file")
         export_btn.connect('clicked', self._on_export_params_clicked)
         button_box.pack_start(export_btn, False, False, 0)
         
-        import_btn = Gtk.Button(label="Import from CSV")
+        import_btn = create_button_with_icon("Import from CSV", "folder--open", 16)
         import_btn.set_tooltip_text("Import parameters from CSV file")
         import_btn.connect('clicked', self._on_import_params_clicked)
         button_box.pack_start(import_btn, False, False, 0)
         
-        reset_btn = Gtk.Button(label="Reset to Defaults")
+        reset_btn = create_button_with_icon("Reset to Defaults", "refresh", 16)
         reset_btn.set_tooltip_text("Reset all parameters to default values")
         reset_btn.connect('clicked', self._on_reset_params_clicked)
         button_box.pack_start(reset_btn, False, False, 0)
@@ -1022,6 +1039,38 @@ class HydrationPanel(Gtk.Box):
         control_box.set_margin_left(15)
         control_box.set_margin_right(15)
         
+        # Operation name input
+        name_label = Gtk.Label("Operation Name:")
+        name_label.set_halign(Gtk.Align.END)
+        control_box.pack_start(name_label, False, False, 0)
+        
+        self.operation_name_entry = Gtk.Entry()
+        self.operation_name_entry.set_placeholder_text("Enter operation name (optional)")
+        self.operation_name_entry.set_width_chars(25)
+        self.operation_name_entry.set_tooltip_text("Custom name for this hydration simulation (leave blank for auto-generated)")
+        control_box.pack_start(self.operation_name_entry, False, False, 0)
+        
+        # Spacer between name and validation
+        control_box.pack_start(Gtk.Box(), False, False, 10)
+        
+        # Save/Load buttons (following Mix Design pattern)
+        save_load_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        save_load_box.get_style_context().add_class("linked")
+        
+        self.load_params_button = create_button_with_icon("Load", "folder--open", 16)
+        self.load_params_button.set_tooltip_text("Load saved hydration parameters")
+        save_load_box.pack_start(self.load_params_button, False, False, 0)
+        
+        self.save_params_button = create_button_with_icon("Save", "save", 16)
+        self.save_params_button.get_style_context().add_class("suggested-action")
+        self.save_params_button.set_tooltip_text("Save current hydration parameters")
+        save_load_box.pack_start(self.save_params_button, False, False, 0)
+        
+        control_box.pack_start(save_load_box, False, False, 0)
+        
+        # Spacer
+        control_box.pack_start(Gtk.Box(), False, False, 10)
+        
         # Validation and estimation
         self.validate_button = Gtk.Button(label="Validate Parameters")
         self.validate_button.set_tooltip_text("Validate parameters and estimate computation time")
@@ -1040,15 +1089,15 @@ class HydrationPanel(Gtk.Box):
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         button_box.get_style_context().add_class("linked")
         
-        self.start_button = Gtk.Button(label="Start Simulation")
+        self.start_button = create_button_with_icon("Start Simulation", "play", 16)
         self.start_button.set_sensitive(False)
         button_box.pack_start(self.start_button, False, False, 0)
         
-        self.pause_button = Gtk.Button(label="Pause")
+        self.pause_button = create_button_with_icon("Pause", "pause", 16)
         self.pause_button.set_sensitive(False)
         button_box.pack_start(self.pause_button, False, False, 0)
         
-        self.stop_button = Gtk.Button(label="Stop")
+        self.stop_button = create_button_with_icon("Stop", "stop", 16)
         self.stop_button.set_sensitive(False)
         button_box.pack_start(self.stop_button, False, False, 0)
         
@@ -1071,7 +1120,7 @@ class HydrationPanel(Gtk.Box):
         
         # Left side: Progress bars and status
         left_progress = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        left_progress.set_size_request(300, -1)
+        left_progress.set_size_request(200, -1)  # Reduced from 300 to allow narrower windows
         
         # Overall progress
         overall_label = Gtk.Label("Overall Progress:")
@@ -1128,7 +1177,7 @@ class HydrationPanel(Gtk.Box):
         
         # Right side: Hydration metrics
         right_progress = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        right_progress.set_size_request(300, -1)
+        right_progress.set_size_request(200, -1)  # Reduced from 300 to allow narrower windows
         
         metrics_frame = Gtk.Frame(label="Hydration Metrics")
         metrics_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -1229,6 +1278,8 @@ class HydrationPanel(Gtk.Box):
         self.ph_active_check.connect('toggled', self._on_parameter_changed)
         
         # Control signals
+        self.save_params_button.connect('clicked', self._on_save_params_clicked)
+        self.load_params_button.connect('clicked', self._on_load_params_clicked)
         self.validate_button.connect('clicked', self._on_validate_clicked)
         self.start_button.connect('clicked', self._on_start_clicked)
         self.pause_button.connect('clicked', self._on_pause_clicked)
@@ -1239,6 +1290,7 @@ class HydrationPanel(Gtk.Box):
         # Load default temperature profile (constant 25°C)
         profiles = self.hydration_service.get_all_temperature_profiles()
         self.current_temperature_profile = profiles.get("Constant 25°C")
+        self.current_profile = self.current_temperature_profile  # Ensure consistency
         
         self._update_temperature_plot()
         self._update_profile_summary()
@@ -1303,6 +1355,7 @@ class HydrationPanel(Gtk.Box):
             
             if profile_name in profiles:
                 self.current_temperature_profile = profiles[profile_name]
+                self.current_profile = self.current_temperature_profile
                 self._update_temperature_plot()
                 self._update_profile_summary()
     
@@ -1356,6 +1409,7 @@ class HydrationPanel(Gtk.Box):
                     
                     # Update current profile
                     self.current_temperature_profile = modified_profile
+                    self.current_profile = self.current_temperature_profile
                     
                     # Update UI
                     self._update_temperature_plot()
@@ -1394,44 +1448,60 @@ class HydrationPanel(Gtk.Box):
             True if save successful, False otherwise
         """
         try:
-            # Get temperature profile service
-            profile_service = self.hydration_service.get_temperature_profile_service()
-            if not profile_service:
-                self._show_error_dialog("Save Error", "Temperature profile service not available")
-                return False
-            
             # Validate profile name
             if not profile.name or not profile.name.strip():
                 self._show_error_dialog("Save Error", "Profile name cannot be empty")
                 return False
             
-            # Check if profile already exists
-            existing_profile = profile_service.get_profile(profile.name)
-            if existing_profile:
-                # Show confirmation dialog
-                dialog = Gtk.MessageDialog(
-                    parent=self.get_toplevel(),
-                    flags=Gtk.DialogFlags.MODAL,
-                    message_type=Gtk.MessageType.QUESTION,
-                    buttons=Gtk.ButtonsType.YES_NO,
-                    text=f"Profile '{profile.name}' already exists. Overwrite?"
-                )
-                response = dialog.run()
-                dialog.destroy()
-                
-                if response != Gtk.ResponseType.YES:
-                    return False
+            # Use direct database access for temperature profile saving
+            from app.models.temperature_profile import TemperatureProfileDB
+            from app.services.service_container import get_service_container
             
-            # Save the profile
-            saved_profile = profile_service.save_profile(profile, overwrite=True)
-            if saved_profile:
+            container = get_service_container()
+            
+            with container.database_service.get_session() as session:
+                # Check if profile already exists
+                existing_profile = session.query(TemperatureProfileDB).filter(
+                    TemperatureProfileDB.name == profile.name
+                ).first()
+                
+                if existing_profile:
+                    # Show confirmation dialog
+                    dialog = Gtk.MessageDialog(
+                        parent=self.get_toplevel(),
+                        flags=Gtk.DialogFlags.MODAL,
+                        message_type=Gtk.MessageType.QUESTION,
+                        buttons=Gtk.ButtonsType.YES_NO,
+                        text=f"Profile '{profile.name}' already exists. Overwrite?"
+                    )
+                    response = dialog.run()
+                    dialog.destroy()
+                    
+                    if response != Gtk.ResponseType.YES:
+                        return False
+                    
+                    # Update existing profile
+                    existing_profile.description = profile.description
+                    import json
+                    existing_profile.points_json = json.dumps([{"time_hours": p.time_hours, "temperature_celsius": p.temperature_celsius} 
+                                                             for p in profile.points])
+                else:
+                    # Create new profile
+                    import json
+                    new_profile = TemperatureProfileDB(
+                        name=profile.name,
+                        description=profile.description,
+                        points_json=json.dumps([{"time_hours": p.time_hours, "temperature_celsius": p.temperature_celsius} 
+                                              for p in profile.points])
+                    )
+                    session.add(new_profile)
+                
+                session.commit()
+                
                 # Refresh the dropdown menu
                 self._refresh_profile_dropdown()
                 self.logger.info(f"Saved temperature profile: {profile.name}")
                 return True
-            else:
-                self._show_error_dialog("Save Error", "Failed to save temperature profile")
-                return False
                 
         except Exception as e:
             self.logger.error(f"Failed to save temperature profile: {e}")
@@ -1446,15 +1516,23 @@ class HydrationPanel(Gtk.Box):
             
             # Clear and repopulate dropdown
             self.profile_combo.remove_all()
+            
+            # Add profiles with proper IDs for set_active_id to work
             for profile_name in sorted(all_profiles.keys()):
-                self.profile_combo.append_text(profile_name)
+                profile_id = profile_name.lower().replace(" ", "_")
+                self.profile_combo.append(profile_id, profile_name)
             
             # Set to current profile if it exists
             if self.current_temperature_profile and self.current_temperature_profile.name in all_profiles:
-                self.profile_combo.set_active_id(self.current_temperature_profile.name)
+                profile_id = self.current_temperature_profile.name.lower().replace(" ", "_")
+                self.profile_combo.set_active_id(profile_id)
+            else:
+                # Set to first item if current profile not found
+                if len(all_profiles) > 0:
+                    self.profile_combo.set_active(0)
                 
         except Exception as e:
-            self.logger.error(f"Failed to refresh profile dropdown: {e}")
+            self.logger.error(f"Failed to refresh profile dropdown: {e}", exc_info=True)
     
     def _show_error_dialog(self, title: str, message: str) -> None:
         """Show an error dialog."""
@@ -1612,8 +1690,14 @@ class HydrationPanel(Gtk.Box):
             advanced_settings = self._collect_advanced_settings()
             db_modifications = self._collect_database_modifications()
             
-            # Generate operation name
-            operation_name = f"HydrationSim_{selected_microstructure['name']}_{self._get_timestamp()}"
+            # Generate operation name (use custom name if provided, otherwise auto-generate)
+            custom_name = self.operation_name_entry.get_text().strip()
+            if custom_name:
+                # Use custom name, but ensure it's unique by appending timestamp if needed
+                operation_name = self._ensure_unique_operation_name(custom_name)
+            else:
+                # Auto-generate name
+                operation_name = f"HydrationSim_{selected_microstructure['name']}_{self._get_timestamp()}"
             
             # Generate extended parameter file
             max_time = self.max_time_spin.get_value()
@@ -1744,6 +1828,41 @@ class HydrationPanel(Gtk.Box):
         """Get current timestamp for operation naming."""
         from datetime import datetime
         return datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    def _ensure_unique_operation_name(self, base_name: str) -> str:
+        """Ensure operation name is unique by checking existing operations and folders."""
+        # Sanitize the name (remove invalid characters for folder names)
+        import re
+        sanitized_name = re.sub(r'[<>:"/\\|?*]', '_', base_name)
+        sanitized_name = sanitized_name.strip()
+        
+        # Check if the name already exists
+        operations_dir = Path(__file__).parent.parent.parent.parent / "Operations"
+        unique_name = sanitized_name
+        counter = 1
+        
+        while True:
+            # Check if folder exists
+            if not (operations_dir / unique_name).exists():
+                # Also check database for existing operations
+                try:
+                    with self.service_container.database_service.get_read_only_session() as session:
+                        from app.models.operation import Operation
+                        existing_op = session.query(Operation).filter_by(name=unique_name).first()
+                        if not existing_op:
+                            return unique_name
+                except Exception:
+                    # If database check fails, just use folder check
+                    return unique_name
+            
+            # Name exists, try with counter
+            unique_name = f"{sanitized_name}_{counter}"
+            counter += 1
+            
+            # Safety limit to prevent infinite loop
+            if counter > 1000:
+                # Fall back to timestamp-based name
+                return f"{sanitized_name}_{self._get_timestamp()}"
     
     def _on_simulation_progress(self, operation_name: str, progress_data) -> None:
         """Handle simulation progress updates."""
@@ -2414,6 +2533,7 @@ class HydrationPanel(Gtk.Box):
             
             # Set temperature profile
             self.current_temperature_profile = params.temperature_profile
+            self.current_profile = self.current_temperature_profile
             self._update_temperature_plot()
             self._update_profile_summary()
             
@@ -2679,6 +2799,449 @@ class HydrationPanel(Gtk.Box):
     def get_database_parameter_modifications(self) -> Dict[str, Any]:
         """Get any modifications made to database parameters."""
         return self.modified_params.copy()
+    
+    def _on_save_params_clicked(self, button) -> None:
+        """Handle save parameters button click."""
+        try:
+            self._show_save_parameters_dialog()
+        except Exception as e:
+            self.logger.error(f"Error saving hydration parameters: {e}")
+            dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to save parameters: {e}"
+            )
+            dialog.run()
+            dialog.destroy()
+    
+    def _on_load_params_clicked(self, button) -> None:
+        """Handle load parameters button click."""
+        try:
+            self._show_load_parameters_dialog()
+        except Exception as e:
+            self.logger.error(f"Error loading hydration parameters: {e}")
+            dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to load parameters: {e}"
+            )
+            dialog.run()
+            dialog.destroy()
+    
+    def _extract_current_parameters(self) -> Dict[str, Any]:
+        """Extract current hydration parameters from UI controls."""
+        # Core simulation parameters
+        max_time_hours = self.max_time_spin.get_value()
+        
+        # Curing conditions
+        curing_conditions = {
+            "temperature_profile": {
+                "name": self.current_profile.name if self.current_profile else "constant_25c",
+                "description": self.current_profile.description if self.current_profile else "Constant 25°C",
+                "points": [{"time_hours": p.time_hours, "temperature_celsius": p.temperature_celsius} 
+                          for p in (self.current_profile.points if self.current_profile else [])]
+            },
+        }
+        
+        # Time calibration settings
+        time_calibration = {
+            "time_conversion_factor": self.time_conversion_spin.get_value(),
+        }
+        
+        # Advanced settings
+        advanced_settings = {
+            "c3a_fraction": self.c3a_fraction_spin.get_value(),
+            "ettringite_formation": self.ettringite_check.get_active(),
+            "csh2_formation": self.csh2_flag_check.get_active(),
+            "ch_formation": self.ch_flag_check.get_active(),
+            "ph_computation": self.ph_active_check.get_active(),
+            "random_seed": self.random_seed_spin.get_value_as_int()
+        }
+        
+        # Database modifications (custom parameter overrides)
+        db_modifications = self.get_database_parameter_modifications()
+        
+        return {
+            "max_time_hours": max_time_hours,
+            "curing_conditions": curing_conditions,
+            "time_calibration": time_calibration,
+            "advanced_settings": advanced_settings,
+            "db_modifications": db_modifications
+        }
+    
+    def _show_save_parameters_dialog(self) -> None:
+        """Show dialog to save current hydration parameters."""
+        dialog = Gtk.Dialog(
+            title="Save Hydration Parameters",
+            parent=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE, Gtk.ResponseType.OK
+        )
+        dialog.set_default_size(400, 300)
+        
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_margin_left(20)
+        content_area.set_margin_right(20)
+        content_area.set_margin_top(20)
+        content_area.set_margin_bottom(20)
+        
+        # Name entry
+        name_label = Gtk.Label("Parameter Set Name:")
+        name_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(name_label, False, False, 0)
+        
+        name_entry = Gtk.Entry()
+        name_entry.set_placeholder_text("Enter a name for this parameter set")
+        content_area.pack_start(name_entry, False, False, 0)
+        
+        # Description entry
+        desc_label = Gtk.Label("Description (optional):")
+        desc_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(desc_label, False, False, 0)
+        
+        desc_buffer = Gtk.TextBuffer()
+        desc_view = Gtk.TextView()
+        desc_view.set_buffer(desc_buffer)
+        desc_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        desc_scrolled = Gtk.ScrolledWindow()
+        desc_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        desc_scrolled.add(desc_view)
+        desc_scrolled.set_size_request(-1, 80)
+        content_area.pack_start(desc_scrolled, False, False, 0)
+        
+        # Notes entry
+        notes_label = Gtk.Label("Notes (optional):")
+        notes_label.set_halign(Gtk.Align.START)
+        content_area.pack_start(notes_label, False, False, 0)
+        
+        notes_buffer = Gtk.TextBuffer()
+        notes_view = Gtk.TextView()
+        notes_view.set_buffer(notes_buffer)
+        notes_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        notes_scrolled = Gtk.ScrolledWindow()
+        notes_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        notes_scrolled.add(notes_view)
+        notes_scrolled.set_size_request(-1, 60)
+        content_area.pack_start(notes_scrolled, False, False, 0)
+        
+        # Template checkbox
+        template_check = Gtk.CheckButton("Save as template")
+        template_check.set_tooltip_text("Templates appear at the top of the parameter list for easy access")
+        content_area.pack_start(template_check, False, False, 0)
+        
+        dialog.show_all()
+        
+        response = dialog.run()
+        
+        if response == Gtk.ResponseType.OK:
+            name = name_entry.get_text().strip()
+            if not name:
+                error_dialog = Gtk.MessageDialog(
+                    dialog,
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    "Please enter a name for the parameter set."
+                )
+                error_dialog.run()
+                error_dialog.destroy()
+                dialog.destroy()
+                return
+            
+            description = desc_buffer.get_text(desc_buffer.get_start_iter(), desc_buffer.get_end_iter(), False)
+            notes = notes_buffer.get_text(notes_buffer.get_start_iter(), notes_buffer.get_end_iter(), False)
+            is_template = template_check.get_active()
+            
+            dialog.destroy()
+            
+            # Save the parameters
+            self._save_current_parameters(name, description, notes, is_template)
+        else:
+            dialog.destroy()
+    
+    def _save_current_parameters(self, name: str, description: str, notes: str, is_template: bool) -> None:
+        """Save current hydration parameters to database."""
+        try:
+            # Get service container and parameter set service
+            container = get_service_container()
+            param_service = HydrationParameterSetService(container.database_service)
+            
+            # Extract current parameters
+            params = self._extract_current_parameters()
+            
+            # Create parameter set data
+            param_set_data = HydrationParameterSetCreate(
+                name=name,
+                description=description if description else None,
+                max_time_hours=params["max_time_hours"],
+                curing_conditions=params["curing_conditions"],
+                time_calibration=params["time_calibration"],
+                advanced_settings=params["advanced_settings"],
+                db_modifications=params["db_modifications"],
+                notes=notes if notes else None,
+                is_template=is_template
+            )
+            
+            # Save to database
+            saved_params = param_service.create(param_set_data)
+            
+            # Show success message
+            success_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.INFO,
+                Gtk.ButtonsType.OK,
+                f"Hydration parameters '{name}' saved successfully!"
+            )
+            success_dialog.run()
+            success_dialog.destroy()
+            
+            self.logger.info(f"Saved hydration parameter set: {name} (ID: {saved_params.id})")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save hydration parameters: {e}")
+            error_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to save parameters: {e}"
+            )
+            error_dialog.run()
+            error_dialog.destroy()
+    
+    def _show_load_parameters_dialog(self) -> None:
+        """Show dialog to load saved hydration parameters."""
+        try:
+            # Get service container and parameter set service
+            container = get_service_container()
+            param_service = HydrationParameterSetService(container.database_service)
+            
+            # Get all parameter sets
+            param_sets = param_service.get_all()
+            
+            if not param_sets:
+                info_dialog = Gtk.MessageDialog(
+                    self.get_toplevel(),
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.INFO,
+                    Gtk.ButtonsType.OK,
+                    "No saved parameter sets found. Save some parameters first."
+                )
+                info_dialog.run()
+                info_dialog.destroy()
+                return
+            
+            dialog = Gtk.Dialog(
+                title="Load Hydration Parameters",
+                parent=self.get_toplevel(),
+                flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
+            )
+            dialog.add_buttons(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+            )
+            dialog.set_default_size(600, 400)
+            
+            content_area = dialog.get_content_area()
+            content_area.set_spacing(10)
+            content_area.set_margin_left(20)
+            content_area.set_margin_right(20)
+            content_area.set_margin_top(20)
+            content_area.set_margin_bottom(20)
+            
+            # Create list view
+            liststore = Gtk.ListStore(int, str, str, str, bool)  # id, name, description, created_at, is_template
+            
+            for param_set in param_sets:
+                liststore.append([
+                    param_set.id,
+                    param_set.name,
+                    param_set.description or "",
+                    param_set.created_at.strftime("%Y-%m-%d %H:%M"),
+                    param_set.is_template
+                ])
+            
+            tree_view = Gtk.TreeView(model=liststore)
+            tree_view.set_headers_visible(True)
+            
+            # Name column
+            name_renderer = Gtk.CellRendererText()
+            name_column = Gtk.TreeViewColumn("Name", name_renderer, text=1)
+            name_column.set_expand(True)
+            tree_view.append_column(name_column)
+            
+            # Description column
+            desc_renderer = Gtk.CellRendererText()
+            desc_column = Gtk.TreeViewColumn("Description", desc_renderer, text=2)
+            desc_column.set_expand(True)
+            tree_view.append_column(desc_column)
+            
+            # Created column
+            created_renderer = Gtk.CellRendererText()
+            created_column = Gtk.TreeViewColumn("Created", created_renderer, text=3)
+            tree_view.append_column(created_column)
+            
+            # Template column
+            template_renderer = Gtk.CellRendererToggle()
+            template_column = Gtk.TreeViewColumn("Template", template_renderer, active=4)
+            tree_view.append_column(template_column)
+            
+            # Scrolled window
+            scrolled = Gtk.ScrolledWindow()
+            scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            scrolled.add(tree_view)
+            content_area.pack_start(scrolled, True, True, 0)
+            
+            dialog.show_all()
+            
+            response = dialog.run()
+            
+            if response == Gtk.ResponseType.OK:
+                selection = tree_view.get_selection()
+                model, tree_iter = selection.get_selected()
+                
+                if tree_iter is not None:
+                    param_set_id = model[tree_iter][0]
+                    dialog.destroy()
+                    
+                    # Load the selected parameter set
+                    self._load_parameter_set(param_set_id)
+                else:
+                    error_dialog = Gtk.MessageDialog(
+                        dialog,
+                        Gtk.DialogFlags.MODAL,
+                        Gtk.MessageType.ERROR,
+                        Gtk.ButtonsType.OK,
+                        "Please select a parameter set to load."
+                    )
+                    error_dialog.run()
+                    error_dialog.destroy()
+                    dialog.destroy()
+            else:
+                dialog.destroy()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to show load parameters dialog: {e}")
+            error_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to load parameters: {e}"
+            )
+            error_dialog.run()
+            error_dialog.destroy()
+    
+    def _load_parameter_set(self, param_set_id: int) -> None:
+        """Load a specific parameter set and restore UI controls."""
+        try:
+            # Get service container and parameter set service
+            container = get_service_container()
+            param_service = HydrationParameterSetService(container.database_service)
+            
+            # Get parameter set from database
+            param_set = param_service.get_by_id(param_set_id)
+            if not param_set:
+                raise ValueError(f"Parameter set with ID {param_set_id} not found")
+            
+            # Restore UI controls from saved parameters
+            self._restore_parameters_to_ui(param_set)
+            
+            # Show success message
+            success_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.INFO,
+                Gtk.ButtonsType.OK,
+                f"Hydration parameters '{param_set.name}' loaded successfully!"
+            )
+            success_dialog.run()
+            success_dialog.destroy()
+            
+            self.logger.info(f"Loaded hydration parameter set: {param_set.name} (ID: {param_set.id})")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load parameter set {param_set_id}: {e}")
+            error_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to load parameters: {e}"
+            )
+            error_dialog.run()
+            error_dialog.destroy()
+    
+    def _restore_parameters_to_ui(self, param_set) -> None:
+        """Restore hydration parameters from database to UI controls."""
+        try:
+            # Core simulation parameters
+            self.max_time_spin.set_value(param_set.max_time_hours)
+            
+            # Restore curing conditions
+            if param_set.curing_conditions:
+                curing = param_set.curing_conditions
+                
+                
+                # Temperature profile
+                if "temperature_profile" in curing:
+                    profile_data = curing["temperature_profile"]
+                    points = []
+                    for point_data in profile_data.get("points", []):
+                        points.append(TemperaturePoint(
+                            point_data["time_hours"],
+                            point_data["temperature_celsius"]
+                        ))
+                    
+                    self.current_profile = TemperatureProfile(
+                        name=profile_data.get("name", "Custom"),
+                        description=profile_data.get("description", "Restored profile"),
+                        points=points
+                    )
+                    self._update_profile_display()
+            
+            # Restore time calibration
+            if param_set.time_calibration:
+                time_cal = param_set.time_calibration
+                if "time_conversion_factor" in time_cal:
+                    self.time_conversion_spin.set_value(time_cal["time_conversion_factor"])
+            
+            # Restore advanced settings
+            if param_set.advanced_settings:
+                advanced = param_set.advanced_settings
+                if "c3a_fraction" in advanced:
+                    self.c3a_fraction_spin.set_value(advanced["c3a_fraction"])
+                if "ettringite_formation" in advanced:
+                    self.ettringite_check.set_active(advanced["ettringite_formation"])
+                if "csh2_formation" in advanced:
+                    self.csh2_flag_check.set_active(advanced["csh2_formation"])
+                if "ch_formation" in advanced:
+                    self.ch_flag_check.set_active(advanced["ch_formation"])
+                if "ph_computation" in advanced:
+                    self.ph_active_check.set_active(advanced["ph_computation"])
+                if "random_seed" in advanced:
+                    self.random_seed_spin.set_value(advanced["random_seed"])
+            
+            # Restore database modifications
+            if param_set.db_modifications:
+                self.modified_params.clear()
+                self.modified_params.update(param_set.db_modifications)
+                self._refresh_database_parameters_display()
+            
+            self.logger.info(f"Successfully restored parameters from: {param_set.name}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to restore parameters to UI: {e}")
+            raise
     
     def cleanup(self) -> None:
         """Cleanup resources when panel is destroyed."""

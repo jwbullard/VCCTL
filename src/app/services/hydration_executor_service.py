@@ -22,7 +22,7 @@ from typing import Optional, Dict, Any, List, Callable
 from datetime import datetime
 from enum import Enum
 
-from app.models.operation import Operation, OperationStatus, OperationType, OperationCreate
+from app.models.operation import Operation, OperationStatus, OperationType
 from app.services.hydration_parameters_service import HydrationParametersService
 from app.database.service import DatabaseService
 
@@ -374,7 +374,7 @@ class HydrationExecutorService:
                     if simulation_completed:
                         # Simulation completed successfully (verified by output files)
                         simulation_info['status'] = HydrationSimulationStatus.COMPLETED
-                        self._update_operation_status(operation_name, OperationStatus.FINISHED)
+                        self._update_operation_status(operation_name, OperationStatus.COMPLETED)
                         if return_code == 0:
                             self.logger.info(f"Simulation completed successfully: {operation_name}")
                         else:
@@ -645,15 +645,38 @@ class HydrationExecutorService:
             operation_dir = self.project_root / "Operations" / operation_name
             
             # Check for key output files that indicate successful completion
-            # Extract microstructure name (e.g., "E2ETest" from "HydrationSim_E2ETest_20250813_205150")
-            if operation_name.startswith('HydrationSim_'):
+            # Try to detect the actual microstructure name from the files in the directory
+            microstructure_name = None
+            
+            # Method 1: Look for existing HydrationOf_*.csv files to determine the microstructure name
+            hydration_csv_files = list(operation_dir.glob("HydrationOf_*.csv"))
+            if hydration_csv_files:
+                # Extract microstructure name from the CSV filename
+                csv_filename = hydration_csv_files[0].stem  # e.g., "HydrationOf_Cem140Quartz07"
+                microstructure_name = csv_filename.replace("HydrationOf_", "")
+                self.logger.debug(f"Detected microstructure name from CSV: {microstructure_name}")
+            
+            # Method 2: If no CSV yet, look for .img files (microstructure files)
+            if not microstructure_name:
+                img_files = list(operation_dir.glob("*.img"))
+                if img_files:
+                    # Use the base name of the .img file (e.g., "Cem140Quartz07.img" -> "Cem140Quartz07")
+                    microstructure_name = img_files[0].stem
+                    self.logger.debug(f"Detected microstructure name from IMG: {microstructure_name}")
+            
+            # Method 3: Fallback for auto-generated names (legacy support)
+            if not microstructure_name and operation_name.startswith('HydrationSim_'):
                 # Remove "HydrationSim_" prefix and timestamp suffix to get microstructure name
                 temp_name = operation_name.replace('HydrationSim_', '')
                 # Find the microstructure name by removing the timestamp (format: _YYYYMMDD_HHMMSS)
                 import re
                 microstructure_name = re.sub(r'_\d{8}_\d{6}$', '', temp_name)
-            else:
+                self.logger.debug(f"Detected microstructure name from operation name: {microstructure_name}")
+            
+            # Method 4: Final fallback - use operation name
+            if not microstructure_name:
                 microstructure_name = operation_name
+                self.logger.debug(f"Using operation name as microstructure name: {microstructure_name}")
                 
             expected_files = [
                 f"HydrationOf_{microstructure_name}.csv",  # Main data file
@@ -693,11 +716,9 @@ class HydrationExecutorService:
                     self.logger.info(f"Creating new operation: {operation_name}")
                     operation = Operation(
                         name=operation_name,
-                        type=OperationType.HYDRATION,
-                        depends_on_operation_name=None,
+                        operation_type=OperationType.HYDRATION.value,
                         notes=f"Hydration simulation started at {datetime.now().isoformat()}"
                     )
-                    operation.mark_queued()
                     session.add(operation)
                     session.flush()  # Ensure operation gets an ID
                 
@@ -705,8 +726,8 @@ class HydrationExecutorService:
                 operation.status = status.value
                 if status == OperationStatus.RUNNING:
                     operation.mark_started()
-                elif status == OperationStatus.FINISHED:
-                    operation.mark_finished()
+                elif status == OperationStatus.COMPLETED:
+                    operation.mark_completed()
                 elif status == OperationStatus.ERROR:
                     operation.mark_error("Hydration simulation failed")
                 elif status == OperationStatus.CANCELLED:

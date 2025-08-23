@@ -15,6 +15,7 @@ from enum import Enum
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GObject, Gio, GdkPixbuf, Pango
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -102,7 +103,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Back button
         self.back_button = Gtk.ToolButton()
-        self.back_button.set_icon_name("go-previous")
+        self.back_button.set_icon_name("arrow--left")
         self.back_button.set_label("Back")
         self.back_button.set_tooltip_text("Go back to parent directory")
         self.back_button.connect('clicked', self._on_back_clicked)
@@ -110,7 +111,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Up button
         self.up_button = Gtk.ToolButton()
-        self.up_button.set_icon_name("go-up")
+        self.up_button.set_icon_name("arrow--up")
         self.up_button.set_label("Up")
         self.up_button.set_tooltip_text("Go to parent directory")
         self.up_button.connect('clicked', self._on_up_clicked)
@@ -118,7 +119,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Home button
         home_button = Gtk.ToolButton()
-        home_button.set_icon_name("go-home")
+        home_button.set_icon_name("home")
         home_button.set_label("Home")
         home_button.set_tooltip_text("Go to home directory")
         home_button.connect('clicked', self._on_home_clicked)
@@ -129,7 +130,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Refresh button
         refresh_button = Gtk.ToolButton()
-        refresh_button.set_icon_name("view-refresh")
+        refresh_button.set_icon_name("refresh")
         refresh_button.set_label("Refresh")
         refresh_button.set_tooltip_text("Refresh current directory")
         refresh_button.connect('clicked', self._on_refresh_clicked)
@@ -137,7 +138,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Create directory button
         create_dir_button = Gtk.ToolButton()
-        create_dir_button.set_icon_name("folder-new")
+        create_dir_button.set_icon_name("folder--add")
         create_dir_button.set_label("New Folder")
         create_dir_button.set_tooltip_text("Create new directory")
         create_dir_button.connect('clicked', self._on_create_directory_clicked)
@@ -148,7 +149,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # View options
         view_button = Gtk.MenuToolButton()
-        view_button.set_icon_name("preferences-desktop")
+        view_button.set_icon_name("settings")
         view_button.set_label("View")
         view_button.set_tooltip_text("View options")
         
@@ -190,7 +191,7 @@ class FileBrowserWidget(Gtk.Box):
         
         # Browse button
         browse_button = Gtk.Button()
-        browse_button.set_image(Gtk.Image.new_from_icon_name("folder-open", Gtk.IconSize.BUTTON))
+        browse_button.set_image(create_icon_image("folder--open", 16))
         browse_button.set_tooltip_text("Browse for directory")
         browse_button.connect('clicked', self._on_browse_clicked)
         path_box.pack_start(browse_button, False, False, 0)

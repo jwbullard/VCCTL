@@ -150,18 +150,18 @@ class MicrostructurePanel(Gtk.Box):
         # Preview controls
         preview_controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
-        self.load_img_button = create_button_with_icon("Load .img File", "document-open", 16)
+        self.load_img_button = create_button_with_icon("Load .img File", "folder--open", 16)
         self.load_img_button.set_tooltip_text("Load genmic.c output file (.img)")
         preview_controls.pack_start(self.load_img_button, True, True, 0)
         
-        self.preview_button = create_button_with_icon("Generate Preview", "48-cube", 16)
+        self.preview_button = create_button_with_icon("Generate Preview", "cube", 16)
         self.preview_button.set_tooltip_text("Generate 3D microstructure preview")
         # Initially hidden since PyVista is default and loads data automatically
         self.preview_button.set_visible(False)
         self.preview_button.set_no_show_all(True)  # Prevent show_all() from making it visible
         preview_controls.pack_start(self.preview_button, True, True, 0)
         
-        self.export_preview_button = create_button_with_icon("Export", "document-export", 16)
+        self.export_preview_button = create_button_with_icon("Export", "export", 16)
         self.export_preview_button.set_tooltip_text("Export preview as image")
         self.export_preview_button.set_sensitive(False)
         preview_controls.pack_start(self.export_preview_button, False, False, 0)

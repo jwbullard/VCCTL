@@ -16,6 +16,7 @@ from pathlib import Path
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Gdk, Pango
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -120,14 +121,14 @@ class MaterialTable(Gtk.Box):
         
         self.bulk_delete_button = Gtk.Button(label="Delete Selected")
         self.bulk_delete_button.set_sensitive(False)
-        delete_icon = Gtk.Image.new_from_icon_name("edit-delete-symbolic", Gtk.IconSize.BUTTON)
+        delete_icon = create_icon_image("trash-can", 16)
         self.bulk_delete_button.set_image(delete_icon)
         self.bulk_delete_button.get_style_context().add_class("destructive-action")
         bulk_box.pack_start(self.bulk_delete_button, False, False, 0)
         
         self.bulk_export_button = Gtk.Button(label="Export Selected")
         self.bulk_export_button.set_sensitive(False)
-        export_icon = Gtk.Image.new_from_icon_name("document-save-symbolic", Gtk.IconSize.BUTTON)
+        export_icon = create_icon_image("save", 16)
         self.bulk_export_button.set_image(export_icon)
         bulk_box.pack_start(self.bulk_export_button, False, False, 0)
         
@@ -151,7 +152,7 @@ class MaterialTable(Gtk.Box):
         # Column visibility
         self.columns_button = Gtk.MenuButton()
         self.columns_button.set_label("Columns")
-        columns_icon = Gtk.Image.new_from_icon_name("view-list-symbolic", Gtk.IconSize.BUTTON)
+        columns_icon = create_icon_image("list", 16)
         self.columns_button.set_image(columns_icon)
         self.columns_button.set_always_show_image(True)
         view_box.pack_start(self.columns_button, False, False, 0)
@@ -160,7 +161,7 @@ class MaterialTable(Gtk.Box):
         
         # Refresh button
         self.refresh_button = Gtk.Button()
-        refresh_icon = Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        refresh_icon = create_icon_image("refresh", 16)
         self.refresh_button.set_image(refresh_icon)
         self.refresh_button.set_tooltip_text("Refresh data")
         toolbar_box.pack_end(self.refresh_button, False, False, 0)
@@ -261,25 +262,25 @@ class MaterialTable(Gtk.Box):
         nav_box.get_style_context().add_class("linked")
         
         self.first_page_button = Gtk.Button()
-        first_icon = Gtk.Image.new_from_icon_name("go-first-symbolic", Gtk.IconSize.BUTTON)
+        first_icon = create_icon_image("skip--back", 16)
         self.first_page_button.set_image(first_icon)
         self.first_page_button.set_tooltip_text("First page")
         nav_box.pack_start(self.first_page_button, False, False, 0)
         
         self.prev_page_button = Gtk.Button()
-        prev_icon = Gtk.Image.new_from_icon_name("go-previous-symbolic", Gtk.IconSize.BUTTON)
+        prev_icon = create_icon_image("arrow--left", 16)
         self.prev_page_button.set_image(prev_icon)
         self.prev_page_button.set_tooltip_text("Previous page")
         nav_box.pack_start(self.prev_page_button, False, False, 0)
         
         self.next_page_button = Gtk.Button()
-        next_icon = Gtk.Image.new_from_icon_name("go-next-symbolic", Gtk.IconSize.BUTTON)
+        next_icon = create_icon_image("arrow--right", 16)
         self.next_page_button.set_image(next_icon)
         self.next_page_button.set_tooltip_text("Next page")
         nav_box.pack_start(self.next_page_button, False, False, 0)
         
         self.last_page_button = Gtk.Button()
-        last_icon = Gtk.Image.new_from_icon_name("go-last-symbolic", Gtk.IconSize.BUTTON)
+        last_icon = create_icon_image("skip--forward", 16)
         self.last_page_button.set_image(last_icon)
         self.last_page_button.set_tooltip_text("Last page")
         nav_box.pack_start(self.last_page_button, False, False, 0)

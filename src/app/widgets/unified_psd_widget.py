@@ -10,6 +10,7 @@ with automatic conversion and table display.
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject
+from app.utils.icon_utils import create_icon_image
 import json
 from typing import Dict, Any, Optional, List, Tuple, Callable
 
@@ -112,7 +113,8 @@ class UnifiedPSDWidget(Gtk.Box):
         mode_box.pack_start(self.mode_combo, False, False, 0)
         
         # Help button
-        help_button = Gtk.Button.new_from_icon_name("help-about", Gtk.IconSize.BUTTON)
+        help_button = Gtk.Button()
+        help_button.set_image(create_icon_image("information", 16))
         help_button.set_tooltip_text("Show help for PSD models")
         help_button.connect('clicked', self._show_help)
         mode_box.pack_end(help_button, False, False, 0)

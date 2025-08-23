@@ -16,6 +16,7 @@ from decimal import Decimal
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, Gdk
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -133,20 +134,20 @@ class AggregatePanel(Gtk.Box):
         action_box.get_style_context().add_class("linked")
         
         self.new_button = Gtk.Button(label="New")
-        new_icon = Gtk.Image.new_from_icon_name("document-new-symbolic", Gtk.IconSize.BUTTON)
+        new_icon = create_icon_image("add-alt", 16)
         self.new_button.set_image(new_icon)
         self.new_button.set_always_show_image(True)
         action_box.pack_start(self.new_button, False, False, 0)
         
         self.save_button = Gtk.Button(label="Save")
-        save_icon = Gtk.Image.new_from_icon_name("document-save-symbolic", Gtk.IconSize.BUTTON)
+        save_icon = create_icon_image("save", 16)
         self.save_button.set_image(save_icon)
         self.save_button.set_always_show_image(True)
         self.save_button.get_style_context().add_class("suggested-action")
         action_box.pack_start(self.save_button, False, False, 0)
         
         self.export_button = Gtk.Button(label="Export")
-        export_icon = Gtk.Image.new_from_icon_name("document-save-as-symbolic", Gtk.IconSize.BUTTON)
+        export_icon = create_icon_image("export", 16)
         self.export_button.set_image(export_icon)
         self.export_button.set_always_show_image(True)
         action_box.pack_start(self.export_button, False, False, 0)
@@ -185,7 +186,7 @@ class AggregatePanel(Gtk.Box):
         
         # Left side: Grading curve widget
         left_frame = Gtk.Frame(label="Grading Curve")
-        left_frame.set_size_request(600, -1)
+        left_frame.set_size_request(250, -1)  # Further reduced to allow narrower windows
         
         # TEMPORARILY DISABLE GRADING CURVE WIDGET TO ELIMINATE INFINITE SURFACE SIZE WARNINGS
         # self.grading_widget = GradingCurveWidget()
@@ -210,7 +211,7 @@ class AggregatePanel(Gtk.Box):
         
         # Right side: Properties and calculations
         right_frame = Gtk.Frame(label="Aggregate Properties")
-        right_frame.set_size_request(350, -1)
+        right_frame.set_size_request(250, -1)  # Reduced to allow narrower windows
         self._create_properties_section(right_frame)
         
         page_box.pack_start(right_frame, False, False, 0)
@@ -263,7 +264,7 @@ class AggregatePanel(Gtk.Box):
         
         # Left: Analysis tools
         left_frame = Gtk.Frame(label="Analysis Tools")
-        left_frame.set_size_request(350, -1)
+        left_frame.set_size_request(250, -1)  # Reduced to allow narrower windows
         self._create_analysis_tools(left_frame)
         analysis_box.pack_start(left_frame, False, False, 0)
         
@@ -399,14 +400,14 @@ class AggregatePanel(Gtk.Box):
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         
         add_component_button = Gtk.Button(label="Add Component")
-        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
+        add_icon = create_icon_image("add", 16)
         add_component_button.set_image(add_icon)
         add_component_button.set_always_show_image(True)
         add_component_button.connect('clicked', self._on_add_blend_component)
         controls_box.pack_start(add_component_button, False, False, 0)
         
         calculate_blend_button = Gtk.Button(label="Calculate Blend")
-        calc_icon = Gtk.Image.new_from_icon_name("accessories-calculator-symbolic", Gtk.IconSize.BUTTON)
+        calc_icon = create_icon_image("calculator", 16)
         calculate_blend_button.set_image(calc_icon)
         calculate_blend_button.set_always_show_image(True)
         calculate_blend_button.connect('clicked', self._on_calculate_blend)
@@ -797,7 +798,7 @@ class AggregatePanel(Gtk.Box):
         
         # Remove button
         remove_button = Gtk.Button()
-        remove_icon = Gtk.Image.new_from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON)
+        remove_icon = create_icon_image("subtract", 16)
         remove_button.set_image(remove_icon)
         remove_button.set_relief(Gtk.ReliefStyle.NONE)
         

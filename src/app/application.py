@@ -183,3 +183,13 @@ class VCCTLApplication(Gtk.Application):
         
         # Quit the application
         self.quit()
+
+
+def main():
+    """Main entry point for the VCCTL application."""
+    app = VCCTLApplication()
+    return app.run(sys.argv)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

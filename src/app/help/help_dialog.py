@@ -8,6 +8,7 @@ Provides the main help dialog window with navigation and content display.
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, GdkPixbuf
+from app.utils.icon_utils import create_icon_image
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import re
@@ -82,7 +83,7 @@ class HelpDialog(Gtk.Dialog):
         
         # Back button
         self.back_button = Gtk.ToolButton()
-        self.back_button.set_icon_name("go-previous")
+        self.back_button.set_icon_name("arrow--left")
         self.back_button.set_label("Back")
         self.back_button.set_tooltip_text("Go to previous topic")
         self.back_button.set_sensitive(False)
@@ -90,7 +91,7 @@ class HelpDialog(Gtk.Dialog):
         
         # Forward button
         self.forward_button = Gtk.ToolButton()
-        self.forward_button.set_icon_name("go-next")
+        self.forward_button.set_icon_name("arrow--right")
         self.forward_button.set_label("Forward")
         self.forward_button.set_tooltip_text("Go to next topic")
         self.forward_button.set_sensitive(False)
@@ -102,7 +103,7 @@ class HelpDialog(Gtk.Dialog):
         
         # Home button
         self.home_button = Gtk.ToolButton()
-        self.home_button.set_icon_name("go-home")
+        self.home_button.set_icon_name("home")
         self.home_button.set_label("Home")
         self.home_button.set_tooltip_text("Go to overview")
         toolbar.insert(self.home_button, -1)
@@ -121,7 +122,7 @@ class HelpDialog(Gtk.Dialog):
         search_box.pack_start(self.search_entry, False, False, 0)
         
         search_button = Gtk.Button()
-        search_button.set_image(Gtk.Image.new_from_icon_name("search", Gtk.IconSize.BUTTON))
+        search_button.set_image(create_icon_image("search", 16))
         search_button.set_tooltip_text("Search help topics")
         search_box.pack_start(search_button, False, False, 0)
         
@@ -135,7 +136,7 @@ class HelpDialog(Gtk.Dialog):
         
         # Print button
         self.print_button = Gtk.ToolButton()
-        self.print_button.set_icon_name("document-print")
+        self.print_button.set_icon_name("printer")
         self.print_button.set_label("Print")
         self.print_button.set_tooltip_text("Print current topic")
         toolbar.insert(self.print_button, -1)
@@ -228,12 +229,12 @@ class HelpDialog(Gtk.Dialog):
         bookmarks_toolbar.set_icon_size(Gtk.IconSize.SMALL_TOOLBAR)
         
         add_bookmark_button = Gtk.ToolButton()
-        add_bookmark_button.set_icon_name("bookmark-new")
+        add_bookmark_button.set_icon_name("bookmark--add")
         add_bookmark_button.set_tooltip_text("Add current topic to bookmarks")
         bookmarks_toolbar.insert(add_bookmark_button, -1)
         
         remove_bookmark_button = Gtk.ToolButton()
-        remove_bookmark_button.set_icon_name("list-remove")
+        remove_bookmark_button.set_icon_name("subtract")
         remove_bookmark_button.set_tooltip_text("Remove selected bookmark")
         bookmarks_toolbar.insert(remove_bookmark_button, -1)
         

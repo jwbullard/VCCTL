@@ -519,7 +519,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             # Show validation messages
             if has_errors:
                 self.validation_infobar.set_message_type(Gtk.MessageType.ERROR)
-                self.validation_icon.set_from_icon_name("dialog-error", Gtk.IconSize.BUTTON)
+                self.validation_icon.set_from_icon_name("error", Gtk.IconSize.BUTTON)
                 
                 # Show first error
                 first_error = next(iter(self.validation_errors.values()))
@@ -530,7 +530,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 
             elif has_warnings:
                 self.validation_infobar.set_message_type(Gtk.MessageType.WARNING)
-                self.validation_icon.set_from_icon_name("dialog-warning", Gtk.IconSize.BUTTON)
+                self.validation_icon.set_from_icon_name("warning", Gtk.IconSize.BUTTON)
                 
                 # Show first warning
                 first_warning = next(iter(self.validation_warnings.values()))
@@ -2787,7 +2787,7 @@ class AggregateDialog(MaterialDialogBase):
         
         self.image_widget = Gtk.Image()
         self.image_widget.set_size_request(250, 180)  # Larger size since it has its own section
-        self.image_widget.set_from_icon_name("image-x-generic", Gtk.IconSize.DIALOG)
+        self.image_widget.set_from_icon_name("image", Gtk.IconSize.DIALOG)
         image_box.pack_start(self.image_widget, False, False, 0)
     
     def _add_mechanical_properties_section(self, container: Gtk.Box) -> None:
@@ -3789,7 +3789,7 @@ class SlagDialog(MaterialDialogBase):
         self.activity_spin.set_digits(1)
         
         activity_info = Gtk.Image()
-        activity_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        activity_info.set_from_icon_name("information", Gtk.IconSize.BUTTON)
         
         # Wrap in EventBox to enable tooltip functionality
         activity_info_box = Gtk.EventBox()
@@ -3914,7 +3914,7 @@ class SlagDialog(MaterialDialogBase):
         self.cao_sio2_display.get_style_context().add_class("calculated-field")
         
         cao_info = Gtk.Image()
-        cao_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        cao_info.set_from_icon_name("information", Gtk.IconSize.BUTTON)
         
         # Wrap in EventBox to enable tooltip functionality
         cao_info_box = Gtk.EventBox()
@@ -3940,7 +3940,7 @@ class SlagDialog(MaterialDialogBase):
         self.mgo_al2o3_display.get_style_context().add_class("calculated-field")
         
         mgo_info = Gtk.Image()
-        mgo_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        mgo_info.set_from_icon_name("information", Gtk.IconSize.BUTTON)
         
         # Wrap in EventBox to enable tooltip functionality
         mgo_info_box = Gtk.EventBox()
@@ -4258,7 +4258,7 @@ class InertFillerDialog(MaterialDialogBase):
         self.specific_surface_spin.set_digits(2)
         
         surface_info = Gtk.Image()
-        surface_info.set_from_icon_name("dialog-information", Gtk.IconSize.BUTTON)
+        surface_info.set_from_icon_name("information", Gtk.IconSize.BUTTON)
         
         # Wrap in EventBox to enable tooltip functionality
         surface_info_box = Gtk.EventBox()

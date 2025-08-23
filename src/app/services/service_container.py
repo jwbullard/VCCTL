@@ -114,10 +114,7 @@ class ServiceContainer:
         """Get operation service instance."""
         if self._operation_service is None:
             self._operation_service = OperationService(self.db_service)
-            # Register operation handlers
-            from app.utils.operation_handlers import OPERATION_HANDLERS
-            for op_type, handler in OPERATION_HANDLERS.items():
-                self._operation_service.register_operation_handler(op_type, handler.execute)
+            # Simplified operation service - no handlers needed for basic CRUD operations
             self.logger.debug("Operation service created")
         return self._operation_service
     

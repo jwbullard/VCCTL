@@ -8,6 +8,7 @@ Manages contextual tooltips throughout the VCCTL application.
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Gdk
+from app.utils.icon_utils import create_icon_image
 from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 
@@ -367,7 +368,7 @@ class TooltipManager(GObject.Object):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         
         # Icon
-        icon = Gtk.Image.new_from_icon_name("help-contents", Gtk.IconSize.LARGE_TOOLBAR)
+        icon = create_icon_image("help", 16)
         hbox.pack_start(icon, False, False, 0)
         
         # Content
@@ -438,7 +439,7 @@ class TooltipManager(GObject.Object):
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
                 
                 # Error icon
-                icon = Gtk.Image.new_from_icon_name("dialog-error", Gtk.IconSize.LARGE_TOOLBAR)
+                icon = create_icon_image("error", 16)
                 hbox.pack_start(icon, False, False, 0)
                 
                 # Error message
@@ -481,7 +482,7 @@ class TooltipManager(GObject.Object):
     def create_info_tooltip_widget(self, text: str, help_topic: str = None) -> Gtk.Widget:
         """Create an info icon with tooltip."""
         info_button = Gtk.Button()
-        info_button.set_image(Gtk.Image.new_from_icon_name("dialog-information", Gtk.IconSize.BUTTON))
+        info_button.set_image(create_icon_image("information", 16))
         info_button.set_relief(Gtk.ReliefStyle.NONE)
         info_button.set_can_focus(False)
         
@@ -499,7 +500,7 @@ class TooltipManager(GObject.Object):
     def create_help_tooltip_widget(self, help_topic: str) -> Gtk.Widget:
         """Create a help icon with contextual help."""
         help_button = Gtk.Button()
-        help_button.set_image(Gtk.Image.new_from_icon_name("help-contents", Gtk.IconSize.BUTTON))
+        help_button.set_image(create_icon_image("help", 16))
         help_button.set_relief(Gtk.ReliefStyle.NONE)
         help_button.set_can_focus(False)
         

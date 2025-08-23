@@ -16,12 +16,14 @@ from app.models.silica_fume import SilicaFume, SilicaFumeCreate, SilicaFumeUpdat
 from app.models.limestone import Limestone, LimestoneCreate, LimestoneUpdate, LimestoneResponse
 from app.models.particle_shape_set import ParticleShapeSet, ParticleShapeSetCreate, ParticleShapeSetUpdate, ParticleShapeSetResponse
 from app.models.grading import Grading, GradingCreate, GradingUpdate, GradingResponse, GradingType
-from app.models.operation import Operation, OperationCreate, OperationUpdate, OperationResponse, OperationStatus, OperationType
+from app.models.operation import Operation, Result, OperationStatus, OperationType, ResultType
 from app.models.db_file import DbFile, DbFileCreate, DbFileUpdate, DbFileResponse
 from app.models.aggregate_sieve import AggregateSieve, AggregateSieveCreate, AggregateSieveUpdate, AggregateSieveResponse, SieveType
 from app.models.mix_design import MixDesign, MixDesignCreate, MixDesignUpdate, MixDesignResponse, MixDesignComponentData, MixDesignPropertiesData
 from app.models.hydration_parameters import HydrationParameters
+from app.models.hydration_parameter_set import HydrationParameterSet, HydrationParameterSetCreate, HydrationParameterSetUpdate, HydrationParameterSetResponse
 from app.models.temperature_profile import TemperatureProfileDB
+from app.models.elastic_moduli_operation import ElasticModuliOperation
 
 # Export all models for easy importing
 __all__ = [
@@ -36,11 +38,14 @@ __all__ = [
     'ParticleShapeSet',
     'Grading',
     'Operation',
+    'Result',
     'DbFile',
     'AggregateSieve',
     'MixDesign',
     'HydrationParameters',
+    'HydrationParameterSet',
     'TemperatureProfileDB',
+    'ElasticModuliOperation',
     
     # Pydantic Create Models
     'CementCreate',
@@ -52,10 +57,10 @@ __all__ = [
     'LimestoneCreate',
     'ParticleShapeSetCreate',
     'GradingCreate',
-    'OperationCreate',
     'DbFileCreate',
     'AggregateSieveCreate',
     'MixDesignCreate',
+    'HydrationParameterSetCreate',
     
     # Pydantic Update Models
     'CementUpdate',
@@ -67,10 +72,10 @@ __all__ = [
     'LimestoneUpdate',
     'ParticleShapeSetUpdate',
     'GradingUpdate',
-    'OperationUpdate',
     'DbFileUpdate',
     'AggregateSieveUpdate',
     'MixDesignUpdate',
+    'HydrationParameterSetUpdate',
     
     # Pydantic Response Models
     'CementResponse',
@@ -82,15 +87,16 @@ __all__ = [
     'LimestoneResponse',
     'ParticleShapeSetResponse',
     'GradingResponse',
-    'OperationResponse',
     'DbFileResponse',
     'AggregateSieveResponse',
     'MixDesignResponse',
+    'HydrationParameterSetResponse',
     
     # Enumerations
     'GradingType',
     'OperationStatus',
     'OperationType',
+    'ResultType',
     'SieveType',
 ]
 
@@ -108,11 +114,14 @@ def get_all_models():
         ParticleShapeSet,
         Grading,
         Operation,
+        Result,
         DbFile,
         AggregateSieve,
         MixDesign,
         HydrationParameters,
+        HydrationParameterSet,
         TemperatureProfileDB,
+        ElasticModuliOperation,
     ]
 
 
@@ -132,6 +141,7 @@ def get_model_by_name(model_name: str):
         'mix_design': MixDesign,
         'hydration_parameters': HydrationParameters,
         'temperature_profile': TemperatureProfileDB,
+        'elastic_moduli_operation': ElasticModuliOperation,
     }
     return model_map.get(model_name.lower())
 

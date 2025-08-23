@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Optional, Dict, Any, List
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -110,26 +111,26 @@ class MaterialsPanel(Gtk.Box):
         
         # Search entry
         search_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        search_icon = Gtk.Image.new_from_icon_name("edit-find-symbolic", Gtk.IconSize.BUTTON)
+        search_icon = create_icon_image("search", 16)
         search_box.pack_start(search_icon, False, False, 0)
         
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_placeholder_text("Search materials by name, type, or properties...")
-        self.search_entry.set_size_request(300, -1)
+        self.search_entry.set_size_request(200, -1)  # Reduced from 300 to allow narrower windows
         search_box.pack_start(self.search_entry, True, True, 0)
         
         controls_box.pack_start(search_box, True, True, 0)
         
         # Filter button
         self.filter_button = Gtk.ToggleButton(label="Filters")
-        filter_icon = Gtk.Image.new_from_icon_name("preferences-system-symbolic", Gtk.IconSize.BUTTON)
+        filter_icon = create_icon_image("settings", 16)
         self.filter_button.set_image(filter_icon)
         self.filter_button.set_always_show_image(True)
         controls_box.pack_start(self.filter_button, False, False, 0)
         
         # Add material button
         self.add_button = Gtk.Button(label="Add Material")
-        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
+        add_icon = create_icon_image("add", 16)
         self.add_button.set_image(add_icon)
         self.add_button.set_always_show_image(True)
         self.add_button.get_style_context().add_class("suggested-action")
@@ -140,14 +141,14 @@ class MaterialsPanel(Gtk.Box):
         io_box.get_style_context().add_class("linked")
         
         self.import_button = Gtk.Button(label="Import")
-        import_icon = Gtk.Image.new_from_icon_name("document-open-symbolic", Gtk.IconSize.BUTTON)
+        import_icon = create_icon_image("folder--open", 16)
         self.import_button.set_image(import_icon)
         self.import_button.set_always_show_image(True)
         self.import_button.set_tooltip_text("Import materials from file")
         io_box.pack_start(self.import_button, False, False, 0)
         
         self.export_button = Gtk.Button(label="Export")
-        export_icon = Gtk.Image.new_from_icon_name("document-save-symbolic", Gtk.IconSize.BUTTON)
+        export_icon = create_icon_image("save", 16)
         self.export_button.set_image(export_icon)
         self.export_button.set_always_show_image(True)
         self.export_button.set_tooltip_text("Export materials to file")
@@ -271,7 +272,7 @@ class MaterialsPanel(Gtk.Box):
         
         # Close button
         close_button = Gtk.Button()
-        close_icon = Gtk.Image.new_from_icon_name("window-close-symbolic", Gtk.IconSize.BUTTON)
+        close_icon = create_icon_image("close", 16)
         close_button.set_image(close_icon)
         close_button.set_relief(Gtk.ReliefStyle.NONE)
         close_button.connect('clicked', self._on_close_details_clicked)
@@ -297,20 +298,20 @@ class MaterialsPanel(Gtk.Box):
         action_box.get_style_context().add_class("linked")
         
         self.edit_button = Gtk.Button(label="Edit")
-        edit_icon = Gtk.Image.new_from_icon_name("document-edit-symbolic", Gtk.IconSize.BUTTON)
+        edit_icon = create_icon_image("edit", 16)
         self.edit_button.set_image(edit_icon)
         self.edit_button.set_always_show_image(True)
         self.edit_button.get_style_context().add_class("suggested-action")
         action_box.pack_start(self.edit_button, True, True, 0)
         
         self.duplicate_button = Gtk.Button(label="Duplicate")
-        duplicate_icon = Gtk.Image.new_from_icon_name("edit-copy-symbolic", Gtk.IconSize.BUTTON)
+        duplicate_icon = create_icon_image("copy", 16)
         self.duplicate_button.set_image(duplicate_icon)
         self.duplicate_button.set_always_show_image(True)
         action_box.pack_start(self.duplicate_button, True, True, 0)
         
         self.delete_button = Gtk.Button(label="Delete")
-        delete_icon = Gtk.Image.new_from_icon_name("edit-delete-symbolic", Gtk.IconSize.BUTTON)
+        delete_icon = create_icon_image("delete", 16)
         self.delete_button.set_image(delete_icon)
         self.delete_button.set_always_show_image(True)
         self.delete_button.get_style_context().add_class("destructive-action")

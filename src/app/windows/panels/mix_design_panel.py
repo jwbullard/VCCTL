@@ -20,6 +20,7 @@ from datetime import timedelta
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, Gdk, GLib
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -131,19 +132,19 @@ class MixDesignPanel(Gtk.Box):
         action_box.get_style_context().add_class("linked")
         
         self.new_button = Gtk.Button(label="New")
-        new_icon = Gtk.Image.new_from_icon_name("document-new-symbolic", Gtk.IconSize.BUTTON)
+        new_icon = create_icon_image("add-alt", 16)
         self.new_button.set_image(new_icon)
         self.new_button.set_always_show_image(True)
         action_box.pack_start(self.new_button, False, False, 0)
         
         self.load_button = Gtk.Button(label="Load")
-        load_icon = Gtk.Image.new_from_icon_name("document-open-symbolic", Gtk.IconSize.BUTTON)
+        load_icon = create_icon_image("folder--open", 16)
         self.load_button.set_image(load_icon)
         self.load_button.set_always_show_image(True)
         action_box.pack_start(self.load_button, False, False, 0)
         
         self.save_button = Gtk.Button(label="Save")
-        save_icon = Gtk.Image.new_from_icon_name("document-save-symbolic", Gtk.IconSize.BUTTON)
+        save_icon = create_icon_image("save", 16)
         self.save_button.set_image(save_icon)
         self.save_button.set_always_show_image(True)
         self.save_button.get_style_context().add_class("suggested-action")
@@ -151,7 +152,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Reset button to restore defaults
         self.reset_button = Gtk.Button(label="Reset")
-        reset_icon = Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        reset_icon = create_icon_image("refresh", 16)
         self.reset_button.set_image(reset_icon)
         self.reset_button.set_always_show_image(True)
         self.reset_button.set_tooltip_text("Reset all parameters to default values")
@@ -171,8 +172,8 @@ class MixDesignPanel(Gtk.Box):
         scrolled.set_hexpand(True)
         scrolled.set_vexpand(True)
         
-        # Main content layout with three columns
-        main_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
+        # TEMP FIX: Changed from horizontal 3-column to vertical layout to fix window width
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=15)
         main_box.set_margin_top(15)
         main_box.set_margin_bottom(15)
         main_box.set_margin_left(15)
@@ -237,7 +238,7 @@ class MixDesignPanel(Gtk.Box):
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
         add_button = Gtk.Button(label="Add Component")
-        add_icon = Gtk.Image.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
+        add_icon = create_icon_image("add", 16)
         add_button.set_image(add_icon)
         add_button.set_always_show_image(True)
         add_button.connect('clicked', self._on_add_component_clicked)
@@ -425,7 +426,7 @@ class MixDesignPanel(Gtk.Box):
         
         self.create_mix_button = Gtk.Button(label="Create Mix")
         self.create_mix_button.set_name("create-mix-button")  # Test ID for Playwright
-        create_icon = Gtk.Image.new_from_icon_name("system-run-symbolic", Gtk.IconSize.BUTTON)
+        create_icon = create_icon_image("play", 16)
         self.create_mix_button.set_image(create_icon)
         self.create_mix_button.set_always_show_image(True)
         self.create_mix_button.set_tooltip_text("Generate 3D microstructure - creates input file and runs simulation automatically")
@@ -434,13 +435,13 @@ class MixDesignPanel(Gtk.Box):
         
         self.validate_button = Gtk.Button(label="Validate")
         self.validate_button.set_name("validate-button")  # Test ID for Playwright
-        validate_icon = Gtk.Image.new_from_icon_name("dialog-information-symbolic", Gtk.IconSize.BUTTON)
+        validate_icon = create_icon_image("information", 16)
         self.validate_button.set_image(validate_icon)
         self.validate_button.set_always_show_image(True)
         button_box.pack_start(self.validate_button, False, False, 0)
         
         self.export_button = Gtk.Button(label="Export")
-        export_icon = Gtk.Image.new_from_icon_name("document-save-as-symbolic", Gtk.IconSize.BUTTON)
+        export_icon = create_icon_image("export", 16)
         self.export_button.set_image(export_icon)
         self.export_button.set_always_show_image(True)
         button_box.pack_start(self.export_button, False, False, 0)
@@ -577,7 +578,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Grading button (only for aggregates)
         grading_button = Gtk.Button()
-        grading_icon = Gtk.Image.new_from_icon_name("preferences-system-symbolic", Gtk.IconSize.BUTTON)
+        grading_icon = create_icon_image("settings", 16)
         grading_button.set_image(grading_icon)
         grading_button.set_relief(Gtk.ReliefStyle.NONE)
         grading_button.set_tooltip_text("Edit grading curve")
@@ -586,7 +587,7 @@ class MixDesignPanel(Gtk.Box):
         
         # Remove button
         remove_button = Gtk.Button()
-        remove_icon = Gtk.Image.new_from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON)
+        remove_icon = create_icon_image("subtract", 16)
         remove_button.set_image(remove_icon)
         remove_button.set_relief(Gtk.ReliefStyle.NONE)
         row_box.pack_start(remove_button, False, False, 0)
@@ -2579,8 +2580,9 @@ class MixDesignPanel(Gtk.Box):
             lines.append("0")  # SPHERES - no additional inputs needed
         else:
             lines.append("1")  # REALSHAPE
-            # Parent directory path (with final separator)
-            parent_path = os.path.join(os.getcwd(), "particle_shape_set") + os.sep
+            # Parent directory path (relative path since genmic runs from mix folder)
+            # From Operations/MixName/ we need to go up two levels to reach particle_shape_set/
+            parent_path = "../../particle_shape_set/"
             lines.append(parent_path)
             # Shape set name (no final separator)
             lines.append(shape_set)
@@ -2707,10 +2709,10 @@ class MixDesignPanel(Gtk.Box):
             # Menu choice 9: DISTRIB (distribute clinker phases)
             lines.append("9")
             
-            # Path/root name for cement correlation files (absolute path)
+            # Path/root name for cement correlation files (relative path since genmic runs from mix folder)
             mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-            mix_folder_path = os.path.abspath(os.path.join("Operations", mix_name_safe))  # Create absolute path to Operations/mix folder
-            correlation_path = os.path.join(mix_folder_path, mix_name_safe)  # Platform-independent path joining
+            # Use relative path since genmic will be executed from within the mix folder
+            correlation_path = mix_name_safe  # Just the base name, files will be in same directory
             lines.append(correlation_path)
             
             # Add volume and surface fractions for cement clinker phases (C3S through NA2SO4)
@@ -2762,14 +2764,14 @@ class MixDesignPanel(Gtk.Box):
         # Menu choice 10: OUTPUTMIC (output microstructure file)
         lines.append("10")
         
-        # Output filename for microstructure (absolute path)
+        # Output filename for microstructure (relative path since genmic runs from mix folder)
         mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
-        mix_folder_path = os.path.abspath(os.path.join("Operations", mix_name_safe))  # Create absolute path to Operations/mix folder
-        output_filename = os.path.join(mix_folder_path, f"{mix_name_safe}.img")  # Platform-independent path
+        # Use relative paths since genmic will be executed from within the mix folder
+        output_filename = f"{mix_name_safe}.img"  # Just the filename, will be in current directory
         lines.append(output_filename)
         
-        # Output filename for particle IDs (absolute path)
-        particle_filename = os.path.join(mix_folder_path, f"{mix_name_safe}.pimg")  # Platform-independent path
+        # Output filename for particle IDs (relative path since genmic runs from mix folder)
+        particle_filename = f"{mix_name_safe}.pimg"  # Just the filename, will be in current directory
         lines.append(particle_filename)
         
         # Menu choice 1: Exit

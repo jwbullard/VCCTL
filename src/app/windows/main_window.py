@@ -14,17 +14,19 @@ import json
 from pathlib import Path
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GObject, GLib
+from gi.repository import Gtk, Gdk, GObject, GLib, GdkPixbuf
+from app.utils.icon_utils import create_icon_image
 
 if TYPE_CHECKING:
     from app.application import VCCTLApplication
 
 from app.services.service_container import get_service_container
-from app.windows.panels import MaterialsPanel, MixDesignPanel, MicrostructurePanel, HydrationPanel, FileManagementPanel, OperationsMonitoringPanel
+from app.windows.panels import MaterialsPanel, MixDesignPanel, MicrostructurePanel, HydrationPanel, ElasticModuliPanel, FileManagementPanel, OperationsMonitoringPanel, ResultsPanel
 from app.utils.error_handling import get_error_handler, ErrorCategory, ErrorSeverity
 from app.utils.performance_monitor import get_performance_monitor, profile_function
 from app.ui import create_ui_polish_manager, UIPolishManager
 from app.help import create_help_system, HelpManager, HelpDialog, TooltipManager
+from app.utils.icon_utils import set_image_custom_icon
 
 
 class VCCTLMainWindow(Gtk.ApplicationWindow):
@@ -151,7 +153,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         
         # Add menu button to header bar
         menu_button = Gtk.MenuButton()
-        menu_button.set_image(Gtk.Image.new_from_icon_name("open-menu-symbolic", Gtk.IconSize.BUTTON))
+        menu_button.set_image(create_icon_image("menu", 16))
         menu_button.set_tooltip_text("Application Menu")
         self.header_bar.pack_end(menu_button)
         
@@ -320,9 +322,10 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self._create_mix_design_tab()        # RE-ENABLED - aggregate names fixed
         # self._create_microstructure_tab()    # REMOVED - use Operations Panel for all microstructure viewing
         self._create_hydration_tab()         # RE-ENABLED - not the width issue
+        self._create_elastic_moduli_tab()    # NEW - third stage after microstructure and hydration
         self._create_file_management_tab()   # RE-ENABLED - testing file operations
         self._create_operations_tab()        # RE-ENABLED - testing monitoring panel
-        # self._create_results_tab()           # REMOVED - not needed
+        self._create_results_tab()           # RE-ENABLED - dedicated Results panel
         
         # Pack notebook into main container
         main_vbox.pack_start(self.notebook, True, True, 0)
@@ -352,11 +355,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         self.progress_bar.set_no_show_all(True)  # Hidden by default
         status_container.pack_start(self.progress_bar, False, False, 5)
         
-        # Status icon (for showing status types)
-        self.status_icon = Gtk.Image()
-        self.status_icon.set_from_icon_name("dialog-information", Gtk.IconSize.SMALL_TOOLBAR)
-        self.status_icon.set_no_show_all(True)  # Hidden by default
-        status_container.pack_start(self.status_icon, False, False, 5)
+        # Removed status icon - not needed with service indicators
         
         # Service status indicator
         self.service_status_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -367,11 +366,12 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         separator = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
         status_container.pack_start(separator, False, False, 5)
         
-        # University attribution
-        university_label = Gtk.Label(label="Texas A&M University")
-        university_label.set_margin_right(10)
-        university_label.set_tooltip_text("Texas A&M University\nVCCTL Development Team")
-        status_container.pack_end(university_label, False, False, 0)
+        # University attribution with clickable link
+        university_button = Gtk.LinkButton(uri="https://www.tamu.edu/", label="Texas A&M University")
+        university_button.set_margin_right(10)
+        university_button.set_tooltip_text("Texas A&M University\nClick to visit university website")
+        university_button.set_relief(Gtk.ReliefStyle.NONE)  # Remove button appearance
+        status_container.pack_end(university_button, False, False, 0)
         
         # Version info
         version_label = Gtk.Label(label=f"v{self.app.app_version}")
@@ -726,18 +726,30 @@ Services:"""
         self.app.quit_application()
     
     def _create_service_indicators(self) -> None:
-        """Create service status indicators."""
-        # Database indicator
+        """Create service status indicators with explanatory text."""
+        # Add explanatory label for the status indicators
+        status_label = Gtk.Label()
+        status_label.set_markup('<span size="small" foreground="gray">System Status:</span>')
+        status_label.set_margin_right(5)
+        self.service_status_box.pack_start(status_label, False, False, 0)
+        
+        # Database indicator  
         self.db_indicator = Gtk.Image()
-        self.db_indicator.set_from_icon_name("network-idle", Gtk.IconSize.MENU)
-        self.db_indicator.set_tooltip_text("Database: Unknown")
+        set_image_custom_icon(self.db_indicator, "48-database", 16)
+        self.db_indicator.set_tooltip_text("Database Connection Status\nShows whether the materials database is accessible")
         self.service_status_box.pack_start(self.db_indicator, False, False, 0)
         
         # Config indicator
         self.config_indicator = Gtk.Image()
-        self.config_indicator.set_from_icon_name("preferences-system", Gtk.IconSize.MENU)
-        self.config_indicator.set_tooltip_text("Configuration: Loaded")
+        set_image_custom_icon(self.config_indicator, "48-floppy-disk", 16)
+        self.config_indicator.set_tooltip_text("Configuration Status\nIndicates whether application settings are loaded correctly")
         self.service_status_box.pack_start(self.config_indicator, False, False, 0)
+        
+        # Application health indicator
+        self.app_health_indicator = Gtk.Image()
+        set_image_custom_icon(self.app_health_indicator, "48-statistics", 16)
+        self.app_health_indicator.set_tooltip_text("Application Health\nOverall system status and performance monitoring")
+        self.service_status_box.pack_start(self.app_health_indicator, False, False, 0)
         
         # Update service status
         self._update_service_status()
@@ -751,21 +763,29 @@ Services:"""
             try:
                 health = service_container.db_service.health_check()
                 if health.get('status') == 'healthy':
-                    self.db_indicator.set_from_icon_name("network-idle", Gtk.IconSize.MENU)
-                    self.db_indicator.set_tooltip_text("Database: Connected")
+                    set_image_custom_icon(self.db_indicator, "48-database", 16)
+                    self.db_indicator.set_tooltip_text("Database Status: Connected\nMaterials database is accessible and ready for use")
                 else:
-                    self.db_indicator.set_from_icon_name("network-error", Gtk.IconSize.MENU)
-                    self.db_indicator.set_tooltip_text("Database: Error")
+                    set_image_custom_icon(self.db_indicator, "48-trash-xmark", 16)  # Error state
+                    self.db_indicator.set_tooltip_text("Database Status: Error\nThere is an issue with the materials database connection")
             except:
-                self.db_indicator.set_from_icon_name("network-offline", Gtk.IconSize.MENU)
-                self.db_indicator.set_tooltip_text("Database: Disconnected")
+                set_image_custom_icon(self.db_indicator, "48-clear-data", 16)  # Disconnected state
+                self.db_indicator.set_tooltip_text("Database Status: Disconnected\nCannot connect to the materials database")
             
             # Config is always loaded if we get here
-            self.config_indicator.set_from_icon_name("emblem-ok", Gtk.IconSize.MENU)
-            self.config_indicator.set_tooltip_text("Configuration: Loaded")
+            set_image_custom_icon(self.config_indicator, "48-floppy-disk", 16)
+            self.config_indicator.set_tooltip_text("Configuration Status: Loaded\nApplication settings and preferences are loaded correctly")
+            
+            # Application health is good if we get here without errors
+            set_image_custom_icon(self.app_health_indicator, "48-statistics", 16)
+            self.app_health_indicator.set_tooltip_text("Application Health: Running\nAll core systems are operational and functioning normally")
             
         except Exception as e:
             self.logger.warning(f"Could not update service status: {e}")
+            # Set error state for app health indicator
+            if hasattr(self, 'app_health_indicator'):
+                set_image_custom_icon(self.app_health_indicator, "48-trash-xmark", 16)
+                self.app_health_indicator.set_tooltip_text("Application Health: Warning\nSome system components may not be functioning correctly")
     
     def update_status(self, message: str, status_type: str = "info", timeout: int = 0) -> None:
         """
@@ -784,19 +804,7 @@ Services:"""
         self.status_bar.pop(self.status_context_id)
         self.status_bar.push(self.status_context_id, message)
         
-        # Set status icon based on type
-        icon_names = {
-            "info": "dialog-information",
-            "warning": "dialog-warning", 
-            "error": "dialog-error",
-            "success": "emblem-ok"
-        }
-        
-        if status_type in icon_names:
-            self.status_icon.set_from_icon_name(icon_names[status_type], Gtk.IconSize.SMALL_TOOLBAR)
-            self.status_icon.show()
-        else:
-            self.status_icon.hide()
+        # Status type handling removed - using service indicators instead
         
         # Auto-clear if timeout specified
         if timeout > 0:
@@ -804,10 +812,9 @@ Services:"""
             GLib.timeout_add_seconds(timeout, self._clear_status_message)
     
     def _clear_status_message(self) -> bool:
-        """Clear status message and hide icon."""
+        """Clear status message."""
         self.status_bar.pop(self.status_context_id)
         self.status_bar.push(self.status_context_id, "Ready")
-        self.status_icon.hide()
         return False  # Don't repeat the timeout
     
     def show_progress(self, text: str = "", fraction: float = 0.0) -> None:
@@ -920,28 +927,53 @@ Services:"""
         """Create the home/welcome tab."""
         
         # Create welcome content
-        welcome_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
-        welcome_box.set_margin_top(40)
-        welcome_box.set_margin_bottom(40)
-        welcome_box.set_margin_left(40)
-        welcome_box.set_margin_right(40)
+        welcome_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=25)
+        welcome_box.set_margin_top(50)
+        welcome_box.set_margin_bottom(50)
+        welcome_box.set_margin_left(50)
+        welcome_box.set_margin_right(50)
         
-        # VCCTL title and description
+        # VCCTL header with icon and title
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+        header_box.set_halign(Gtk.Align.CENTER)
+        
+        # VCCTL logo icon
+        try:
+            from pathlib import Path
+            icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
+            icon_path = icon_path.resolve()  # Make absolute path to avoid working directory issues
+            if icon_path.exists():
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon_path), 80, 80, True)
+                vcctl_icon = Gtk.Image.new_from_pixbuf(pixbuf)
+                vcctl_icon.set_valign(Gtk.Align.CENTER)  # Vertically center the icon
+                header_box.pack_start(vcctl_icon, False, False, 0)
+        except Exception as e:
+            self.logger.warning(f"Could not load VCCTL icon: {e}")
+        
+        # Title and subtitle in vertical box
+        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        title_box.set_valign(Gtk.Align.CENTER)  # Center the text box vertically
+        
         title_label = Gtk.Label()
-        title_label.set_markup('<span size="xx-large" weight="bold">VCCTL</span>')
-        welcome_box.pack_start(title_label, False, False, 0)
+        title_label.set_markup('<span size="30000" weight="bold">VCCTL</span>')  # Increased from xx-large
+        title_label.set_halign(Gtk.Align.START)  # Left-align the title
+        title_box.pack_start(title_label, False, False, 0)
         
         subtitle_label = Gtk.Label()
-        subtitle_label.set_markup('<span size="large">Virtual Cement and Concrete Testing Laboratory</span>')
-        welcome_box.pack_start(subtitle_label, False, False, 0)
+        subtitle_label.set_markup('<span size="18000">Virtual Cement and Concrete Testing Laboratory</span>')  # Increased from large
+        subtitle_label.set_halign(Gtk.Align.START)  # Left-align the subtitle
+        title_box.pack_start(subtitle_label, False, False, 0)
+        
+        header_box.pack_start(title_box, False, False, 0)
+        welcome_box.pack_start(header_box, False, False, 0)
         
         # Description
         desc_label = Gtk.Label()
         desc_label.set_markup("""
-Developed by Texas A&amp;M University,
+<span size="14000">Developed by Texas A&amp;M University,
 VCCTL is a comprehensive toolkit for cement and concrete materials modeling.
 
-This GTK3 desktop application provides an intuitive interface for:
+This GTK3 desktop application provides an intuitive interface for:</span>
         """)
         desc_label.set_justify(Gtk.Justification.CENTER)
         desc_label.set_line_wrap(True)
@@ -971,15 +1003,16 @@ This GTK3 desktop application provides an intuitive interface for:
             col = (i % 2) * 3
             
             icon_label = Gtk.Label(icon)
-            icon_label.set_markup(f'<span size="x-large">{icon}</span>')
+            icon_label.set_markup(f'<span size="20000">{icon}</span>')  # Increased from x-large
             features_grid.attach(icon_label, col, row, 1, 1)
             
             title_label = Gtk.Label()
-            title_label.set_markup(f'<b>{title}</b>')
+            title_label.set_markup(f'<span size="14000"><b>{title}</b></span>')  # Increased size
             title_label.set_halign(Gtk.Align.START)
             features_grid.attach(title_label, col + 1, row, 1, 1)
             
             desc_label = Gtk.Label(desc)
+            desc_label.set_markup(f'<span size="11000">{desc}</span>')  # Increased size
             desc_label.set_halign(Gtk.Align.START)
             desc_label.set_line_wrap(True)
             desc_label.set_max_width_chars(40)
@@ -998,10 +1031,10 @@ This GTK3 desktop application provides an intuitive interface for:
         
         steps_label = Gtk.Label()
         steps_label.set_markup("""
-<b>1. Materials Tab:</b> Define your cement and aggregate materials
+<span size="12000"><b>1. Materials Tab:</b> Define your cement and aggregate materials
 <b>2. Mix Design Tab:</b> Create concrete mix compositions
 <b>3. Operations Tab:</b> Run simulations and analyses
-<b>4. Results Tab:</b> View and analyze your results
+<b>4. Results Tab:</b> View and analyze your results</span>
         """)
         steps_label.set_halign(Gtk.Align.START)
         getting_started_box.pack_start(steps_label, False, False, 0)
@@ -1097,6 +1130,25 @@ This GTK3 desktop application provides an intuitive interface for:
         tab_label = Gtk.Label("Hydration")
         self.notebook.append_page(self.hydration_panel, tab_label)
     
+    def _create_elastic_moduli_tab(self) -> None:
+        """Create the elastic moduli calculations tab."""
+        # Create elastic moduli panel
+        self.elastic_moduli_panel = ElasticModuliPanel(self)
+        self.panels['elastic_moduli'] = self.elastic_moduli_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'elastic_moduli_panel', self.elastic_moduli_panel,
+            {
+                'name': 'Elastic Moduli Panel',
+                'description': 'Panel for calculating mechanical properties from hydrated microstructures',
+                'tooltip': 'Set aggregate properties and calculate elastic moduli of cement-based materials'
+            }
+        )
+        
+        tab_label = Gtk.Label("Elastic Moduli")
+        self.notebook.append_page(self.elastic_moduli_panel, tab_label)
+    
     def _create_file_management_tab(self) -> None:
         """Create the file management tab."""
         # Create file management panel
@@ -1138,20 +1190,23 @@ This GTK3 desktop application provides an intuitive interface for:
     
     def _create_results_tab(self) -> None:
         """Create the results/visualization tab."""
-        # Placeholder for results tab
-        placeholder = Gtk.Label()
-        placeholder.set_markup("""
-<span size="large"><b>Results &amp; Visualization</b></span>
-
-This tab will contain the results analysis interface.
-
-<i>Implementation in progress...</i>
-        """)
-        placeholder.set_justify(Gtk.Justification.CENTER)
-        placeholder.set_margin_top(100)
+        # Create results panel
+        self.results_panel = ResultsPanel(self)
+        self.panels['results'] = self.results_panel
+        
+        # Register with UI polish manager
+        self.ui_polish_manager.register_scientific_widget(
+            'results_panel', self.results_panel,
+            {
+                'name': 'Results Analysis Panel',
+                'description': 'Panel for analyzing and visualizing completed simulation results',
+                'tooltip': 'View 3D results, plot data, and analyze completed operations'
+            }
+        )
         
         tab_label = Gtk.Label("Results")
-        self.notebook.append_page(placeholder, tab_label)
+        tab_label.set_name("results-tab")  # Test ID for Playwright
+        self.notebook.append_page(self.results_panel, tab_label)
     
     def _on_tab_switched(self, notebook: Gtk.Notebook, page: Gtk.Widget, page_num: int) -> None:
         """Handle tab switch events."""
@@ -1160,6 +1215,11 @@ This tab will contain the results analysis interface.
             tab_name = tab_names[page_num]
             self.update_status(f"Switched to {tab_name} tab")
             self.logger.debug(f"Switched to tab: {tab_name}")
+            
+            # Handle specific tab activations
+            if tab_name == "Results" and hasattr(self, 'results_panel'):
+                # Refresh the results panel when it becomes visible
+                self.results_panel.on_show()
     
     def switch_to_tab(self, tab_name: str) -> bool:
         """Switch to a specific tab by name."""
@@ -1287,6 +1347,16 @@ This tab will contain the results analysis interface.
         about_dialog.set_modal(True)
         about_dialog.set_destroy_with_parent(True)
         
+        # Set VCCTL logo icon
+        try:
+            icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
+            icon_path = icon_path.resolve()  # Make absolute path to avoid working directory issues
+            if icon_path.exists():
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon_path), 128, 128, True)
+                about_dialog.set_logo(pixbuf)
+        except Exception as e:
+            self.logger.warning(f"Could not load VCCTL icon for About dialog: {e}")
+        
         # Set basic program info
         about_dialog.set_program_name("VCCTL")
         about_dialog.set_version("10.0.0")
@@ -1294,21 +1364,21 @@ This tab will contain the results analysis interface.
         about_dialog.set_website("https://github.com/jwbullard/VCCTL-GTK")
         about_dialog.set_website_label("VCCTL GitHub Repository")
         
-        # Set authors using escaped text to prevent markup interpretation
+        # Set authors using plain text (no HTML encoding needed)
         authors_list = [
-            "Texas A&amp;M University",  # Escape the ampersand
-            "Jeffrey W. Bullard",
+            "Texas A&M University",
+            "Jeffrey W. Bullard", 
             "Development Team"
         ]
         about_dialog.set_authors(authors_list)
         
-        # Set copyright with escaped ampersand
-        about_dialog.set_copyright("© 2024 Texas A&amp;M University")
+        # Set copyright with plain text (no HTML encoding needed)
+        about_dialog.set_copyright("© 2024 Texas A&M University")
         
-        # Set license with escaped ampersands
+        # Set license with plain text (no HTML encoding needed)
         license_text = """MIT License
 
-Copyright (c) 2024 Texas A&amp;M University
+Copyright (c) 2024 Texas A&M University
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

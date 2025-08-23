@@ -1,0 +1,201 @@
+{
+  "operations": {
+    "HydrationSim_Cem140Blend_20250820_132554": {
+      "id": "HydrationSim_Cem140Blend_20250820_132554",
+      "name": "HydrationSim_Cem140Blend_20250820_132554",
+      "operation_type": "hydration_simulation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/HydrationSim_Cem140Blend_20250820_132554"
+      },
+      "start_time": "2025-08-20T18:25:54.528511",
+      "end_time": "2025-08-20T18:34:20.784418",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "genmic_input_Cem152Blend Microstructure": {
+      "id": "genmic_input_Cem152Blend Microstructure",
+      "name": "genmic_input_Cem152Blend Microstructure",
+      "operation_type": "microstructure_generation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/genmic_input_Cem152Blend Microstructure"
+      },
+      "start_time": "2025-08-20T13:44:55.419000",
+      "end_time": "2025-08-20T13:46:34",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "MyCustomHydrationTest": {
+      "id": "MyCustomHydrationTest",
+      "name": "MyCustomHydrationTest",
+      "operation_type": "hydration_simulation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/MyCustomHydrationTest"
+      },
+      "start_time": "2025-08-22T02:11:21.659656",
+      "end_time": "2025-08-22T02:33:12.824340",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "MyCustomTest": {
+      "id": "MyCustomTest",
+      "name": "MyCustomTest",
+      "operation_type": "hydration_simulation",
+      "status": "cancelled",
+      "progress": 0.0,
+      "current_step": "Operation cancelled",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/MyCustomTest"
+      },
+      "start_time": "2025-08-22T02:12:08.876675",
+      "end_time": "2025-08-22T02:33:28.798199",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "AnotherCustomTest": {
+      "id": "AnotherCustomTest",
+      "name": "AnotherCustomTest",
+      "operation_type": "hydration_simulation",
+      "status": "cancelled",
+      "progress": 0.0,
+      "current_step": "Operation cancelled",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/AnotherCustomTest"
+      },
+      "start_time": "2025-08-22T02:12:10.902440",
+      "end_time": "2025-08-22T02:33:28.798203",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "HydrationSim_Cem140Quartz07_20250821_212033": {
+      "id": "HydrationSim_Cem140Quartz07_20250821_212033",
+      "name": "HydrationSim_Cem140Quartz07_20250821_212033",
+      "operation_type": "hydration_simulation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/HydrationSim_Cem140Quartz07_20250821_212033"
+      },
+      "start_time": "2025-08-22T02:20:33.662304",
+      "end_time": "2025-08-22T02:22:48.737181",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "c140q07-early": {
+      "id": "c140q07-early",
+      "name": "c140q07-early",
+      "operation_type": "hydration_simulation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/c140q07-early"
+      },
+      "start_time": "2025-08-22T02:23:19.416415",
+      "end_time": "2025-08-22T02:33:12.826727",
+      "paused_time": null,
+      "estimated_duration": null
+    },
+    "proc_1755879433832": {
+      "id": "proc_1755879433832",
+      "name": "genmic_input_Cem140Quartz03_copy Microstructure",
+      "operation_type": "microstructure_generation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Generation complete",
+      "total_steps": 4,
+      "completed_steps": 4,
+      "cpu_usage": 0.0,
+      "memory_usage": 36.859375,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {},
+      "start_time": "2025-08-22T11:17:13.847919",
+      "end_time": "2025-08-22T11:24:35.964440",
+      "paused_time": null,
+      "estimated_duration": 180.0
+    },
+    "HydrationSim_Cem140Quartz03_copy_20250822_195417": {
+      "id": "HydrationSim_Cem140Quartz03_copy_20250822_195417",
+      "name": "HydrationSim_Cem140Quartz03_copy_20250822_195417",
+      "operation_type": "hydration_simulation",
+      "status": "completed",
+      "progress": 1.0,
+      "current_step": "Process completed (cleanup - status unknown)",
+      "total_steps": 0,
+      "completed_steps": 0,
+      "cpu_usage": 0.0,
+      "memory_usage": 0.0,
+      "disk_usage": 0.0,
+      "error_message": null,
+      "metadata": {
+        "source": "database",
+        "output_directory": "Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417"
+      },
+      "start_time": "2025-08-22T19:54:47.547810",
+      "end_time": "2025-08-23T01:05:03.047636",
+      "paused_time": null,
+      "estimated_duration": 24.552162
+    }
+  },
+  "operation_counter": 0,
+  "saved_at": "2025-08-22T20:57:48.677305"
+}

@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
 
 from app.services.service_container import get_service_container
+from app.utils.icon_utils import set_tool_button_custom_icon, create_button_with_icon
 
 
 class OperationStatus(Enum):
@@ -81,6 +82,38 @@ class Operation:
     stderr_file: Optional[str] = field(default=None, init=False)
     stdout_handle: Optional[object] = field(default=None, init=False)
     stderr_handle: Optional[object] = field(default=None, init=False)
+    
+    def pause_process(self) -> bool:
+        """Pause the operation's process using SIGSTOP signal."""
+        try:
+            if self.process and self.process.poll() is None:
+                # Process is still running, pause it
+                self.process.send_signal(signal.SIGSTOP)
+                return True
+            elif self.pid:
+                # Try using stored PID
+                os.kill(self.pid, signal.SIGSTOP)
+                return True
+        except (ProcessLookupError, PermissionError, OSError) as e:
+            # Process may have ended or we don't have permission
+            return False
+        return False
+    
+    def resume_process(self) -> bool:
+        """Resume the operation's process using SIGCONT signal."""
+        try:
+            if self.process and self.process.poll() is None:
+                # Process is still running (paused), resume it
+                self.process.send_signal(signal.SIGCONT)
+                return True
+            elif self.pid:
+                # Try using stored PID
+                os.kill(self.pid, signal.SIGCONT)
+                return True
+        except (ProcessLookupError, PermissionError, OSError) as e:
+            # Process may have ended or we don't have permission
+            return False
+        return False
     
     @property
     def duration(self) -> Optional[timedelta]:
@@ -139,6 +172,57 @@ class Operation:
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             pass
         return None
+    
+    def parse_genmic_progress(self, stderr_line: str) -> bool:
+        """Parse genmic progress updates from stderr line. Returns True if progress was updated."""
+        try:
+            if not stderr_line.startswith("GENMIC_PROGRESS:"):
+                return False
+            
+            # Parse: GENMIC_PROGRESS: stage=particle_placement progress=0.30 message=Placed 3000 particles
+            content = stderr_line.replace("GENMIC_PROGRESS:", "").strip()
+            
+            # Extract key=value pairs
+            progress_data = {}
+            parts = content.split()
+            for part in parts:
+                if "=" in part and not part.startswith("message="):
+                    key, value = part.split("=", 1)
+                    progress_data[key] = value
+            
+            # Handle message separately (may contain spaces)
+            if "message=" in content:
+                message_start = content.find("message=") + 8
+                progress_data["message"] = content[message_start:].strip()
+            
+            # Update operation progress
+            if "progress" in progress_data:
+                try:
+                    new_progress = float(progress_data["progress"])
+                    self.progress = max(0.0, min(1.0, new_progress))  # Clamp to 0-1
+                except ValueError:
+                    pass
+            
+            # Update stage and message
+            if "stage" in progress_data:
+                self.current_step = progress_data.get("message", f"Stage: {progress_data['stage']}")
+                
+                # Special handling for completion
+                if progress_data["stage"] == "complete":
+                    self.status = OperationStatus.COMPLETED
+                    self.progress = 1.0
+                    self.end_time = datetime.now()
+                    self.completed_steps = self.total_steps
+                    return True
+            
+            return True
+            
+        except Exception as e:
+            # If parsing fails, don't crash - just log and continue
+            import logging
+            logger = logging.getLogger(f'VCCTL.{self.__class__.__name__}')
+            logger.warning(f"Error parsing genmic progress: {e}")
+            return False
     
     def pause_process(self) -> bool:
         """Pause the underlying process using OS signals."""
@@ -310,8 +394,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.operation_counter = 0
         self.system_resources = SystemResources()
         
-        # Persistence
-        self.operations_file = Path.cwd() / "config" / "operations_history.json"
+        # Database-only persistence (JSON file no longer used)
         
         # Monitoring control
         self.monitoring_active = False
@@ -330,7 +413,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         self._connect_signals()
         
         # Load saved operations
-        self._load_operations_from_file()
+        self._load_operations_from_database()
         
         # Start monitoring
         self._start_monitoring()
@@ -356,13 +439,14 @@ class OperationsMonitoringPanel(Gtk.Box):
         self._create_status_bar()
     
     def _create_toolbar(self) -> None:
-        """Create the operations toolbar."""
+        """Create the operations toolbar with custom SVG icons."""
         toolbar = Gtk.Toolbar()
         toolbar.set_style(Gtk.ToolbarStyle.BOTH_HORIZ)
         
         # Start operation button
         self.start_button = Gtk.ToolButton()
-        self.start_button.set_icon_name("media-playback-start")
+        self.start_button.set_icon_name("play")
+        set_tool_button_custom_icon(self.start_button, "play", 24)
         self.start_button.set_label("Start")
         self.start_button.set_tooltip_text("Launch a new microstructure generation or hydration simulation")
         self.start_button.connect('clicked', self._on_start_operation_clicked)
@@ -370,7 +454,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Stop operation button
         self.stop_button = Gtk.ToolButton()
-        self.stop_button.set_icon_name("media-playback-stop")
+        self.stop_button.set_icon_name("stop")
+        set_tool_button_custom_icon(self.stop_button, "stop", 24)
         self.stop_button.set_label("Stop")
         self.stop_button.set_tooltip_text("Terminate the selected running operation immediately")
         self.stop_button.connect('clicked', self._on_stop_operation_clicked)
@@ -378,7 +463,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Pause operation button
         self.pause_button = Gtk.ToolButton()
-        self.pause_button.set_icon_name("media-playback-pause")
+        self.pause_button.set_icon_name("pause")
+        set_tool_button_custom_icon(self.pause_button, "pause", 24)
         self.pause_button.set_label("Pause")
         self.pause_button.set_tooltip_text("Pause running operations or resume paused operations")
         self.pause_button.connect('clicked', self._on_pause_operation_clicked)
@@ -389,7 +475,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Clear completed button
         self.clear_button = Gtk.ToolButton()
-        self.clear_button.set_icon_name("edit-clear")
+        self.clear_button.set_icon_name("erase")
+        set_tool_button_custom_icon(self.clear_button, "edit-clear", 24)
         self.clear_button.set_label("Clear")
         self.clear_button.set_tooltip_text("Remove all completed, failed, and cancelled operations from the list")
         self.clear_button.connect('clicked', self._on_clear_completed_clicked)
@@ -397,7 +484,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Delete operation button
         self.delete_button = Gtk.ToolButton()
-        self.delete_button.set_icon_name("edit-delete")
+        self.delete_button.set_icon_name("trash-can")
+        set_tool_button_custom_icon(self.delete_button, "trash-can", 24)
         self.delete_button.set_label("Delete")
         self.delete_button.set_tooltip_text("Permanently delete selected operation(s) and all their output files")
         self.delete_button.connect('clicked', self._on_delete_selected_operation_clicked)
@@ -405,7 +493,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Refresh button
         self.refresh_button = Gtk.ToolButton()
-        self.refresh_button.set_icon_name("view-refresh")
+        self.refresh_button.set_icon_name("refresh")
+        set_tool_button_custom_icon(self.refresh_button, "refresh", 24)
         self.refresh_button.set_label("Refresh")
         self.refresh_button.set_tooltip_text("Update operation status and check for new operations in the Operations folder")
         self.refresh_button.connect('clicked', self._on_refresh_clicked)
@@ -413,40 +502,23 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Clean Duplicates button
         self.clean_duplicates_button = Gtk.ToolButton()
-        self.clean_duplicates_button.set_icon_name("edit-clear")
+        self.clean_duplicates_button.set_icon_name("erase")
+        set_tool_button_custom_icon(self.clean_duplicates_button, "edit-clear", 24)
         self.clean_duplicates_button.set_label("Clean Duplicates")
         self.clean_duplicates_button.set_tooltip_text("Remove duplicate operations from the list")
         self.clean_duplicates_button.set_is_important(True)  # Force label to show
         self.clean_duplicates_button.connect('clicked', self._on_clean_duplicates_clicked)
         toolbar.insert(self.clean_duplicates_button, -1)
         
-        # Separator
-        toolbar.insert(Gtk.SeparatorToolItem(), -1)
-        
-        # View 3D Results button
-        self.view_3d_button = Gtk.ToolButton()
-        self.view_3d_button.set_icon_name("applications-graphics")
-        self.view_3d_button.set_label("View 3D Results")
-        self.view_3d_button.set_tooltip_text("View 3D microstructure evolution from hydration simulation results")
-        self.view_3d_button.set_is_important(True)  # Force label to show
-        self.view_3d_button.connect('clicked', self._on_view_3d_results_clicked)
-        toolbar.insert(self.view_3d_button, -1)
-        
-        # Plot Data button
-        self.plot_data_button = Gtk.ToolButton()
-        self.plot_data_button.set_icon_name("applications-science")
-        self.plot_data_button.set_label("Plot Data")
-        self.plot_data_button.set_tooltip_text("Create plots from simulation data CSV files")
-        self.plot_data_button.set_is_important(True)  # Force label to show
-        self.plot_data_button.connect('clicked', self._on_plot_data_clicked)
-        toolbar.insert(self.plot_data_button, -1)
+        # Note: View 3D Results and Plot Data buttons moved to dedicated Results panel
         
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
         # Settings button
         self.settings_button = Gtk.ToolButton()
-        self.settings_button.set_icon_name("preferences-system")
+        self.settings_button.set_icon_name("settings")
+        set_tool_button_custom_icon(self.settings_button, "settings", 24)
         self.settings_button.set_label("Settings")
         self.settings_button.set_tooltip_text("Configure operation monitoring preferences and resource limits")
         self.settings_button.connect('clicked', self._on_settings_clicked)
@@ -495,21 +567,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Delete button: Enabled if selection exists and selected operation is not running
             self.delete_button.set_sensitive(has_selection and not selected_is_running)
             
-            # 3D Results button: Enabled if selected operation is a completed operation with 3D results
-            selected_has_3d_results = False
-            if has_selection and selected_operation:
-                is_completed = selected_operation.status == OperationStatus.COMPLETED
-                has_3d = self._has_3d_results(selected_operation)
-                selected_has_3d_results = is_completed and has_3d
-            self.view_3d_button.set_sensitive(selected_has_3d_results)
-            
-            # Plot Data button: Enabled if selected operation has CSV data
-            selected_has_csv_data = (
-                selected_operation and 
-                selected_operation.status == OperationStatus.COMPLETED and
-                self._has_csv_data(selected_operation)
-            ) if has_selection else False
-            self.plot_data_button.set_sensitive(selected_has_csv_data)
+            # Note: 3D Results and Plot Data functionality moved to dedicated Results panel
             
             # Refresh, Clean Duplicates, and Settings: Always enabled
             self.refresh_button.set_sensitive(True)
@@ -689,17 +747,18 @@ class OperationsMonitoringPanel(Gtk.Box):
         controls_box.set_margin_top(5)
         controls_box.set_margin_bottom(5)
         
-        self.control_pause_button = Gtk.Button(label="Pause")
+        self.control_pause_button = create_button_with_icon("Pause", "pause", 16)
         self.control_pause_button.connect('clicked', self._on_pause_operation_clicked)
         controls_box.pack_start(self.control_pause_button, False, False, 0)
         
-        self.control_stop_button = Gtk.Button(label="Stop")
+        self.control_stop_button = create_button_with_icon("Stop", "stop", 16)
         self.control_stop_button.connect('clicked', self._on_stop_operation_clicked)
         controls_box.pack_start(self.control_stop_button, False, False, 0)
         
-        self.control_priority_button = Gtk.Button(label="Set Priority")
-        self.control_priority_button.connect('clicked', self._on_set_priority_clicked)
-        controls_box.pack_start(self.control_priority_button, False, False, 0)
+        # Set Priority button hidden - functionality not implemented
+        # self.control_priority_button = Gtk.Button(label="Set Priority")
+        # self.control_priority_button.connect('clicked', self._on_set_priority_clicked)
+        # controls_box.pack_start(self.control_priority_button, False, False, 0)
         
         controls_frame.add(controls_box)
         tab_box.pack_start(controls_frame, False, False, 0)
@@ -809,12 +868,12 @@ class OperationsMonitoringPanel(Gtk.Box):
         controls_box.pack_start(self.auto_scroll_check, False, False, 0)
         
         # Clear logs button
-        clear_logs_button = Gtk.Button(label="Clear Logs")
+        clear_logs_button = create_button_with_icon("Clear Logs", "erase", 16)
         clear_logs_button.connect('clicked', self._on_clear_logs_clicked)
         controls_box.pack_start(clear_logs_button, False, False, 0)
         
         # Export logs button
-        export_logs_button = Gtk.Button(label="Export Logs")
+        export_logs_button = create_button_with_icon("Export Logs", "export", 16)
         export_logs_button.connect('clicked', self._on_export_logs_clicked)
         controls_box.pack_start(export_logs_button, False, False, 0)
         
@@ -920,7 +979,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Refresh button
         refresh_button = Gtk.ToolButton()
-        refresh_button.set_icon_name("view-refresh")
+        refresh_button.set_icon_name("refresh")
         refresh_button.set_label("Refresh")
         refresh_button.set_tooltip_text("Scan Operations directory for new files and updated operation results")
         refresh_button.connect('clicked', self._on_refresh_files_clicked)
@@ -928,7 +987,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Open folder button
         open_folder_button = Gtk.ToolButton()
-        open_folder_button.set_icon_name("folder-open")
+        open_folder_button.set_icon_name("folder--open")
         open_folder_button.set_label("Open Folder")
         open_folder_button.set_tooltip_text("Open the Operations directory in your system's file manager")
         open_folder_button.connect('clicked', self._on_open_operations_folder_clicked)
@@ -939,7 +998,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Delete operation button
         delete_button = Gtk.ToolButton()
-        delete_button.set_icon_name("edit-delete")
+        delete_button.set_icon_name("trash-can")
         delete_button.set_label("Delete")
         delete_button.set_tooltip_text("Permanently delete the selected operation folder and all its contents")
         delete_button.connect('clicked', self._on_delete_operation_clicked)
@@ -1249,25 +1308,25 @@ class OperationsMonitoringPanel(Gtk.Box):
         controls_box.set_margin_bottom(10)
         
         # Refresh analysis button
-        refresh_analysis_btn = Gtk.Button(label="🔄 Refresh Analysis")
+        refresh_analysis_btn = create_button_with_icon("Refresh Analysis", "refresh", 16)
         refresh_analysis_btn.set_tooltip_text("Recalculate operation success rates, performance metrics, and quality assessments")
         refresh_analysis_btn.connect('clicked', self._on_refresh_analysis_clicked)
         controls_box.pack_start(refresh_analysis_btn, False, False, 0)
         
         # Export report button
-        export_report_btn = Gtk.Button(label="📄 Export Report") 
+        export_report_btn = create_button_with_icon("Export Report", "export", 16)
         export_report_btn.set_tooltip_text("Generate and save a comprehensive operations analysis report to file")
         export_report_btn.connect('clicked', self._on_export_report_clicked)
         controls_box.pack_start(export_report_btn, False, False, 0)
         
         # Cleanup old results button
-        cleanup_btn = Gtk.Button(label="🧹 Cleanup Old Results")
+        cleanup_btn = create_button_with_icon("Cleanup Old Results", "erase", 16)
         cleanup_btn.set_tooltip_text("Archive or delete old operation files to free up disk space (with confirmation)")
         cleanup_btn.connect('clicked', self._on_cleanup_results_clicked)
         controls_box.pack_start(cleanup_btn, False, False, 0)
         
         # Validation check button
-        validate_btn = Gtk.Button(label="🔍 Validate Results") 
+        validate_btn = create_button_with_icon("Validate Results", "information", 16)
         validate_btn.set_tooltip_text("Verify integrity and completeness of all operation result files")
         validate_btn.connect('clicked', self._on_validate_results_clicked)
         controls_box.pack_start(validate_btn, False, False, 0)
@@ -1398,7 +1457,14 @@ class OperationsMonitoringPanel(Gtk.Box):
                 continue
                 
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
-                # Check if process is still running
+                # Parse stdout for progress updates (for genmic operations)
+                self._parse_operation_stdout(operation)
+                
+                # Check if process is still running (unless already marked complete by progress parser)
+                if operation.status == OperationStatus.COMPLETED:
+                    # Already completed by progress parser, skip further processing
+                    continue
+                    
                 if not operation.is_process_running():
                     # Process has ended, determine if it completed successfully
                     self.logger.info(f"Process {operation.id} ({operation.name}) has ended")
@@ -1408,21 +1474,32 @@ class OperationsMonitoringPanel(Gtk.Box):
                         self.logger.info(f"Process {operation.id} exit code: {return_code}")
                         
                         if return_code == 0:
-                            operation.status = OperationStatus.COMPLETED
-                            operation.progress = 1.0
-                            operation.current_step = "Process completed successfully"
-                            self.logger.info(f"Process {operation.id} marked as COMPLETED")
+                            # For microstructure operations, verify output files exist before marking complete
+                            # (This is a fallback in case genmic doesn't send progress messages)
+                            if self._verify_operation_completion(operation):
+                                operation.status = OperationStatus.COMPLETED
+                                operation.progress = 1.0
+                                operation.current_step = "Process completed successfully (verified by output files)"
+                                self.logger.info(f"Process {operation.id} marked as COMPLETED via file verification (fallback)")
+                            else:
+                                # Process returned 0 but output files don't exist yet - keep running
+                                self.logger.info(f"Process {operation.id} returned 0 but output files not ready - continuing to monitor")
+                                continue
                         else:
                             operation.status = OperationStatus.FAILED
                             operation.error_message = f"Process exited with code {return_code}"
                             operation.current_step = "Process failed"
                             self.logger.warning(f"Process {operation.id} marked as FAILED with code {return_code}")
                     else:
-                        # Process ended without proper exit code tracking
-                        self.logger.info(f"Process {operation.id} ended without return code - marking as completed")
-                        operation.status = OperationStatus.COMPLETED
-                        operation.progress = 1.0
-                        operation.current_step = "Process completed"
+                        # Process ended without proper exit code tracking - verify completion
+                        if self._verify_operation_completion(operation):
+                            self.logger.info(f"Process {operation.id} ended without return code - verified complete")
+                            operation.status = OperationStatus.COMPLETED
+                            operation.progress = 1.0
+                            operation.current_step = "Process completed"
+                        else:
+                            self.logger.info(f"Process {operation.id} ended without return code - output files not ready, continuing monitor")
+                            continue
                     
                     operation.end_time = current_time
                     operation.completed_steps = operation.total_steps
@@ -1430,7 +1507,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     # Close output file handles
                     operation.close_output_files()
                     
-                    self._save_operations_to_file()
+                    self._update_operation_in_database(operation)
                     
                 elif operation.status == OperationStatus.RUNNING:
                     # Update process resource usage for running operations
@@ -1440,7 +1517,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                         operation.memory_usage = process_info['memory_mb']
                     
                     # Update progress based on elapsed time (time-based estimation)
-                    if operation.start_time and operation.estimated_duration:
+                    # Skip ALL time-based estimation for microstructure operations (using progress messages)
+                    if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
+                        # Microstructure operations use genmic progress messages - skip time-based estimation
+                        pass
+                    elif operation.start_time and operation.estimated_duration:
                         elapsed = current_time - operation.start_time
                         # Progress based on estimated duration, capped at 95% until completion
                         time_progress = min(0.95, elapsed.total_seconds() / operation.estimated_duration.total_seconds())
@@ -1538,6 +1619,84 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Fallback to original name
         return operation.name
+
+    def _verify_operation_completion(self, operation) -> bool:
+        """Verify that an operation has actually completed by checking for expected output files."""
+        try:
+            # For microstructure operations, check for expected output files
+            if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
+                # Extract operation name and look for output directory
+                operation_name = operation.name
+                if operation_name.endswith(" Microstructure"):
+                    base_name = operation_name.replace(" Microstructure", "")
+                    
+                    # Look for output directory
+                    import os
+                    output_dir = os.path.join("Operations", base_name)
+                    if not os.path.exists(output_dir):
+                        self.logger.info(f"Output directory {output_dir} does not exist - operation not complete")
+                        return False
+                    
+                    # Check for expected output files (.img and .pimg)
+                    img_file = os.path.join(output_dir, f"{base_name}.img")
+                    pimg_file = os.path.join(output_dir, f"{base_name}.pimg")
+                    
+                    img_exists = os.path.exists(img_file)
+                    pimg_exists = os.path.exists(pimg_file)
+                    
+                    if img_exists and pimg_exists:
+                        self.logger.info(f"Operation {operation.name} verified complete - output files exist")
+                        return True
+                    else:
+                        self.logger.info(f"Operation {operation.name} not complete - img:{img_exists}, pimg:{pimg_exists}")
+                        return False
+            
+            # For other operation types, assume completion based on process exit
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error verifying operation completion: {e}")
+            # If verification fails, fall back to assuming completion
+            return True
+
+    def _parse_operation_stdout(self, operation) -> None:
+        """Parse stdout output from running operation for progress updates."""
+        try:
+            # Only parse stdout for microstructure operations that have stdout files
+            if (operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION and 
+                hasattr(operation, 'stdout_file') and operation.stdout_file):
+                
+                stdout_path = operation.stdout_file
+                if not hasattr(operation, '_stdout_position'):
+                    operation._stdout_position = 0
+                
+                # Read new content from stdout file
+                try:
+                    with open(stdout_path, 'r', encoding='utf-8') as f:
+                        f.seek(operation._stdout_position)
+                        new_content = f.read()
+                        operation._stdout_position = f.tell()
+                        
+                        # Process each new line
+                        for line in new_content.strip().split('\n'):
+                            if line.strip():
+                                if operation.parse_genmic_progress(line.strip()):
+                                    # Progress was updated, log it
+                                    self.logger.info(f"Updated progress for {operation.name}: {operation.progress:.1%} - {operation.current_step}")
+                                    
+                                    # If operation was marked complete by progress parser, break
+                                    if operation.status == OperationStatus.COMPLETED:
+                                        self.logger.info(f"Operation {operation.name} completed via progress message")
+                                        operation.close_output_files()
+                                        self._update_operation_in_database(operation)
+                                        break
+                        
+                except (IOError, OSError) as e:
+                    # File might not exist yet or be locked, that's okay
+                    pass
+                    
+        except Exception as e:
+            self.logger.error(f"Error parsing stdout for operation {operation.id}: {e}")
 
     def _update_operations_list(self) -> None:
         """Update the operations list view efficiently without clearing."""
@@ -2038,14 +2197,14 @@ class OperationsMonitoringPanel(Gtk.Box):
                         output_dir = str(project_root / output_dir)
                         self.logger.info(f"Made absolute path for {operation.name}: {output_dir}")
                     
-                    # Delete from database if it's a database-sourced operation (like hydration simulations)
-                    if operation_source == 'database':
-                        try:
-                            operation_service = self.service_container.operation_service
-                            operation_service.delete(operation.name)
-                            self.logger.info(f"Deleted operation from database: {operation.name}")
-                        except Exception as e:
-                            self.logger.warning(f"Failed to delete operation from database: {operation.name}: {e}")
+                    # Always try to delete from database (operations may exist in both JSON and database)
+                    try:
+                        operation_service = self.service_container.operation_service
+                        operation_service.delete(operation.name)
+                        self.logger.info(f"Deleted operation from database: {operation.name}")
+                    except Exception as e:
+                        # This is expected if operation was not in database (e.g., file-based only)
+                        self.logger.debug(f"Operation not found in database (expected for file-based operations): {operation.name}: {e}")
                     
                     # Delete the operation from memory
                     if operation_id in self.operations:
@@ -2075,9 +2234,6 @@ class OperationsMonitoringPanel(Gtk.Box):
                     meaningful_name = self._get_meaningful_operation_name(operation)
                     self.logger.error(f"Error deleting operation '{meaningful_name}': {e}")
             
-            # Save updated operations to file
-            self._save_operations_to_file()
-            
             # Refresh the UI
             self._update_operations_list()
             self._load_operations_files()  # Refresh file browser
@@ -2093,23 +2249,12 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _on_refresh_clicked(self, button: Gtk.Button) -> None:
         """Handle refresh button click."""
-        self._update_status("Refreshing operations and checking process status...")
+        self._update_status("Refreshing operations from database...")
         
-        # Force a thorough update of all operations
-        self._force_cleanup_stale_operations()
+        # Simple database reload
+        self._load_operations_from_database()
         
-        # RELOAD OPERATIONS FROM ALL SOURCES (including filesystem scan)
-        self.logger.info("=== REFRESH: Reloading operations from all sources ===")
-        
-        # Clear existing operations to prevent accumulation of duplicates
-        operations_count_before = len(self.operations)
-        self.operations.clear()
-        self.logger.info(f"Cleared {operations_count_before} existing operations before reload")
-        
-        # Load operations from all sources without calling _update_operations which would double-load
-        self._load_operations_from_file()
-        
-        # Only update UI, don't call _update_operations to avoid duplicate loading
+        # Update UI
         self._update_ui()
         
         # Count active operations for status feedback
@@ -2275,7 +2420,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         if cleaned_count > 0:
             self.logger.info(f"Force cleanup completed: {cleaned_count} stale operations cleaned")
-            self._save_operations_to_file()  # Save changes
+            # Database automatically updated through operation monitoring
         else:
             self.logger.info("Force cleanup completed: no stale operations found")
     
@@ -2692,7 +2837,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self._add_log_entry(f"Error: {error_message}")
                 
             self._update_operations_list()
-            self._save_operations_to_file()  # Save when operation completes
+            # Database automatically updated through operation monitoring
             return True
         return False
     
@@ -2713,7 +2858,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             self._add_log_entry(f"Cancelled operation: {operation.name}")
             self._update_operations_list()
-            self._save_operations_to_file()  # Save when operation cancelled
+            # Database automatically updated through operation monitoring
             return True
         return False
     
@@ -3889,178 +4034,60 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.logger.info("Starting operations monitoring panel cleanup...")
         try:
             self._stop_monitoring()
-            self._save_operations_to_file()  # Save operations before cleanup
+            # Database automatically updated through operation monitoring
             self.logger.info(f"Operations monitoring panel cleanup completed - saved {len(self.operations)} operations")
         except Exception as e:
             self.logger.error(f"Error during operations panel cleanup: {e}")
     
-    def save_operations_now(self) -> None:
-        """Manually save operations immediately."""
-        self._save_operations_to_file()
     
-    def _save_operations_to_file(self) -> None:
-        """Save operations to JSON file."""
-        try:
-            self.logger.info(f"Attempting to save {len(self.operations)} operations to {self.operations_file}")
-            
-            # Ensure config directory exists
-            self.operations_file.parent.mkdir(parents=True, exist_ok=True)
-            
-            # Convert operations to serializable format
-            operations_data = {
-                'operations': {op_id: op.to_dict() for op_id, op in self.operations.items()},
-                'operation_counter': self.operation_counter,
-                'saved_at': datetime.now().isoformat()
-            }
-            
-            # Write to file
-            with open(self.operations_file, 'w') as f:
-                json.dump(operations_data, f, indent=2)
-            
-            self.logger.info(f"Successfully saved {len(self.operations)} operations to {self.operations_file}")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to save operations to file: {e}", exc_info=True)
     
-    def _load_operations_from_file(self) -> None:
-        """Load operations from JSON file and database."""
-        # First load from file (existing operations)
+    def _load_operations_from_database(self) -> None:
+        """Load all operations from database (single source of truth)."""
         try:
-            self.logger.info(f"Attempting to load operations from {self.operations_file}")
+            self.logger.info("Loading all operations from database...")
             
-            if self.operations_file.exists():
-                with open(self.operations_file, 'r') as f:
-                    data = json.load(f)
-                
-                self.logger.info(f"Found operations file with {len(data.get('operations', {}))} operations")
-                
-                # Load operations from file
-                operations_data = data.get('operations', {})
-                for op_id, op_data in operations_data.items():
-                    try:
-                        operation = Operation.from_dict(op_data)
-                        self.operations[op_id] = operation
-                    except Exception as e:
-                        self.logger.warning(f"Failed to load operation {op_id}: {e}")
-                
-                # Restore operation counter
-                self.operation_counter = data.get('operation_counter', 0)
-                
-                self.logger.info(f"Successfully loaded {len(self.operations)} operations from file")
-            else:
-                self.logger.info("No operations history file found")
-            
-        except Exception as e:
-            self.logger.error(f"Failed to load operations from file: {e}", exc_info=True)
-        
-        # Then load from database (recent operations like hydration simulations)
-        try:
-            self.logger.info("Loading operations from database...")
-            operation_service = self.service_container.operation_service
+            # Clear existing operations
+            self.operations.clear()
             
             # Get all operations from database
-            db_operations = operation_service.get_all()
+            with self.service_container.database_service.get_read_only_session() as session:
+                from app.models.operation import Operation as DBOperation
+                db_operations = session.query(DBOperation).all()
+            
             self.logger.info(f"Found {len(db_operations)} operations in database")
             
             # Convert database operations to UI operations
             for db_op in db_operations:
                 try:
                     ui_operation = self._convert_db_operation_to_ui_operation(db_op)
-                    
-                    # Only add if not already loaded from file
-                    if ui_operation.id not in self.operations:
-                        self.operations[ui_operation.id] = ui_operation
-                        self.logger.info(f"Added database operation: {ui_operation.name} (type: {ui_operation.operation_type}, status: {ui_operation.status})")
-                    else:
-                        # Update status if the database version is more recent
-                        existing = self.operations[ui_operation.id]
-                        # Use start time for comparison since Operation model doesn't have 'updated' field
-                        db_time = db_op.start or db_op.queue
-                        existing_time = existing.start_time
-                        if db_time and existing_time and db_time > existing_time:
-                            existing.status = ui_operation.status
-                            existing.progress = ui_operation.progress
-                            existing.end_time = ui_operation.end_time
-                            self.logger.debug(f"Updated operation status: {ui_operation.name} -> {ui_operation.status.value}")
-                        else:
-                            # Just update the status to be safe
-                            existing.status = ui_operation.status
-                            existing.progress = ui_operation.progress
-                            existing.end_time = ui_operation.end_time
-                            
+                    self.operations[ui_operation.id] = ui_operation
+                    self.logger.debug(f"Loaded: {ui_operation.name} ({ui_operation.operation_type.value}, {ui_operation.status.value})")
                 except Exception as e:
                     self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
             
-            self.logger.info(f"Total operations loaded: {len(self.operations)}")
+            self.logger.info(f"Successfully loaded {len(self.operations)} operations from database")
             
         except Exception as e:
             self.logger.error(f"Failed to load operations from database: {e}", exc_info=True)
-        
-        # Finally scan Operations directory for filesystem operations (microstructures)
+    
+    def _update_operation_in_database(self, operation: 'Operation') -> None:
+        """Update an operation's status in the database using the operation service."""
         try:
-            self.logger.info("Scanning Operations directory for filesystem operations...")
-            operations_dir = Path(__file__).parent.parent.parent.parent.parent / "Operations"
+            # Use the operation service's update method
+            success = self.service_container.operation_service.update_status(
+                name=operation.name,
+                status=operation.status,
+                progress=operation.progress,
+                current_step=operation.current_step
+            )
             
-            if operations_dir.exists():
-                added_count = 0
-                for operation_folder in operations_dir.iterdir():
-                    if operation_folder.is_dir():
-                        operation_name = operation_folder.name
-                        
-                        # Skip if already loaded from file or database (check by name and type)
-                        existing_ops = [(op.name, op.operation_type) for op in self.operations.values()]
-                        op_type_to_check = OperationType.HYDRATION_SIMULATION if any(f.name.endswith('.h.') for f in operation_folder.glob("*.img.*")) else OperationType.MICROSTRUCTURE_GENERATION
-                        if (operation_name, op_type_to_check) in existing_ops:
-                            self.logger.debug(f"Skipping duplicate filesystem operation: {operation_name} ({op_type_to_check.value})")
-                            continue
-                        
-                        # Check if this looks like a microstructure operation
-                        img_files = list(operation_folder.glob("*.img"))
-                        pimg_files = list(operation_folder.glob("*.pimg"))
-                        genmic_files = list(operation_folder.glob("genmic_input_*.txt"))
-                        
-                        if img_files or pimg_files or genmic_files:
-                            # Create operation from filesystem data
-                            operation_id = f"fs_{operation_name}"
-                            
-                            # Use the type we already determined
-                            op_type = op_type_to_check
-                            
-                            # Get modification time
-                            mod_time = datetime.fromtimestamp(operation_folder.stat().st_mtime)
-                            
-                            # Create operation object  
-                            operation = Operation(
-                                id=operation_id,
-                                name=operation_name,
-                                operation_type=op_type,
-                                status=OperationStatus.COMPLETED,  # Use proper enum
-                                progress=1.0,
-                                start_time=mod_time,
-                                end_time=mod_time,
-                                metadata={
-                                    'source': 'filesystem',
-                                    'output_directory': str(operation_folder),
-                                    'img_files': len(img_files),
-                                    'pimg_files': len(pimg_files)
-                                }
-                            )
-                            
-                            self.operations[operation_id] = operation
-                            added_count += 1
-                            self.logger.info(f"Added filesystem operation: {operation_name} (ID: {operation_id}, Type: {op_type.value})")
-                
-                self.logger.info(f"Filesystem scan complete. Added {added_count} operations. Total: {len(self.operations)}")
+            if success:
+                self.logger.debug(f"Updated database operation: {operation.name} -> {operation.status.value}")
             else:
-                self.logger.warning("Operations directory not found")
-                
+                self.logger.warning(f"Failed to update operation in database: {operation.name}")
+                    
         except Exception as e:
-            self.logger.error(f"Failed to scan Operations directory: {e}", exc_info=True)
-        
-        # Clean up any data inconsistencies
-        self._validate_operations_data()
-        
-        # Synchronize with active hydration simulations
+            self.logger.error(f"Failed to update operation in database: {operation.name}: {e}")
         self._sync_with_active_hydration_simulations()
         
         # Update UI with all loaded operations
@@ -4077,27 +4104,27 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Convert database Operation to UI Operation format."""
         from app.models.operation import OperationStatus as DBOperationStatus, OperationType as DBOperationType
         
-        # Map database status to UI status
+        # Map database status to UI status (using string values)
         status_mapping = {
-            DBOperationStatus.QUEUED.value: OperationStatus.PENDING,
-            DBOperationStatus.RUNNING.value: OperationStatus.RUNNING,  
-            DBOperationStatus.FINISHED.value: OperationStatus.COMPLETED,
-            DBOperationStatus.ERROR.value: OperationStatus.FAILED,
-            DBOperationStatus.CANCELLED.value: OperationStatus.CANCELLED,
+            'QUEUED': OperationStatus.PENDING,
+            'RUNNING': OperationStatus.RUNNING,  
+            'COMPLETED': OperationStatus.COMPLETED,
+            'FAILED': OperationStatus.FAILED,
+            'CANCELLED': OperationStatus.CANCELLED,
         }
         
-        # Map database type to UI type
+        # Map database type to UI type (using string values)
         type_mapping = {
-            DBOperationType.HYDRATION.value: OperationType.HYDRATION_SIMULATION,
-            DBOperationType.MICROSTRUCTURE.value: OperationType.MICROSTRUCTURE_GENERATION,
-            DBOperationType.ANALYSIS.value: OperationType.PROPERTY_CALCULATION,
-            DBOperationType.EXPORT.value: OperationType.FILE_OPERATION,
-            DBOperationType.IMPORT.value: OperationType.FILE_OPERATION,
+            'HYDRATION': OperationType.HYDRATION_SIMULATION,
+            'MICROSTRUCTURE': OperationType.MICROSTRUCTURE_GENERATION,
+            'ANALYSIS': OperationType.PROPERTY_CALCULATION,
+            'EXPORT': OperationType.FILE_OPERATION,
+            'IMPORT': OperationType.FILE_OPERATION,
         }
         
         # Convert status and type
         ui_status = status_mapping.get(db_op.status, OperationStatus.PENDING)
-        ui_type = type_mapping.get(db_op.type, OperationType.BATCH_OPERATION)
+        ui_type = type_mapping.get(db_op.operation_type, OperationType.BATCH_OPERATION)
         
         # Calculate progress and default current step
         progress = 0.0
@@ -4121,8 +4148,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             current_step = "Operation cancelled"
         
         # Fix timezone-aware datetime issues that cause negative durations
-        start_time = db_op.start
-        end_time = db_op.finish
+        start_time = db_op.started_at
+        end_time = db_op.completed_at
         
         # Ensure times are timezone-naive and reasonable
         if start_time:
@@ -4159,221 +4186,16 @@ class OperationsMonitoringPanel(Gtk.Box):
             log_entries=[],
             metadata={"source": "database", "output_directory": f"Operations/{db_op.name}"}
         )
-    
-    def _refresh_operations_from_database(self) -> None:
-        """Refresh operations from database to pick up new operations."""
-        try:
-            self.logger.debug("Refreshing operations from database...")
-            operation_service = self.service_container.operation_service
-            
-            # Get all operations from database
-            db_operations = operation_service.get_all()
-            
-            # Convert database operations to UI operations
-            new_operations_count = 0
-            for db_op in db_operations:
-                try:
-                    ui_operation = self._convert_db_operation_to_ui_operation(db_op)
-                    
-                    # Only add if not already loaded
-                    if ui_operation.id not in self.operations:
-                        self.operations[ui_operation.id] = ui_operation
-                        new_operations_count += 1
-                        self.logger.info(f"Added new database operation: {ui_operation.name}")
-                    else:
-                        # Update status of existing operations from database
-                        existing = self.operations[ui_operation.id]
-                        status_changed = False
-                        
-                        # Compare status (handle both enum and string values)
-                        existing_status = existing.status.value if hasattr(existing.status, 'value') else str(existing.status)
-                        new_status = ui_operation.status.value if hasattr(ui_operation.status, 'value') else str(ui_operation.status)
-                        
-                        if existing_status != new_status:
-                            existing.status = ui_operation.status
-                            existing.progress = ui_operation.progress
-                            existing.end_time = ui_operation.end_time
-                            status_changed = True
-                            self.logger.info(f"Updated operation status: {ui_operation.name} -> {new_status}")
-                        
-                        # Also check if progress or end_time changed without status change
-                        if not status_changed and (existing.progress != ui_operation.progress or existing.end_time != ui_operation.end_time):
-                            existing.progress = ui_operation.progress
-                            existing.end_time = ui_operation.end_time
-                            self.logger.debug(f"Updated operation details: {ui_operation.name}")
-                            
-                except Exception as e:
-                    self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
-            
-            if new_operations_count > 0:
-                self.logger.info(f"Added {new_operations_count} new operations from database")
-                # Validate data consistency after adding new operations
-                self._validate_operations_data()
-                # Trigger UI update for new operations
-                GLib.idle_add(self._update_operations_list)
-                
-        except Exception as e:
-            self.logger.error(f"Failed to refresh operations from database: {e}")
-    
-    def _save_operations_periodically(self) -> None:
-        """Save operations periodically (called from monitoring loop)."""
-        # Save every 5 minutes or when operations change significantly
-        if hasattr(self, '_last_save_time'):
-            time_since_save = time.time() - self._last_save_time
-            if time_since_save < 300:  # 5 minutes
-                return
-        
-        # Check if there are completed operations since last save
-        completed_ops = [op for op in self.operations.values() 
-                        if op.status in [OperationStatus.COMPLETED, OperationStatus.FAILED, OperationStatus.CANCELLED]]
-        
-        if completed_ops:
-            self._save_operations_to_file()
-            self._last_save_time = time.time()
-            
-            # Also refresh results analysis when operations complete
-            try:
-                self._refresh_results_analysis()
-            except Exception as e:
-                self.logger.warning(f"Error refreshing results analysis: {e}")
 
-    def _has_3d_results(self, operation) -> bool:
-        """Check if operation has 3D microstructure results (.img files)."""
-        try:
-            # Check for output_dir in metadata or try to construct from operation name
-            output_dir = None
-            if hasattr(operation, 'output_dir') and operation.output_dir:
-                output_dir = operation.output_dir
-            elif hasattr(operation, 'metadata') and operation.metadata and 'output_directory' in operation.metadata:
-                output_dir = operation.metadata['output_directory']
-            else:
-                # Try to construct from operation name
-                project_root = Path(__file__).parent.parent.parent.parent.parent
-                operations_dir = project_root / "Operations"
-                potential_folder = operations_dir / operation.name
-                if potential_folder.exists():
-                    output_dir = str(potential_folder)
-            
-            if not output_dir:
-                return False
-            
-            output_path = Path(output_dir)
-            if not output_path.exists():
-                return False
-            
-            # Look for any .img files (both hydration time-series and regular microstructures)
-            # Time-series hydration files (*.img.XXXh.XX.XXX)
-            hydration_img_files = list(output_path.glob("*.img.*h.*.*"))
-            
-            # Final hydrated microstructures (HydrationOf_*.img.*.*)
-            final_img_files = list(output_path.glob("HydrationOf_*.img.*.*"))
-            
-            # Regular microstructure files (*.img)
-            regular_img_files = list(output_path.glob("*.img"))
-            
-            # Return true if any .img files exist
-            return len(hydration_img_files) > 0 or len(final_img_files) > 0 or len(regular_img_files) > 0
-            
-        except Exception as e:
-            self.logger.error(f"Error checking for 3D results: {e}")
-            return False
-    
-    def _has_csv_data(self, operation) -> bool:
-        """Check if operation has CSV data files for plotting."""
-        try:
-            # Check for output_dir in metadata or try to construct from operation name
-            output_dir = None
-            if hasattr(operation, 'output_dir') and operation.output_dir:
-                output_dir = operation.output_dir
-            elif hasattr(operation, 'metadata') and operation.metadata and 'output_directory' in operation.metadata:
-                output_dir = operation.metadata['output_directory']
-            else:
-                # Try to construct from operation name
-                project_root = Path(__file__).parent.parent.parent.parent
-                operations_dir = project_root / "Operations"
-                potential_folder = operations_dir / operation.name
-                if potential_folder.exists():
-                    output_dir = str(potential_folder)
-            
-            if not output_dir:
-                return False
-            
-            output_path = Path(output_dir)
-            if not output_path.exists():
-                return False
-            
-            # Look for CSV files (data tables from simulations)
-            csv_files = list(output_path.glob("*.csv"))
-            
-            return len(csv_files) > 0
-            
-        except Exception as e:
-            self.logger.error(f"Error checking for CSV data: {e}")
-            return False
+    # MOVED TO RESULTS PANEL: The following methods have been moved to the dedicated Results panel
+    # to separate operation monitoring from results analysis functionality:
+    # - _has_3d_results()
+    # - _has_csv_data()
+    # - _on_view_3d_results_clicked()
+    # - _on_plot_data_clicked()
 
-    def _on_view_3d_results_clicked(self, button) -> None:
-        """Handle View 3D Results button click."""
-        selected_operation = self._get_selected_operation()
-        if not selected_operation:
-            return
-        
-        try:
-            # Import here to avoid circular imports
-            from app.windows.dialogs.hydration_results_viewer import HydrationResultsViewer
-            
-            # Create and show the 3D results viewer dialog
-            viewer = HydrationResultsViewer(
-                parent=self.get_toplevel(),
-                operation=selected_operation
-            )
-            # Show the dialog but don't run() since it will hide instead of destroy
-            viewer.show_all()
-            
-        except Exception as e:
-            self.logger.error(f"Error opening 3D results viewer: {e}")
-            # Show error dialog
-            dialog = Gtk.MessageDialog(
-                transient_for=self.get_toplevel(),
-                flags=0,
-                message_type=Gtk.MessageType.ERROR,
-                buttons=Gtk.ButtonsType.OK,
-                text="Error Opening 3D Results"
-            )
-            dialog.format_secondary_text(f"Failed to open 3D results viewer: {e}")
-            dialog.run()
-            dialog.destroy()
-
-    def _on_plot_data_clicked(self, button) -> None:
-        """Handle Plot Data button click."""
-        selected_operation = self._get_selected_operation()
-        if not selected_operation:
-            return
-        
-        try:
-            # Import here to avoid circular imports
-            from app.windows.dialogs.data_plotter import DataPlotter
-            
-            # Create and show the data plotting dialog
-            plotter = DataPlotter(
-                parent=self.get_toplevel(),
-                operation=selected_operation
-            )
-            plotter.run()
-            plotter.destroy()
-            
-        except Exception as e:
-            self.logger.error(f"Error opening data plotter: {e}")
-            # Show error dialog
-            dialog = Gtk.MessageDialog(
-                transient_for=self.get_toplevel(),
-                flags=0,
-                message_type=Gtk.MessageType.ERROR,
-                buttons=Gtk.ButtonsType.OK,
-                text="Error Opening Data Plotter"
-            )
-            dialog.format_secondary_text(f"Failed to open data plotter: {e}")
-            dialog.run()
-            dialog.destroy()
+    # REMOVED: _on_view_3d_results_clicked() and _on_plot_data_clicked() methods
+    # These have been moved to the dedicated Results panel for better separation of concerns
 
     def _sync_with_active_hydration_simulations(self) -> None:
         """Synchronize operations panel with active hydration simulations."""

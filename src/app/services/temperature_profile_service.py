@@ -19,7 +19,7 @@ class TemperatureProfileService(BaseService):
     """Service for managing temperature profiles."""
     
     def __init__(self, db_service):
-        super().__init__(db_service)
+        super().__init__(TemperatureProfileDB, db_service)
         self.logger = logging.getLogger(__name__)
     
     def save_profile(self, profile: TemperatureProfile, overwrite: bool = False) -> TemperatureProfileDB:
@@ -53,7 +53,7 @@ class TemperatureProfileService(BaseService):
             if profile.name in predefined_names:
                 raise ValidationError(f"Profile name '{profile.name}' is reserved for predefined profiles")
             
-            with self.get_session() as session:
+            with self.db_service.get_session() as session:
                 # Check if profile with same name exists
                 existing = session.query(TemperatureProfileDB).filter_by(name=profile.name).first()
                 
@@ -97,7 +97,7 @@ class TemperatureProfileService(BaseService):
                 return predefined[name]
             
             # Then check database
-            with self.get_session() as session:
+            with self.db_service.get_session() as session:
                 db_profile = session.query(TemperatureProfileDB).filter_by(name=name).first()
                 if db_profile:
                     return db_profile.to_temperature_profile()
@@ -131,7 +131,7 @@ class TemperatureProfileService(BaseService):
                 })
             
             # Add custom profiles from database
-            with self.get_session() as session:
+            with self.db_service.get_session() as session:
                 db_profiles = session.query(TemperatureProfileDB).filter_by(is_predefined=False).all()
                 for db_profile in db_profiles:
                     profiles.append({
@@ -167,7 +167,7 @@ class TemperatureProfileService(BaseService):
             if name in predefined:
                 raise ServiceError(f"Cannot delete predefined profile '{name}'")
             
-            with self.get_session() as session:
+            with self.db_service.get_session() as session:
                 db_profile = session.query(TemperatureProfileDB).filter_by(name=name, is_predefined=False).first()
                 if db_profile:
                     session.delete(db_profile)
@@ -245,7 +245,7 @@ class TemperatureProfileService(BaseService):
         try:
             predefined = self._get_predefined_profiles()
             
-            with self.get_session() as session:
+            with self.db_service.get_session() as session:
                 for name, profile in predefined.items():
                     existing = session.query(TemperatureProfileDB).filter_by(name=name, is_predefined=True).first()
                     if not existing:
@@ -257,3 +257,57 @@ class TemperatureProfileService(BaseService):
                 
         except Exception as e:
             self.logger.error(f"Failed to initialize predefined profiles: {e}")
+    
+    # Abstract method implementations required by BaseService
+    def get_all(self) -> List[TemperatureProfileDB]:
+        """Get all temperature profiles from database."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                return session.query(TemperatureProfileDB).all()
+        except Exception as e:
+            self.logger.error(f"Failed to get all temperature profiles: {e}")
+            return []
+    
+    def get_by_name(self, name: str) -> Optional[TemperatureProfileDB]:
+        """Get temperature profile by name."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                return session.query(TemperatureProfileDB).filter_by(name=name).first()
+        except Exception as e:
+            self.logger.error(f"Failed to get temperature profile '{name}': {e}")
+            return None
+    
+    def create(self, create_data) -> TemperatureProfileDB:
+        """Create new temperature profile."""
+        # For now, redirect to save_profile method
+        return self.save_profile(create_data, overwrite=False)
+    
+    def update(self, name: str, update_data) -> TemperatureProfileDB:
+        """Update existing temperature profile."""
+        # For now, redirect to save_profile method
+        return self.save_profile(update_data, overwrite=True)
+    
+    def delete(self, name: str) -> bool:
+        """Delete temperature profile."""
+        return self.delete_profile(name)
+    
+    def list_profiles(self) -> List[Dict[str, Any]]:
+        """Get list of all temperature profiles with basic info."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                profiles = session.query(TemperatureProfileDB).all()
+                return [{"name": p.name, "is_predefined": p.is_predefined} for p in profiles]
+        except Exception as e:
+            self.logger.error(f"Failed to list temperature profiles: {e}")
+            return []
+    
+    def get_profile(self, name: str) -> Optional[TemperatureProfile]:
+        """Get temperature profile as TemperatureProfile object."""
+        try:
+            db_profile = self.get_by_name(name)
+            if db_profile:
+                return db_profile.to_temperature_profile()
+            return None
+        except Exception as e:
+            self.logger.error(f"Failed to get temperature profile '{name}': {e}")
+            return None

@@ -1,325 +1,729 @@
 /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
   warnings.warn(
-2025-08-15 09:40:58,343 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
-2025-08-15 09:40:58,417 - VCCTL - INFO - Application startup
-2025-08-15 09:40:58,417 - VCCTL - INFO - Application activated
-2025-08-15 09:40:58,417 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
-2025-08-15 09:40:58,423 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
-2025-08-15 09:40:58,436 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-08-15 09:40:58,436 - VCCTL.ThemeManager - INFO - Theme manager initialized
-2025-08-15 09:40:58,437 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
-2025-08-15 09:40:58,437 - VCCTL.AccessibilityManager - INFO - Screen reader detected
-2025-08-15 09:40:58,437 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
-2025-08-15 09:40:58,437 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
-2025-08-15 09:40:58,438 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-08-15 09:40:58,438 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-08-15 09:40:58,438 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-08-15 09:40:58,438 - VCCTL.UIPolish - INFO - UI Polish manager initialized
-2025-08-15 09:40:58,762 - VCCTL.Database - INFO - Database engine created successfully
-2025-08-15 09:40:58,765 - VCCTL.Database - INFO - All database tables created successfully
-2025-08-15 09:40:58,765 - VCCTL.Database - INFO - Initializing default database data...
-2025-08-15 09:40:58,765 - VCCTL.Database - INFO - Session maker created successfully
-2025-08-15 09:40:58,773 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
-2025-08-15 09:40:58,773 - VCCTL.Database - INFO - Default database data initialized successfully
-2025-08-15 09:40:58,773 - VCCTL.Database - INFO - Database initialized successfully
-2025-08-15 09:40:58,785 - VCCTL.MaterialTable - INFO - Loaded 58 materials
-2025-08-15 09:40:58,785 - VCCTL.MaterialTable - INFO - Material table initialized
-2025-08-15 09:40:58,788 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
-2025-08-15 09:40:58,788 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma157
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
-2025-08-15 09:40:58,789 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
-2025-08-15 09:40:58,790 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
-2025-08-15 09:40:58,799 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-08-15 09:40:58,799 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
-2025-08-15 09:40:58,799 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-08-15 09:40:59,006 - VCCTL.PyVistaViewer3D - INFO - PyVista headless plotter created successfully
-2025-08-15 09:40:59,009 - VCCTL.PyVistaViewer3D - INFO - PyVista 3D viewer initialized
-2025-08-15 09:40:59,009 - VCCTL.MicrostructurePanel - INFO - PyVista 3D viewer initialized automatically
-2025-08-15 09:40:59,010 - VCCTL.MicrostructurePanel - INFO - Microstructure panel initialized
-2025-08-15 09:40:59,010 - VCCTL.HydrationService - INFO - Hydration service initialized
-2025-08-15 09:40:59,010 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-08-15 09:40:59,011 - VCCTL.HydrationPanel - INFO - Found 7 microstructures
-2025-08-15 09:40:59,034 - VCCTL.HydrationService - ERROR - Failed to get temperature profile service: Can't instantiate abstract class TemperatureProfileService with abstract methods create, delete, get_all, get_by_name, update
-2025-08-15 09:40:59,043 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
-2025-08-15 09:40:59,043 - VCCTL.HydrationService - ERROR - Failed to get temperature profile service: Can't instantiate abstract class TemperatureProfileService with abstract methods create, delete, get_all, get_by_name, update
-2025-08-15 09:40:59,043 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
-2025-08-15 09:40:59,050 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config
-2025-08-15 09:40:59,050 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
-2025-08-15 09:40:59,050 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
-2025-08-15 09:40:59,055 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
-2025-08-15 09:40:59,056 - VCCTL.FileBrowser - INFO - File browser widget initialized
-2025-08-15 09:40:59,058 - VCCTL.FileManagementPanel - INFO - File management panel initialized
-2025-08-15 09:40:59,062 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-08-15 09:40:59,062 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Found 19 total items in Operations directory
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Found 18 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'E2ETest', 'HydrationSim_CemotcBox_20250815_093721', 'HydrationSim_E2ETest_20250814_122433', 'HydrationSim_E2ETest_20250814_153645', 'HydrationSim_E2ETest_20250814_154640', 'HydrationSim_E2ETest_20250814_170316', 'HydrationSim_E2ETest_20250814_172436', 'Hydration_CemotcBox', 'Hydration_E2ETest', 'MisDesignSaveTest_copy', 'ProcessControl', 'TestHydrationExecution', 'TestHydrationOp']
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
-2025-08-15 09:40:59,063 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 12 files
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
-2025-08-15 09:40:59,064 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: E2ETest
-2025-08-15 09:40:59,065 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for E2ETest with 12 files
-2025-08-15 09:40:59,065 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_CemotcBox_20250815_093721
-2025-08-15 09:40:59,065 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_CemotcBox_20250815_093721 with 32 files
-2025-08-15 09:40:59,065 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_122433
-2025-08-15 09:40:59,066 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_122433 with 27 files
-2025-08-15 09:40:59,066 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_153645
-2025-08-15 09:40:59,067 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_153645 with 27 files
-2025-08-15 09:40:59,067 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_154640
-2025-08-15 09:40:59,067 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_154640 with 27 files
-2025-08-15 09:40:59,067 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_170316
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_170316 with 28 files
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_172436
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_172436 with 35 files
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_CemotcBox
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_CemotcBox with 8 files
-2025-08-15 09:40:59,068 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_E2ETest
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_E2ETest with 11 files
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationExecution
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationExecution with 1 files
-2025-08-15 09:40:59,069 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationOp
-2025-08-15 09:40:59,070 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationOp with 1 files
-2025-08-15 09:40:59,070 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 18 operations
-2025-08-15 09:40:59,070 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-08-15 09:40:59,070 - VCCTL.OperationsMonitoringPanel - INFO - Adding 18 operations to display
-2025-08-15 09:40:59,073 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+2025-08-22 21:22:18,595 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-08-22 21:22:18,673 - VCCTL - INFO - Application startup
+2025-08-22 21:22:18,673 - VCCTL - INFO - Application activated
+2025-08-22 21:22:18,674 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-08-22 21:22:18,680 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-08-22 21:22:18,695 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-22 21:22:18,695 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-08-22 21:22:18,696 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-08-22 21:22:18,696 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-08-22 21:22:18,696 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-08-22 21:22:18,696 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-08-22 21:22:18,697 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-22 21:22:18,697 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-08-22 21:22:18,698 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-08-22 21:22:18,698 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-08-22 21:22:18,829 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
+2025-08-22 21:22:18,845 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
+2025-08-22 21:22:18,852 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
+2025-08-22 21:22:19,199 - VCCTL.Database - INFO - Database engine created successfully
+2025-08-22 21:22:19,202 - VCCTL.Database - INFO - All database tables created successfully
+2025-08-22 21:22:19,202 - VCCTL.Database - INFO - Initializing default database data...
+2025-08-22 21:22:19,202 - VCCTL.Database - INFO - Session maker created successfully
+2025-08-22 21:22:19,212 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-08-22 21:22:19,212 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-08-22 21:22:19,212 - VCCTL.Database - INFO - Database initialized successfully
+2025-08-22 21:22:19,223 - VCCTL.MaterialTable - INFO - Loaded 58 materials
+2025-08-22 21:22:19,223 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-08-22 21:22:19,228 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
+2025-08-22 21:22:19,228 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-08-22 21:22:19,228 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-08-22 21:22:19,228 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-08-22 21:22:19,228 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-08-22 21:22:19,229 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-08-22 21:22:19,239 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-08-22 21:22:19,239 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-08-22 21:22:19,239 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-08-22 21:22:19,239 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-08-22 21:22:19,240 - VCCTL.HydrationPanel - INFO - Found 0 microstructures
+2025-08-22 21:22:19,273 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
+2025-08-22 21:22:19,275 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-08-22 21:22:19,279 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
+2025-08-22 21:22:19,285 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config
+2025-08-22 21:22:19,286 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-08-22 21:22:19,286 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-08-22 21:22:19,286 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-08-22 21:22:19,287 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-08-22 21:22:19,287 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
+2025-08-22 21:22:19,288 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
+2025-08-22 21:22:19,288 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
+2025-08-22 21:22:19,289 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
+2025-08-22 21:22:19,289 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
+2025-08-22 21:22:19,289 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
+2025-08-22 21:22:19,290 - VCCTL.FileManagementPanel - INFO - Operations folder not found, using data directory: data
+2025-08-22 21:22:19,292 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-08-22 21:22:19,293 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-08-22 21:22:19,295 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Found 1 total items in Operations directory
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Found 0 operation directories: []
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 0 operations
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - WARNING - Failed to load operations: success=True, data_count=0
+2025-08-22 21:22:19,301 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-2025-08-15 09:40:59,074 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-08-15 09:40:59,086 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-08-15 09:40:59,086 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load operations from /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:40:59,086 - VCCTL.OperationsMonitoringPanel - INFO - Found operations file with 5 operations
-2025-08-15 09:40:59,086 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 5 operations from file
-2025-08-15 09:40:59,086 - VCCTL.OperationsMonitoringPanel - INFO - Loading operations from database...
-2025-08-15 09:40:59,086 - VCCTL.OperationService - INFO - Operation service initialized
-2025-08-15 09:40:59,088 - VCCTL.OperationsMonitoringPanel - INFO - Found 2 operations in database
-2025-08-15 09:40:59,088 - VCCTL.OperationsMonitoringPanel - INFO - Total operations loaded: 5
-2025-08-15 09:40:59,088 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
-2025-08-15 09:40:59,088 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
-2025-08-15 09:40:59,088 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 5 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:40:59,089 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 5 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:40:59,226 - VCCTL.MainWindow - INFO - Main window initialized
-2025-08-15 09:41:28,473 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 419.13624668693114, 'current_memory_mb': 601.046875}
-2025-08-15 09:41:58,498 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 230.656320130738, 'current_memory_mb': 622.203125}
-2025-08-15 09:42:13,347 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
-2025-08-15 09:42:13,348 - app.services.microstructure_hydration_bridge - ERROR - Failed to calculate one-voxel bias: No metadata found for microstructure: E2ETest
-2025-08-15 09:42:13,348 - app.services.microstructure_hydration_bridge - WARNING - Using default one-voxel bias values
-2025-08-15 09:42:13,363 - app.services.microstructure_hydration_bridge - INFO - Copied 8 microstructure files from E2ETest to ./Operations/Hydration_E2ETest
-2025-08-15 09:42:13,364 - app.services.microstructure_hydration_bridge - INFO - Generated extended parameter file with 418 parameters: ./Operations/Hydration_E2ETest/Hydration_E2ETest_extended_parameters.csv
-2025-08-15 09:42:13,364 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
-2025-08-15 09:42:13,364 - app.services.microstructure_hydration_bridge - WARNING - No metadata found for microstructure E2ETest, using default alkali data
-2025-08-15 09:42:13,365 - app.services.microstructure_hydration_bridge - INFO - Generated alkali files: alkalichar.dat only (no fly ash)
-2025-08-15 09:42:13,366 - app.services.microstructure_hydration_bridge - INFO - Generated slag characteristics file: slagchar.dat
-2025-08-15 09:42:13,366 - VCCTL.HydrationPanel - INFO - Generated parameter file: ./Operations/Hydration_E2ETest/Hydration_E2ETest_extended_parameters.csv
-2025-08-15 09:42:13,366 - VCCTL.HydrationPanel - INFO - Parameter validation completed
-2025-08-15 09:42:24,141 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
-2025-08-15 09:42:24,142 - app.services.microstructure_hydration_bridge - ERROR - Failed to calculate one-voxel bias: No metadata found for microstructure: E2ETest
-2025-08-15 09:42:24,142 - app.services.microstructure_hydration_bridge - WARNING - Using default one-voxel bias values
-2025-08-15 09:42:24,152 - app.services.microstructure_hydration_bridge - INFO - Copied 8 microstructure files from E2ETest to ./Operations/HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,152 - app.services.microstructure_hydration_bridge - INFO - Generated extended parameter file with 418 parameters: ./Operations/HydrationSim_E2ETest_20250815_094224/HydrationSim_E2ETest_20250815_094224_extended_parameters.csv
-2025-08-15 09:42:24,152 - app.services.microstructure_hydration_bridge - WARNING - Metadata file not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/microstructure_metadata/E2ETest_metadata.json
-2025-08-15 09:42:24,152 - app.services.microstructure_hydration_bridge - WARNING - No metadata found for microstructure E2ETest, using default alkali data
-2025-08-15 09:42:24,152 - app.services.microstructure_hydration_bridge - INFO - Generated alkali files: alkalichar.dat only (no fly ash)
-2025-08-15 09:42:24,153 - app.services.microstructure_hydration_bridge - INFO - Generated slag characteristics file: slagchar.dat
-2025-08-15 09:42:24,153 - VCCTL.HydrationExecutor - INFO - Starting hydration simulation for operation: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,154 - VCCTL.HydrationExecutor - INFO - Environment prepared for operation: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,154 - VCCTL.HydrationExecutor - INFO -   Parameter file: Operations/HydrationSim_E2ETest_20250815_094224/HydrationSim_E2ETest_20250815_094224_extended_parameters.csv
-2025-08-15 09:42:24,154 - VCCTL.HydrationExecutor - INFO -   Working directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,154 - VCCTL.HydrationExecutor - INFO - Creating new operation: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,157 - VCCTL.HydrationExecutor - INFO - Starting disrealnew process: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/backend/bin/disrealnew --workdir . --json progress.json --parameters HydrationSim_E2ETest_20250815_094224_extended_parameters.csv
-2025-08-15 09:42:24,167 - VCCTL.HydrationExecutor - INFO - Starting simulation monitoring for: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,167 - VCCTL.HydrationExecutor - INFO - Hydration simulation started successfully: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:24,168 - VCCTL.HydrationPanel - INFO - Hydration simulation started: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:28,528 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 153.89448316976535, 'current_memory_mb': 622.375}
-2025-08-15 09:42:29,447 - VCCTL.OperationsMonitoringPanel - INFO - Added new database operation: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:42:29,447 - VCCTL.OperationsMonitoringPanel - INFO - Added 1 new operations from database
-2025-08-15 09:42:58,552 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 118.61221727938229, 'current_memory_mb': 628.765625}
-2025-08-15 09:43:11,922 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_E2ETest_20250814_172436
-2025-08-15 09:43:11,922 - VCCTL.OperationsMonitoringPanel - WARNING - No output directory found for operation: HydrationSim_E2ETest_20250814_172436
-2025-08-15 09:43:11,922 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 5 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:43:11,923 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 5 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-08-15 09:43:11,924 - VCCTL.OperationsMonitoringPanel - INFO - Found 20 total items in Operations directory
-2025-08-15 09:43:11,928 - VCCTL.OperationsMonitoringPanel - INFO - Found 19 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'E2ETest', 'HydrationSim_CemotcBox_20250815_093721', 'HydrationSim_E2ETest_20250814_122433', 'HydrationSim_E2ETest_20250814_153645', 'HydrationSim_E2ETest_20250814_154640', 'HydrationSim_E2ETest_20250814_170316', 'HydrationSim_E2ETest_20250814_172436', 'HydrationSim_E2ETest_20250815_094224', 'Hydration_CemotcBox', 'Hydration_E2ETest', 'MisDesignSaveTest_copy', 'ProcessControl', 'TestHydrationExecution', 'TestHydrationOp']
-2025-08-15 09:43:11,928 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
-2025-08-15 09:43:11,928 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
-2025-08-15 09:43:11,928 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
-2025-08-15 09:43:11,929 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
-2025-08-15 09:43:11,929 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
-2025-08-15 09:43:11,929 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
-2025-08-15 09:43:11,929 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
-2025-08-15 09:43:11,931 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 12 files
-2025-08-15 09:43:11,931 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
-2025-08-15 09:43:11,932 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
-2025-08-15 09:43:11,932 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: E2ETest
-2025-08-15 09:43:11,932 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for E2ETest with 12 files
-2025-08-15 09:43:11,932 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_CemotcBox_20250815_093721
-2025-08-15 09:43:11,933 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_CemotcBox_20250815_093721 with 32 files
-2025-08-15 09:43:11,933 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_122433
-2025-08-15 09:43:11,935 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_122433 with 27 files
-2025-08-15 09:43:11,935 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_153645
-2025-08-15 09:43:11,936 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_153645 with 27 files
-2025-08-15 09:43:11,936 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_154640
-2025-08-15 09:43:11,938 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_154640 with 27 files
-2025-08-15 09:43:11,938 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_170316
-2025-08-15 09:43:11,940 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_170316 with 28 files
-2025-08-15 09:43:11,940 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_172436
-2025-08-15 09:43:11,943 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_172436 with 35 files
-2025-08-15 09:43:11,943 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:11,944 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250815_094224 with 19 files
-2025-08-15 09:43:11,944 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_CemotcBox
-2025-08-15 09:43:11,944 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_CemotcBox with 8 files
-2025-08-15 09:43:11,944 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_E2ETest
-2025-08-15 09:43:11,946 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_E2ETest with 11 files
-2025-08-15 09:43:11,946 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationExecution
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationExecution with 1 files
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationOp
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationOp with 1 files
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 19 operations
-2025-08-15 09:43:11,947 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-08-15 09:43:11,948 - VCCTL.OperationsMonitoringPanel - INFO - Adding 19 operations to display
-2025-08-15 09:43:11,951 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+2025-08-22 21:22:19,303 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-08-22 21:22:19,303 - VCCTL.OperationsMonitoringPanel - ERROR - Error loading operations data: 'OperationsMonitoringPanel' object has no attribute 'operations_file'
+2025-08-22 21:22:19,303 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-08-22 21:22:19,303 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - INFO - Found 9 operations in database
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - WARNING - Database operation HydrationSim_Cem140Quartz03_copy_20250822_195417 has future start_time 2025-08-23 00:54:17.855744, adjusting to current time
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 9 operations from database
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:19,304 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-08-22 21:22:19,305 - VCCTL.ResultsPanel - INFO - Results panel initialized
+2025-08-22 21:22:19,305 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-08-22 21:22:19,305 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-22 21:22:19,305 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 0 results from Operations folder
+2025-08-22 21:22:19,309 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-08-22 21:22:19,310 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-08-22 21:22:19,311 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-08-22 21:22:19,311 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-08-22 21:22:19,481 - VCCTL.MainWindow - INFO - Main window initialized
+2025-08-22 21:22:19,510 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
+2025-08-22 21:22:19,510 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-08-22 21:22:19,510 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-22 21:22:19,511 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 0 results from Operations folder
+2025-08-22 21:22:20,309 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:21,315 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:22,317 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:23,021 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-08-22 21:22:23,022 - VCCTL.OperationsMonitoringPanel - INFO - Found 9 operations in database
+2025-08-22 21:22:23,022 - VCCTL.OperationsMonitoringPanel - WARNING - Database operation HydrationSim_Cem140Quartz03_copy_20250822_195417 has future start_time 2025-08-23 00:54:17.855744, adjusting to current time
+2025-08-22 21:22:23,022 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 9 operations from database
+2025-08-22 21:22:23,322 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:24,327 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:24,351 - VCCTL.OperationsMonitoringPanel - INFO - STEP_DEBUG: Operation HydrationSim_Cem140Blend_20250820_132554, current_step='Process completed', status=OperationStatus.COMPLETED
+2025-08-22 21:22:24,351 - VCCTL.OperationsMonitoringPanel - INFO - STEP_DEBUG: Setting step text to: 'Process completed'
+2025-08-22 21:22:25,328 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1906, in _on_operation_selection_changed
+    self._update_multiple_operation_details(selected_operations)
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2060, in _update_multiple_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+2025-08-22 21:22:26,329 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:27,335 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:28,340 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,345 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:29,832 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation HydrationSim_Cem140Blend_20250820_132554 metadata: {'source': 'database', 'output_directory': 'Operations/HydrationSim_Cem140Blend_20250820_132554'}
+2025-08-22 21:22:29,832 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/HydrationSim_Cem140Blend_20250820_132554, operation_source=database
+2025-08-22 21:22:29,832 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for HydrationSim_Cem140Blend_20250820_132554: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,836 - app.services.operation_service - INFO - Deleted operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation genmic_input_Cem152Blend Microstructure metadata: {'source': 'database', 'output_directory': 'Operations/genmic_input_Cem152Blend Microstructure'}
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/genmic_input_Cem152Blend Microstructure, operation_source=database
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for genmic_input_Cem152Blend Microstructure: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem152Blend Microstructure
+2025-08-22 21:22:29,836 - app.services.operation_service - INFO - Deleted operation: genmic_input_Cem152Blend Microstructure
+2025-08-22 21:22:29,836 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: genmic_input_Cem152Blend Microstructure
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem152Blend Microstructure
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem152Blend Microstructure
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation HydrationSim_Cem140Quartz07_20250821_205203 metadata: {'source': 'database', 'output_directory': 'Operations/HydrationSim_Cem140Quartz07_20250821_205203'}
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/HydrationSim_Cem140Quartz07_20250821_205203, operation_source=database
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for HydrationSim_Cem140Quartz07_20250821_205203: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_205203
+2025-08-22 21:22:29,837 - app.services.operation_service - INFO - Deleted operation: HydrationSim_Cem140Quartz07_20250821_205203
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_Cem140Quartz07_20250821_205203
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_205203
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_205203
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation MyCustomHydrationTest metadata: {'source': 'database', 'output_directory': 'Operations/MyCustomHydrationTest'}
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/MyCustomHydrationTest, operation_source=database
+2025-08-22 21:22:29,837 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for MyCustomHydrationTest: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/MyCustomHydrationTest
+2025-08-22 21:22:29,838 - app.services.operation_service - INFO - Deleted operation: MyCustomHydrationTest
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: MyCustomHydrationTest
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/MyCustomHydrationTest
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/MyCustomHydrationTest
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation HydrationSim_Cem140Quartz07_20250821_211206 metadata: {'source': 'database', 'output_directory': 'Operations/HydrationSim_Cem140Quartz07_20250821_211206'}
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/HydrationSim_Cem140Quartz07_20250821_211206, operation_source=database
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for HydrationSim_Cem140Quartz07_20250821_211206: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_211206
+2025-08-22 21:22:29,838 - app.services.operation_service - INFO - Deleted operation: HydrationSim_Cem140Quartz07_20250821_211206
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_Cem140Quartz07_20250821_211206
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_211206
+2025-08-22 21:22:29,838 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_211206
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation HydrationSim_Cem140Quartz07_20250821_212033 metadata: {'source': 'database', 'output_directory': 'Operations/HydrationSim_Cem140Quartz07_20250821_212033'}
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/HydrationSim_Cem140Quartz07_20250821_212033, operation_source=database
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for HydrationSim_Cem140Quartz07_20250821_212033: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_212033
+2025-08-22 21:22:29,839 - app.services.operation_service - INFO - Deleted operation: HydrationSim_Cem140Quartz07_20250821_212033
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_Cem140Quartz07_20250821_212033
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_212033
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz07_20250821_212033
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation c140q07-early metadata: {'source': 'database', 'output_directory': 'Operations/c140q07-early'}
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/c140q07-early, operation_source=database
+2025-08-22 21:22:29,839 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for c140q07-early: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/c140q07-early
+2025-08-22 21:22:29,840 - app.services.operation_service - INFO - Deleted operation: c140q07-early
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: c140q07-early
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/c140q07-early
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/c140q07-early
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation HydrationSim_Cem140Quartz03_copy_20250822_195417 metadata: {'source': 'database', 'output_directory': 'Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417'}
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417, operation_source=database
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for HydrationSim_Cem140Quartz03_copy_20250822_195417: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417
+2025-08-22 21:22:29,840 - app.services.operation_service - INFO - Deleted operation: HydrationSim_Cem140Quartz03_copy_20250822_195417
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_Cem140Quartz03_copy_20250822_195417
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/HydrationSim_Cem140Quartz03_copy_20250822_195417
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Operation genmic_input_Cem140Quartz03_copy Microstructure metadata: {'source': 'database', 'output_directory': 'Operations/genmic_input_Cem140Quartz03_copy Microstructure'}
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: output_dir=Operations/genmic_input_Cem140Quartz03_copy Microstructure, operation_source=database
+2025-08-22 21:22:29,840 - VCCTL.OperationsMonitoringPanel - INFO - Made absolute path for genmic_input_Cem140Quartz03_copy Microstructure: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem140Quartz03_copy Microstructure
+2025-08-22 21:22:29,841 - app.services.operation_service - INFO - Deleted operation: genmic_input_Cem140Quartz03_copy Microstructure
+2025-08-22 21:22:29,841 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: genmic_input_Cem140Quartz03_copy Microstructure
+2025-08-22 21:22:29,841 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Attempting to delete folder: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem140Quartz03_copy Microstructure
+2025-08-22 21:22:29,841 - VCCTL.OperationsMonitoringPanel - INFO - DEBUG: Folder exists: False
+2025-08-22 21:22:29,841 - VCCTL.OperationsMonitoringPanel - WARNING - Operation folder not found: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations/genmic_input_Cem140Quartz03_copy Microstructure
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+Traceback (most recent call last):
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 1909, in _on_operation_selection_changed
+    self._clear_operation_details()
+  File "/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2080, in _clear_operation_details
+    self.step_progress.set_fraction(0.0)
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'OperationsMonitoringPanel' object has no attribute 'step_progress'
+2025-08-22 21:22:29,849 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Found 1 total items in Operations directory
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Found 0 operation directories: []
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 0 operations
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - WARNING - Failed to load operations: success=True, data_count=0
+2025-08-22 21:22:29,850 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-2025-08-15 09:43:28,575 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 99.53858615058533, 'current_memory_mb': 640.390625}
-2025-08-15 09:43:47,160 - VCCTL.OperationsMonitoringPanel - INFO - Deleted operation from database: HydrationSim_CemotcBox_20250815_093721
-2025-08-15 09:43:47,160 - VCCTL.OperationsMonitoringPanel - WARNING - No output directory found for operation: HydrationSim_CemotcBox_20250815_093721
-2025-08-15 09:43:47,160 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:43:47,161 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:43:47,161 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/Operations
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Found 20 total items in Operations directory
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Found 19 operation directories: ['BigPaste', 'BigPaste01', 'Cement168', 'CemotcBox', 'ControlPaste', 'E2ETest', 'HydrationSim_CemotcBox_20250815_093721', 'HydrationSim_E2ETest_20250814_122433', 'HydrationSim_E2ETest_20250814_153645', 'HydrationSim_E2ETest_20250814_154640', 'HydrationSim_E2ETest_20250814_170316', 'HydrationSim_E2ETest_20250814_172436', 'HydrationSim_E2ETest_20250815_094224', 'Hydration_CemotcBox', 'Hydration_E2ETest', 'MisDesignSaveTest_copy', 'ProcessControl', 'TestHydrationExecution', 'TestHydrationOp']
-2025-08-15 09:43:47,162 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste
-2025-08-15 09:43:47,163 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste with 13 files
-2025-08-15 09:43:47,163 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: BigPaste01
-2025-08-15 09:43:47,164 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for BigPaste01 with 13 files
-2025-08-15 09:43:47,164 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cement168
-2025-08-15 09:43:47,165 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cement168 with 13 files
-2025-08-15 09:43:47,165 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemotcBox
-2025-08-15 09:43:47,166 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemotcBox with 12 files
-2025-08-15 09:43:47,166 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ControlPaste
-2025-08-15 09:43:47,167 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ControlPaste with 15 files
-2025-08-15 09:43:47,167 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: E2ETest
-2025-08-15 09:43:47,168 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for E2ETest with 12 files
-2025-08-15 09:43:47,168 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_CemotcBox_20250815_093721
-2025-08-15 09:43:47,170 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_CemotcBox_20250815_093721 with 32 files
-2025-08-15 09:43:47,170 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_122433
-2025-08-15 09:43:47,172 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_122433 with 27 files
-2025-08-15 09:43:47,172 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_153645
-2025-08-15 09:43:47,174 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_153645 with 27 files
-2025-08-15 09:43:47,174 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_154640
-2025-08-15 09:43:47,176 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_154640 with 27 files
-2025-08-15 09:43:47,176 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_170316
-2025-08-15 09:43:47,179 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_170316 with 28 files
-2025-08-15 09:43:47,179 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250814_172436
-2025-08-15 09:43:47,182 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250814_172436 with 35 files
-2025-08-15 09:43:47,182 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:47,183 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationSim_E2ETest_20250815_094224 with 25 files
-2025-08-15 09:43:47,183 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_CemotcBox
-2025-08-15 09:43:47,183 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_CemotcBox with 8 files
-2025-08-15 09:43:47,183 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_E2ETest
-2025-08-15 09:43:47,184 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_E2ETest with 11 files
-2025-08-15 09:43:47,184 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: MisDesignSaveTest_copy
-2025-08-15 09:43:47,185 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for MisDesignSaveTest_copy with 15 files
-2025-08-15 09:43:47,185 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: ProcessControl
-2025-08-15 09:43:47,185 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for ProcessControl with 7 files
-2025-08-15 09:43:47,185 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationExecution
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationExecution with 1 files
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: TestHydrationOp
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for TestHydrationOp with 1 files
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 19 operations
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-08-15 09:43:47,186 - VCCTL.OperationsMonitoringPanel - INFO - Adding 19 operations to display
-2025-08-15 09:43:47,190 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
-
-2025-08-15 09:43:54,200 - VCCTL.HydrationExecutor - INFO - Simulation completion verified by output files: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:54,202 - VCCTL.HydrationExecutor - INFO - Simulation completed successfully: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:54,203 - VCCTL.HydrationExecutor - INFO - Cleaned up simulation resources for: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:54,203 - VCCTL.HydrationExecutor - INFO - Simulation monitoring ended for: HydrationSim_E2ETest_20250815_094224
-2025-08-15 09:43:58,604 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 84.51721905463482, 'current_memory_mb': 645.09375}
-2025-08-15 09:43:59,902 - VCCTL.OperationsMonitoringPanel - INFO - Updated operation status: HydrationSim_E2ETest_20250815_094224 -> completed
-2025-08-15 09:44:28,633 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 121.01019339121737, 'current_memory_mb': 815.234375}
-2025-08-15 09:44:58,661 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 106.61272673336138, 'current_memory_mb': 818.15625}
-2025-08-15 09:45:28,689 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 94.78073542942033, 'current_memory_mb': 818.21875}
-2025-08-15 09:45:59,393 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:45:59,397 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:45:59,397 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-08-15 09:45:59,436 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-08-15 09:50:55,554 - VCCTL - INFO - Quitting application
-2025-08-15 09:50:55,555 - VCCTL - INFO - Application shutdown
-2025-08-15 09:50:55,555 - VCCTL.MainWindow - INFO - Cleaning up main window resources
-2025-08-15 09:50:55,555 - VCCTL.OperationsMonitoringPanel - INFO - Starting operations monitoring panel cleanup...
-2025-08-15 09:50:55,740 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring stopped
-2025-08-15 09:50:55,741 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to save 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:50:55,743 - VCCTL.OperationsMonitoringPanel - INFO - Successfully saved 4 operations to /Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/config/operations_history.json
-2025-08-15 09:50:55,743 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel cleanup completed - saved 4 operations
-2025-08-15 09:50:57,744 - VCCTL.PerformanceMonitor - INFO - Performance monitoring stopped
-2025-08-15 09:50:57,751 - VCCTL.PerformanceMonitor - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1755269457.json
-2025-08-15 09:50:57,751 - VCCTL.MainWindow - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1755269457.json
-2025-08-15 09:50:57,764 - VCCTL.ConfigManager - INFO - Configuration saved successfully
-2025-08-15 09:50:57,772 - VCCTL.ConfigManager - INFO - Configuration saved successfully
+2025-08-22 21:22:30,349 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:31,355 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:32,360 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:33,361 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:34,366 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:35,205 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-08-22 21:22:35,205 - VCCTL.OperationsMonitoringPanel - INFO - Found 0 operations in database
+2025-08-22 21:22:35,205 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 0 operations from database
+2025-08-22 21:22:35,371 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:36,071 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-08-22 21:22:36,071 - VCCTL.OperationsMonitoringPanel - INFO - Found 0 operations in database
+2025-08-22 21:22:36,071 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 0 operations from database
+2025-08-22 21:22:36,377 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:37,382 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:38,385 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:39,391 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:40,395 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:41,400 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:42,403 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:43,407 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:44,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:44,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:44,412 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:45,417 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:46,421 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:47,427 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:48,432 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_save_operations_periodically'
+2025-08-22 21:22:48,721 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 399.69569449361785, 'current_memory_mb': 592.375}
+2025-08-22 21:22:49,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:49,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:49,436 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:50,441 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:51,443 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:52,447 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:53,452 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:54,457 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:55,460 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:56,465 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:57,467 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:58,472 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:22:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:22:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:22:59,476 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:00,479 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:01,483 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:02,489 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:03,494 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:04,497 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:05,502 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:06,506 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:07,509 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:08,511 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:09,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:09,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:09,516 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:10,518 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:11,521 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:12,523 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:13,528 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:14,533 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:15,538 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:16,542 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:17,547 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:18,552 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:18,749 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 201.2485230472285, 'current_memory_mb': 593.78125}
+2025-08-22 21:23:19,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:19,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:19,558 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:20,562 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:21,564 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:22,566 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:23,567 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:24,571 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:25,576 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:26,579 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:27,582 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:28,588 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:29,592 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:30,597 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:31,599 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:32,600 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:33,601 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:34,602 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:35,604 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:36,605 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:37,606 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:38,607 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:39,609 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:40,610 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:41,612 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:42,613 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:43,615 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:44,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:44,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:44,617 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:45,617 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:46,620 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:47,621 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:48,623 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:48,818 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 135.59859018006867, 'current_memory_mb': 595.9375}
+2025-08-22 21:23:49,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:49,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:49,624 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:50,625 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:51,627 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:52,628 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:53,629 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:54,631 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:55,631 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:56,633 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:57,634 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:58,635 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:23:59,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:23:59,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:23:59,637 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:00,638 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:01,640 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:02,641 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:03,643 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:04,644 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:05,646 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:06,647 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:07,648 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:08,652 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:09,652 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:10,654 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:11,655 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:12,656 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:13,658 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:14,659 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:15,661 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:16,661 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:17,662 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:18,663 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:18,888 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 102.6493688033676, 'current_memory_mb': 597.90625}
+2025-08-22 21:24:19,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:19,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:19,665 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:20,665 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:21,667 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:22,668 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:23,669 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:24,671 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:25,672 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:26,673 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:27,674 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:28,676 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:29,677 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:30,679 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:31,680 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:32,681 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:33,682 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:34,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:34,684 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:35,685 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:36,687 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:37,688 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:38,689 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:39,690 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:40,692 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:41,693 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:42,694 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:43,695 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:44,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:44,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:44,697 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:45,698 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:46,699 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:47,701 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:48,702 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:48,951 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 83.13764756477956, 'current_memory_mb': 600.5}
+2025-08-22 21:24:49,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:49,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:49,704 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:50,705 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:51,706 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:52,708 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:53,709 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:54,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:54,710 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:55,711 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:56,712 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:57,714 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:58,715 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:24:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:24:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:24:59,717 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:00,718 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:01,720 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:02,721 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:03,722 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:04,724 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:05,726 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:06,727 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:07,729 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:08,730 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:09,731 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:10,733 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:11,734 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:12,736 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:13,737 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:14,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:14,738 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:15,740 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:16,741 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:17,743 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:18,744 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:19,020 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 70.1368673868321, 'current_memory_mb': 603.09375}
+2025-08-22 21:25:19,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:19,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:19,745 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:20,747 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:21,748 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:22,749 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:23,750 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:24,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:24,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:24,752 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:25,753 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:26,755 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:27,756 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:28,758 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:29,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:29,759 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:30,760 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:31,761 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:32,762 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:33,762 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:34,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:34,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:34,763 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:35,765 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:36,766 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:37,767 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:38,769 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:39,769 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:40,771 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:41,772 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:42,773 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:43,775 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:44,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:44,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:44,776 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:45,778 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:46,779 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:47,781 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:48,782 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:49,077 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 60.115017266275274, 'current_memory_mb': 603.109375}
+2025-08-22 21:25:49,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:49,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:49,783 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:50,784 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:51,785 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:52,787 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:53,789 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:54,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:54,791 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:55,793 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:56,795 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:57,797 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:58,798 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:25:59,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:25:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:25:59,800 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:00,801 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:01,803 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:02,804 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:03,806 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:04,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:04,808 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:05,809 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:06,811 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:07,812 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:08,813 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:09,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:09,263 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:09,814 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:10,816 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:11,818 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:12,819 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:13,821 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:14,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:14,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:14,823 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:15,824 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:16,826 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:17,828 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:18,830 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:19,204 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 53.24628144188425, 'current_memory_mb': 605.703125}
+2025-08-22 21:26:19,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:19,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:19,832 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:20,834 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:21,836 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:22,837 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:23,839 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:24,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:24,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:24,841 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:25,843 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:26,844 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:27,845 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:28,847 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:29,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:29,262 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:29,849 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:30,850 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:31,851 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:32,853 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:33,855 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:34,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:34,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:34,857 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:35,858 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:36,860 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:37,861 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:38,862 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:39,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:39,863 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:40,865 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:41,867 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:42,868 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:43,870 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:44,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:44,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:44,871 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:45,873 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:46,875 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:47,877 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:48,878 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:49,266 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:49,272 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:49,879 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:50,881 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:51,882 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:52,884 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:53,886 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:54,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:54,887 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:55,889 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:56,890 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:57,892 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:58,893 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:26:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:26:59,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:26:59,894 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:00,895 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:01,897 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:02,898 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:03,900 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:04,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:27:04,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:27:04,901 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:05,902 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:06,904 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:07,905 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:08,907 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:27:09,261 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:27:09,909 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:10,910 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:11,912 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:12,913 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:13,915 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:14,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:27:14,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:27:14,916 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:15,918 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:16,919 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:17,921 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:18,922 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:19,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: _periodic_update_operation_details called
+2025-08-22 21:27:19,260 - VCCTL.OperationsMonitoringPanel - INFO - PERIODIC_UPDATE: Currently displayed operation: HydrationSim_Cem140Blend_20250820_132554
+2025-08-22 21:27:19,924 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:20,925 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:21,927 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
+2025-08-22 21:27:22,929 - VCCTL.OperationsMonitoringPanel - ERROR - Error in monitoring loop: 'OperationsMonitoringPanel' object has no attribute '_refresh_operations_from_database'
