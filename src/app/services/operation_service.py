@@ -30,21 +30,30 @@ class OperationService:
         with self.db_service.get_read_only_session() as session:
             return session.query(Operation).filter(Operation.name == name).first()
     
-    def create_operation(self, name: str, operation_type: str, notes: str = None) -> Operation:
-        """Create a new operation."""
+    def create_operation(self, name: str, operation_type: str, notes: str = None, status: OperationStatus = None, progress: float = 0.0, current_step: str = None) -> Operation:
+        """Create a new operation with specified status."""
+        if status is None:
+            status = OperationStatus.QUEUED
+            
         with self.db_service.get_session() as session:
             operation = Operation(
                 name=name,
                 operation_type=operation_type,
-                status=OperationStatus.QUEUED.value,
-                progress=0.0,
+                status=status.value,
+                progress=progress,
+                current_step=current_step,
                 notes=notes,
                 queued_at=datetime.utcnow()
             )
+            
+            # Set started_at timestamp if creating with RUNNING status
+            if status == OperationStatus.RUNNING:
+                operation.started_at = datetime.utcnow()
+            
             session.add(operation)
             session.commit()
             session.refresh(operation)
-            self.logger.info(f"Created operation: {operation.name}")
+            self.logger.info(f"Created operation: {operation.name} with status {status.value}")
             return operation
     
     def delete(self, name: str) -> bool:

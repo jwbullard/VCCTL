@@ -173,14 +173,14 @@ class Operation:
             pass
         return None
     
-    def parse_genmic_progress(self, stderr_line: str) -> bool:
-        """Parse genmic progress updates from stderr line. Returns True if progress was updated."""
+    def parse_genmic_progress(self, output_line: str) -> bool:
+        """Parse genmic progress updates from stdout/stderr line. Returns True if progress was updated."""
         try:
-            if not stderr_line.startswith("GENMIC_PROGRESS:"):
+            if not output_line.startswith("GENMIC_PROGRESS:"):
                 return False
             
             # Parse: GENMIC_PROGRESS: stage=particle_placement progress=0.30 message=Placed 3000 particles
-            content = stderr_line.replace("GENMIC_PROGRESS:", "").strip()
+            content = output_line.replace("GENMIC_PROGRESS:", "").strip()
             
             # Extract key=value pairs
             progress_data = {}
@@ -199,7 +199,15 @@ class Operation:
             if "progress" in progress_data:
                 try:
                     new_progress = float(progress_data["progress"])
-                    self.progress = max(0.0, min(1.0, new_progress))  # Clamp to 0-1
+                    # Only update if progress value is reasonable (0.0 to 1.0 range)
+                    # Ignore astronomical values that seem to be particle counts, not percentages
+                    if 0.0 <= new_progress <= 1.0:
+                        self.progress = new_progress
+                        # Progress update successful - no need to log every update
+                        pass
+                    else:
+                        # Invalid progress values are silently ignored
+                        pass
                 except ValueError:
                     pass
             
@@ -424,6 +432,12 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Start periodic updates for operation details refresh
         from gi.repository import GLib
         GLib.timeout_add_seconds(5, self._periodic_update_operation_details)
+        
+        # SIMPLE SOLUTION: Direct progress file reader every 5 seconds
+        GLib.timeout_add_seconds(5, self._simple_progress_update)
+        
+        # Start periodic updates for operations list (main table) - more frequent for running operations
+        GLib.timeout_add_seconds(2, self._periodic_update_operations_list)
         
         self.logger.info("Operations monitoring panel initialized")
     
@@ -1375,30 +1389,81 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.logger.info("Monitoring stopped")
     
     def _monitoring_loop(self) -> None:
-        """Main monitoring loop."""
+        """Main monitoring loop with robust error handling and detailed logging."""
+        loop_iteration = 0
+        last_operation_count = 0
+        last_running_count = 0
+        
+        self.logger.info("Monitoring loop started")
+        
         while self.monitoring_active:
             try:
-                # Update system resources
-                self._update_system_resources()
+                loop_iteration += 1
+                current_time = time.time()
                 
-                # Update operations
-                self._update_operations()
+                # Log periodic status to detect if monitoring is stuck
+                if loop_iteration % 30 == 1:  # Every 30 seconds
+                    running_ops = sum(1 for op in self.operations.values() 
+                                     if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED])
+                    self.logger.info(f"Monitoring loop iteration {loop_iteration}: {len(self.operations)} total operations, {running_ops} running")
                 
-                # Save operations periodically
-                self._save_operations_periodically()
+                # Update system resources with error isolation
+                try:
+                    self._update_system_resources()
+                except Exception as e:
+                    self.logger.warning(f"System resources update failed: {e}")
+                
+                # Update operations - CRITICAL SECTION with detailed error handling
+                try:
+                    operations_before = len(self.operations)
+                    running_before = sum(1 for op in self.operations.values() 
+                                        if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED])
+                    
+                    self._update_operations()
+                    
+                    operations_after = len(self.operations)
+                    running_after = sum(1 for op in self.operations.values() 
+                                       if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED])
+                    
+                    # Log significant changes
+                    if running_after != running_before or (loop_iteration % 60 == 1):
+                        self.logger.info(f"Operations update: {running_before}→{running_after} running, {operations_before}→{operations_after} total")
+                        
+                        # Log details of running operations
+                        for op in self.operations.values():
+                            if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
+                                self.logger.debug(f"  Running: {op.name} ({op.progress:.1%}) - {op.current_step}")
+                    
+                except Exception as e:
+                    self.logger.error(f"CRITICAL: Operations update failed: {e}", exc_info=True)
+                
+                # Operations are saved directly to database in _update_operation_in_database()
+                # No need for periodic file saving since we use database-only approach
                 
                 # Throttle UI updates to reduce blinking
-                current_time = time.time()
                 if current_time - self.last_ui_update >= self.ui_update_throttle:
                     self.last_ui_update = current_time
-                    GLib.idle_add(self._update_ui)
+                    try:
+                        GLib.idle_add(self._update_ui)
+                    except Exception as e:
+                        self.logger.warning(f"UI update scheduling failed: {e}")
                 
                 # Sleep until next update
                 time.sleep(self.update_interval)
                 
             except Exception as e:
-                self.logger.error(f"Error in monitoring loop: {e}")
-                time.sleep(1.0)  # Brief pause on error
+                self.logger.error(f"CRITICAL: Monitoring loop iteration {loop_iteration} failed: {e}", exc_info=True)
+                time.sleep(2.0)  # Longer pause on critical error to prevent spam
+                
+                # Recovery attempt - try to reload operations if monitoring is broken
+                if loop_iteration % 10 == 0:  # Every 10 failures
+                    try:
+                        self.logger.info("Attempting recovery - reloading operations from database")
+                        self._load_operations_from_database()
+                    except Exception as recovery_e:
+                        self.logger.error(f"Recovery attempt failed: {recovery_e}")
+        
+        self.logger.info("Monitoring loop ended")
     
     def _update_system_resources(self) -> None:
         """Update system resource information."""
@@ -1442,22 +1507,58 @@ class OperationsMonitoringPanel(Gtk.Box):
             self._last_db_refresh = current_time
         
         # Check if we have any running operations
-        has_running_ops = any(op.status in ['running', 'pending'] for op in self.operations.values())
+        has_running_ops = any(op.status in [OperationStatus.RUNNING, OperationStatus.PENDING] for op in self.operations.values())
         refresh_interval = 10 if has_running_ops else 30  # 10 seconds if running ops, 30 seconds otherwise
         
         time_since_refresh = (current_time - self._last_db_refresh).total_seconds()
         if time_since_refresh >= refresh_interval:
-            self._refresh_operations_from_database()
-            self._last_db_refresh = current_time
+            # Use thread-safe database refresh to avoid crashes
+            try:
+                self._safe_load_operations_from_database()
+                self._last_db_refresh = current_time
+            except Exception as e:
+                self.logger.error(f"Database refresh failed safely: {e}")
+                self._last_db_refresh = current_time  # Still update to prevent constant retries
         
         # Update existing operations based on actual process status
         for operation in self.operations.values():
-            # Skip process monitoring for database-sourced operations (they don't have process info)
-            if hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database':
+            # Skip process monitoring for database-sourced operations that don't have process handles AND no stdout files
+            # BUT still allow UI updates for running operations (they need duration/progress updates)
+            is_database_sourced = hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database'
+            has_process_handle = hasattr(operation, 'process') and operation.process is not None
+            
+            # For database-sourced operations, check if they have stdout files to monitor
+            can_monitor_stdout = False
+            if is_database_sourced and operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
+                # Check if stdout files exist for this operation
+                try:
+                    import glob
+                    import os
+                    operation_name = operation.name
+                    if operation_name.endswith(" Microstructure"):
+                        base_name = operation_name.replace(" Microstructure", "")
+                        if base_name.startswith("genmic_input_"):
+                            folder_name = base_name.replace("genmic_input_", "")
+                        else:
+                            folder_name = base_name
+                        
+                        operations_dir = os.path.join("Operations", folder_name)
+                        if os.path.exists(operations_dir):
+                            # Check for both stdout files and progress files
+                            stdout_files = glob.glob(os.path.join(operations_dir, "proc_*_stdout.txt"))
+                            progress_file = os.path.join(operations_dir, "genmic_progress.txt")
+                            
+                            if stdout_files or os.path.exists(progress_file):
+                                can_monitor_stdout = True
+                except Exception as e:
+                    pass
+            
+            # Only skip if database-sourced AND no process handle AND no stdout files to monitor
+            if is_database_sourced and not has_process_handle and not can_monitor_stdout:
                 continue
                 
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
-                # Parse stdout for progress updates (for genmic operations)
+                # Parse stdout for GENMIC_PROGRESS messages (for genmic operations)
                 self._parse_operation_stdout(operation)
                 
                 # Check if process is still running (unless already marked complete by progress parser)
@@ -1546,6 +1647,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                             operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
                         else:
                             operation.current_step = f"{step_desc}..."
+                        
+                        # Save progress updates to database
+                        self._update_operation_in_database(operation)
                             
                     elif operation.start_time:
                         # If no estimated duration, use a simple time-based progress (slower)
@@ -1570,6 +1674,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                             operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
                         else:
                             operation.current_step = f"{step_desc}..."
+                        
+                        # Save progress updates to database
+                        self._update_operation_in_database(operation)
         
         # Synchronize with active hydration simulations to get detailed progress
         self._sync_with_active_hydration_simulations()
@@ -1630,16 +1737,25 @@ class OperationsMonitoringPanel(Gtk.Box):
                 if operation_name.endswith(" Microstructure"):
                     base_name = operation_name.replace(" Microstructure", "")
                     
+                    # Remove "genmic_input_" prefix if present to get actual folder name
+                    if base_name.startswith("genmic_input_"):
+                        folder_name = base_name.replace("genmic_input_", "")
+                    else:
+                        folder_name = base_name
+                    
                     # Look for output directory
                     import os
-                    output_dir = os.path.join("Operations", base_name)
+                    output_dir = os.path.join("Operations", folder_name)
+                    self.logger.info(f"Looking for output directory: {output_dir} (from operation: {operation.name})")
+                    
                     if not os.path.exists(output_dir):
                         self.logger.info(f"Output directory {output_dir} does not exist - operation not complete")
                         return False
                     
                     # Check for expected output files (.img and .pimg)
-                    img_file = os.path.join(output_dir, f"{base_name}.img")
-                    pimg_file = os.path.join(output_dir, f"{base_name}.pimg")
+                    # Files are named with the folder name, not the full operation name
+                    img_file = os.path.join(output_dir, f"{folder_name}.img")
+                    pimg_file = os.path.join(output_dir, f"{folder_name}.pimg")
                     
                     img_exists = os.path.exists(img_file)
                     pimg_exists = os.path.exists(pimg_file)
@@ -1662,34 +1778,61 @@ class OperationsMonitoringPanel(Gtk.Box):
     def _parse_operation_stdout(self, operation) -> None:
         """Parse stdout output from running operation for progress updates."""
         try:
-            # Only parse stdout for microstructure operations that have stdout files
-            if (operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION and 
-                hasattr(operation, 'stdout_file') and operation.stdout_file):
+            # Only parse stdout for microstructure operations
+            if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
                 
-                stdout_path = operation.stdout_file
-                if not hasattr(operation, '_stdout_position'):
-                    operation._stdout_position = 0
-                
-                # Read new content from stdout file
-                try:
-                    with open(stdout_path, 'r', encoding='utf-8') as f:
-                        f.seek(operation._stdout_position)
-                        new_content = f.read()
-                        operation._stdout_position = f.tell()
+                # Try to find stdout file if not already available
+                stdout_path = None
+                if hasattr(operation, 'stdout_file') and operation.stdout_file:
+                    stdout_path = operation.stdout_file
+                else:
+                    # For database-loaded operations, find the process stdout file with GENMIC_PROGRESS messages
+                    operation_name = operation.name
+                    if operation_name.endswith(" Microstructure"):
+                        base_name = operation_name.replace(" Microstructure", "")
                         
-                        # Process each new line
-                        for line in new_content.strip().split('\n'):
-                            if line.strip():
-                                if operation.parse_genmic_progress(line.strip()):
-                                    # Progress was updated, log it
-                                    self.logger.info(f"Updated progress for {operation.name}: {operation.progress:.1%} - {operation.current_step}")
-                                    
-                                    # If operation was marked complete by progress parser, break
-                                    if operation.status == OperationStatus.COMPLETED:
-                                        self.logger.info(f"Operation {operation.name} completed via progress message")
-                                        operation.close_output_files()
-                                        self._update_operation_in_database(operation)
-                                        break
+                        # Remove "genmic_input_" prefix if present to get actual folder name
+                        if base_name.startswith("genmic_input_"):
+                            folder_name = base_name.replace("genmic_input_", "")
+                        else:
+                            folder_name = base_name
+                        
+                        # Look for genmic_progress.txt file (single-line, always same name)
+                        import os
+                        operations_dir = os.path.join("Operations", folder_name)
+                        if os.path.exists(operations_dir):
+                            progress_file = os.path.join(operations_dir, "genmic_progress.txt")
+                            if os.path.exists(progress_file):
+                                stdout_path = progress_file
+                                self.logger.info(f"Found genmic progress file: {progress_file}")
+                            else:
+                                self.logger.info(f"No genmic_progress.txt file found in {operations_dir}")
+                        else:
+                            self.logger.info(f"Operations directory not found: {operations_dir}")
+                
+                if not stdout_path:
+                    return
+                
+                # Read simple progress file (single line, overwritten each time)
+                try:
+                    self.logger.info(f"Reading simple progress file: {stdout_path}")
+                    with open(stdout_path, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+                        self.logger.info(f"Progress file content: {repr(content)}")
+                        
+                        if content:
+                            # Parse simple format: "PROGRESS: 0.65 Distributing cement phases..."
+                            if self._parse_simple_progress(operation, content):
+                                # Progress was updated, log it
+                                self.logger.info(f"Updated progress for {operation.name}: {operation.progress:.1%} - {operation.current_step}")
+                                
+                                # Update database for any progress change
+                                self._update_operation_in_database(operation)
+                                
+                                # If operation was marked complete, close output files
+                                if operation.status == OperationStatus.COMPLETED:
+                                    self.logger.info(f"Operation {operation.name} completed via progress file")
+                                    operation.close_output_files()
                         
                 except (IOError, OSError) as e:
                     # File might not exist yet or be locked, that's okay
@@ -1697,6 +1840,47 @@ class OperationsMonitoringPanel(Gtk.Box):
                     
         except Exception as e:
             self.logger.error(f"Error parsing stdout for operation {operation.id}: {e}")
+    
+    def _parse_simple_progress(self, operation, content: str) -> bool:
+        """Parse simple progress format: 'PROGRESS: 0.65 Distributing cement phases...'"""
+        try:
+            if not content.startswith("PROGRESS:"):
+                return False
+            
+            # Remove "PROGRESS: " prefix
+            data = content[9:].strip()
+            
+            # Split into progress and message
+            parts = data.split(' ', 1)
+            if len(parts) < 2:
+                return False
+            
+            progress_str, message = parts[0], parts[1]
+            
+            try:
+                progress = float(progress_str)
+                
+                # Update operation
+                old_progress = operation.progress
+                operation.progress = progress
+                operation.current_step = message
+                
+                # Check for completion
+                if progress >= 1.0:
+                    operation.status = OperationStatus.COMPLETED
+                    operation.end_time = datetime.now()
+                    operation.completed_steps = operation.total_steps
+                
+                # Return True if progress changed
+                return abs(progress - old_progress) > 0.001
+                
+            except ValueError:
+                self.logger.warning(f"Invalid progress value: {progress_str}")
+                return False
+            
+        except Exception as e:
+            self.logger.warning(f"Error parsing simple progress: {e}")
+            return False
 
     def _update_operations_list(self) -> None:
         """Update the operations list view efficiently without clearing."""
@@ -1994,7 +2178,11 @@ class OperationsMonitoringPanel(Gtk.Box):
         elif operation.status == OperationStatus.CANCELLED:
             self.operation_step_value.set_text("Operation cancelled")
         elif operation.status == OperationStatus.PENDING:
-            self.operation_step_value.set_text("Queued for execution")
+            # Show actual step if available, otherwise default queued message
+            if operation.current_step and operation.current_step.strip():
+                self.operation_step_value.set_text(operation.current_step)
+            else:
+                self.operation_step_value.set_text("Queued for execution")
         else:
             self.operation_step_value.set_text("Not started")
         
@@ -2251,8 +2439,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Handle refresh button click."""
         self._update_status("Refreshing operations from database...")
         
-        # Simple database reload
-        self._load_operations_from_database()
+        # Smart refresh: preserve running operations, reload others from database
+        self._smart_refresh_from_database()
         
         # Update UI
         self._update_ui()
@@ -2307,6 +2495,24 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Return True to continue the periodic updates
         return True
     
+    def _periodic_update_operations_list(self) -> bool:
+        """Periodically update the main operations list to refresh durations and status."""
+        try:
+            # Always update UI regularly to show status changes
+            # This ensures operations that complete are immediately reflected in UI
+            from gi.repository import GLib
+            GLib.idle_add(self._update_operations_list)
+            
+            # Log update activity
+            running_ops = sum(1 for op in self.operations.values() if op.status == OperationStatus.RUNNING)
+            self.logger.debug(f"Periodic main operations list update triggered - {running_ops} running operations")
+            
+        except Exception as e:
+            self.logger.error(f"Error in periodic operations list update: {e}")
+        
+        # Return True to continue the periodic updates
+        return True
+    
     def _force_cleanup_stale_operations(self) -> None:
         """Force cleanup of stale operations by thoroughly checking process status."""
         self.logger.info("=== Starting force cleanup of stale operations ===")
@@ -2314,8 +2520,12 @@ class OperationsMonitoringPanel(Gtk.Box):
         cleaned_count = 0
         
         for operation in list(self.operations.values()):
-            # Skip cleanup for database-sourced operations (they don't have process info)
-            if hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database':
+            # Skip cleanup for database-sourced operations that don't have process handles
+            is_database_sourced = hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database'
+            has_process_handle = hasattr(operation, 'process') and operation.process is not None
+            
+            # Only skip if database-sourced AND no process handle (historical operations)
+            if is_database_sourced and not has_process_handle:
                 continue
                 
             # Check running/paused operations for stale processes
@@ -2737,6 +2947,24 @@ class OperationsMonitoringPanel(Gtk.Box):
             operation.stderr_handle = stderr_handle
             
             self.operations[operation_id] = operation
+            
+            # Save operation to database so it persists through refreshes
+            try:
+                # Convert UI enum to database enum
+                from app.models.operation import OperationStatus as DBOperationStatus
+                
+                db_operation = self.service_container.operation_service.create_operation(
+                    name=name,
+                    operation_type=operation_type.value,
+                    status=DBOperationStatus.RUNNING,  # Use database enum, not UI enum
+                    progress=operation.progress,
+                    current_step=operation.current_step,
+                    notes=f"Process PID: {process.pid}"
+                )
+                self.logger.info(f"Saved operation to database: {name} with RUNNING status")
+            except Exception as e:
+                self.logger.error(f"Failed to save operation to database: {e}")
+            
             self._add_log_entry(f"Started real process operation: {name} (PID: {process.pid})")
             self._add_log_entry(f"Command: {' '.join(command)}")
             self._add_log_entry(f"Working directory: {working_dir}")
@@ -3401,12 +3629,19 @@ class OperationsMonitoringPanel(Gtk.Box):
             self._set_error_analysis(f"Error refreshing analysis: {e}")
     
     def _load_operations_data(self) -> Dict[str, Any]:
-        """Load operations data from history file."""
+        """Load operations data from database (database-only approach)."""
         try:
-            if self.operations_file.exists():
-                with open(self.operations_file, 'r') as f:
-                    return json.load(f)
-            return {'operations': {}}
+            # Convert current in-memory operations to format expected by analysis methods
+            operations_dict = {}
+            for op_id, operation in self.operations.items():
+                operations_dict[op_id] = {
+                    'name': operation.name,
+                    'status': operation.status.value,
+                    'progress': operation.progress,
+                    'start_time': operation.start_time.isoformat() if operation.start_time else None,
+                    'end_time': operation.end_time.isoformat() if operation.end_time else None
+                }
+            return {'operations': operations_dict}
         except Exception as e:
             self.logger.error(f"Error loading operations data: {e}")
             return {'operations': {}}
@@ -4041,13 +4276,21 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     
     
-    def _load_operations_from_database(self) -> None:
-        """Load all operations from database (single source of truth)."""
+    def _smart_refresh_from_database(self) -> None:
+        """Smart refresh: preserve running operations, reload others from database."""
         try:
-            self.logger.info("Loading all operations from database...")
+            self.logger.info("Smart refresh: preserving running operations...")
             
-            # Clear existing operations
-            self.operations.clear()
+            # Save running/paused operations with their current progress
+            running_operations = {
+                op_id: op for op_id, op in self.operations.items() 
+                if op.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]
+            }
+            
+            # Create a set of running operation names to avoid duplicates
+            running_operation_names = {op.name for op in running_operations.values()}
+            
+            self.logger.info(f"Preserving {len(running_operations)} running operations: {list(running_operation_names)}")
             
             # Get all operations from database
             with self.service_container.database_service.get_read_only_session() as session:
@@ -4056,27 +4299,304 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             self.logger.info(f"Found {len(db_operations)} operations in database")
             
+            # Instead of clearing all, only remove non-running operations to preserve process handles
+            non_running_ids = [
+                op_id for op_id, op in self.operations.items() 
+                if op.status not in [OperationStatus.RUNNING, OperationStatus.PAUSED]
+            ]
+            
+            # Remove only non-running operations (keeps process handles for running ones)
+            for op_id in non_running_ids:
+                del self.operations[op_id]
+            
+            # Convert database operations to UI operations, but skip those that are running
+            db_loaded_count = 0
+            db_skipped_count = 0
+            
+            for db_op in db_operations:
+                try:
+                    # For operations running in-memory, update their status from database while preserving process handles
+                    if db_op.name in running_operation_names:
+                        self.logger.debug(f"Updating status for running operation from DB: {db_op.name}")
+                        # Find the in-memory operation
+                        in_memory_op = None
+                        for op in running_operations.values():
+                            if op.name == db_op.name:
+                                in_memory_op = op
+                                break
+                        
+                        if in_memory_op:
+                            # Update status, progress, and step from database while keeping process handle
+                            if db_op.status == 'COMPLETED':
+                                in_memory_op.status = OperationStatus.COMPLETED
+                                in_memory_op.progress = getattr(db_op, 'progress', 1.0)
+                                in_memory_op.current_step = getattr(db_op, 'current_step', 'Process completed')
+                                self.logger.info(f"Updated running operation {db_op.name} to COMPLETED from database")
+                            elif db_op.status == 'FAILED':
+                                in_memory_op.status = OperationStatus.FAILED
+                                in_memory_op.progress = getattr(db_op, 'progress', 0.0)
+                                in_memory_op.current_step = getattr(db_op, 'current_step', 'Process failed')
+                                self.logger.info(f"Updated running operation {db_op.name} to FAILED from database")
+                            else:
+                                # Update progress for still-running operations
+                                in_memory_op.progress = getattr(db_op, 'progress', in_memory_op.progress)
+                                in_memory_op.current_step = getattr(db_op, 'current_step', in_memory_op.current_step)
+                        
+                        db_skipped_count += 1
+                        continue
+                    
+                    ui_operation = self._convert_db_operation_to_ui_operation(db_op)
+                    self.operations[ui_operation.id] = ui_operation
+                    self.logger.debug(f"Loaded from DB: {ui_operation.name} ({ui_operation.operation_type.value}, {ui_operation.status.value})")
+                    db_loaded_count += 1
+                except Exception as e:
+                    self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
+            
+            # Running operations are already preserved in self.operations with process handles intact
+            self.logger.info(f"Running operations already preserved with process handles: {len(running_operations)} operations")
+            
+            self.logger.info(f"Smart refresh complete: {len(self.operations)} total operations ({db_loaded_count} from DB, {len(running_operations)} running preserved, {db_skipped_count} duplicates avoided)")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to perform smart refresh from database: {e}", exc_info=True)
+
+    def _load_operations_from_database(self) -> None:
+        """Load all operations from database (single source of truth) with robust error handling."""
+        try:
+            self.logger.info("Loading all operations from database...")
+            
+            # Clear existing operations
+            self.operations.clear()
+            
+            # Get all operations from database with retry logic
+            db_operations = []
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    with self.service_container.database_service.get_read_only_session() as session:
+                        from app.models.operation import Operation as DBOperation
+                        db_operations = session.query(DBOperation).all()
+                    break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise e
+                    self.logger.warning(f"Database query attempt {attempt + 1} failed, retrying: {e}")
+                    import time
+                    time.sleep(0.5)
+            
+            self.logger.info(f"Found {len(db_operations)} operations in database")
+            
             # Convert database operations to UI operations
+            successful_conversions = 0
+            failed_conversions = 0
+            
             for db_op in db_operations:
                 try:
                     ui_operation = self._convert_db_operation_to_ui_operation(db_op)
                     self.operations[ui_operation.id] = ui_operation
+                    successful_conversions += 1
                     self.logger.debug(f"Loaded: {ui_operation.name} ({ui_operation.operation_type.value}, {ui_operation.status.value})")
                 except Exception as e:
+                    failed_conversions += 1
                     self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
             
-            self.logger.info(f"Successfully loaded {len(self.operations)} operations from database")
+            self.logger.info(f"Successfully loaded {successful_conversions} operations from database ({failed_conversions} failed)")
+            
+            # Force UI update after loading - CRITICAL for fixing empty panel issue
+            from gi.repository import GLib
+            GLib.idle_add(self._update_operations_list)
+            
+            # Also update the UI immediately if we're on the main thread
+            try:
+                self._update_operations_list()
+            except Exception as e:
+                self.logger.debug(f"Direct UI update failed (expected if not on main thread): {e}")
             
         except Exception as e:
-            self.logger.error(f"Failed to load operations from database: {e}", exc_info=True)
+            self.logger.error(f"CRITICAL: Failed to load operations from database: {e}", exc_info=True)
+            # Even on failure, ensure UI is updated with empty state
+            from gi.repository import GLib
+            GLib.idle_add(self._update_operations_list)
+    
+    def _convert_db_status_to_ui_status(self, db_status: str) -> OperationStatus:
+        """Convert database status string to UI OperationStatus enum."""
+        status_mapping = {
+            'QUEUED': OperationStatus.PENDING,
+            'RUNNING': OperationStatus.RUNNING,  
+            'COMPLETED': OperationStatus.COMPLETED,
+            'FAILED': OperationStatus.FAILED,
+            'CANCELLED': OperationStatus.CANCELLED,
+        }
+        return status_mapping.get(db_status, OperationStatus.PENDING)
+    
+    def _safe_load_operations_from_database(self) -> None:
+        """Thread-safe database refresh that only loads NEW operations without clearing existing ones."""
+        try:
+            # Get database operations without clearing in-memory operations
+            db_operations = []
+            max_retries = 3
+            
+            for attempt in range(max_retries):
+                try:
+                    with self.service_container.database_service.get_read_only_session() as session:
+                        from app.models.operation import Operation as DBOperation
+                        db_operations = session.query(DBOperation).all()
+                        break
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise e
+                    self.logger.warning(f"Database query attempt {attempt + 1} failed, retrying: {e}")
+                    import time
+                    time.sleep(0.1)
+            
+            # Add new operations and update existing ones from database
+            new_operations = []
+            updated_operations = []
+            
+            for db_op in db_operations:
+                # Check if we already have this operation
+                existing_op_found = None
+                for existing_id, existing_op in self.operations.items():
+                    if (hasattr(existing_op, 'name') and existing_op.name == db_op.name) or \
+                       (existing_id == str(db_op.id)):
+                        existing_op_found = existing_op
+                        break
+                
+                if existing_op_found is None:
+                    # This is a new operation - add it
+                    try:
+                        ui_operation = self._convert_db_operation_to_ui_operation(db_op)
+                        self.operations[ui_operation.id] = ui_operation
+                        new_operations.append(ui_operation.name)
+                        self.logger.info(f"Added new operation from database: {ui_operation.name}")
+                    except Exception as e:
+                        self.logger.warning(f"Failed to add new operation {db_op.name}: {e}")
+                else:
+                    # This operation exists - update its database-stored progress/status
+                    try:
+                        # Only update database fields, preserve process handles
+                        if hasattr(db_op, 'progress') and db_op.progress is not None:
+                            if existing_op_found.progress != db_op.progress:
+                                existing_op_found.progress = db_op.progress
+                                updated_operations.append(db_op.name)
+                        
+                        if hasattr(db_op, 'current_step') and db_op.current_step:
+                            existing_op_found.current_step = db_op.current_step
+                        
+                        # Update status if it changed in database
+                        db_status = self._convert_db_status_to_ui_status(db_op.status)
+                        if existing_op_found.status != db_status:
+                            existing_op_found.status = db_status
+                            if db_status == OperationStatus.COMPLETED and not existing_op_found.end_time:
+                                existing_op_found.end_time = getattr(db_op, 'completed_at', datetime.now())
+                            
+                    except Exception as e:
+                        self.logger.warning(f"Failed to update existing operation {db_op.name}: {e}")
+            
+            if new_operations or updated_operations:
+                # Update UI if we added new operations or updated existing ones
+                from gi.repository import GLib
+                GLib.idle_add(self._update_operations_list)
+                
+                if new_operations:
+                    self.logger.info(f"Added {len(new_operations)} new operations from database")
+                if updated_operations:
+                    self.logger.info(f"Updated {len(updated_operations)} existing operations from database: {updated_operations}")
+            
+        except Exception as e:
+            self.logger.warning(f"Safe database refresh failed: {e}")
+            # Don't crash - just log and continue
+    
+    def _simple_progress_update(self) -> bool:
+        """SIMPLE SOLUTION: Directly read progress files and update operations every 5 seconds."""
+        try:
+            operations_dir = Path("Operations")
+            if not operations_dir.exists():
+                return True  # Continue timer
+            
+            # Check each operation folder for progress files
+            for op_folder in operations_dir.iterdir():
+                if not op_folder.is_dir():
+                    continue
+                    
+                progress_file = op_folder / "genmic_progress.txt"
+                if not progress_file.exists():
+                    continue
+                
+                try:
+                    # Read progress file
+                    content = progress_file.read_text().strip()
+                    if not content.startswith("PROGRESS:"):
+                        continue
+                    
+                    # Parse: "PROGRESS: 0.65 Distributing phases"
+                    data = content[9:].strip()  # Remove "PROGRESS: "
+                    parts = data.split(' ', 1)
+                    if len(parts) < 2:
+                        continue
+                    
+                    progress_val = float(parts[0])
+                    message = parts[1]
+                    
+                    # Find matching operation
+                    operation_name = f"genmic_input_{op_folder.name} Microstructure"
+                    matching_op = None
+                    
+                    for op in self.operations.values():
+                        if op.name == operation_name:
+                            matching_op = op
+                            break
+                    
+                    if matching_op:
+                        # Update progress directly
+                        old_progress = matching_op.progress
+                        matching_op.progress = progress_val
+                        matching_op.current_step = message
+                        
+                        # Mark as completed if progress >= 1.0
+                        if progress_val >= 1.0 and matching_op.status != OperationStatus.COMPLETED:
+                            matching_op.status = OperationStatus.COMPLETED
+                            matching_op.end_time = datetime.now()
+                        
+                        # Log progress change
+                        if abs(progress_val - old_progress) > 0.01:
+                            self.logger.info(f"SIMPLE UPDATE: {operation_name} -> {progress_val:.1%} - {message}")
+                            
+                            # Force UI update
+                            self._update_operations_list()
+                            
+                            # Update database
+                            self._update_operation_in_database(matching_op)
+                
+                except Exception as e:
+                    self.logger.warning(f"Simple progress update failed for {op_folder.name}: {e}")
+                    
+        except Exception as e:
+            self.logger.error(f"Simple progress update failed: {e}")
+        
+        return True  # Continue timer
     
     def _update_operation_in_database(self, operation: 'Operation') -> None:
         """Update an operation's status in the database using the operation service."""
         try:
+            # Convert UI status enum to database status enum
+            from app.models.operation import OperationStatus as DBOperationStatus
+            
+            ui_to_db_status_mapping = {
+                OperationStatus.PENDING: DBOperationStatus.QUEUED,
+                OperationStatus.RUNNING: DBOperationStatus.RUNNING,
+                OperationStatus.COMPLETED: DBOperationStatus.COMPLETED,
+                OperationStatus.FAILED: DBOperationStatus.FAILED,
+                OperationStatus.CANCELLED: DBOperationStatus.CANCELLED,
+                OperationStatus.PAUSED: DBOperationStatus.RUNNING,  # Map paused to running in DB
+            }
+            
+            db_status = ui_to_db_status_mapping.get(operation.status, DBOperationStatus.QUEUED)
+            
             # Use the operation service's update method
             success = self.service_container.operation_service.update_status(
                 name=operation.name,
-                status=operation.status,
+                status=db_status,
                 progress=operation.progress,
                 current_step=operation.current_step
             )
@@ -4113,13 +4633,19 @@ class OperationsMonitoringPanel(Gtk.Box):
             'CANCELLED': OperationStatus.CANCELLED,
         }
         
-        # Map database type to UI type (using string values)
+        # Map database type to UI type (handle both uppercase and lowercase formats)
         type_mapping = {
             'HYDRATION': OperationType.HYDRATION_SIMULATION,
             'MICROSTRUCTURE': OperationType.MICROSTRUCTURE_GENERATION,
             'ANALYSIS': OperationType.PROPERTY_CALCULATION,
             'EXPORT': OperationType.FILE_OPERATION,
             'IMPORT': OperationType.FILE_OPERATION,
+            # Handle lowercase variants
+            'hydration': OperationType.HYDRATION_SIMULATION,
+            'microstructure': OperationType.MICROSTRUCTURE_GENERATION,
+            'microstructure_generation': OperationType.MICROSTRUCTURE_GENERATION,
+            'hydration_simulation': OperationType.HYDRATION_SIMULATION,
+            'analysis': OperationType.PROPERTY_CALCULATION,
         }
         
         # Convert status and type
@@ -4141,7 +4667,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             else:
                 current_step = "Operation in progress..."
         elif ui_status == OperationStatus.PENDING:
-            current_step = "Queued for execution"
+            # Use actual current_step if available, otherwise default message
+            current_step = db_op.current_step if (db_op.current_step and db_op.current_step.strip()) else "Queued for execution"
         elif ui_status == OperationStatus.FAILED:
             current_step = "Operation failed"
         elif ui_status == OperationStatus.CANCELLED:
@@ -4151,16 +4678,14 @@ class OperationsMonitoringPanel(Gtk.Box):
         start_time = db_op.started_at
         end_time = db_op.completed_at
         
-        # Ensure times are timezone-naive and reasonable
+        # Ensure times are timezone-naive (but DO NOT modify valid historical timestamps)
         if start_time:
             # If start_time is timezone-aware, convert to naive
             if start_time.tzinfo is not None:
                 start_time = start_time.replace(tzinfo=None)
-            # If start_time is in the future (more than 1 minute), adjust it
-            now = datetime.now()
-            if start_time > now + timedelta(minutes=1):
-                self.logger.warning(f"Database operation {db_op.name} has future start_time {start_time}, adjusting to current time")
-                start_time = now
+            # DO NOT modify historical timestamps - they are valid even if old
+            # The original logic incorrectly detected valid past times as "future" times
+            # and overwrote them with current time, corrupting completed operation timestamps
         
         if end_time and end_time.tzinfo is not None:
             end_time = end_time.replace(tzinfo=None)

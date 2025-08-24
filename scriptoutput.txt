@@ -1,0 +1,30 @@
+/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
+  warnings.warn(
+Error loading metadata: 'str' object has no attribute 'get'
+🔍 Debugging Monitoring Loop Behavior
+==================================================
+Monitoring active: True
+Thread alive: True
+Update interval: 1.0 seconds
+\nYAP13 initial state:
+  Status: running
+  Progress: 0.500
+  Step: 'Operation in progress...'
+  Has process: False
+  Has metadata: True
+  Metadata source: database
+\nWaiting 5 seconds to see if monitoring loop updates YAP13...
+  Second 1: Progress=0.650, Step='Distributing phases'
+  ✅ Monitoring loop IS updating YAP13!
+\nFinal YAP13 state:
+  Status: running
+  Progress: 0.650
+  Step: 'Distributing phases'
+\nChecking monitoring skip conditions...
+  Database sourced: True
+  Has process handle: False
+  Progress file exists: Operations/YAP13/genmic_progress.txt
+  Can monitor stdout: True
+  Should be skipped by monitoring: False
+\n✅ YAP13 should be processed by monitoring loop
+   There might be another issue preventing updates.

@@ -2958,7 +2958,7 @@ class MixDesignPanel(Gtk.Box):
                         )
                         
                         # Monitor progress in real-time
-                        self._monitor_genmic_progress(process, stdout_f, stderr_f, operations_panel, operation_id)
+                        self._monitor_genmic_progress(process, stdout_f, stderr_f, operations_panel, operation_id, output_dir)
                         
                         # Wait for completion
                         result = process
@@ -3014,7 +3014,7 @@ class MixDesignPanel(Gtk.Box):
             if operation_id and operations_panel:
                 operations_panel.complete_operation(operation_id, success=False, error_message=str(e))
     
-    def _monitor_genmic_progress(self, process: subprocess.Popen, stdout_f, stderr_f, operations_panel, operation_id: Optional[str]) -> None:
+    def _monitor_genmic_progress(self, process: subprocess.Popen, stdout_f, stderr_f, operations_panel, operation_id: Optional[str], output_dir: str = None) -> None:
         """Monitor genmic progress in real-time by parsing stdout output."""
         
         # Define progress mapping for genmic phases
@@ -3070,6 +3070,9 @@ class MixDesignPanel(Gtk.Box):
                                 current_progress = progress
                                 step_count += 1
                                 
+                                # Write simple progress file (single line, overwrite each time)
+                                self._write_simple_progress(progress, message, output_dir)
+                                
                                 if operations_panel and operation_id:
                                     GLib.idle_add(operations_panel.update_operation_progress,
                                                 operation_id, progress, message, step_count)
@@ -3083,6 +3086,9 @@ class MixDesignPanel(Gtk.Box):
                                         if progress > current_progress:  # Only advance progress
                                             current_progress = progress
                                             step_count += 1
+                                            
+                                            # Write simple progress file (single line, overwrite each time)
+                                            self._write_simple_progress(progress, message, output_dir)
                                             
                                             if operations_panel and operation_id:
                                                 GLib.idle_add(operations_panel.update_operation_progress,
@@ -3129,6 +3135,24 @@ class MixDesignPanel(Gtk.Box):
             if remaining_stderr:
                 stderr_f.write(remaining_stderr)
     
+    def _write_simple_progress(self, progress: float, message: str, output_dir: str = None) -> None:
+        """Write simple single-line progress file that gets overwritten each time."""
+        try:
+            if not output_dir:
+                return
+            
+            # Create progress.txt file in the output directory
+            progress_file = os.path.join(output_dir, "progress.txt")
+            
+            # Write single line with progress and message (overwrite each time)
+            with open(progress_file, 'w') as f:
+                f.write(f"PROGRESS: {progress:.2f} {message}")
+            
+            self.logger.debug(f"Wrote progress to {progress_file}: {progress:.2f} - {message}")
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to write progress file: {e}")
+    
     def _genmic_completed(self, result: subprocess.CompletedProcess, output_dir: str, operation_id: Optional[str] = None) -> bool:
         """Handle genmic completion on main thread."""
         operations_panel = getattr(self.main_window, 'operations_panel', None)
@@ -3162,6 +3186,9 @@ class MixDesignPanel(Gtk.Box):
         self.logger.info(f"Success determination: output_files={len(output_files)}, success={success}, return_code={result.returncode}")
         
         if success:
+            # Write completion progress file
+            self._write_simple_progress(1.0, "Microstructure generation complete", output_dir)
+            
             # Success
             if result.returncode != 0:
                 self.logger.info(f"genmic execution completed successfully (return code {result.returncode} ignored due to known stack corruption issue)")
