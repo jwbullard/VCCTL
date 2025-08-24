@@ -429,15 +429,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Initialize operation details tracking
         self._currently_displayed_operation = None
         
-        # Start periodic updates for operation details refresh
-        from gi.repository import GLib
-        GLib.timeout_add_seconds(5, self._periodic_update_operation_details)
-        
         # SIMPLE SOLUTION: Direct progress file reader every 5 seconds
+        from gi.repository import GLib
         GLib.timeout_add_seconds(5, self._simple_progress_update)
-        
-        # Start periodic updates for operations list (main table) - more frequent for running operations
-        GLib.timeout_add_seconds(2, self._periodic_update_operations_list)
         
         self.logger.info("Operations monitoring panel initialized")
     
@@ -2473,166 +2467,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         else:
             self._update_status("No duplicate operations found.")
     
-    def _periodic_update_operation_details(self) -> bool:
-        """Periodically update the operation details if one is currently displayed."""
-        try:
-            self.logger.info("PERIODIC_UPDATE: _periodic_update_operation_details called")
-            if self._currently_displayed_operation:
-                self.logger.info(f"PERIODIC_UPDATE: Currently displayed operation: {self._currently_displayed_operation.name}")
-                # Find the current version of this operation
-                operation_id = self._currently_displayed_operation.id
-                if operation_id in self.operations:
-                    updated_operation = self.operations[operation_id]
-                    # Only update if it's still running to avoid unnecessary UI updates
-                    if updated_operation.status == OperationStatus.RUNNING:
-                        # Ensure UI update happens on main thread
-                        from gi.repository import GLib
-                        GLib.idle_add(self._update_operation_details, updated_operation)
-                        self.logger.debug(f"Refreshed operation details for: {updated_operation.name}")
-        except Exception as e:
-            self.logger.error(f"Error in periodic operation details update: {e}")
-        
-        # Return True to continue the periodic updates
-        return True
     
-    def _periodic_update_operations_list(self) -> bool:
-        """Periodically update the main operations list to refresh durations and status."""
-        try:
-            # Always update UI regularly to show status changes
-            # This ensures operations that complete are immediately reflected in UI
-            from gi.repository import GLib
-            GLib.idle_add(self._update_operations_list)
-            
-            # Log update activity
-            running_ops = sum(1 for op in self.operations.values() if op.status == OperationStatus.RUNNING)
-            self.logger.debug(f"Periodic main operations list update triggered - {running_ops} running operations")
-            
-        except Exception as e:
-            self.logger.error(f"Error in periodic operations list update: {e}")
-        
-        # Return True to continue the periodic updates
-        return True
     
-    def _force_cleanup_stale_operations(self) -> None:
-        """Force cleanup of stale operations by thoroughly checking process status."""
-        self.logger.info("=== Starting force cleanup of stale operations ===")
-        current_time = datetime.now()
-        cleaned_count = 0
-        
-        for operation in list(self.operations.values()):
-            # Skip cleanup for database-sourced operations that don't have process handles
-            is_database_sourced = hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database'
-            has_process_handle = hasattr(operation, 'process') and operation.process is not None
-            
-            # Only skip if database-sourced AND no process handle (historical operations)
-            if is_database_sourced and not has_process_handle:
-                continue
-                
-            # Check running/paused operations for stale processes
-            if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
-                self.logger.info(f"Checking running operation {operation.id}: {operation.name}")
-                
-                # Multiple checks to ensure process is truly dead
-                is_running = False
-                
-                # ... (existing process check logic follows)
-            
-            # Also check failed operations that might have actually succeeded
-            elif operation.status == OperationStatus.FAILED:
-                self.logger.info(f"Checking failed operation {operation.id}: {operation.name}")
-                
-                # Verify if this "failed" operation actually completed successfully
-                if self._verify_operation_completion_by_files(operation):
-                    self.logger.info(f"  - Operation {operation.id} has success indicators - correcting status")
-                    operation.status = OperationStatus.COMPLETED
-                    operation.progress = 1.0
-                    operation.current_step = "Process completed successfully (corrected)"
-                    operation.error_message = None
-                    if not operation.end_time:
-                        operation.end_time = current_time
-                    operation.completed_steps = operation.total_steps
-                    self._add_log_entry(f"Corrected falsely failed operation: {operation.name}")
-                    cleaned_count += 1
-                else:
-                    self.logger.info(f"  - Operation {operation.id} genuinely failed")
-        
-        # Continue with existing running/paused operation checks
-        for operation in list(self.operations.values()):
-            if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
-                self.logger.info(f"Checking operation {operation.id}: {operation.name}")
-                
-                # Multiple checks to ensure process is truly dead
-                is_running = False
-                
-                # Check 1: subprocess.Popen object
-                if operation.process:
-                    try:
-                        return_code = operation.process.poll()
-                        if return_code is None:
-                            is_running = True
-                            self.logger.info(f"  - Process object shows running (poll() returned None)")
-                        else:
-                            self.logger.info(f"  - Process object shows finished (return code: {return_code})")
-                    except Exception as e:
-                        self.logger.warning(f"  - Error checking process object: {e}")
-                
-                # Check 2: PID with psutil
-                if operation.pid and not is_running:
-                    try:
-                        process = psutil.Process(operation.pid)
-                        if process.is_running():
-                            is_running = True
-                            self.logger.info(f"  - PID {operation.pid} shows running via psutil")
-                        else:
-                            self.logger.info(f"  - PID {operation.pid} shows not running via psutil")
-                    except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                        self.logger.info(f"  - PID {operation.pid} not found: {e}")
-                
-                # Check 3: System call (last resort)
-                if operation.pid and not is_running:
-                    try:
-                        os.kill(operation.pid, 0)  # Signal 0 just checks if process exists
-                        is_running = True
-                        self.logger.info(f"  - PID {operation.pid} exists via os.kill(0)")
-                    except (OSError, ProcessLookupError):
-                        self.logger.info(f"  - PID {operation.pid} does not exist via os.kill(0)")
-                
-                # If process is definitely not running, mark as completed/failed
-                if not is_running:
-                    self.logger.info(f"  - Operation {operation.id} marked as stale - cleaning up")
-                    
-                    # Determine final status based on available information
-                    if operation.process and hasattr(operation.process, 'returncode') and operation.process.returncode is not None:
-                        if operation.process.returncode == 0:
-                            operation.status = OperationStatus.COMPLETED
-                            operation.progress = 1.0
-                            operation.current_step = "Process completed successfully (cleanup)"
-                        else:
-                            operation.status = OperationStatus.FAILED
-                            operation.error_message = f"Process exited with code {operation.process.returncode} (cleanup)"
-                            operation.current_step = "Process failed (cleanup)"
-                    else:
-                        # Default to completed if we can't determine exit status
-                        operation.status = OperationStatus.COMPLETED
-                        operation.progress = 1.0
-                        operation.current_step = "Process completed (cleanup - status unknown)"
-                    
-                    operation.end_time = current_time
-                    operation.completed_steps = operation.total_steps
-                    
-                    # Close output file handles
-                    operation.close_output_files()
-                    
-                    self._add_log_entry(f"Cleaned up stale operation: {operation.name}")
-                    cleaned_count += 1
-                else:
-                    self.logger.info(f"  - Operation {operation.id} is legitimately running")
-        
-        if cleaned_count > 0:
-            self.logger.info(f"Force cleanup completed: {cleaned_count} stale operations cleaned")
-            # Database automatically updated through operation monitoring
-        else:
-            self.logger.info("Force cleanup completed: no stale operations found")
     
     def _verify_operation_completion_by_files(self, operation: Operation) -> bool:
         """
