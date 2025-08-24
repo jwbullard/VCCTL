@@ -123,9 +123,47 @@ class Operation:
                 # Return duration up to pause time
                 return self.paused_time - self.start_time
             else:
-                # Normal duration calculation
-                end = self.end_time or datetime.now()
-                return end - self.start_time
+                # Normal duration calculation - ensure timezone consistency
+                end = self.end_time
+                if end is None:
+                    # For running operations, detect if start_time is likely UTC stored as naive
+                    from datetime import timezone
+                    
+                    # Check if start_time appears to be UTC stored as naive (common pattern)
+                    # If start_time is more than 2 hours ahead of local time, it's probably UTC stored as naive
+                    local_now = datetime.now()
+                    if self.start_time.tzinfo is None:
+                        time_diff_hours = (self.start_time - local_now).total_seconds() / 3600
+                        if time_diff_hours > 2:  # start_time is significantly ahead of local time
+                            # start_time is probably UTC stored as naive, so use UTC now
+                            end = datetime.now(timezone.utc).replace(tzinfo=None)  # Make it naive too
+                        else:
+                            # start_time is likely local time stored as naive
+                            end = local_now
+                    else:
+                        # start_time is timezone-aware, use timezone-aware now
+                        end = datetime.now(timezone.utc)
+                
+                # Final timezone consistency check (both should now be compatible)
+                if self.start_time.tzinfo is not None and end.tzinfo is None:
+                    # start_time is timezone-aware, end is naive - make end timezone-aware
+                    from datetime import timezone
+                    end = end.replace(tzinfo=timezone.utc)
+                elif self.start_time.tzinfo is None and end.tzinfo is not None:
+                    # start_time is naive, end is timezone-aware - make both naive
+                    end = end.replace(tzinfo=None)
+                
+                duration = end - self.start_time
+                
+                # Debug negative durations
+                if duration.total_seconds() < 0:
+                    print(f"NEGATIVE DURATION DEBUG: {self.name}")
+                    print(f"  Start time: {self.start_time} (tzinfo: {self.start_time.tzinfo})")
+                    print(f"  End time: {end} (tzinfo: {end.tzinfo})")
+                    print(f"  Original end_time: {self.end_time}")
+                    print(f"  Duration: {duration}")
+                
+                return duration
         return None
     
     @property
@@ -4394,15 +4432,24 @@ class OperationsMonitoringPanel(Gtk.Box):
                             matching_op.status = OperationStatus.COMPLETED
                             matching_op.end_time = datetime.now()
                         
+                        # Update operation details if this operation is currently displayed (ALWAYS)
+                        if self._currently_displayed_operation:
+                            self.logger.debug(f"DETAIL CHECK: Currently displayed: {self._currently_displayed_operation.id}, Updated: {matching_op.id}")
+                            if self._currently_displayed_operation.id == matching_op.id:
+                                self.logger.debug(f"DETAIL UPDATE: Updating details for {matching_op.id}")
+                                self._update_operation_details(matching_op)
+                            else:
+                                self.logger.debug(f"DETAIL SKIP: IDs don't match - displayed: {self._currently_displayed_operation.id}, updated: {matching_op.id}")
+                        else:
+                            self.logger.debug("DETAIL SKIP: No operation currently displayed")
+                        
                         # Log progress change
                         if abs(progress_val - old_progress) > 0.01:
                             self.logger.info(f"SIMPLE UPDATE: {operation_name} -> {progress_val:.1%} - {message}")
-                            
-                            # Force UI update
-                            self._update_operations_list()
-                            
-                            # Update database
-                            self._update_operation_in_database(matching_op)
+                        
+                        # Always force UI update and database update
+                        self._update_operations_list()
+                        self._update_operation_in_database(matching_op)
                 
                 except Exception as e:
                     self.logger.warning(f"Simple progress update failed for {op_folder.name}: {e}")
