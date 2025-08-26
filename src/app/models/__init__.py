@@ -24,6 +24,8 @@ from app.models.hydration_parameters import HydrationParameters
 from app.models.hydration_parameter_set import HydrationParameterSet, HydrationParameterSetCreate, HydrationParameterSetUpdate, HydrationParameterSetResponse
 from app.models.temperature_profile import TemperatureProfileDB
 from app.models.elastic_moduli_operation import ElasticModuliOperation
+from app.models.microstructure_operation import MicrostructureOperation
+from app.models.hydration_operation import HydrationOperation
 
 # Export all models for easy importing
 __all__ = [
@@ -46,6 +48,8 @@ __all__ = [
     'HydrationParameterSet',
     'TemperatureProfileDB',
     'ElasticModuliOperation',
+    'MicrostructureOperation',
+    'HydrationOperation',
     
     # Pydantic Create Models
     'CementCreate',
@@ -122,6 +126,8 @@ def get_all_models():
         HydrationParameterSet,
         TemperatureProfileDB,
         ElasticModuliOperation,
+        MicrostructureOperation,
+        HydrationOperation,
     ]
 
 
@@ -142,6 +148,8 @@ def get_model_by_name(model_name: str):
         'hydration_parameters': HydrationParameters,
         'temperature_profile': TemperatureProfileDB,
         'elastic_moduli_operation': ElasticModuliOperation,
+        'microstructure_operation': MicrostructureOperation,
+        'hydration_operation': HydrationOperation,
     }
     return model_map.get(model_name.lower())
 

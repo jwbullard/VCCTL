@@ -154,6 +154,10 @@ class MicrostructurePanel(Gtk.Box):
         self.load_img_button.set_tooltip_text("Load genmic.c output file (.img)")
         preview_controls.pack_start(self.load_img_button, True, True, 0)
         
+        self.load_operation_button = create_button_with_icon("Load Operation", "data_table", 16)
+        self.load_operation_button.set_tooltip_text("Load previous microstructure operation and populate all parameters")
+        preview_controls.pack_start(self.load_operation_button, True, True, 0)
+        
         self.preview_button = create_button_with_icon("Generate Preview", "cube", 16)
         self.preview_button.set_tooltip_text("Generate 3D microstructure preview")
         # Initially hidden since PyVista is default and loads data automatically
@@ -176,6 +180,7 @@ class MicrostructurePanel(Gtk.Box):
         """Connect UI signals."""
         # Preview signals only - parameters are now in Mix Design
         self.load_img_button.connect('clicked', self._on_load_img_clicked)
+        self.load_operation_button.connect('clicked', self._on_load_operation_clicked)
         self.preview_button.connect('clicked', self._on_preview_clicked)
         self.export_preview_button.connect('clicked', self._on_export_preview_clicked)
         

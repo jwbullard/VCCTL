@@ -22,7 +22,8 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject, Pango, GLib
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import Gtk, GObject, Pango, GLib, GdkPixbuf
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -638,7 +639,7 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _create_operations_list(self, parent: Gtk.Paned) -> None:
         """Create the operations list view."""
-        list_frame = Gtk.Frame(label="Active Operations")
+        list_frame = Gtk.Frame(label="Operation Status")
         
         # Create list store: ID, Name, Type, Status, Progress, Duration, Started, Resources
         self.operations_store = Gtk.ListStore(
@@ -683,6 +684,10 @@ class OperationsMonitoringPanel(Gtk.Box):
                 column.add_attribute(renderer, "text", col_id)
                 column.set_resizable(True)
                 column.set_min_width(width)
+            
+            # Make column sortable by clicking on header
+            column.set_clickable(True)
+            column.set_sort_column_id(col_id)
             
             self.operations_view.append_column(column)
         
@@ -1023,17 +1028,29 @@ class OperationsMonitoringPanel(Gtk.Box):
         toolbar = Gtk.Toolbar()
         toolbar.set_style(Gtk.ToolbarStyle.BOTH_HORIZ)
         
-        # Refresh button
+        # Refresh button - use Carbon icon
         refresh_button = Gtk.ToolButton()
-        refresh_button.set_icon_name("refresh")
+        refresh_icon = self._load_carbon_icon("restart", 32)
+        if refresh_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = refresh_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            refresh_button.set_icon_widget(Gtk.Image.new_from_pixbuf(scaled_icon))
+        else:
+            refresh_button.set_icon_name("view-refresh")  # Fallback to GTK icon
         refresh_button.set_label("Refresh")
         refresh_button.set_tooltip_text("Scan Operations directory for new files and updated operation results")
         refresh_button.connect('clicked', self._on_refresh_files_clicked)
         toolbar.insert(refresh_button, -1)
         
-        # Open folder button
+        # Open folder button - use Carbon icon
         open_folder_button = Gtk.ToolButton()
-        open_folder_button.set_icon_name("folder--open")
+        folder_icon = self._load_carbon_icon("folder--open", 32)
+        if folder_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = folder_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            open_folder_button.set_icon_widget(Gtk.Image.new_from_pixbuf(scaled_icon))
+        else:
+            open_folder_button.set_icon_name("folder")  # Fallback to GTK icon
         open_folder_button.set_label("Open Folder")
         open_folder_button.set_tooltip_text("Open the Operations directory in your system's file manager")
         open_folder_button.connect('clicked', self._on_open_operations_folder_clicked)
@@ -1042,9 +1059,15 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
-        # Delete operation button
+        # Delete operation button - use Carbon icon
         delete_button = Gtk.ToolButton()
-        delete_button.set_icon_name("trash-can")
+        delete_icon = self._load_carbon_icon("trash-can", 32)
+        if delete_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = delete_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            delete_button.set_icon_widget(Gtk.Image.new_from_pixbuf(scaled_icon))
+        else:
+            delete_button.set_icon_name("edit-delete")  # Fallback to GTK icon
         delete_button.set_label("Delete")
         delete_button.set_tooltip_text("Permanently delete the selected operation folder and all its contents")
         delete_button.connect('clicked', self._on_delete_operation_clicked)
@@ -1061,8 +1084,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         tree_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         tree_scrolled.set_size_request(200, 400)  # Reduced width to allow narrower windows
         
-        # Create file tree store: Name, Path, Type, Size, Modified
-        self.files_store = Gtk.TreeStore(str, str, str, str, str)
+        # Create file tree store: Icon, Name, Path, Type, Size, Modified
+        self.files_store = Gtk.TreeStore(GdkPixbuf.Pixbuf, str, str, str, str, str)
         
         # Create tree view
         self.files_view = Gtk.TreeView(model=self.files_store)
@@ -1070,11 +1093,18 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.files_view.get_selection().set_mode(Gtk.SelectionMode.SINGLE)
         self.files_view.get_selection().connect('changed', self._on_file_selection_changed)
         
-        # Name column
+        # Name column with icon
         name_column = Gtk.TreeViewColumn("Name")
+        
+        # Add icon renderer
+        icon_renderer = Gtk.CellRendererPixbuf()
+        name_column.pack_start(icon_renderer, False)
+        name_column.add_attribute(icon_renderer, "pixbuf", 0)
+        
+        # Add text renderer
         name_renderer = Gtk.CellRendererText()
         name_column.pack_start(name_renderer, True)
-        name_column.add_attribute(name_renderer, "text", 0)
+        name_column.add_attribute(name_renderer, "text", 1)
         name_column.set_expand(True)
         self.files_view.append_column(name_column)
         
@@ -1082,7 +1112,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         size_column = Gtk.TreeViewColumn("Size")
         size_renderer = Gtk.CellRendererText()
         size_column.pack_start(size_renderer, False)
-        size_column.add_attribute(size_renderer, "text", 3)
+        size_column.add_attribute(size_renderer, "text", 4)  # Updated column index
         size_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
         size_column.set_fixed_width(80)
         self.files_view.append_column(size_column)
@@ -1091,7 +1121,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         modified_column = Gtk.TreeViewColumn("Modified")
         modified_renderer = Gtk.CellRendererText()
         modified_column.pack_start(modified_renderer, False)
-        modified_column.add_attribute(modified_renderer, "text", 4)
+        modified_column.add_attribute(modified_renderer, "text", 5)  # Updated column index
         modified_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
         modified_column.set_fixed_width(120)
         self.files_view.append_column(modified_column)
@@ -3008,7 +3038,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         if not operations_dir.exists():
             self.files_store.clear()
-            self.files_store.append(None, ["No Operations directory found", "", "info", "", ""])
+            icon = self._get_file_icon("warning")
+            self.files_store.append(None, [icon, "No Operations directory found", "", "info", "", ""])
             return
         
         # Build the new tree data first, then replace the store content
@@ -3060,7 +3091,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.files_store.clear()
             
             # Add root Operations folder
-            root_iter = self.files_store.append(None, ["Operations", str(operations_dir), "folder", "", ""])
+            folder_icon = self._get_file_icon("folder")
+            root_iter = self.files_store.append(None, [folder_icon, "Operations", str(operations_dir), "folder", "", ""])
             
             if success and new_tree_data:
                 self.logger.info(f"Adding {len(new_tree_data)} operations to display")
@@ -3070,8 +3102,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             else:
                 self.logger.warning(f"Failed to load operations: success={success}, data_count={len(new_tree_data)}")
                 # Failed to load after retries
+                warning_icon = self._get_file_icon("warning")
                 self.files_store.append(root_iter, [
-                    "⚠️ Files temporarily unavailable (operation running?)", 
+                    warning_icon, "⚠️ Files temporarily unavailable (operation running?)", 
                     "", "warning", "", ""
                 ])
             
@@ -3082,7 +3115,8 @@ class OperationsMonitoringPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error updating files display: {e}")
             self.files_store.clear()
-            self.files_store.append(None, [f"Error loading files: {e}", "", "error", "", ""])
+            error_icon = self._get_file_icon("error")
+            self.files_store.append(None, [error_icon, f"Error loading files: {e}", "", "error", "", ""])
     
     def _build_operation_folder_data(self, op_dir: Path) -> dict:
         """Build operation folder data structure without adding to tree store."""
@@ -3180,7 +3214,9 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Add an operation folder to the tree from pre-built data."""
         try:
             # Add operation folder
+            folder_icon = self._get_file_icon(op_data['type'])
             folder_iter = self.files_store.append(parent_iter, [
+                folder_icon,
                 op_data['name'],
                 op_data['path'],
                 op_data['type'],
@@ -3190,7 +3226,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             # Add files
             for file_data in op_data['files']:
+                file_icon = self._get_file_icon(file_data['type'], Path(file_data['path']) if file_data['path'] else None)
                 self.files_store.append(folder_iter, [
+                    file_icon,
                     file_data['name'],
                     file_data['path'],
                     file_data['type'],
@@ -3213,7 +3251,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                 modified_time = "Accessing..."
             
             # Add operation folder
+            folder_icon = self._get_file_icon("folder")
             folder_iter = self.files_store.append(parent_iter, [
+                folder_icon,
                 op_dir.name,
                 str(op_dir),
                 "folder", 
@@ -3234,8 +3274,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                 except (PermissionError, OSError, FileNotFoundError) as e:
                     if attempt == max_retries - 1:
                         # Final attempt failed
+                        warning_icon = self._get_file_icon("warning")
                         self.files_store.append(folder_iter, [
-                            "⚠️ Files temporarily inaccessible", 
+                            warning_icon, "⚠️ Files temporarily inaccessible", 
                             "", "warning", "", ""
                         ])
                     else:
@@ -3244,7 +3285,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                         time.sleep(0.05)
                 except Exception as e:
                     self.logger.error(f"Error loading files in {op_dir}: {e}")
-                    self.files_store.append(folder_iter, [f"Error loading files: {e}", "", "error", "", ""])
+                    error_icon = self._get_file_icon("error")
+                    self.files_store.append(folder_iter, [error_icon, f"Error loading files: {e}", "", "error", "", ""])
                     break
                 
         except Exception as e:
@@ -3266,7 +3308,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Determine file type for icon
             file_type = self._get_file_type(file_path)
             
+            file_icon = self._get_file_icon(file_type, file_path)
             self.files_store.append(parent_iter, [
+                file_icon,
                 file_path.name,
                 str(file_path),
                 file_type,
@@ -3302,6 +3346,63 @@ class OperationsMonitoringPanel(Gtk.Box):
             return 'binary'
         else:
             return 'file'
+    
+    def _get_file_icon(self, file_type: str, file_path: Path = None) -> GdkPixbuf.Pixbuf:
+        """Get appropriate icon for file type using GTK theme icons."""
+        try:
+            icon_theme = Gtk.IconTheme.get_default()
+            
+            # Use only icons that are confirmed to be available
+            if file_type == 'folder':
+                icon_name = 'folder'
+            else:
+                # All other file types use text-x-generic (universally available)
+                icon_name = 'text-x-generic'
+            
+            # Try to load the icon
+            if icon_theme.has_icon(icon_name):
+                pixbuf = icon_theme.load_icon(icon_name, 16, Gtk.IconLookupFlags.FORCE_SIZE)
+                return pixbuf
+                
+            # Fallback - try the most basic icons
+            fallback_icons = ['folder', 'text-x-generic']
+            for fallback_name in fallback_icons:
+                if icon_theme.has_icon(fallback_name):
+                    pixbuf = icon_theme.load_icon(fallback_name, 16, Gtk.IconLookupFlags.FORCE_SIZE)
+                    return pixbuf
+                    
+        except Exception as e:
+            self.logger.warning(f"Failed to load icon for {file_type}: {e}")
+        
+        # Return None if all else fails - no icon will be displayed
+        return None
+    
+    def _load_carbon_icon(self, icon_name: str, size: int = 32) -> GdkPixbuf.Pixbuf:
+        """Load a Carbon icon from the icons directory."""
+        from pathlib import Path
+        
+        try:
+            # Build path to Carbon icon - use current working directory as project root
+            # This is more reliable than calculating from __file__
+            project_root = Path.cwd()
+            icon_path = project_root / "icons" / "carbon" / str(size) / f"{icon_name}.svg"
+            
+            self.logger.info(f"Attempting to load Carbon icon: {icon_name} from {icon_path}")
+            
+            if icon_path.exists():
+                # Load SVG and scale to desired size
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    str(icon_path), size, size, True
+                )
+                self.logger.info(f"Successfully loaded Carbon icon: {icon_name} ({pixbuf.get_width()}x{pixbuf.get_height()})")
+                return pixbuf
+            else:
+                self.logger.warning(f"Carbon icon not found: {icon_path}")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to load Carbon icon {icon_name}: {e}")
+        
+        return None
     
     # Event handlers for file browser
     
