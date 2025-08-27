@@ -540,8 +540,13 @@ class MixDesignPanel(Gtk.Box):
         self.coarse_agg_mass_spin.connect('value-changed', self._on_mass_changed)
         self.micro_air_content_spin.connect('value-changed', self._on_volume_fraction_changed)
     
-    def _create_component_row(self) -> Gtk.Box:
+    def _create_component_row(self) -> Dict[str, Any]:
         """Create a new component row widget."""
+        import traceback
+        self.logger.info(f"DEBUG: _create_component_row called from:")
+        stack_lines = traceback.format_stack()
+        for line in stack_lines[-3:-1]:  # Show last 2 stack frames
+            self.logger.info(f"DEBUG: {line.strip()}")
         row_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         row_box.set_margin_top(2)
         row_box.set_margin_bottom(2)
@@ -747,10 +752,17 @@ class MixDesignPanel(Gtk.Box):
                 type_combo.append(type_value, display_name)  # append(id, text) where id=type_value, text=display_name
         
         # Auto-select highest unused material type if nothing is selected
-        if type_combo.get_active() == -1 and not keep_selection:
+        # BUT skip auto-selection during loading to prevent interference
+        loading_flag = getattr(self, '_loading_in_progress', False)
+        if type_combo.get_active() == -1 and not keep_selection and not loading_flag:
             selected_index = self._get_highest_unused_material_type_index(type_combo)
             if selected_index >= 0:
+                # Get the type being auto-selected for debugging
                 type_combo.set_active(selected_index)
+                auto_selected_type = type_combo.get_active_id()
+                self.logger.info(f"DEBUG: Auto-selected material type: {auto_selected_type} (index {selected_index})")
+        elif loading_flag:
+            self.logger.info(f"DEBUG: Skipping auto-selection during loading")
 
     def _get_highest_unused_material_type_index(self, current_combo: Gtk.ComboBoxText) -> int:
         """Get the index of the highest priority unused material type.
@@ -809,6 +821,7 @@ class MixDesignPanel(Gtk.Box):
         else:
             # Check for duplicate material type selection
             selected_type = combo.get_active_id()
+            self.logger.info(f"DEBUG: Component type changed to: {selected_type}")
             print(f"DEBUG: Constraint check: selected_type='{selected_type}', total_rows={len(self.component_rows)}")
             
             if selected_type:
@@ -958,8 +971,14 @@ class MixDesignPanel(Gtk.Box):
     
     def _on_create_mix_clicked(self, button) -> None:
         """Handle create mix button click."""
+        self.logger.info("DEBUG: Generate Microstructure button clicked!")
+        self.logger.info(f"DEBUG: _loading_in_progress={getattr(self, '_loading_in_progress', False)}")
+        self.logger.info(f"DEBUG: auto_calculate_enabled={self.auto_calculate_enabled}")
+        self.logger.info(f"DEBUG: component_rows count={len(self.component_rows)}")
+        
         # Show immediate feedback that operation is starting
         mix_name = self.mix_name_entry.get_text().strip() or "Untitled Mix"
+        self.logger.info(f"Mix name for generation: '{mix_name}'")
         
         # Create confirmation dialog
         dialog = Gtk.MessageDialog(
@@ -977,11 +996,21 @@ class MixDesignPanel(Gtk.Box):
         response = dialog.run()
         dialog.destroy()
         
+        self.logger.info(f"Confirmation dialog response: {response} (OK={Gtk.ResponseType.OK})")
+        
         if response == Gtk.ResponseType.OK:
-            # Update status bar immediately
-            self.main_window.update_status("Starting 3D microstructure generation...", "info", 0)
+            # Auto-save the current mix design before generation
+            self.logger.info("Auto-saving mix design before microstructure generation...")
+            saved_mix_design_id = self._auto_save_mix_design_before_generation()
+            if saved_mix_design_id:
+                self.logger.info(f"Mix design auto-saved with ID: {saved_mix_design_id}")
+                self.main_window.update_status("Mix design auto-saved. Starting 3D microstructure generation...", "info", 0)
+            else:
+                self.logger.warning("Auto-save failed, continuing with generation...")
+                self.main_window.update_status("Starting 3D microstructure generation...", "info", 0)
+            
             # Start the actual operation
-            self._create_microstructure_input_file()
+            self._create_microstructure_input_file(saved_mix_design_id)
         # If cancelled, do nothing
     
     def _on_validate_clicked(self, button) -> None:
@@ -1409,6 +1438,12 @@ class MixDesignPanel(Gtk.Box):
     def _create_mix_design_from_ui(self) -> Optional[MixDesign]:
         """Create a MixDesign object from current UI state."""
         try:
+            self.logger.info(f"DEBUG: _create_mix_design_from_ui - found {len(self.component_rows)} UI component rows")
+            for i, row in enumerate(self.component_rows):
+                type_str = row['type_combo'].get_active_id()
+                name = row['name_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                self.logger.info(f"DEBUG: UI Row {i+1}: type='{type_str}', name='{name}', mass={mass_kg}")
             mix_name = self.mix_name_entry.get_text().strip()
             if not mix_name:
                 mix_name = "Untitled Mix"
@@ -1881,7 +1916,7 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Failed to show grading dialog: {e}")
             self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
     
-    def _create_microstructure_input_file(self) -> None:
+    def _create_microstructure_input_file(self, saved_mix_design_id: Optional[int] = None) -> None:
         """Create microstructure input file after validation."""
         try:
             # Step 1: Validate mix name
@@ -1921,7 +1956,7 @@ class MixDesignPanel(Gtk.Box):
             input_file_content = self._generate_genmic_input_file(mix_design, microstructure_params)
             
             # Step 7: Save input file and execute genmic
-            self._save_input_file(input_file_content, mix_design.name)
+            self._save_input_file(input_file_content, mix_design.name, saved_mix_design_id)
             
         except Exception as e:
             self.logger.error(f"Failed to create microstructure input file: {e}")
@@ -2799,7 +2834,7 @@ class MixDesignPanel(Gtk.Box):
         else:
             return 1  # Default to C3S
     
-    def _save_input_file(self, content: str, mix_name: str) -> None:
+    def _save_input_file(self, content: str, mix_name: str, saved_mix_design_id: Optional[int] = None) -> None:
         """Save input file content to disk automatically and execute genmic program."""
         try:
             # Create safe filename
@@ -2836,17 +2871,23 @@ class MixDesignPanel(Gtk.Box):
             # Execute genmic program immediately
             self.logger.info(f"Starting genmic execution...")
             try:
-                self._execute_genmic(filename, mix_folder_path)
+                self.logger.info(f"DEBUG: About to call _execute_genmic with saved_mix_design_id={saved_mix_design_id}")
+                self._execute_genmic(filename, mix_folder_path, saved_mix_design_id)
             except Exception as e:
                 self.logger.error(f"Error in genmic execution: {e}")
+                import traceback
+                self.logger.error(f"Full traceback: {traceback.format_exc()}")
                 self.main_window.update_status(f"Error executing genmic: {e}", "error", 5)
             
         except Exception as e:
             self.logger.error(f"Failed to save input file: {e}")
             self.main_window.update_status(f"Error saving file: {e}", "error", 5)
     
-    def _execute_genmic(self, input_file: str, output_dir: str) -> None:
+    def _execute_genmic(self, input_file: str, output_dir: str, saved_mix_design_id: Optional[int] = None) -> None:
         """Execute genmic program with input file and redirect output to same directory."""
+        
+        # Store the saved_mix_design_id as an instance variable for use in callbacks
+        self._current_saved_mix_design_id = saved_mix_design_id
         
         try:
             self.logger.info(f"_execute_genmic called with input_file={input_file}, output_dir={output_dir}")
@@ -2891,6 +2932,14 @@ class MixDesignPanel(Gtk.Box):
                     
                     if operation_id:
                         self.logger.info(f"Successfully launched genmic through Operations panel: {operation_id}")
+                        
+                        # Create MicrostructureOperation record with all input parameters
+                        try:
+                            self._create_microstructure_operation_record(operation_id, self._current_saved_mix_design_id)
+                            self.logger.info("Created MicrostructureOperation database record")
+                        except Exception as e:
+                            self.logger.error(f"Failed to create MicrostructureOperation record: {e}")
+                        
                         self.main_window.update_status(
                             f"Genmic process started! Monitor progress in Operations tab.", 
                             "success", 5
@@ -3215,6 +3264,11 @@ class MixDesignPanel(Gtk.Box):
             log_files = [f for f in os.listdir(output_dir) if f.endswith(('_stdout.log', '_stderr.log'))]
             if log_files:
                 success_text += f"\n\nExecution logs:\n" + "\n".join(log_files)
+            
+            # Update the mix design with file paths (use current name in UI, which may have been auto-renamed)
+            current_mix_name = self.mix_name_entry.get_text().strip()
+            if current_mix_name:
+                self._update_mix_design_file_paths(current_mix_name, output_dir, output_files)
             
             success_dialog.format_secondary_text(success_text)
             success_dialog.run()
@@ -3754,6 +3808,7 @@ class MixDesignPanel(Gtk.Box):
         )
         dialog.add_buttons(
             "Cancel", Gtk.ResponseType.CANCEL,
+            "Manage", Gtk.ResponseType.APPLY,
             "Load", Gtk.ResponseType.OK,
             "Delete", Gtk.ResponseType.REJECT
         )
@@ -3817,7 +3872,7 @@ class MixDesignPanel(Gtk.Box):
         # Info label
         info_label = Gtk.Label()
         info_label.set_halign(Gtk.Align.START)
-        info_label.set_markup("<i>Select a saved mix design or previous microstructure operation to load</i>")
+        info_label.set_markup("<i>Select a saved mix design to load</i>")
         content_area.pack_start(info_label, False, False, 0)
         
         # Load mix designs (placeholder for now)
@@ -3827,7 +3882,12 @@ class MixDesignPanel(Gtk.Box):
         
         # Handle response
         response = dialog.run()
-        if response in [Gtk.ResponseType.OK, Gtk.ResponseType.REJECT]:
+        if response == Gtk.ResponseType.APPLY:
+            # Open advanced management dialog
+            dialog.destroy()
+            self._show_mix_design_management_dialog()
+            return
+        elif response in [Gtk.ResponseType.OK, Gtk.ResponseType.REJECT]:
             selection = tree_view.get_selection()
             model, treeiter = selection.get_selected()
             
@@ -3837,18 +3897,16 @@ class MixDesignPanel(Gtk.Box):
                 item_type = model[treeiter][3]
                 
                 if response == Gtk.ResponseType.OK:
-                    # Load either mix design or microstructure operation
+                    # Load mix design (only mix designs are shown now)
                     if item_type == "Mix Design":
                         # Extract actual mix design ID
                         mix_id = int(unique_id.split("_")[-1])
                         self._load_mix_design(mix_id)
-                    elif item_type == "Operation":
-                        # Load microstructure operation
-                        micro_op_id = int(unique_id.split("_")[-1])
-                        self._load_microstructure_operation(micro_op_id)
-                    dialog.destroy()
+                        dialog.destroy()
+                    else:
+                        self.main_window.update_status("Unknown item type selected", "error", 3)
                 elif response == Gtk.ResponseType.REJECT:
-                    # Only allow delete for saved mix designs, not operations
+                    # Delete mix design (only mix designs are shown now)
                     if item_type == "Mix Design":
                         mix_id = int(unique_id.split("_")[-1])
                         delete_success = self._delete_mix_design(mix_id, item_name)
@@ -3859,7 +3917,7 @@ class MixDesignPanel(Gtk.Box):
                         # Don't destroy main dialog - let user continue or cancel
                         return
                     else:
-                        self.main_window.update_status("Cannot delete microstructure operations from here", "info", 3)
+                        self.main_window.update_status("Cannot delete this item type", "error", 3)
             else:
                 self.main_window.update_status("Please select a mix design", "info", 3)
                 dialog.destroy()
@@ -3867,7 +3925,7 @@ class MixDesignPanel(Gtk.Box):
             dialog.destroy()
     
     def _populate_mix_design_list(self, list_store: Gtk.ListStore) -> None:
-        """Populate the mix design list store with both saved mix designs AND all microstructure operations."""
+        """Populate the mix design list store with saved mix designs only."""
         try:
             list_store.clear()
             
@@ -3876,50 +3934,32 @@ class MixDesignPanel(Gtk.Box):
             mix_design_service = MixDesignService(self.service_container.database_service)
             mix_designs = mix_design_service.get_all()
             
-            # Load ALL microstructure operations from database
-            from app.models import MicrostructureOperation
-            
-            with self.service_container.database_service.get_read_only_session() as session:
-                microstructure_ops = session.query(MicrostructureOperation).all()
-            
-            total_items = len(mix_designs) + len(microstructure_ops)
-            
-            # Add saved mix designs first
+            # Add saved mix designs to list store (sorted by updated date, newest first)
             for design in mix_designs:
-                # Format: (name, description, date, type, id)
                 date_str = design.updated_at.strftime("%Y-%m-%d") if design.updated_at else "Unknown"
-                list_store.append((
+                
+                list_store.append([
                     design.name,
-                    design.description or "Saved mix design",
+                    design.description or "Auto-saved mix design", 
                     date_str,
-                    "Mix Design",  # Type column
-                    f"mix_design_{design.id}"  # Unique identifier
-                ))
-            
-            # Add ALL microstructure operations
-            for micro_op in microstructure_ops:
-                # Format: (name, description, date, type, id)  
-                operation_name = micro_op.operation.name if micro_op.operation else "Unknown Operation"
-                mix_design_name = micro_op.mix_design.name if micro_op.mix_design else "No mix design"
-                date_str = micro_op.created_at.strftime("%Y-%m-%d") if micro_op.created_at else "Unknown"
+                    "Mix Design",
+                    f"mix_design_{design.id}"
+                ])
                 
-                description = f"From operation: {mix_design_name}"
-                if micro_op.system_size_x and micro_op.system_size_x != 100:
-                    description += f" ({micro_op.system_size_x}³ voxels)"
+        except Exception as e:
+            self.logger.error(f"Failed to populate mix design list: {e}")
+            # Add fallback message
+            list_store.append([
+                "Error loading mix designs",
+                "Please check the console for details",
+                "Unknown",
+                "Error",
+                "error_0"
+            ])
                 
-                list_store.append((
-                    operation_name,
-                    description,
-                    date_str,
-                    "Operation",  # Type column
-                    f"microstructure_op_{micro_op.id}"  # Unique identifier
-                ))
-            
-            self.logger.info(f"Populated mix design list with {len(mix_designs)} saved designs and {len(microstructure_ops)} operations ({total_items} total)")
-            
         except Exception as e:
             self.logger.error(f"Error populating mix design list: {e}")
-            self.main_window.update_status(f"Error loading mix designs and operations: {e}", "error", 5)
+            # Note: Cannot call update_status here as main_window may not be available
     
     def _extract_current_mix_design_data(self) -> Dict[str, Any]:
         """Extract current mix design data from UI controls."""
@@ -4296,7 +4336,9 @@ class MixDesignPanel(Gtk.Box):
             self.resolution_spin.set_value(mix_design_data.get('resolution', 1.0))
             
             # Set random seed
-            self.random_seed_spin.set_value(mix_design_data.get('random_seed', -1))
+            random_seed_value = mix_design_data.get('random_seed', -1)
+            self.logger.info(f"Setting random seed to: {random_seed_value}")
+            self.random_seed_spin.set_value(random_seed_value)
             
             # Set flocculation parameters
             self.flocculation_check.set_active(mix_design_data.get('flocculation_enabled', False))
@@ -4359,12 +4401,33 @@ class MixDesignPanel(Gtk.Box):
             # Calculate total mass for component mass calculations
             total_water_content = mix_design_data.get('total_water_content', 0.0)
             wb_ratio = mix_design_data.get('water_binder_ratio', 0.40)
-            total_powder_mass = total_water_content / wb_ratio if wb_ratio > 0 else 0.0
+            
+            # For loading saved data, calculate total solid mass from stored component mass fractions
+            # This preserves the original scaling when the mix was created
+            components = mix_design_data.get('components', [])
+            total_solid_mass_fractions = 0.0
+            water_mass_fraction = 0.0
+            
+            for comp in components:
+                mass_frac = comp.get('mass_fraction', 0.0)
+                if comp.get('material_type', '').lower() == 'water':
+                    water_mass_fraction = mass_frac
+                else:
+                    total_solid_mass_fractions += mass_frac
+            
+            # Calculate total solid mass from water mass and water mass fraction
+            if water_mass_fraction > 0:
+                total_powder_mass = total_water_content * total_solid_mass_fractions / water_mass_fraction
+                self.logger.info(f"DEBUG: Calculated total_powder_mass={total_powder_mass} from water_content={total_water_content}, water_fraction={water_mass_fraction}, solid_fractions={total_solid_mass_fractions}")
+            else:
+                # Fallback to W/B ratio calculation
+                total_powder_mass = total_water_content / wb_ratio if wb_ratio > 0 else 0.0
+                self.logger.info(f"DEBUG: Fallback total_powder_mass={total_powder_mass} from W/B ratio")
+            
             total_mass = total_powder_mass + total_water_content
             
-            # Add components (skip water - it's handled separately)
-            components = mix_design_data.get('components', [])
-            self.logger.info(f"Loading {len(components)} components from mix design")
+            # Process components for UI (skip water - it's handled separately)
+            self.logger.info(f"Loading {len(components)} components from mix design: {components}")
             
             for i, comp_data in enumerate(components):
                 self.logger.info(f"Processing component {i+1}/{len(components)}: {comp_data}")
@@ -4372,6 +4435,11 @@ class MixDesignPanel(Gtk.Box):
                 # Skip water component - it's set by water_content_spin (case-insensitive check)
                 if comp_data.get('material_type', '').lower() == 'water':
                     self.logger.info("Skipping water component")
+                    continue
+                
+                # Skip aggregate components - they're handled by aggregate controls
+                if comp_data.get('material_type', '').lower() == 'aggregate':
+                    self.logger.info(f"Skipping aggregate component: {comp_data.get('material_name', '')} - handled by aggregate controls")
                     continue
                     
                 # Add new component row
@@ -4481,17 +4549,18 @@ class MixDesignPanel(Gtk.Box):
                             self.logger.error(f"Could not restore material '{material_name}' - using default instead")
                             # Keep the default selection from _update_material_names()
                     
-                    # Calculate mass from mass fraction
+                    # Calculate mass from mass fraction (use total_powder_mass not total_mass)
+                    # Mass fractions in database are relative to solid mass only (excluding water)
                     mass_fraction = comp_data.get('mass_fraction', 0.0)
-                    component_mass = mass_fraction * total_mass
-                    self.logger.info(f"Setting component mass: {component_mass} kg (from fraction {mass_fraction})")
+                    component_mass = mass_fraction * total_powder_mass
+                    self.logger.info(f"Setting component mass: {component_mass} kg (from fraction {mass_fraction} * solid mass {total_powder_mass})")
                     
                     # Set mass
                     row['mass_spin'].set_value(component_mass)
                     self.logger.info(f"Component row setup complete")
             
-            # Trigger recalculation and UI update
-            self._trigger_calculation()
+            # Skip calculation during loading to prevent phantom components
+            # The calculation will be triggered naturally when loading flag is cleared
             
             # Update mix name if available (from database)
             if hasattr(self, 'mix_name_entry'):
@@ -4598,110 +4667,226 @@ class MixDesignPanel(Gtk.Box):
                 micro_op = session.query(MicrostructureOperation).filter_by(id=micro_op_id).first()
                 
                 if not micro_op:
-                    self.main_window.update_status("Microstructure operation not found", "error", 3)
-                    return
+                    self.logger.error("Microstructure operation not found")
+                    return None
                 
-                # Load the associated mix design
+                # Load all related data within the session to avoid lazy loading issues
                 mix_design = micro_op.mix_design
                 if not mix_design:
-                    self.main_window.update_status("No mix design found for this operation", "error", 3)
-                    return
+                    self.logger.error("No mix design found for this operation")
+                    return None
                 
-                self.logger.info(f"Loading microstructure operation: {micro_op.operation.name if micro_op.operation else 'Unknown'}")
+                operation = micro_op.operation
+                operation_name = operation.name if operation else f"Operation_{micro_op_id}"
+                self.logger.info(f"Loading microstructure operation: {operation_name}")
                 
-                # Prevent constraint checking during loading
-                self._loading_in_progress = True
+                # Extract all data within the session to avoid lazy loading issues
+                mix_design_data = {
+                    'water_binder_ratio': mix_design.water_binder_ratio,
+                    'total_water_content': mix_design.total_water_content,
+                    'air_content': mix_design.air_content,
+                    'air_volume_fraction': mix_design.air_volume_fraction,
+                    'components': mix_design.components,
+                    'calculated_properties': mix_design.calculated_properties,
+                    'fine_aggregate_name': getattr(mix_design, 'fine_aggregate_name', None),
+                    'fine_aggregate_mass': getattr(mix_design, 'fine_aggregate_mass', 0.0),
+                    'coarse_aggregate_name': getattr(mix_design, 'coarse_aggregate_name', None),
+                    'coarse_aggregate_mass': getattr(mix_design, 'coarse_aggregate_mass', 0.0),
+                    'cement_shape_set': getattr(mix_design, 'cement_shape_set', 'spherical'),
+                    'fine_aggregate_shape_set': getattr(mix_design, 'fine_aggregate_shape_set', 'spherical'),
+                    'coarse_aggregate_shape_set': getattr(mix_design, 'coarse_aggregate_shape_set', 'spherical')
+                }
                 
-                # Load mix design data first
-                self._populate_mix_design_fields(mix_design)
+                # Extract microstructure operation data
+                micro_op_data = {
+                    'system_size_x': micro_op.system_size_x,
+                    'system_size_y': micro_op.system_size_y,
+                    'system_size_z': micro_op.system_size_z,
+                    'resolution': micro_op.resolution,
+                    'random_seed': micro_op.random_seed,
+                    'flocculation_enabled': micro_op.flocculation_enabled,
+                    'flocculation_degree': micro_op.flocculation_degree,
+                    'dispersion_factor': micro_op.dispersion_factor
+                }
                 
-                # Then override with any operation-specific parameters
-                # System size
-                if micro_op.system_size_x and hasattr(self, 'system_size_x_spin'):
-                    self.system_size_x_spin.set_value(micro_op.system_size_x)
-                if micro_op.system_size_y and hasattr(self, 'system_size_y_spin'):
-                    self.system_size_y_spin.set_value(micro_op.system_size_y)
-                if micro_op.system_size_z and hasattr(self, 'system_size_z_spin'):
-                    self.system_size_z_spin.set_value(micro_op.system_size_z)
+                self.logger.info(f"Extracted random seed: {micro_op_data['random_seed']}")
+                self.logger.info(f"Extracted components: {mix_design_data['components']}")
                 
-                # Resolution
-                if micro_op.resolution and hasattr(self, 'resolution_spin'):
-                    self.resolution_spin.set_value(micro_op.resolution)
+                # Create combined mix design data dictionary (operation parameters override mix design)
+                mix_data = {**mix_design_data, **micro_op_data}
                 
-                # Random seed
-                if micro_op.random_seed != -1 and hasattr(self, 'random_seed_spin'):
-                    self.random_seed_spin.set_value(micro_op.random_seed)
+                # Use the same UI population method as regular mix design loading
+                self._populate_ui_from_mix_design(mix_data)
                 
-                # Flocculation
-                if hasattr(self, 'flocculation_switch'):
-                    self.flocculation_switch.set_active(micro_op.flocculation_enabled)
-                if micro_op.flocculation_degree and hasattr(self, 'flocculation_degree_spin'):
-                    self.flocculation_degree_spin.set_value(micro_op.flocculation_degree)
-                
-                # Dispersion
-                if micro_op.dispersion_factor and hasattr(self, 'dispersion_spin'):
-                    self.dispersion_spin.set_value(micro_op.dispersion_factor)
-                
-                # Update mix name to indicate it's loaded from operation
-                operation_name = micro_op.operation.name if micro_op.operation else f"Operation_{micro_op_id}"
-                copy_name = f"{operation_name}_loaded"
+                # Set mix name to indicate it's loaded from operation
+                copy_name = f"{operation_name}_copy"
                 self.mix_name_entry.set_text(copy_name)
                 
-                # Re-enable constraint checking
-                self._loading_in_progress = False
-                
-                # Update status
-                self.main_window.update_status(f"Loaded microstructure operation '{operation_name}' successfully", "success", 3)
+                # Log success
                 self.logger.info(f"Loaded microstructure operation: {operation_name} (ID: {micro_op_id})")
+                return mix_data
                 
         except Exception as e:
             self.logger.error(f"Error loading microstructure operation: {e}")
-            self.main_window.update_status(f"Error loading operation: {e}", "error", 5)
-            self._loading_in_progress = False
+            # Note: Cannot call update_status here as main_window may not be available
     
-    def _populate_mix_design_fields(self, mix_design) -> None:
-        """Helper method to populate UI fields from a mix design object."""
-        # This logic is extracted from the existing _load_mix_design method
+    def _generate_unique_mix_name(self, base_name: str, existing_designs: List) -> str:
+        """Generate a unique mix design name by appending a counter if needed."""
+        # Check if base name is already unique
+        existing_names = {design.name for design in existing_designs}
+        if base_name not in existing_names:
+            return base_name
         
-        # Set basic mix properties
-        self.wb_ratio_spin.set_value(mix_design.water_binder_ratio)
-        self.total_water_spin.set_value(mix_design.total_water_content)
-        self.air_content_spin.set_value(mix_design.air_content)
-        
-        # Set system parameters
-        if hasattr(self, 'system_size_x_spin') and mix_design.system_size_x:
-            self.system_size_x_spin.set_value(mix_design.system_size_x)
-        if hasattr(self, 'system_size_y_spin') and mix_design.system_size_y:
-            self.system_size_y_spin.set_value(mix_design.system_size_y)
-        if hasattr(self, 'system_size_z_spin') and mix_design.system_size_z:
-            self.system_size_z_spin.set_value(mix_design.system_size_z)
-        if hasattr(self, 'resolution_spin'):
-            self.resolution_spin.set_value(mix_design.resolution)
-        
-        # Set flocculation parameters
-        if hasattr(self, 'flocculation_switch'):
-            self.flocculation_switch.set_active(mix_design.flocculation_enabled)
-        if hasattr(self, 'flocculation_degree_spin'):
-            self.flocculation_degree_spin.set_value(mix_design.flocculation_degree)
-        if hasattr(self, 'dispersion_spin'):
-            self.dispersion_spin.set_value(mix_design.dispersion_factor)
-        
-        # Load components
-        components = mix_design.components or []
-        self.logger.info(f"Loading {len(components)} components from mix design")
-        
-        for i, comp_data in enumerate(components):
-            self.logger.info(f"Processing component {i+1}/{len(components)}: {comp_data}")
+        # Generate unique name with counter
+        counter = 1
+        while True:
+            candidate_name = f"{base_name}_v{counter}"
+            if candidate_name not in existing_names:
+                return candidate_name
+            counter += 1
+            # Safety check to avoid infinite loop
+            if counter > 999:
+                import time
+                timestamp = int(time.time())
+                return f"{base_name}_{timestamp}"
+    
+    def _auto_save_mix_design_before_generation(self) -> Optional[int]:
+        """
+        Auto-save the current mix design before generating microstructure.
+        Automatically generates unique name to prevent overwriting existing designs.
+        Returns the saved mix design ID if successful, None if failed.
+        """
+        try:
+            # Get the current mix name
+            base_mix_name = self.mix_name_entry.get_text().strip()
+            if not base_mix_name:
+                self.logger.warning("No mix name provided for auto-save")
+                return None
             
-            material_name = comp_data.get('material_name', '')
-            material_type = comp_data.get('material_type', '')
-            mass_fraction = comp_data.get('mass_fraction', 0.0)
+            # Get all existing designs to check for conflicts
+            from app.services.mix_design_service import MixDesignService
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            existing_designs = mix_design_service.get_all()
             
-            # Set appropriate material combo boxes and mass fractions
-            # This logic should match what's in the original _load_mix_design method
-            # (Implementation details depend on the specific UI structure)
+            # Generate unique name to prevent overwriting
+            unique_mix_name = self._generate_unique_mix_name(base_mix_name, existing_designs)
             
-        self.logger.info("Populated mix design fields successfully")
+            # Update the UI with the unique name if it changed
+            if unique_mix_name != base_mix_name:
+                self.mix_name_entry.set_text(unique_mix_name)
+                self.logger.info(f"Auto-generated unique name: '{base_mix_name}' → '{unique_mix_name}'")
+                self.main_window.update_status(f"Generated unique name '{unique_mix_name}' to prevent overwrite", "info", 2)
+            
+            # Get current mix design data
+            mix_design_data = self._extract_current_mix_design_data()
+            
+            # Convert components to proper Pydantic models
+            from app.models.mix_design import MixDesignCreate, MixDesignComponentData, MixDesignPropertiesData
+            
+            # Convert component dictionaries to MixDesignComponentData objects
+            component_objects = []
+            for comp_dict in mix_design_data.get('components', []):
+                component_objects.append(MixDesignComponentData(
+                    material_name=comp_dict['material_name'],
+                    material_type=comp_dict['material_type'],
+                    mass_fraction=comp_dict['mass_fraction'],
+                    volume_fraction=comp_dict['volume_fraction'],
+                    specific_gravity=comp_dict['specific_gravity']
+                ))
+            
+            # Convert properties to Pydantic model if present
+            properties = None
+            if mix_design_data.get('calculated_properties'):
+                properties = MixDesignPropertiesData(**mix_design_data['calculated_properties'])
+            
+            # Create MixDesignCreate object with the converted data
+            create_data = MixDesignCreate(
+                name=unique_mix_name,
+                description="Auto-saved before microstructure generation",
+                components=component_objects,
+                calculated_properties=properties,
+                # All other fields from the extracted data
+                water_binder_ratio=mix_design_data['water_binder_ratio'],
+                total_water_content=mix_design_data['total_water_content'],
+                air_content=mix_design_data['air_content'],
+                water_volume_fraction=mix_design_data['water_volume_fraction'],
+                air_volume_fraction=mix_design_data['air_volume_fraction'],
+                system_size_x=mix_design_data['system_size_x'],
+                system_size_y=mix_design_data['system_size_y'],
+                system_size_z=mix_design_data['system_size_z'],
+                system_size=mix_design_data['system_size'],
+                resolution=mix_design_data['resolution'],
+                random_seed=mix_design_data['random_seed'],
+                cement_shape_set=mix_design_data['cement_shape_set'],
+                fine_aggregate_shape_set=mix_design_data['fine_aggregate_shape_set'],
+                coarse_aggregate_shape_set=mix_design_data['coarse_aggregate_shape_set'],
+                aggregate_shape_set=mix_design_data['aggregate_shape_set'],
+                flocculation_enabled=mix_design_data['flocculation_enabled'],
+                flocculation_degree=mix_design_data['flocculation_degree'],
+                dispersion_factor=mix_design_data['dispersion_factor'],
+                auto_calculation_enabled=mix_design_data['auto_calculation_enabled'],
+                fine_aggregate_name=mix_design_data['fine_aggregate_name'],
+                fine_aggregate_mass=mix_design_data['fine_aggregate_mass'],
+                coarse_aggregate_name=mix_design_data['coarse_aggregate_name'],
+                coarse_aggregate_mass=mix_design_data['coarse_aggregate_mass']
+            )
+            
+            # Create new mix design (we know the name is unique now)
+            self.logger.info(f"Auto-saving new mix design: {unique_mix_name}")
+            new_design = mix_design_service.create(create_data)
+            return new_design.id
+            
+        except Exception as e:
+            self.logger.error(f"Error auto-saving mix design: {e}")
+            return None
+    
+    def _update_mix_design_file_paths(self, mix_name: str, output_dir: str, output_files: List[str]) -> None:
+        """Update the mix design with generated microstructure file paths."""
+        try:
+            from app.services.mix_design_service import MixDesignService
+            from datetime import datetime
+            
+            mix_design_service = MixDesignService(self.service_container.database_service)
+            
+            # Find the mix design by name
+            existing_designs = mix_design_service.get_all()
+            mix_design = None
+            for design in existing_designs:
+                if design.name == mix_name:
+                    mix_design = design
+                    break
+            
+            if not mix_design:
+                self.logger.warning(f"Mix design '{mix_name}' not found for file path update")
+                return
+            
+            # Find the .img and .pimg files
+            img_file = None
+            pimg_file = None
+            for file_path in output_files:
+                filename = os.path.basename(file_path)
+                if filename.endswith('.img') and not filename.endswith('.pimg'):
+                    img_file = file_path
+                elif filename.endswith('.pimg'):
+                    pimg_file = file_path
+            
+            # Update the mix design with file paths
+            update_data = {
+                'output_directory': output_dir,
+                'generation_completed_at': datetime.utcnow()
+            }
+            
+            if img_file:
+                update_data['microstructure_img_path'] = img_file
+            if pimg_file:
+                update_data['microstructure_pimg_path'] = pimg_file
+            
+            # Update the mix design
+            mix_design_service.update(mix_design.id, **update_data)
+            self.logger.info(f"Updated mix design '{mix_name}' with file paths: img={img_file}, pimg={pimg_file}")
+            
+        except Exception as e:
+            self.logger.error(f"Error updating mix design file paths: {e}")
     
     def _delete_mix_design(self, mix_id: int, mix_name: str) -> bool:
         """Delete a mix design with confirmation. Returns True if deleted, False if cancelled."""
@@ -4738,3 +4923,307 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Error deleting mix design: {e}")
             self.main_window.update_status(f"Error deleting mix design: {e}", "error", 5)
             return False
+    
+    def _create_microstructure_operation_record(self, operation_id: str, mix_design_id: Optional[int] = None) -> None:
+        """Create a MicrostructureOperation record with all input parameters."""
+        try:
+            # Import services and models
+            from app.models.microstructure_operation import MicrostructureOperation
+            from app.models.operation import Operation
+            
+            # Use provided mix design ID if available, otherwise skip creation
+            if not mix_design_id:
+                self.logger.warning("No mix design ID provided for MicrostructureOperation - skipping creation")
+                return
+            
+            # Get operation from database using string operation_id
+            with self.service_container.database_service.get_session() as session:
+                operation = session.query(Operation).filter_by(id=int(operation_id)).first()
+                if not operation:
+                    raise Exception(f"Operation {operation_id} not found in database")
+                
+                # Get all microstructure parameters from UI
+                microstructure_params = self._get_microstructure_parameters()
+                
+                # Create MicrostructureOperation record
+                micro_op = MicrostructureOperation(
+                    operation_id=operation.id,
+                    mix_design_id=mix_design_id,
+                    system_size_x=microstructure_params.get('system_size_x', 100),
+                    system_size_y=microstructure_params.get('system_size_y', 100),
+                    system_size_z=microstructure_params.get('system_size_z', 100),
+                    resolution=microstructure_params.get('resolution', 1.0),
+                    random_seed=int(self.random_seed_spin.get_value()),
+                    flocculation_enabled=self.flocculation_check.get_active() if hasattr(self, 'flocculation_check') else False,
+                    flocculation_degree=self.flocculation_spin.get_value() if hasattr(self, 'flocculation_spin') else 0.0,
+                    dispersion_factor=int(self.dispersion_factor_spin.get_value()),
+                    genmic_mode=2,
+                    output_img_filename=f"{operation.name}.img",
+                    output_pimg_filename=f"{operation.name}.pimg",
+                    output_directory=f"/Operations/{operation.name}"
+                )
+                
+                session.add(micro_op)
+                session.commit()
+                
+                self.logger.info(f"Created MicrostructureOperation record for operation {operation_id}")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to create MicrostructureOperation record: {e}")
+            raise
+    
+    def _load_carbon_icon(self, icon_name: str, size: int = 32):
+        """Load a Carbon icon from the icons directory."""
+        from pathlib import Path
+        from gi.repository import GdkPixbuf
+        
+        try:
+            # Build path to Carbon icon - use current working directory as project root
+            project_root = Path.cwd()
+            icon_path = project_root / "icons" / "carbon" / str(size) / f"{icon_name}.svg"
+            
+            self.logger.info(f"Attempting to load Carbon icon: {icon_name} from {icon_path}")
+            
+            if icon_path.exists():
+                # Load SVG and scale to desired size
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon_path), size, size, True)
+                self.logger.info(f"Successfully loaded Carbon icon: {icon_name} ({pixbuf.get_width()}x{pixbuf.get_height()})")
+                return pixbuf
+            else:
+                self.logger.warning(f"Carbon icon not found: {icon_path}")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to load Carbon icon {icon_name}: {e}")
+        
+        return None
+    
+    def _show_mix_design_management_dialog(self) -> None:
+        """Show advanced mix design management dialog with bulk operations."""
+        from gi.repository import GdkPixbuf
+        
+        # Create management dialog
+        dialog = Gtk.Dialog(
+            title="Mix Design Management",
+            transient_for=self.main_window,
+            flags=0
+        )
+        dialog.add_buttons(
+            "Close", Gtk.ResponseType.CANCEL
+        )
+        dialog.set_size_request(800, 600)
+        
+        # Create content
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_margin_left(20)
+        content_area.set_margin_right(20)
+        content_area.set_margin_top(10)
+        content_area.set_margin_bottom(10)
+        
+        # Toolbar with management actions
+        toolbar = Gtk.Toolbar()
+        toolbar.set_style(Gtk.ToolbarStyle.BOTH)
+        
+        # Bulk Delete button - use Carbon icon
+        bulk_delete_button = Gtk.ToolButton()
+        delete_icon = self._load_carbon_icon("trash-can", 32)
+        if delete_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = delete_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            delete_image = Gtk.Image.new_from_pixbuf(scaled_icon)
+            bulk_delete_button.set_icon_widget(delete_image)
+        else:
+            bulk_delete_button.set_icon_name("edit-delete")  # Fallback
+        bulk_delete_button.set_label("Delete Selected")
+        bulk_delete_button.set_tooltip_text("Delete all selected mix designs")
+        bulk_delete_button.set_sensitive(False)  # Enable when items are selected
+        
+        # Duplicate button - use Carbon icon
+        duplicate_button = Gtk.ToolButton()
+        copy_icon = self._load_carbon_icon("copy", 32)
+        if copy_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = copy_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            copy_image = Gtk.Image.new_from_pixbuf(scaled_icon)
+            duplicate_button.set_icon_widget(copy_image)
+        else:
+            duplicate_button.set_icon_name("edit-copy")  # Fallback
+        duplicate_button.set_label("Duplicate")
+        duplicate_button.set_tooltip_text("Create a copy of selected mix design")
+        duplicate_button.set_sensitive(False)
+        
+        # Export button - use Carbon icon  
+        export_button = Gtk.ToolButton()
+        export_icon = self._load_carbon_icon("document--export", 32)
+        if export_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = export_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            export_image = Gtk.Image.new_from_pixbuf(scaled_icon)
+            export_button.set_icon_widget(export_image)
+        else:
+            export_button.set_icon_name("document-save")  # Fallback
+        export_button.set_label("Export")
+        export_button.set_tooltip_text("Export mix design to file")
+        export_button.set_sensitive(False)
+        
+        # Refresh button - use Carbon icon
+        refresh_button = Gtk.ToolButton()
+        refresh_icon = self._load_carbon_icon("restart", 32)
+        if refresh_icon:
+            # Scale down to toolbar size (24px)
+            scaled_icon = refresh_icon.scale_simple(24, 24, GdkPixbuf.InterpType.BILINEAR)
+            refresh_image = Gtk.Image.new_from_pixbuf(scaled_icon)
+            refresh_button.set_icon_widget(refresh_image)
+        else:
+            refresh_button.set_icon_name("view-refresh")  # Fallback
+        refresh_button.set_label("Refresh")
+        refresh_button.set_tooltip_text("Refresh the list")
+        
+        toolbar.insert(bulk_delete_button, -1)
+        toolbar.insert(duplicate_button, -1)
+        toolbar.insert(export_button, -1)
+        toolbar.insert(Gtk.SeparatorToolItem(), -1)
+        toolbar.insert(refresh_button, -1)
+        
+        content_area.pack_start(toolbar, False, False, 0)
+        
+        # Search and filter box
+        filter_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        
+        search_label = Gtk.Label("Search:")
+        search_entry = Gtk.Entry()
+        search_entry.set_placeholder_text("Search mix designs...")
+        
+        sort_label = Gtk.Label("Sort by:")
+        sort_combo = Gtk.ComboBoxText()
+        sort_combo.append_text("Name (A-Z)")
+        sort_combo.append_text("Name (Z-A)")  
+        sort_combo.append_text("Date Created (Newest)")
+        sort_combo.append_text("Date Created (Oldest)")
+        sort_combo.append_text("W/B Ratio (Low to High)")
+        sort_combo.append_text("W/B Ratio (High to Low)")
+        sort_combo.set_active(0)
+        
+        filter_box.pack_start(search_label, False, False, 0)
+        filter_box.pack_start(search_entry, True, True, 0)
+        filter_box.pack_start(sort_label, False, False, 0)
+        filter_box.pack_start(sort_combo, False, False, 0)
+        
+        content_area.pack_start(filter_box, False, False, 0)
+        
+        # Mix design list with checkboxes for selection
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        
+        # Create list store: selected, name, description, created_date, w/b_ratio, has_microstructure, mix_id
+        list_store = Gtk.ListStore(bool, str, str, str, str, str, int)
+        
+        tree_view = Gtk.TreeView(model=list_store)
+        tree_view.set_rubber_banding(True)  # Allow multiple selection
+        
+        # Checkbox column for selection
+        checkbox_renderer = Gtk.CellRendererToggle()
+        checkbox_renderer.set_property("activatable", True)
+        checkbox_column = Gtk.TreeViewColumn("", checkbox_renderer, active=0)
+        tree_view.append_column(checkbox_column)
+        
+        # Name column
+        name_renderer = Gtk.CellRendererText()
+        name_column = Gtk.TreeViewColumn("Name", name_renderer, text=1)
+        name_column.set_sort_column_id(1)
+        name_column.set_resizable(True)
+        tree_view.append_column(name_column)
+        
+        # Description column
+        desc_renderer = Gtk.CellRendererText()
+        desc_renderer.set_property("ellipsize", 3)  # ELLIPSIZE_END
+        desc_column = Gtk.TreeViewColumn("Description", desc_renderer, text=2)
+        desc_column.set_sort_column_id(2)
+        desc_column.set_resizable(True)
+        tree_view.append_column(desc_column)
+        
+        # Created date column
+        date_renderer = Gtk.CellRendererText()
+        date_column = Gtk.TreeViewColumn("Created", date_renderer, text=3)
+        date_column.set_sort_column_id(3)
+        date_column.set_resizable(True)
+        tree_view.append_column(date_column)
+        
+        # W/B Ratio column
+        wb_renderer = Gtk.CellRendererText()
+        wb_column = Gtk.TreeViewColumn("W/B Ratio", wb_renderer, text=4)
+        wb_column.set_sort_column_id(4)
+        wb_column.set_resizable(True)
+        tree_view.append_column(wb_column)
+        
+        # Has Microstructure column
+        micro_renderer = Gtk.CellRendererText()
+        micro_column = Gtk.TreeViewColumn("Microstructure", micro_renderer, text=5)
+        micro_column.set_sort_column_id(5)
+        micro_column.set_resizable(True)
+        tree_view.append_column(micro_column)
+        
+        scrolled.add(tree_view)
+        content_area.pack_start(scrolled, True, True, 0)
+        
+        # Status bar
+        status_bar = Gtk.Statusbar()
+        context_id = status_bar.get_context_id("mix_management")
+        content_area.pack_start(status_bar, False, False, 0)
+        
+        # Populate the list
+        from app.mix_design_management_helpers import populate_management_mix_design_list
+        populate_management_mix_design_list(self.service_container, list_store)
+        
+        # Import helper functions
+        from app.mix_design_management_helpers import (
+            update_management_button_sensitivity, bulk_delete_mix_designs,
+            duplicate_selected_mix_design, export_selected_mix_design,
+            filter_management_list, sort_management_list
+        )
+        
+        # Set up event handlers
+        def on_checkbox_toggled(renderer, path):
+            list_store[path][0] = not list_store[path][0]
+            update_management_button_sensitivity(list_store, bulk_delete_button, duplicate_button, export_button)
+            
+        def on_selection_changed(selection):
+            update_management_button_sensitivity(list_store, bulk_delete_button, duplicate_button, export_button)
+            
+        def on_search_changed(entry):
+            search_text = entry.get_text().lower()
+            filter_management_list([], list_store, search_text)
+            
+        def on_sort_changed(combo):
+            sort_management_list(list_store, combo.get_active())
+            
+        def on_bulk_delete_clicked(button):
+            bulk_delete_mix_designs(self.service_container, list_store, status_bar, context_id, self.main_window)
+            
+        def on_duplicate_clicked(button):
+            duplicate_selected_mix_design(self.service_container, list_store, status_bar, context_id, self.main_window)
+            
+        def on_export_clicked(button):
+            export_selected_mix_design(self.service_container, list_store, status_bar, context_id, self.main_window)
+            
+        def on_refresh_clicked(button):
+            list_store.clear()
+            populate_management_mix_design_list(self.service_container, list_store)
+            status_bar.push(context_id, "List refreshed")
+        
+        checkbox_renderer.connect("toggled", on_checkbox_toggled)
+        tree_view.get_selection().connect("changed", on_selection_changed)
+        search_entry.connect("changed", on_search_changed)
+        sort_combo.connect("changed", on_sort_changed)
+        bulk_delete_button.connect("clicked", on_bulk_delete_clicked)
+        duplicate_button.connect("clicked", on_duplicate_clicked)
+        export_button.connect("clicked", on_export_clicked)
+        refresh_button.connect("clicked", on_refresh_clicked)
+        
+        # Show initial status
+        total_designs = len(list_store)
+        status_bar.push(context_id, f"Total mix designs: {total_designs}")
+        
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()

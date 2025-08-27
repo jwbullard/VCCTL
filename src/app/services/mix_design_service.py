@@ -317,6 +317,23 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                     raise NotFoundError(f"Mix design with ID {mix_design_id} not found")
                 
                 name = mix_design.name  # Store name for logging
+                
+                # Check for foreign key constraints - find any MicrostructureOperations that reference this mix design
+                from app.models.microstructure_operation import MicrostructureOperation
+                referencing_operations = session.query(MicrostructureOperation).filter(
+                    MicrostructureOperation.mix_design_id == mix_design_id
+                ).all()
+                
+                if referencing_operations:
+                    # Delete referencing operations first to avoid foreign key constraint
+                    operation_names = [op.operation.name if op.operation else f"Operation {op.id}" 
+                                     for op in referencing_operations]
+                    self.logger.info(f"Deleting {len(referencing_operations)} MicrostructureOperations referencing mix design '{name}': {operation_names}")
+                    
+                    for micro_op in referencing_operations:
+                        session.delete(micro_op)
+                
+                # Now delete the mix design
                 session.delete(mix_design)
                 session.commit()
                 
