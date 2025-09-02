@@ -187,3 +187,4 @@ logs/
 
 # VCCTL Operations folder - contains user-generated mix designs and simulation outputs
 Operations/backend/bin/*
+Operations/
