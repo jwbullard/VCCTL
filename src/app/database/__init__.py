@@ -10,11 +10,8 @@ from app.database.base import Base, BaseModel, SessionLocal
 from app.database.service import DatabaseService, database_service
 from app.database.migrations import MigrationManager, Migration, create_migration_manager
 
-# Import all models to ensure they are registered with SQLAlchemy
-from app.models import (
-    Cement, FlyAsh, Slag, Aggregate, InertFiller, 
-    ParticleShapeSet, Grading, Operation, DbFile, AggregateSieve
-)
+# Models are registered with SQLAlchemy when they are imported by the application
+# No need to import them here, avoiding circular import issues
 
 __all__ = [
     'DatabaseConfig',
