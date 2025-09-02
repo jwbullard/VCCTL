@@ -1,2 +1,0 @@
-CemotcBox.img
-perc3d_results.txt

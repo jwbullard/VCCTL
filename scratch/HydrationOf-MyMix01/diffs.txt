@@ -1,4 +1,0 @@
-370,372d369
-< FitpHoc3ay1,1.1
-< FitpHoc3ay2,1.25
-< PHsulfcoeffoc3a,1.0

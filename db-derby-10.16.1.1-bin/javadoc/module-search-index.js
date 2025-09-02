@@ -1,1 +1,0 @@
-moduleSearchIndex = [{"l":"org.apache.derby.client"},{"l":"org.apache.derby.commons"},{"l":"org.apache.derby.engine"},{"l":"org.apache.derby.optionaltools"},{"l":"org.apache.derby.runner"},{"l":"org.apache.derby.server"},{"l":"org.apache.derby.tools"}];updateSearchResults();
