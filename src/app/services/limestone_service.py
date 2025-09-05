@@ -77,14 +77,14 @@ class LimestoneService(BaseService[Limestone, LimestoneCreate, LimestoneUpdate])
             self.logger.error(f"Failed to create limestone: {e}")
             raise ServiceError(f"Failed to create limestone: {e}")
     
-    def update(self, name: str, update_data: LimestoneUpdate) -> Limestone:
+    def update(self, limestone_id: int, update_data: LimestoneUpdate) -> Limestone:
         """Update an existing limestone material."""
         try:
             with self.db_service.get_session() as session:
-                limestone = session.query(Limestone).filter_by(name=name).first()
+                limestone = session.query(Limestone).filter_by(id=limestone_id).first()
                 
                 if not limestone:
-                    raise NotFoundError(f"Limestone '{name}' not found")
+                    raise NotFoundError(f"Limestone with ID '{limestone_id}' not found")
                 
                 # Update fields
                 update_dict = update_data.model_dump(exclude_unset=True)
@@ -94,13 +94,13 @@ class LimestoneService(BaseService[Limestone, LimestoneCreate, LimestoneUpdate])
                 session.commit()
                 session.refresh(limestone)
                 
-                self.logger.info(f"Updated limestone: {name}")
+                self.logger.info(f"Updated limestone: {limestone.name}")
                 return limestone
                 
         except NotFoundError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to update limestone {name}: {e}")
+            self.logger.error(f"Failed to update limestone {limestone_id}: {e}")
             raise ServiceError(f"Failed to update limestone: {e}")
     
     def delete(self, name: str) -> bool:

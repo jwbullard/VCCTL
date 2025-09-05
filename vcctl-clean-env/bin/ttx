@@ -1,4 +1,4 @@
-#!/Users/jwbullard/Library/CloudStorage/OneDrive-TexasA&MUniversity/Documents/Projects/Modeling/VCCTL-THAMES-SPRING/vcctl-gtk/vcctl-clean-env/bin/python3.11
+#!/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys

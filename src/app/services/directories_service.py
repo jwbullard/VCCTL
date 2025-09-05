@@ -23,7 +23,7 @@ class DirectoriesService:
     def _ensure_base_directories(self) -> None:
         """Ensure all base directories exist."""
         try:
-            directories_config = self.config_manager.get_directories_config()
+            directories_config = self.config_manager.directories
             directories_config.create_directories()
             self.logger.info("Base directories ensured")
         except Exception as e:
@@ -49,7 +49,7 @@ class DirectoriesService:
         # Sanitize operation name for filesystem
         safe_name = self._sanitize_filename(operation_name)
         
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         operation_path = directories_config.operations_path / safe_name
         
         try:
@@ -80,42 +80,42 @@ class DirectoriesService:
     
     def get_materials_dir(self) -> Path:
         """Get the materials directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.materials_path
     
     def get_temp_dir(self) -> Path:
         """Get the temporary directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.temp_path
     
     def get_database_dir(self) -> Path:
         """Get the database directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.database_path
     
     def get_logs_dir(self) -> Path:
         """Get the logs directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.logs_path
     
     def get_bin_dir(self) -> Path:
         """Get the bin directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.bin_path
     
     def get_data_dir(self) -> Path:
         """Get the data directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.data_path
     
     def get_aggregate_dir(self) -> Path:
         """Get the aggregate directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.aggregate_path
     
     def get_particle_shape_set_dir(self) -> Path:
         """Get the particle shape set directory path."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.particle_shape_set_path
     
     def create_temp_file(self, prefix: str = "vcctl_", suffix: str = ".tmp") -> Path:
@@ -186,22 +186,22 @@ class DirectoriesService:
     
     def get_directory_info(self) -> Dict[str, Any]:
         """Get information about all application directories."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.get_directory_info()
     
     def validate_directory_structure(self) -> Dict[str, Any]:
         """Validate the directory structure and permissions."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.validate()
     
     def get_relative_path(self, absolute_path: Path) -> Path:
         """Get a path relative to the application directory."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.get_relative_path(absolute_path)
     
     def resolve_path(self, path_str: str) -> Path:
         """Resolve a path string relative to the application directory."""
-        directories_config = self.config_manager.get_directories_config()
+        directories_config = self.config_manager.directories
         return directories_config.resolve_path(path_str)
     
     def _sanitize_filename(self, filename: str) -> str:
@@ -265,7 +265,7 @@ class DirectoriesService:
             True if path is safe, False otherwise
         """
         if base_path is None:
-            directories_config = self.config_manager.get_directories_config()
+            directories_config = self.config_manager.directories
             base_path = directories_config.app_directory
         
         try:
@@ -290,7 +290,7 @@ class DirectoriesService:
             Dictionary with total, used, and free space in GB
         """
         if path is None:
-            directories_config = self.config_manager.get_directories_config()
+            directories_config = self.config_manager.directories
             path = directories_config.app_directory
         
         try:

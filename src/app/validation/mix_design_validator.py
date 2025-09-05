@@ -55,7 +55,7 @@ class MixDesignValidator:
         MaterialType.CEMENT, 
         MaterialType.FLY_ASH, 
         MaterialType.SLAG, 
-        MaterialType.INERT_FILLER, 
+        MaterialType.FILLER, 
         MaterialType.SILICA_FUME, 
         MaterialType.LIMESTONE
     }

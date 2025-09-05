@@ -39,7 +39,7 @@ class PhaseType(Enum):
     
     # Aggregates and fillers
     AGGREGATE = "AGG"        # Aggregate
-    INERT_FILLER = "INERT"   # Inert filler
+    FILLER = "INERT"   # Filler
     
     # Pores and water
     WATER = "WATER"          # Capillary water
@@ -407,7 +407,7 @@ class MicrostructureService:
             'slag': PhaseType.SLAG,
             'silica_fume': PhaseType.SILICA_FUME,
             'aggregate': PhaseType.AGGREGATE,
-            'inert_filler': PhaseType.INERT_FILLER
+            'filler': PhaseType.FILLER
         }
         return mapping.get(material_type.lower())
     

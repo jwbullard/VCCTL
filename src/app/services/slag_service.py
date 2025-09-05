@@ -86,13 +86,13 @@ class SlagService(BaseService[Slag, SlagCreate, SlagUpdate]):
             self.logger.error(f"Failed to create slag: {e}")
             raise ServiceError(f"Failed to create slag: {e}")
     
-    def update(self, name: str, slag_data: SlagUpdate) -> Slag:
+    def update(self, slag_id: int, slag_data: SlagUpdate) -> Slag:
         """Update an existing slag material."""
         try:
             with self.db_service.get_session() as session:
-                slag = session.query(Slag).filter_by(name=name).first()
+                slag = session.query(Slag).filter_by(id=slag_id).first()
                 if not slag:
-                    raise NotFoundError(f"Slag '{name}' not found")
+                    raise NotFoundError(f"Slag with ID '{slag_id}' not found")
                 
                 # Update fields
                 update_dict = slag_data.dict(exclude_unset=True)
@@ -113,7 +113,7 @@ class SlagService(BaseService[Slag, SlagCreate, SlagUpdate]):
             self.logger.error(f"Database integrity error updating slag: {e}")
             raise ServiceError(f"Slag update failed: invalid data")
         except Exception as e:
-            self.logger.error(f"Failed to update slag {name}: {e}")
+            self.logger.error(f"Failed to update slag {slag_id}: {e}")
             raise ServiceError(f"Failed to update slag: {e}")
     
     def delete(self, name: str) -> bool:

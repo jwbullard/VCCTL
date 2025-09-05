@@ -733,7 +733,7 @@ class MicrostructurePanel(Gtk.Box):
                     8: ("#FFF056", "Hemihydrate"),
                     9: ("#FFFF80", "Anhydrite"),
                     10: ("#28AD4B", "Sfume"),
-                    11: ("#6464FF", "Inert Filler"),
+                    11: ("#6464FF", "Filler"),
                     12: ("#FFA500", "Slag"),
                     13: ("#FFC041", "Fly Ash"),
                     16: ("#1A641A", "Brucite"),

@@ -645,7 +645,7 @@ class MixDesignPanel(Gtk.Box):
             # Set smart defaults based on material type
             default_selected = False
             if materials:
-                if material_type == MaterialType.INERT_FILLER:
+                if material_type == MaterialType.FILLER:
                     # Prefer "quartz" as default for inert fillers
                     for i, material_name in enumerate(materials):
                         if material_name.lower() == "quartz":
@@ -781,7 +781,7 @@ class MixDesignPanel(Gtk.Box):
             MaterialType.SLAG,
             MaterialType.SILICA_FUME,
             MaterialType.LIMESTONE,
-            MaterialType.INERT_FILLER
+            MaterialType.FILLER
         ]
         
         # Get currently used material types from other components
@@ -1308,8 +1308,8 @@ class MixDesignPanel(Gtk.Box):
             self.logger.warning(f"Failed to calculate W/B ratio: {e}")
     
     def _calculate_total_powder_mass(self) -> float:
-        """Calculate total powder mass in kg (cement, fly ash, slag, inert filler)."""
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+        """Calculate total powder mass in kg (cement, fly ash, slag, inert filler, filler)."""
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         total_powder = 0.0
         
         for row in self.component_rows:
@@ -1336,7 +1336,7 @@ class MixDesignPanel(Gtk.Box):
     
     def _calculate_powder_specific_gravity(self) -> float:
         """Calculate mass-weighted average specific gravity of all powder components."""
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         total_weighted_sg = 0.0
         total_powder_mass = 0.0
         
@@ -1996,9 +1996,9 @@ class MixDesignPanel(Gtk.Box):
                 elif material_type == MaterialType.SLAG:
                     from app.models.slag import Slag
                     material = session.query(Slag).filter_by(name=material_name).first()
-                elif material_type == MaterialType.INERT_FILLER:
-                    from app.models.inert_filler import InertFiller
-                    material = session.query(InertFiller).filter_by(name=material_name).first()
+                elif material_type == MaterialType.FILLER:
+                    from app.models.filler import Filler
+                    material = session.query(Filler).filter_by(name=material_name).first()
                 else:
                     return self._generate_default_psd()
                 
@@ -2229,7 +2229,7 @@ class MixDesignPanel(Gtk.Box):
                 # Silica fume has 1 phase: SILICA_FUME(10) - only if non-zero mass fraction
                 if component.mass_fraction > 0.0:
                     num_phases += 1
-            elif component.material_type == MaterialType.INERT_FILLER:
+            elif component.material_type == MaterialType.FILLER:
                 # Inert filler has 1 phase: INERT(11) - only if non-zero mass fraction
                 if component.mass_fraction > 0.0:
                     num_phases += 1
@@ -2248,7 +2248,7 @@ class MixDesignPanel(Gtk.Box):
         """
         try:
             # Get powder components only (no aggregates)
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             
             # Calculate total powder absolute volume (mass/sg)
             total_powder_absolute_volume = 0.0
@@ -2398,7 +2398,7 @@ class MixDesignPanel(Gtk.Box):
         is relative to the total powder (binder solid) volume, NOT total concrete volume.
         """
         try:
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             
             # Calculate total powder absolute volume from UI (paste-only basis)
             total_powder_absolute_volume = 0.0
@@ -2638,7 +2638,7 @@ class MixDesignPanel(Gtk.Box):
         # Add phase data for each component
         # TODO: This section will be completely rewritten to handle cement phases properly
         # For now, keeping simplified structure to implement num_phases fix
-        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+        powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
         
         for component in mix_design.components:
             if component.material_type in powder_types and component.mass_fraction > 0.0:
@@ -2827,7 +2827,7 @@ class MixDesignPanel(Gtk.Box):
             return 12  # SLAG
         elif material_type == MaterialType.SILICA_FUME:
             return 10  # SILICA_FUME
-        elif material_type == MaterialType.INERT_FILLER:
+        elif material_type == MaterialType.FILLER:
             return 11  # INERT
         elif material_type == MaterialType.LIMESTONE:
             return 33  # CaCO3/LIMESTONE
@@ -4462,13 +4462,13 @@ class MixDesignPanel(Gtk.Box):
                     type_model = type_combo.get_model()
                     
                     # Convert stored lowercase material type to UI format
-                    # Database stores: 'cement', 'inert_filler', 'silica_fume'
-                    # UI expects: 'Cement', 'Inert Filler', 'Silica Fume'
+                    # Database stores: 'cement', 'filler', 'silica_fume'
+                    # UI expects: 'Cement', 'Filler', 'Silica Fume'
                     type_conversion = {
                         'cement': 'Cement',
                         'fly_ash': 'Fly Ash', 
                         'slag': 'Slag',
-                        'inert_filler': 'Inert Filler',
+                        'filler': 'Filler',
                         'silica_fume': 'Silica Fume',
                         'limestone': 'Limestone'
                     }
@@ -4522,8 +4522,8 @@ class MixDesignPanel(Gtk.Box):
                                 service = self.service_container.fly_ash_service
                             elif material_type_enum == MaterialType.SLAG:
                                 service = self.service_container.slag_service
-                            elif material_type_enum == MaterialType.INERT_FILLER:
-                                service = self.service_container.inert_filler_service
+                            elif material_type_enum == MaterialType.FILLER:
+                                service = self.service_container.filler_service
                             elif material_type_enum == MaterialType.SILICA_FUME:
                                 service = self.service_container.silica_fume_service
                             elif material_type_enum == MaterialType.LIMESTONE:

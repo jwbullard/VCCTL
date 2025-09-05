@@ -23,13 +23,9 @@ class Aggregate(Base):
     
     __tablename__ = 'aggregate'
     
-    # Override base model id with string primary key
-    id = None
-    
-    # Primary key - display name (unique identifier)
-    display_name = Column(String(64), primary_key=True, nullable=False, unique=True)
-    
-    # Name for internal reference (indexed)
+    # Use integer ID as primary key (inherited from Base)
+    # Display name and name are now regular fields
+    display_name = Column(String(64), nullable=False, unique=True)
     name = Column(String(64), nullable=True, default='')
     
     # Aggregate type (coarse=1, fine=2, etc.)

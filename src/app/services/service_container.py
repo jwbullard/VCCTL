@@ -12,7 +12,8 @@ from app.database.service import DatabaseService, database_service
 from app.services.cement_service import CementService
 from app.services.fly_ash_service import FlyAshService
 from app.services.slag_service import SlagService
-from app.services.inert_filler_service import InertFillerService
+# Removed InertFillerService - replaced with FillerService
+from app.services.filler_service import FillerService
 from app.services.silica_fume_service import SilicaFumeService
 from app.services.limestone_service import LimestoneService
 from app.services.mix_service import MixService
@@ -63,7 +64,8 @@ class ServiceContainer:
         self._cement_service = None
         self._fly_ash_service = None
         self._slag_service = None
-        self._inert_filler_service = None
+        self._filler_service = None
+        self._filler_service = None
         self._silica_fume_service = None
         self._limestone_service = None
         self._mix_service = None
@@ -143,12 +145,20 @@ class ServiceContainer:
         return self._slag_service
     
     @property
-    def inert_filler_service(self) -> InertFillerService:
-        """Get inert filler service instance."""
-        if self._inert_filler_service is None:
-            self._inert_filler_service = InertFillerService(self.db_service)
-            self.logger.debug("Inert filler service created")
-        return self._inert_filler_service
+    def filler_service(self) -> FillerService:
+        """Get filler service instance."""
+        if self._filler_service is None:
+            self._filler_service = FillerService(self.db_service)
+            self.logger.debug("Filler service created")
+        return self._filler_service
+    
+    @property
+    def filler_service(self) -> FillerService:
+        """Get filler service instance."""
+        if self._filler_service is None:
+            self._filler_service = FillerService(self.db_service)
+            self.logger.debug("Filler service created")
+        return self._filler_service
     
     @property
     def silica_fume_service(self) -> SilicaFumeService:
@@ -236,7 +246,8 @@ class ServiceContainer:
             'cement': self.cement_service,
             'fly_ash': self.fly_ash_service,
             'slag': self.slag_service,
-            'inert_filler': self.inert_filler_service,
+            'filler': self.filler_service,
+            'filler': self.filler_service,
             'silica_fume': self.silica_fume_service,
             'limestone': self.limestone_service,
             'mix': self.mix_service,
@@ -337,7 +348,8 @@ class ServiceContainer:
         self._cement_service = None
         self._fly_ash_service = None
         self._slag_service = None
-        self._inert_filler_service = None
+        self._filler_service = None
+        self._filler_service = None
         self._mix_service = None
         self._aggregate_service = None
         self._microstructure_service = None

@@ -23,7 +23,7 @@ from ..models.cement import Cement
 from ..models.fly_ash import FlyAsh
 from ..models.slag import Slag
 from ..models.aggregate import Aggregate
-from ..models.inert_filler import InertFiller
+from ..models.filler import Filler
 
 
 class FileOperationsService:

@@ -189,7 +189,7 @@ class MaterialsPanel(Gtk.Box):
         self.type_combo.append("aggregate", "Aggregate")
         self.type_combo.append("fly_ash", "Fly Ash")
         self.type_combo.append("slag", "Slag")
-        self.type_combo.append("inert_filler", "Inert Filler")
+        self.type_combo.append("filler", "Filler")
         self.type_combo.append("silica_fume", "Silica Fume")
         self.type_combo.append("limestone", "Limestone")
         self.type_combo.set_active(0)
@@ -441,7 +441,7 @@ class MaterialsPanel(Gtk.Box):
         type_combo.append("aggregate", "Aggregate")
         type_combo.append("fly_ash", "Fly Ash")
         type_combo.append("slag", "Slag")
-        type_combo.append("inert_filler", "Inert Filler")
+        type_combo.append("filler", "Filler")
         type_combo.append("silica_fume", "Silica Fume")
         type_combo.append("limestone", "Limestone")
         type_combo.set_active(0)
@@ -1080,8 +1080,8 @@ class MaterialsPanel(Gtk.Box):
                 return 'fly_ash'
             elif tablename == 'slag':
                 return 'slag'
-            elif tablename == 'inert_filler':
-                return 'inert_filler'
+            elif tablename == 'filler':
+                return 'filler'
             elif tablename == 'silica_fume':
                 return 'silica_fume'
             elif tablename == 'limestone':
@@ -1098,7 +1098,7 @@ class MaterialsPanel(Gtk.Box):
         elif 'slag' in class_name:
             return 'slag'
         elif 'filler' in class_name:
-            return 'inert_filler'
+            return 'filler'
         elif 'silica_fume' in class_name or 'silicafume' in class_name:
             return 'silica_fume'
         elif 'limestone' in class_name:
@@ -1293,6 +1293,18 @@ class MaterialsPanel(Gtk.Box):
                 service = service_container.cement_service
             elif material_type == 'aggregate':
                 service = service_container.aggregate_service
+            elif material_type == 'filler':
+                service = service_container.filler_service
+            elif material_type == 'fly_ash':
+                service = service_container.fly_ash_service
+            elif material_type == 'slag':
+                service = service_container.slag_service
+            elif material_type == 'silica_fume':
+                service = service_container.silica_fume_service
+            elif material_type == 'limestone':
+                service = service_container.limestone_service
+            elif material_type == 'filler':
+                service = service_container.filler_service
             else:
                 raise ValueError(f"Unsupported material type for duplication: {material_type}")
             
@@ -1308,6 +1320,30 @@ class MaterialsPanel(Gtk.Box):
                 from app.models.aggregate import AggregateCreate
                 aggregate_create = AggregateCreate(**duplicate_data)
                 service.create(aggregate_create)
+            elif material_type == 'filler':
+                from app.models.filler import FillerCreate
+                filler_create = FillerCreate(**duplicate_data)
+                service.create(filler_create)
+            elif material_type == 'fly_ash':
+                from app.models.fly_ash import FlyAshCreate
+                fly_ash_create = FlyAshCreate(**duplicate_data)
+                service.create(fly_ash_create)
+            elif material_type == 'slag':
+                from app.models.slag import SlagCreate
+                slag_create = SlagCreate(**duplicate_data)
+                service.create(slag_create)
+            elif material_type == 'silica_fume':
+                from app.models.silica_fume import SilicaFumeCreate
+                silica_fume_create = SilicaFumeCreate(**duplicate_data)
+                service.create(silica_fume_create)
+            elif material_type == 'limestone':
+                from app.models.limestone import LimestoneCreate
+                limestone_create = LimestoneCreate(**duplicate_data)
+                service.create(limestone_create)
+            elif material_type == 'filler':
+                from app.models.filler import FillerCreate
+                filler_create = FillerCreate(**duplicate_data)
+                service.create(filler_create)
             
             # Refresh the table to show the new material
             self.material_table.refresh_data()
@@ -1328,6 +1364,18 @@ class MaterialsPanel(Gtk.Box):
             service = service_container.cement_service
         elif material_type == 'aggregate':
             service = service_container.aggregate_service
+        elif material_type == 'filler':
+            service = service_container.filler_service
+        elif material_type == 'fly_ash':
+            service = service_container.fly_ash_service
+        elif material_type == 'slag':
+            service = service_container.slag_service
+        elif material_type == 'silica_fume':
+            service = service_container.silica_fume_service
+        elif material_type == 'limestone':
+            service = service_container.limestone_service
+        elif material_type == 'filler':
+            service = service_container.filler_service
         else:
             raise ValueError(f"Unsupported material type: {material_type}")
         
@@ -1366,6 +1414,18 @@ class MaterialsPanel(Gtk.Box):
                 return self._copy_cement_data(original_material, new_name)
             elif material_type == 'aggregate':
                 return self._copy_aggregate_data(original_material, new_name)
+            elif material_type == 'filler':
+                return self._copy_filler_data(original_material, new_name)
+            elif material_type == 'fly_ash':
+                return self._copy_fly_ash_data(original_material, new_name)
+            elif material_type == 'slag':
+                return self._copy_slag_data(original_material, new_name)
+            elif material_type == 'silica_fume':
+                return self._copy_silica_fume_data(original_material, new_name)
+            elif material_type == 'limestone':
+                return self._copy_limestone_data(original_material, new_name)
+            elif material_type == 'filler':
+                return self._copy_filler_data(original_material, new_name)
             else:
                 raise ValueError(f"Unsupported material type: {material_type}")
         except Exception as e:
@@ -1481,6 +1541,181 @@ class MaterialsPanel(Gtk.Box):
         
         return copy_data
 
+    def _copy_filler_data(self, original_filler, new_name: str) -> dict:
+        """Create a copy of filler data."""
+        copy_data = {
+            'name': new_name,
+            'specific_gravity': getattr(original_filler, 'specific_gravity', None),
+            'description': getattr(original_filler, 'description', None),
+            'source': getattr(original_filler, 'source', None),
+            'blaine_fineness': getattr(original_filler, 'blaine_fineness', None),
+            'water_absorption': getattr(original_filler, 'water_absorption', None),
+            'filler_type': getattr(original_filler, 'filler_type', None),
+            'color': getattr(original_filler, 'color', None),
+            'notes': getattr(original_filler, 'notes', None),
+        }
+        
+        # Copy PSD data if available
+        psd_fields = [
+            'diameter_percentile_10', 'diameter_percentile_50', 'diameter_percentile_90'
+        ]
+        for field in psd_fields:
+            if hasattr(original_filler, field):
+                copy_data[field] = getattr(original_filler, field)
+        
+        return copy_data
+
+    def _copy_fly_ash_data(self, original_fly_ash, new_name: str) -> dict:
+        """Create a copy of fly ash data."""
+        copy_data = {
+            'name': new_name,
+            'specific_gravity': getattr(original_fly_ash, 'specific_gravity', None),
+            'description': getattr(original_fly_ash, 'description', None),
+            'source': getattr(original_fly_ash, 'source', None),
+            'notes': getattr(original_fly_ash, 'notes', None),
+        }
+        
+        # Copy all PSD fields
+        psd_fields = [
+            'psd', 'psd_custom_points', 'psd_mode', 'psd_d50', 'psd_n', 'psd_dmax',
+            'psd_median', 'psd_spread', 'psd_exponent'
+        ]
+        for field in psd_fields:
+            if hasattr(original_fly_ash, field):
+                copy_data[field] = getattr(original_fly_ash, field)
+        
+        # Copy phase distribution and fractions
+        phase_fields = [
+            'distribute_phases_by', 'aluminosilicate_glass_fraction',
+            'calcium_aluminum_disilicate_fraction', 'tricalcium_aluminate_fraction',
+            'calcium_chloride_fraction', 'silica_fraction', 'anhydrate_fraction'
+        ]
+        for field in phase_fields:
+            if hasattr(original_fly_ash, field):
+                copy_data[field] = getattr(original_fly_ash, field)
+        
+        # Copy chemical composition
+        chemical_fields = [
+            'sio2_content', 'al2o3_content', 'fe2o3_content', 'cao_content',
+            'mgo_content', 'so3_content', 'na2o', 'k2o', 'na2o_equivalent',
+            'loi', 'fineness_45um'
+        ]
+        for field in chemical_fields:
+            if hasattr(original_fly_ash, field):
+                copy_data[field] = getattr(original_fly_ash, field)
+        
+        # Copy activity and classification fields
+        activity_fields = [
+            'astm_class', 'activity_index', 'pozzolanic_activity', 'activation_energy'
+        ]
+        for field in activity_fields:
+            if hasattr(original_fly_ash, field):
+                copy_data[field] = getattr(original_fly_ash, field)
+        
+        return copy_data
+
+    def _copy_slag_data(self, original_slag, new_name: str) -> dict:
+        """Create a copy of slag data."""
+        copy_data = {
+            'name': new_name,
+            'specific_gravity': getattr(original_slag, 'specific_gravity', None),
+            'description': getattr(original_slag, 'description', None),
+            'source': getattr(original_slag, 'source', None),
+            'notes': getattr(original_slag, 'notes', None),
+        }
+        
+        # Copy all PSD fields
+        psd_fields = [
+            'psd', 'psd_custom_points', 'psd_mode', 'psd_d50', 'psd_n', 'psd_dmax',
+            'psd_median', 'psd_spread', 'psd_exponent'
+        ]
+        for field in psd_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        # Copy basic slag properties
+        basic_fields = [
+            'glass_content', 'activity_index'
+        ]
+        for field in basic_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        # Copy chemical composition (oxide content)
+        chemical_fields = [
+            'sio2_content', 'cao_content', 'al2o3_content', 'mgo_content',
+            'fe2o3_content', 'so3_content'
+        ]
+        for field in chemical_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        # Copy reaction parameters
+        reaction_fields = [
+            'activation_energy', 'reactivity_factor', 'rate_constant'
+        ]
+        for field in reaction_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        # Copy molecular and chemical properties
+        molecular_fields = [
+            'molecular_mass', 'casi_mol_ratio', 'si_per_mole',
+            'base_slag_reactivity', 'c3a_per_mole'
+        ]
+        for field in molecular_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        # Copy hydration product (HP) properties
+        hp_fields = [
+            'hp_molecular_mass', 'hp_density', 'hp_casi_mol_ratio', 'hp_h2o_sio2_mol_ratio'
+        ]
+        for field in hp_fields:
+            if hasattr(original_slag, field):
+                copy_data[field] = getattr(original_slag, field)
+        
+        return copy_data
+
+    def _copy_silica_fume_data(self, original_silica_fume, new_name: str) -> dict:
+        """Create a copy of silica fume data."""
+        copy_data = {
+            'name': new_name,
+            'specific_gravity': getattr(original_silica_fume, 'specific_gravity', 2.22),
+            'description': getattr(original_silica_fume, 'description', None),
+            'source': getattr(original_silica_fume, 'source', None),
+            'notes': getattr(original_silica_fume, 'notes', None),
+            'psd': getattr(original_silica_fume, 'psd', 'cement141'),
+            'psd_custom_points': getattr(original_silica_fume, 'psd_custom_points', None),
+            'distribute_phases_by': getattr(original_silica_fume, 'distribute_phases_by', None),
+            'silica_fume_fraction': getattr(original_silica_fume, 'silica_fume_fraction', 1.0),
+            'activation_energy': getattr(original_silica_fume, 'activation_energy', 54000.0),
+        }
+        
+        return copy_data
+
+    def _copy_limestone_data(self, original_limestone, new_name: str) -> dict:
+        """Create a copy of limestone data."""
+        copy_data = {
+            'name': new_name,
+            'specific_gravity': getattr(original_limestone, 'specific_gravity', 2.71),
+            'description': getattr(original_limestone, 'description', None),
+            'source': getattr(original_limestone, 'source', None),
+            'notes': getattr(original_limestone, 'notes', None),
+            'psd': getattr(original_limestone, 'psd', 'cement141'),
+            'psd_custom_points': getattr(original_limestone, 'psd_custom_points', None),
+            'distribute_phases_by': getattr(original_limestone, 'distribute_phases_by', None),
+            'limestone_fraction': getattr(original_limestone, 'limestone_fraction', 1.0),
+            'caco3_content': getattr(original_limestone, 'caco3_content', 97.0),
+            'hardness': getattr(original_limestone, 'hardness', 3.0),
+            'psd_median': getattr(original_limestone, 'psd_median', 5.0),
+            'psd_spread': getattr(original_limestone, 'psd_spread', 2.0),
+            'activation_energy': getattr(original_limestone, 'activation_energy', 54000.0),
+        }
+        
+        return copy_data
+
+
     def _show_material_dialog(self, material_type: str, material_data=None) -> None:
         """Show the material dialog for adding or editing."""
         try:
@@ -1537,8 +1772,8 @@ class MaterialsPanel(Gtk.Box):
                 service = service_container.fly_ash_service
             elif material_type == 'slag':
                 service = service_container.slag_service
-            elif material_type == 'inert_filler':
-                service = service_container.inert_filler_service
+            elif material_type == 'filler':
+                service = service_container.filler_service
             elif material_type == 'silica_fume':
                 service = service_container.silica_fume_service
             elif material_type == 'limestone':
@@ -1551,7 +1786,7 @@ class MaterialsPanel(Gtk.Box):
                 service.delete(material_data.name)
             elif material_type == 'aggregate':
                 service.delete(material_data.display_name)
-            elif material_type in ['limestone', 'silica_fume', 'inert_filler', 'fly_ash', 'slag']:
+            elif material_type in ['limestone', 'silica_fume', 'filler', 'fly_ash', 'slag']:
                 # These services use name-based delete
                 service.delete(material_data.name)
             else:

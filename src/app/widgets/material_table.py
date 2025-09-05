@@ -457,23 +457,23 @@ class MaterialTable(Gtk.Box):
             except Exception as e:
                 self.logger.warning(f"Error loading slag materials: {e}")
             
-            # Load inert filler materials
+            # Load filler materials
             try:
-                inert_filler_service = self.service_container.inert_filler_service
-                inert_fillers = inert_filler_service.get_all()
-                for inert_filler in inert_fillers:
+                filler_service = self.service_container.filler_service
+                fillers = filler_service.get_all()
+                for filler in fillers:
                     materials.append({
-                        'id': inert_filler.name,
-                        'name': inert_filler.name,
-                        'type': 'inert_filler',
-                        'specific_gravity': inert_filler.specific_gravity,
-                        'created_date': inert_filler.created_at.strftime('%Y-%m-%d') if inert_filler.created_at else '',
-                        'modified_date': inert_filler.updated_at.strftime('%Y-%m-%d') if inert_filler.updated_at else '',
-                        'description': inert_filler.description or '',
-                        'data': inert_filler
+                        'id': filler.name,
+                        'name': filler.name,
+                        'type': 'filler',
+                        'specific_gravity': filler.specific_gravity,
+                        'created_date': filler.created_at.strftime('%Y-%m-%d') if filler.created_at else '',
+                        'modified_date': filler.updated_at.strftime('%Y-%m-%d') if filler.updated_at else '',
+                        'description': filler.description or '',
+                        'data': filler
                     })
             except Exception as e:
-                self.logger.warning(f"Error loading inert filler materials: {e}")
+                self.logger.warning(f"Error loading filler materials: {e}")
             
             # Load silica fume materials
             try:
@@ -532,19 +532,8 @@ class MaterialTable(Gtk.Box):
             # Store materials data
             self.materials_data = materials
             
-            # Populate list store
-            for material in materials:
-                self.list_store.append([
-                    material['name'],
-                    material['type'],
-                    material['specific_gravity'],
-                    material['created_date'],
-                    material['modified_date'],
-                    material['description'],
-                    material['data']
-                ])
-            
-            # Update display
+            # Update display with pagination
+            self._populate_current_page()
             self._update_pagination()
             self._update_status()
             
@@ -553,10 +542,77 @@ class MaterialTable(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error loading materials: {e}")
     
+    def _populate_current_page(self) -> None:
+        """Populate the list store with items for the current page only."""
+        # Clear existing items
+        self.list_store.clear()
+        
+        # Calculate which materials to show for current page
+        # First apply any active filters
+        filtered_materials = []
+        for material in self.materials_data:
+            if self._material_passes_filter(material):  # Check if material passes filter
+                filtered_materials.append(material)
+        
+        materials_to_paginate = filtered_materials
+        
+        # Calculate pagination bounds
+        start_index = self.current_page * self.items_per_page
+        end_index = start_index + self.items_per_page
+        
+        # Get materials for current page
+        current_page_materials = materials_to_paginate[start_index:end_index]
+        
+        # Add materials to list store
+        for material in current_page_materials:
+            self.list_store.append([
+                material['name'],
+                material['type'],
+                material['specific_gravity'],
+                material['created_date'],
+                material['modified_date'],
+                material['description'],
+                material['data']
+            ])
+    
+    def _material_passes_filter(self, material: dict) -> bool:
+        """Check if a material passes the current filters."""
+        try:
+            # Text filter (search in name and description)
+            text_filter = self.current_filters.get('text', '').lower()
+            if text_filter:
+                name = material.get('name', '').lower()
+                description = material.get('description', '').lower()
+                if text_filter not in name and text_filter not in description:
+                    return False
+            
+            # Type filter
+            type_filter = self.current_filters.get('type', 'all')
+            if type_filter != 'all':
+                if material.get('type', '') != type_filter:
+                    return False
+            
+            # Specific gravity filter
+            sg = material.get('specific_gravity', 0.0) or 0.0
+            sg_min = self.current_filters.get('sg_min', 1.0)
+            sg_max = self.current_filters.get('sg_max', 5.0)
+            if sg < sg_min or sg > sg_max:
+                return False
+            
+            return True
+            
+        except Exception as e:
+            self.logger.warning(f"Error in material filter: {e}")
+            return True
+    
     def _update_pagination(self) -> None:
         """Update pagination controls."""
-        # Calculate pagination info - count visible rows in filter model
-        self.total_items = len(self.filter_model) if self.filter_model else len(self.materials_data)
+        # Calculate pagination info - count filtered materials
+        filtered_count = 0
+        for material in self.materials_data:
+            if self._material_passes_filter(material):
+                filtered_count += 1
+        self.total_items = filtered_count
         total_pages = max(1, (self.total_items + self.items_per_page - 1) // self.items_per_page)
         
         # Update page spinner
@@ -675,6 +731,7 @@ class MaterialTable(Gtk.Box):
         """Handle items per page combo change."""
         self.items_per_page = int(combo.get_active_id())
         self.current_page = 0
+        self._populate_current_page()
         self._update_pagination()
     
     def _on_refresh_clicked(self, button) -> None:
@@ -684,12 +741,14 @@ class MaterialTable(Gtk.Box):
     def _on_first_page_clicked(self, button) -> None:
         """Handle first page button click."""
         self.current_page = 0
+        self._populate_current_page()
         self._update_pagination()
     
     def _on_prev_page_clicked(self, button) -> None:
         """Handle previous page button click."""
         if self.current_page > 0:
             self.current_page -= 1
+            self._populate_current_page()
             self._update_pagination()
     
     def _on_next_page_clicked(self, button) -> None:
@@ -697,17 +756,20 @@ class MaterialTable(Gtk.Box):
         total_pages = max(1, (self.total_items + self.items_per_page - 1) // self.items_per_page)
         if self.current_page < total_pages - 1:
             self.current_page += 1
+            self._populate_current_page()
             self._update_pagination()
     
     def _on_last_page_clicked(self, button) -> None:
         """Handle last page button click."""
         total_pages = max(1, (self.total_items + self.items_per_page - 1) // self.items_per_page)
         self.current_page = total_pages - 1
+        self._populate_current_page()
         self._update_pagination()
     
     def _on_page_spin_changed(self, spin) -> None:
         """Handle page spinner change."""
         self.current_page = int(spin.get_value()) - 1
+        self._populate_current_page()
         self._update_pagination()
     
     def _on_selection_changed(self, selection) -> None:
@@ -725,7 +787,7 @@ class MaterialTable(Gtk.Box):
                         material_id = material_data.name
                     elif material_data.__tablename__ == 'aggregate':
                         material_id = material_data.display_name
-                    elif material_data.__tablename__ in ['limestone', 'silica_fume', 'inert_filler']:
+                    elif material_data.__tablename__ in ['limestone', 'silica_fume', 'filler']:
                         # These materials have id=None, so use name
                         material_id = material_data.name
                     else:
@@ -909,7 +971,7 @@ class MaterialTable(Gtk.Box):
                     elif material['type'] == 'aggregate' and display_name_attr == material_id:
                         material_data = material
                         break
-                    elif material['type'] in ['limestone', 'silica_fume', 'inert_filler'] and name_attr == material_id:
+                    elif material['type'] in ['limestone', 'silica_fume', 'filler'] and name_attr == material_id:
                         material_data = material
                         break
                     elif material['type'] in ['slag', 'fly_ash'] and name_attr == material_id:
@@ -931,8 +993,8 @@ class MaterialTable(Gtk.Box):
                         service = self.service_container.fly_ash_service
                     elif material_type == 'slag':
                         service = self.service_container.slag_service
-                    elif material_type == 'inert_filler':
-                        service = self.service_container.inert_filler_service
+                    elif material_type == 'filler':
+                        service = self.service_container.filler_service
                     elif material_type == 'silica_fume':
                         service = self.service_container.silica_fume_service
                     elif material_type == 'limestone':
@@ -946,7 +1008,7 @@ class MaterialTable(Gtk.Box):
                         delete_param = data_obj.name
                     elif material_type == 'aggregate':
                         delete_param = data_obj.display_name
-                    elif material_type in ['limestone', 'silica_fume', 'inert_filler', 'fly_ash', 'slag']:
+                    elif material_type in ['limestone', 'silica_fume', 'filler', 'fly_ash', 'slag']:
                         delete_param = data_obj.name
                     else:
                         delete_param = data_obj.id
@@ -1033,8 +1095,8 @@ class MaterialTable(Gtk.Box):
     def apply_filters(self, filters: Dict[str, Any]) -> None:
         """Apply filters to the table."""
         self.current_filters.update(filters)
-        self.filter_model.refilter()
         self.current_page = 0
+        self._populate_current_page()
         self._update_pagination()
         self._update_status()
     
@@ -1046,8 +1108,8 @@ class MaterialTable(Gtk.Box):
             'sg_min': 1.0,
             'sg_max': 5.0
         }
-        self.filter_model.refilter()
         self.current_page = 0
+        self._populate_current_page()
         self._update_pagination()
         self._update_status()
     

@@ -63,7 +63,7 @@ materials:
   ettringite_specific_gravity: 1.78
   fine_aggregate_default_specific_gravity: 2.65
   fly_ash_default_specific_gravity: 2.77
-  inert_filler_default_specific_gravity: 3.0
+  filler_default_specific_gravity: 3.0
   limestone_specific_gravity: 2.71
   monosulfate_specific_gravity: 2.02
   psd_limits:

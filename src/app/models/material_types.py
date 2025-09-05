@@ -14,7 +14,7 @@ class MaterialType(Enum):
     CEMENT = "cement"
     FLY_ASH = "fly_ash"
     SLAG = "slag"
-    INERT_FILLER = "inert_filler"
+    FILLER = "filler"
     SILICA_FUME = "silica_fume"
     LIMESTONE = "limestone"
     AGGREGATE = "aggregate"

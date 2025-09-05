@@ -16,7 +16,7 @@ from app.database.service import DatabaseService
 from app.models.cement import Cement
 from app.models.fly_ash import FlyAsh
 from app.models.slag import Slag
-from app.models.inert_filler import InertFiller
+from app.models.filler import Filler
 from app.models.silica_fume import SilicaFume
 from app.models.limestone import Limestone
 from app.models.aggregate import Aggregate
@@ -82,7 +82,7 @@ class MixService:
             MaterialType.CEMENT: 3.15,
             MaterialType.FLY_ASH: 2.77,
             MaterialType.SLAG: 2.87,
-            MaterialType.INERT_FILLER: 3.0,
+            MaterialType.FILLER: 3.0,
             MaterialType.SILICA_FUME: 2.22,
             MaterialType.LIMESTONE: 2.71,
             MaterialType.AGGREGATE: 2.65
@@ -165,8 +165,8 @@ class MixService:
                     material = session.query(FlyAsh).filter_by(name=material_name).first()
                 elif material_type == MaterialType.SLAG:
                     material = session.query(Slag).filter_by(name=material_name).first()
-                elif material_type == MaterialType.INERT_FILLER:
-                    material = session.query(InertFiller).filter_by(name=material_name).first()
+                elif material_type == MaterialType.FILLER:
+                    material = session.query(Filler).filter_by(name=material_name).first()
                 elif material_type == MaterialType.SILICA_FUME:
                     material = session.query(SilicaFume).filter_by(name=material_name).first()
                 elif material_type == MaterialType.LIMESTONE:
@@ -245,7 +245,7 @@ class MixService:
         """Calculate water-binder ratio for a mix design (water mass / powder mass)."""
         try:
             # Calculate total powder mass fraction (cement, fly ash, slag, inert filler)
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in powder_types
@@ -318,7 +318,7 @@ class MixService:
             properties['weighted_average_specific_gravity'] = total_weighted_sg
             
             # Calculate powder-specific properties
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             powder_components = [comp for comp in mix_design.components if comp.material_type in powder_types]
             
             # Calculate mass-weighted average specific gravity of powder components
@@ -417,7 +417,7 @@ class MixService:
         """Optimize water content to achieve target water-binder ratio (water mass / powder mass)."""
         try:
             # Calculate total powder mass fraction
-            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.INERT_FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
+            powder_types = {MaterialType.CEMENT, MaterialType.FLY_ASH, MaterialType.SLAG, MaterialType.FILLER, MaterialType.SILICA_FUME, MaterialType.LIMESTONE}
             total_powder_fraction = sum(
                 comp.mass_fraction for comp in mix_design.components 
                 if comp.material_type in powder_types
@@ -450,8 +450,8 @@ class MixService:
                     materials = session.query(FlyAsh.name).all()
                 elif material_type == MaterialType.SLAG:
                     materials = session.query(Slag.name).all()
-                elif material_type == MaterialType.INERT_FILLER:
-                    materials = session.query(InertFiller.name).all()
+                elif material_type == MaterialType.FILLER:
+                    materials = session.query(Filler.name).all()
                 elif material_type == MaterialType.SILICA_FUME:
                     materials = session.query(SilicaFume.name).all()
                 elif material_type == MaterialType.LIMESTONE:
@@ -463,9 +463,9 @@ class MixService:
                 
                 # For aggregates, return display_name; for others, return name
                 if material_type == MaterialType.AGGREGATE:
-                    return [material.display_name for material in materials]
+                    return [material[0] for material in materials]  # materials are tuples from query
                 else:
-                    return [material.name for material in materials]
+                    return [material[0] for material in materials]  # materials are tuples from query
                 
         except Exception as e:
             self.logger.error(f"Failed to get compatible materials for {material_type}: {e}")

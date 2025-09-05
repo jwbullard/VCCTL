@@ -350,7 +350,7 @@ class FileOperationDialog(Gtk.Dialog):
         self.material_type_combo.append("flyash", "Fly Ash")
         self.material_type_combo.append("slag", "Slag")
         self.material_type_combo.append("aggregate", "Aggregate")
-        self.material_type_combo.append("inert_filler", "Inert Filler")
+        self.material_type_combo.append("filler", "Filler")
         self.material_type_combo.set_active(0)
         type_box.pack_start(self.material_type_combo, True, True, 0)
         

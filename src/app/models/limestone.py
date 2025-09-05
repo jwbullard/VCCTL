@@ -22,11 +22,9 @@ class Limestone(Base):
     
     __tablename__ = 'limestone'
     
-    # Override base model id with string primary key
-    id = None
-    
-    # Primary key - limestone name (unique identifier)
-    name = Column(String(64), primary_key=True, nullable=False, unique=True)
+    # Use integer ID as primary key (inherited from Base)
+    # Name is now just a regular field that can be updated
+    name = Column(String(64), nullable=False, unique=True)
     
     # Physical properties
     specific_gravity = Column(Float, nullable=True, default=2.71, 
@@ -171,6 +169,7 @@ class LimestoneCreate(BaseModel):
 class LimestoneUpdate(BaseModel):
     """Pydantic model for updating limestone instances."""
     
+    name: Optional[str] = Field(None, max_length=64, description="Limestone name (unique identifier)")
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
     psd: Optional[str] = Field(None, max_length=64, 
                               description="Particle size distribution reference")

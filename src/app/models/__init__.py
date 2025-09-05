@@ -11,7 +11,8 @@ from app.models.cement import Cement, CementCreate, CementUpdate, CementResponse
 from app.models.fly_ash import FlyAsh, FlyAshCreate, FlyAshUpdate, FlyAshResponse
 from app.models.slag import Slag, SlagCreate, SlagUpdate, SlagResponse
 from app.models.aggregate import Aggregate, AggregateCreate, AggregateUpdate, AggregateResponse
-from app.models.inert_filler import InertFiller, InertFillerCreate, InertFillerUpdate, InertFillerResponse
+# Removed InertFiller - replaced with Filler
+from app.models.filler import Filler, FillerCreate, FillerUpdate, FillerResponse
 from app.models.silica_fume import SilicaFume, SilicaFumeCreate, SilicaFumeUpdate, SilicaFumeResponse
 from app.models.limestone import Limestone, LimestoneCreate, LimestoneUpdate, LimestoneResponse
 from app.models.particle_shape_set import ParticleShapeSet, ParticleShapeSetCreate, ParticleShapeSetUpdate, ParticleShapeSetResponse
@@ -35,6 +36,7 @@ __all__ = [
     'Slag',
     'Aggregate', 
     'InertFiller',
+    'Filler',
     'SilicaFume',
     'Limestone',
     'ParticleShapeSet',
@@ -57,6 +59,7 @@ __all__ = [
     'SlagCreate',
     'AggregateCreate',
     'InertFillerCreate',
+    'FillerCreate',
     'SilicaFumeCreate',
     'LimestoneCreate',
     'ParticleShapeSetCreate',
@@ -72,6 +75,7 @@ __all__ = [
     'SlagUpdate',
     'AggregateUpdate',
     'InertFillerUpdate',
+    'FillerUpdate',
     'SilicaFumeUpdate',
     'LimestoneUpdate',
     'ParticleShapeSetUpdate',
@@ -87,6 +91,7 @@ __all__ = [
     'SlagResponse',
     'AggregateResponse',
     'InertFillerResponse',
+    'FillerResponse',
     'SilicaFumeResponse',
     'LimestoneResponse',
     'ParticleShapeSetResponse',
@@ -113,6 +118,7 @@ def get_all_models():
         Slag,
         Aggregate,
         InertFiller,
+        Filler,
         SilicaFume,
         Limestone,
         ParticleShapeSet,
@@ -138,7 +144,7 @@ def get_model_by_name(model_name: str):
         'fly_ash': FlyAsh,
         'slag': Slag,
         'aggregate': Aggregate,
-        'inert_filler': InertFiller,
+        'filler': Filler,
         'silica_fume': SilicaFume,
         'limestone': Limestone,
         'particle_shape_set': ParticleShapeSet,
@@ -161,7 +167,7 @@ def get_create_model_by_name(model_name: str):
         'fly_ash': FlyAshCreate,
         'slag': SlagCreate,
         'aggregate': AggregateCreate,
-        'inert_filler': InertFillerCreate,
+        'filler': FillerCreate,
         'silica_fume': SilicaFumeCreate,
         'limestone': LimestoneCreate,
         'particle_shape_set': ParticleShapeSetCreate,
@@ -179,7 +185,7 @@ def get_update_model_by_name(model_name: str):
         'fly_ash': FlyAshUpdate,
         'slag': SlagUpdate,
         'aggregate': AggregateUpdate,
-        'inert_filler': InertFillerUpdate,
+        'filler': FillerUpdate,
         'silica_fume': SilicaFumeUpdate,
         'limestone': LimestoneUpdate,
         'particle_shape_set': ParticleShapeSetUpdate,
@@ -197,7 +203,7 @@ def get_response_model_by_name(model_name: str):
         'fly_ash': FlyAshResponse,
         'slag': SlagResponse,
         'aggregate': AggregateResponse,
-        'inert_filler': InertFillerResponse,
+        'filler': FillerResponse,
         'silica_fume': SilicaFumeResponse,
         'limestone': LimestoneResponse,
         'particle_shape_set': ParticleShapeSetResponse,

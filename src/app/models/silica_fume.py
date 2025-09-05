@@ -22,15 +22,21 @@ class SilicaFume(Base):
     
     __tablename__ = 'silica_fume'
     
-    # Override base model id with string primary key
-    id = None
-    
-    # Primary key - silica fume name (unique identifier)
-    name = Column(String(64), primary_key=True, nullable=False, unique=True)
+    # Use integer ID as primary key (inherited from Base)
+    # Name is now just a regular field that can be updated
+    name = Column(String(64), nullable=False, unique=True)
     
     # Physical properties
     specific_gravity = Column(Float, nullable=True, default=2.22, 
                             doc="Specific gravity of silica fume material")
+    
+    # Chemical composition
+    silica_content = Column(Float, nullable=True, default=92.0,
+                           doc="Silicon dioxide content percentage (typically 85-98%)")
+    
+    # Physical properties
+    surface_area = Column(Float, nullable=True, default=20000.0,
+                         doc="Specific surface area in m²/kg (typically 15,000-40,000)")
     
     # Particle size distribution reference
     psd = Column(String(64), nullable=True, default='cement141',
@@ -108,6 +114,8 @@ class SilicaFumeCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Silica fume name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.22, ge=0.0, description="Specific gravity")
+    silica_content: Optional[float] = Field(92.0, ge=80.0, le=100.0, description="SiO2 content percentage")
+    surface_area: Optional[float] = Field(20000.0, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
     psd: Optional[str] = Field('cement141', max_length=64, 
                               description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, 
@@ -146,6 +154,8 @@ class SilicaFumeUpdate(BaseModel):
     """Pydantic model for updating silica fume instances."""
     
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
+    silica_content: Optional[float] = Field(None, ge=80.0, le=100.0, description="SiO2 content percentage")
+    surface_area: Optional[float] = Field(None, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
     psd: Optional[str] = Field(None, max_length=64, 
                               description="Particle size distribution reference")
     psd_custom_points: Optional[str] = Field(None, 

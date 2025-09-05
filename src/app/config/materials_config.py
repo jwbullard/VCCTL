@@ -28,7 +28,7 @@ class MaterialsConfig:
     silica_fume_default_specific_gravity: float = 2.2
     
     # Inert fillers
-    inert_filler_default_specific_gravity: float = 3.0
+    filler_default_specific_gravity: float = 3.0
     limestone_specific_gravity: float = 2.71
     quartz_specific_gravity: float = 2.65
     
@@ -83,7 +83,7 @@ class MaterialsConfig:
             fly_ash_default_specific_gravity=data.get('fly_ash_default_specific_gravity', 2.77),
             slag_default_specific_gravity=data.get('slag_default_specific_gravity', 2.87),
             silica_fume_default_specific_gravity=data.get('silica_fume_default_specific_gravity', 2.2),
-            inert_filler_default_specific_gravity=data.get('inert_filler_default_specific_gravity', 3.0),
+            filler_default_specific_gravity=data.get('filler_default_specific_gravity', 3.0),
             limestone_specific_gravity=data.get('limestone_specific_gravity', 2.71),
             quartz_specific_gravity=data.get('quartz_specific_gravity', 2.65),
             fine_aggregate_default_specific_gravity=data.get('fine_aggregate_default_specific_gravity', 2.65),
@@ -115,7 +115,7 @@ class MaterialsConfig:
             'fly_ash': self.fly_ash_default_specific_gravity,
             'slag': self.slag_default_specific_gravity,
             'silica_fume': self.silica_fume_default_specific_gravity,
-            'inert_filler': self.inert_filler_default_specific_gravity,
+            'filler': self.filler_default_specific_gravity,
             'limestone': self.limestone_specific_gravity,
             'quartz': self.quartz_specific_gravity,
             'fine_aggregate': self.fine_aggregate_default_specific_gravity,
@@ -158,8 +158,8 @@ class MaterialsConfig:
             'silica_fume': {
                 'specific_gravity': self.silica_fume_default_specific_gravity
             },
-            'inert_filler': {
-                'specific_gravity': self.inert_filler_default_specific_gravity
+            'filler': {
+                'specific_gravity': self.filler_default_specific_gravity
             },
             'limestone': {
                 'specific_gravity': self.limestone_specific_gravity

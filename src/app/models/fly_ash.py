@@ -23,11 +23,9 @@ class FlyAsh(Base):
     
     __tablename__ = 'fly_ash'
     
-    # Override base model id with string primary key
-    id = None
-    
-    # Primary key - fly ash name (unique identifier)
-    name = Column(String(64), primary_key=True, nullable=False, unique=True)
+    # Use integer ID as primary key (inherited from Base)
+    # Name is now just a regular field that can be updated
+    name = Column(String(64), nullable=False, unique=True)
     
     # Physical properties
     specific_gravity = Column(Float, nullable=True, default=2.77, 

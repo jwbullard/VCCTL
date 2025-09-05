@@ -503,7 +503,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             'aggregate': self.service_container.aggregate_service,
             'fly_ash': self.service_container.fly_ash_service,
             'slag': self.service_container.slag_service,
-            'inert_filler': self.service_container.inert_filler_service,
+            'filler': self.service_container.filler_service,
             'silica_fume': self.service_container.silica_fume_service,
             'limestone': self.service_container.limestone_service
         }
@@ -792,7 +792,10 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         
         # Add material-specific data (phase fractions, Blaine fineness, etc.)
         material_data = self._collect_material_specific_data()
+        print(f"DEBUG: _collect_form_data - material_type = {self.material_type}")
+        print(f"DEBUG: _collect_form_data - collected material_data = {material_data}")
         data.update(material_data)
+        print(f"DEBUG: _collect_form_data - final data = {data}")
         
         return data
     
@@ -851,9 +854,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 if self.material_type == 'aggregate':
                     # For aggregates, use display_name as the primary key
                     material_id = self.material_data.get('display_name') if isinstance(self.material_data, dict) else getattr(self.material_data, 'display_name', None)
-                elif self.material_type in ['inert_filler', 'limestone', 'silica_fume', 'fly_ash', 'slag']:
-                    # For materials with name-based primary keys, use name
-                    material_id = self.material_data.get('name') if isinstance(self.material_data, dict) else getattr(self.material_data, 'name', None)
+                elif self.material_type in ['filler', 'limestone', 'silica_fume', 'fly_ash', 'slag']:
+                    # For materials with integer IDs, use id
+                    material_id = self.material_data.get('id') if isinstance(self.material_data, dict) else getattr(self.material_data, 'id', None)
                 else:
                     # For cement materials, use integer ID as the primary key
                     material_id = self.material_data.get('id') if isinstance(self.material_data, dict) else getattr(self.material_data, 'id', None)
@@ -876,9 +879,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 elif self.material_type == 'limestone':
                     from app.models.limestone import LimestoneUpdate
                     update_data = LimestoneUpdate(**data)
-                elif self.material_type == 'inert_filler':
-                    from app.models.inert_filler import InertFillerUpdate
-                    update_data = InertFillerUpdate(**data)
+                elif self.material_type == 'filler':
+                    from app.models.filler import FillerUpdate
+                    update_data = FillerUpdate(**data)
                 elif self.material_type == 'fly_ash':
                     from app.models.fly_ash import FlyAshUpdate
                     update_data = FlyAshUpdate(**data)
@@ -904,9 +907,9 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 elif self.material_type == 'limestone':
                     from app.models.limestone import LimestoneCreate
                     create_data = LimestoneCreate(**data)
-                elif self.material_type == 'inert_filler':
-                    from app.models.inert_filler import InertFillerCreate
-                    create_data = InertFillerCreate(**data)
+                elif self.material_type == 'filler':
+                    from app.models.filler import FillerCreate
+                    create_data = FillerCreate(**data)
                 elif self.material_type == 'fly_ash':
                     from app.models.fly_ash import FlyAshCreate
                     create_data = FlyAshCreate(**data)
@@ -953,7 +956,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             final_name = new_name
             
             # Get cement service for checking duplicates
-            cement_service = self.service_container.get_cement_service()
+            cement_service = self.service_container.cement_service
             while cement_service.get_by_name(final_name):
                 counter += 1
                 final_name = f"{new_name}_{counter}"
@@ -3617,9 +3620,11 @@ class FlyAshDialog(MaterialDialogBase):
             pozz_qualitative = 'low'
         self.pozz_combo.set_active_id(pozz_qualitative)
         
-        # Load PSD data into unified widget
+        # Load PSD data into unified widget - fly ash uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
+            # For fly ash, we can load directly since it uses standard PSD field names
             self.psd_widget.load_from_material_data(self.material_data)
+            print(f"DEBUG: Loaded fly ash PSD data directly into unified widget")
         
         # Update calculations and summary
         self._update_alkali_calculations()
@@ -3718,10 +3723,30 @@ class FlyAshDialog(MaterialDialogBase):
             database_field = oxide_field_mapping.get(oxide_key, oxide_key)
             data[database_field] = spin.get_value()
         
-        # Add PSD data from unified widget
+        # Add PSD data from unified widget - convert to fly ash model field names  
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
-            data.update(psd_data)
+            print(f"DEBUG: Raw psd_data from fly ash widget = {psd_data}")
+            
+            # Map PSD parameters directly (fly ash model has standard PSD fields)
+            if 'psd_mode' in psd_data:
+                data['psd_mode'] = psd_data['psd_mode']
+            if 'psd_d50' in psd_data:
+                data['psd_d50'] = psd_data['psd_d50']
+            if 'psd_n' in psd_data:
+                data['psd_n'] = psd_data['psd_n'] 
+            if 'psd_dmax' in psd_data:
+                data['psd_dmax'] = psd_data['psd_dmax']
+            if 'psd_median' in psd_data:
+                data['psd_median'] = psd_data['psd_median']
+            if 'psd_spread' in psd_data:
+                data['psd_spread'] = psd_data['psd_spread']
+            if 'psd_exponent' in psd_data:
+                data['psd_exponent'] = psd_data['psd_exponent']
+            if 'psd_custom_points' in psd_data:
+                data['psd_custom_points'] = psd_data['psd_custom_points']
+                
+            print(f"DEBUG: Final fly ash psd_data = {data}")
         
         return data
     
@@ -4212,21 +4237,23 @@ class SlagDialog(MaterialDialogBase):
         pass
 
 
-class InertFillerDialog(MaterialDialogBase):
+class FillerDialog(MaterialDialogBase):
     """Dialog for managing inert filler materials."""
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
         """Initialize the inert filler dialog."""
+        # Initialize widget references before calling super().__init__
+        # to avoid overwriting the widgets created by the parent constructor
         self.psd_container = None
-        super().__init__(parent, 'inert_filler', material_data)
-        
-        # Inert filler-specific UI components
         self.filler_type_combo = None
         self.psd_median_spin = None
         self.psd_spread_spin = None
         self.specific_surface_spin = None
         self.color_combo = None
         self.absorption_spin = None
+        
+        # Call parent constructor - this will create the widgets and assign them to these attributes
+        super().__init__(parent, 'filler', material_data)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
         """Add inert filler-specific fields to the basic info grid."""
@@ -4344,8 +4371,8 @@ class InertFillerDialog(MaterialDialogBase):
         """Add unified particle size distribution section."""
         from app.widgets.unified_psd_widget import UnifiedPSDWidget
         
-        # Create unified PSD widget for inert_filler
-        self.psd_widget = UnifiedPSDWidget('inert_filler')
+        # Create unified PSD widget for filler
+        self.psd_widget = UnifiedPSDWidget('filler')
         self.psd_widget.set_change_callback(self._on_psd_changed)
         
         # Add to container
@@ -4355,6 +4382,138 @@ class InertFillerDialog(MaterialDialogBase):
         """Handle PSD data changes from unified widget."""
         # Optional: validation or other updates
         pass
+    
+    def _collect_material_specific_data(self) -> Dict[str, Any]:
+        """Collect filler-specific data."""
+        print("DEBUG: FillerDialog._collect_material_specific_data called")
+        data = {}
+        
+        # Debug: Check which widgets exist
+        print(f"DEBUG: hasattr(self, 'filler_type_combo') = {hasattr(self, 'filler_type_combo')}")
+        print(f"DEBUG: self.filler_type_combo = {getattr(self, 'filler_type_combo', 'NOT_FOUND')}")
+        print(f"DEBUG: hasattr(self, 'specific_surface_spin') = {hasattr(self, 'specific_surface_spin')}")
+        print(f"DEBUG: self.specific_surface_spin = {getattr(self, 'specific_surface_spin', 'NOT_FOUND')}")
+        print(f"DEBUG: hasattr(self, 'absorption_spin') = {hasattr(self, 'absorption_spin')}")
+        print(f"DEBUG: self.absorption_spin = {getattr(self, 'absorption_spin', 'NOT_FOUND')}")
+        print(f"DEBUG: hasattr(self, 'color_combo') = {hasattr(self, 'color_combo')}")
+        print(f"DEBUG: self.color_combo = {getattr(self, 'color_combo', 'NOT_FOUND')}")
+        
+        # Collect filler type if available
+        if hasattr(self, 'filler_type_combo') and self.filler_type_combo:
+            filler_type = self.filler_type_combo.get_active_id()
+            data['filler_type'] = filler_type
+            print(f"DEBUG: Collected filler_type = {filler_type}")
+        else:
+            print("DEBUG: filler_type_combo not available for collection")
+        
+        # Collect specific surface area (Blaine fineness)
+        if hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
+            blaine_fineness = self.specific_surface_spin.get_value()
+            data['blaine_fineness'] = blaine_fineness
+            print(f"DEBUG: Collected blaine_fineness = {blaine_fineness}")
+        else:
+            print("DEBUG: specific_surface_spin not available for collection")
+        
+        # Collect water absorption if available
+        if hasattr(self, 'absorption_spin') and self.absorption_spin:
+            water_absorption = self.absorption_spin.get_value()
+            data['water_absorption'] = water_absorption
+            print(f"DEBUG: Collected water_absorption = {water_absorption}")
+        else:
+            print("DEBUG: absorption_spin not available for collection")
+        
+        # Collect color if available
+        if hasattr(self, 'color_combo') and self.color_combo:
+            active_id = self.color_combo.get_active_id()
+            if active_id:
+                data['color'] = active_id
+                print(f"DEBUG: Collected color = {active_id}")
+            else:
+                print("DEBUG: color_combo has no active_id")
+        else:
+            print("DEBUG: color_combo not available for collection")
+        
+        # Add PSD data from unified widget - convert to filler model field names
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            psd_data = self.psd_widget.get_material_data_dict()
+            print(f"DEBUG: Raw psd_data from widget = {psd_data}")
+            
+            # Convert PSD data to filler model field names
+            if 'psd_d50' in psd_data:
+                data['diameter_percentile_50'] = psd_data['psd_d50']
+                print(f"DEBUG: Mapped psd_d50 -> diameter_percentile_50: {psd_data['psd_d50']}")
+            
+            # For fillers, we need to estimate D10 and D90 based on D50 and distribution shape
+            # This is a simplified approach - in practice, you'd want to calculate from the distribution
+            if 'diameter_percentile_50' in data:
+                d50 = data['diameter_percentile_50']
+                # Rough estimates: D10 ≈ D50/3, D90 ≈ D50*3 (assuming log-normal-ish distribution)
+                data['diameter_percentile_10'] = d50 / 3.0
+                data['diameter_percentile_90'] = d50 * 3.0
+                print(f"DEBUG: Estimated D10={data['diameter_percentile_10']:.2f}, D90={data['diameter_percentile_90']:.2f}")
+            
+            print(f"DEBUG: Final filler psd_data = {data}")
+        
+        print(f"DEBUG: FillerDialog._collect_material_specific_data returning: {data}")
+        return data
+    
+    def _load_material_specific_data(self) -> None:
+        """Load filler-specific data into form fields."""
+        print(f"DEBUG: FillerDialog._load_material_specific_data called, material_data = {self.material_data}")
+        
+        if not self.material_data:
+            print("DEBUG: No material_data, returning early")
+            return
+        
+        print(f"DEBUG: Available material_data keys: {list(self.material_data.keys()) if self.material_data else 'None'}")
+        
+        # Load filler type
+        filler_type = self.material_data.get('filler_type')
+        print(f"DEBUG: filler_type = {filler_type}, has combo = {hasattr(self, 'filler_type_combo')}, combo exists = {self.filler_type_combo is not None if hasattr(self, 'filler_type_combo') else 'N/A'}")
+        if filler_type and hasattr(self, 'filler_type_combo') and self.filler_type_combo:
+            self.filler_type_combo.set_active_id(filler_type)
+            print(f"DEBUG: Set filler_type_combo to {filler_type}")
+        
+        # Load specific surface area (Blaine fineness)
+        blaine_fineness = self.material_data.get('blaine_fineness')
+        print(f"DEBUG: blaine_fineness = {blaine_fineness}, has spin = {hasattr(self, 'specific_surface_spin')}, spin exists = {self.specific_surface_spin is not None if hasattr(self, 'specific_surface_spin') else 'N/A'}")
+        if blaine_fineness is not None and hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
+            self.specific_surface_spin.set_value(float(blaine_fineness))
+            print(f"DEBUG: Set specific_surface_spin to {blaine_fineness}")
+        
+        # Load water absorption
+        water_absorption = self.material_data.get('water_absorption')
+        print(f"DEBUG: water_absorption = {water_absorption}, has spin = {hasattr(self, 'absorption_spin')}, spin exists = {self.absorption_spin is not None if hasattr(self, 'absorption_spin') else 'N/A'}")
+        if water_absorption is not None and hasattr(self, 'absorption_spin') and self.absorption_spin:
+            self.absorption_spin.set_value(float(water_absorption))
+            print(f"DEBUG: Set absorption_spin to {water_absorption}")
+        
+        # Load color
+        color = self.material_data.get('color')
+        print(f"DEBUG: color = {color}, has combo = {hasattr(self, 'color_combo')}, combo exists = {self.color_combo is not None if hasattr(self, 'color_combo') else 'N/A'}")
+        if color and hasattr(self, 'color_combo') and self.color_combo:
+            self.color_combo.set_active_id(color)
+            print(f"DEBUG: Set color_combo to {color}")
+        
+        # Load PSD data into unified widget - convert from filler model field names
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            # Convert filler model field names to unified widget format
+            converted_data = dict(self.material_data)
+            
+            # Map diameter percentile fields to PSD widget format
+            d50 = self.material_data.get('diameter_percentile_50')
+            if d50 is not None:
+                converted_data['psd_d50'] = d50
+                converted_data['psd_mode'] = 'rosin_rammler'  # Default to Rosin-Rammler
+                # Set some reasonable defaults for other RR parameters
+                converted_data['psd_n'] = 1.0  # Uniformity parameter
+                converted_data['psd_dmax'] = d50 * 5.0  # Maximum diameter
+                print(f"DEBUG: Converting filler D50={d50} to psd_d50 for unified widget")
+            
+            self.psd_widget.load_from_material_data(converted_data)
+            print(f"DEBUG: Loaded PSD data into unified widget: D50={d50}")
+        
+        print("DEBUG: FillerDialog._load_material_specific_data completed")
 
 
 class SilicaFumeDialog(MaterialDialogBase):
@@ -4398,10 +4557,10 @@ class SilicaFumeDialog(MaterialDialogBase):
         surface_label.get_style_context().add_class("form-label")
         surface_label.set_tooltip_text("Specific surface area (very high for silica fume)")
         
-        self.surface_area_spin = Gtk.SpinButton.new_with_range(15000, 25000, 100)
+        self.surface_area_spin = Gtk.SpinButton.new_with_range(15000, 40000, 100)
         self.surface_area_spin.set_digits(0)
         self.surface_area_spin.set_value(20000)  # Typical value
-        self.surface_area_spin.set_tooltip_text("Silica fume typically has 15,000-25,000 m²/kg")
+        self.surface_area_spin.set_tooltip_text("Silica fume typically has 15,000-30,000 m²/kg")
         
         surface_unit_label = Gtk.Label("m²/kg")
         surface_unit_label.get_style_context().add_class("dim-label")
@@ -4460,6 +4619,61 @@ class SilicaFumeDialog(MaterialDialogBase):
         """Handle PSD data changes from unified widget."""
         # Optional: validation or other updates
         pass
+
+    def _collect_material_specific_data(self) -> Dict[str, Any]:
+        """Collect silica fume-specific data."""
+        print("DEBUG: SilicaFumeDialog._collect_material_specific_data called")
+        data = {}
+        
+        # Collect UI field values
+        if hasattr(self, 'silica_content_spin'):
+            data['silica_content'] = self.silica_content_spin.get_value()
+        
+        if hasattr(self, 'surface_area_spin'):
+            data['surface_area'] = self.surface_area_spin.get_value()
+            
+        if hasattr(self, 'silica_fume_fraction_spin'):
+            data['silica_fume_fraction'] = self.silica_fume_fraction_spin.get_value()
+        
+        # Add PSD data from unified widget
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            psd_data = self.psd_widget.get_material_data_dict()
+            print(f"DEBUG: Raw psd_data from silica fume widget = {psd_data}")
+            data.update(psd_data)
+                
+            print(f"DEBUG: Final silica fume psd_data = {data}")
+        
+        return data
+
+    def _load_material_specific_data(self) -> None:
+        """Load silica fume-specific data."""
+        print(f"DEBUG: SilicaFumeDialog._load_material_specific_data called, material_data = {self.material_data}")
+        if not self.material_data:
+            return
+        
+        # Load silica content field
+        if hasattr(self, 'silica_content_spin') and 'silica_content' in self.material_data:
+            silica_content = self.material_data.get('silica_content', 92.0)
+            self.silica_content_spin.set_value(float(silica_content))
+            print(f"DEBUG: Loaded silica_content = {silica_content}")
+        
+        # Load surface area field
+        if hasattr(self, 'surface_area_spin') and 'surface_area' in self.material_data:
+            surface_area = self.material_data.get('surface_area', 20000.0)
+            self.surface_area_spin.set_value(float(surface_area))
+            print(f"DEBUG: Loaded surface_area = {surface_area}")
+            
+        # Load silica fume fraction field
+        if hasattr(self, 'silica_fume_fraction_spin') and 'silica_fume_fraction' in self.material_data:
+            fraction = self.material_data.get('silica_fume_fraction', 1.0)
+            self.silica_fume_fraction_spin.set_value(float(fraction))
+            print(f"DEBUG: Loaded silica_fume_fraction = {fraction}")
+        
+        # Load PSD data into unified widget - silica fume uses standard PSD field names
+        if hasattr(self, 'psd_widget') and self.psd_widget:
+            # For silica fume, we can load directly since it uses standard PSD field names
+            self.psd_widget.load_from_material_data(self.material_data)
+            print(f"DEBUG: Loaded silica fume PSD data directly into unified widget")
 
 
 class LimestoneDialog(MaterialDialogBase):
@@ -4574,9 +4788,23 @@ class LimestoneDialog(MaterialDialogBase):
         if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
             self.activation_energy_spin.set_value(float(self.material_data.get('activation_energy', 54000.0)))
         
-        # Load PSD data into unified widget
+        # Load PSD data into unified widget - convert from limestone model field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
-            self.psd_widget.load_from_material_data(self.material_data)
+            # Convert limestone model field names to unified widget format
+            converted_data = dict(self.material_data)
+            
+            # Map limestone model fields to PSD widget format
+            psd_median = self.material_data.get('psd_median')
+            if psd_median is not None:
+                converted_data['psd_d50'] = psd_median
+                converted_data['psd_mode'] = 'rosin_rammler'  # Default to Rosin-Rammler
+                # Set some reasonable defaults for other RR parameters
+                converted_data['psd_n'] = self.material_data.get('psd_n', 1.0)
+                converted_data['psd_dmax'] = self.material_data.get('psd_dmax', psd_median * 5.0)
+                print(f"DEBUG: Converting limestone psd_median={psd_median} to psd_d50 for unified widget")
+            
+            self.psd_widget.load_from_material_data(converted_data)
+            print(f"DEBUG: Loaded limestone PSD data into unified widget: median={psd_median}")
     
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect limestone-specific data."""
@@ -4590,10 +4818,31 @@ class LimestoneDialog(MaterialDialogBase):
         if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
             data['activation_energy'] = self.activation_energy_spin.get_value()
         
-        # Add PSD data from unified widget
+        # Add PSD data from unified widget - convert to limestone model field names  
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
-            data.update(psd_data)
+            print(f"DEBUG: Raw psd_data from limestone widget = {psd_data}")
+            
+            # Convert PSD data to limestone model field names
+            if 'psd_d50' in psd_data:
+                data['psd_median'] = psd_data['psd_d50']
+                print(f"DEBUG: Mapped psd_d50 -> psd_median: {psd_data['psd_d50']}")
+            
+            # Map other PSD parameters if available
+            if 'psd_mode' in psd_data:
+                data['psd_mode'] = psd_data['psd_mode']
+            if 'psd_custom_points' in psd_data:
+                data['psd_custom_points'] = psd_data['psd_custom_points']
+            if 'psd_n' in psd_data:
+                data['psd_n'] = psd_data['psd_n'] 
+            if 'psd_dmax' in psd_data:
+                data['psd_dmax'] = psd_data['psd_dmax']
+            if 'psd_spread' in psd_data:
+                data['psd_spread'] = psd_data['psd_spread']
+            if 'psd_exponent' in psd_data:
+                data['psd_exponent'] = psd_data['psd_exponent']
+                
+            print(f"DEBUG: Final limestone psd_data = {data}")
         
         return data
 
@@ -4606,7 +4855,7 @@ def create_material_dialog(parent: 'VCCTLMainWindow', material_type: str, materi
         'aggregate': AggregateDialog,  
         'fly_ash': FlyAshDialog,
         'slag': SlagDialog,
-        'inert_filler': InertFillerDialog,
+        'filler': FillerDialog,
         'silica_fume': SilicaFumeDialog,
         'limestone': LimestoneDialog
     }

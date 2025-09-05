@@ -85,13 +85,13 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
             self.logger.error(f"Failed to create fly ash: {e}")
             raise ServiceError(f"Failed to create fly ash: {e}")
     
-    def update(self, name: str, fly_ash_data: FlyAshUpdate) -> FlyAsh:
+    def update(self, fly_ash_id: int, fly_ash_data: FlyAshUpdate) -> FlyAsh:
         """Update an existing fly ash material."""
         try:
             with self.db_service.get_session() as session:
-                fly_ash = session.query(FlyAsh).filter_by(name=name).first()
+                fly_ash = session.query(FlyAsh).filter_by(id=fly_ash_id).first()
                 if not fly_ash:
-                    raise NotFoundError(f"Fly ash '{name}' not found")
+                    raise NotFoundError(f"Fly ash with ID '{fly_ash_id}' not found")
                 
                 # Update fields
                 update_dict = fly_ash_data.dict(exclude_unset=True)
@@ -112,7 +112,7 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
             self.logger.error(f"Database integrity error updating fly ash: {e}")
             raise ServiceError(f"Fly ash update failed: invalid data")
         except Exception as e:
-            self.logger.error(f"Failed to update fly ash {name}: {e}")
+            self.logger.error(f"Failed to update fly ash {fly_ash_id}: {e}")
             raise ServiceError(f"Failed to update fly ash: {e}")
     
     def delete(self, name: str) -> bool:

@@ -25,7 +25,7 @@ class MaterialType(Enum):
     FLY_ASH = "flyash"
     SLAG = "slag"
     AGGREGATE = "aggregate"
-    INERT_FILLER = "inert_filler"
+    FILLER = "filler"
 
 
 class ValidationSeverity(Enum):
@@ -115,7 +115,7 @@ class MaterialSchemaValidator:
             'absorption': (int, float),
             'gradation': dict,
         },
-        MaterialType.INERT_FILLER: {
+        MaterialType.FILLER: {
             'name': str,
             'specific_gravity': (int, float),
             'surface_area': (int, float),
@@ -227,7 +227,7 @@ class MaterialSchemaValidator:
         elif 'gradation' in data:
             return MaterialType.AGGREGATE
         elif 'surface_area' in data and 'specific_gravity' in data and len(data) < 10:
-            return MaterialType.INERT_FILLER
+            return MaterialType.FILLER
         
         return None
     
@@ -293,8 +293,8 @@ class MaterialSchemaValidator:
             self._validate_slag_specific(data, result)
         elif material_type == MaterialType.AGGREGATE:
             self._validate_aggregate_specific(data, result)
-        elif material_type == MaterialType.INERT_FILLER:
-            self._validate_inert_filler_specific(data, result)
+        elif material_type == MaterialType.FILLER:
+            self._validate_filler_specific(data, result)
     
     def _validate_cement_specific(self, data: Dict[str, Any], 
                                 result: SchemaValidationResult) -> None:
@@ -392,7 +392,7 @@ class MaterialSchemaValidator:
                             location=f"gradation.{sieve}"
                         ))
     
-    def _validate_inert_filler_specific(self, data: Dict[str, Any],
+    def _validate_filler_specific(self, data: Dict[str, Any],
                                       result: SchemaValidationResult) -> None:
         """Validate inert filler-specific constraints."""
         # Check reasonable surface area

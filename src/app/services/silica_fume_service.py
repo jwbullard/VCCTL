@@ -77,14 +77,14 @@ class SilicaFumeService(BaseService[SilicaFume, SilicaFumeCreate, SilicaFumeUpda
             self.logger.error(f"Failed to create silica fume: {e}")
             raise ServiceError(f"Failed to create silica fume: {e}")
     
-    def update(self, name: str, update_data: SilicaFumeUpdate) -> SilicaFume:
+    def update(self, silica_fume_id: int, update_data: SilicaFumeUpdate) -> SilicaFume:
         """Update an existing silica fume material."""
         try:
             with self.db_service.get_session() as session:
-                silica_fume = session.query(SilicaFume).filter_by(name=name).first()
+                silica_fume = session.query(SilicaFume).filter_by(id=silica_fume_id).first()
                 
                 if not silica_fume:
-                    raise NotFoundError(f"Silica fume '{name}' not found")
+                    raise NotFoundError(f"Silica fume with ID '{silica_fume_id}' not found")
                 
                 # Update fields
                 update_dict = update_data.model_dump(exclude_unset=True)
@@ -94,13 +94,13 @@ class SilicaFumeService(BaseService[SilicaFume, SilicaFumeCreate, SilicaFumeUpda
                 session.commit()
                 session.refresh(silica_fume)
                 
-                self.logger.info(f"Updated silica fume: {name}")
+                self.logger.info(f"Updated silica fume: {silica_fume.name}")
                 return silica_fume
                 
         except NotFoundError:
             raise
         except Exception as e:
-            self.logger.error(f"Failed to update silica fume {name}: {e}")
+            self.logger.error(f"Failed to update silica fume {silica_fume_id}: {e}")
             raise ServiceError(f"Failed to update silica fume: {e}")
     
     def delete(self, name: str) -> bool:

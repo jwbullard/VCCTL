@@ -545,7 +545,7 @@ class MigrationManager:
                 "V9__Insert_data_db_file.sql",
                 "V10__Insert_data_fly_ash.sql",
                 "V11__Insert_data_slag.sql",
-                "V13__Insert_data_inert_filler.sql",
+                "V13__Insert_data_filler.sql",
                 "V15__Insert_data_particle_shape_set.sql",
                 "V17__Insert_data_aggregate_sieves.sql",
                 "V19__Insert_grading_data.sql"

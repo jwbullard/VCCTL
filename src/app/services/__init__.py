@@ -15,7 +15,7 @@ from app.services.base_service import (
 from app.services.cement_service import CementService
 from app.services.fly_ash_service import FlyAshService
 from app.services.slag_service import SlagService
-from app.services.inert_filler_service import InertFillerService
+from app.services.filler_service import FillerService
 from app.services.silica_fume_service import SilicaFumeService
 from app.services.limestone_service import LimestoneService
 from app.services.mix_service import MixService, MixComponent, MixDesign
