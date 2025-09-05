@@ -31,7 +31,7 @@ class Filler(Base):
     
     # Basic material properties
     specific_gravity = Column(Float, CheckConstraint('specific_gravity > 0 AND specific_gravity < 10'))
-    blaine_fineness = Column(Float, CheckConstraint('blaine_fineness >= 0 AND blaine_fineness <= 10000'))
+    specific_surface_area = Column(Float, CheckConstraint('specific_surface_area >= 0 AND specific_surface_area <= 10000'))
     
     # PSD relationship (replaces embedded PSD fields)
     psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
@@ -52,7 +52,7 @@ class FillerCreate(BaseModel):
     """Schema for creating a new filler material."""
     name: str = Field(..., min_length=1, max_length=64, description="Name of the filler material")
     specific_gravity: Optional[float] = Field(None, gt=0, lt=10, description="Specific gravity")
-    blaine_fineness: Optional[float] = Field(None, ge=0, le=10000, description="Blaine fineness in cm2/g")
+    specific_surface_area: Optional[float] = Field(None, ge=0, le=10000, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
     filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (limestone, quartz, glass, other)")
     
@@ -76,7 +76,7 @@ class FillerUpdate(BaseModel):
     """Schema for updating an existing filler material."""
     name: Optional[str] = Field(None, min_length=1, max_length=64, description="Name of the filler material")
     specific_gravity: Optional[float] = Field(None, gt=0, lt=10, description="Specific gravity")
-    blaine_fineness: Optional[float] = Field(None, ge=0, le=10000, description="Blaine fineness in cm2/g")
+    specific_surface_area: Optional[float] = Field(None, ge=0, le=10000, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
     filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (limestone, quartz, glass, other)")
     
@@ -93,7 +93,7 @@ class FillerResponse(BaseModel):
     """Schema for filler material responses."""
     name: str = Field(..., description="Name of the filler material")
     specific_gravity: Optional[float] = Field(None, description="Specific gravity")
-    blaine_fineness: Optional[float] = Field(None, description="Blaine fineness in cm2/g")
+    specific_surface_area: Optional[float] = Field(None, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, description="Water absorption percentage")
     filler_type: Optional[str] = Field(None, description="Filler type (limestone, quartz, glass, other)")
     

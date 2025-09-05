@@ -36,8 +36,8 @@ class SilicaFume(Base):
                            doc="Silicon dioxide content percentage (typically 85-98%)")
     
     # Physical properties
-    surface_area = Column(Float, nullable=True, default=20000.0,
-                         doc="Specific surface area in m²/kg (typically 15,000-40,000)")
+    specific_surface_area = Column(Float, nullable=True, default=20000.0,
+                                   doc="Specific surface area in m²/kg (typically 15,000-40,000)")
     
     # PSD relationship (replaces embedded PSD fields)
     psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
@@ -112,7 +112,7 @@ class SilicaFumeCreate(BaseModel):
     name: str = Field(..., max_length=64, description="Silica fume name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.22, ge=0.0, description="Specific gravity")
     silica_content: Optional[float] = Field(92.0, ge=80.0, le=100.0, description="SiO2 content percentage")
-    surface_area: Optional[float] = Field(20000.0, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
+    specific_surface_area: Optional[float] = Field(20000.0, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
     
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
@@ -150,7 +150,7 @@ class SilicaFumeUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=64, description="Silica fume name")
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
     silica_content: Optional[float] = Field(None, ge=80.0, le=100.0, description="SiO2 content percentage")
-    surface_area: Optional[float] = Field(None, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
+    specific_surface_area: Optional[float] = Field(None, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
     
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
@@ -172,7 +172,7 @@ class SilicaFumeResponse(BaseModel):
     name: str
     specific_gravity: Optional[float]
     silica_content: Optional[float]
-    surface_area: Optional[float]
+    specific_surface_area: Optional[float]
     
     # PSD data accessed through relationship
     psd_data_id: Optional[int]
