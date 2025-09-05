@@ -15,6 +15,7 @@ from app.models.aggregate import Aggregate, AggregateCreate, AggregateUpdate, Ag
 from app.models.filler import Filler, FillerCreate, FillerUpdate, FillerResponse
 from app.models.silica_fume import SilicaFume, SilicaFumeCreate, SilicaFumeUpdate, SilicaFumeResponse
 from app.models.limestone import Limestone, LimestoneCreate, LimestoneUpdate, LimestoneResponse
+from app.models.psd_data import PSDData, PSDDataCreate, PSDDataUpdate, PSDDataResponse
 from app.models.particle_shape_set import ParticleShapeSet, ParticleShapeSetCreate, ParticleShapeSetUpdate, ParticleShapeSetResponse
 from app.models.grading import Grading, GradingCreate, GradingUpdate, GradingResponse, GradingType
 from app.models.operation import Operation, Result, OperationStatus, OperationType, ResultType
@@ -39,6 +40,7 @@ __all__ = [
     'Filler',
     'SilicaFume',
     'Limestone',
+    'PSDData',
     'ParticleShapeSet',
     'Grading',
     'Operation',

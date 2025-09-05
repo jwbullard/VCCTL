@@ -6,7 +6,8 @@ Represents silica fume materials with single-phase composition and properties.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text
+from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator
 
 from app.database.base import Base
@@ -38,13 +39,9 @@ class SilicaFume(Base):
     surface_area = Column(Float, nullable=True, default=20000.0,
                          doc="Specific surface area in m²/kg (typically 15,000-40,000)")
     
-    # Particle size distribution reference
-    psd = Column(String(64), nullable=True, default='cement141',
-                doc="Particle size distribution reference")
-    
-    # Custom PSD data points (JSON format)
-    psd_custom_points = Column(Text, nullable=True, 
-                              doc="Custom PSD points stored as JSON")
+    # PSD relationship (replaces embedded PSD fields)
+    psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
+    psd_data = relationship('PSDData', backref='silica_fume_materials')
     
     # Phase distribution parameters
     distribute_phases_by = Column(Integer, nullable=True,
@@ -116,10 +113,7 @@ class SilicaFumeCreate(BaseModel):
     specific_gravity: Optional[float] = Field(2.22, ge=0.0, description="Specific gravity")
     silica_content: Optional[float] = Field(92.0, ge=80.0, le=100.0, description="SiO2 content percentage")
     surface_area: Optional[float] = Field(20000.0, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
-    psd: Optional[str] = Field('cement141', max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, 
-                                           description="Custom PSD points stored as JSON")
+    
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Single phase fraction
@@ -153,13 +147,11 @@ class SilicaFumeCreate(BaseModel):
 class SilicaFumeUpdate(BaseModel):
     """Pydantic model for updating silica fume instances."""
     
+    name: Optional[str] = Field(None, max_length=64, description="Silica fume name")
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
     silica_content: Optional[float] = Field(None, ge=80.0, le=100.0, description="SiO2 content percentage")
     surface_area: Optional[float] = Field(None, ge=10000.0, le=40000.0, description="Specific surface area m²/kg")
-    psd: Optional[str] = Field(None, max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, 
-                                           description="Custom PSD points stored as JSON")
+    
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Single phase fraction
@@ -179,7 +171,12 @@ class SilicaFumeResponse(BaseModel):
     
     name: str
     specific_gravity: Optional[float]
-    psd: Optional[str]
+    silica_content: Optional[float]
+    surface_area: Optional[float]
+    
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int]
+    
     distribute_phases_by: Optional[int]
     silica_fume_fraction: Optional[float]
     

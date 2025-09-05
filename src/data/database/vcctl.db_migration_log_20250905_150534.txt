@@ -1,0 +1,137 @@
+[2025-09-05 15:05:34] Starting PSD normalization migration...
+[2025-09-05 15:05:34] Creating database backup...
+[2025-09-05 15:05:34] Database backed up to: src/data/database/vcctl.db.backup_20250905_150534
+[2025-09-05 15:05:34] Creating psd_data table...
+[2025-09-05 15:05:34] psd_data table created successfully
+[2025-09-05 15:05:34] Extracting PSD data from material tables...
+[2025-09-05 15:05:34] Processing cement table...
+[2025-09-05 15:05:34] Extracted 37 records with PSD data from cement
+[2025-09-05 15:05:34] Processing filler table...
+[2025-09-05 15:05:34] Extracted 4 records with PSD data from filler
+[2025-09-05 15:05:34] Processing silica_fume table...
+[2025-09-05 15:05:34] Extracted 3 records with PSD data from silica_fume
+[2025-09-05 15:05:34] Processing limestone table...
+[2025-09-05 15:05:34] Extracted 4 records with PSD data from limestone
+[2025-09-05 15:05:34] Processing fly_ash table...
+[2025-09-05 15:05:34] Extracted 0 records with PSD data from fly_ash
+[2025-09-05 15:05:34] Processing slag table...
+[2025-09-05 15:05:34] Extracted 0 records with PSD data from slag
+[2025-09-05 15:05:34] Creating PSD records...
+[2025-09-05 15:05:34] Created PSD record 1 for cement.3
+[2025-09-05 15:05:34] Created PSD record 2 for cement.4
+[2025-09-05 15:05:34] Created PSD record 3 for cement.5
+[2025-09-05 15:05:34] Created PSD record 4 for cement.6
+[2025-09-05 15:05:34] Created PSD record 5 for cement.7
+[2025-09-05 15:05:34] Created PSD record 6 for cement.8
+[2025-09-05 15:05:34] Created PSD record 7 for cement.9
+[2025-09-05 15:05:34] Created PSD record 8 for cement.10
+[2025-09-05 15:05:34] Created PSD record 9 for cement.11
+[2025-09-05 15:05:34] Created PSD record 10 for cement.12
+[2025-09-05 15:05:34] Created PSD record 11 for cement.13
+[2025-09-05 15:05:34] Created PSD record 12 for cement.14
+[2025-09-05 15:05:34] Created PSD record 13 for cement.15
+[2025-09-05 15:05:34] Created PSD record 14 for cement.16
+[2025-09-05 15:05:34] Created PSD record 15 for cement.17
+[2025-09-05 15:05:34] Created PSD record 16 for cement.18
+[2025-09-05 15:05:34] Created PSD record 17 for cement.19
+[2025-09-05 15:05:34] Created PSD record 18 for cement.20
+[2025-09-05 15:05:34] Created PSD record 19 for cement.21
+[2025-09-05 15:05:34] Created PSD record 20 for cement.22
+[2025-09-05 15:05:34] Created PSD record 21 for cement.23
+[2025-09-05 15:05:34] Created PSD record 22 for cement.24
+[2025-09-05 15:05:34] Created PSD record 23 for cement.25
+[2025-09-05 15:05:34] Created PSD record 24 for cement.26
+[2025-09-05 15:05:34] Created PSD record 25 for cement.27
+[2025-09-05 15:05:34] Created PSD record 26 for cement.28
+[2025-09-05 15:05:34] Created PSD record 27 for cement.29
+[2025-09-05 15:05:34] Created PSD record 28 for cement.30
+[2025-09-05 15:05:34] Created PSD record 29 for cement.31
+[2025-09-05 15:05:34] Created PSD record 30 for cement.32
+[2025-09-05 15:05:34] Created PSD record 31 for cement.33
+[2025-09-05 15:05:34] Created PSD record 32 for cement.34
+[2025-09-05 15:05:34] Created PSD record 33 for cement.35
+[2025-09-05 15:05:34] Created PSD record 34 for cement.36
+[2025-09-05 15:05:34] Created PSD record 35 for cement.37
+[2025-09-05 15:05:34] Created PSD record 36 for cement.38
+[2025-09-05 15:05:34] Created PSD record 37 for cement.55
+[2025-09-05 15:05:34] Created PSD record 38 for filler.7
+[2025-09-05 15:05:34] Created PSD record 39 for filler.8
+[2025-09-05 15:05:34] Created PSD record 40 for filler.9
+[2025-09-05 15:05:34] Created PSD record 41 for filler.13
+[2025-09-05 15:05:34] Created PSD record 42 for silica_fume.1
+[2025-09-05 15:05:34] Created PSD record 43 for silica_fume.2
+[2025-09-05 15:05:34] Created PSD record 44 for silica_fume.8
+[2025-09-05 15:05:34] Created PSD record 45 for limestone.1
+[2025-09-05 15:05:34] Created PSD record 46 for limestone.2
+[2025-09-05 15:05:34] Created PSD record 47 for limestone.4
+[2025-09-05 15:05:34] Created PSD record 48 for limestone.5
+[2025-09-05 15:05:34] Adding psd_data_id foreign key columns...
+[2025-09-05 15:05:34] Added psd_data_id column to cement
+[2025-09-05 15:05:34] Added psd_data_id column to filler
+[2025-09-05 15:05:34] Added psd_data_id column to silica_fume
+[2025-09-05 15:05:34] Added psd_data_id column to limestone
+[2025-09-05 15:05:34] Added psd_data_id column to fly_ash
+[2025-09-05 15:05:34] Added psd_data_id column to slag
+[2025-09-05 15:05:34] Updating material foreign key references...
+[2025-09-05 15:05:34] Updated cement.3 -> psd_data.1
+[2025-09-05 15:05:34] Updated cement.4 -> psd_data.2
+[2025-09-05 15:05:34] Updated cement.5 -> psd_data.3
+[2025-09-05 15:05:34] Updated cement.6 -> psd_data.4
+[2025-09-05 15:05:34] Updated cement.7 -> psd_data.5
+[2025-09-05 15:05:34] Updated cement.8 -> psd_data.6
+[2025-09-05 15:05:34] Updated cement.9 -> psd_data.7
+[2025-09-05 15:05:34] Updated cement.10 -> psd_data.8
+[2025-09-05 15:05:34] Updated cement.11 -> psd_data.9
+[2025-09-05 15:05:34] Updated cement.12 -> psd_data.10
+[2025-09-05 15:05:34] Updated cement.13 -> psd_data.11
+[2025-09-05 15:05:34] Updated cement.14 -> psd_data.12
+[2025-09-05 15:05:34] Updated cement.15 -> psd_data.13
+[2025-09-05 15:05:34] Updated cement.16 -> psd_data.14
+[2025-09-05 15:05:34] Updated cement.17 -> psd_data.15
+[2025-09-05 15:05:34] Updated cement.18 -> psd_data.16
+[2025-09-05 15:05:34] Updated cement.19 -> psd_data.17
+[2025-09-05 15:05:34] Updated cement.20 -> psd_data.18
+[2025-09-05 15:05:34] Updated cement.21 -> psd_data.19
+[2025-09-05 15:05:34] Updated cement.22 -> psd_data.20
+[2025-09-05 15:05:34] Updated cement.23 -> psd_data.21
+[2025-09-05 15:05:34] Updated cement.24 -> psd_data.22
+[2025-09-05 15:05:34] Updated cement.25 -> psd_data.23
+[2025-09-05 15:05:34] Updated cement.26 -> psd_data.24
+[2025-09-05 15:05:34] Updated cement.27 -> psd_data.25
+[2025-09-05 15:05:34] Updated cement.28 -> psd_data.26
+[2025-09-05 15:05:34] Updated cement.29 -> psd_data.27
+[2025-09-05 15:05:34] Updated cement.30 -> psd_data.28
+[2025-09-05 15:05:34] Updated cement.31 -> psd_data.29
+[2025-09-05 15:05:34] Updated cement.32 -> psd_data.30
+[2025-09-05 15:05:34] Updated cement.33 -> psd_data.31
+[2025-09-05 15:05:34] Updated cement.34 -> psd_data.32
+[2025-09-05 15:05:34] Updated cement.35 -> psd_data.33
+[2025-09-05 15:05:34] Updated cement.36 -> psd_data.34
+[2025-09-05 15:05:34] Updated cement.37 -> psd_data.35
+[2025-09-05 15:05:34] Updated cement.38 -> psd_data.36
+[2025-09-05 15:05:34] Updated cement.55 -> psd_data.37
+[2025-09-05 15:05:34] Updated filler.7 -> psd_data.38
+[2025-09-05 15:05:34] Updated filler.8 -> psd_data.39
+[2025-09-05 15:05:34] Updated filler.9 -> psd_data.40
+[2025-09-05 15:05:34] Updated filler.13 -> psd_data.41
+[2025-09-05 15:05:34] Updated silica_fume.1 -> psd_data.42
+[2025-09-05 15:05:34] Updated silica_fume.2 -> psd_data.43
+[2025-09-05 15:05:34] Updated silica_fume.8 -> psd_data.44
+[2025-09-05 15:05:34] Updated limestone.1 -> psd_data.45
+[2025-09-05 15:05:34] Updated limestone.2 -> psd_data.46
+[2025-09-05 15:05:34] Updated limestone.4 -> psd_data.47
+[2025-09-05 15:05:34] Updated limestone.5 -> psd_data.48
+[2025-09-05 15:05:34] Removing PSD columns from material tables...
+[2025-09-05 15:05:34] Recreating cement without PSD columns...
+[2025-09-05 15:05:34] Recreated cement without 7 PSD columns
+[2025-09-05 15:05:34] Recreating filler without PSD columns...
+[2025-09-05 15:05:34] Recreated filler without 12 PSD columns
+[2025-09-05 15:05:34] Recreating silica_fume without PSD columns...
+[2025-09-05 15:05:34] Recreated silica_fume without 12 PSD columns
+[2025-09-05 15:05:34] Recreating limestone without PSD columns...
+[2025-09-05 15:05:34] Recreated limestone without 9 PSD columns
+[2025-09-05 15:05:34] Recreating fly_ash without PSD columns...
+[2025-09-05 15:05:34] Recreated fly_ash without 9 PSD columns
+[2025-09-05 15:05:34] Recreating slag without PSD columns...
+[2025-09-05 15:05:34] Recreated slag without 9 PSD columns
+[2025-09-05 15:05:34] PSD normalization migration completed successfully!

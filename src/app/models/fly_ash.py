@@ -7,7 +7,8 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text
+from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -31,28 +32,9 @@ class FlyAsh(Base):
     specific_gravity = Column(Float, nullable=True, default=2.77, 
                             doc="Specific gravity of fly ash material")
     
-    # Particle size distribution reference
-    psd = Column(String(64), nullable=True, default='cement141',
-                doc="Particle size distribution reference")
-    
-    psd_custom_points = Column(Text, nullable=True, 
-                              doc="Custom PSD points stored as JSON")
-    
-    # Complete PSD parameters (unified with cement model)
-    psd_mode = Column(String(64), nullable=True, default='log_normal',
-                     doc="PSD mode (rosin_rammler, log_normal, fuller, custom)")
-    psd_d50 = Column(Float, nullable=True, default=5.0,
-                    doc="PSD D50 parameter (μm) for Rosin-Rammler")
-    psd_n = Column(Float, nullable=True, default=2.0,
-                  doc="PSD n parameter for Rosin-Rammler")
-    psd_dmax = Column(Float, nullable=True, default=75.0,
-                     doc="PSD Dmax parameter (μm)")
-    psd_median = Column(Float, nullable=True, default=5.0,
-                       doc="Median particle size (μm) for log-normal distribution")
-    psd_spread = Column(Float, nullable=True, default=2.0,
-                       doc="PSD distribution spread parameter for log-normal distribution")
-    psd_exponent = Column(Float, nullable=True, default=0.5,
-                         doc="PSD exponent parameter for Fuller-Thompson")
+    # PSD relationship (replaces embedded PSD fields)
+    psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
+    psd_data = relationship('PSDData', backref='fly_ash_materials')
     
     # Phase distribution parameters
     distribute_phases_by = Column(Integer, nullable=True,
@@ -86,27 +68,19 @@ class FlyAsh(Base):
     so3_content = Column(Float, nullable=True, default=1.0,
                         doc="SO3 content percentage")
     
-    # Physical properties
-    loi = Column(Float, nullable=True, default=3.0,
-                doc="Loss on ignition (unburned carbon content) percentage")
-    fineness_45um = Column(Float, nullable=True, default=20.0,
-                          doc="Fineness - percent retained on 45μm sieve")
-    
-    # Alkali characteristics
+    # Alkali characteristics  
     na2o = Column(Float, nullable=True, default=1.2,
                  doc="Na2O content percentage")
     k2o = Column(Float, nullable=True, default=2.1,
                 doc="K2O content percentage")
     na2o_equivalent = Column(Float, nullable=True,
                            doc="Calculated Na2O equivalent percentage")
+    loss_on_ignition = Column(Float, nullable=True, default=3.0,
+                            doc="Loss on ignition (unburned carbon content) percentage")
     
     # Classification properties
     astm_class = Column(String(20), nullable=True, default='class_f',
                        doc="ASTM classification (class_f, class_c, class_n)")
-    activity_index = Column(Float, nullable=True, default=85.0,
-                          doc="Activity index percentage")
-    pozzolanic_activity = Column(Float, nullable=True, default=75.0,
-                               doc="Pozzolanic activity index percentage")
     
     # Reaction parameters
     activation_energy = Column(Float, nullable=True, default=54000.0,
@@ -266,8 +240,6 @@ class FlyAshCreate(BaseModel):
     
     # Classification properties
     astm_class: Optional[str] = Field('class_f', description="ASTM classification")
-    activity_index: Optional[float] = Field(85.0, ge=0.0, le=150.0, description="Activity index percentage")
-    pozzolanic_activity: Optional[float] = Field(75.0, ge=0.0, le=150.0, description="Pozzolanic activity index percentage")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
@@ -362,10 +334,11 @@ class FlyAshUpdate(BaseModel):
     k2o: Optional[float] = Field(None, ge=0.0, le=10.0, description="K2O content percentage")
     na2o_equivalent: Optional[float] = Field(None, ge=0.0, le=15.0, description="Na2O equivalent percentage")
     
+    # Physical properties
+    specific_surface_area: Optional[float] = Field(None, ge=100.0, le=10000.0, description="Specific surface area m²/kg")
+    
     # Classification properties
     astm_class: Optional[str] = Field(None, description="ASTM classification")
-    activity_index: Optional[float] = Field(None, ge=0.0, le=150.0, description="Activity index percentage")
-    pozzolanic_activity: Optional[float] = Field(None, ge=0.0, le=150.0, description="Pozzolanic activity index percentage")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")

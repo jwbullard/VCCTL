@@ -6,7 +6,8 @@ Represents limestone materials with single-phase composition and properties.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text
+from sqlalchemy import Column, String, Float, Integer, CheckConstraint, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator
 
 from app.database.base import Base
@@ -30,35 +31,17 @@ class Limestone(Base):
     specific_gravity = Column(Float, nullable=True, default=2.71, 
                             doc="Specific gravity of limestone material")
     
-    # Particle size distribution reference
-    psd = Column(String(64), nullable=True, default='cement141',
-                doc="Particle size distribution reference")
-    
-    # Custom PSD data points (JSON format)
-    psd_custom_points = Column(Text, nullable=True, 
-                              doc="Custom PSD points stored as JSON")
+    # PSD relationship (replaces embedded PSD fields)
+    psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
+    psd_data = relationship('PSDData', backref='limestone_materials')
     
     # Phase distribution parameters
     distribute_phases_by = Column(Integer, nullable=True,
                                 doc="Method for phase distribution")
     
-    # Single phase fraction (limestone is essentially calcium carbonate)
-    limestone_fraction = Column(Float, nullable=True, default=1.0,
-                              doc="Limestone phase mass fraction")
-    
     # Chemical composition
     caco3_content = Column(Float, nullable=True, default=97.0,
                           doc="Calcium carbonate content percentage")
-    
-    # Physical properties
-    hardness = Column(Float, nullable=True, default=3.0,
-                     doc="Mohs hardness scale (typically 3-4 for limestone)")
-    
-    # PSD parameters for log-normal distribution
-    psd_median = Column(Float, nullable=True, default=5.0,
-                       doc="Median particle size (μm) for log-normal distribution")
-    psd_spread = Column(Float, nullable=True, default=2.0,
-                       doc="PSD distribution spread parameter for log-normal distribution")
     
     # Reaction parameters
     activation_energy = Column(Float, nullable=True, default=54000.0,
@@ -87,32 +70,29 @@ class Limestone(Base):
         """
         return (
             f"{self.distribute_phases_by or 0}\n"
-            f"{self.limestone_fraction or 1.0}\n"
+            f"1.0\n"  # Limestone is pure phase
         )
     
     @property
     def phase_fractions(self) -> dict:
         """Get all phase fractions as a dictionary."""
         return {
-            'limestone': self.limestone_fraction
+            'limestone': 1.0  # Limestone is pure phase
         }
     
     @property
     def total_phase_fraction(self) -> Optional[float]:
         """Calculate total phase fraction."""
-        return self.limestone_fraction
+        return 1.0  # Limestone is pure phase
     
     @property
     def has_complete_phase_data(self) -> bool:
         """Check if limestone has complete phase composition data."""
-        return self.limestone_fraction is not None
+        return True  # Limestone is always pure phase
     
     def validate_phase_fractions(self) -> bool:
         """Validate that phase fractions are reasonable (0-1 range)."""
-        if self.limestone_fraction is None:
-            return True
-        
-        return 0 <= self.limestone_fraction <= 1
+        return True  # Limestone is always pure phase (1.0)
 
 
 class LimestoneCreate(BaseModel):
@@ -120,27 +100,11 @@ class LimestoneCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Limestone name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.71, ge=0.0, description="Specific gravity")
-    psd: Optional[str] = Field('cement141', max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, 
-                                           description="Custom PSD points stored as JSON")
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
-    
-    # Single phase fraction
-    limestone_fraction: Optional[float] = Field(1.0, ge=0.0, le=1.0,
-                                               description="Limestone phase fraction")
     
     # Chemical composition
     caco3_content: Optional[float] = Field(97.0, ge=0.0, le=100.0,
                                           description="Calcium carbonate content percentage")
-    
-    # Physical properties
-    hardness: Optional[float] = Field(3.0, ge=0.0, le=10.0,
-                                     description="Mohs hardness scale")
-    
-    # PSD parameters
-    psd_median: Optional[float] = Field(5.0, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(2.0, gt=0.0, description="PSD distribution spread parameter")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
@@ -171,27 +135,14 @@ class LimestoneUpdate(BaseModel):
     
     name: Optional[str] = Field(None, max_length=64, description="Limestone name (unique identifier)")
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
-    psd: Optional[str] = Field(None, max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, 
-                                           description="Custom PSD points stored as JSON")
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
-    
-    # Single phase fraction
-    limestone_fraction: Optional[float] = Field(None, ge=0.0, le=1.0,
-                                               description="Limestone phase fraction")
     
     # Chemical composition
     caco3_content: Optional[float] = Field(None, ge=0.0, le=100.0,
                                           description="Calcium carbonate content percentage")
     
     # Physical properties
-    hardness: Optional[float] = Field(None, ge=0.0, le=10.0,
-                                     description="Mohs hardness scale")
-    
-    # PSD parameters
-    psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
+    specific_surface_area: Optional[float] = Field(None, ge=100.0, le=10000.0, description="Specific surface area m²/kg")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
@@ -206,19 +157,13 @@ class LimestoneResponse(BaseModel):
     
     name: str
     specific_gravity: Optional[float]
-    psd: Optional[str]
     distribute_phases_by: Optional[int]
-    limestone_fraction: Optional[float]
     
     # Chemical composition
     caco3_content: Optional[float]
     
-    # Physical properties
-    hardness: Optional[float]
-    
-    # PSD parameters
-    psd_median: Optional[float]
-    psd_spread: Optional[float]
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int]
     
     # Reaction parameters
     activation_energy: Optional[float]

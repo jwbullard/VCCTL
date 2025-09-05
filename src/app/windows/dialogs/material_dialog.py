@@ -742,6 +742,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         notes = self.notes_buffer.get_text(notes_start, notes_end, False)
         
         name = self.name_entry.get_text().strip()
+        print(f"DEBUG: _collect_form_data - name from UI = '{name}'")
         
         # Collect ALL form data for both create and edit modes
         # The main difference is how we handle the primary key field
@@ -790,12 +791,15 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                     'notes': notes.strip() if notes.strip() else None
                 }
         
-        # Add material-specific data (phase fractions, Blaine fineness, etc.)
+        # Add material-specific data (phase fractions, specific surface area, etc.)
         material_data = self._collect_material_specific_data()
         print(f"DEBUG: _collect_form_data - material_type = {self.material_type}")
         print(f"DEBUG: _collect_form_data - collected material_data = {material_data}")
+        print(f"DEBUG: _collect_form_data - data before update = {data}")
+        print(f"DEBUG: _collect_form_data - name before update = '{data.get('name')}'")
         data.update(material_data)
         print(f"DEBUG: _collect_form_data - final data = {data}")
+        print(f"DEBUG: _collect_form_data - final name = '{data.get('name')}'")
         
         return data
     
@@ -1128,8 +1132,8 @@ class CementDialog(MaterialDialogBase):
         """Add cement-specific fields."""
         row = start_row
         
-        # Blaine fineness
-        blaine_label = Gtk.Label("Blaine Fineness:")
+        # Specific surface area
+        blaine_label = Gtk.Label("Specific Surface Area:")
         blaine_label.set_halign(Gtk.Align.END)
         blaine_label.get_style_context().add_class("form-label")
         
@@ -1953,32 +1957,32 @@ class CementDialog(MaterialDialogBase):
             "type_i": {
                 "name": "Type I (Ordinary Portland)",
                 "c3s": 55.0, "c2s": 19.0, "c3a": 10.0, "c4af": 7.0,
-                "blaine": 350, "specific_gravity": 3.15
+                "specific_surface_area": 350, "specific_gravity": 3.15
             },
             "type_ii": {
                 "name": "Type II (Moderate Sulfate Resistance)",
                 "c3s": 51.0, "c2s": 24.0, "c3a": 6.0, "c4af": 11.0,
-                "blaine": 370, "specific_gravity": 3.16
+                "specific_surface_area": 370, "specific_gravity": 3.16
             },
             "type_iii": {
                 "name": "Type III (High Early Strength)",
                 "c3s": 56.0, "c2s": 16.0, "c3a": 12.0, "c4af": 8.0,
-                "blaine": 540, "specific_gravity": 3.15
+                "specific_surface_area": 540, "specific_gravity": 3.15
             },
             "type_iv": {
                 "name": "Type IV (Low Heat)",
                 "c3s": 28.0, "c2s": 49.0, "c3a": 4.0, "c4af": 12.0,
-                "blaine": 330, "specific_gravity": 3.13
+                "specific_surface_area": 330, "specific_gravity": 3.13
             },
             "type_v": {
                 "name": "Type V (High Sulfate Resistance)",
                 "c3s": 38.0, "c2s": 43.0, "c3a": 4.0, "c4af": 9.0,
-                "blaine": 380, "specific_gravity": 3.14
+                "specific_surface_area": 380, "specific_gravity": 3.14
             },
             "white": {
                 "name": "White Portland Cement",
                 "c3s": 70.0, "c2s": 12.0, "c3a": 12.0, "c4af": 1.0,
-                "blaine": 420, "specific_gravity": 3.12
+                "specific_surface_area": 420, "specific_gravity": 3.12
             }
         }
         
@@ -2033,8 +2037,8 @@ class CementDialog(MaterialDialogBase):
                 spin.set_value(value)
             
             # Load other properties
-            if 'blaine' in template:
-                self.blaine_spin.set_value(template['blaine'])
+            if 'specific_surface_area' in template:
+                self.blaine_spin.set_value(template['specific_surface_area'])
             
             if 'specific_gravity' in template:
                 self.specific_gravity_spin.set_value(template['specific_gravity'])
@@ -2095,8 +2099,8 @@ class CementDialog(MaterialDialogBase):
         else:
             print("DEBUG: Loading existing cement material data")
         
-        # Load Blaine fineness
-        blaine = self.material_data.get('blaine_fineness', 350)
+        # Load specific surface area
+        blaine = self.material_data.get('specific_surface_area', 350)
         self.blaine_spin.set_value(float(blaine))
         
         # Load gypsum mass fractions (convert from fraction to percentage)
@@ -2381,7 +2385,7 @@ class CementDialog(MaterialDialogBase):
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect cement-specific data."""
         data = {
-            'blaine_fineness': self.blaine_spin.get_value(),
+            'specific_surface_area': self.blaine_spin.get_value(),
             # Setting times removed per user request
             # Gypsum mass fractions (convert from percentage to fraction)
             'dihyd': self.dihyd_spin.get_value() / 100.0,
@@ -4028,22 +4032,22 @@ class SlagDialog(MaterialDialogBase):
         param_grid.attach(reactivity_label, 0, 1, 1, 1)
         param_grid.attach(reactivity_spin, 1, 1, 1, 1)
         
-        # Hydration rate constant
-        rate_label = Gtk.Label("Rate Constant:")
-        rate_label.set_halign(Gtk.Align.END)
-        rate_label.get_style_context().add_class("form-label")
-        
-        rate_spin = Gtk.SpinButton.new_with_range(1e-8, 1e-4, 1e-9)
-        rate_spin.set_value(1e-6)
-        rate_spin.set_digits(9)
-        self.reaction_params['rate_constant'] = rate_spin
-        
-        rate_unit_label = Gtk.Label("1/s")
-        rate_unit_label.get_style_context().add_class("dim-label")
-        
-        param_grid.attach(rate_label, 0, 2, 1, 1)
-        param_grid.attach(rate_spin, 1, 2, 1, 1)
-        param_grid.attach(rate_unit_label, 2, 2, 1, 1)
+        # Hydration rate constant - HIDDEN (not currently used in backend models)
+        # rate_label = Gtk.Label("Rate Constant:")
+        # rate_label.set_halign(Gtk.Align.END)
+        # rate_label.get_style_context().add_class("form-label")
+        # 
+        # rate_spin = Gtk.SpinButton.new_with_range(1e-8, 1e-4, 1e-9)
+        # rate_spin.set_value(1e-6)
+        # rate_spin.set_digits(9)
+        # self.reaction_params['rate_constant'] = rate_spin
+        # 
+        # rate_unit_label = Gtk.Label("1/s")
+        # rate_unit_label.get_style_context().add_class("dim-label")
+        # 
+        # param_grid.attach(rate_label, 0, 2, 1, 1)
+        # param_grid.attach(rate_spin, 1, 2, 1, 1)
+        # param_grid.attach(rate_unit_label, 2, 2, 1, 1)
         
         reaction_box.pack_start(param_grid, False, False, 0)
         reaction_frame.add(reaction_box)
@@ -4051,8 +4055,71 @@ class SlagDialog(MaterialDialogBase):
     
     def _add_advanced_sections(self, container: Gtk.Box) -> None:
         """Add slag-specific advanced sections."""
-        # No advanced sections currently needed for slag materials
-        pass
+        # Add ratio characteristics section (read-only informational)
+        self._add_ratio_characteristics_section(container)
+    
+    def _add_ratio_characteristics_section(self, container: Gtk.Box) -> None:
+        """Add read-only ratio characteristics section."""
+        # Ratio characteristics frame
+        ratio_frame = Gtk.Frame(label="Ratio Characteristics (Calculated)")
+        ratio_grid = Gtk.Grid()
+        ratio_grid.set_row_spacing(10)
+        ratio_grid.set_column_spacing(15)
+        ratio_grid.set_margin_top(10)
+        ratio_grid.set_margin_bottom(10)
+        ratio_grid.set_margin_left(15)
+        ratio_grid.set_margin_right(15)
+        
+        # Initialize ratio display labels dictionary
+        self.ratio_labels = {}
+        
+        row = 0
+        
+        # Ca/Si Molar Ratio
+        casi_label = Gtk.Label("Ca/Si Molar Ratio:")
+        casi_label.set_halign(Gtk.Align.END)
+        casi_label.get_style_context().add_class("form-label")
+        
+        self.ratio_labels['casi_mol_ratio'] = Gtk.Label("—")
+        self.ratio_labels['casi_mol_ratio'].set_halign(Gtk.Align.START)
+        self.ratio_labels['casi_mol_ratio'].get_style_context().add_class("monospace")
+        
+        ratio_grid.attach(casi_label, 0, row, 1, 1)
+        ratio_grid.attach(self.ratio_labels['casi_mol_ratio'], 1, row, 1, 1)
+        row += 1
+        
+        # Molecular Mass
+        mol_mass_label = Gtk.Label("Molecular Mass:")
+        mol_mass_label.set_halign(Gtk.Align.END)
+        mol_mass_label.get_style_context().add_class("form-label")
+        
+        self.ratio_labels['molecular_mass'] = Gtk.Label("—")
+        self.ratio_labels['molecular_mass'].set_halign(Gtk.Align.START)
+        self.ratio_labels['molecular_mass'].get_style_context().add_class("monospace")
+        
+        mol_mass_unit = Gtk.Label("g/mol")
+        mol_mass_unit.get_style_context().add_class("dim-label")
+        
+        ratio_grid.attach(mol_mass_label, 0, row, 1, 1)
+        ratio_grid.attach(self.ratio_labels['molecular_mass'], 1, row, 1, 1)
+        ratio_grid.attach(mol_mass_unit, 2, row, 1, 1)
+        row += 1
+        
+        # Si per Mole
+        si_per_mole_label = Gtk.Label("Si per Mole:")
+        si_per_mole_label.set_halign(Gtk.Align.END)
+        si_per_mole_label.get_style_context().add_class("form-label")
+        
+        self.ratio_labels['si_per_mole'] = Gtk.Label("—")
+        self.ratio_labels['si_per_mole'].set_halign(Gtk.Align.START)
+        self.ratio_labels['si_per_mole'].get_style_context().add_class("monospace")
+        
+        ratio_grid.attach(si_per_mole_label, 0, row, 1, 1)
+        ratio_grid.attach(self.ratio_labels['si_per_mole'], 1, row, 1, 1)
+        row += 1
+        
+        ratio_frame.add(ratio_grid)
+        container.pack_start(ratio_frame, False, False, 0)
     
     def _connect_material_signals(self) -> None:
         """Connect slag-specific signals."""
@@ -4081,30 +4148,49 @@ class SlagDialog(MaterialDialogBase):
     
     def _update_ratio_calculations(self) -> None:
         """Update ratio calculations."""
+        if not hasattr(self, 'ratio_labels'):
+            return  # UI not fully initialized yet
+            
         try:
-            cao = self.oxide_spins['cao'].get_value()
-            sio2 = self.oxide_spins['sio2'].get_value()
-            mgo = self.oxide_spins['mgo'].get_value()
-            al2o3 = self.oxide_spins['al2o3'].get_value()
+            # Get composition values (using *_content field names)
+            cao = self.oxide_spins.get('cao_content', self.oxide_spins.get('cao', None))
+            sio2 = self.oxide_spins.get('sio2_content', self.oxide_spins.get('sio2', None))
+            al2o3 = self.oxide_spins.get('al2o3_content', self.oxide_spins.get('al2o3', None))
             
-            # CaO/SiO2 ratio
-            if sio2 > 0:
-                cao_sio2_ratio = cao / sio2
-                self.cao_sio2_display.set_text(f"{cao_sio2_ratio:.3f}")
-            else:
-                self.cao_sio2_display.set_text("N/A")
+            if not all([cao, sio2, al2o3]):
+                return  # Required spinboxes not found
+                
+            cao_val = cao.get_value()
+            sio2_val = sio2.get_value()
+            al2o3_val = al2o3.get_value()
             
-            # MgO/Al2O3 ratio
-            if al2o3 > 0:
-                mgo_al2o3_ratio = mgo / al2o3
-                self.mgo_al2o3_display.set_text(f"{mgo_al2o3_ratio:.3f}")
+            # Ca/Si Molar Ratio (molecular weight: CaO=56.08, SiO2=60.08)
+            if sio2_val > 0:
+                casi_mol_ratio = (cao_val / 56.08) / (sio2_val / 60.08)
+                self.ratio_labels['casi_mol_ratio'].set_text(f"{casi_mol_ratio:.3f}")
             else:
-                self.mgo_al2o3_display.set_text("N/A")
+                self.ratio_labels['casi_mol_ratio'].set_text("N/A")
+            
+            # Approximate Molecular Mass (simplified calculation)
+            total_mass = cao_val + sio2_val + al2o3_val  # Basic approximation
+            if total_mass > 0:
+                # Rough estimate based on major components
+                molecular_mass = (cao_val * 56.08 + sio2_val * 60.08 + al2o3_val * 101.96) / 100
+                self.ratio_labels['molecular_mass'].set_text(f"{molecular_mass:.1f}")
+            else:
+                self.ratio_labels['molecular_mass'].set_text("N/A")
+            
+            # Si per Mole (approximation)
+            if sio2_val > 0:
+                si_per_mole = sio2_val / 60.08  # Simplified
+                self.ratio_labels['si_per_mole'].set_text(f"{si_per_mole:.3f}")
+            else:
+                self.ratio_labels['si_per_mole'].set_text("N/A")
                 
         except Exception as e:
-            self.logger.warning(f"Error updating ratio calculations: {e}")
-            self.cao_sio2_display.set_text("Error")
-            self.mgo_al2o3_display.set_text("Error")
+            # Fallback for any calculation errors
+            for key in self.ratio_labels:
+                self.ratio_labels[key].set_text("Error")
     
     def _load_material_specific_data(self) -> None:
         """Load slag-specific data."""
@@ -4276,7 +4362,7 @@ class FillerDialog(MaterialDialogBase):
         row += 1
         
         # Specific surface area
-        surface_label = Gtk.Label("Specific Surface:")
+        surface_label = Gtk.Label("Specific Surface Area:")
         surface_label.set_halign(Gtk.Align.END)
         surface_label.get_style_context().add_class("form-label")
         
@@ -4291,7 +4377,7 @@ class FillerDialog(MaterialDialogBase):
         surface_info_box = Gtk.EventBox()
         surface_info_box.add(surface_info)
         surface_info_box.set_has_tooltip(True)
-        surface_info_box.set_tooltip_text("Blaine specific surface area")
+        surface_info_box.set_tooltip_text("Specific surface area")
         
         surface_unit_label = Gtk.Label("m²/g")
         surface_unit_label.get_style_context().add_class("dim-label")
@@ -4406,11 +4492,11 @@ class FillerDialog(MaterialDialogBase):
         else:
             print("DEBUG: filler_type_combo not available for collection")
         
-        # Collect specific surface area (Blaine fineness)
+        # Collect specific surface area
         if hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
-            blaine_fineness = self.specific_surface_spin.get_value()
-            data['blaine_fineness'] = blaine_fineness
-            print(f"DEBUG: Collected blaine_fineness = {blaine_fineness}")
+            specific_surface_area = self.specific_surface_spin.get_value()
+            data['specific_surface_area'] = specific_surface_area
+            print(f"DEBUG: Collected specific_surface_area = {specific_surface_area}")
         else:
             print("DEBUG: specific_surface_spin not available for collection")
         
@@ -4474,12 +4560,12 @@ class FillerDialog(MaterialDialogBase):
             self.filler_type_combo.set_active_id(filler_type)
             print(f"DEBUG: Set filler_type_combo to {filler_type}")
         
-        # Load specific surface area (Blaine fineness)
-        blaine_fineness = self.material_data.get('blaine_fineness')
-        print(f"DEBUG: blaine_fineness = {blaine_fineness}, has spin = {hasattr(self, 'specific_surface_spin')}, spin exists = {self.specific_surface_spin is not None if hasattr(self, 'specific_surface_spin') else 'N/A'}")
-        if blaine_fineness is not None and hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
-            self.specific_surface_spin.set_value(float(blaine_fineness))
-            print(f"DEBUG: Set specific_surface_spin to {blaine_fineness}")
+        # Load specific surface area
+        specific_surface_area = self.material_data.get('specific_surface_area')
+        print(f"DEBUG: specific_surface_area = {specific_surface_area}, has spin = {hasattr(self, 'specific_surface_spin')}, spin exists = {self.specific_surface_spin is not None if hasattr(self, 'specific_surface_spin') else 'N/A'}")
+        if specific_surface_area is not None and hasattr(self, 'specific_surface_spin') and self.specific_surface_spin:
+            self.specific_surface_spin.set_value(float(specific_surface_area))
+            print(f"DEBUG: Set specific_surface_spin to {specific_surface_area}")
         
         # Load water absorption
         water_absorption = self.material_data.get('water_absorption')
@@ -4521,15 +4607,17 @@ class SilicaFumeDialog(MaterialDialogBase):
     
     def __init__(self, parent: 'VCCTLMainWindow', material_data: Optional[Dict[str, Any]] = None):
         """Initialize the silica fume dialog."""
+        # Initialize UI components BEFORE calling parent constructor
         self.psd_container = None
-        super().__init__(parent, 'silica_fume', material_data)
-        
-        # Silica fume-specific UI components (minimal since it's single phase)
         self.silica_content_spin = None
         self.surface_area_spin = None
+        self.silica_fume_fraction_spin = None
+        
+        super().__init__(parent, 'silica_fume', material_data)
     
     def _add_material_specific_fields(self, grid: Gtk.Grid, start_row: int) -> int:
         """Add silica fume-specific fields to the basic info grid."""
+        print("DEBUG: SilicaFumeDialog._add_material_specific_fields called")
         row = start_row
         
         # Silica content (typically 85-98%)
@@ -4542,6 +4630,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.silica_content_spin.set_digits(1)
         self.silica_content_spin.set_value(92.0)  # Typical value
         self.silica_content_spin.set_tooltip_text("High-quality silica fume is typically >90% SiO2")
+        print(f"DEBUG: Created silica_content_spin: {self.silica_content_spin}")
         
         silica_unit_label = Gtk.Label("%")
         silica_unit_label.get_style_context().add_class("dim-label")
@@ -4552,7 +4641,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         row += 1
         
         # Specific surface area (very high for silica fume)
-        surface_label = Gtk.Label("Surface Area:")
+        surface_label = Gtk.Label("Specific Surface Area:")
         surface_label.set_halign(Gtk.Align.END)
         surface_label.get_style_context().add_class("form-label")
         surface_label.set_tooltip_text("Specific surface area (very high for silica fume)")
@@ -4561,6 +4650,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.surface_area_spin.set_digits(0)
         self.surface_area_spin.set_value(20000)  # Typical value
         self.surface_area_spin.set_tooltip_text("Silica fume typically has 15,000-30,000 m²/kg")
+        print(f"DEBUG: Created surface_area_spin: {self.surface_area_spin}")
         
         surface_unit_label = Gtk.Label("m²/kg")
         surface_unit_label.get_style_context().add_class("dim-label")
@@ -4594,6 +4684,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.silica_fume_fraction_spin.set_value(1.0)
         self.silica_fume_fraction_spin.set_sensitive(False)  # Always 1.0
         self.silica_fume_fraction_spin.set_tooltip_text("Silica fume is treated as a single phase (always 1.0)")
+        print(f"DEBUG: Created silica_fume_fraction_spin: {self.silica_fume_fraction_spin}")
         
         phase_grid.attach(phase_label, 0, 0, 1, 1)
         phase_grid.attach(self.silica_fume_fraction_spin, 1, 0, 1, 1)
@@ -4625,15 +4716,35 @@ class SilicaFumeDialog(MaterialDialogBase):
         print("DEBUG: SilicaFumeDialog._collect_material_specific_data called")
         data = {}
         
-        # Collect UI field values
-        if hasattr(self, 'silica_content_spin'):
-            data['silica_content'] = self.silica_content_spin.get_value()
+        # Collect UI field values with extra safety checks
+        print(f"DEBUG: Widget states - silica_content_spin: {self.silica_content_spin}, surface_area_spin: {self.surface_area_spin}, silica_fume_fraction_spin: {getattr(self, 'silica_fume_fraction_spin', 'NOT_SET')}")
         
-        if hasattr(self, 'surface_area_spin'):
-            data['surface_area'] = self.surface_area_spin.get_value()
+        try:
+            if hasattr(self, 'silica_content_spin') and self.silica_content_spin is not None:
+                data['silica_content'] = self.silica_content_spin.get_value()
+                print(f"DEBUG: Collected silica_content = {data['silica_content']}")
+            else:
+                print(f"DEBUG: silica_content_spin is None or missing - hasattr: {hasattr(self, 'silica_content_spin')}, value: {getattr(self, 'silica_content_spin', 'MISSING')}")
+        except Exception as e:
+            print(f"DEBUG: Error collecting silica_content: {e}")
+        
+        try:
+            if hasattr(self, 'surface_area_spin') and self.surface_area_spin is not None:
+                data['specific_surface_area'] = self.surface_area_spin.get_value()
+                print(f"DEBUG: Collected specific_surface_area = {data['specific_surface_area']}")
+            else:
+                print(f"DEBUG: surface_area_spin is None or missing - hasattr: {hasattr(self, 'surface_area_spin')}, value: {getattr(self, 'surface_area_spin', 'MISSING')}")
+        except Exception as e:
+            print(f"DEBUG: Error collecting surface_area: {e}")
             
-        if hasattr(self, 'silica_fume_fraction_spin'):
-            data['silica_fume_fraction'] = self.silica_fume_fraction_spin.get_value()
+        try:
+            if hasattr(self, 'silica_fume_fraction_spin') and self.silica_fume_fraction_spin is not None:
+                data['silica_fume_fraction'] = self.silica_fume_fraction_spin.get_value()
+                print(f"DEBUG: Collected silica_fume_fraction = {data['silica_fume_fraction']}")
+            else:
+                print(f"DEBUG: silica_fume_fraction_spin is None or missing - hasattr: {hasattr(self, 'silica_fume_fraction_spin')}, value: {getattr(self, 'silica_fume_fraction_spin', 'MISSING')}")
+        except Exception as e:
+            print(f"DEBUG: Error collecting silica_fume_fraction: {e}")
         
         # Add PSD data from unified widget
         if hasattr(self, 'psd_widget') and self.psd_widget:
@@ -4657,11 +4768,11 @@ class SilicaFumeDialog(MaterialDialogBase):
             self.silica_content_spin.set_value(float(silica_content))
             print(f"DEBUG: Loaded silica_content = {silica_content}")
         
-        # Load surface area field
-        if hasattr(self, 'surface_area_spin') and 'surface_area' in self.material_data:
-            surface_area = self.material_data.get('surface_area', 20000.0)
+        # Load specific surface area field
+        if hasattr(self, 'surface_area_spin') and 'specific_surface_area' in self.material_data:
+            surface_area = self.material_data.get('specific_surface_area', 20000.0)
             self.surface_area_spin.set_value(float(surface_area))
-            print(f"DEBUG: Loaded surface_area = {surface_area}")
+            print(f"DEBUG: Loaded specific_surface_area = {surface_area}")
             
         # Load silica fume fraction field
         if hasattr(self, 'silica_fume_fraction_spin') and 'silica_fume_fraction' in self.material_data:
@@ -4723,19 +4834,6 @@ class LimestoneDialog(MaterialDialogBase):
         phase_grid.set_margin_left(15)
         phase_grid.set_margin_right(15)
         
-        # Single phase fraction (always 1.0 for limestone)
-        phase_label = Gtk.Label("Limestone Fraction:")
-        phase_label.set_halign(Gtk.Align.END)
-        phase_label.get_style_context().add_class("form-label")
-        
-        self.limestone_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.limestone_fraction_spin.set_digits(3)
-        self.limestone_fraction_spin.set_value(1.0)
-        self.limestone_fraction_spin.set_sensitive(False)  # Always 1.0
-        self.limestone_fraction_spin.set_tooltip_text("Limestone is treated as a single phase (always 1.0)")
-        
-        phase_grid.attach(phase_label, 0, 0, 1, 1)
-        phase_grid.attach(self.limestone_fraction_spin, 1, 0, 1, 1)
         
         # Activation energy
         activation_label = Gtk.Label("Activation Energy:")
@@ -4749,9 +4847,9 @@ class LimestoneDialog(MaterialDialogBase):
         activation_unit = Gtk.Label("J/mol")
         activation_unit.get_style_context().add_class("dim-label")
         
-        phase_grid.attach(activation_label, 0, 1, 1, 1)
-        phase_grid.attach(self.activation_energy_spin, 1, 1, 1, 1)
-        phase_grid.attach(activation_unit, 2, 1, 1, 1)
+        phase_grid.attach(activation_label, 0, 0, 1, 1)
+        phase_grid.attach(self.activation_energy_spin, 1, 0, 1, 1)
+        phase_grid.attach(activation_unit, 2, 0, 1, 1)
         
         phase_frame.add(phase_grid)
         container.pack_start(phase_frame, False, False, 0)

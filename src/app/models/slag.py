@@ -7,7 +7,8 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, Text
+from sqlalchemy import Column, String, Float, Integer, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -31,16 +32,16 @@ class Slag(Base):
     specific_gravity = Column(Float, nullable=True, default=2.87,
                             doc="Specific gravity of slag material")
     
-    # Particle size distribution reference
-    psd = Column(String(64), nullable=True, default='cement141',
-                doc="Particle size distribution reference")
+    # PSD relationship (replaces embedded PSD fields)
+    psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
+    psd_data = relationship('PSDData', backref='slag_materials')
     
     psd_custom_points = Column(Text, nullable=True, 
                               doc="Custom PSD points stored as JSON")
     
     # Complete PSD parameters (unified with cement model)
-    psd_mode = Column(String(64), nullable=True, default='log_normal',
-                     doc="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_mode = Column(Integer, nullable=True,
+                     doc="PSD mode/type")
     psd_d50 = Column(Float, nullable=True, default=15.0,
                     doc="PSD D50 parameter (μm) for Rosin-Rammler")
     psd_n = Column(Float, nullable=True, default=1.4,
@@ -57,8 +58,8 @@ class Slag(Base):
     # Basic slag properties
     glass_content = Column(Float, nullable=True, default=95.0,
                           doc="Glass content percentage")
-    activity_index = Column(Float, nullable=True, default=95.0,
-                           doc="Activity index percentage")
+    specific_surface_area = Column(Float, nullable=True,
+                                 doc="Specific surface area in m²/kg")
     
     # Chemical composition (oxide content) - typical GGBS composition totaling 100%
     sio2_content = Column(Float, nullable=True, default=35.0,
@@ -219,7 +220,7 @@ class SlagCreate(BaseModel):
     
     # Basic slag properties
     glass_content: Optional[float] = Field(95.0, ge=85.0, le=100.0, description="Glass content percentage")
-    activity_index: Optional[float] = Field(95.0, ge=50.0, le=150.0, description="Activity index percentage")
+    specific_surface_area: Optional[float] = Field(None, ge=100.0, le=10000.0, description="Specific surface area m²/kg")
     
     # Chemical composition (oxide content) - typical GGBS composition totaling 100%
     sio2_content: Optional[float] = Field(35.0, ge=0.0, le=100.0, description="SiO2 content percentage")
@@ -287,7 +288,7 @@ class SlagUpdate(BaseModel):
     
     # Basic slag properties
     glass_content: Optional[float] = Field(None, ge=85.0, le=100.0, description="Glass content percentage")
-    activity_index: Optional[float] = Field(None, ge=50.0, le=150.0, description="Activity index percentage")
+    specific_surface_area: Optional[float] = Field(None, ge=100.0, le=10000.0, description="Specific surface area m²/kg")
     
     # Chemical composition (oxide content)
     sio2_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="SiO2 content percentage")
@@ -338,7 +339,7 @@ class SlagResponse(BaseModel):
     
     # Basic slag properties
     glass_content: Optional[float]
-    activity_index: Optional[float]
+    specific_surface_area: Optional[float]
     
     # Chemical composition
     sio2_content: Optional[float]
