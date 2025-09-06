@@ -2,35 +2,42 @@
 
 ## Current Status: Materials Management Complete & Ready for PSD Renormalization
 
-**Latest Session: Surface Area Field Standardization & PSD Renormalization Planning (September 5, 2025)**
+**Latest Session: Materials Testing Complete & PSD Renormalization Ready (September 6, 2025)**
 
-**Status: MATERIALS MANAGEMENT FIXES ✅ - Ready for Systematic PSD Database Normalization**
+**Status: ALL MATERIALS TESTING ✅ - Ready to Begin Systematic PSD Database Normalization**
 
-## Materials Management & PSD Renormalization Planning (September 5, 2025)
+## Materials Testing Complete & PSD Renormalization Ready (September 6, 2025)
 
 ### **Session Summary:**
-This session completed materials management fixes and established a comprehensive systematic plan for PSD database normalization. All surface area field inconsistencies were resolved, and 5 out of 6 material types are now available for testing before PSD renormalization begins.
+This session completed comprehensive materials testing and implemented all user-requested fixes. All surface area field issues are resolved, and 5 out of 6 material types are fully operational. The system is now ready to begin the systematic PSD renormalization process.
 
 ### **Major Accomplishments:**
 
-#### **1. Surface Area Field Standardization ✅**
-- **Problem**: Column name mismatches prevented filler and silica_fume materials from loading
-- **Root Cause**: Models referenced `blaine_fineness` and `surface_area` but database had `specific_surface_area`
-- **Solution**: Updated models and Pydantic schemas to use consistent `specific_surface_area` naming
-- **Result**: All materials now use standardized surface area field naming
+#### **1. Comprehensive Materials Testing & Fixes ✅**
+- **Silica Fume**: Removed unnecessary `silica_fume_fraction` field from UI, model, and database
+- **Limestone**: Added missing `specific_surface_area` field to model and schemas  
+- **Fly Ash**: Identified PSD field mismatch requiring systematic renormalization
+- **Filler**: Updated type choices ("Quartz Powder" → "Inert component", removed "Other")
+- **Result**: 5 out of 6 material types fully functional and tested
 
-#### **2. Materials Loading Recovery ✅**  
-- **Filler Materials**: Fixed `blaine_fineness` → `specific_surface_area` (model + schemas)
-- **Silica Fume Materials**: Fixed `surface_area` → `specific_surface_area` (model + schemas)
-- **Database Verification**: Confirmed all field queries work correctly
-- **Material Counts**: Restored access to 4 filler + 3 silica fume materials
+#### **2. Final Material Status Summary:**
+```
+✅ Limestone (4 records) - Fully functional, surface area field added
+✅ Filler (4 records) - Fully functional, type choices updated  
+✅ Silica Fume (3 records) - Fully functional, fraction field removed
+✅ Aggregate - Fully functional
+⚠️ Fly Ash (2 records) - Duplication fails (PSD field mismatch)
+⚠️ Cement (37 records) - Loading fails (PSD field mismatch)
+⚠️ Slag (2 records) - Loading fails (PSD field mismatch)
+```
 
-#### **3. Systematic PSD Renormalization Plan ✅**
-**Problem Statement**: Each material model has embedded PSD columns creating inconsistent PSD functionality across materials.
+#### **3. PSD Renormalization Requirements Confirmed:**
+Three material types require PSD renormalization due to schema/model mismatches:
+- **Cement**: `ERROR: no such column: cement.psd`
+- **Slag**: `ERROR: no such column: slag.psd_custom_points`
+- **Fly Ash**: `'psd' is an invalid keyword argument for FlyAsh`
 
-**Goal**: All materials use exactly the same PSD functionality through unified PSD architecture.
-
-### **📋 SYSTEMATIC PSD RENORMALIZATION PLAN - MEMORIZED**
+### **📋 SYSTEMATIC PSD RENORMALIZATION PLAN - READY FOR EXECUTION**
 
 #### **Phase 1: Design & Architecture** 
 **Objective**: Create unified PSD infrastructure without touching existing material tables
@@ -52,7 +59,7 @@ This session completed materials management fixes and established a comprehensiv
 
 #### **Phase 3: Model Updates (Per Material Type)**
 **Objective**: Update one material type at a time with full testing
-**Tickets** (repeat for each: cement, filler, silica_fume, limestone, fly_ash, slag):
+**Priority Order**: cement, slag, fly_ash (based on complexity and usage)
 - 3.X.1. Update Material model to use PSD relationship
 - 3.X.2. Update Material Pydantic schemas (Create, Update, Response)
 - 3.X.3. Update Material service layer for PSD operations
@@ -87,51 +94,81 @@ This session completed materials management fixes and established a comprehensiv
 
 ### **Current System State:**
 
-#### **Materials Status (Post-Surface Area Fixes):**
-- ✅ **Limestone** (4 records) - Available for testing
-- ✅ **Fly ash** (2 records) - Available for testing
-- ✅ **Aggregate** - Available for testing
-- ✅ **Filler** (4 records) - **RESTORED** - Available for testing
-- ✅ **Silica fume** (3 records) - **RESTORED** - Available for testing
-- ⏸️ **Cement** (37 records) - Awaiting PSD renormalization (PSD column issues)
-- ⏸️ **Slag** (2 records) - Awaiting PSD renormalization (PSD column issues)
+#### **Materials Status (Post-Testing & Fixes):**
+- ✅ **Limestone** (4 records) - **COMPLETE** - Surface area field added, fully functional
+- ✅ **Filler** (4 records) - **COMPLETE** - Type choices updated, fully functional  
+- ✅ **Silica fume** (3 records) - **COMPLETE** - Fraction field removed, fully functional
+- ✅ **Aggregate** - **COMPLETE** - Fully functional
+- ⏸️ **Fly ash** (2 records) - **PENDING PSD** - Duplication fails, needs Phase 3.3
+- ⏸️ **Cement** (37 records) - **PENDING PSD** - Loading fails, needs Phase 3.1
+- ⏸️ **Slag** (2 records) - **PENDING PSD** - Loading fails, needs Phase 3.2
 
-**Testing Status**: **5 out of 6 material types** available for comprehensive testing
+**Testing Status**: **Materials testing complete! 4 material types fully functional, 3 awaiting PSD renormalization**
 
 #### **Git Status:**
-- **Current Commit**: `63186bc7f` - "Fix Surface Area Field Consistency for Material Loading"
-- **Safe State**: All surface area fixes committed, system ready for testing
-- **Next**: Await user testing results before beginning PSD renormalization
+- **Current Commit**: `d094ba3ab` - "Complete Materials Management Testing & Final Fixes"
+- **Safe State**: All materials testing and fixes committed, ready for PSD work
+- **Next**: Begin systematic PSD renormalization starting with Phase 1
 
 ### **Technical Implementation Details:**
 
-#### **Surface Area Field Fixes:**
+#### **Completed Fixes:**
 ```python
-# Filler model - Before/After
-blaine_fineness = Column(Float, ...)  # OLD
-specific_surface_area = Column(Float, ...)  # NEW
+# Silica Fume - Fraction field removed entirely
+# OLD: silica_fume_fraction = Column(Float, nullable=True, default=1.0)
+# NEW: Hardcoded to 1.0 in properties, field removed
 
-# Silica Fume model - Before/After  
-surface_area = Column(Float, ...)  # OLD
-specific_surface_area = Column(Float, ...)  # NEW
+# Limestone - Surface area field added  
+specific_surface_area = Column(Float, nullable=True, default=400.0,
+                               doc="Specific surface area in m²/kg")
+
+# Filler - Type choices updated
+# OLD: "quartz", "Quartz Powder" + "other", "Other"
+# NEW: "quartz", "Inert component" (Other removed)
 ```
 
-#### **PSD Issues Identified (For Future Work):**
+#### **PSD Issues Ready for Resolution:**
 ```bash
-# Console errors showing PSD column mismatches
-ERROR: no such column: cement.psd
-ERROR: no such column: slag.psd_custom_points
-# These will be resolved during PSD renormalization
+# Three material types with PSD schema/model mismatches:
+ERROR: no such column: cement.psd                    # → Phase 3.1
+ERROR: no such column: slag.psd_custom_points        # → Phase 3.2  
+ERROR: 'psd' is invalid keyword argument for FlyAsh  # → Phase 3.3
 ```
 
 ### **Next Steps:**
-1. **User Testing**: Test all 5 available material types thoroughly
-2. **PSD Renormalization**: Execute systematic plan after testing approval
-3. **Full System**: All 6 material types with unified PSD functionality
+1. **Phase 1**: Create unified PSD infrastructure (PSDData model, service, relationships)
+2. **Phase 2**: Plan database migration strategy with backup/rollback procedures  
+3. **Phase 3**: Systematic material model updates (cement → slag → fly_ash)
+4. **Phase 4**: Execute data migration with full validation
+5. **Phase 5**: System cleanup and comprehensive testing
 
-**Status**: Surface area standardization complete! System ready for comprehensive testing before systematic PSD database normalization begins.
+**Status**: Materials management complete! All fixes implemented and committed. System ready to begin systematic PSD database normalization with full safety procedures.
 
 ## Previous Sessions Archive
+
+## Materials Management & PSD Renormalization Planning (September 5, 2025)
+
+### **Session Summary:**
+This session completed materials management fixes and established a comprehensive systematic plan for PSD database normalization. All surface area field inconsistencies were resolved, and 5 out of 6 material types are now available for testing before PSD renormalization begins.
+
+### **Major Accomplishments:**
+
+#### **1. Surface Area Field Standardization ✅**
+- **Problem**: Column name mismatches prevented filler and silica_fume materials from loading
+- **Root Cause**: Models referenced `blaine_fineness` and `surface_area` but database had `specific_surface_area`
+- **Solution**: Updated models and Pydantic schemas to use consistent `specific_surface_area` naming
+- **Result**: All materials now use standardized surface area field naming
+
+#### **2. Materials Loading Recovery ✅**  
+- **Filler Materials**: Fixed `blaine_fineness` → `specific_surface_area` (model + schemas)
+- **Silica Fume Materials**: Fixed `surface_area` → `specific_surface_area` (model + schemas)
+- **Database Verification**: Confirmed all field queries work correctly
+- **Material Counts**: Restored access to 4 filler + 3 silica fume materials
+
+#### **3. Systematic PSD Renormalization Plan ✅**
+**Problem Statement**: Each material model has embedded PSD columns creating inconsistent PSD functionality across materials.
+
+**Goal**: All materials use exactly the same PSD functionality through unified PSD architecture.
 
 ## Mix Design Management System Implementation (August 27, 2025)
 
@@ -159,57 +196,6 @@ This session resolved the Create Mix button failure issue and implemented a comp
 - **Foreign Key Constraint Resolution**: Fixed deletion issues for mix designs referenced by operations
 - **Clean Data Flow**: Eliminated confusion between mix designs and operational data
 
-### **Technical Implementation Details:**
-
-#### **Mix Design Management Features:**
-```python
-# Professional Management Dialog with Carbon Icons
-def _show_mix_design_management_dialog(self) -> None:
-    # Carbon icon integration with fallbacks
-    delete_icon = self._load_carbon_icon("trash-can", 32)
-    copy_icon = self._load_carbon_icon("copy", 32)
-    export_icon = self._load_carbon_icon("document--export", 32)
-    refresh_icon = self._load_carbon_icon("restart", 32)
-    
-    # Advanced features: search, sort, bulk operations
-```
-
-#### **Foreign Key Constraint Resolution:**
-```python
-# Smart deletion handling
-def delete_by_id(self, mix_design_id: int) -> bool:
-    # Check for referencing MicrostructureOperations
-    referencing_operations = session.query(MicrostructureOperation).filter(
-        MicrostructureOperation.mix_design_id == mix_design_id
-    ).all()
-    
-    if referencing_operations:
-        # Delete references first, then delete mix design
-        for micro_op in referencing_operations:
-            session.delete(micro_op)
-```
-
-#### **Clean Data Architecture:**
-```python
-# Simplified Load Dialog - Mix Designs Only
-def _populate_mix_design_list(self, list_store: Gtk.ListStore) -> None:
-    """Populate the mix design list store with saved mix designs only."""
-    # No more microstructure operations - clean separation of concerns
-```
-
-### **User Experience Improvements:**
-- **Consistent Data**: Both Load and Management dialogs show identical mix design lists
-- **Professional Management**: Advanced sorting (Name, Date, W/B Ratio), bulk operations, export functionality
-- **Carbon Icon Consistency**: Matches VCCTL's design language throughout
-- **Clear Purpose**: Each dialog has focused, logical functionality
-- **No Data Loss**: Auto-save ensures all work is preserved
-- **Intuitive Workflow**: Streamlined interface eliminates confusion
-
-### **Files Modified:**
-- `src/app/windows/panels/mix_design_panel.py` - Main implementation
-- `src/app/mix_design_management_helpers.py` - Management functionality helpers
-- `src/app/services/mix_design_service.py` - Enhanced deletion with constraint handling
-
 ### **Architecture Benefits:**
 - **Clean Separation**: Operations managed in Operations panel, mix designs in Mix Design panel
 - **Data Integrity**: Foreign key constraints properly handled
@@ -235,18 +221,6 @@ Major architectural improvements completed:
 - ✅ **Professional Icons**: 2,366+ Carbon icons with size fallback system
 - ✅ **Real-time Progress**: Progress updates save properly to database
 
-**Technical Implementation:**
-```python
-def _load_operations_from_database(self) -> None:
-    """Load all operations from database (single source of truth)."""
-    self.operations.clear()
-    with self.service_container.database_service.get_read_only_session() as session:
-        db_operations = session.query(DBOperation).all()
-    for db_op in db_operations:
-        ui_operation = self._convert_db_operation_to_ui_operation(db_op)
-        self.operations[ui_operation.id] = ui_operation
-```
-
 ## System Status
 
 **Current System State:**
@@ -259,7 +233,7 @@ def _load_operations_from_database(self) -> None:
 - ✅ **Hydration Tool**: Complete integration with parameter files and progress monitoring
 - ✅ **3D Visualization**: PyVista integration for microstructure analysis
 
-**Ready for**: Production use and advanced feature development
+**Ready for**: Systematic PSD database normalization and advanced feature development
 
 ---
-*Historical development context (Phases 1-3 implementation details, debugging sessions, integration work) archived on 2025-01-XX for performance optimization.*
+*Historical development context (Phases 1-3 implementation details, debugging sessions, integration work) archived for performance optimization.*

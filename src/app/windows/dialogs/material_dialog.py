@@ -4351,7 +4351,6 @@ class FillerDialog(MaterialDialogBase):
         type_label.get_style_context().add_class("form-label")
         
         self.filler_type_combo = Gtk.ComboBoxText()
-        self.filler_type_combo.append("limestone", "Limestone Powder")
         self.filler_type_combo.append("quartz", "Inert component")
         self.filler_type_combo.append("glass", "Glass Powder")
         self.filler_type_combo.set_active(0)

@@ -39,7 +39,7 @@ class Filler(Base):
     
     # Additional material properties
     water_absorption = Column(Float, CheckConstraint('water_absorption >= 0 AND water_absorption <= 100'))
-    filler_type = Column(String(64))  # limestone, quartz, glass
+    filler_type = Column(String(64))  # quartz, glass
     
     # Descriptive properties
     description = Column(Text)
@@ -54,7 +54,7 @@ class FillerCreate(BaseModel):
     specific_gravity: Optional[float] = Field(None, gt=0, lt=10, description="Specific gravity")
     specific_surface_area: Optional[float] = Field(None, ge=0, le=10000, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
-    filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (limestone, quartz, glass)")
+    filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (quartz, glass)")
     
     # PSD data will be managed through separate PSD service
     # No embedded PSD fields in create schema
@@ -78,7 +78,7 @@ class FillerUpdate(BaseModel):
     specific_gravity: Optional[float] = Field(None, gt=0, lt=10, description="Specific gravity")
     specific_surface_area: Optional[float] = Field(None, ge=0, le=10000, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
-    filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (limestone, quartz, glass)")
+    filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (quartz, glass)")
     
     # PSD data managed through separate PSD service
     # No embedded PSD fields in update schema
@@ -95,7 +95,7 @@ class FillerResponse(BaseModel):
     specific_gravity: Optional[float] = Field(None, description="Specific gravity")
     specific_surface_area: Optional[float] = Field(None, description="Specific surface area in m²/kg")
     water_absorption: Optional[float] = Field(None, description="Water absorption percentage")
-    filler_type: Optional[str] = Field(None, description="Filler type (limestone, quartz, glass)")
+    filler_type: Optional[str] = Field(None, description="Filler type (quartz, glass)")
     
     # PSD data accessed through relationship
     psd_data_id: Optional[int] = Field(None, description="PSD data ID")
