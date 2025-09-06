@@ -1,10 +1,137 @@
 # VCCTL Project - Claude Context
 
-## Current Status: Mix Design Management System Complete & Auto-Save Enhancement
+## Current Status: Materials Management Complete & Ready for PSD Renormalization
 
-**Latest Session: Mix Design Management & Auto-Save Workflow Enhancement (August 27, 2025)**
+**Latest Session: Surface Area Field Standardization & PSD Renormalization Planning (September 5, 2025)**
 
-**Status: COMPREHENSIVE MIX DESIGN MANAGEMENT SYSTEM ✅ - Professional Management Interface & Clean Data Architecture**
+**Status: MATERIALS MANAGEMENT FIXES ✅ - Ready for Systematic PSD Database Normalization**
+
+## Materials Management & PSD Renormalization Planning (September 5, 2025)
+
+### **Session Summary:**
+This session completed materials management fixes and established a comprehensive systematic plan for PSD database normalization. All surface area field inconsistencies were resolved, and 5 out of 6 material types are now available for testing before PSD renormalization begins.
+
+### **Major Accomplishments:**
+
+#### **1. Surface Area Field Standardization ✅**
+- **Problem**: Column name mismatches prevented filler and silica_fume materials from loading
+- **Root Cause**: Models referenced `blaine_fineness` and `surface_area` but database had `specific_surface_area`
+- **Solution**: Updated models and Pydantic schemas to use consistent `specific_surface_area` naming
+- **Result**: All materials now use standardized surface area field naming
+
+#### **2. Materials Loading Recovery ✅**  
+- **Filler Materials**: Fixed `blaine_fineness` → `specific_surface_area` (model + schemas)
+- **Silica Fume Materials**: Fixed `surface_area` → `specific_surface_area` (model + schemas)
+- **Database Verification**: Confirmed all field queries work correctly
+- **Material Counts**: Restored access to 4 filler + 3 silica fume materials
+
+#### **3. Systematic PSD Renormalization Plan ✅**
+**Problem Statement**: Each material model has embedded PSD columns creating inconsistent PSD functionality across materials.
+
+**Goal**: All materials use exactly the same PSD functionality through unified PSD architecture.
+
+### **📋 SYSTEMATIC PSD RENORMALIZATION PLAN - MEMORIZED**
+
+#### **Phase 1: Design & Architecture** 
+**Objective**: Create unified PSD infrastructure without touching existing material tables
+- 1.1. Create `PSDData` model with all necessary PSD columns
+- 1.2. Create `PSDDataService` for CRUD operations on PSD data  
+- 1.3. Define PSD relationship patterns for material models
+- 1.4. Add PSDData to model imports and database initialization
+- 1.5. Test that new PSD infrastructure works independently
+**Safety**: No existing functionality affected - pure addition
+
+#### **Phase 2: Database Migration Strategy**
+**Objective**: Plan and prepare the data migration process
+- 2.1. Audit all existing PSD columns across all material tables
+- 2.2. Create comprehensive migration script (backup → migrate → validate)
+- 2.3. Design rollback procedures and safety checks
+- 2.4. Create test migration on database copy
+- 2.5. Document migration risks and mitigation strategies
+**Safety**: All planning, no production changes yet
+
+#### **Phase 3: Model Updates (Per Material Type)**
+**Objective**: Update one material type at a time with full testing
+**Tickets** (repeat for each: cement, filler, silica_fume, limestone, fly_ash, slag):
+- 3.X.1. Update Material model to use PSD relationship
+- 3.X.2. Update Material Pydantic schemas (Create, Update, Response)
+- 3.X.3. Update Material service layer for PSD operations
+- 3.X.4. Update Material dialog UI to use PSD service
+- 3.X.5. Test Material CRUD operations thoroughly before next material
+**Safety**: One material at a time, full testing before proceeding
+
+#### **Phase 4: Database Migration Execution**
+**Objective**: Execute the actual data migration
+- 4.1. Create database backup
+- 4.2. Run migration script (extract PSD data → create PSD records → update foreign keys)
+- 4.3. Validate data integrity post-migration
+- 4.4. Test all material loading/saving operations
+- 4.5. Performance testing and optimization
+**Safety**: Full backup, validation at each step
+
+#### **Phase 5: Cleanup & Verification**
+**Objective**: Remove old PSD columns and verify system integrity
+- 5.1. Remove old PSD columns from material tables
+- 5.2. System-wide integration testing
+- 5.3. UI testing across all material types
+- 5.4. Performance benchmarking
+- 5.5. Documentation updates
+**Safety**: Only after full system verification
+
+#### **Critical Safety Principles:**
+- Database backup before any destructive changes
+- One material type at a time in Phase 3
+- Full testing after each ticket
+- Rollback procedures documented and tested
+- No ticket proceeds without previous ticket completion
+
+### **Current System State:**
+
+#### **Materials Status (Post-Surface Area Fixes):**
+- ✅ **Limestone** (4 records) - Available for testing
+- ✅ **Fly ash** (2 records) - Available for testing
+- ✅ **Aggregate** - Available for testing
+- ✅ **Filler** (4 records) - **RESTORED** - Available for testing
+- ✅ **Silica fume** (3 records) - **RESTORED** - Available for testing
+- ⏸️ **Cement** (37 records) - Awaiting PSD renormalization (PSD column issues)
+- ⏸️ **Slag** (2 records) - Awaiting PSD renormalization (PSD column issues)
+
+**Testing Status**: **5 out of 6 material types** available for comprehensive testing
+
+#### **Git Status:**
+- **Current Commit**: `63186bc7f` - "Fix Surface Area Field Consistency for Material Loading"
+- **Safe State**: All surface area fixes committed, system ready for testing
+- **Next**: Await user testing results before beginning PSD renormalization
+
+### **Technical Implementation Details:**
+
+#### **Surface Area Field Fixes:**
+```python
+# Filler model - Before/After
+blaine_fineness = Column(Float, ...)  # OLD
+specific_surface_area = Column(Float, ...)  # NEW
+
+# Silica Fume model - Before/After  
+surface_area = Column(Float, ...)  # OLD
+specific_surface_area = Column(Float, ...)  # NEW
+```
+
+#### **PSD Issues Identified (For Future Work):**
+```bash
+# Console errors showing PSD column mismatches
+ERROR: no such column: cement.psd
+ERROR: no such column: slag.psd_custom_points
+# These will be resolved during PSD renormalization
+```
+
+### **Next Steps:**
+1. **User Testing**: Test all 5 available material types thoroughly
+2. **PSD Renormalization**: Execute systematic plan after testing approval
+3. **Full System**: All 6 material types with unified PSD functionality
+
+**Status**: Surface area standardization complete! System ready for comprehensive testing before systematic PSD database normalization begins.
+
+## Previous Sessions Archive
 
 ## Mix Design Management System Implementation (August 27, 2025)
 

@@ -4352,9 +4352,8 @@ class FillerDialog(MaterialDialogBase):
         
         self.filler_type_combo = Gtk.ComboBoxText()
         self.filler_type_combo.append("limestone", "Limestone Powder")
-        self.filler_type_combo.append("quartz", "Quartz Powder")
+        self.filler_type_combo.append("quartz", "Inert component")
         self.filler_type_combo.append("glass", "Glass Powder")
-        self.filler_type_combo.append("other", "Other")
         self.filler_type_combo.set_active(0)
         
         grid.attach(type_label, 0, row, 1, 1)
@@ -4611,7 +4610,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         self.psd_container = None
         self.silica_content_spin = None
         self.surface_area_spin = None
-        self.silica_fume_fraction_spin = None
+        # silica_fume_fraction removed - always 1.0 for single-phase material
         
         super().__init__(parent, 'silica_fume', material_data)
     
@@ -4674,20 +4673,8 @@ class SilicaFumeDialog(MaterialDialogBase):
         phase_grid.set_margin_left(15)
         phase_grid.set_margin_right(15)
         
-        # Single phase fraction (always 1.0 for silica fume)
-        phase_label = Gtk.Label("Silica Fume Fraction:")
-        phase_label.set_halign(Gtk.Align.END)
-        phase_label.get_style_context().add_class("form-label")
-        
-        self.silica_fume_fraction_spin = Gtk.SpinButton.new_with_range(0.0, 1.0, 0.01)
-        self.silica_fume_fraction_spin.set_digits(3)
-        self.silica_fume_fraction_spin.set_value(1.0)
-        self.silica_fume_fraction_spin.set_sensitive(False)  # Always 1.0
-        self.silica_fume_fraction_spin.set_tooltip_text("Silica fume is treated as a single phase (always 1.0)")
-        print(f"DEBUG: Created silica_fume_fraction_spin: {self.silica_fume_fraction_spin}")
-        
-        phase_grid.attach(phase_label, 0, 0, 1, 1)
-        phase_grid.attach(self.silica_fume_fraction_spin, 1, 0, 1, 1)
+        # Silica fume is treated as a single phase material (100% silica)
+        # No phase fraction field needed as it's always 1.0
         
         phase_frame.add(phase_grid)
         container.pack_start(phase_frame, False, False, 0)
@@ -4717,7 +4704,7 @@ class SilicaFumeDialog(MaterialDialogBase):
         data = {}
         
         # Collect UI field values with extra safety checks
-        print(f"DEBUG: Widget states - silica_content_spin: {self.silica_content_spin}, surface_area_spin: {self.surface_area_spin}, silica_fume_fraction_spin: {getattr(self, 'silica_fume_fraction_spin', 'NOT_SET')}")
+        print(f"DEBUG: Widget states - silica_content_spin: {self.silica_content_spin}, surface_area_spin: {self.surface_area_spin}")
         
         try:
             if hasattr(self, 'silica_content_spin') and self.silica_content_spin is not None:
@@ -4737,14 +4724,8 @@ class SilicaFumeDialog(MaterialDialogBase):
         except Exception as e:
             print(f"DEBUG: Error collecting surface_area: {e}")
             
-        try:
-            if hasattr(self, 'silica_fume_fraction_spin') and self.silica_fume_fraction_spin is not None:
-                data['silica_fume_fraction'] = self.silica_fume_fraction_spin.get_value()
-                print(f"DEBUG: Collected silica_fume_fraction = {data['silica_fume_fraction']}")
-            else:
-                print(f"DEBUG: silica_fume_fraction_spin is None or missing - hasattr: {hasattr(self, 'silica_fume_fraction_spin')}, value: {getattr(self, 'silica_fume_fraction_spin', 'MISSING')}")
-        except Exception as e:
-            print(f"DEBUG: Error collecting silica_fume_fraction: {e}")
+        # silica_fume_fraction is always 1.0 for this single-phase material
+        # No need to collect from UI as the field has been removed
         
         # Add PSD data from unified widget
         if hasattr(self, 'psd_widget') and self.psd_widget:
@@ -4775,10 +4756,7 @@ class SilicaFumeDialog(MaterialDialogBase):
             print(f"DEBUG: Loaded specific_surface_area = {surface_area}")
             
         # Load silica fume fraction field
-        if hasattr(self, 'silica_fume_fraction_spin') and 'silica_fume_fraction' in self.material_data:
-            fraction = self.material_data.get('silica_fume_fraction', 1.0)
-            self.silica_fume_fraction_spin.set_value(float(fraction))
-            print(f"DEBUG: Loaded silica_fume_fraction = {fraction}")
+        # silica_fume_fraction field removed - always 1.0 for single-phase material
         
         # Load PSD data into unified widget - silica fume uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:

@@ -47,9 +47,8 @@ class SilicaFume(Base):
     distribute_phases_by = Column(Integer, nullable=True,
                                 doc="Method for phase distribution")
     
-    # Single phase fraction (silica fume is essentially pure silica)
-    silica_fume_fraction = Column(Float, nullable=True, default=1.0,
-                                doc="Silica fume phase mass fraction")
+    # Silica fume is a single-phase material (100% silica) 
+    # silica_fume_fraction field removed - always implicitly 1.0
     
     # Reaction parameters
     activation_energy = Column(Float, nullable=True, default=54000.0,
@@ -78,32 +77,29 @@ class SilicaFume(Base):
         """
         return (
             f"{self.distribute_phases_by or 0}\n"
-            f"{self.silica_fume_fraction or 1.0}\n"
+            f"1.0\n"  # Silica fume is always 100% silica phase
         )
     
     @property
     def phase_fractions(self) -> dict:
         """Get all phase fractions as a dictionary."""
         return {
-            'silica_fume': self.silica_fume_fraction
+            'silica_fume': 1.0  # Always 100% silica phase
         }
     
     @property
     def total_phase_fraction(self) -> Optional[float]:
         """Calculate total phase fraction."""
-        return self.silica_fume_fraction
+        return 1.0  # Always 100% for single-phase material
     
     @property
     def has_complete_phase_data(self) -> bool:
         """Check if silica fume has complete phase composition data."""
-        return self.silica_fume_fraction is not None
+        return True  # Always complete for single-phase material
     
     def validate_phase_fractions(self) -> bool:
         """Validate that phase fractions are reasonable (0-1 range)."""
-        if self.silica_fume_fraction is None:
-            return True
-        
-        return 0 <= self.silica_fume_fraction <= 1
+        return True  # Always valid for single-phase material
 
 
 class SilicaFumeCreate(BaseModel):
@@ -116,9 +112,7 @@ class SilicaFumeCreate(BaseModel):
     
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
-    # Single phase fraction
-    silica_fume_fraction: Optional[float] = Field(1.0, ge=0.0, le=1.0,
-                                                 description="Silica fume phase fraction")
+    # Silica fume is single-phase material - no fraction field needed
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
@@ -154,9 +148,7 @@ class SilicaFumeUpdate(BaseModel):
     
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
-    # Single phase fraction
-    silica_fume_fraction: Optional[float] = Field(None, ge=0.0, le=1.0,
-                                                 description="Silica fume phase fraction")
+    # Silica fume is single-phase material - no fraction field needed
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
@@ -178,7 +170,7 @@ class SilicaFumeResponse(BaseModel):
     psd_data_id: Optional[int]
     
     distribute_phases_by: Optional[int]
-    silica_fume_fraction: Optional[float]
+    # silica_fume_fraction removed - always 1.0
     
     # Reaction parameters
     activation_energy: Optional[float]

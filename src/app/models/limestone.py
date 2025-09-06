@@ -30,6 +30,8 @@ class Limestone(Base):
     # Physical properties
     specific_gravity = Column(Float, nullable=True, default=2.71, 
                             doc="Specific gravity of limestone material")
+    specific_surface_area = Column(Float, nullable=True, default=400.0,
+                                   doc="Specific surface area in m²/kg")
     
     # PSD relationship (replaces embedded PSD fields)
     psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
@@ -100,6 +102,7 @@ class LimestoneCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Limestone name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.71, ge=0.0, description="Specific gravity")
+    specific_surface_area: Optional[float] = Field(400.0, ge=100.0, le=10000.0, description="Specific surface area m²/kg")
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Chemical composition
@@ -157,6 +160,7 @@ class LimestoneResponse(BaseModel):
     
     name: str
     specific_gravity: Optional[float]
+    specific_surface_area: Optional[float]
     distribute_phases_by: Optional[int]
     
     # Chemical composition
