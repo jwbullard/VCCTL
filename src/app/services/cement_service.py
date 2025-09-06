@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database.service import DatabaseService
 from app.models.cement import Cement, CementCreate, CementUpdate, CementResponse
@@ -31,20 +31,20 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
         self.default_alkali_file = 'lowalkali'
     
     def get_all(self) -> List[Cement]:
-        """Get all cement materials."""
+        """Get all cement materials with eagerly loaded PSD relationships."""
         try:
             with self.db_service.get_read_only_session() as session:
-                # Order by id (new primary key) instead of name
-                return session.query(Cement).order_by(Cement.id).all()
+                # Order by id (new primary key) instead of name, include PSD data
+                return session.query(Cement).options(joinedload(Cement.psd_data)).order_by(Cement.id).all()
         except Exception as e:
             self.logger.error(f"Failed to get all cements: {e}")
             raise ServiceError(f"Failed to retrieve cements: {e}")
     
     def get_by_name(self, name: str) -> Optional[Cement]:
-        """Get cement by name."""
+        """Get cement by name with eagerly loaded PSD relationship."""
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(Cement).filter_by(name=name).first()
+                return session.query(Cement).options(joinedload(Cement.psd_data)).filter_by(name=name).first()
         except Exception as e:
             self.logger.error(f"Failed to get cement {name}: {e}")
             raise ServiceError(f"Failed to retrieve cement: {e}")
@@ -61,17 +61,38 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
                 # Create cement with defaults
                 cement_dict = cement_data.dict(exclude_unset=True)
                 
+                # Extract PSD fields from create data if present
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
+                
+                # Separate PSD fields from cement fields
+                for field in list(cement_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = cement_dict.pop(field)
+                
                 # Set default alkali file if not provided
                 if not cement_dict.get('alkali_file'):
                     cement_dict['alkali_file'] = self.default_alkali_file
                 
+                # Create cement object
                 cement = Cement(**cement_dict)
+                
+                # Create PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    new_psd = PSDData(**psd_data)
+                    session.add(new_psd)
+                    session.flush()  # Get the ID
+                    cement.psd_data = new_psd
+                    cement.psd_data_id = new_psd.id
                 
                 # Validate cement properties
                 self._validate_cement(cement)
                 
                 session.add(cement)
                 session.flush()  # Flush to get any database errors
+                # Note: session.commit() happens automatically in the context manager
                 
                 self.logger.info(f"Created cement: {cement.name}")
                 return cement
@@ -89,20 +110,47 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
         """Update an existing cement material."""
         try:
             with self.db_service.get_session() as session:
-                cement = session.query(Cement).filter_by(id=cement_id).first()
+                cement = session.query(Cement).options(joinedload(Cement.psd_data)).filter_by(id=cement_id).first()
                 if not cement:
                     raise NotFoundError(f"Cement with ID '{cement_id}' not found")
                 
-                # Update fields
+                # Extract PSD fields from update data if present
                 update_dict = cement_data.dict(exclude_unset=True)
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
+                
+                # Separate PSD fields from cement fields
+                for field in list(update_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = update_dict.pop(field)
+                
+                # Handle PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    
+                    if cement.psd_data_id and cement.psd_data:
+                        # Update existing PSD data
+                        for field, value in psd_data.items():
+                            setattr(cement.psd_data, field, value)
+                    else:
+                        # Create new PSD data
+                        new_psd = PSDData(**psd_data)
+                        session.add(new_psd)
+                        session.flush()  # Get the ID
+                        cement.psd_data = new_psd
+                        cement.psd_data_id = new_psd.id
+                
+                # Update remaining cement fields
                 for field, value in update_dict.items():
-                    setattr(cement, field, value)
+                    if hasattr(cement, field):
+                        setattr(cement, field, value)
                 
                 # Validate updated cement
                 self._validate_cement(cement)
                 
                 session.flush()  # Flush to get any database errors
-                
+                # Note: session.commit() happens automatically in the context manager
                 self.logger.info(f"Updated cement: {cement.name}")
                 return cement
                 
@@ -124,6 +172,7 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
                     raise NotFoundError(f"Cement '{name}' not found")
                 
                 session.delete(cement)
+                # Note: session.commit() happens automatically in the context manager
                 
                 self.logger.info(f"Deleted cement: {name}")
                 return True
@@ -147,8 +196,8 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
         """
         try:
             with self.db_service.get_session() as session:
-                # Get original cement
-                original = session.query(Cement).filter_by(name=original_name).first()
+                # Get original cement with PSD data
+                original = session.query(Cement).options(joinedload(Cement.psd_data)).filter_by(name=original_name).first()
                 if not original:
                     raise NotFoundError(f"Cement '{original_name}' not found")
                 
@@ -163,10 +212,38 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
                 cement_dict.pop('id', None)  # Remove auto-generated fields
                 cement_dict.pop('created_at', None)
                 cement_dict.pop('updated_at', None)
+                cement_dict.pop('psd_data', None)  # Remove relationship object
+                cement_dict.pop('psd_data_id', None)  # Will set new one if needed
                 
                 new_cement = Cement(**cement_dict)
+                
+                # Copy PSD data if exists
+                if original.psd_data:
+                    from app.models.psd_data import PSDData
+                    # Create a copy of the PSD data
+                    psd_dict = {
+                        'psd_reference': original.psd_data.psd_reference,
+                        'psd_custom_points': original.psd_data.psd_custom_points,
+                        'psd_mode': original.psd_data.psd_mode,
+                        'psd_d50': original.psd_data.psd_d50,
+                        'psd_n': original.psd_data.psd_n,
+                        'psd_dmax': original.psd_data.psd_dmax,
+                        'psd_median': original.psd_data.psd_median,
+                        'psd_spread': original.psd_data.psd_spread,
+                        'psd_exponent': original.psd_data.psd_exponent,
+                        'diameter_percentile_10': original.psd_data.diameter_percentile_10,
+                        'diameter_percentile_50': original.psd_data.diameter_percentile_50,
+                        'diameter_percentile_90': original.psd_data.diameter_percentile_90
+                    }
+                    new_psd = PSDData(**psd_dict)
+                    session.add(new_psd)
+                    session.flush()  # Get the ID
+                    new_cement.psd_data = new_psd
+                    new_cement.psd_data_id = new_psd.id
+                
                 session.add(new_cement)
                 session.flush()
+                # Note: session.commit() happens automatically in the context manager
                 
                 self.logger.info(f"Copied cement '{original_name}' to '{new_name}'")
                 return new_cement

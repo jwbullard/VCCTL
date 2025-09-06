@@ -614,7 +614,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         return {
             'cement': {
                 'cement_type': 'Type I Portland Cement',
-                'blaine_fineness': 350.0,
+                'specific_surface_area': 350.0,
                 'density': 3.15,
                 'phase_composition': {
                     'C3S': 55.0,

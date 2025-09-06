@@ -493,11 +493,51 @@ class MaterialsPanel(Gtk.Box):
         self.details_revealer.set_reveal_child(False)
         self.selected_material = None
     
+    def _get_service_for_type(self, material_type: str):
+        """Get the appropriate service for a material type."""
+        service_container = get_service_container()
+        service_map = {
+            'cement': service_container.cement_service,
+            'filler': service_container.filler_service,
+            'aggregate': service_container.aggregate_service,
+            'fly_ash': service_container.fly_ash_service,
+            'slag': service_container.slag_service,
+            'silica_fume': service_container.silica_fume_service,
+            'limestone': service_container.limestone_service
+        }
+        return service_map.get(material_type)
+    
     def _on_edit_material_clicked(self, button) -> None:
         """Handle edit material button click."""
         if self.selected_material:
             material_type = self._get_material_type(self.selected_material)
-            self._show_material_dialog(material_type, self.selected_material)
+            
+            # Re-fetch the material to get fresh data from database
+            service = self._get_service_for_type(material_type)
+            if service:
+                try:
+                    # Get fresh material data by name or id
+                    if material_type == 'cement':
+                        fresh_material = service.get_by_name(self.selected_material.name)
+                    elif material_type == 'aggregate':
+                        # Aggregate uses display_name as primary key
+                        with service.db_service.get_read_only_session() as session:
+                            fresh_material = session.query(service.model).filter_by(display_name=self.selected_material.display_name).first()
+                    else:
+                        # Other materials with integer IDs
+                        fresh_material = service.get_by_name(self.selected_material.name)
+                    
+                    if fresh_material:
+                        self._show_material_dialog(material_type, fresh_material)
+                    else:
+                        self.logger.error(f"Could not re-fetch material for editing")
+                        self._show_material_dialog(material_type, self.selected_material)
+                except Exception as e:
+                    self.logger.error(f"Error re-fetching material: {e}")
+                    # Fall back to using the cached material
+                    self._show_material_dialog(material_type, self.selected_material)
+            else:
+                self._show_material_dialog(material_type, self.selected_material)
     
     def _on_duplicate_material_clicked(self, button) -> None:
         """Handle duplicate material button click."""
@@ -1488,13 +1528,18 @@ class MaterialsPanel(Gtk.Box):
         
         # Copy gypsum data if available
         gypsum_fields = ['dihyd', 'anhyd', 'hemihyd']
+        print(f"DEBUG: _copy_cement_data - copying gypsum data from {original_cement.name}")
         for field in gypsum_fields:
             if hasattr(original_cement, field):
-                copy_data[field] = getattr(original_cement, field)
+                value = getattr(original_cement, field)
+                copy_data[field] = value
+                print(f"DEBUG: Copied {field} = {value}")
+            else:
+                print(f"DEBUG: Original cement missing field {field}")
         
         # Copy new fields (setting times, fineness, PSD parameters)
         new_fields = [
-            'initial_set_time', 'final_set_time', 'blaine_fineness',
+            'initial_set_time', 'final_set_time', 'specific_surface_area',
             'psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_exponent', 'psd_custom_points',
             'source', 'notes'
         ]
@@ -1548,7 +1593,7 @@ class MaterialsPanel(Gtk.Box):
             'specific_gravity': getattr(original_filler, 'specific_gravity', None),
             'description': getattr(original_filler, 'description', None),
             'source': getattr(original_filler, 'source', None),
-            'blaine_fineness': getattr(original_filler, 'blaine_fineness', None),
+            'specific_surface_area': getattr(original_filler, 'specific_surface_area', None),
             'water_absorption': getattr(original_filler, 'water_absorption', None),
             'filler_type': getattr(original_filler, 'filler_type', None),
             'color': getattr(original_filler, 'color', None),
@@ -1739,6 +1784,19 @@ class MaterialsPanel(Gtk.Box):
                                 material_dict[attr] = value
                         except:
                             pass
+                
+                # Special handling for cement PSD data relationship
+                if material_type == 'cement' and hasattr(material_data, 'psd_data') and material_data.psd_data:
+                    # Flatten PSD data fields into the material dict
+                    psd_data = material_data.psd_data
+                    psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                                 'psd_spread', 'psd_exponent', 'psd_custom_points',
+                                 'diameter_percentile_10', 'diameter_percentile_50', 'diameter_percentile_90']
+                    for field in psd_fields:
+                        if hasattr(psd_data, field):
+                            value = getattr(psd_data, field)
+                            if value is not None:
+                                material_dict[field] = value
                 dialog = create_material_dialog(self.main_window, material_type, material_dict)
             else:
                 dialog = create_material_dialog(self.main_window, material_type, material_data)

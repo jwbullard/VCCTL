@@ -711,15 +711,18 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def _replace_save_with_duplicate_button(self) -> None:
         """Replace Save button with Duplicate to Edit button."""
+        print("DEBUG: _replace_save_with_duplicate_button called")
         self.save_button.hide()
         
         if not hasattr(self, 'duplicate_button'):
             # Create duplicate button
+            print("DEBUG: Creating duplicate button with APPLY response")
             self.duplicate_button = self.add_button('Duplicate to Edit', Gtk.ResponseType.APPLY)
             self.duplicate_button.get_style_context().add_class('suggested-action')
             
         self.duplicate_button.show()
         self.set_default_response(Gtk.ResponseType.APPLY)
+        print("DEBUG: Duplicate button setup complete")
     
     def _restore_save_button(self) -> None:
         """Restore Save button and hide Duplicate button."""
@@ -797,6 +800,15 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         print(f"DEBUG: _collect_form_data - collected material_data = {material_data}")
         print(f"DEBUG: _collect_form_data - data before update = {data}")
         print(f"DEBUG: _collect_form_data - name before update = '{data.get('name')}'")
+        
+        # For cement materials, specifically check surface area and PSD data
+        if self.material_type == 'cement':
+            print(f"DEBUG: Cement-specific checks:")
+            print(f"DEBUG: specific_surface_area = {material_data.get('specific_surface_area')}")
+            print(f"DEBUG: psd_mode = {material_data.get('psd_mode')}")
+            print(f"DEBUG: psd_median = {material_data.get('psd_median')}")
+            print(f"DEBUG: psd_custom_points = {material_data.get('psd_custom_points')}")
+        
         data.update(material_data)
         print(f"DEBUG: _collect_form_data - final data = {data}")
         print(f"DEBUG: _collect_form_data - final name = '{data.get('name')}'")
@@ -947,50 +959,85 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def _duplicate_material(self) -> bool:
         """Duplicate the current immutable material as a mutable copy."""
-        if not self.material_data or self.material_type != 'cement':
+        print(f"DEBUG: MaterialDialogBase._duplicate_material called with material_type='{self.material_type}'")
+        if not self.material_data:
+            print("DEBUG: No material_data, returning False")
             return False
             
         try:
             # Create a copy of current material data
-            original_name = self.material_data.get('name', 'cement')
+            original_name = self.material_data.get('name', self.material_type)
             new_name = f"{original_name}_copy"
             
             # Check if the name already exists and find a unique name
             counter = 1
             final_name = new_name
             
-            # Get cement service for checking duplicates
-            cement_service = self.service_container.cement_service
-            while cement_service.get_by_name(final_name):
+            # Get appropriate service for checking duplicates
+            service = getattr(self.service_container, f"{self.material_type}_service")
+            while service.get_by_name(final_name):
                 counter += 1
                 final_name = f"{new_name}_{counter}"
             
-            # Collect all current form data (excluding old PSD fields)
-            duplicate_data = self._collect_form_data()
+            # Create duplicate data based on original material data (more reliable than form data)
+            duplicate_data = {}
+            
+            # Debug: Print original material data
+            print(f"DEBUG: Original material_data type: {type(self.material_data)}")
+            print(f"DEBUG: Original material_data keys: {list(self.material_data.keys()) if isinstance(self.material_data, dict) else 'Not a dict'}")
+            
+            # Copy all data from original material (excluding auto-generated fields)
+            if isinstance(self.material_data, dict):
+                duplicate_data = self.material_data.copy()
+            else:
+                # Handle SQLAlchemy object
+                duplicate_data = self.material_data.to_dict() if hasattr(self.material_data, 'to_dict') else {}
+            
+            # Debug: Print gypsum data in original
+            gypsum_fields = ['dihyd', 'hemihyd', 'anhyd', 'dihyd_volume_fraction', 'hemihyd_volume_fraction', 'anhyd_volume_fraction']
+            print(f"DEBUG: Original gypsum data:")
+            for field in gypsum_fields:
+                value = duplicate_data.get(field, 'NOT_FOUND')
+                print(f"DEBUG:   {field} = {value}")
+            
+            print(f"DEBUG: All duplicate_data after copy: {duplicate_data}")
             
             # Override key fields for the duplicate
             duplicate_data['name'] = final_name
             duplicate_data['immutable'] = False  # New copy is mutable
             
-            # Remove the ID field if present (for new cement)
-            if 'id' in duplicate_data:
-                del duplicate_data['id']
+            # Remove auto-generated fields that shouldn't be copied
+            fields_to_remove = ['id', 'created_at', 'updated_at']
+            for field in fields_to_remove:
+                duplicate_data.pop(field, None)
             
-            # Remove old PSD fields that may come from the widget
+            # Remove old PSD fields that may exist in legacy data
             old_psd_fields = ['psd', 'psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 
                              'psd_median', 'psd_spread', 'psd_exponent', 'psd_custom_points']
             for field in old_psd_fields:
                 duplicate_data.pop(field, None)
             
-            # Use the original material's psd_data_id
+            # Ensure psd_data_id is preserved
             duplicate_data['psd_data_id'] = self.material_data.get('psd_data_id')
             
-            # Create the duplicate cement
-            from app.models.cement import CementCreate
+            # Create the duplicate material
+            # Import the appropriate create model
+            if self.material_type == 'cement':
+                from app.models.cement import CementCreate
+                create_model = CementCreate
+            elif self.material_type == 'aggregate':
+                from app.models.aggregate import AggregateCreate
+                create_model = AggregateCreate
+            else:
+                # Generic fallback for other material types
+                create_model = dict
             
-            # Create new cement
-            create_data = CementCreate(**duplicate_data)
-            new_cement = cement_service.create(create_data)
+            # Create new material
+            if create_model == dict:
+                new_material = service.create(duplicate_data)
+            else:
+                create_data = create_model(**duplicate_data)
+                new_material = service.create(create_data)
             
             # Show success message with option to edit
             dialog = Gtk.MessageDialog(
@@ -998,11 +1045,11 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 flags=0,
                 message_type=Gtk.MessageType.QUESTION,
                 buttons=Gtk.ButtonsType.YES_NO,
-                text="Cement Duplicated Successfully"
+                text=f"{self.material_type.title()} Duplicated Successfully"
             )
             dialog.format_secondary_text(
                 f"Created '{final_name}' as a mutable copy.\\n\\n"
-                "Would you like to open the new cement for editing?"
+                f"Would you like to open the new {self.material_type} for editing?"
             )
             
             response = dialog.run()
@@ -1010,17 +1057,20 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             
             if response == Gtk.ResponseType.YES:
                 # Open new dialog for editing the duplicate
-                from app.windows.dialogs.material_dialog import CementDialog
-                
-                edit_dialog = CementDialog(
-                    self.parent_window,
-                    new_cement.to_dict()
-                )
+                if self.material_type == 'cement':
+                    from app.windows.dialogs.material_dialog import CementDialog
+                    edit_dialog = CementDialog(self.parent_window, new_material.to_dict())
+                elif self.material_type == 'aggregate':
+                    from app.windows.dialogs.material_dialog import AggregateDialog
+                    edit_dialog = AggregateDialog(self.parent_window, new_material.to_dict())
+                else:
+                    # Generic material dialog for other types
+                    edit_dialog = MaterialDialogBase(self.parent_window, self.material_type, new_material.to_dict())
                 
                 edit_response = edit_dialog.run()
                 edit_dialog.destroy()
                 
-                # If user saved the new cement, refresh the original caller
+                # If user saved the new material, refresh the original caller
                 if edit_response == Gtk.ResponseType.OK:
                     # Emit signal to refresh materials list if possible
                     pass
@@ -1043,6 +1093,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
         return False
     
     def _on_response(self, widget: Gtk.Dialog, response_id: int) -> None:
+        print(f"DEBUG: _on_response called with response_id={response_id} (APPLY={Gtk.ResponseType.APPLY})")
         """Handle dialog response."""
         if response_id == Gtk.ResponseType.OK:
             # Try to save
@@ -1055,6 +1106,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 self.stop_emission_by_name('response')
         elif response_id == Gtk.ResponseType.APPLY:
             # Handle duplicate button click
+            print(f"DEBUG: Response handler APPLY called, material_type='{self.material_type}'")
             if self._duplicate_material():
                 # For aggregates that switch to edit mode, prevent dialog from closing
                 if self.material_type == 'aggregate' and self.is_edit_mode:
@@ -2112,25 +2164,58 @@ class CementDialog(MaterialDialogBase):
         blaine = self.material_data.get('specific_surface_area', 350)
         self.blaine_spin.set_value(float(blaine))
         
-        # Load gypsum mass fractions (convert from fraction to percentage)
-        dihyd = self.material_data.get('dihyd', 0.0)
-        self.dihyd_spin.set_value(float(dihyd) * 100.0 if dihyd else 0.0)
+        # Temporarily disable signal handling during gypsum data loading
+        was_updating = getattr(self, '_updating_fractions', False)
+        self._updating_fractions = True
         
-        hemihyd = self.material_data.get('hemihyd', 0.0)
-        self.hemihyd_spin.set_value(float(hemihyd) * 100.0 if hemihyd else 0.0)
-        
-        anhyd = self.material_data.get('anhyd', 0.0)
-        self.anhyd_spin.set_value(float(anhyd) * 100.0 if anhyd else 0.0)
-        
-        # Load gypsum volume fractions (convert from fraction to percentage)
-        dihyd_vol = self.material_data.get('dihyd_volume_fraction', 0.0)
-        self.dihyd_volume_spin.set_value(float(dihyd_vol) * 100.0 if dihyd_vol else 0.0)
-        
-        hemihyd_vol = self.material_data.get('hemihyd_volume_fraction', 0.0)
-        self.hemihyd_volume_spin.set_value(float(hemihyd_vol) * 100.0 if hemihyd_vol else 0.0)
-        
-        anhyd_vol = self.material_data.get('anhyd_volume_fraction', 0.0)
-        self.anhyd_volume_spin.set_value(float(anhyd_vol) * 100.0 if anhyd_vol else 0.0)
+        try:
+            # Load gypsum mass fractions (convert from fraction to percentage)
+            dihyd = self.material_data.get('dihyd', 0.0)
+            print(f"DEBUG: Loading dihyd from material_data: {dihyd}")
+            dihyd_percent = float(dihyd) * 100.0 if dihyd else 0.0
+            print(f"DEBUG: Setting dihyd_spin to: {dihyd_percent}")
+            self.dihyd_spin.set_value(dihyd_percent)
+            print(f"DEBUG: dihyd_spin now shows: {self.dihyd_spin.get_value()}")
+            
+            hemihyd = self.material_data.get('hemihyd', 0.0)
+            print(f"DEBUG: Loading hemihyd from material_data: {hemihyd}")
+            hemihyd_percent = float(hemihyd) * 100.0 if hemihyd else 0.0
+            print(f"DEBUG: Setting hemihyd_spin to: {hemihyd_percent}")
+            self.hemihyd_spin.set_value(hemihyd_percent)
+            print(f"DEBUG: hemihyd_spin now shows: {self.hemihyd_spin.get_value()}")
+            
+            anhyd = self.material_data.get('anhyd', 0.0)
+            print(f"DEBUG: Loading anhyd from material_data: {anhyd}")
+            anhyd_percent = float(anhyd) * 100.0 if anhyd else 0.0
+            print(f"DEBUG: Setting anhyd_spin to: {anhyd_percent}")
+            self.anhyd_spin.set_value(anhyd_percent)
+            print(f"DEBUG: anhyd_spin now shows: {self.anhyd_spin.get_value()}")
+            
+            # Calculate gypsum volume fractions from mass fractions - keep signal protection
+            cement_bulk_sg = self.specific_gravity_spin.get_value()
+            print(f"DEBUG: Using cement bulk SG: {cement_bulk_sg}")
+            
+            # Calculate volume fractions using: volume_fraction = (mass_fraction / component_SG) * cement_bulk_SG
+            for gypsum_type, mass_value in [('dihyd', dihyd), ('hemihyd', hemihyd), ('anhyd', anhyd)]:
+                if mass_value > 0:
+                    sg_gypsum = self.GYPSUM_SPECIFIC_GRAVITIES.get(gypsum_type, 1.0)
+                    volume_fraction = (mass_value / sg_gypsum) * cement_bulk_sg
+                    volume_percent = volume_fraction * 100.0
+                    print(f"DEBUG: {gypsum_type}: mass={mass_value} → volume={volume_percent:.3f}% (SG={sg_gypsum})")
+                else:
+                    volume_percent = 0.0
+                    print(f"DEBUG: {gypsum_type}: mass={mass_value} → volume=0.000% (no mass)")
+                
+                # Set the volume spin button
+                if gypsum_type == 'dihyd':
+                    self.dihyd_volume_spin.set_value(volume_percent)
+                elif gypsum_type == 'hemihyd':
+                    self.hemihyd_volume_spin.set_value(volume_percent)
+                elif gypsum_type == 'anhyd':
+                    self.anhyd_volume_spin.set_value(volume_percent)
+        finally:
+            # Restore previous updating state
+            self._updating_fractions = was_updating
         
         # Load phase composition
         phase_mapping = {
@@ -2195,6 +2280,11 @@ class CementDialog(MaterialDialogBase):
             self._updating_fractions = False
         
         # Setting times loading removed per user request
+        
+        # Load activation energy if available
+        if hasattr(self, 'physical_properties') and 'activation_energy' in self.physical_properties:
+            activation_energy = self.material_data.get('activation_energy', 54000.0)
+            self.physical_properties['activation_energy'].set_value(float(activation_energy))
         
         # Load PSD data into unified widget
         if hasattr(self, 'psd_widget') and self.psd_widget:
@@ -2450,10 +2540,17 @@ class CementDialog(MaterialDialogBase):
             # Convert percentage to fraction (0-1 range)
             data[model_field] = spin.get_value() / 100.0
         
+        print(f"DEBUG: Cement data before PSD collection = {data}")
+        print(f"DEBUG: specific_surface_area in data = {data.get('specific_surface_area')}")
+        
         # Add PSD data from unified widget
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
+            print(f"DEBUG: Cement PSD data collected = {psd_data}")
             data.update(psd_data)
+            print(f"DEBUG: Cement data after PSD collection = {data}")
+        else:
+            print("DEBUG: No PSD widget found in cement dialog")
         
         # Add activation energy
         if hasattr(self, 'physical_properties') and 'activation_energy' in self.physical_properties:
@@ -3248,10 +3345,12 @@ class AggregateDialog(MaterialDialogBase):
     
     def _duplicate_material(self) -> bool:
         """Override base class to handle aggregate duplication."""
+        print(f"DEBUG: AggregateDialog._duplicate_material called with material_type='{self.material_type}'")
         if self.material_type == 'aggregate':
             return self._duplicate_aggregate()
         else:
             # Fallback to base class implementation for other material types
+            print(f"DEBUG: AggregateDialog calling super()._duplicate_material()")
             return super()._duplicate_material()
     
     def _show_immutable_message(self) -> None:

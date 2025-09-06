@@ -31,7 +31,7 @@ class TestCementModel:
         assert cement.name == sample_cement_data['name']
         assert cement.type == sample_cement_data['type']
         assert cement.sio2 == sample_cement_data['sio2']
-        assert cement.blaine_fineness == sample_cement_data['blaine_fineness']
+        assert cement.specific_surface_area == sample_cement_data['specific_surface_area']
 
     @pytest.mark.unit
     def test_cement_create_missing_required_fields(self):
@@ -69,7 +69,7 @@ class TestCementModel:
         invalid_data = {
             'name': 'Test Cement',
             'type': 'Type I',
-            'blaine_fineness': -100.0,  # Negative fineness
+            'specific_surface_area': -100.0,  # Negative fineness
             'density': 0.0,  # Zero density
             'loss_on_ignition': 15.0  # Too high LOI
         }
@@ -88,7 +88,7 @@ class TestCementModel:
             'type': 'Type I',
             'sio2': 0.0,  # Minimum
             'al2o3': 100.0,  # Maximum
-            'blaine_fineness': 1.0,  # Minimum positive
+            'specific_surface_area': 1.0,  # Minimum positive
             'density': 0.1,  # Minimum positive
             'loss_on_ignition': 0.0  # Minimum
         }
@@ -102,12 +102,12 @@ class TestCementModel:
         """Test partial cement update."""
         update_data = {
             'sio2': 21.0,
-            'blaine_fineness': 375.0
+            'specific_surface_area': 375.0
         }
         
         cement_update = CementUpdate(**update_data)
         assert cement_update.sio2 == 21.0
-        assert cement_update.blaine_fineness == 375.0
+        assert cement_update.specific_surface_area == 375.0
         assert cement_update.name is None  # Not provided in update
 
     @pytest.mark.unit
@@ -247,7 +247,7 @@ class TestFlyAshModel:
             'k2o': 2.1,
             'na2o': 1.8,
             'specific_gravity': 2.35,
-            'blaine_fineness': 420.0,
+            'specific_surface_area': 420.0,
             'loss_on_ignition': 2.8
         }
 
@@ -317,7 +317,7 @@ class TestSlagModel:
             'mgo': 6.8,
             'so3': 1.2,
             'specific_gravity': 2.90,
-            'blaine_fineness': 450.0,
+            'specific_surface_area': 450.0,
             'activity_index_7d': 65.0,
             'activity_index_28d': 85.0
         }
@@ -364,7 +364,7 @@ class TestInertFillerModel:
             'name': 'Limestone Powder',
             'type': 'limestone',
             'specific_gravity': 2.72,
-            'blaine_fineness': 380.0,
+            'specific_surface_area': 380.0,
             'particle_size_d50': 15.0,
             'cao': 85.2,
             'mgo': 1.8,
@@ -473,7 +473,7 @@ class TestModelRelationships:
         assert 2.0 <= aggregate.density <= 3.5  # Typical aggregate density
         
         # Fineness ranges
-        assert 200 <= cement.blaine_fineness <= 800  # Typical cement fineness
+        assert 200 <= cement.specific_surface_area <= 800  # Typical cement fineness
 
 
 @pytest.mark.unit
@@ -528,14 +528,14 @@ class TestDataModelEdgeCases:
             'cao': 95.0,      # Very high but possible
             'mgo': 0.0,       # Minimum
             'so3': 0.0,       # Minimum
-            'blaine_fineness': 1000.0,  # Very high but possible
+            'specific_surface_area': 1000.0,  # Very high but possible
             'density': 4.0,   # Maximum reasonable
             'loss_on_ignition': 0.0     # Minimum
         }
         
         cement = CementCreate(**extreme_cement)
         assert cement.cao == 95.0
-        assert cement.blaine_fineness == 1000.0
+        assert cement.specific_surface_area == 1000.0
 
     def test_string_field_validation(self):
         """Test string field validation and trimming."""

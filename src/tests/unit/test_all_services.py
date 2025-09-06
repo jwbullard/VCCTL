@@ -633,5 +633,5 @@ def sample_cement_data():
         'c4af_mass_fraction': 0.08,
         'gypsum_mass_fraction': 0.05,
         'specific_gravity': 3.15,
-        'blaine_fineness': 380
+        'specific_surface_area': 380
     }

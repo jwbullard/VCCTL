@@ -140,7 +140,7 @@ def sample_cement_data() -> Dict[str, Any]:
         'so3': 2.4,
         'k2o': 0.5,
         'na2o': 0.2,
-        'blaine_fineness': 350.0,
+        'specific_surface_area': 350.0,
         'density': 3.15,
         'loss_on_ignition': 1.2
     }
@@ -304,7 +304,7 @@ def generate_test_cement_data(variations: int = 1) -> Generator[Dict[str, Any], 
         'type': 'Type I',
         'sio2': 20.5, 'al2o3': 5.2, 'fe2o3': 3.1, 'cao': 65.0,
         'mgo': 2.8, 'so3': 2.4, 'k2o': 0.5, 'na2o': 0.2,
-        'blaine_fineness': 350.0, 'density': 3.15, 'loss_on_ignition': 1.2
+        'specific_surface_area': 350.0, 'density': 3.15, 'loss_on_ignition': 1.2
     }
     
     for i in range(variations):

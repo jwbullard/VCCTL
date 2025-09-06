@@ -292,7 +292,7 @@ class ExportService(BaseService):
             cement_data = [
                 ['Property', 'Value'],
                 ['Type', cement.get('cement_type', 'N/A')],
-                ['Blaine Fineness', f"{cement.get('blaine_fineness', 'N/A')} m²/kg"],
+                ['Blaine Fineness', f"{cement.get('specific_surface_area', 'N/A')} m²/kg"],
                 ['Density', f"{cement.get('density', 'N/A')} g/cm³"],
             ]
             

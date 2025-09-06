@@ -441,7 +441,7 @@ class TestCementFileOperations:
         assert isinstance(content, str)
         assert len(content) > 0
         # Should contain fineness information
-        assert str(cement.blaine_fineness) in content
+        assert str(cement.specific_surface_area) in content
 
 
 @pytest.mark.performance
@@ -515,18 +515,18 @@ def multiple_cements_data():
             'name': 'Type I Portland',
             'type': 'Type I',
             'sio2': 20.1, 'al2o3': 5.1, 'fe2o3': 3.0, 'cao': 64.8,
-            'mgo': 2.9, 'so3': 2.6, 'blaine_fineness': 350
+            'mgo': 2.9, 'so3': 2.6, 'specific_surface_area': 350
         },
         {
             'name': 'Type II Portland',
             'type': 'Type II', 
             'sio2': 21.2, 'al2o3': 4.8, 'fe2o3': 3.2, 'cao': 63.5,
-            'mgo': 3.1, 'so3': 2.2, 'blaine_fineness': 370
+            'mgo': 3.1, 'so3': 2.2, 'specific_surface_area': 370
         },
         {
             'name': 'Type III High Early',
             'type': 'Type III',
             'sio2': 20.8, 'al2o3': 5.5, 'fe2o3': 2.9, 'cao': 64.2,
-            'mgo': 2.7, 'so3': 3.0, 'blaine_fineness': 450
+            'mgo': 2.7, 'so3': 3.0, 'specific_surface_area': 450
         }
     ]

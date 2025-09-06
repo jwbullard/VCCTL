@@ -94,7 +94,7 @@ class Cement(Base):
     # Setting times removed per user request
     
     # Fineness properties
-    blaine_fineness = Column(Float, nullable=True, doc="Blaine fineness (m²/kg)")
+    specific_surface_area = Column(Float, nullable=True, doc="Specific surface area (m²/kg)")
     
     # Reaction parameters
     activation_energy = Column(Float, nullable=True, default=54000.0,
@@ -225,6 +225,16 @@ class CementCreate(BaseModel):
     # PSD data accessed through relationship
     psd_data_id: Optional[int] = Field(None, description="PSD data ID")
     
+    # PSD fields that can be provided during creation (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=2.0, description="Exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points as JSON")
+    
     # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
     anhyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Anhydrite gypsum mass fraction")
@@ -289,7 +299,7 @@ class CementCreate(BaseModel):
     # Setting times removed per user request
     
     # Fineness properties
-    blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
+    specific_surface_area: Optional[float] = Field(None, gt=0.0, description="Specific surface area (m²/kg)")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
@@ -349,6 +359,16 @@ class CementUpdate(BaseModel):
     
     # PSD data accessed through relationship
     psd_data_id: Optional[int] = Field(None, description="PSD data ID")
+    
+    # PSD fields that can be updated (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=2.0, description="Exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points as JSON")
     
     # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
@@ -414,7 +434,7 @@ class CementUpdate(BaseModel):
     # Setting times removed per user request
     
     # Fineness properties
-    blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
+    specific_surface_area: Optional[float] = Field(None, gt=0.0, description="Specific surface area (m²/kg)")
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")

@@ -157,9 +157,9 @@ class FillerService(BaseService[Filler, FillerCreate, FillerUpdate]):
             if filler_data.specific_gravity >= 10:
                 raise ValidationError("Specific gravity must be less than 10")
         
-        if filler_data.blaine_fineness is not None:
-            if filler_data.blaine_fineness < 0:
-                raise ValidationError("Blaine fineness cannot be negative")
+        if filler_data.specific_surface_area is not None:
+            if filler_data.specific_surface_area < 0:
+                raise ValidationError("Specific surface area cannot be negative")
         
         # Validate particle size distribution consistency
         d10 = filler_data.diameter_percentile_10
