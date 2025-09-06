@@ -192,19 +192,10 @@ class FlyAshCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Fly ash name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.77, ge=0.0, description="Specific gravity")
-    psd: Optional[str] = Field('cement141', max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
     
-    # Complete PSD parameters (unified with cement model)
-    psd_mode: Optional[str] = Field('log_normal', max_length=64, 
-                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
-    psd_d50: Optional[float] = Field(5.0, gt=0.0, description="PSD D50 parameter (μm)")
-    psd_n: Optional[float] = Field(2.0, gt=0.0, description="PSD n parameter")
-    psd_dmax: Optional[float] = Field(75.0, gt=0.0, description="PSD Dmax parameter (μm)")
-    psd_median: Optional[float] = Field(5.0, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(2.0, gt=0.0, description="PSD distribution spread parameter")
-    psd_exponent: Optional[float] = Field(0.5, gt=0.0, description="PSD exponent parameter")
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
+    
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Phase fractions
@@ -288,19 +279,10 @@ class FlyAshUpdate(BaseModel):
     """Pydantic model for updating fly ash instances."""
     
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
-    psd: Optional[str] = Field(None, max_length=64, 
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
     
-    # Complete PSD parameters (unified with cement model)
-    psd_mode: Optional[str] = Field(None, max_length=64, 
-                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
-    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (μm)")
-    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
-    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (μm)")
-    psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
-    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
+    
     distribute_phases_by: Optional[int] = Field(None, description="Phase distribution method")
     
     # Phase fractions
@@ -353,14 +335,10 @@ class FlyAshResponse(BaseModel):
     
     name: str
     specific_gravity: Optional[float]
-    psd: Optional[str]
-    psd_mode: Optional[str]
-    psd_d50: Optional[float]
-    psd_n: Optional[float]
-    psd_dmax: Optional[float]
-    psd_median: Optional[float]
-    psd_spread: Optional[float]
-    psd_exponent: Optional[float]
+    
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int]
+    
     distribute_phases_by: Optional[int]
     aluminosilicate_glass_fraction: Optional[float]
     calcium_aluminum_disilicate_fraction: Optional[float]

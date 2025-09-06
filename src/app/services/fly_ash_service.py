@@ -62,8 +62,7 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
                 # Set defaults if not provided
                 if 'specific_gravity' not in fly_ash_dict:
                     fly_ash_dict['specific_gravity'] = self.default_specific_gravity
-                if 'psd' not in fly_ash_dict:
-                    fly_ash_dict['psd'] = self.default_psd
+                # PSD data handled through psd_data_id relationship
                 
                 fly_ash = FlyAsh(**fly_ash_dict)
                 

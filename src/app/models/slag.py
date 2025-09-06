@@ -36,25 +36,6 @@ class Slag(Base):
     psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
     psd_data = relationship('PSDData', backref='slag_materials')
     
-    psd_custom_points = Column(Text, nullable=True, 
-                              doc="Custom PSD points stored as JSON")
-    
-    # Complete PSD parameters (unified with cement model)
-    psd_mode = Column(Integer, nullable=True,
-                     doc="PSD mode/type")
-    psd_d50 = Column(Float, nullable=True, default=15.0,
-                    doc="PSD D50 parameter (μm) for Rosin-Rammler")
-    psd_n = Column(Float, nullable=True, default=1.4,
-                  doc="PSD n parameter for Rosin-Rammler")
-    psd_dmax = Column(Float, nullable=True, default=75.0,
-                     doc="PSD Dmax parameter (μm)")
-    psd_median = Column(Float, nullable=True, default=15.0,
-                       doc="Median particle size (μm) for log-normal distribution")
-    psd_spread = Column(Float, nullable=True, default=1.4,
-                       doc="PSD distribution spread parameter for log-normal distribution")
-    psd_exponent = Column(Float, nullable=True, default=0.5,
-                         doc="PSD exponent parameter for Fuller-Thompson")
-    
     # Basic slag properties
     glass_content = Column(Float, nullable=True, default=95.0,
                           doc="Glass content percentage")
@@ -204,19 +185,9 @@ class SlagCreate(BaseModel):
     
     name: str = Field(..., max_length=64, description="Slag name (unique identifier)")
     specific_gravity: Optional[float] = Field(2.87, gt=0.0, description="Specific gravity")
-    psd: Optional[str] = Field('cement141', max_length=64,
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
     
-    # Complete PSD parameters (unified with cement model)
-    psd_mode: Optional[str] = Field('log_normal', max_length=64, 
-                                   description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
-    psd_d50: Optional[float] = Field(15.0, gt=0.0, description="PSD D50 parameter (μm)")
-    psd_n: Optional[float] = Field(1.4, gt=0.0, description="PSD n parameter")
-    psd_dmax: Optional[float] = Field(75.0, gt=0.0, description="PSD Dmax parameter (μm)")
-    psd_median: Optional[float] = Field(15.0, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(1.4, gt=0.0, description="PSD distribution spread parameter")
-    psd_exponent: Optional[float] = Field(0.5, gt=0.0, description="PSD exponent parameter")
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
     
     # Basic slag properties
     glass_content: Optional[float] = Field(95.0, ge=85.0, le=100.0, description="Glass content percentage")
@@ -278,13 +249,9 @@ class SlagUpdate(BaseModel):
     """Pydantic model for updating slag instances."""
     
     specific_gravity: Optional[float] = Field(None, gt=0.0, description="Specific gravity")
-    psd: Optional[str] = Field(None, max_length=64,
-                              description="Particle size distribution reference")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points stored as JSON")
     
-    # PSD parameters for log-normal distribution
-    psd_median: Optional[float] = Field(None, gt=0.0, description="Median particle size (μm)")
-    psd_spread: Optional[float] = Field(None, gt=0.0, description="PSD distribution spread parameter")
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
     
     # Basic slag properties
     glass_content: Optional[float] = Field(None, ge=85.0, le=100.0, description="Glass content percentage")
@@ -331,11 +298,9 @@ class SlagResponse(BaseModel):
     
     name: str
     specific_gravity: Optional[float]
-    psd: Optional[str]
     
-    # PSD parameters
-    psd_median: Optional[float]
-    psd_spread: Optional[float]
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int]
     
     # Basic slag properties
     glass_content: Optional[float]

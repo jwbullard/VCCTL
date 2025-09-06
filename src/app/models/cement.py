@@ -7,7 +7,8 @@ Converted from Java JPA entity to SQLAlchemy model.
 """
 
 from typing import Optional
-from sqlalchemy import Column, String, Float, LargeBinary, Text, Integer, Boolean
+from sqlalchemy import Column, String, Float, LargeBinary, Text, Integer, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.database.base import Base
@@ -29,8 +30,9 @@ class Cement(Base):
     # Cement name - unique but not primary key
     name = Column(String(64), nullable=False, unique=True)
     
-    # Particle size distribution reference
-    psd = Column(String(64), nullable=True)
+    # PSD relationship (replaces embedded PSD fields)
+    psd_data_id = Column(Integer, ForeignKey('psd_data.id'), nullable=True)
+    psd_data = relationship('PSDData', backref='cement_materials')
     
     # Binary data columns (BLOB equivalents)
     pfc = Column(LargeBinary, nullable=True, doc="Phase fraction data")
@@ -94,14 +96,6 @@ class Cement(Base):
     # Fineness properties
     blaine_fineness = Column(Float, nullable=True, doc="Blaine fineness (m²/kg)")
     
-    # PSD parameters
-    psd_mode = Column(String(64), nullable=True, doc="PSD mode (rosin_rammler, fuller, custom)")
-    psd_d50 = Column(Float, nullable=True, doc="PSD D50 parameter (µm)")
-    psd_n = Column(Float, nullable=True, doc="PSD n parameter")
-    psd_dmax = Column(Float, nullable=True, doc="PSD Dmax parameter (µm)")
-    psd_exponent = Column(Float, nullable=True, doc="PSD exponent parameter")
-    psd_custom_points = Column(Text, nullable=True, doc="Custom PSD points (JSON)")
-    
     # Reaction parameters
     activation_energy = Column(Float, nullable=True, default=54000.0,
                               doc="Activation energy (J/mol)")
@@ -113,7 +107,7 @@ class Cement(Base):
     
     def __repr__(self) -> str:
         """String representation of the cement."""
-        return f"<Cement(name='{self.name}', psd='{self.psd}')>"
+        return f"<Cement(name='{self.name}', psd_data_id='{self.psd_data_id}')>"
     
     def to_dict_extended(self) -> dict:
         """Convert to dictionary with binary data handling."""
@@ -227,7 +221,9 @@ class CementCreate(BaseModel):
     """Pydantic model for creating cement instances."""
     
     name: str = Field(..., max_length=64, description="Cement name (unique identifier)")
-    psd: Optional[str] = Field(None, max_length=64, description="Particle size distribution reference")
+    
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
     
     # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
@@ -295,14 +291,6 @@ class CementCreate(BaseModel):
     # Fineness properties
     blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
     
-    # PSD parameters
-    psd_mode: Optional[str] = Field(None, max_length=64, description="PSD mode (rosin_rammler, fuller, custom)")
-    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (µm)")
-    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
-    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
-    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
-    
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
     
@@ -358,7 +346,9 @@ class CementUpdate(BaseModel):
     """Pydantic model for updating cement instances."""
     
     name: Optional[str] = Field(None, max_length=64, description="Cement name (unique identifier)")
-    psd: Optional[str] = Field(None, max_length=64, description="Particle size distribution reference")
+    
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int] = Field(None, description="PSD data ID")
     
     # Gypsum fractions (mass fractions)
     dihyd: Optional[float] = Field(None, ge=0.0, le=1.0, description="Dihydrate gypsum mass fraction")
@@ -426,14 +416,6 @@ class CementUpdate(BaseModel):
     # Fineness properties
     blaine_fineness: Optional[float] = Field(None, gt=0.0, description="Blaine fineness (m²/kg)")
     
-    # PSD parameters
-    psd_mode: Optional[str] = Field(None, max_length=64, description="PSD mode (rosin_rammler, fuller, custom)")
-    psd_d50: Optional[float] = Field(None, gt=0.0, description="PSD D50 parameter (µm)")
-    psd_n: Optional[float] = Field(None, gt=0.0, description="PSD n parameter")
-    psd_dmax: Optional[float] = Field(None, gt=0.0, description="PSD Dmax parameter (µm)")
-    psd_exponent: Optional[float] = Field(None, gt=0.0, description="PSD exponent parameter")
-    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points (JSON)")
-    
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
     
@@ -447,7 +429,9 @@ class CementResponse(BaseModel):
     """Pydantic model for cement API responses."""
     
     name: str
-    psd: Optional[str]
+    
+    # PSD data accessed through relationship
+    psd_data_id: Optional[int]
     dihyd: Optional[float]
     anhyd: Optional[float]
     hemihyd: Optional[float]

@@ -19,8 +19,29 @@ class PSDDataService(BaseService):
     
     def __init__(self, database_service):
         """Initialize PSD data service."""
-        super().__init__(database_service)
-        self.model_class = PSDData
+        super().__init__(PSDData, database_service)
+        self.database_service = database_service
+    
+    def _to_response(self, db_psd: PSDData) -> PSDDataResponse:
+        """Convert database model to response model."""
+        response_dict = {
+            'id': db_psd.id,
+            'psd_reference': db_psd.psd_reference,
+            'psd_custom_points': db_psd.psd_custom_points,
+            'psd_mode': db_psd.psd_mode,
+            'psd_d50': db_psd.psd_d50,
+            'psd_n': db_psd.psd_n,
+            'psd_dmax': db_psd.psd_dmax,
+            'psd_median': db_psd.psd_median,
+            'psd_spread': db_psd.psd_spread,
+            'psd_exponent': db_psd.psd_exponent,
+            'diameter_percentile_10': db_psd.diameter_percentile_10,
+            'diameter_percentile_50': db_psd.diameter_percentile_50,
+            'diameter_percentile_90': db_psd.diameter_percentile_90,
+            'created_at': str(db_psd.created_at) if db_psd.created_at else '',
+            'updated_at': str(db_psd.updated_at) if db_psd.updated_at else ''
+        }
+        return PSDDataResponse(**response_dict)
     
     def create_psd_data(self, psd_data: PSDDataCreate) -> Optional[PSDDataResponse]:
         """Create new PSD data record."""
@@ -38,7 +59,7 @@ class PSDDataService(BaseService):
                 session.refresh(db_psd)
                 
                 self.logger.info(f"Created PSD data: {db_psd.id} ({db_psd.psd_mode})")
-                return PSDDataResponse.model_validate(db_psd)
+                return self._to_response(db_psd)
                 
         except SQLAlchemyError as e:
             self.logger.error(f"Database error creating PSD data: {e}")
@@ -54,7 +75,7 @@ class PSDDataService(BaseService):
                 db_psd = session.query(PSDData).filter(PSDData.id == psd_id).first()
                 
                 if db_psd:
-                    return PSDDataResponse.model_validate(db_psd)
+                    return self._to_response(db_psd)
                 return None
                 
         except SQLAlchemyError as e:
@@ -84,7 +105,7 @@ class PSDDataService(BaseService):
                 session.refresh(db_psd)
                 
                 self.logger.info(f"Updated PSD data: {psd_id}")
-                return PSDDataResponse.model_validate(db_psd)
+                return self._to_response(db_psd)
                 
         except SQLAlchemyError as e:
             self.logger.error(f"Database error updating PSD data {psd_id}: {e}")
@@ -188,3 +209,73 @@ class PSDDataService(BaseService):
         except Exception as e:
             self.logger.error(f"Error getting PSD summary for {psd_id}: {e}")
             return "Error loading PSD"
+    
+    # Implement abstract methods from BaseService
+    def get_all(self) -> List[PSDData]:
+        """Get all PSD data records."""
+        try:
+            with self.database_service.get_read_only_session() as session:
+                return session.query(PSDData).all()
+        except Exception as e:
+            self.logger.error(f"Error fetching all PSD data: {e}")
+            return []
+    
+    def get_by_name(self, name: str) -> Optional[PSDData]:
+        """Get PSD data by reference name."""
+        try:
+            with self.database_service.get_read_only_session() as session:
+                return session.query(PSDData).filter(
+                    PSDData.psd_reference == name
+                ).first()
+        except Exception as e:
+            self.logger.error(f"Error fetching PSD data by name {name}: {e}")
+            return None
+    
+    def create(self, create_data: PSDDataCreate) -> Optional[PSDData]:
+        """Create a new PSD data record (alias for create_psd_data)."""
+        return self.create_psd_data(create_data)
+    
+    def update(self, name: str, update_data: PSDDataUpdate) -> Optional[PSDData]:
+        """Update PSD data by reference name."""
+        try:
+            with self.database_service.get_session() as session:
+                db_psd = session.query(PSDData).filter(
+                    PSDData.psd_reference == name
+                ).first()
+                
+                if not db_psd:
+                    self.logger.warning(f"PSD data not found by name: {name}")
+                    return None
+                
+                # Update fields
+                update_dict = update_data.model_dump(exclude_unset=True)
+                for field, value in update_dict.items():
+                    setattr(db_psd, field, value)
+                
+                session.commit()
+                session.refresh(db_psd)
+                return db_psd
+                
+        except Exception as e:
+            self.logger.error(f"Error updating PSD data by name {name}: {e}")
+            return None
+    
+    def delete(self, name: str) -> bool:
+        """Delete PSD data by reference name."""
+        try:
+            with self.database_service.get_session() as session:
+                db_psd = session.query(PSDData).filter(
+                    PSDData.psd_reference == name
+                ).first()
+                
+                if not db_psd:
+                    self.logger.warning(f"PSD data not found for deletion by name: {name}")
+                    return False
+                
+                session.delete(db_psd)
+                session.commit()
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Error deleting PSD data by name {name}: {e}")
+            return False

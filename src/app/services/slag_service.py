@@ -316,7 +316,6 @@ class SlagService(BaseService[Slag, SlagCreate, SlagUpdate]):
             with self.db_service.get_read_only_session() as session:
                 search_query = session.query(Slag).filter(
                     (Slag.name.contains(query)) | 
-                    (Slag.psd.contains(query) if query else False) |
                     (Slag.description.contains(query) if query else False)
                 ).order_by(Slag.name)
                 
@@ -353,7 +352,7 @@ class SlagService(BaseService[Slag, SlagCreate, SlagUpdate]):
                 avg_casi_ratio = sum(casi_ratios) / len(casi_ratios) if casi_ratios else 0
                 
                 # Get unique PSD types
-                unique_psds = len(set(s.psd for s in slag_materials if s.psd))
+                unique_psds = len(set(s.psd_data_id for s in slag_materials if s.psd_data_id))
                 
                 return {
                     'total_slag': total_count,

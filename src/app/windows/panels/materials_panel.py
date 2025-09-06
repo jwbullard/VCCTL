@@ -606,8 +606,8 @@ class MaterialsPanel(Gtk.Box):
             if hasattr(material_data, '__tablename__') and material_data.__tablename__ == 'cement':
                 try:
                     # Particle size distribution
-                    if hasattr(material_data, 'psd') and material_data.psd:
-                        self._add_property_row(name_grid, row, "Particle Size Dist.:", str(material_data.psd))
+                    if hasattr(material_data, 'psd_data_id') and material_data.psd_data_id:
+                        self._add_property_row(name_grid, row, "PSD Data ID:", str(material_data.psd_data_id))
                         row += 1
                 except Exception:
                     pass
@@ -737,8 +737,8 @@ class MaterialsPanel(Gtk.Box):
                 pass
             
             try:
-                if hasattr(cement_data, 'psd') and cement_data.psd:
-                    self._add_property_row(cement_grid, row, "Particle Size Dist.:", str(cement_data.psd))
+                if hasattr(cement_data, 'psd_data_id') and cement_data.psd_data_id:
+                    self._add_property_row(cement_grid, row, "PSD Data ID:", str(cement_data.psd_data_id))
                     row += 1
             except Exception:
                 pass
@@ -880,8 +880,8 @@ class MaterialsPanel(Gtk.Box):
             self.logger.warning(f"Error displaying specific gravity: {e}")
         
         try:
-            if hasattr(cement_data, 'psd') and cement_data.psd:
-                self._add_property_row(basic_grid, row, "Particle Size Dist.:", str(cement_data.psd))
+            if hasattr(cement_data, 'psd_data_id') and cement_data.psd_data_id:
+                self._add_property_row(basic_grid, row, "PSD Data ID:", str(cement_data.psd_data_id))
                 row += 1
         except Exception as e:
             self.logger.warning(f"Error displaying PSD: {e}")
@@ -1455,7 +1455,7 @@ class MaterialsPanel(Gtk.Box):
             'name': new_name,
             'specific_gravity': original_cement.specific_gravity,
             'description': truncated_description,
-            'psd': original_cement.psd,
+            'psd_data_id': original_cement.psd_data_id,
             'alkali_file': original_cement.alkali_file,
         }
         

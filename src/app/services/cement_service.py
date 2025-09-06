@@ -278,8 +278,7 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
         try:
             with self.db_service.get_read_only_session() as session:
                 search_query = session.query(Cement).filter(
-                    (Cement.name.contains(query)) | 
-                    (Cement.psd.contains(query) if query else False)
+                    Cement.name.contains(query)
                 ).order_by(Cement.name)
                 
                 if limit:
@@ -299,8 +298,8 @@ class CementService(BaseService[Cement, CementCreate, CementUpdate]):
                 with_phase_data = len([c for c in session.query(Cement).all() if c.has_phase_data])
                 with_gypsum_data = len([c for c in session.query(Cement).all() if c.has_gypsum_data])
                 
-                # Get unique PSD types
-                unique_psds = session.query(Cement.psd).distinct().filter(Cement.psd.isnot(None)).count()
+                # Get unique PSD data references
+                unique_psds = session.query(Cement.psd_data_id).distinct().filter(Cement.psd_data_id.isnot(None)).count()
                 
                 # Get unique alkali files
                 unique_alkali = session.query(Cement.alkali_file).distinct().filter(Cement.alkali_file.isnot(None)).count()

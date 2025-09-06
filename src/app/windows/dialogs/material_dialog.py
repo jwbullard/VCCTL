@@ -965,7 +965,7 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 counter += 1
                 final_name = f"{new_name}_{counter}"
             
-            # Collect all current form data (including PSD data)
+            # Collect all current form data (excluding old PSD fields)
             duplicate_data = self._collect_form_data()
             
             # Override key fields for the duplicate
@@ -975,6 +975,15 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
             # Remove the ID field if present (for new cement)
             if 'id' in duplicate_data:
                 del duplicate_data['id']
+            
+            # Remove old PSD fields that may come from the widget
+            old_psd_fields = ['psd', 'psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 
+                             'psd_median', 'psd_spread', 'psd_exponent', 'psd_custom_points']
+            for field in old_psd_fields:
+                duplicate_data.pop(field, None)
+            
+            # Use the original material's psd_data_id
+            duplicate_data['psd_data_id'] = self.material_data.get('psd_data_id')
             
             # Create the duplicate cement
             from app.models.cement import CementCreate
