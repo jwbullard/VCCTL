@@ -9,6 +9,7 @@ Simplified from InertFillerService for cleaner UI terminology.
 import logging
 from typing import List, Optional, Dict, Any
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 
 from app.database.service import DatabaseService
 from app.models.filler import Filler, FillerCreate, FillerUpdate, FillerResponse
@@ -30,22 +31,22 @@ class FillerService(BaseService[Filler, FillerCreate, FillerUpdate]):
         self.default_specific_gravity = 3.0
     
     def get_all(self) -> List[Filler]:
-        """Get all filler materials."""
+        """Get all filler materials with eagerly loaded PSD relationships."""
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(Filler).order_by(Filler.name).all()
+                return session.query(Filler).options(joinedload(Filler.psd_data)).order_by(Filler.name).all()
         except Exception as e:
             self.logger.error(f"Failed to get all fillers: {e}")
             raise ServiceError(f"Failed to retrieve fillers: {e}")
     
     def get_by_name(self, name: str) -> Optional[Filler]:
-        """Get filler by name (primary key)."""
+        """Get filler by name with eagerly loaded PSD relationship."""
         if not name or not name.strip():
             raise ValidationError("Name is required")
         
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(Filler).filter(Filler.name == name.strip()).first()
+                return session.query(Filler).options(joinedload(Filler.psd_data)).filter(Filler.name == name.strip()).first()
         except Exception as e:
             self.logger.error(f"Failed to get filler {name}: {e}")
             raise ServiceError(f"Failed to retrieve filler: {e}")
@@ -64,7 +65,29 @@ class FillerService(BaseService[Filler, FillerCreate, FillerUpdate]):
             
             # Create filler
             with self.db_service.get_session() as session:
-                filler = Filler(**filler_data.model_dump())
+                # Extract PSD fields from create data if present
+                filler_dict = filler_data.model_dump()
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
+                
+                # Separate PSD fields from filler fields
+                for field in list(filler_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = filler_dict.pop(field)
+                
+                # Create filler object
+                filler = Filler(**filler_dict)
+                
+                # Create PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    new_psd = PSDData(**psd_data)
+                    session.add(new_psd)
+                    session.flush()  # Get the ID
+                    filler.psd_data = new_psd
+                    filler.psd_data_id = new_psd.id
+                
                 session.add(filler)
                 session.commit()
                 session.refresh(filler)
@@ -85,14 +108,41 @@ class FillerService(BaseService[Filler, FillerCreate, FillerUpdate]):
         """Update an existing filler material."""
         try:
             with self.db_service.get_session() as session:
-                filler = session.query(Filler).filter(Filler.id == filler_id).first()
+                filler = session.query(Filler).options(joinedload(Filler.psd_data)).filter(Filler.id == filler_id).first()
                 if not filler:
                     raise NotFoundError(f"Filler with ID '{filler_id}' not found")
                 
-                # Update fields
+                # Extract PSD fields from update data if present
                 update_dict = update_data.model_dump(exclude_unset=True)
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
+                
+                # Separate PSD fields from filler fields
+                for field in list(update_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = update_dict.pop(field)
+                
+                # Handle PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    
+                    if filler.psd_data_id and filler.psd_data:
+                        # Update existing PSD data
+                        for field, value in psd_data.items():
+                            setattr(filler.psd_data, field, value)
+                    else:
+                        # Create new PSD data
+                        new_psd = PSDData(**psd_data)
+                        session.add(new_psd)
+                        session.flush()  # Get the ID
+                        filler.psd_data = new_psd
+                        filler.psd_data_id = new_psd.id
+                
+                # Update remaining filler fields
                 for field, value in update_dict.items():
-                    setattr(filler, field, value)
+                    if hasattr(filler, field):
+                        setattr(filler, field, value)
                 
                 session.commit()
                 session.refresh(filler)

@@ -56,8 +56,15 @@ class FillerCreate(BaseModel):
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
     filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (quartz, glass)")
     
-    # PSD data will be managed through separate PSD service
-    # No embedded PSD fields in create schema
+    # PSD fields that can be provided during creation (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=2.0, description="Exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points as JSON")
     
     description: Optional[str] = Field(None, description="Description of the filler material")
     color: Optional[str] = Field(None, max_length=64, description="Color of the filler")
@@ -80,8 +87,15 @@ class FillerUpdate(BaseModel):
     water_absorption: Optional[float] = Field(None, ge=0, le=100, description="Water absorption percentage")
     filler_type: Optional[str] = Field(None, max_length=64, description="Filler type (quartz, glass)")
     
-    # PSD data managed through separate PSD service
-    # No embedded PSD fields in update schema
+    # PSD fields that can be updated (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=2.0, description="Exponent parameter")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD points as JSON")
     
     description: Optional[str] = Field(None, description="Description of the filler material")
     color: Optional[str] = Field(None, max_length=64, description="Color of the filler")

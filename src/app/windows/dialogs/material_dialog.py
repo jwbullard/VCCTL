@@ -851,9 +851,14 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
     
     def _save_material(self) -> bool:
         """Save the material data."""
+        print(f"DEBUG: _save_material called for {self.material_type}")
         try:
             # Validate all fields
-            if not self._validate_all():
+            print(f"DEBUG: About to validate all fields for {self.material_type}")
+            validation_result = self._validate_all()
+            print(f"DEBUG: Validation result: {validation_result}")
+            if not validation_result:
+                print(f"DEBUG: Validation failed, returning False")
                 return False
             
             # Collect form data
@@ -881,6 +886,8 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                     raise Exception(f"Could not determine material ID for {self.material_type} update")
                 
                 print(f"DEBUG: Using material_id='{material_id}' for {self.material_type} update")
+                print(f"DEBUG: Raw form data before conversion: {data}")
+                print(f"DEBUG: PSD fields in data: psd_mode={data.get('psd_mode')}, psd_d50={data.get('psd_d50')}, psd_n={data.get('psd_n')}")
                 
                 # Convert data to appropriate model format
                 if self.material_type == 'cement':
@@ -907,7 +914,20 @@ class MaterialDialogBase(Gtk.Dialog, ABC, metaclass=MaterialDialogMeta):
                 else:
                     update_data = data
                 
+                print(f"DEBUG: About to call service.update with:")
+                print(f"DEBUG:   material_id = {material_id}")
+                print(f"DEBUG:   update_data type = {type(update_data)}")
+                print(f"DEBUG:   update_data content = {update_data if hasattr(update_data, 'model_dump') else update_data}")
+                if hasattr(update_data, 'model_dump'):
+                    print(f"DEBUG:   update_data.model_dump() = {update_data.model_dump()}")
+                
                 updated_material = service.update(material_id, update_data)
+                print(f"DEBUG: Service update returned: {getattr(updated_material, 'name', 'unknown')}")
+                print(f"DEBUG: Updated material PSD data ID: {getattr(updated_material, 'psd_data_id', 'None')}")
+                if hasattr(updated_material, 'psd_data') and updated_material.psd_data:
+                    print(f"DEBUG: Updated material PSD mode: {updated_material.psd_data.psd_mode}")
+                    print(f"DEBUG: Updated material PSD d50: {updated_material.psd_data.psd_d50}")
+                
                 self.logger.info(f"Updated {self.material_type}: {getattr(updated_material, 'name', getattr(updated_material, 'display_name', 'unknown'))}")
             else:
                 # Create new material
@@ -3406,23 +3426,7 @@ class FlyAshDialog(MaterialDialogBase):
         grid.attach(loi_unit_label, 2, row, 1, 1)
         row += 1
         
-        # Fineness (45μm sieve retention)
-        fineness_label = Gtk.Label("Fineness:")
-        fineness_label.set_halign(Gtk.Align.END)
-        fineness_label.get_style_context().add_class("form-label")
-        fineness_label.set_tooltip_text("Percent retained on 45μm sieve")
-        
-        self.fineness_spin = Gtk.SpinButton.new_with_range(0.0, 50.0, 0.5)
-        self.fineness_spin.set_digits(1)
-        self.fineness_spin.set_value(20.0)  # Typical value
-        
-        fineness_unit_label = Gtk.Label("% retained on 45μm")
-        fineness_unit_label.get_style_context().add_class("dim-label")
-        
-        grid.attach(fineness_label, 0, row, 1, 1)
-        grid.attach(self.fineness_spin, 1, row, 1, 1)
-        grid.attach(fineness_unit_label, 2, row, 1, 1)
-        row += 1
+        # Fineness field removed - not needed
         
         return row
     
@@ -3578,20 +3582,7 @@ class FlyAshDialog(MaterialDialogBase):
         class_grid.attach(astm_label, 0, 0, 1, 1)
         class_grid.attach(self.astm_combo, 1, 0, 2, 1)
         
-        # Activity index
-        activity_label = Gtk.Label("Activity Index:")
-        activity_label.set_halign(Gtk.Align.END)
-        activity_label.get_style_context().add_class("form-label")
-        
-        self.activity_spin = Gtk.SpinButton.new_with_range(50.0, 120.0, 1.0)
-        self.activity_spin.set_value(85.0)
-        
-        activity_unit = Gtk.Label("% at 28 days")
-        activity_unit.get_style_context().add_class("dim-label")
-        
-        class_grid.attach(activity_label, 0, 1, 1, 1)
-        class_grid.attach(self.activity_spin, 1, 1, 1, 1)
-        class_grid.attach(activity_unit, 2, 1, 1, 1)
+        # Activity index removed - not needed
         
         # Activation energy
         activation_label = Gtk.Label("Activation Energy:")
@@ -3605,9 +3596,9 @@ class FlyAshDialog(MaterialDialogBase):
         activation_unit = Gtk.Label("J/mol")
         activation_unit.get_style_context().add_class("dim-label")
         
-        class_grid.attach(activation_label, 0, 2, 1, 1)
-        class_grid.attach(self.activation_energy_spin, 1, 2, 1, 1)
-        class_grid.attach(activation_unit, 2, 2, 1, 1)
+        class_grid.attach(activation_label, 0, 1, 1, 1)
+        class_grid.attach(self.activation_energy_spin, 1, 1, 1, 1)
+        class_grid.attach(activation_unit, 2, 1, 1, 1)
         
         class_box.pack_start(class_grid, False, False, 0)
         
@@ -3632,19 +3623,7 @@ class FlyAshDialog(MaterialDialogBase):
         perf_grid.set_row_spacing(10)
         perf_grid.set_column_spacing(15)
         
-        # Pozzolanic activity
-        pozz_label = Gtk.Label("Pozzolanic Activity:")
-        pozz_label.set_halign(Gtk.Align.END)
-        pozz_label.get_style_context().add_class("form-label")
-        
-        self.pozz_combo = Gtk.ComboBoxText()
-        self.pozz_combo.append("high", "High")
-        self.pozz_combo.append("moderate", "Moderate")
-        self.pozz_combo.append("low", "Low")
-        self.pozz_combo.set_active(0)
-        
-        perf_grid.attach(pozz_label, 0, 0, 1, 1)
-        perf_grid.attach(self.pozz_combo, 1, 0, 2, 1)
+        # Pozzolanic activity removed - not needed
         
         perf_frame.add(perf_grid)
         container.pack_start(perf_frame, False, False, 0)
@@ -3661,8 +3640,7 @@ class FlyAshDialog(MaterialDialogBase):
         
         # Connect other fields
         self.loi_spin.connect('value-changed', self._on_field_changed)
-        self.fineness_spin.connect('value-changed', self._on_field_changed)
-        self.activity_spin.connect('value-changed', self._on_field_changed)
+        # Fineness and activity spins removed - not needed
     
     def _on_alkali_changed(self, widget) -> None:
         """Handle alkali field changes."""
@@ -3692,8 +3670,8 @@ class FlyAshDialog(MaterialDialogBase):
             return
         
         # Load basic fields
-        self.loi_spin.set_value(float(self.material_data.get('loi', 3.0)))
-        self.fineness_spin.set_value(float(self.material_data.get('fineness_45um', 20.0)))
+        self.loi_spin.set_value(float(self.material_data.get('loss_on_ignition', 3.0)))
+        # Fineness field removed - not needed
         
         # Load oxide composition - map database field names to UI keys
         oxide_field_mapping = {
@@ -3717,20 +3695,12 @@ class FlyAshDialog(MaterialDialogBase):
         astm_class = self.material_data.get('astm_class', 'class_f')
         self.astm_combo.set_active_id(astm_class)
         
-        self.activity_spin.set_value(float(self.material_data.get('activity_index', 85.0)))
+        # Activity index removed - no longer used
         
         # Load activation energy
         self.activation_energy_spin.set_value(float(self.material_data.get('activation_energy', 54000.0)))
         
-        # Convert numeric pozzolanic activity to qualitative value
-        pozz_numeric = self.material_data.get('pozzolanic_activity', 75.0)
-        if pozz_numeric >= 80:
-            pozz_qualitative = 'high'
-        elif pozz_numeric >= 70:
-            pozz_qualitative = 'moderate'
-        else:
-            pozz_qualitative = 'low'
-        self.pozz_combo.set_active_id(pozz_qualitative)
+        # Pozzolanic activity removed - not needed
         
         # Load PSD data into unified widget - fly ash uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
@@ -3793,9 +3763,8 @@ class FlyAshDialog(MaterialDialogBase):
         
         # Add physical properties
         if hasattr(self, 'loi_spin') and self.loi_spin:
-            data['loi'] = self.loi_spin.get_value()
-        if hasattr(self, 'fineness_spin') and self.fineness_spin:
-            data['fineness_45um'] = self.fineness_spin.get_value()
+            data['loss_on_ignition'] = self.loi_spin.get_value()
+        # Fineness field removed - not needed
         
         # Add alkali characteristics
         if hasattr(self, 'na2o_spin') and self.na2o_spin:
@@ -3810,13 +3779,7 @@ class FlyAshDialog(MaterialDialogBase):
         # Add classification data
         if hasattr(self, 'astm_combo') and self.astm_combo:
             data['astm_class'] = self.astm_combo.get_active_id()
-        if hasattr(self, 'activity_spin') and self.activity_spin:
-            data['activity_index'] = self.activity_spin.get_value()
-        if hasattr(self, 'pozz_combo') and self.pozz_combo:
-            # Convert qualitative pozzolanic activity to numeric value
-            pozz_activity = self.pozz_combo.get_active_id()
-            numeric_activity = {'high': 85.0, 'moderate': 75.0, 'low': 65.0}.get(pozz_activity, 75.0)
-            data['pozzolanic_activity'] = numeric_activity
+        # Activity index and pozzolanic activity removed - not needed
         
         # Add activation energy
         if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
@@ -3835,28 +3798,13 @@ class FlyAshDialog(MaterialDialogBase):
             database_field = oxide_field_mapping.get(oxide_key, oxide_key)
             data[database_field] = spin.get_value()
         
-        # Add PSD data from unified widget - convert to fly ash model field names  
+        # Add PSD data from unified widget - fly ash uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
             print(f"DEBUG: Raw psd_data from fly ash widget = {psd_data}")
             
-            # Map PSD parameters directly (fly ash model has standard PSD fields)
-            if 'psd_mode' in psd_data:
-                data['psd_mode'] = psd_data['psd_mode']
-            if 'psd_d50' in psd_data:
-                data['psd_d50'] = psd_data['psd_d50']
-            if 'psd_n' in psd_data:
-                data['psd_n'] = psd_data['psd_n'] 
-            if 'psd_dmax' in psd_data:
-                data['psd_dmax'] = psd_data['psd_dmax']
-            if 'psd_median' in psd_data:
-                data['psd_median'] = psd_data['psd_median']
-            if 'psd_spread' in psd_data:
-                data['psd_spread'] = psd_data['psd_spread']
-            if 'psd_exponent' in psd_data:
-                data['psd_exponent'] = psd_data['psd_exponent']
-            if 'psd_custom_points' in psd_data:
-                data['psd_custom_points'] = psd_data['psd_custom_points']
+            # Fly ash model uses standard PSD field names, so we can add them directly
+            data.update(psd_data)
                 
             print(f"DEBUG: Final fly ash psd_data = {data}")
         
@@ -3916,35 +3864,6 @@ class SlagDialog(MaterialDialogBase):
         grid.attach(glass_unit_label, 2, row, 1, 1)
         row += 1
         
-        # Activity index
-        activity_label = Gtk.Label("Activity Index:")
-        activity_label.set_halign(Gtk.Align.END)
-        activity_label.get_style_context().add_class("form-label")
-        
-        self.activity_spin = Gtk.SpinButton.new_with_range(50.0, 150.0, 0.1)
-        self.activity_spin.set_value(95.0)
-        self.activity_spin.set_digits(1)
-        
-        activity_info = Gtk.Image()
-        activity_info.set_from_icon_name("information", Gtk.IconSize.BUTTON)
-        
-        # Wrap in EventBox to enable tooltip functionality
-        activity_info_box = Gtk.EventBox()
-        activity_info_box.add(activity_info)
-        activity_info_box.set_has_tooltip(True)
-        activity_info_box.set_tooltip_text("Hydraulic activity relative to portland cement")
-        
-        activity_unit_label = Gtk.Label("%")
-        activity_unit_label.get_style_context().add_class("dim-label")
-        
-        activity_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        activity_box.pack_start(self.activity_spin, False, False, 0)
-        activity_box.pack_start(activity_unit_label, False, False, 0)
-        activity_box.pack_start(activity_info_box, False, False, 0)
-        
-        grid.attach(activity_label, 0, row, 1, 1)
-        grid.attach(activity_box, 1, row, 1, 1)
-        row += 1
         
         return row
     
@@ -4237,7 +4156,7 @@ class SlagDialog(MaterialDialogBase):
         
         # Connect other fields
         self.glass_content_spin.connect('value-changed', self._on_field_changed)
-        self.activity_spin.connect('value-changed', self._on_field_changed)
+        # Activity index removed - no longer used
         
         # Connect reaction parameter fields
         for spin in self.reaction_params.values():
@@ -4308,7 +4227,7 @@ class SlagDialog(MaterialDialogBase):
         
         # Load basic fields
         self.glass_content_spin.set_value(float(self.material_data.get('glass_content', 95.0)))
-        self.activity_spin.set_value(float(self.material_data.get('activity_index', 95.0)))
+        # Activity index removed - no longer used
         
         # Load oxide composition - map database field names to UI keys
         oxide_field_mapping = {
@@ -4333,6 +4252,7 @@ class SlagDialog(MaterialDialogBase):
         # Load PSD data into unified widget
         if hasattr(self, 'psd_widget') and self.psd_widget:
             self.psd_widget.load_from_material_data(self.material_data)
+            print(f"DEBUG: Loaded slag PSD data directly into unified widget")
         
         # Update calculations
         self._update_ratio_calculations()
@@ -4379,8 +4299,7 @@ class SlagDialog(MaterialDialogBase):
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect slag-specific data."""
         data = {
-            'glass_content': self.glass_content_spin.get_value(),
-            'activity_index': self.activity_spin.get_value()
+            'glass_content': self.glass_content_spin.get_value()
         }
         
         # Add oxide composition - map UI keys to database field names
@@ -4625,24 +4544,13 @@ class FillerDialog(MaterialDialogBase):
         else:
             print("DEBUG: color_combo not available for collection")
         
-        # Add PSD data from unified widget - convert to filler model field names
+        # Add PSD data from unified widget - filler uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
             print(f"DEBUG: Raw psd_data from widget = {psd_data}")
             
-            # Convert PSD data to filler model field names
-            if 'psd_d50' in psd_data:
-                data['diameter_percentile_50'] = psd_data['psd_d50']
-                print(f"DEBUG: Mapped psd_d50 -> diameter_percentile_50: {psd_data['psd_d50']}")
-            
-            # For fillers, we need to estimate D10 and D90 based on D50 and distribution shape
-            # This is a simplified approach - in practice, you'd want to calculate from the distribution
-            if 'diameter_percentile_50' in data:
-                d50 = data['diameter_percentile_50']
-                # Rough estimates: D10 ≈ D50/3, D90 ≈ D50*3 (assuming log-normal-ish distribution)
-                data['diameter_percentile_10'] = d50 / 3.0
-                data['diameter_percentile_90'] = d50 * 3.0
-                print(f"DEBUG: Estimated D10={data['diameter_percentile_10']:.2f}, D90={data['diameter_percentile_90']:.2f}")
+            # Filler model uses standard PSD field names, so we can add them directly
+            data.update(psd_data)
             
             print(f"DEBUG: Final filler psd_data = {data}")
         
@@ -4689,21 +4597,9 @@ class FillerDialog(MaterialDialogBase):
         
         # Load PSD data into unified widget - convert from filler model field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
-            # Convert filler model field names to unified widget format
-            converted_data = dict(self.material_data)
-            
-            # Map diameter percentile fields to PSD widget format
-            d50 = self.material_data.get('diameter_percentile_50')
-            if d50 is not None:
-                converted_data['psd_d50'] = d50
-                converted_data['psd_mode'] = 'rosin_rammler'  # Default to Rosin-Rammler
-                # Set some reasonable defaults for other RR parameters
-                converted_data['psd_n'] = 1.0  # Uniformity parameter
-                converted_data['psd_dmax'] = d50 * 5.0  # Maximum diameter
-                print(f"DEBUG: Converting filler D50={d50} to psd_d50 for unified widget")
-            
-            self.psd_widget.load_from_material_data(converted_data)
-            print(f"DEBUG: Loaded PSD data into unified widget: D50={d50}")
+            # Filler model uses standard PSD field names, so we can load directly
+            self.psd_widget.load_from_material_data(self.material_data)
+            print(f"DEBUG: Loaded filler PSD data directly into unified widget")
         
         print("DEBUG: FillerDialog._load_material_specific_data completed")
 
@@ -4974,20 +4870,9 @@ class LimestoneDialog(MaterialDialogBase):
         # Load PSD data into unified widget - convert from limestone model field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
             # Convert limestone model field names to unified widget format
-            converted_data = dict(self.material_data)
-            
-            # Map limestone model fields to PSD widget format
-            psd_median = self.material_data.get('psd_median')
-            if psd_median is not None:
-                converted_data['psd_d50'] = psd_median
-                converted_data['psd_mode'] = 'rosin_rammler'  # Default to Rosin-Rammler
-                # Set some reasonable defaults for other RR parameters
-                converted_data['psd_n'] = self.material_data.get('psd_n', 1.0)
-                converted_data['psd_dmax'] = self.material_data.get('psd_dmax', psd_median * 5.0)
-                print(f"DEBUG: Converting limestone psd_median={psd_median} to psd_d50 for unified widget")
-            
-            self.psd_widget.load_from_material_data(converted_data)
-            print(f"DEBUG: Loaded limestone PSD data into unified widget: median={psd_median}")
+            # Limestone model uses standard PSD field names, so we can load directly
+            self.psd_widget.load_from_material_data(self.material_data)
+            print(f"DEBUG: Loaded limestone PSD data directly into unified widget")
     
     def _collect_material_specific_data(self) -> Dict[str, Any]:
         """Collect limestone-specific data."""
@@ -5001,29 +4886,13 @@ class LimestoneDialog(MaterialDialogBase):
         if hasattr(self, 'activation_energy_spin') and self.activation_energy_spin:
             data['activation_energy'] = self.activation_energy_spin.get_value()
         
-        # Add PSD data from unified widget - convert to limestone model field names  
+        # Add PSD data from unified widget - limestone uses standard PSD field names
         if hasattr(self, 'psd_widget') and self.psd_widget:
             psd_data = self.psd_widget.get_material_data_dict()
             print(f"DEBUG: Raw psd_data from limestone widget = {psd_data}")
             
-            # Convert PSD data to limestone model field names
-            if 'psd_d50' in psd_data:
-                data['psd_median'] = psd_data['psd_d50']
-                print(f"DEBUG: Mapped psd_d50 -> psd_median: {psd_data['psd_d50']}")
-            
-            # Map other PSD parameters if available
-            if 'psd_mode' in psd_data:
-                data['psd_mode'] = psd_data['psd_mode']
-            if 'psd_custom_points' in psd_data:
-                data['psd_custom_points'] = psd_data['psd_custom_points']
-            if 'psd_n' in psd_data:
-                data['psd_n'] = psd_data['psd_n'] 
-            if 'psd_dmax' in psd_data:
-                data['psd_dmax'] = psd_data['psd_dmax']
-            if 'psd_spread' in psd_data:
-                data['psd_spread'] = psd_data['psd_spread']
-            if 'psd_exponent' in psd_data:
-                data['psd_exponent'] = psd_data['psd_exponent']
+            # Limestone model uses standard PSD field names, so we can add them directly
+            data.update(psd_data)
                 
             print(f"DEBUG: Final limestone psd_data = {data}")
         

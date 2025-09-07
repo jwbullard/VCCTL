@@ -449,7 +449,45 @@ class PSDService:
     def parse_psd_from_material(self, material_data: Dict[str, Any]) -> PSDParameters:
         """Parse PSD parameters from material data dictionary."""
         try:
-            # Check for existing PSD mode (cement materials)
+            # Check for PSD data object (newer materials using relationships)
+            psd_data_obj = material_data.get('psd_data')
+            if psd_data_obj:
+                psd_mode = getattr(psd_data_obj, 'psd_mode', None)
+                if psd_mode == 'rosin_rammler':
+                    return PSDParameters(
+                        psd_type=PSDType.ROSIN_RAMMLER,
+                        d50=getattr(psd_data_obj, 'psd_d50', None),
+                        n=getattr(psd_data_obj, 'psd_n', None),
+                        dmax=getattr(psd_data_obj, 'psd_dmax', None)
+                    )
+                elif psd_mode == 'log_normal':
+                    return PSDParameters(
+                        psd_type=PSDType.LOG_NORMAL,
+                        median=getattr(psd_data_obj, 'psd_median', 10.0),
+                        sigma=getattr(psd_data_obj, 'psd_spread', 2.0)
+                    )
+                elif psd_mode == 'fuller':
+                    return PSDParameters(
+                        psd_type=PSDType.FULLER_THOMPSON,
+                        exponent=getattr(psd_data_obj, 'psd_exponent', None),
+                        dmax=getattr(psd_data_obj, 'psd_dmax', None)
+                    )
+                elif psd_mode == 'custom':
+                    custom_data = getattr(psd_data_obj, 'psd_custom_points', None)
+                    custom_points = None
+                    if custom_data:
+                        try:
+                            points_data = json.loads(custom_data)
+                            custom_points = [(p[0], p[1]) for p in points_data]
+                        except (json.JSONDecodeError, IndexError, KeyError) as e:
+                            self.logger.warning(f"Failed to parse custom PSD points from psd_data: {e}")
+                    
+                    return PSDParameters(
+                        psd_type=PSDType.CUSTOM,
+                        custom_points=custom_points
+                    )
+            
+            # Check for existing PSD mode (cement materials - flat fields)
             psd_mode = material_data.get('psd_mode')
             
             if psd_mode == 'rosin_rammler':

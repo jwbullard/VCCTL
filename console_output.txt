@@ -1,765 +1,705 @@
 /Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
   warnings.warn(
-2025-09-06 15:46:18,759 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
-2025-09-06 15:46:18,820 - VCCTL - INFO - Application startup
-2025-09-06 15:46:18,821 - VCCTL - INFO - Application activated
-2025-09-06 15:46:18,821 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
-2025-09-06 15:46:18,828 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
-2025-09-06 15:46:18,841 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-06 15:46:18,842 - VCCTL.ThemeManager - INFO - Theme manager initialized
-2025-09-06 15:46:18,842 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
-2025-09-06 15:46:18,843 - VCCTL.AccessibilityManager - INFO - Screen reader detected
-2025-09-06 15:46:18,843 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
-2025-09-06 15:46:18,843 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
-2025-09-06 15:46:18,843 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-06 15:46:18,843 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-06 15:46:18,843 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-06 15:46:18,844 - VCCTL.UIPolish - INFO - UI Polish manager initialized
-2025-09-06 15:46:18,976 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
-2025-09-06 15:46:18,988 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
-2025-09-06 15:46:18,995 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
-2025-09-06 15:46:19,146 - VCCTL.Database - INFO - Database engine created successfully
-2025-09-06 15:46:19,150 - VCCTL.Database - INFO - All database tables created successfully
-2025-09-06 15:46:19,150 - VCCTL.Database - INFO - Initializing default database data...
-2025-09-06 15:46:19,150 - VCCTL.Database - INFO - Session maker created successfully
-2025-09-06 15:46:19,169 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
-2025-09-06 15:46:19,169 - VCCTL.Database - INFO - Default database data initialized successfully
-2025-09-06 15:46:19,169 - VCCTL.Database - INFO - Database initialized successfully
-2025-09-06 15:46:19,181 - VCCTL.MaterialTable - INFO - Loaded 63 materials
-2025-09-06 15:46:19,181 - VCCTL.MaterialTable - INFO - Material table initialized
-2025-09-06 15:46:19,185 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 39 cement, 7 aggregate
-2025-09-06 15:46:19,185 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
-2025-09-06 15:46:19,186 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
-2025-09-06 15:46:19,187 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
-2025-09-06 15:46:19,196 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-09-06 15:46:19,196 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
-2025-09-06 15:46:19,196 - VCCTL.HydrationService - INFO - Hydration service initialized
-2025-09-06 15:46:19,196 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-09-06 15:46:19,197 - VCCTL.HydrationPanel - INFO - Found 20 microstructures
-2025-09-06 15:46:19,226 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
-2025-09-06 15:46:19,228 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
-2025-09-06 15:46:19,232 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
-2025-09-06 15:46:19,238 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
-2025-09-06 15:46:19,238 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
-2025-09-06 15:46:19,238 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
-2025-09-06 15:46:19,239 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-06 15:46:19,239 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-06 15:46:19,240 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
-2025-09-06 15:46:19,240 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
-2025-09-06 15:46:19,240 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
-2025-09-06 15:46:19,240 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
-2025-09-06 15:46:19,241 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
-2025-09-06 15:46:19,241 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
-2025-09-06 15:46:19,241 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
-2025-09-06 15:46:19,244 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
-2025-09-06 15:46:19,245 - VCCTL.FileBrowser - INFO - File browser widget initialized
-2025-09-06 15:46:19,248 - VCCTL.FileManagementPanel - INFO - File management panel initialized
-2025-09-06 15:46:19,251 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: restart from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/restart.svg
-2025-09-06 15:46:19,252 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: restart (32x32)
-2025-09-06 15:46:19,252 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: folder--open from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/folder--open.svg
-2025-09-06 15:46:19,252 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: folder--open (32x32)
-2025-09-06 15:46:19,252 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: trash-can from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/trash-can.svg
-2025-09-06 15:46:19,252 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: trash-can (32x32)
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Software/vcctl-gtk
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-09-06 15:46:19,253 - VCCTL.OperationsMonitoringPanel - INFO - Found 43 total items in Operations directory
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Found 42 operation directories: ['Cem152-C109', 'Cem152-LargePaste', 'Cem152SF-Crete', 'Cem152SF-Mortar_v1', 'Elastic_HY-YAP13-C109', 'Elastic_HYOf-YAP13-C109', 'HY-YAP01-C109', 'HY-YAP09-C109', 'HY-YAP10-C109', 'HY-YAP11-C109', 'HY-YAP12-C109', 'HY-YAP13-C109', 'HY-YAP16-C109', 'HYOf-YAP13-C109', 'Hydration_YAP09-C109', 'Hydration_YAP10-C109', 'Hydration_YAP13-C109', 'Hydration_YAP160-C100', 'Poopcrete', 'YAP01', 'YAP01-C109', 'YAP02-C109', 'YAP03-Concrete', 'YAP04-Concrete', 'YAP05-Debug', 'YAP06-Debug', 'YAP06-ForReal', 'YAP06-ForReal-v03', 'YAP06-ForReal-v04', 'YAP06-ForReal-v2', 'YAP06-ForReal_v1', 'YAP07FA', 'YAP09-C109', 'YAP10-C109', 'YAP11-C109', 'YAP12-C109', 'YAP12-C109_copy', 'YAP13-C109', 'YAP15-C109', 'YAP15-C109_v1', 'YAP160-C100', 'vcctl-gtk-Operations-backup']
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152-C109
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152-C109 with 1 files
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152-LargePaste
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152-LargePaste with 1 files
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152SF-Crete
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152SF-Crete with 15 files
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152SF-Mortar_v1
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152SF-Mortar_v1 with 15 files
-2025-09-06 15:46:19,254 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Elastic_HY-YAP13-C109
-2025-09-06 15:46:19,255 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Elastic_HY-YAP13-C109 with 9 files
-2025-09-06 15:46:19,255 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Elastic_HYOf-YAP13-C109
-2025-09-06 15:46:19,255 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Elastic_HYOf-YAP13-C109 with 1 files
-2025-09-06 15:46:19,255 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP01-C109
-2025-09-06 15:46:19,256 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP01-C109 with 74 files
-2025-09-06 15:46:19,256 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP09-C109
-2025-09-06 15:46:19,257 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP09-C109 with 76 files
-2025-09-06 15:46:19,257 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP10-C109
-2025-09-06 15:46:19,258 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP10-C109 with 74 files
-2025-09-06 15:46:19,258 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP11-C109
-2025-09-06 15:46:19,258 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP11-C109 with 74 files
-2025-09-06 15:46:19,259 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP12-C109
-2025-09-06 15:46:19,259 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP12-C109 with 74 files
-2025-09-06 15:46:19,259 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP13-C109
-2025-09-06 15:46:19,260 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP13-C109 with 87 files
-2025-09-06 15:46:19,260 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP16-C109
-2025-09-06 15:46:19,261 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP16-C109 with 31 files
-2025-09-06 15:46:19,261 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYOf-YAP13-C109
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYOf-YAP13-C109 with 74 files
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP09-C109
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP09-C109 with 10 files
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP10-C109
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP10-C109 with 8 files
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP13-C109
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP13-C109 with 8 files
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP160-C100
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP160-C100 with 9 files
-2025-09-06 15:46:19,262 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Poopcrete
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Poopcrete with 14 files
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP01
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP01 with 13 files
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP01-C109
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP01-C109 with 13 files
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP02-C109
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP02-C109 with 15 files
-2025-09-06 15:46:19,263 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP03-Concrete
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP03-Concrete with 14 files
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP04-Concrete
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP04-Concrete with 15 files
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP05-Debug
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP05-Debug with 12 files
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-Debug
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-Debug with 14 files
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal with 6 files
-2025-09-06 15:46:19,264 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v03
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v03 with 6 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v04
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v04 with 14 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v2
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v2 with 6 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal_v1
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal_v1 with 6 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP07FA
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP07FA with 13 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP09-C109
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP09-C109 with 15 files
-2025-09-06 15:46:19,265 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP10-C109
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP10-C109 with 13 files
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP11-C109
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP11-C109 with 13 files
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP12-C109
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP12-C109 with 13 files
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP12-C109_copy
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP12-C109_copy with 10 files
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP13-C109
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP13-C109 with 13 files
-2025-09-06 15:46:19,266 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP15-C109
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP15-C109 with 14 files
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP15-C109_v1
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP15-C109_v1 with 12 files
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP160-C100
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP160-C100 with 12 files
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: vcctl-gtk-Operations-backup
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for vcctl-gtk-Operations-backup with 1 files
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 42 operations
-2025-09-06 15:46:19,267 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-09-06 15:46:19,268 - VCCTL.OperationsMonitoringPanel - INFO - Adding 42 operations to display
-2025-09-06 15:46:19,283 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+2025-09-06 21:35:36,474 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-09-06 21:35:36,534 - VCCTL - INFO - Application startup
+2025-09-06 21:35:36,535 - VCCTL - INFO - Application activated
+2025-09-06 21:35:36,535 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-09-06 21:35:36,541 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-09-06 21:35:36,553 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-09-06 21:35:36,553 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-09-06 21:35:36,554 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-09-06 21:35:36,554 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-09-06 21:35:36,554 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-09-06 21:35:36,554 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-09-06 21:35:36,555 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-09-06 21:35:36,555 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-09-06 21:35:36,555 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-09-06 21:35:36,555 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-09-06 21:35:36,676 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
+2025-09-06 21:35:36,688 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
+2025-09-06 21:35:36,695 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
+2025-09-06 21:35:36,841 - VCCTL.Database - INFO - Database engine created successfully
+2025-09-06 21:35:36,843 - VCCTL.Database - INFO - All database tables created successfully
+2025-09-06 21:35:36,843 - VCCTL.Database - INFO - Initializing default database data...
+2025-09-06 21:35:36,843 - VCCTL.Database - INFO - Session maker created successfully
+2025-09-06 21:35:36,860 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-09-06 21:35:36,860 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-09-06 21:35:36,860 - VCCTL.Database - INFO - Database initialized successfully
+2025-09-06 21:35:36,875 - VCCTL.MaterialTable - INFO - Loaded 61 materials
+2025-09-06 21:35:36,875 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-09-06 21:35:36,878 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 40 cement, 7 aggregate
+2025-09-06 21:35:36,879 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-09-06 21:35:36,879 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-09-06 21:35:36,879 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-09-06 21:35:36,879 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-09-06 21:35:36,879 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-09-06 21:35:36,879 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-09-06 21:35:36,880 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-09-06 21:35:36,888 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-09-06 21:35:36,888 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-09-06 21:35:36,889 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-09-06 21:35:36,889 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-09-06 21:35:36,890 - VCCTL.HydrationPanel - INFO - Found 20 microstructures
+2025-09-06 21:35:36,920 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
+2025-09-06 21:35:36,922 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-09-06 21:35:36,926 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
+2025-09-06 21:35:36,932 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
+2025-09-06 21:35:36,932 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-09-06 21:35:36,932 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-09-06 21:35:36,932 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-09-06 21:35:36,933 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-09-06 21:35:36,933 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
+2025-09-06 21:35:36,933 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
+2025-09-06 21:35:36,934 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
+2025-09-06 21:35:36,934 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
+2025-09-06 21:35:36,934 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
+2025-09-06 21:35:36,934 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
+2025-09-06 21:35:36,935 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
+2025-09-06 21:35:36,937 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-09-06 21:35:36,938 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-09-06 21:35:36,941 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: restart from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/restart.svg
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: restart (32x32)
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: folder--open from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/folder--open.svg
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: folder--open (32x32)
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: trash-can from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/trash-can.svg
+2025-09-06 21:35:36,945 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: trash-can (32x32)
+2025-09-06 21:35:36,946 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-09-06 21:35:36,946 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Software/vcctl-gtk
+2025-09-06 21:35:36,946 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-06 21:35:36,946 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-09-06 21:35:36,946 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Found 43 total items in Operations directory
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Found 42 operation directories: ['Cem152-C109', 'Cem152-LargePaste', 'Cem152SF-Crete', 'Cem152SF-Mortar_v1', 'Elastic_HY-YAP13-C109', 'Elastic_HYOf-YAP13-C109', 'HY-YAP01-C109', 'HY-YAP09-C109', 'HY-YAP10-C109', 'HY-YAP11-C109', 'HY-YAP12-C109', 'HY-YAP13-C109', 'HY-YAP16-C109', 'HYOf-YAP13-C109', 'Hydration_YAP09-C109', 'Hydration_YAP10-C109', 'Hydration_YAP13-C109', 'Hydration_YAP160-C100', 'Poopcrete', 'YAP01', 'YAP01-C109', 'YAP02-C109', 'YAP03-Concrete', 'YAP04-Concrete', 'YAP05-Debug', 'YAP06-Debug', 'YAP06-ForReal', 'YAP06-ForReal-v03', 'YAP06-ForReal-v04', 'YAP06-ForReal-v2', 'YAP06-ForReal_v1', 'YAP07FA', 'YAP09-C109', 'YAP10-C109', 'YAP11-C109', 'YAP12-C109', 'YAP12-C109_copy', 'YAP13-C109', 'YAP15-C109', 'YAP15-C109_v1', 'YAP160-C100', 'vcctl-gtk-Operations-backup']
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152-C109
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152-C109 with 1 files
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152-LargePaste
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152-LargePaste with 1 files
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152SF-Crete
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152SF-Crete with 15 files
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Cem152SF-Mortar_v1
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Cem152SF-Mortar_v1 with 15 files
+2025-09-06 21:35:36,947 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Elastic_HY-YAP13-C109
+2025-09-06 21:35:36,948 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Elastic_HY-YAP13-C109 with 9 files
+2025-09-06 21:35:36,948 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Elastic_HYOf-YAP13-C109
+2025-09-06 21:35:36,948 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Elastic_HYOf-YAP13-C109 with 1 files
+2025-09-06 21:35:36,948 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP01-C109
+2025-09-06 21:35:36,949 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP01-C109 with 74 files
+2025-09-06 21:35:36,949 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP09-C109
+2025-09-06 21:35:36,950 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP09-C109 with 76 files
+2025-09-06 21:35:36,950 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP10-C109
+2025-09-06 21:35:36,951 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP10-C109 with 74 files
+2025-09-06 21:35:36,951 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP11-C109
+2025-09-06 21:35:36,952 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP11-C109 with 74 files
+2025-09-06 21:35:36,952 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP12-C109
+2025-09-06 21:35:36,952 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP12-C109 with 74 files
+2025-09-06 21:35:36,952 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP13-C109
+2025-09-06 21:35:36,953 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP13-C109 with 87 files
+2025-09-06 21:35:36,953 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-YAP16-C109
+2025-09-06 21:35:36,954 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-YAP16-C109 with 31 files
+2025-09-06 21:35:36,954 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYOf-YAP13-C109
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYOf-YAP13-C109 with 74 files
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP09-C109
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP09-C109 with 10 files
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP10-C109
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP10-C109 with 8 files
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP13-C109
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP13-C109 with 8 files
+2025-09-06 21:35:36,955 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Hydration_YAP160-C100
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Hydration_YAP160-C100 with 9 files
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Poopcrete
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Poopcrete with 14 files
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP01
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP01 with 13 files
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP01-C109
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP01-C109 with 13 files
+2025-09-06 21:35:36,956 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP02-C109
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP02-C109 with 15 files
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP03-Concrete
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP03-Concrete with 14 files
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP04-Concrete
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP04-Concrete with 15 files
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP05-Debug
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP05-Debug with 12 files
+2025-09-06 21:35:36,957 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-Debug
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-Debug with 14 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal with 6 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v03
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v03 with 6 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v04
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v04 with 14 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal-v2
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal-v2 with 6 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP06-ForReal_v1
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP06-ForReal_v1 with 6 files
+2025-09-06 21:35:36,958 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP07FA
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP07FA with 13 files
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP09-C109
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP09-C109 with 15 files
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP10-C109
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP10-C109 with 13 files
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP11-C109
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP11-C109 with 13 files
+2025-09-06 21:35:36,959 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP12-C109
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP12-C109 with 13 files
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP12-C109_copy
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP12-C109_copy with 10 files
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP13-C109
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP13-C109 with 13 files
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP15-C109
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP15-C109 with 14 files
+2025-09-06 21:35:36,960 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP15-C109_v1
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP15-C109_v1 with 12 files
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: YAP160-C100
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for YAP160-C100 with 12 files
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: vcctl-gtk-Operations-backup
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for vcctl-gtk-Operations-backup with 1 files
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 42 operations
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-09-06 21:35:36,961 - VCCTL.OperationsMonitoringPanel - INFO - Adding 42 operations to display
+2025-09-06 21:35:36,976 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-2025-09-06 15:46:19,285 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:46:19,320 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:46:19,320 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
-2025-09-06 15:46:19,320 - VCCTL.OperationsMonitoringPanel - INFO - Found 6 operations in database
-2025-09-06 15:46:19,320 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 6 operations from database (0 failed)
-2025-09-06 15:46:19,321 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
-2025-09-06 15:46:19,321 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
-2025-09-06 15:46:19,321 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 6 total operations, 0 running
-2025-09-06 15:46:19,321 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel initialized
-2025-09-06 15:46:19,322 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP07FA
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP07FA' - found 13 files
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,322 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP07FA' of type 'Microstructure Generation'
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal_v1
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal_v1' - found 6 files
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' classified as Unknown
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal_v1' of type 'Unknown Analysis'
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109' - found 14 files
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,323 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP16-C109
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP16-C109' - found 31 files
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP16-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP02-C109
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP02-C109' - found 15 files
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,324 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,325 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP02-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,325 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP01-C109
-2025-09-06 15:46:19,325 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP01-C109' - found 74 files
-2025-09-06 15:46:19,325 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,325 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,326 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP01-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,326 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYOf-YAP13-C109
-2025-09-06 15:46:19,326 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYOf-YAP13-C109' - found 74 files
-2025-09-06 15:46:19,326 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,326 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYOf-YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal' - found 6 files
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' classified as Unknown
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal' of type 'Unknown Analysis'
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP04-Concrete
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP04-Concrete' - found 15 files
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,327 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP04-Concrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v03
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v03' - found 6 files
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' classified as Unknown
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v03' of type 'Unknown Analysis'
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v04
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v04' - found 14 files
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,328 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v04' of type 'Microstructure Generation'
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP13-C109
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP13-C109' - found 13 files
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP13-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP10-C109
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP10-C109' - found 74 files
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,329 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,330 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP10-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,330 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP03-Concrete
-2025-09-06 15:46:19,330 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP03-Concrete' - found 14 files
-2025-09-06 15:46:19,330 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,330 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP03-Concrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HY-YAP13-C109
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HY-YAP13-C109' - found 9 files
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' classified as Unknown
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HY-YAP13-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP09-C109
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP09-C109' - found 15 files
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP09-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,331 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Mortar_v1
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Mortar_v1' - found 15 files
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Mortar_v1' of type 'Microstructure Generation'
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Poopcrete
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Poopcrete' - found 14 files
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Poopcrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,332 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v2
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v2' - found 6 files
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' classified as Unknown
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v2' of type 'Unknown Analysis'
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP160-C100
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP160-C100' - found 12 files
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP160-C100' of type 'Microstructure Generation'
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP13-C109
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP13-C109' - found 8 files
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP13-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,333 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP11-C109
-2025-09-06 15:46:19,334 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP11-C109' - found 74 files
-2025-09-06 15:46:19,334 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,334 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP11-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109' - found 13 files
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109_v1
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109_v1' - found 12 files
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,335 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109_v1' of type 'Microstructure Generation'
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP09-C109
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP09-C109' - found 10 files
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP09-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP09-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Crete
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Crete' - found 15 files
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Crete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,336 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-Debug
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-Debug' - found 14 files
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-Debug' of type 'Microstructure Generation'
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP12-C109
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP12-C109' - found 74 files
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,337 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP12-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP11-C109
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP11-C109' - found 13 files
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP11-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,338 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: vcctl-gtk-Operations-backup
-2025-09-06 15:46:19,348 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'vcctl-gtk-Operations-backup' - found 985 files
-2025-09-06 15:46:19,348 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,348 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' classified as Hydration (time-series files)
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'vcctl-gtk-Operations-backup' of type 'Hydration Simulation'
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-C109
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-C109' - found 1 files
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' classified as Unknown
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,359 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01' - found 13 files
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01' of type 'Microstructure Generation'
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP10-C109
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP10-C109' - found 8 files
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP10-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP10-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-LargePaste
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-LargePaste' - found 1 files
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,360 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' classified as Unknown
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-LargePaste' of type 'Unknown Analysis'
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HYOf-YAP13-C109
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HYOf-YAP13-C109' - found 1 files
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' classified as Unknown
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HYOf-YAP13-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109_copy
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109_copy' - found 10 files
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' classified as Unknown
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109_copy' of type 'Unknown Analysis'
-2025-09-06 15:46:19,361 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP09-C109
-2025-09-06 15:46:19,362 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP09-C109' - found 76 files
-2025-09-06 15:46:19,362 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,362 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,362 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP09-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,362 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP10-C109
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP10-C109' - found 13 files
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP10-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP13-C109
-2025-09-06 15:46:19,363 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP13-C109' - found 87 files
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP160-C100
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP160-C100' - found 9 files
-2025-09-06 15:46:19,364 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP160-C100' classified as Hydration (folder name)
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP160-C100' of type 'Hydration Simulation'
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP05-Debug
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP05-Debug' - found 12 files
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP05-Debug' of type 'Microstructure Generation'
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01-C109
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01-C109' - found 13 files
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,365 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,366 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 42 results from Operations folder
-2025-09-06 15:46:19,370 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-06 15:46:19,370 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-06 15:46:19,371 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-06 15:46:19,371 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-06 15:46:19,524 - VCCTL.MainWindow - INFO - Main window initialized
-2025-09-06 15:46:19,549 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
-2025-09-06 15:46:19,549 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-06 15:46:19,549 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-06 15:46:19,549 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP07FA
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP07FA' - found 13 files
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP07FA' of type 'Microstructure Generation'
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal_v1
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal_v1' - found 6 files
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' classified as Unknown
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal_v1' of type 'Unknown Analysis'
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109
-2025-09-06 15:46:19,550 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109' - found 14 files
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP16-C109
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP16-C109' - found 31 files
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,551 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP16-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP02-C109
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP02-C109' - found 15 files
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP02-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,552 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP01-C109
-2025-09-06 15:46:19,553 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP01-C109' - found 74 files
-2025-09-06 15:46:19,553 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,553 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,553 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP01-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,553 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYOf-YAP13-C109
-2025-09-06 15:46:19,554 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYOf-YAP13-C109' - found 74 files
-2025-09-06 15:46:19,554 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,554 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYOf-YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal' - found 6 files
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' classified as Unknown
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal' of type 'Unknown Analysis'
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP04-Concrete
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP04-Concrete' - found 15 files
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP04-Concrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,555 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v03
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v03' - found 6 files
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' classified as Unknown
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v03' of type 'Unknown Analysis'
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v04
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v04' - found 14 files
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v04' of type 'Microstructure Generation'
-2025-09-06 15:46:19,556 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP13-C109
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP13-C109' - found 13 files
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP13-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP10-C109
-2025-09-06 15:46:19,557 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP10-C109' - found 74 files
-2025-09-06 15:46:19,558 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,558 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,558 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP10-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,558 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP03-Concrete
-2025-09-06 15:46:19,558 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP03-Concrete' - found 14 files
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP03-Concrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HY-YAP13-C109
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HY-YAP13-C109' - found 9 files
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' classified as Unknown
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HY-YAP13-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP09-C109
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP09-C109' - found 15 files
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,559 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP09-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Mortar_v1
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Mortar_v1' - found 15 files
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Mortar_v1' of type 'Microstructure Generation'
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Poopcrete
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Poopcrete' - found 14 files
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,560 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Poopcrete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v2
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v2' - found 6 files
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' classified as Unknown
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v2' of type 'Unknown Analysis'
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP160-C100
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP160-C100' - found 12 files
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP160-C100' of type 'Microstructure Generation'
-2025-09-06 15:46:19,561 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP13-C109
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP13-C109' - found 8 files
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP13-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP11-C109
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP11-C109' - found 74 files
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,562 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,563 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP11-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,563 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109
-2025-09-06 15:46:19,563 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109' - found 13 files
-2025-09-06 15:46:19,563 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,563 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109_v1
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109_v1' - found 12 files
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109_v1' of type 'Microstructure Generation'
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP09-C109
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP09-C109' - found 10 files
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP09-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP09-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,564 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Crete
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Crete' - found 15 files
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Crete' of type 'Microstructure Generation'
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-Debug
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-Debug' - found 14 files
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-Debug' of type 'Microstructure Generation'
-2025-09-06 15:46:19,565 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP12-C109
-2025-09-06 15:46:19,566 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP12-C109' - found 74 files
-2025-09-06 15:46:19,566 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,566 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP12-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP11-C109
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP11-C109' - found 13 files
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP11-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,567 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: vcctl-gtk-Operations-backup
-2025-09-06 15:46:19,577 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'vcctl-gtk-Operations-backup' - found 985 files
-2025-09-06 15:46:19,578 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,578 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' classified as Hydration (time-series files)
-2025-09-06 15:46:19,589 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'vcctl-gtk-Operations-backup' of type 'Hydration Simulation'
-2025-09-06 15:46:19,589 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-C109
-2025-09-06 15:46:19,589 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-C109' - found 1 files
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' classified as Unknown
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01' - found 13 files
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01' of type 'Microstructure Generation'
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP10-C109
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP10-C109' - found 8 files
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP10-C109' classified as Hydration (folder name)
-2025-09-06 15:46:19,590 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP10-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-LargePaste
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-LargePaste' - found 1 files
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' classified as Unknown
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-LargePaste' of type 'Unknown Analysis'
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HYOf-YAP13-C109
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HYOf-YAP13-C109' - found 1 files
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' classified as Unknown
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HYOf-YAP13-C109' of type 'Unknown Analysis'
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109_copy
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109_copy' - found 10 files
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' - time_series_img: False, csv: False, img: False
-2025-09-06 15:46:19,591 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' classified as Unknown
-2025-09-06 15:46:19,592 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109_copy' of type 'Unknown Analysis'
-2025-09-06 15:46:19,592 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP09-C109
-2025-09-06 15:46:19,592 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP09-C109' - found 76 files
-2025-09-06 15:46:19,592 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,592 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP09-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP10-C109
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP10-C109' - found 13 files
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP10-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,593 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP13-C109
-2025-09-06 15:46:19,594 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP13-C109' - found 87 files
-2025-09-06 15:46:19,594 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' - time_series_img: True, csv: True, img: True
-2025-09-06 15:46:19,594 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' classified as Hydration (time-series files)
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP13-C109' of type 'Hydration Simulation'
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP160-C100
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP160-C100' - found 9 files
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP160-C100' classified as Hydration (folder name)
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP160-C100' of type 'Hydration Simulation'
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP05-Debug
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP05-Debug' - found 12 files
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,595 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP05-Debug' of type 'Microstructure Generation'
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01-C109
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01-C109' - found 13 files
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' - time_series_img: False, csv: False, img: True
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' classified as Microstructure (IMG only)
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01-C109' of type 'Microstructure Generation'
-2025-09-06 15:46:19,596 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 42 results from Operations folder
-2025-09-06 15:46:19,719 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-06 15:46:19,719 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-DEBUG: MaterialDialogBase.__init__ called with material_type='filler', material_data={'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Beef is made to be eaten', 'color': 'gray', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'glass', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.7000000000000006, 'updated_at': datetime.datetime(2025, 9, 6, 2, 43, 5, 319187), 'water_absorption': 0.2}
-DEBUG: _load_material_data called, material_data={'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Beef is made to be eaten', 'color': 'gray', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'glass', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.7000000000000006, 'updated_at': datetime.datetime(2025, 9, 6, 2, 43, 5, 319187), 'water_absorption': 0.2}
-DEBUG: FillerDialog._load_material_specific_data called, material_data = {'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Beef is made to be eaten', 'color': 'gray', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'glass', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.7000000000000006, 'updated_at': datetime.datetime(2025, 9, 6, 2, 43, 5, 319187), 'water_absorption': 0.2}
-DEBUG: Available material_data keys: ['name', 'display_name', 'description', 'specific_gravity', 'source', 'notes', 'color', 'created_at', 'filler_type', 'id', 'metadata', 'psd_data_id', 'registry', 'specific_surface_area', 'updated_at', 'water_absorption']
-DEBUG: filler_type = glass, has combo = True, combo exists = True
-DEBUG: Set filler_type_combo to glass
-DEBUG: specific_surface_area = 1.7000000000000006, has spin = True, spin exists = True
-DEBUG: Set specific_surface_spin to 1.7000000000000006
-DEBUG: water_absorption = 0.2, has spin = True, spin exists = True
-DEBUG: Set absorption_spin to 0.2
-DEBUG: color = gray, has combo = True, combo exists = True
-DEBUG: Set color_combo to gray
-DEBUG: Loaded PSD data into unified widget: D50=None
-DEBUG: FillerDialog._load_material_specific_data completed
-2025-09-06 15:46:48,880 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 425.02886741874903, 'current_memory_mb': 609.296875}
-2025-09-06 15:46:49,493 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 31: 6 total operations, 0 running
-2025-09-06 15:46:50,058 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:46:50,114 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-DEBUG: _on_response called with response_id=-5 (APPLY=-10)
-DEBUG: _collect_form_data - name from UI = 'Burger'
-DEBUG: FillerDialog._collect_material_specific_data called
-DEBUG: hasattr(self, 'filler_type_combo') = True
-DEBUG: self.filler_type_combo = <Gtk.ComboBoxText object at 0x3234b4fc0 (GtkComboBoxText at 0x321f5e210)>
-DEBUG: hasattr(self, 'specific_surface_spin') = True
-DEBUG: self.specific_surface_spin = <Gtk.SpinButton object at 0x323447a40 (GtkSpinButton at 0x321f5fd50)>
-DEBUG: hasattr(self, 'absorption_spin') = True
-DEBUG: self.absorption_spin = <Gtk.SpinButton object at 0x3234464c0 (GtkSpinButton at 0x321f677a0)>
-DEBUG: hasattr(self, 'color_combo') = True
-DEBUG: self.color_combo = <Gtk.ComboBoxText object at 0x323434ac0 (GtkComboBoxText at 0x321f68840)>
-DEBUG: Collected filler_type = quartz
-DEBUG: Collected specific_surface_area = 1.71
-DEBUG: Collected water_absorption = 0.3
-DEBUG: Collected color = beige
-DEBUG: Raw psd_data from widget = {'psd_mode': 'fuller', 'psd_exponent': 0.5, 'psd_dmax': 60.0, 'psd_custom_points': '[[1.0, 0.1574591643244434], [2.0, 0.045819742720992034], [3.0, 0.03724393941498189], [4.0, 0.032204426266855386], [5.0, 0.028784071850490887], [6.0, 0.03863932694714014], [8.0, 0.045543936395031286], [10.0, 0.040706824791285796], [12.0, 0.045976060262109326], [15.0, 0.06544794185390772], [20.0, 0.07201128630906835], [25.0, 0.06436314132693582], [30.0, 0.08640016165864485], [40.0, 0.1018393377422165], [50.0, 0.0910232273814889], [60.0, 0.04653741075440773]]'}
-DEBUG: Final filler psd_data = {'filler_type': 'quartz', 'specific_surface_area': 1.71, 'water_absorption': 0.3, 'color': 'beige'}
-DEBUG: FillerDialog._collect_material_specific_data returning: {'filler_type': 'quartz', 'specific_surface_area': 1.71, 'water_absorption': 0.3, 'color': 'beige'}
-DEBUG: _collect_form_data - material_type = filler
-DEBUG: _collect_form_data - collected material_data = {'filler_type': 'quartz', 'specific_surface_area': 1.71, 'water_absorption': 0.3, 'color': 'beige'}
-DEBUG: _collect_form_data - data before update = {'name': 'Burger', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Metadata now'}
-DEBUG: _collect_form_data - name before update = 'Burger'
-DEBUG: _collect_form_data - final data = {'name': 'Burger', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Metadata now', 'filler_type': 'quartz', 'specific_surface_area': 1.71, 'water_absorption': 0.3, 'color': 'beige'}
-DEBUG: _collect_form_data - final name = 'Burger'
-DEBUG: Using material_id='14' for filler update
-2025-09-06 15:47:11,221 - VCCTL.FillerService - INFO - Updated filler: Burger
-2025-09-06 15:47:11,222 - VCCTL.MaterialDialog.filler - INFO - Updated filler: Burger
-2025-09-06 15:47:11,225 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-09-06 15:47:11,238 - VCCTL.MaterialTable - INFO - Loaded 63 materials
-2025-09-06 15:47:11,240 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 39 cement, 7 aggregate
-2025-09-06 15:47:11,726 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-06 15:47:11,726 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-06 15:47:11,726 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-06 15:47:11,726 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-DEBUG: MaterialDialogBase.__init__ called with material_type='filler', material_data={'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Metadata now', 'color': 'beige', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'quartz', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.71, 'updated_at': datetime.datetime(2025, 9, 6, 20, 47, 11, 218738), 'water_absorption': 0.3}
-DEBUG: _load_material_data called, material_data={'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Metadata now', 'color': 'beige', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'quartz', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.71, 'updated_at': datetime.datetime(2025, 9, 6, 20, 47, 11, 218738), 'water_absorption': 0.3}
-DEBUG: FillerDialog._load_material_specific_data called, material_data = {'name': 'Burger', 'display_name': '', 'description': 'I chopped up the beef', 'specific_gravity': 3.0, 'source': 'VCCTL Burger', 'notes': 'Metadata now', 'color': 'beige', 'created_at': datetime.datetime(2025, 9, 6, 2, 41, 35, 153113), 'filler_type': 'quartz', 'id': 14, 'metadata': MetaData(), 'psd_data_id': 71, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 1.71, 'updated_at': datetime.datetime(2025, 9, 6, 20, 47, 11, 218738), 'water_absorption': 0.3}
-DEBUG: Available material_data keys: ['name', 'display_name', 'description', 'specific_gravity', 'source', 'notes', 'color', 'created_at', 'filler_type', 'id', 'metadata', 'psd_data_id', 'registry', 'specific_surface_area', 'updated_at', 'water_absorption']
-DEBUG: filler_type = quartz, has combo = True, combo exists = True
-DEBUG: Set filler_type_combo to quartz
-DEBUG: specific_surface_area = 1.71, has spin = True, spin exists = True
-DEBUG: Set specific_surface_spin to 1.71
-DEBUG: water_absorption = 0.3, has spin = True, spin exists = True
-DEBUG: Set absorption_spin to 0.3
-DEBUG: color = beige, has combo = True, combo exists = True
-DEBUG: Set color_combo to beige
-DEBUG: Loaded PSD data into unified widget: D50=None
-DEBUG: FillerDialog._load_material_specific_data completed
-2025-09-06 15:47:18,918 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 231.9712204312446, 'current_memory_mb': 628.828125}
-2025-09-06 15:47:19,666 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 61: 6 total operations, 0 running
-2025-09-06 15:47:19,669 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:47:20,061 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:47:20,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-DEBUG: _on_response called with response_id=-6 (APPLY=-10)
-2025-09-06 15:47:48,966 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 156.71764003280978, 'current_memory_mb': 631.953125}
-2025-09-06 15:47:49,822 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 91: 6 total operations, 0 running
-2025-09-06 15:47:50,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:47:50,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:48:19,016 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 117.52534509726449, 'current_memory_mb': 631.953125}
-2025-09-06 15:48:20,022 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 121: 6 total operations, 0 running
-2025-09-06 15:48:20,026 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:48:25,061 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:48:25,115 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-DEBUG: CementDialog.__init__ called with material_data={'name': 'cement168_02', 'display_name': '', 'description': 'Enter material description...', 'specific_gravity': 3.16, 'source': 'CCRL', 'notes': None, 'activation_energy': 58888.0, 'alkali_file': 'alkalicem116', 'anhyd': 0.0, 'anhyd_volume_fraction': 0.0, 'c2s_mass_fraction': 0.1702089089715603, 'c2s_surface_fraction': 0.265, 'c2s_volume_fraction': 0.1802, 'c3a_mass_fraction': 0.07757281664554933, 'c3a_surface_fraction': 0.09569999999999998, 'c3a_volume_fraction': 0.0805, 'c3s_mass_fraction': 0.6478, 'c3s_surface_fraction': 0.4211, 'c3s_volume_fraction': 0.6579926111045757, 'c4af_mass_fraction': 0.0907488894316638, 'c4af_surface_fraction': 0.1906, 'c4af_volume_fraction': 0.0765, 'created_at': datetime.datetime(2025, 9, 6, 20, 40, 26, 456249), 'density': 3160.0, 'dihyd': 0.0, 'dihyd_volume_fraction': 0.0, 'has_gypsum_data': True, 'has_phase_data': True, 'hemihyd': 0.0305, 'hemihyd_volume_fraction': 0.035175182481751825, 'id': 57, 'immutable': False, 'k2so4_mass_fraction': 0.013704642251973072, 'k2so4_surface_fraction': 0.0276, 'k2so4_volume_fraction': 0.0162, 'metadata': MetaData(), 'na2so4_mass_fraction': 0.0, 'na2so4_surface_fraction': 0.0, 'na2so4_volume_fraction': 0.0, 'psd_data': <PSDData(mode='log_normal', reference='cement168 psd')>, 'psd_data_id': 35, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 397.0, 'total_gypsum_fraction': 0.0305, 'total_phase_fraction': 0.9863306150487735, 'updated_at': datetime.datetime(2025, 9, 6, 20, 45, 31, 713938), 'psd_mode': 'log_normal', 'psd_d50': 15.0, 'psd_n': 1.3, 'psd_dmax': 60.0, 'psd_median': 12.0, 'psd_spread': 3.0, 'psd_custom_points': '[[1.0, 0.33435560972648515], [2.0, 0.07728270679674787], [3.0, 0.0549376500016076], [4.0, 0.04275456698913267], [5.0, 0.035004109176823374], [6.0, 0.04286625901795364], [8.0, 0.04532992999856559], [10.0, 0.036472944001480344], [12.0, 0.03729429713098527], [15.0, 0.0470931306359092], [20.0, 0.045123739249204306], [25.0, 0.035481483610438305], [30.0, 0.04176855833095011], [40.0, 0.04226753975082876], [50.0, 0.032661904816619076], [60.0, 0.03220884007095881], [75.0, 0.017096730695309915]]'}
-DEBUG: MaterialDialogBase.__init__ called with material_type='cement', material_data={'name': 'cement168_02', 'display_name': '', 'description': 'Enter material description...', 'specific_gravity': 3.16, 'source': 'CCRL', 'notes': None, 'activation_energy': 58888.0, 'alkali_file': 'alkalicem116', 'anhyd': 0.0, 'anhyd_volume_fraction': 0.0, 'c2s_mass_fraction': 0.1702089089715603, 'c2s_surface_fraction': 0.265, 'c2s_volume_fraction': 0.1802, 'c3a_mass_fraction': 0.07757281664554933, 'c3a_surface_fraction': 0.09569999999999998, 'c3a_volume_fraction': 0.0805, 'c3s_mass_fraction': 0.6478, 'c3s_surface_fraction': 0.4211, 'c3s_volume_fraction': 0.6579926111045757, 'c4af_mass_fraction': 0.0907488894316638, 'c4af_surface_fraction': 0.1906, 'c4af_volume_fraction': 0.0765, 'created_at': datetime.datetime(2025, 9, 6, 20, 40, 26, 456249), 'density': 3160.0, 'dihyd': 0.0, 'dihyd_volume_fraction': 0.0, 'has_gypsum_data': True, 'has_phase_data': True, 'hemihyd': 0.0305, 'hemihyd_volume_fraction': 0.035175182481751825, 'id': 57, 'immutable': False, 'k2so4_mass_fraction': 0.013704642251973072, 'k2so4_surface_fraction': 0.0276, 'k2so4_volume_fraction': 0.0162, 'metadata': MetaData(), 'na2so4_mass_fraction': 0.0, 'na2so4_surface_fraction': 0.0, 'na2so4_volume_fraction': 0.0, 'psd_data': <PSDData(mode='log_normal', reference='cement168 psd')>, 'psd_data_id': 35, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 397.0, 'total_gypsum_fraction': 0.0305, 'total_phase_fraction': 0.9863306150487735, 'updated_at': datetime.datetime(2025, 9, 6, 20, 45, 31, 713938), 'psd_mode': 'log_normal', 'psd_d50': 15.0, 'psd_n': 1.3, 'psd_dmax': 60.0, 'psd_median': 12.0, 'psd_spread': 3.0, 'psd_custom_points': '[[1.0, 0.33435560972648515], [2.0, 0.07728270679674787], [3.0, 0.0549376500016076], [4.0, 0.04275456698913267], [5.0, 0.035004109176823374], [6.0, 0.04286625901795364], [8.0, 0.04532992999856559], [10.0, 0.036472944001480344], [12.0, 0.03729429713098527], [15.0, 0.0470931306359092], [20.0, 0.045123739249204306], [25.0, 0.035481483610438305], [30.0, 0.04176855833095011], [40.0, 0.04226753975082876], [50.0, 0.032661904816619076], [60.0, 0.03220884007095881], [75.0, 0.017096730695309915]]'}
-DEBUG: _load_material_data called, material_data={'name': 'cement168_02', 'display_name': '', 'description': 'Enter material description...', 'specific_gravity': 3.16, 'source': 'CCRL', 'notes': None, 'activation_energy': 58888.0, 'alkali_file': 'alkalicem116', 'anhyd': 0.0, 'anhyd_volume_fraction': 0.0, 'c2s_mass_fraction': 0.1702089089715603, 'c2s_surface_fraction': 0.265, 'c2s_volume_fraction': 0.1802, 'c3a_mass_fraction': 0.07757281664554933, 'c3a_surface_fraction': 0.09569999999999998, 'c3a_volume_fraction': 0.0805, 'c3s_mass_fraction': 0.6478, 'c3s_surface_fraction': 0.4211, 'c3s_volume_fraction': 0.6579926111045757, 'c4af_mass_fraction': 0.0907488894316638, 'c4af_surface_fraction': 0.1906, 'c4af_volume_fraction': 0.0765, 'created_at': datetime.datetime(2025, 9, 6, 20, 40, 26, 456249), 'density': 3160.0, 'dihyd': 0.0, 'dihyd_volume_fraction': 0.0, 'has_gypsum_data': True, 'has_phase_data': True, 'hemihyd': 0.0305, 'hemihyd_volume_fraction': 0.035175182481751825, 'id': 57, 'immutable': False, 'k2so4_mass_fraction': 0.013704642251973072, 'k2so4_surface_fraction': 0.0276, 'k2so4_volume_fraction': 0.0162, 'metadata': MetaData(), 'na2so4_mass_fraction': 0.0, 'na2so4_surface_fraction': 0.0, 'na2so4_volume_fraction': 0.0, 'psd_data': <PSDData(mode='log_normal', reference='cement168 psd')>, 'psd_data_id': 35, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 397.0, 'total_gypsum_fraction': 0.0305, 'total_phase_fraction': 0.9863306150487735, 'updated_at': datetime.datetime(2025, 9, 6, 20, 45, 31, 713938), 'psd_mode': 'log_normal', 'psd_d50': 15.0, 'psd_n': 1.3, 'psd_dmax': 60.0, 'psd_median': 12.0, 'psd_spread': 3.0, 'psd_custom_points': '[[1.0, 0.33435560972648515], [2.0, 0.07728270679674787], [3.0, 0.0549376500016076], [4.0, 0.04275456698913267], [5.0, 0.035004109176823374], [6.0, 0.04286625901795364], [8.0, 0.04532992999856559], [10.0, 0.036472944001480344], [12.0, 0.03729429713098527], [15.0, 0.0470931306359092], [20.0, 0.045123739249204306], [25.0, 0.035481483610438305], [30.0, 0.04176855833095011], [40.0, 0.04226753975082876], [50.0, 0.032661904816619076], [60.0, 0.03220884007095881], [75.0, 0.017096730695309915]]'}
-DEBUG: CementDialog._load_material_specific_data called, material_data = {'name': 'cement168_02', 'display_name': '', 'description': 'Enter material description...', 'specific_gravity': 3.16, 'source': 'CCRL', 'notes': None, 'activation_energy': 58888.0, 'alkali_file': 'alkalicem116', 'anhyd': 0.0, 'anhyd_volume_fraction': 0.0, 'c2s_mass_fraction': 0.1702089089715603, 'c2s_surface_fraction': 0.265, 'c2s_volume_fraction': 0.1802, 'c3a_mass_fraction': 0.07757281664554933, 'c3a_surface_fraction': 0.09569999999999998, 'c3a_volume_fraction': 0.0805, 'c3s_mass_fraction': 0.6478, 'c3s_surface_fraction': 0.4211, 'c3s_volume_fraction': 0.6579926111045757, 'c4af_mass_fraction': 0.0907488894316638, 'c4af_surface_fraction': 0.1906, 'c4af_volume_fraction': 0.0765, 'created_at': datetime.datetime(2025, 9, 6, 20, 40, 26, 456249), 'density': 3160.0, 'dihyd': 0.0, 'dihyd_volume_fraction': 0.0, 'has_gypsum_data': True, 'has_phase_data': True, 'hemihyd': 0.0305, 'hemihyd_volume_fraction': 0.035175182481751825, 'id': 57, 'immutable': False, 'k2so4_mass_fraction': 0.013704642251973072, 'k2so4_surface_fraction': 0.0276, 'k2so4_volume_fraction': 0.0162, 'metadata': MetaData(), 'na2so4_mass_fraction': 0.0, 'na2so4_surface_fraction': 0.0, 'na2so4_volume_fraction': 0.0, 'psd_data': <PSDData(mode='log_normal', reference='cement168 psd')>, 'psd_data_id': 35, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x10a4b7d90>, 'specific_surface_area': 397.0, 'total_gypsum_fraction': 0.0305, 'total_phase_fraction': 0.9863306150487735, 'updated_at': datetime.datetime(2025, 9, 6, 20, 45, 31, 713938), 'psd_mode': 'log_normal', 'psd_d50': 15.0, 'psd_n': 1.3, 'psd_dmax': 60.0, 'psd_median': 12.0, 'psd_spread': 3.0, 'psd_custom_points': '[[1.0, 0.33435560972648515], [2.0, 0.07728270679674787], [3.0, 0.0549376500016076], [4.0, 0.04275456698913267], [5.0, 0.035004109176823374], [6.0, 0.04286625901795364], [8.0, 0.04532992999856559], [10.0, 0.036472944001480344], [12.0, 0.03729429713098527], [15.0, 0.0470931306359092], [20.0, 0.045123739249204306], [25.0, 0.035481483610438305], [30.0, 0.04176855833095011], [40.0, 0.04226753975082876], [50.0, 0.032661904816619076], [60.0, 0.03220884007095881], [75.0, 0.017096730695309915]]'}/Users/jwbullard/Software/vcctl-gtk/src/app/widgets/unified_psd_widget.py:444: Warning: Source ID 10587 was not found when attempting to remove it
+2025-09-06 21:35:36,978 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:35:37,015 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:35:37,015 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-09-06 21:35:37,015 - VCCTL.OperationsMonitoringPanel - INFO - Found 6 operations in database
+2025-09-06 21:35:37,015 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 6 operations from database (0 failed)
+2025-09-06 21:35:37,016 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
+2025-09-06 21:35:37,016 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-09-06 21:35:37,016 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 6 total operations, 0 running
+2025-09-06 21:35:37,016 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel initialized
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-09-06 21:35:37,017 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP07FA
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP07FA' - found 13 files
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,017 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP07FA' of type 'Microstructure Generation'
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal_v1
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal_v1' - found 6 files
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' classified as Unknown
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal_v1' of type 'Unknown Analysis'
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109' - found 14 files
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,018 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP16-C109
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP16-C109' - found 31 files
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP16-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP02-C109
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP02-C109' - found 15 files
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,019 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,020 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP02-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,020 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP01-C109
+2025-09-06 21:35:37,020 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP01-C109' - found 74 files
+2025-09-06 21:35:37,020 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,020 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,021 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP01-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,021 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYOf-YAP13-C109
+2025-09-06 21:35:37,021 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYOf-YAP13-C109' - found 74 files
+2025-09-06 21:35:37,021 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,021 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYOf-YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal' - found 6 files
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' classified as Unknown
+2025-09-06 21:35:37,022 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal' of type 'Unknown Analysis'
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP04-Concrete
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP04-Concrete' - found 15 files
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP04-Concrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v03
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v03' - found 6 files
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' classified as Unknown
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v03' of type 'Unknown Analysis'
+2025-09-06 21:35:37,023 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v04
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v04' - found 14 files
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v04' of type 'Microstructure Generation'
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP13-C109
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP13-C109' - found 13 files
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP13-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,024 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP10-C109
+2025-09-06 21:35:37,025 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP10-C109' - found 74 files
+2025-09-06 21:35:37,025 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,025 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP10-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP03-Concrete
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP03-Concrete' - found 14 files
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP03-Concrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HY-YAP13-C109
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HY-YAP13-C109' - found 9 files
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' classified as Unknown
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HY-YAP13-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,026 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP09-C109
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP09-C109' - found 15 files
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP09-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Mortar_v1
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Mortar_v1' - found 15 files
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Mortar_v1' of type 'Microstructure Generation'
+2025-09-06 21:35:37,027 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Poopcrete
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Poopcrete' - found 14 files
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Poopcrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v2
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v2' - found 6 files
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' classified as Unknown
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v2' of type 'Unknown Analysis'
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP160-C100
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP160-C100' - found 12 files
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,028 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP160-C100' of type 'Microstructure Generation'
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP13-C109
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP13-C109' - found 8 files
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP13-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,029 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP11-C109
+2025-09-06 21:35:37,030 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP11-C109' - found 74 files
+2025-09-06 21:35:37,030 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,030 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,030 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP11-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,030 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109' - found 13 files
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109_v1
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109_v1' - found 12 files
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109_v1' of type 'Microstructure Generation'
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP09-C109
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP09-C109' - found 10 files
+2025-09-06 21:35:37,031 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP09-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP09-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Crete
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Crete' - found 15 files
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Crete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-Debug
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-Debug' - found 14 files
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,032 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,033 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-Debug' of type 'Microstructure Generation'
+2025-09-06 21:35:37,033 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP12-C109
+2025-09-06 21:35:37,033 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP12-C109' - found 74 files
+2025-09-06 21:35:37,033 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,033 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP12-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP11-C109
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP11-C109' - found 13 files
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP11-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,034 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: vcctl-gtk-Operations-backup
+2025-09-06 21:35:37,044 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'vcctl-gtk-Operations-backup' - found 985 files
+2025-09-06 21:35:37,044 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,044 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' classified as Hydration (time-series files)
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'vcctl-gtk-Operations-backup' of type 'Hydration Simulation'
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-C109
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-C109' - found 1 files
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' classified as Unknown
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01' - found 13 files
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01' of type 'Microstructure Generation'
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP10-C109
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP10-C109' - found 8 files
+2025-09-06 21:35:37,056 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP10-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP10-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-LargePaste
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-LargePaste' - found 1 files
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' classified as Unknown
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-LargePaste' of type 'Unknown Analysis'
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HYOf-YAP13-C109
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HYOf-YAP13-C109' - found 1 files
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' classified as Unknown
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HYOf-YAP13-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109_copy
+2025-09-06 21:35:37,057 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109_copy' - found 10 files
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' classified as Unknown
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109_copy' of type 'Unknown Analysis'
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP09-C109
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP09-C109' - found 76 files
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,058 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP09-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP10-C109
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP10-C109' - found 13 files
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP10-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,059 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP13-C109
+2025-09-06 21:35:37,060 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP13-C109' - found 87 files
+2025-09-06 21:35:37,060 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,060 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP160-C100
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP160-C100' - found 9 files
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP160-C100' classified as Hydration (folder name)
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP160-C100' of type 'Hydration Simulation'
+2025-09-06 21:35:37,061 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP05-Debug
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP05-Debug' - found 12 files
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP05-Debug' of type 'Microstructure Generation'
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01-C109
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01-C109' - found 13 files
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,062 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 42 results from Operations folder
+2025-09-06 21:35:37,066 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-09-06 21:35:37,067 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-09-06 21:35:37,067 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-09-06 21:35:37,067 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-09-06 21:35:37,225 - VCCTL.MainWindow - INFO - Main window initialized
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP07FA
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP07FA' - found 13 files
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,251 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP07FA' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP07FA' of type 'Microstructure Generation'
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal_v1
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal_v1' - found 6 files
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal_v1' classified as Unknown
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal_v1' of type 'Unknown Analysis'
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109' - found 14 files
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,252 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP16-C109
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP16-C109' - found 31 files
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP16-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP16-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,253 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP02-C109
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP02-C109' - found 15 files
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP02-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP02-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP01-C109
+2025-09-06 21:35:37,254 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP01-C109' - found 74 files
+2025-09-06 21:35:37,255 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,255 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP01-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,255 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP01-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,255 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYOf-YAP13-C109
+2025-09-06 21:35:37,256 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYOf-YAP13-C109' - found 74 files
+2025-09-06 21:35:37,256 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,256 - VCCTL.ResultsPanel - INFO - Results panel: 'HYOf-YAP13-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYOf-YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal' - found 6 files
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal' classified as Unknown
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal' of type 'Unknown Analysis'
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP04-Concrete
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP04-Concrete' - found 15 files
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,257 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP04-Concrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP04-Concrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v03
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v03' - found 6 files
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v03' classified as Unknown
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v03' of type 'Unknown Analysis'
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v04
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v04' - found 14 files
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v04' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v04' of type 'Microstructure Generation'
+2025-09-06 21:35:37,258 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP13-C109
+2025-09-06 21:35:37,259 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP13-C109' - found 13 files
+2025-09-06 21:35:37,259 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,259 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP13-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,259 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP13-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,259 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP10-C109
+2025-09-06 21:35:37,260 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP10-C109' - found 74 files
+2025-09-06 21:35:37,260 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,260 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP10-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,260 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP10-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,260 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP03-Concrete
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP03-Concrete' - found 14 files
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP03-Concrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP03-Concrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HY-YAP13-C109
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HY-YAP13-C109' - found 9 files
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HY-YAP13-C109' classified as Unknown
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HY-YAP13-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,261 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP09-C109
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP09-C109' - found 15 files
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP09-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP09-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Mortar_v1
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Mortar_v1' - found 15 files
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Mortar_v1' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Mortar_v1' of type 'Microstructure Generation'
+2025-09-06 21:35:37,262 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Poopcrete
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Poopcrete' - found 14 files
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: 'Poopcrete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Poopcrete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-ForReal-v2
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-ForReal-v2' - found 6 files
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-ForReal-v2' classified as Unknown
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-ForReal-v2' of type 'Unknown Analysis'
+2025-09-06 21:35:37,263 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP160-C100
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP160-C100' - found 12 files
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP160-C100' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP160-C100' of type 'Microstructure Generation'
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP13-C109
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP13-C109' - found 8 files
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP13-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,264 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP11-C109
+2025-09-06 21:35:37,265 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP11-C109' - found 74 files
+2025-09-06 21:35:37,265 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,265 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP11-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP11-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109' - found 13 files
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP15-C109_v1
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP15-C109_v1' - found 12 files
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,266 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP15-C109_v1' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP15-C109_v1' of type 'Microstructure Generation'
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP09-C109
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP09-C109' - found 10 files
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP09-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP09-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152SF-Crete
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152SF-Crete' - found 15 files
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152SF-Crete' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152SF-Crete' of type 'Microstructure Generation'
+2025-09-06 21:35:37,267 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP06-Debug
+2025-09-06 21:35:37,268 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP06-Debug' - found 14 files
+2025-09-06 21:35:37,268 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,268 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP06-Debug' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,268 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP06-Debug' of type 'Microstructure Generation'
+2025-09-06 21:35:37,268 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP12-C109
+2025-09-06 21:35:37,269 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP12-C109' - found 74 files
+2025-09-06 21:35:37,269 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,269 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP12-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,269 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP12-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,269 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP11-C109
+2025-09-06 21:35:37,270 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP11-C109' - found 13 files
+2025-09-06 21:35:37,270 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,270 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP11-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,270 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP11-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,270 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: vcctl-gtk-Operations-backup
+2025-09-06 21:35:37,281 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'vcctl-gtk-Operations-backup' - found 985 files
+2025-09-06 21:35:37,281 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,281 - VCCTL.ResultsPanel - INFO - Results panel: 'vcctl-gtk-Operations-backup' classified as Hydration (time-series files)
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'vcctl-gtk-Operations-backup' of type 'Hydration Simulation'
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-C109
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-C109' - found 1 files
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-C109' classified as Unknown
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01' - found 13 files
+2025-09-06 21:35:37,295 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01' of type 'Microstructure Generation'
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP10-C109
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP10-C109' - found 8 files
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP10-C109' classified as Hydration (folder name)
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP10-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Cem152-LargePaste
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Cem152-LargePaste' - found 1 files
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,296 - VCCTL.ResultsPanel - INFO - Results panel: 'Cem152-LargePaste' classified as Unknown
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Cem152-LargePaste' of type 'Unknown Analysis'
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Elastic_HYOf-YAP13-C109
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic_HYOf-YAP13-C109' - found 1 files
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic_HYOf-YAP13-C109' classified as Unknown
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic_HYOf-YAP13-C109' of type 'Unknown Analysis'
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP12-C109_copy
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP12-C109_copy' - found 10 files
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' - time_series_img: False, csv: False, img: False
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP12-C109_copy' classified as Unknown
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP12-C109_copy' of type 'Unknown Analysis'
+2025-09-06 21:35:37,297 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP09-C109
+2025-09-06 21:35:37,298 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP09-C109' - found 76 files
+2025-09-06 21:35:37,298 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,298 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP09-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP09-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP10-C109
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP10-C109' - found 13 files
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP10-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP10-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,299 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-YAP13-C109
+2025-09-06 21:35:37,300 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-YAP13-C109' - found 87 files
+2025-09-06 21:35:37,300 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' - time_series_img: True, csv: True, img: True
+2025-09-06 21:35:37,300 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-YAP13-C109' classified as Hydration (time-series files)
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-YAP13-C109' of type 'Hydration Simulation'
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Hydration_YAP160-C100
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Hydration_YAP160-C100' - found 9 files
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: 'Hydration_YAP160-C100' classified as Hydration (folder name)
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Hydration_YAP160-C100' of type 'Hydration Simulation'
+2025-09-06 21:35:37,301 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP05-Debug
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP05-Debug' - found 12 files
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP05-Debug' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP05-Debug' of type 'Microstructure Generation'
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: YAP01-C109
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'YAP01-C109' - found 13 files
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' - time_series_img: False, csv: False, img: True
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: 'YAP01-C109' classified as Microstructure (IMG only)
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'YAP01-C109' of type 'Microstructure Generation'
+2025-09-06 21:35:37,302 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 42 results from Operations folder
+2025-09-06 21:35:37,397 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-09-06 21:35:37,397 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+/Users/jwbullard/Software/vcctl-gtk/src/app/widgets/unified_psd_widget.py:453: Warning: Source ID 1052 was not found when attempting to remove it
   GObject.source_remove(self._pending_update_id)
-
-DEBUG: Loading existing cement material data
-DEBUG: Loading dihyd from material_data: 0.0
-DEBUG: Setting dihyd_spin to: 0.0
-DEBUG: dihyd_spin now shows: 0.0
-DEBUG: Loading hemihyd from material_data: 0.0305
-DEBUG: Setting hemihyd_spin to: 3.05
-DEBUG: hemihyd_spin now shows: 3.05
-DEBUG: Loading anhyd from material_data: 0.0
-DEBUG: Setting anhyd_spin to: 0.0
-DEBUG: anhyd_spin now shows: 0.0
-DEBUG: Using cement bulk SG: 3.16
-DEBUG: dihyd: mass=0.0 → volume=0.000% (no mass)
-DEBUG: hemihyd: mass=0.0305 → volume=3.518% (SG=2.74)
-DEBUG: anhyd: mass=0.0 → volume=0.000% (no mass)
-2025-09-06 15:48:49,068 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 100.12918203121461, 'current_memory_mb': 647.265625}
-2025-09-06 15:48:50,199 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 151: 6 total operations, 0 running
-2025-09-06 15:49:00,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:49:00,115 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:49:19,116 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 83.44589267351583, 'current_memory_mb': 647.296875}
-2025-09-06 15:49:20,361 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 181: 6 total operations, 0 running
-2025-09-06 15:49:20,363 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:49:30,064 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:49:30,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:49:49,160 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 71.52272927675783, 'current_memory_mb': 647.296875}
-2025-09-06 15:49:50,525 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 211: 6 total operations, 0 running
-2025-09-06 15:50:05,062 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:50:05,117 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:50:19,210 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 62.65626369347175, 'current_memory_mb': 647.59375}
-2025-09-06 15:50:20,704 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 241: 6 total operations, 0 running
-2025-09-06 15:50:20,706 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:50:40,062 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:50:40,123 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:50:49,251 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 56.063950046510186, 'current_memory_mb': 649.265625}
-2025-09-06 15:50:50,878 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 271: 6 total operations, 0 running
-2025-09-06 15:51:10,062 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:51:10,119 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:51:21,068 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 301: 6 total operations, 0 running
-2025-09-06 15:51:21,071 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
-2025-09-06 15:51:45,054 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-06 15:51:45,095 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-06 15:51:51,234 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 331: 6 total operations, 0 running
+DEBUG: MaterialDialogBase.__init__ called with material_type='fly_ash', material_data={'name': 'Class-F-01', 'display_name': '', 'description': 'Low-calcium fly ash (Class F)', 'specific_gravity': 2.88, 'source': 'VCCTL', 'notes': 'Metabunk', 'activation_energy': 54888.0, 'al2o3_content': 23.0, 'astm_class': 'class_f', 'cao_content': 8.899999999999986, 'created_at': datetime.datetime(2025, 9, 7, 2, 25, 19, 182265), 'fe2o3_content': 11.0, 'has_complete_phase_data': False, 'id': 3, 'k2o': 2.1, 'loss_on_ignition': 3.88, 'metadata': MetaData(), 'mgo_content': 2.0, 'na2o': 1.2, 'na2o_equivalent': 2.5818000000000003, 'phase_fractions': {'aluminosilicate_glass': None, 'calcium_aluminum_disilicate': None, 'tricalcium_aluminate': None, 'calcium_chloride': None, 'silica': None, 'anhydrate': None}, 'psd_data': <PSDData(mode='rosin_rammler', reference='default')>, 'psd_data_id': 89, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x1432c0350>, 'sio2_content': 52.0, 'so3_content': 1.7000000000000006, 'updated_at': datetime.datetime(2025, 9, 7, 2, 31, 28, 233066)}
+DEBUG: _load_material_data called, material_data={'name': 'Class-F-01', 'display_name': '', 'description': 'Low-calcium fly ash (Class F)', 'specific_gravity': 2.88, 'source': 'VCCTL', 'notes': 'Metabunk', 'activation_energy': 54888.0, 'al2o3_content': 23.0, 'astm_class': 'class_f', 'cao_content': 8.899999999999986, 'created_at': datetime.datetime(2025, 9, 7, 2, 25, 19, 182265), 'fe2o3_content': 11.0, 'has_complete_phase_data': False, 'id': 3, 'k2o': 2.1, 'loss_on_ignition': 3.88, 'metadata': MetaData(), 'mgo_content': 2.0, 'na2o': 1.2, 'na2o_equivalent': 2.5818000000000003, 'phase_fractions': {'aluminosilicate_glass': None, 'calcium_aluminum_disilicate': None, 'tricalcium_aluminate': None, 'calcium_chloride': None, 'silica': None, 'anhydrate': None}, 'psd_data': <PSDData(mode='rosin_rammler', reference='default')>, 'psd_data_id': 89, 'registry': <sqlalchemy.orm.decl_api.registry object at 0x1432c0350>, 'sio2_content': 52.0, 'so3_content': 1.7000000000000006, 'updated_at': datetime.datetime(2025, 9, 7, 2, 31, 28, 233066)}
+DEBUG: Loaded fly ash PSD data directly into unified widget
+2025-09-06 21:35:43,536 - VCCTL.MaterialDialog.fly_ash - ERROR - Failed to load material data: 'FlyAshDialog' object has no attribute '_update_psd_summary_label'
+DEBUG: _on_response called with response_id=-6 (APPLY=-10)
+2025-09-06 21:36:06,602 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 457.7441842226162, 'current_memory_mb': 634.453125}
+2025-09-06 21:36:07,061 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:36:07,114 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:36:07,199 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 31: 6 total operations, 0 running
+2025-09-06 21:36:36,643 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 231.97094527867725, 'current_memory_mb': 637.65625}
+2025-09-06 21:36:37,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:36:37,125 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:36:37,378 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 61: 6 total operations, 0 running
+2025-09-06 21:36:37,382 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:37:06,681 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 154.638737213817, 'current_memory_mb': 637.65625}
+2025-09-06 21:37:07,564 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 91: 6 total operations, 0 running
+2025-09-06 21:37:12,061 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:37:12,121 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:37:36,720 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 115.98698685706424, 'current_memory_mb': 637.671875}
+2025-09-06 21:37:37,750 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 121: 6 total operations, 0 running
+2025-09-06 21:37:37,752 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:37:42,062 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:37:42,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:38:06,768 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 92.7887317295167, 'current_memory_mb': 637.671875}
+2025-09-06 21:38:07,928 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 151: 6 total operations, 0 running
+2025-09-06 21:38:12,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:38:12,116 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:38:36,808 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 77.31961459349304, 'current_memory_mb': 637.671875}
+2025-09-06 21:38:38,104 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 181: 6 total operations, 0 running
+2025-09-06 21:38:38,109 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:38:42,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:38:42,122 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:39:06,847 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 66.27368556528891, 'current_memory_mb': 637.671875}
+2025-09-06 21:39:08,279 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 211: 6 total operations, 0 running
+2025-09-06 21:39:17,062 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:39:17,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:39:36,891 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 57.98975990447845, 'current_memory_mb': 637.671875}
+2025-09-06 21:39:38,448 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 241: 6 total operations, 0 running
+2025-09-06 21:39:38,453 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:39:47,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:39:47,123 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:40:06,937 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 52.135034930775745, 'current_memory_mb': 640.328125}
+2025-09-06 21:40:08,636 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 271: 6 total operations, 0 running
+2025-09-06 21:40:17,064 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:40:17,105 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:40:38,797 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 301: 6 total operations, 0 running
+2025-09-06 21:40:38,800 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:40:52,059 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:40:52,120 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:41:08,962 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 331: 6 total operations, 0 running
+2025-09-06 21:41:27,056 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:41:27,099 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:41:39,125 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 361: 6 total operations, 0 running
+2025-09-06 21:41:39,127 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:41:57,056 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:41:57,105 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:42:09,282 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 391: 6 total operations, 0 running
+2025-09-06 21:42:27,057 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:42:27,093 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:42:39,452 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 421: 6 total operations, 0 running
+2025-09-06 21:42:39,457 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 6→6 total
+2025-09-06 21:42:57,063 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:42:57,118 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-06 21:43:09,637 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 451: 6 total operations, 0 running
+2025-09-06 21:43:27,069 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-06 21:43:27,123 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed

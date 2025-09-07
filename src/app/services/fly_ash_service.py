@@ -9,6 +9,7 @@ Converted from Java Spring service to Python.
 import logging
 from typing import List, Optional, Dict, Any
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 
 from app.database.service import DatabaseService
 from app.models.fly_ash import FlyAsh, FlyAshCreate, FlyAshUpdate, FlyAshResponse
@@ -30,19 +31,19 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
         self.default_specific_gravity = 2.77
     
     def get_all(self) -> List[FlyAsh]:
-        """Get all fly ash materials."""
+        """Get all fly ash materials with eagerly loaded PSD relationships."""
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(FlyAsh).order_by(FlyAsh.name).all()
+                return session.query(FlyAsh).options(joinedload(FlyAsh.psd_data)).order_by(FlyAsh.name).all()
         except Exception as e:
             self.logger.error(f"Failed to get all fly ash materials: {e}")
             raise ServiceError(f"Failed to retrieve fly ash materials: {e}")
     
     def get_by_name(self, name: str) -> Optional[FlyAsh]:
-        """Get fly ash by name."""
+        """Get fly ash by name with eagerly loaded PSD relationship."""
         try:
             with self.db_service.get_read_only_session() as session:
-                return session.query(FlyAsh).filter_by(name=name).first()
+                return session.query(FlyAsh).options(joinedload(FlyAsh.psd_data)).filter_by(name=name).first()
         except Exception as e:
             self.logger.error(f"Failed to get fly ash {name}: {e}")
             raise ServiceError(f"Failed to retrieve fly ash: {e}")
@@ -50,66 +51,105 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
     def create(self, fly_ash_data: FlyAshCreate) -> FlyAsh:
         """Create a new fly ash material."""
         try:
+            # Validate data
+            if not fly_ash_data.name or not fly_ash_data.name.strip():
+                raise ValidationError("Fly ash name is required")
+            
+            # Check if already exists
+            existing = self.get_by_name(fly_ash_data.name)
+            if existing:
+                raise AlreadyExistsError(f"Fly ash '{fly_ash_data.name}' already exists")
+            
+            # Create new fly ash
             with self.db_service.get_session() as session:
-                # Check if fly ash already exists
-                existing = session.query(FlyAsh).filter_by(name=fly_ash_data.name).first()
-                if existing:
-                    raise AlreadyExistsError(f"Fly ash '{fly_ash_data.name}' already exists")
+                # Extract PSD fields from create data if present
+                create_dict = fly_ash_data.model_dump(exclude_unset=True)
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
                 
-                # Create fly ash with defaults
-                fly_ash_dict = fly_ash_data.dict(exclude_unset=True)
+                # Separate PSD fields from fly ash fields
+                for field in list(create_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = create_dict.pop(field)
                 
-                # Set defaults if not provided
-                if 'specific_gravity' not in fly_ash_dict:
-                    fly_ash_dict['specific_gravity'] = self.default_specific_gravity
-                # PSD data handled through psd_data_id relationship
+                # Create fly ash
+                fly_ash = FlyAsh(**create_dict)
                 
-                fly_ash = FlyAsh(**fly_ash_dict)
-                
-                # Validate fly ash properties
-                self._validate_fly_ash(fly_ash)
+                # Handle PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    new_psd = PSDData(**psd_data)
+                    session.add(new_psd)
+                    session.flush()  # Get the ID
+                    fly_ash.psd_data = new_psd
+                    fly_ash.psd_data_id = new_psd.id
                 
                 session.add(fly_ash)
-                session.flush()  # Flush to get any database errors
+                session.commit()
+                session.refresh(fly_ash)
                 
                 self.logger.info(f"Created fly ash: {fly_ash.name}")
                 return fly_ash
                 
-        except AlreadyExistsError:
+        except (AlreadyExistsError, ValidationError):
             raise
         except IntegrityError as e:
             self.logger.error(f"Database integrity error creating fly ash: {e}")
-            raise ServiceError(f"Fly ash creation failed: invalid data")
+            raise AlreadyExistsError(f"Fly ash '{fly_ash_data.name}' already exists")
         except Exception as e:
             self.logger.error(f"Failed to create fly ash: {e}")
             raise ServiceError(f"Failed to create fly ash: {e}")
     
-    def update(self, fly_ash_id: int, fly_ash_data: FlyAshUpdate) -> FlyAsh:
+    def update(self, fly_ash_id: int, update_data: FlyAshUpdate) -> FlyAsh:
         """Update an existing fly ash material."""
         try:
             with self.db_service.get_session() as session:
-                fly_ash = session.query(FlyAsh).filter_by(id=fly_ash_id).first()
+                fly_ash = session.query(FlyAsh).options(joinedload(FlyAsh.psd_data)).filter_by(id=fly_ash_id).first()
+                
                 if not fly_ash:
                     raise NotFoundError(f"Fly ash with ID '{fly_ash_id}' not found")
                 
-                # Update fields
-                update_dict = fly_ash_data.dict(exclude_unset=True)
+                # Extract PSD fields from update data if present
+                update_dict = update_data.model_dump(exclude_unset=True)
+                psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                             'psd_spread', 'psd_exponent', 'psd_custom_points']
+                psd_data = {}
+                
+                # Separate PSD fields from fly ash fields
+                for field in list(update_dict.keys()):
+                    if field in psd_fields:
+                        psd_data[field] = update_dict.pop(field)
+                
+                # Handle PSD data if any PSD fields were provided
+                if psd_data:
+                    from app.models.psd_data import PSDData
+                    
+                    if fly_ash.psd_data_id and fly_ash.psd_data:
+                        # Update existing PSD data
+                        for field, value in psd_data.items():
+                            setattr(fly_ash.psd_data, field, value)
+                    else:
+                        # Create new PSD data
+                        new_psd = PSDData(**psd_data)
+                        session.add(new_psd)
+                        session.flush()  # Get the ID
+                        fly_ash.psd_data = new_psd
+                        fly_ash.psd_data_id = new_psd.id
+                
+                # Update remaining fly ash fields
                 for field, value in update_dict.items():
-                    setattr(fly_ash, field, value)
+                    if hasattr(fly_ash, field):
+                        setattr(fly_ash, field, value)
                 
-                # Validate updated fly ash
-                self._validate_fly_ash(fly_ash)
-                
-                session.flush()  # Flush to get any database errors
+                session.commit()
+                session.refresh(fly_ash)
                 
                 self.logger.info(f"Updated fly ash: {fly_ash.name}")
                 return fly_ash
                 
         except NotFoundError:
             raise
-        except IntegrityError as e:
-            self.logger.error(f"Database integrity error updating fly ash: {e}")
-            raise ServiceError(f"Fly ash update failed: invalid data")
         except Exception as e:
             self.logger.error(f"Failed to update fly ash {fly_ash_id}: {e}")
             raise ServiceError(f"Failed to update fly ash: {e}")
@@ -119,10 +159,12 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
         try:
             with self.db_service.get_session() as session:
                 fly_ash = session.query(FlyAsh).filter_by(name=name).first()
+                
                 if not fly_ash:
                     raise NotFoundError(f"Fly ash '{name}' not found")
                 
                 session.delete(fly_ash)
+                session.commit()
                 
                 self.logger.info(f"Deleted fly ash: {name}")
                 return True
@@ -133,191 +175,90 @@ class FlyAshService(BaseService[FlyAsh, FlyAshCreate, FlyAshUpdate]):
             self.logger.error(f"Failed to delete fly ash {name}: {e}")
             raise ServiceError(f"Failed to delete fly ash: {e}")
     
-    def _validate_fly_ash(self, fly_ash: FlyAsh) -> None:
-        """Validate fly ash properties."""
-        # Validate phase fractions
-        if not fly_ash.validate_phase_fractions():
-            raise ValidationError("Invalid phase fractions: values must be between 0 and 1, and total cannot exceed 1.0")
-        
-        # Validate specific gravity
-        if fly_ash.specific_gravity is not None and fly_ash.specific_gravity < 0:
-            raise ValidationError("Specific gravity cannot be negative")
-        
-        # Validate required fields
-        if not fly_ash.name or not fly_ash.name.strip():
-            raise ValidationError("Fly ash name is required")
-    
-    def get_fly_ash_with_complete_phase_data(self) -> List[FlyAsh]:
-        """Get all fly ash materials that have complete phase composition data."""
+    def duplicate(self, source_name: str, new_name: str, description: Optional[str] = None) -> FlyAsh:
+        """Duplicate an existing fly ash with a new name."""
         try:
-            with self.db_service.get_read_only_session() as session:
-                return [fa for fa in session.query(FlyAsh).all() 
-                       if fa.has_complete_phase_data]
-        except Exception as e:
-            self.logger.error(f"Failed to get fly ash with complete phase data: {e}")
-            raise ServiceError(f"Failed to retrieve fly ash with complete phase data: {e}")
-    
-    def search_fly_ash(self, query: str, limit: Optional[int] = None) -> List[FlyAsh]:
-        """
-        Search fly ash materials by name, PSD, or description.
-        
-        Args:
-            query: Search query string
-            limit: Maximum number of results to return
+            # Get source fly ash
+            source = self.get_by_name(source_name)
+            if not source:
+                raise NotFoundError(f"Source fly ash '{source_name}' not found")
             
-        Returns:
-            List of matching fly ash materials
-        """
-        try:
-            with self.db_service.get_read_only_session() as session:
-                search_query = session.query(FlyAsh).filter(
-                    (FlyAsh.name.contains(query)) | 
-                    (FlyAsh.psd.contains(query) if query else False) |
-                    (FlyAsh.description.contains(query) if query else False)
-                ).order_by(FlyAsh.name)
-                
-                if limit:
-                    search_query = search_query.limit(limit)
-                
-                return search_query.all()
-                
-        except Exception as e:
-            self.logger.error(f"Failed to search fly ash: {e}")
-            raise ServiceError(f"Failed to search fly ash: {e}")
-    
-    def get_by_class_type(self, class_type: str) -> List[FlyAsh]:
-        """
-        Get fly ash materials by class type (based on name patterns).
-        
-        Args:
-            class_type: Class type ('f' for Class F, 'c' for Class C)
+            # Check if new name already exists
+            if self.get_by_name(new_name):
+                raise AlreadyExistsError(f"Fly ash '{new_name}' already exists")
             
-        Returns:
-            List of fly ash materials matching the class type
-        """
-        try:
-            class_type_lower = class_type.lower()
-            with self.db_service.get_read_only_session() as session:
-                return session.query(FlyAsh).filter(
-                    FlyAsh.name.contains(f'class_{class_type_lower}') |
-                    FlyAsh.description.contains(f'Class {class_type.upper()}')
-                ).all()
-                
-        except Exception as e:
-            self.logger.error(f"Failed to get fly ash by class type {class_type}: {e}")
-            raise ServiceError(f"Failed to retrieve fly ash by class type: {e}")
-    
-    def calculate_phase_distribution_input(self, name: str) -> str:
-        """
-        Generate phase distribution input string for a fly ash material.
-        
-        Args:
-            name: Name of the fly ash material
+            # Create duplicate
+            create_data = FlyAshCreate(
+                name=new_name,
+                specific_gravity=source.specific_gravity,
+                distribute_phases_by=source.distribute_phases_by,
+                aluminosilicate_glass_fraction=source.aluminosilicate_glass_fraction,
+                calcium_aluminum_disilicate_fraction=source.calcium_aluminum_disilicate_fraction,
+                tricalcium_aluminate_fraction=source.tricalcium_aluminate_fraction,
+                calcium_chloride_fraction=source.calcium_chloride_fraction,
+                silica_fraction=source.silica_fraction,
+                anhydrate_fraction=source.anhydrate_fraction,
+                activation_energy=source.activation_energy,
+                description=description or f"Copy of {source.name}"
+            )
             
-        Returns:
-            Formatted phase distribution input string
-        """
-        try:
-            fly_ash = self.get_by_name(name)
-            if not fly_ash:
-                raise NotFoundError(f"Fly ash '{name}' not found")
+            return self.create(create_data)
             
-            return fly_ash.build_phase_distribution_input()
-            
-        except NotFoundError:
+        except (NotFoundError, AlreadyExistsError):
             raise
         except Exception as e:
-            self.logger.error(f"Failed to calculate phase distribution input for {name}: {e}")
-            raise ServiceError(f"Failed to calculate phase distribution input: {e}")
+            self.logger.error(f"Failed to duplicate fly ash {source_name}: {e}")
+            raise ServiceError(f"Failed to duplicate fly ash: {e}")
     
-    def get_fly_ash_statistics(self) -> Dict[str, Any]:
-        """Get statistics about fly ash materials."""
+    def validate_composition(self, fly_ash: FlyAsh) -> Dict[str, Any]:
+        """Validate fly ash composition and return analysis."""
         try:
-            with self.db_service.get_read_only_session() as session:
-                total_count = session.query(FlyAsh).count()
-                
-                if total_count == 0:
-                    return {'total_fly_ash': 0}
-                
-                fly_ash_materials = session.query(FlyAsh).all()
-                
-                with_complete_phase_data = len([fa for fa in fly_ash_materials if fa.has_complete_phase_data])
-                
-                # Calculate specific gravity statistics
-                specific_gravities = [fa.specific_gravity for fa in fly_ash_materials if fa.specific_gravity is not None]
-                avg_specific_gravity = sum(specific_gravities) / len(specific_gravities) if specific_gravities else 0
-                min_specific_gravity = min(specific_gravities) if specific_gravities else 0
-                max_specific_gravity = max(specific_gravities) if specific_gravities else 0
-                
-                # Get unique PSD types
-                unique_psds = len(set(fa.psd for fa in fly_ash_materials if fa.psd))
-                
-                # Count by class type (approximate)
-                class_f_count = len([fa for fa in fly_ash_materials if 'class_f' in fa.name.lower()])
-                class_c_count = len([fa for fa in fly_ash_materials if 'class_c' in fa.name.lower()])
-                
-                return {
-                    'total_fly_ash': total_count,
-                    'with_complete_phase_data': with_complete_phase_data,
-                    'percentage_with_complete_phase_data': (with_complete_phase_data / total_count * 100),
-                    'average_specific_gravity': round(avg_specific_gravity, 3) if avg_specific_gravity else None,
-                    'min_specific_gravity': min_specific_gravity,
-                    'max_specific_gravity': max_specific_gravity,
-                    'unique_psd_types': unique_psds,
-                    'estimated_class_f_count': class_f_count,
-                    'estimated_class_c_count': class_c_count
-                }
-                
-        except Exception as e:
-            self.logger.error(f"Failed to get fly ash statistics: {e}")
-            raise ServiceError(f"Failed to get fly ash statistics: {e}")
-    
-    def validate_phase_fractions_for_mix(self, name: str, mix_fraction: float) -> Dict[str, Any]:
-        """
-        Validate that phase fractions are appropriate for use in a mix.
-        
-        Args:
-            name: Name of the fly ash material
-            mix_fraction: Fraction of total binder that this fly ash represents
-            
-        Returns:
-            Validation results dictionary
-        """
-        try:
-            fly_ash = self.get_by_name(name)
-            if not fly_ash:
-                raise NotFoundError(f"Fly ash '{name}' not found")
-            
-            validation_result = {
+            analysis = {
                 'is_valid': True,
                 'warnings': [],
                 'errors': [],
-                'phase_fractions': fly_ash.phase_fractions
+                'total_phase_fraction': fly_ash.total_phase_fraction,
+                'has_complete_data': fly_ash.has_complete_phase_data
             }
             
-            # Check if has complete phase data
+            # Check phase fractions
             if not fly_ash.has_complete_phase_data:
-                validation_result['warnings'].append("Incomplete phase composition data")
+                analysis['warnings'].append("Incomplete phase fraction data")
+            elif fly_ash.total_phase_fraction and fly_ash.total_phase_fraction > 1.0:
+                analysis['errors'].append("Total phase fractions exceed 1.0")
+                analysis['is_valid'] = False
             
-            # Check mix fraction bounds
-            if mix_fraction < 0 or mix_fraction > 1:
-                validation_result['errors'].append("Mix fraction must be between 0 and 1")
-                validation_result['is_valid'] = False
+            # Check specific gravity
+            if fly_ash.specific_gravity is None:
+                analysis['warnings'].append("No specific gravity data")
+            elif fly_ash.specific_gravity <= 0:
+                analysis['errors'].append("Specific gravity must be positive")
+                analysis['is_valid'] = False
             
-            # Check if total phase fraction exceeds reasonable limits
-            total_fraction = fly_ash.total_phase_fraction
-            if total_fraction and total_fraction > 1.0:
-                validation_result['errors'].append("Total phase fractions exceed 100%")
-                validation_result['is_valid'] = False
+            return analysis
             
-            # Check if specific gravity is reasonable
-            if fly_ash.specific_gravity and (fly_ash.specific_gravity < 2.0 or fly_ash.specific_gravity > 4.0):
-                validation_result['warnings'].append("Specific gravity outside typical range (2.0-4.0)")
-            
-            return validation_result
-            
-        except NotFoundError:
-            raise
         except Exception as e:
-            self.logger.error(f"Failed to validate phase fractions for mix: {e}")
-            raise ServiceError(f"Failed to validate phase fractions: {e}")
+            self.logger.error(f"Failed to validate fly ash composition: {e}")
+            raise ServiceError(f"Failed to validate composition: {e}")
+    
+    def get_names(self) -> List[str]:
+        """Get list of all fly ash names."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                return [name[0] for name in session.query(FlyAsh.name).order_by(FlyAsh.name).all()]
+        except Exception as e:
+            self.logger.error(f"Failed to get fly ash names: {e}")
+            raise ServiceError(f"Failed to retrieve fly ash names: {e}")
+    
+    def search(self, query: str) -> List[FlyAsh]:
+        """Search fly ash materials by name or description."""
+        try:
+            with self.db_service.get_read_only_session() as session:
+                search_pattern = f"%{query}%"
+                return session.query(FlyAsh).filter(
+                    (FlyAsh.name.ilike(search_pattern)) |
+                    (FlyAsh.description.ilike(search_pattern))
+                ).order_by(FlyAsh.name).all()
+        except Exception as e:
+            self.logger.error(f"Failed to search fly ash materials: {e}")
+            raise ServiceError(f"Failed to search fly ash materials: {e}")

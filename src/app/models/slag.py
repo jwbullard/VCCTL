@@ -224,6 +224,16 @@ class SlagCreate(BaseModel):
     hp_h2o_si_mol_ratio: Optional[float] = Field(None, ge=0.0, le=5.0,
                                                 description="HP H2O/SiO2 ratio")
     
+    # PSD fields that can be created (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=5.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=5.0, description="Fuller curve exponent")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD data points (JSON)")
+    
     description: Optional[str] = Field(None, description="Slag description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -248,6 +258,7 @@ class SlagCreate(BaseModel):
 class SlagUpdate(BaseModel):
     """Pydantic model for updating slag instances."""
     
+    name: Optional[str] = Field(None, min_length=1, max_length=64, description="Slag material name")
     specific_gravity: Optional[float] = Field(None, gt=0.0, description="Specific gravity")
     
     # PSD data accessed through relationship
@@ -287,6 +298,16 @@ class SlagUpdate(BaseModel):
                                              description="HP CaO/SiO2 ratio")
     hp_h2o_si_mol_ratio: Optional[float] = Field(None, ge=0.0, le=5.0,
                                                 description="HP H2O/SiO2 ratio")
+    
+    # PSD fields that can be updated (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=5.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=5.0, description="Fuller curve exponent")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD data points (JSON)")
     
     description: Optional[str] = Field(None, description="Slag description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")

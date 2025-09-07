@@ -235,6 +235,16 @@ class FlyAshCreate(BaseModel):
     # Reaction parameters
     activation_energy: Optional[float] = Field(54000.0, gt=0.0, description="Activation energy (J/mol)")
     
+    # PSD fields that can be created (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=5.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=5.0, description="Fuller curve exponent")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD data points (JSON)")
+    
     description: Optional[str] = Field(None, max_length=512, description="Fly ash description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")
     notes: Optional[str] = Field(None, max_length=1000, description="Additional notes")
@@ -278,6 +288,7 @@ class FlyAshCreate(BaseModel):
 class FlyAshUpdate(BaseModel):
     """Pydantic model for updating fly ash instances."""
     
+    name: Optional[str] = Field(None, min_length=1, max_length=64, description="Material name")
     specific_gravity: Optional[float] = Field(None, ge=0.0, description="Specific gravity")
     
     # PSD data accessed through relationship
@@ -307,9 +318,9 @@ class FlyAshUpdate(BaseModel):
     mgo_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="MgO content percentage")
     so3_content: Optional[float] = Field(None, ge=0.0, le=100.0, description="SO3 content percentage")
     
-    # Physical properties
-    loi: Optional[float] = Field(None, ge=0.0, le=20.0, description="Loss on ignition percentage")
-    fineness_45um: Optional[float] = Field(None, ge=0.0, le=50.0, description="Fineness - percent retained on 45μm sieve")
+    # Physical properties (use database field names)
+    loss_on_ignition: Optional[float] = Field(None, ge=0.0, le=20.0, description="Loss on ignition percentage")
+    # Fineness field removed - not needed
     
     # Alkali characteristics
     na2o: Optional[float] = Field(None, ge=0.0, le=10.0, description="Na2O content percentage")
@@ -324,6 +335,16 @@ class FlyAshUpdate(BaseModel):
     
     # Reaction parameters
     activation_energy: Optional[float] = Field(None, gt=0.0, description="Activation energy (J/mol)")
+    
+    # PSD fields that can be updated (will be handled via relationship)
+    psd_mode: Optional[str] = Field(None, description="PSD mode (rosin_rammler, log_normal, fuller, custom)")
+    psd_d50: Optional[float] = Field(None, ge=0.0, le=1000.0, description="D50 particle size (μm)")
+    psd_n: Optional[float] = Field(None, ge=0.0, le=10.0, description="Distribution parameter")
+    psd_dmax: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Maximum particle size (μm)")
+    psd_median: Optional[float] = Field(None, ge=0.0, le=1000.0, description="Median particle size (μm)")
+    psd_spread: Optional[float] = Field(None, ge=0.0, le=5.0, description="Distribution spread parameter")
+    psd_exponent: Optional[float] = Field(None, ge=0.0, le=5.0, description="Fuller curve exponent")
+    psd_custom_points: Optional[str] = Field(None, description="Custom PSD data points (JSON)")
     
     description: Optional[str] = Field(None, max_length=512, description="Fly ash description")
     source: Optional[str] = Field(None, max_length=255, description="Material source")

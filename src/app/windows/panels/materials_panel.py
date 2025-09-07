@@ -1797,6 +1797,20 @@ class MaterialsPanel(Gtk.Box):
                             value = getattr(psd_data, field)
                             if value is not None:
                                 material_dict[field] = value
+                
+                # Special handling for filler PSD data relationship
+                if material_type == 'filler' and hasattr(material_data, 'psd_data') and material_data.psd_data:
+                    # Flatten PSD data fields into the material dict
+                    psd_data = material_data.psd_data
+                    psd_fields = ['psd_mode', 'psd_d50', 'psd_n', 'psd_dmax', 'psd_median', 
+                                 'psd_spread', 'psd_exponent', 'psd_custom_points',
+                                 'diameter_percentile_10', 'diameter_percentile_50', 'diameter_percentile_90']
+                    for field in psd_fields:
+                        if hasattr(psd_data, field):
+                            value = getattr(psd_data, field)
+                            if value is not None:
+                                material_dict[field] = value
+                
                 dialog = create_material_dialog(self.main_window, material_type, material_dict)
             else:
                 dialog = create_material_dialog(self.main_window, material_type, material_data)
