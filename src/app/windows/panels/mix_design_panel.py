@@ -16,7 +16,7 @@ import threading
 import numpy as np
 from typing import TYPE_CHECKING, Optional, Dict, Any, List, Tuple
 from decimal import Decimal
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, Gdk, GLib
@@ -142,6 +142,7 @@ class MixDesignPanel(Gtk.Box):
         self.load_button.set_image(load_icon)
         self.load_button.set_always_show_image(True)
         action_box.pack_start(self.load_button, False, False, 0)
+        
         
         self.save_button = Gtk.Button(label="Save")
         save_icon = create_icon_image("save", 16)
@@ -414,11 +415,12 @@ class MixDesignPanel(Gtk.Box):
         actions_box.set_margin_left(15)
         actions_box.set_margin_right(15)
         
+        
         # Status label
         self.status_label = Gtk.Label()
         self.status_label.set_markup('<span size="small">Ready to design mix</span>')
         self.status_label.set_halign(Gtk.Align.START)
-        actions_box.pack_start(self.status_label, True, True, 0)
+        actions_box.pack_start(self.status_label, True, True, 10)
         
         # Action buttons
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -960,6 +962,7 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error showing mix design selection dialog: {e}")
             self.main_window.update_status(f"Error loading mix designs: {e}", "error", 5)
+    
     
     def _on_save_mix_clicked(self, button) -> None:
         """Handle save mix button click."""
@@ -2837,9 +2840,9 @@ class MixDesignPanel(Gtk.Box):
     def _save_input_file(self, content: str, mix_name: str, saved_mix_design_id: Optional[int] = None) -> None:
         """Save input file content to disk automatically and execute genmic program."""
         try:
-            # Create safe filename
+            # Create safe filename - Phase 2: Use clean naming without genmic_input_ prefix
             mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
-            default_filename = f"genmic_input_{mix_name_safe}.txt"
+            default_filename = f"{mix_name_safe}_input.txt"
             
             # Automatically save to mix folder in Operations directory
             operations_dir = os.path.join(os.getcwd(), "Operations")
@@ -2914,14 +2917,20 @@ class MixDesignPanel(Gtk.Box):
             if operations_panel:
                 try:
                     from app.windows.panels.operations_monitoring_panel import OperationType
-                    mix_name_safe = os.path.splitext(os.path.basename(input_file))[0]
-                    operation_name = f"{mix_name_safe} Microstructure"
+                    
+                    # Capture UI parameters for storage
+                    ui_parameters = self._capture_ui_parameters()
+                    
+                    # Auto-generate operation name from mix name
+                    mix_name = self.mix_name_entry.get_text().strip() or "UnnamedMix"
+                    mix_name_safe = "".join(c for c in mix_name if c.isalnum() or c in ['_', '-'])
+                    operation_name = mix_name_safe
                     
                     # Read input file content to pass as stdin
                     with open(input_file, 'r') as f:
                         input_content = f.read()
                     
-                    # Launch real process operation
+                    # Launch real process operation with clean naming
                     operation_id = operations_panel.start_real_process_operation(
                         name=operation_name,
                         operation_type=OperationType.MICROSTRUCTURE_GENERATION,
@@ -2929,6 +2938,10 @@ class MixDesignPanel(Gtk.Box):
                         working_dir=output_dir,
                         input_data=input_content
                     )
+                    
+                    # Store UI parameters in the operation for reproducibility
+                    if operation_id and ui_parameters:
+                        self._store_ui_parameters_in_operation(operation_id, ui_parameters)
                     
                     if operation_id:
                         self.logger.info(f"Successfully launched genmic through Operations panel: {operation_id}")
@@ -4658,77 +4671,6 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Error loading mix design: {e}")
             self.main_window.update_status(f"Error loading mix design: {e}", "error", 5)
     
-    def _load_microstructure_operation(self, micro_op_id: int) -> None:
-        """Load a microstructure operation and populate all UI fields."""
-        try:
-            from app.models import MicrostructureOperation
-            
-            with self.service_container.database_service.get_read_only_session() as session:
-                micro_op = session.query(MicrostructureOperation).filter_by(id=micro_op_id).first()
-                
-                if not micro_op:
-                    self.logger.error("Microstructure operation not found")
-                    return None
-                
-                # Load all related data within the session to avoid lazy loading issues
-                mix_design = micro_op.mix_design
-                if not mix_design:
-                    self.logger.error("No mix design found for this operation")
-                    return None
-                
-                operation = micro_op.operation
-                operation_name = operation.name if operation else f"Operation_{micro_op_id}"
-                self.logger.info(f"Loading microstructure operation: {operation_name}")
-                
-                # Extract all data within the session to avoid lazy loading issues
-                mix_design_data = {
-                    'water_binder_ratio': mix_design.water_binder_ratio,
-                    'total_water_content': mix_design.total_water_content,
-                    'air_content': mix_design.air_content,
-                    'air_volume_fraction': mix_design.air_volume_fraction,
-                    'components': mix_design.components,
-                    'calculated_properties': mix_design.calculated_properties,
-                    'fine_aggregate_name': getattr(mix_design, 'fine_aggregate_name', None),
-                    'fine_aggregate_mass': getattr(mix_design, 'fine_aggregate_mass', 0.0),
-                    'coarse_aggregate_name': getattr(mix_design, 'coarse_aggregate_name', None),
-                    'coarse_aggregate_mass': getattr(mix_design, 'coarse_aggregate_mass', 0.0),
-                    'cement_shape_set': getattr(mix_design, 'cement_shape_set', 'spherical'),
-                    'fine_aggregate_shape_set': getattr(mix_design, 'fine_aggregate_shape_set', 'spherical'),
-                    'coarse_aggregate_shape_set': getattr(mix_design, 'coarse_aggregate_shape_set', 'spherical')
-                }
-                
-                # Extract microstructure operation data
-                micro_op_data = {
-                    'system_size_x': micro_op.system_size_x,
-                    'system_size_y': micro_op.system_size_y,
-                    'system_size_z': micro_op.system_size_z,
-                    'resolution': micro_op.resolution,
-                    'random_seed': micro_op.random_seed,
-                    'flocculation_enabled': micro_op.flocculation_enabled,
-                    'flocculation_degree': micro_op.flocculation_degree,
-                    'dispersion_factor': micro_op.dispersion_factor
-                }
-                
-                self.logger.info(f"Extracted random seed: {micro_op_data['random_seed']}")
-                self.logger.info(f"Extracted components: {mix_design_data['components']}")
-                
-                # Create combined mix design data dictionary (operation parameters override mix design)
-                mix_data = {**mix_design_data, **micro_op_data}
-                
-                # Use the same UI population method as regular mix design loading
-                self._populate_ui_from_mix_design(mix_data)
-                
-                # Set mix name to indicate it's loaded from operation
-                copy_name = f"{operation_name}_copy"
-                self.mix_name_entry.set_text(copy_name)
-                
-                # Log success
-                self.logger.info(f"Loaded microstructure operation: {operation_name} (ID: {micro_op_id})")
-                return mix_data
-                
-        except Exception as e:
-            self.logger.error(f"Error loading microstructure operation: {e}")
-            # Note: Cannot call update_status here as main_window may not be available
     
     def _generate_unique_mix_name(self, base_name: str, existing_designs: List) -> str:
         """Generate a unique mix design name by appending a counter if needed."""
@@ -4924,6 +4866,91 @@ class MixDesignPanel(Gtk.Box):
             self.main_window.update_status(f"Error deleting mix design: {e}", "error", 5)
             return False
     
+    def _capture_ui_parameters(self) -> Dict[str, Any]:
+        """Capture all UI parameters for storage with operation."""
+        try:
+            ui_params = {
+                # Basic mix information
+                'mix_name': self.mix_name_entry.get_text().strip(),
+                'operation_name': "".join(c for c in self.mix_name_entry.get_text().strip() if c.isalnum() or c in ['_', '-']) or "UnnamedMix",
+                
+                # Component data
+                'components': [],
+                
+                # System parameters
+                'system_size_x': self.system_size_x_spin.get_value(),
+                'system_size_y': self.system_size_y_spin.get_value(), 
+                'system_size_z': self.system_size_z_spin.get_value(),
+                'resolution_micrometers': self.resolution_spin.get_value(),
+                
+                # Water parameters
+                'wb_ratio': self.wb_ratio_spin.get_value(),
+                'water_content_kg_m3': self.water_content_spin.get_value(),
+                
+                # Advanced parameters
+                'flocculation_enabled': self.flocculation_check.get_active(),
+                'dispersion_factor': self.dispersion_factor_spin.get_value(),
+                'distribution_coefficient': self.distribution_coefficient_spin.get_value(),
+                'minimum_distance': self.minimum_distance_spin.get_value(),
+                'maximum_iterations': self.maximum_iterations_spin.get_value(),
+                
+                # Auto-calculation settings
+                'auto_calculate_enabled': self.auto_calculate_enabled,
+                
+                # Capture timestamp
+                'captured_at': datetime.now().isoformat()
+            }
+            
+            # Capture component data
+            for i, row in enumerate(self.component_rows):
+                component = {
+                    'index': i,
+                    'type': row['type_combo'].get_active_id(),
+                    'name': row['name_combo'].get_active_id(), 
+                    'mass_kg_m3': row['mass_spin'].get_value(),
+                    'volume_fraction': row.get('volume_fraction_label', {}).get('text', '0.0')
+                }
+                ui_params['components'].append(component)
+            
+            self.logger.info(f"Captured UI parameters: {len(ui_params['components'])} components, "
+                           f"system size {ui_params['system_size_x']}x{ui_params['system_size_y']}x{ui_params['system_size_z']}")
+            
+            return ui_params
+            
+        except Exception as e:
+            self.logger.error(f"Failed to capture UI parameters: {e}")
+            return {}
+
+    def _store_ui_parameters_in_operation(self, operation_id: str, ui_parameters: Dict[str, Any]) -> None:
+        """Store UI parameters in the operation for reproducibility."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation
+            
+            db_service = DatabaseService()
+            
+            with db_service.get_session() as session:
+                # Find operation by name (operation_id is actually operation name in this context)
+                operation = session.query(Operation).filter_by(name=operation_id).first()
+                
+                if operation:
+                    operation.stored_ui_parameters = ui_parameters
+                    session.commit()
+                    self.logger.info(f"Stored UI parameters for operation: {operation_id}")
+                else:
+                    self.logger.warning(f"Operation not found for storing UI parameters: {operation_id}")
+                    
+        except Exception as e:
+            self.logger.error(f"Failed to store UI parameters for operation {operation_id}: {e}")
+
+
+
+    def _clear_components(self) -> None:
+        """Clear all component rows."""
+        for row in self.component_rows:
+            self.components_box.remove(row['box'])
+        self.component_rows.clear()
+
     def _create_microstructure_operation_record(self, operation_id: str, mix_design_id: Optional[int] = None) -> None:
         """Create a MicrostructureOperation record with all input parameters."""
         try:

@@ -1627,44 +1627,34 @@ class HydrationPanel(Gtk.Box):
             if validation['is_valid']:
                 self.current_params = params
                 
-                # Generate extended parameter file with curing conditions
+                # Perform in-memory parameter validation without creating files/folders
                 try:
+                    # Get all parameter settings for validation
+                    curing_conditions = self.get_curing_conditions()
+                    time_calibration_settings = self.get_time_calibration_settings()
+                    advanced_settings = self.get_advanced_settings()
+                    db_param_modifications = self.get_database_parameter_modifications()
+                    max_time = self.max_time_spin.get_value()
+                    
+                    # Validate that we can load required data without file creation
                     from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
                     bridge = MicrostructureHydrationBridge()
                     
-                    # Create operation name for hydration simulation
-                    operation_name = f"Hydration_{self.selected_microstructure['operation_name']}"
+                    # Check if microstructure metadata exists (validates microstructure compatibility)
+                    metadata = bridge.load_microstructure_metadata(self.selected_microstructure['operation_name'])
+                    if not metadata:
+                        raise ValueError(f"No metadata found for microstructure: {self.selected_microstructure['operation_name']}")
                     
-                    # Get curing conditions
-                    curing_conditions = self.get_curing_conditions()
+                    # Validate parameter completeness (without file generation)
+                    self._validate_parameter_completeness(curing_conditions, time_calibration_settings, 
+                                                        advanced_settings, db_param_modifications)
                     
-                    # Get time calibration settings
-                    time_calibration_settings = self.get_time_calibration_settings()
-                    
-                    # Get advanced settings
-                    advanced_settings = self.get_advanced_settings()
-                    
-                    # Get database parameter modifications
-                    db_param_modifications = self.get_database_parameter_modifications()
-                    
-                    # Generate extended parameter file
-                    max_time = self.max_time_spin.get_value()
-                    param_file = bridge.generate_extended_parameter_file(
-                        operation_name, 
-                        self.selected_microstructure['operation_name'],
-                        curing_conditions,
-                        time_calibration_settings,
-                        advanced_settings,
-                        db_param_modifications,
-                        max_time
-                    )
-                    
-                    self._update_status(f"Parameters validated - extended parameter file generated: {param_file}")
-                    self.logger.info(f"Generated parameter file: {param_file}")
+                    self._update_status("Parameters validated successfully - ready to start simulation")
+                    self.logger.info("Parameter validation completed successfully (in-memory)")
                     
                 except Exception as e:
-                    self.logger.error(f"Failed to generate parameter file: {e}")
-                    self._update_status("Parameters validated but failed to generate parameter file")
+                    self.logger.error(f"Parameter validation failed: {e}")
+                    self._update_status(f"Parameter validation failed: {e}")
                 
             else:
                 self._update_status("Parameter validation failed - check errors")
@@ -1690,14 +1680,21 @@ class HydrationPanel(Gtk.Box):
             advanced_settings = self._collect_advanced_settings()
             db_modifications = self._collect_database_modifications()
             
-            # Generate operation name (use custom name if provided, otherwise auto-generate)
-            custom_name = self.operation_name_entry.get_text().strip()
-            if custom_name:
-                # Use custom name, but ensure it's unique by appending timestamp if needed
-                operation_name = self._ensure_unique_operation_name(custom_name)
-            else:
-                # Auto-generate name
-                operation_name = f"HydrationSim_{selected_microstructure['name']}_{self._get_timestamp()}"
+            # Phase 3: Clean naming - use user-defined operation name directly
+            operation_name = self.operation_name_entry.get_text().strip()
+            if not operation_name:
+                self._update_status("Please enter an operation name")
+                return
+            
+            # Phase 3: Capture UI parameters for storage and reproducibility
+            ui_parameters = self._capture_hydration_ui_parameters(
+                operation_name, selected_microstructure, curing_conditions,
+                time_calibration, advanced_settings, db_modifications
+            )
+            
+            # Phase 3: Create database operation with UI parameters and lineage
+            parent_operation_id = self._find_microstructure_operation_id(selected_microstructure['name'])
+            operation = self._create_hydration_operation(operation_name, ui_parameters, parent_operation_id)
             
             # Generate extended parameter file
             max_time = self.max_time_spin.get_value()
@@ -1728,6 +1725,11 @@ class HydrationPanel(Gtk.Box):
                 self._start_progress_updates()
                 self._update_status(f"Simulation started: {operation_name}")
                 self.logger.info(f"Hydration simulation started: {operation_name}")
+                
+                # Register the hydration process with operations panel for pause/resume support
+                # Use a delayed registration with retry to ensure operation is loaded in operations panel
+                from gi.repository import GLib
+                GLib.timeout_add(1000, self._retry_registration, operation_name, executor, 0)
             else:
                 self._update_status("Failed to start simulation")
             
@@ -3247,3 +3249,228 @@ class HydrationPanel(Gtk.Box):
         """Cleanup resources when panel is destroyed."""
         self._stop_progress_updates()
         self.hydration_service.remove_progress_callback(self._on_simulation_progress)
+    
+    # Phase 3: Clean Naming and Lineage Methods
+    
+    def _capture_hydration_ui_parameters(self, operation_name: str, selected_microstructure: Dict[str, Any],
+                                       curing_conditions: Dict[str, Any], time_calibration: Dict[str, Any],
+                                       advanced_settings: Dict[str, Any], db_modifications: Dict[str, Any]) -> Dict[str, Any]:
+        """Capture all hydration UI parameters for storage and reproducibility."""
+        from datetime import datetime
+        
+        # Core operation info
+        ui_params = {
+            'operation_name': operation_name,
+            'operation_type': 'hydration',
+            'source_microstructure': selected_microstructure,
+            'captured_at': datetime.utcnow().isoformat(),
+        }
+        
+        # Simulation parameters
+        ui_params.update({
+            'max_simulation_time_hours': self.max_time_spin.get_value(),
+            'target_degree_of_hydration': 0.8,  # Default value
+            'random_seed': advanced_settings.get('random_seed', -1),
+        })
+        
+        # Curing conditions
+        ui_params['curing_conditions'] = curing_conditions.copy()
+        
+        # Time calibration
+        ui_params['time_calibration'] = time_calibration.copy()
+        
+        # Advanced settings
+        ui_params['advanced_settings'] = advanced_settings.copy()
+        
+        # Database parameter modifications
+        ui_params['database_modifications'] = db_modifications.copy()
+        
+        # Temperature profile (if using one)
+        if hasattr(self, 'current_profile') and self.current_profile:
+            ui_params['temperature_profile'] = {
+                'name': self.current_profile.name,
+                'description': self.current_profile.description,
+                'points': [{'time_hours': p.time_hours, 'temperature_celsius': p.temperature_celsius} 
+                          for p in self.current_profile.points]
+            }
+        
+        return ui_params
+    
+    def _find_microstructure_operation_id(self, microstructure_name: str) -> Optional[int]:
+        """Find the database ID of the parent microstructure operation."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation, OperationType
+            
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                # Look for microstructure operation with matching name
+                parent_op = session.query(Operation).filter(
+                    Operation.name == microstructure_name,
+                    Operation.operation_type == OperationType.MICROSTRUCTURE.value
+                ).first()
+                
+                if parent_op:
+                    return parent_op.id
+                else:
+                    self.logger.warning(f"Parent microstructure operation not found: {microstructure_name}")
+                    return None
+        except Exception as e:
+            self.logger.error(f"Error finding parent microstructure operation: {e}")
+            return None
+    
+    def _create_hydration_operation(self, operation_name: str, ui_parameters: Dict[str, Any], 
+                                  parent_operation_id: Optional[int]) -> 'Operation':
+        """Create hydration operation in database with UI parameters and lineage."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation, OperationType, OperationStatus
+            
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                # Create the general operation record
+                operation = Operation(
+                    name=operation_name,
+                    operation_type=OperationType.HYDRATION.value,
+                    status=OperationStatus.QUEUED.value,
+                    stored_ui_parameters=ui_parameters,
+                    parent_operation_id=parent_operation_id  # Phase 3: Lineage tracking
+                )
+                
+                session.add(operation)
+                session.commit()
+                
+                self.logger.info(f"Created hydration operation: {operation_name} (ID: {operation.id})")
+                if parent_operation_id:
+                    self.logger.info(f"Linked to parent microstructure operation ID: {parent_operation_id}")
+                
+                return operation
+                
+        except Exception as e:
+            self.logger.error(f"Error creating hydration operation: {e}")
+            raise
+    
+    def _register_hydration_with_operations_panel(self, operation_name: str, executor) -> None:
+        """Register the hydration process with operations panel for pause/resume support."""
+        try:
+            # Get the operations panel from main window
+            operations_panel = getattr(self.main_window, 'operations_panel', None)
+            if not operations_panel:
+                self.logger.error("PAUSE DEBUG: Operations panel not available for process registration")
+                return
+            
+            self.logger.info(f"PAUSE DEBUG: Starting registration for {operation_name}")
+            
+            # Get the active simulation info from executor
+            if operation_name not in executor.active_simulations:
+                self.logger.error(f"PAUSE DEBUG: No active simulation found for {operation_name}")
+                return
+                
+            simulation_info = executor.active_simulations[operation_name]
+            process = simulation_info.get('process')
+            operation_dir = simulation_info.get('operation_dir')
+            
+            if not process:
+                self.logger.error(f"PAUSE DEBUG: No process found for {operation_name}")
+                return
+            
+            self.logger.info(f"PAUSE DEBUG: Found process with PID {process.pid} for {operation_name}")
+            
+            # Force operations panel to refresh from database to get new operation
+            self.logger.info(f"PAUSE DEBUG: Forcing operations panel to reload from database")
+            operations_panel._safe_load_operations_from_database()
+            
+            # Find the operation in the operations panel by name
+            for op_id, operation in operations_panel.operations.items():
+                if operation.name == operation_name:
+                    # Update the operation with process information for pause/resume support
+                    self.logger.info(f"PAUSE DEBUG: Found matching operation! Updating with process info...")
+                    operation.process = process
+                    operation.pid = process.pid
+                    operation.working_directory = str(operation_dir) if operation_dir else None
+                    
+                    self.logger.info(f"PAUSE DEBUG: Successfully registered hydration process (PID: {process.pid}) with operations panel for {operation_name}")
+                    return
+            
+            self.logger.error(f"PAUSE DEBUG: Operation {operation_name} not found in operations panel!")
+            self.logger.error(f"PAUSE DEBUG: Available operations: {[op.name for op in operations_panel.operations.values()]}")
+                
+        except Exception as e:
+            self.logger.error(f"PAUSE DEBUG: Error registering hydration process: {e}")
+            import traceback
+            self.logger.error(f"PAUSE DEBUG: Traceback: {traceback.format_exc()}")
+    
+    def _retry_registration(self, operation_name: str, executor, attempt: int = 0) -> bool:
+        """Retry registration with backoff. Returns False to stop GLib timeout."""
+        MAX_ATTEMPTS = 10
+        
+        if attempt >= MAX_ATTEMPTS:
+            self.logger.error(f"PAUSE DEBUG: Registration failed after {MAX_ATTEMPTS} attempts for {operation_name}")
+            return False  # Stop retrying
+        
+        try:
+            # Try the registration
+            self._register_hydration_with_operations_panel(operation_name, executor)
+            
+            # Check if it worked by looking for the process in operations panel
+            operations_panel = getattr(self.main_window, 'operations_panel', None)
+            if operations_panel:
+                for op_id, operation in operations_panel.operations.items():
+                    if operation.name == operation_name and operation.process is not None:
+                        self.logger.info(f"PAUSE DEBUG: Registration successful on attempt {attempt + 1}")
+                        return False  # Stop retrying
+            
+            # Registration didn't work, try again
+            self.logger.info(f"PAUSE DEBUG: Registration attempt {attempt + 1}/{MAX_ATTEMPTS} failed, will retry...")
+            from gi.repository import GLib
+            GLib.timeout_add(1000, self._retry_registration, operation_name, executor, attempt + 1)
+            return False  # Stop this timeout, next one is scheduled
+            
+        except Exception as e:
+            self.logger.error(f"PAUSE DEBUG: Registration attempt {attempt + 1} error: {e}")
+            from gi.repository import GLib
+            GLib.timeout_add(1000, self._retry_registration, operation_name, executor, attempt + 1)
+            return False  # Stop this timeout, next one is scheduled
+    
+    def _validate_parameter_completeness(self, curing_conditions: dict, time_calibration_settings: dict,
+                                       advanced_settings: dict, db_param_modifications: dict) -> None:
+        """Validate that all required parameters are present and valid for hydration simulation.
+        
+        This performs in-memory validation without creating files or folders.
+        """
+        # Validate curing conditions
+        if not curing_conditions:
+            raise ValueError("Curing conditions are required")
+        
+        required_curing_keys = ['initial_temperature_celsius', 'thermal_mode', 'moisture_mode']
+        for key in required_curing_keys:
+            if key not in curing_conditions:
+                raise ValueError(f"Missing required curing condition: {key}")
+        
+        # Validate temperature range
+        temp = curing_conditions.get('initial_temperature_celsius', 0)
+        if not (0 <= temp <= 100):
+            raise ValueError(f"Temperature must be between 0-100°C, got {temp}")
+        
+        # Validate time calibration settings
+        if time_calibration_settings and 'time_conversion_factor' in time_calibration_settings:
+            factor = time_calibration_settings['time_conversion_factor']
+            if not (0.1 <= factor <= 10.0):
+                raise ValueError(f"Time conversion factor must be between 0.1-10.0, got {factor}")
+        
+        # Validate advanced settings ranges
+        if advanced_settings:
+            if 'c3a_fraction' in advanced_settings:
+                c3a = advanced_settings['c3a_fraction']
+                if not (0.0 <= c3a <= 0.3):
+                    raise ValueError(f"C3A fraction must be between 0.0-0.3, got {c3a}")
+        
+        # Validate database parameter modifications
+        if db_param_modifications:
+            for param_name, value in db_param_modifications.items():
+                if not isinstance(value, (int, float)):
+                    raise ValueError(f"Parameter modification values must be numeric, got {type(value)} for {param_name}")
+                if not (0.01 <= value <= 100.0):
+                    raise ValueError(f"Parameter modification values must be between 0.01-100.0, got {value} for {param_name}")
+        
+        self.logger.info("Parameter completeness validation passed")

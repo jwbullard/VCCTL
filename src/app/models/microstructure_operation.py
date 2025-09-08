@@ -142,7 +142,8 @@ class MicrostructureOperation(Base):
         return {
             'img_file': self.output_img_filename,
             'pimg_file': self.output_pimg_filename,
-            'genmic_input': f'genmic_input_{self.operation.name.replace(" Microstructure", "")}.txt',
+            # Phase 2: Clean naming - use operation name directly with _input.txt suffix
+            'genmic_input': f'{self.operation.name}_input.txt',
             'genmic_progress': 'genmic_progress.txt',
             'stdout_log': f'proc_{self.operation.name}_stdout.txt',
             'stderr_log': f'proc_{self.operation.name}_stderr.txt'

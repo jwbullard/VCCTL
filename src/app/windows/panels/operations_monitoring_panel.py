@@ -86,18 +86,33 @@ class Operation:
     
     def pause_process(self) -> bool:
         """Pause the operation's process using SIGSTOP signal."""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"PAUSE DEBUG: pause_process called for {self.name}")
+        logger.info(f"PAUSE DEBUG: self.process = {self.process}")
+        logger.info(f"PAUSE DEBUG: self.pid = {self.pid}")
+        
         try:
             if self.process and self.process.poll() is None:
                 # Process is still running, pause it
+                logger.info(f"PAUSE DEBUG: Using process object to send SIGSTOP")
                 self.process.send_signal(signal.SIGSTOP)
+                logger.info(f"PAUSE DEBUG: SIGSTOP sent successfully via process object")
                 return True
             elif self.pid:
                 # Try using stored PID
+                logger.info(f"PAUSE DEBUG: Using PID {self.pid} to send SIGSTOP")
                 os.kill(self.pid, signal.SIGSTOP)
+                logger.info(f"PAUSE DEBUG: SIGSTOP sent successfully via PID")
                 return True
+            else:
+                logger.error(f"PAUSE DEBUG: No process or PID available!")
         except (ProcessLookupError, PermissionError, OSError) as e:
             # Process may have ended or we don't have permission
+            logger.error(f"PAUSE DEBUG: Exception while pausing: {e}")
             return False
+        logger.error(f"PAUSE DEBUG: Reached end of pause_process without sending signal")
         return False
     
     def resume_process(self) -> bool:
@@ -1599,10 +1614,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                     operation_name = operation.name
                     if operation_name.endswith(" Microstructure"):
                         base_name = operation_name.replace(" Microstructure", "")
-                        if base_name.startswith("genmic_input_"):
-                            folder_name = base_name.replace("genmic_input_", "")
-                        else:
-                            folder_name = base_name
+                        # Phase 2: Clean naming - operation name is already clean, use as-is
+                        folder_name = base_name
+                    else:
+                        # For non-microstructure operations, use name as-is
+                        folder_name = operation_name
                         
                         operations_dir = os.path.join("Operations", folder_name)
                         if os.path.exists(operations_dir):
@@ -1799,11 +1815,8 @@ class OperationsMonitoringPanel(Gtk.Box):
                 if operation_name.endswith(" Microstructure"):
                     base_name = operation_name.replace(" Microstructure", "")
                     
-                    # Remove "genmic_input_" prefix if present to get actual folder name
-                    if base_name.startswith("genmic_input_"):
-                        folder_name = base_name.replace("genmic_input_", "")
-                    else:
-                        folder_name = base_name
+                    # Phase 2: Clean naming - operation name is already clean, use as-is
+                    folder_name = base_name
                     
                     # Look for output directory
                     import os
@@ -1853,11 +1866,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                     if operation_name.endswith(" Microstructure"):
                         base_name = operation_name.replace(" Microstructure", "")
                         
-                        # Remove "genmic_input_" prefix if present to get actual folder name
-                        if base_name.startswith("genmic_input_"):
-                            folder_name = base_name.replace("genmic_input_", "")
-                        else:
-                            folder_name = base_name
+                        # Phase 2: Clean naming - operation name is already clean, use as-is
+                        folder_name = base_name
+                    else:
+                        # For non-microstructure operations, use name as-is
+                        folder_name = operation_name
                         
                         # Look for genmic_progress.txt file (single-line, always same name)
                         import os
@@ -2706,14 +2719,22 @@ class OperationsMonitoringPanel(Gtk.Box):
         """Pause or resume an operation using real process control."""
         operation = self.operations.get(operation_id)
         if operation:
+            self.logger.info(f"PAUSE DEBUG: Attempting to pause/resume operation {operation_id}: {operation.name}")
+            self.logger.info(f"PAUSE DEBUG: Operation status: {operation.status}")
+            self.logger.info(f"PAUSE DEBUG: Operation has process: {operation.process is not None}")
+            self.logger.info(f"PAUSE DEBUG: Operation has pid: {operation.pid}")
+            
             if operation.status == OperationStatus.RUNNING:
                 # Pause the actual process
+                self.logger.info(f"PAUSE DEBUG: Calling pause_process() for {operation.name}")
                 if operation.pause_process():
                     operation.status = OperationStatus.PAUSED
                     operation.paused_time = datetime.now()  # Record when paused
                     self._add_log_entry(f"Successfully paused process for operation: {operation.name}")
+                    self.logger.info(f"PAUSE DEBUG: Successfully paused {operation.name}")
                 else:
                     self._add_log_entry(f"Failed to pause process for operation: {operation.name} (process may have ended)")
+                    self.logger.error(f"PAUSE DEBUG: Failed to pause {operation.name}")
                 self._update_operations_list()
                 
             elif operation.status == OperationStatus.PAUSED:
@@ -4340,6 +4361,18 @@ class OperationsMonitoringPanel(Gtk.Box):
         try:
             self.logger.info("Loading all operations from database...")
             
+            # IMPORTANT: Preserve process references for running operations before clearing
+            # This is critical for pause/resume functionality to work
+            preserved_processes = {}
+            for op_id, operation in self.operations.items():
+                if operation.process is not None or operation.pid is not None:
+                    preserved_processes[operation.name] = {
+                        'process': operation.process,
+                        'pid': operation.pid,
+                        'working_directory': operation.working_directory
+                    }
+                    self.logger.debug(f"Preserving process info for {operation.name}: PID={operation.pid}")
+            
             # Clear existing operations
             self.operations.clear()
             
@@ -4369,6 +4402,16 @@ class OperationsMonitoringPanel(Gtk.Box):
                 try:
                     ui_operation = self._convert_db_operation_to_ui_operation(db_op)
                     self.operations[ui_operation.id] = ui_operation
+                    
+                    # CRITICAL: Restore preserved process references for running operations
+                    # This enables pause/resume functionality for hydration operations
+                    if ui_operation.name in preserved_processes:
+                        preserved = preserved_processes[ui_operation.name]
+                        ui_operation.process = preserved['process']
+                        ui_operation.pid = preserved['pid']
+                        ui_operation.working_directory = preserved['working_directory']
+                        self.logger.debug(f"Restored process info for {ui_operation.name}: PID={ui_operation.pid}")
+                    
                     successful_conversions += 1
                     self.logger.debug(f"Loaded: {ui_operation.name} ({ui_operation.operation_type.value}, {ui_operation.status.value})")
                 except Exception as e:
@@ -4513,8 +4556,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                     progress_val = float(parts[0])
                     message = parts[1]
                     
+                    # Phase 2: Use clean operation naming without genmic_input_ prefix
                     # Find matching operation
-                    operation_name = f"genmic_input_{op_folder.name} Microstructure"
+                    operation_name = op_folder.name
                     matching_op = None
                     
                     for op in self.operations.values():

@@ -320,6 +320,22 @@ class ResultsPanel(Gtk.Box):
         summary_frame.add(summary_box)
         self.results_box.pack_start(summary_frame, False, False, 0)
     
+    def _get_operation_output_dir(self, operation) -> Optional[str]:
+        """Get the output directory path for an operation."""
+        try:
+            if not operation or not operation.name:
+                return None
+            
+            # Construct the path to Operations/{operation_name}
+            project_root = Path(__file__).parent.parent.parent.parent
+            output_dir = project_root / "Operations" / operation.name
+            
+            return str(output_dir)
+            
+        except Exception as e:
+            self.logger.error(f"Error getting output directory for operation {operation.name}: {e}")
+            return None
+    
     def _has_3d_results(self, operation) -> bool:
         """Check if operation has 3D microstructure results (.img files)."""
         try:

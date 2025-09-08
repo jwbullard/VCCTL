@@ -10,7 +10,7 @@ Clean database models with proper foreign key relationships:
 from typing import Optional
 from datetime import datetime
 import enum
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
 
 from app.database.base import Base
@@ -73,6 +73,14 @@ class Operation(Base):
     
     # Metadata
     notes = Column(Text, nullable=True)
+    
+    # Lineage tracking
+    parent_operation_id = Column(Integer, ForeignKey('operations.id'), nullable=True, index=True)
+    parent_operation = relationship("Operation", remote_side=[id], back_populates="child_operations")
+    child_operations = relationship("Operation", back_populates="parent_operation", cascade="all, delete-orphan")
+    
+    # UI parameter storage for reproducibility
+    stored_ui_parameters = Column(JSON, nullable=True)
     
     # Relationship to result (one-to-one)
     result = relationship("Result", back_populates="operation", uselist=False, cascade="all, delete-orphan")
