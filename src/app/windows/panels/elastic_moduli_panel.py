@@ -9,6 +9,7 @@ This is the third stage in the VCCTL workflow: Microstructure → Hydration → 
 import gi
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Dict, Any, List
 
@@ -478,8 +479,9 @@ class ElasticModuliPanel(Gtk.Box):
     
     def _populate_fields_from_hydration(self, hydration_operation: Operation) -> None:
         """Populate form fields based on selected hydration operation."""
-        # Set operation name
-        operation_name = f"ElasticModuli_{hydration_operation.name}"
+        # Set operation name (Phase 3: Clean naming without auto-prefixes)
+        # User can override this with their own clean name
+        operation_name = ""  # Let user provide their own clean name
         self.operation_name_entry.set_text(operation_name)
         
         # Set image filename
@@ -491,12 +493,22 @@ class ElasticModuliPanel(Gtk.Box):
         output_dir = project_root / "Operations" / f"Elastic_{hydration_operation.name}"
         self.output_dir_entry.set_text(str(output_dir))
         
-        # Try to find .pimg file in hydration directory
-        hydration_dir = project_root / "Operations" / hydration_operation.name
-        if hydration_dir.exists():
-            pimg_files = list(hydration_dir.glob("*.pimg"))
-            if pimg_files:
-                self.pimg_file_entry.set_text(str(pimg_files[0]))
+        # Find .pimg file in MICROSTRUCTURE directory (not hydration)
+        # The pimg file is created during microstructure generation
+        microstructure_name = self._get_parent_microstructure_name(hydration_operation)
+        if microstructure_name:
+            microstructure_dir = project_root / "Operations" / microstructure_name
+            if microstructure_dir.exists():
+                pimg_files = list(microstructure_dir.glob("*.pimg"))
+                if pimg_files:
+                    self.pimg_file_entry.set_text(str(pimg_files[0]))
+                    self.logger.info(f"Found pimg file in microstructure directory: {pimg_files[0]}")
+                else:
+                    self.logger.warning(f"No .pimg file found in microstructure directory: {microstructure_dir}")
+            else:
+                self.logger.warning(f"Microstructure directory not found: {microstructure_dir}")
+        else:
+            self.logger.warning(f"Could not determine parent microstructure for hydration operation: {hydration_operation.name}")
         
         # **NEW**: Auto-populate aggregate properties from microstructure metadata
         try:
@@ -695,21 +707,42 @@ class ElasticModuliPanel(Gtk.Box):
             self._show_error_dialog(f"Failed to generate input file:\n{str(e)}")
     
     def _on_start_calculation(self, button: Gtk.Button) -> None:
-        """Handle start calculation button."""
+        """Handle start calculation button with Phase 3 clean naming and lineage."""
         try:
+            # Phase 3: Clean naming validation
+            operation_name = self.operation_name_entry.get_text().strip()
+            if not operation_name:
+                self._show_error_dialog("Please enter an operation name")
+                return
+            
+            # Validate form and create operation object
             operation = self._create_operation_from_form()
             if not operation:
                 return
             
-            # Save operation to database
+            # Phase 3: Capture all UI parameters for reproducibility
+            ui_parameters = self._capture_elastic_ui_parameters()
+            
+            # Phase 3: Find parent hydration operation for lineage
+            hydration_id = self.hydration_combo.get_active_id()
+            parent_operation_id = int(hydration_id) if hydration_id else None
+            
+            # Phase 3: Create general Operation with lineage and UI parameters
+            general_operation = self._create_elastic_operation(
+                operation_name, ui_parameters, parent_operation_id
+            )
+            
+            # Create specific ElasticModuliOperation linked to general operation
             saved_operation = self.elastic_moduli_service.create_operation(
-                name=operation.name,
+                name=operation_name,
                 hydration_operation_id=operation.hydration_operation_id,
                 description=operation.description,
+                general_operation_id=general_operation.id if general_operation else None,
                 **operation.to_dict()
             )
             
-            self._show_info_dialog(f"Elastic moduli operation '{saved_operation.name}' created successfully.\nCheck the Operations Tool to monitor progress.")
+            self._show_info_dialog(f"Elastic moduli operation '{operation_name}' created successfully.\nCheck the Operations Tool to monitor progress.")
+            self.logger.info(f"Phase 3: Created elastic operation '{operation_name}' with lineage to hydration operation {parent_operation_id}")
             
         except Exception as e:
             self.logger.error(f"Error starting calculation: {e}")
@@ -835,3 +868,124 @@ class ElasticModuliPanel(Gtk.Box):
     def get_panel_name(self) -> str:
         """Get the panel name for tab display."""
         return "Elastic Moduli"
+    
+    # Phase 3: Clean Naming and Lineage Methods
+    
+    def _capture_elastic_ui_parameters(self) -> Dict[str, Any]:
+        """Capture all UI parameters for storage with operation (Phase 3)."""
+        try:
+            # Get selected hydration operation details
+            hydration_id = self.hydration_combo.get_active_id()
+            hydration_name = ""
+            if hydration_id:
+                model = self.hydration_combo.get_model()
+                iter = self.hydration_combo.get_active_iter()
+                if iter:
+                    hydration_name = model.get_value(iter, 1)  # Get operation name from combo
+            
+            ui_params = {
+                # Basic operation information
+                'operation_name': self.operation_name_entry.get_text().strip(),
+                'hydration_operation_id': hydration_id,
+                'hydration_operation_name': hydration_name,
+                
+                # File settings
+                'image_filename': self.image_filename_entry.get_text().strip(),
+                'output_directory': self.output_dir_entry.get_text().strip(),
+                'pimg_file_path': self.pimg_file_entry.get_text().strip(),
+                
+                # Microstructure settings
+                'has_itz': self.has_itz_check.get_active(),
+                'air_volume_fraction': self.air_volume_spin.get_value(),
+                
+                # Fine aggregate settings
+                'has_fine_aggregate': self.fine_agg_check.get_active(),
+                'fine_aggregate_settings': {
+                    'volume_fraction': self.fine_volume_spin.get_value(),
+                    'grading_file': self.fine_grading_entry.get_text().strip(),
+                    'bulk_modulus': self.fine_bulk_spin.get_value(),
+                    'shear_modulus': self.fine_shear_spin.get_value()
+                } if self.fine_agg_check.get_active() else None,
+                
+                # Coarse aggregate settings
+                'has_coarse_aggregate': self.coarse_agg_check.get_active(),
+                'coarse_aggregate_settings': {
+                    'volume_fraction': self.coarse_volume_spin.get_value(),
+                    'grading_file': self.coarse_grading_entry.get_text().strip(),
+                    'bulk_modulus': self.coarse_bulk_spin.get_value(),
+                    'shear_modulus': self.coarse_shear_spin.get_value()
+                } if self.coarse_agg_check.get_active() else None,
+                
+                # Metadata
+                'timestamp': datetime.now().isoformat(),
+                'panel_version': '1.0'
+            }
+            
+            return ui_params
+            
+        except Exception as e:
+            self.logger.error(f"Error capturing UI parameters: {e}")
+            return {}
+    
+    def _create_elastic_operation(self, operation_name: str, ui_parameters: Dict[str, Any], 
+                                 parent_operation_id: Optional[int]) -> Optional['Operation']:
+        """Create elastic moduli operation in database with UI parameters and lineage (Phase 3)."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation, OperationType, OperationStatus
+            
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                # Create the general operation record with Phase 3 features
+                operation = Operation(
+                    name=operation_name,  # Clean user-defined name
+                    operation_type=OperationType.ELASTIC_MODULI.value,
+                    status=OperationStatus.QUEUED.value,
+                    stored_ui_parameters=ui_parameters,  # Complete UI state for reproducibility
+                    parent_operation_id=parent_operation_id  # Phase 3: Lineage to hydration operation
+                )
+                
+                session.add(operation)
+                session.commit()
+                session.refresh(operation)
+                
+                self.logger.info(f"Phase 3: Created elastic operation: {operation_name} (ID: {operation.id})")
+                if parent_operation_id:
+                    self.logger.info(f"Phase 3: Linked to parent hydration operation ID: {parent_operation_id}")
+                
+                return operation
+                
+        except Exception as e:
+            self.logger.error(f"Error creating elastic operation: {e}")
+            return None
+    
+    def _get_parent_microstructure_name(self, hydration_operation: Operation) -> Optional[str]:
+        """Get the parent microstructure operation name through lineage chain."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation, OperationType
+            
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                # Get the parent of the hydration operation (should be microstructure)
+                if hydration_operation.parent_operation_id:
+                    parent_op = session.query(Operation).filter_by(
+                        id=hydration_operation.parent_operation_id
+                    ).first()
+                    
+                    if parent_op and parent_op.operation_type == OperationType.MICROSTRUCTURE.value:
+                        return parent_op.name
+                    else:
+                        self.logger.warning(f"Parent operation {hydration_operation.parent_operation_id} is not a microstructure operation")
+                else:
+                    # Fallback: Try to extract from stored UI parameters if available
+                    if hydration_operation.stored_ui_parameters:
+                        params = hydration_operation.stored_ui_parameters
+                        if 'source_microstructure' in params:
+                            return params['source_microstructure'].get('name')
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error getting parent microstructure name: {e}")
+            return None

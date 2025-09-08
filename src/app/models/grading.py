@@ -8,7 +8,8 @@ Converted from Java JPA entity to SQLAlchemy model.
 
 from typing import Optional, List, Dict
 import json
-from sqlalchemy import Column, String, Float, LargeBinary, Enum, event
+from datetime import datetime
+from sqlalchemy import Column, String, Float, LargeBinary, Enum, event, JSON, DateTime, Integer, Text
 from pydantic import BaseModel, Field, field_validator, model_validator
 import enum
 
@@ -31,20 +32,32 @@ class Grading(Base):
     
     __tablename__ = 'grading'
     
-    # Override base model id with string primary key
+    # Override the inherited id column - don't use it for this model
     id = None
     
-    # Primary key - grading name (unique identifier)
-    name = Column(String(64), primary_key=True, nullable=False, unique=True)
+    # Use name as primary key to match existing database table structure
+    name = Column(String(64), primary_key=True, doc="User-defined grading name")
     
     # Grading type (COARSE or FINE)
     type = Column(Enum(GradingType), nullable=True, doc="Grading type classification")
     
-    # Binary grading data (sieve analysis)
-    grading = Column(LargeBinary, nullable=True, doc="Binary grading data")
+    # Legacy binary grading data (kept for backward compatibility)
+    grading = Column(LargeBinary, nullable=True, doc="Legacy binary grading data")
+    
+    # NEW: JSON field for structured sieve data
+    sieve_data = Column(JSON, nullable=True, doc="Sieve analysis data as [(size_mm, percent_passing), ...]")
     
     # Maximum particle diameter
     max_diameter = Column(Float, nullable=True, doc="Maximum particle diameter (mm)")
+    
+    # NEW: Additional metadata fields
+    description = Column(Text, nullable=True, doc="User description of the grading")
+    aggregate_id = Column(Integer, nullable=True, doc="Reference to associated aggregate material")
+    is_standard = Column(Integer, nullable=True, default=0, doc="Flag for standard/system gradings (1=true)")
+    
+    # NEW: Timestamps
+    created_at = Column(DateTime, nullable=True, default=datetime.utcnow, doc="Creation timestamp")
+    modified_at = Column(DateTime, nullable=True, default=datetime.utcnow, onupdate=datetime.utcnow, doc="Last modification timestamp")
     
     def __repr__(self) -> str:
         """String representation of the grading."""
@@ -84,7 +97,30 @@ class Grading(Base):
     @property
     def has_grading_data(self) -> bool:
         """Check if grading has sieve analysis data."""
-        return self.grading is not None and len(self.grading) > 0
+        return (self.sieve_data is not None and len(self.sieve_data) > 0) or (self.grading is not None and len(self.grading) > 0)
+    
+    @property
+    def is_system_grading(self) -> bool:
+        """Check if this is a system/standard grading."""
+        return self.is_standard == 1
+    
+    @property
+    def sieve_points(self) -> List[tuple]:
+        """Get sieve data as list of (size_mm, percent_passing) tuples."""
+        if self.sieve_data:
+            return [tuple(point) for point in self.sieve_data]
+        return []
+    
+    @sieve_points.setter
+    def sieve_points(self, points: List[tuple]):
+        """Set sieve data from list of (size_mm, percent_passing) tuples."""
+        if points:
+            self.sieve_data = [list(point) for point in points]
+            # Update max diameter from largest sieve size
+            self.max_diameter = max(point[0] for point in points) if points else None
+        else:
+            self.sieve_data = None
+            self.max_diameter = None
     
     def parse_grading_data(self) -> Optional[List[Dict[str, float]]]:
         """
@@ -168,6 +204,118 @@ class Grading(Base):
                     return False
         
         return True
+    
+    def get_sieve_data(self) -> Optional[List[Dict[str, float]]]:
+        """
+        Get sieve data in dictionary format from JSON field.
+        
+        Returns:
+            List of dictionaries with 'sieve_size' and 'percent_passing' keys
+        """
+        if not self.sieve_data:
+            return None
+        
+        result = []
+        for point in self.sieve_data:
+            if len(point) >= 2:
+                result.append({
+                    'sieve_size': float(point[0]),
+                    'percent_passing': float(point[1])
+                })
+        
+        return result if result else None
+    
+    def set_sieve_data(self, sieve_data: List[Dict[str, float]]):
+        """
+        Set sieve data from dictionary format to JSON field.
+        
+        Args:
+            sieve_data: List of dictionaries with 'sieve_size' and 'percent_passing'
+        """
+        if not sieve_data:
+            self.sieve_data = None
+            self.max_diameter = None
+            return
+        
+        # Convert to [size, percent] pairs
+        points = []
+        for item in sieve_data:
+            size = float(item.get('sieve_size', 0.0))
+            percent = float(item.get('percent_passing', 0.0))
+            points.append([size, percent])
+        
+        self.sieve_data = points
+        # Update max diameter
+        self.max_diameter = max(point[0] for point in points) if points else None
+        
+        # Update modified timestamp
+        self.modified_at = datetime.utcnow()
+    
+    def to_gdg_format(self) -> str:
+        """
+        Convert sieve data to .gdg file format.
+        
+        Returns:
+            Tab-delimited string: "size_mm\tpercent_passing\n..."
+        """
+        if not self.sieve_data:
+            return ""
+        
+        lines = []
+        # Sort by sieve size (largest first for standard format)
+        sorted_points = sorted(self.sieve_data, key=lambda x: x[0], reverse=True)
+        
+        for point in sorted_points:
+            size_mm = point[0]
+            percent_passing = point[1]
+            lines.append(f"{size_mm}\t{percent_passing}")
+        
+        return '\n'.join(lines)
+    
+    @classmethod
+    def from_gdg_format(cls, gdg_content: str, name: str, grading_type: GradingType, 
+                       description: str = None) -> 'Grading':
+        """
+        Create Grading instance from .gdg file content.
+        
+        Args:
+            gdg_content: Tab-delimited content "size\tpercent\nsize\tpercent..."
+            name: Name for the grading
+            grading_type: FINE or COARSE
+            description: Optional description
+            
+        Returns:
+            Grading instance
+        """
+        grading = cls(
+            name=name,
+            type=grading_type,
+            description=description
+        )
+        
+        if not gdg_content.strip():
+            return grading
+        
+        # Parse content into sieve data
+        points = []
+        lines = gdg_content.strip().split('\n')
+        
+        for line in lines:
+            if line.strip():
+                parts = line.split('\t')
+                if len(parts) >= 2:
+                    try:
+                        size = float(parts[0])
+                        percent = float(parts[1])
+                        points.append([size, percent])
+                    except ValueError:
+                        continue  # Skip invalid lines
+        
+        if points:
+            grading.sieve_data = points
+            grading.max_diameter = max(point[0] for point in points)
+        
+        return grading
 
 
 # Event listener to set grading_text after loading from database

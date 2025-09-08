@@ -1,0 +1,23 @@
+/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
+  warnings.warn(
+Database session error: Source grading with ID ASTM C-33 Fine Aggregate not found
+Failed to duplicate grading: Source grading with ID ASTM C-33 Fine Aggregate not found
+Testing Phase 1 GradingService API...
+✅ Filter by type: 3 FINE, 3 COARSE
+Traceback (most recent call last):
+  File "/Users/jwbullard/Software/vcctl-gtk/src/app/services/grading_service.py", line 649, in duplicate_grading
+    raise NotFoundError(f"Source grading with ID {grading_id} not found")
+app.services.base_service.NotFoundError: Source grading with ID ASTM C-33 Fine Aggregate not found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jwbullard/Software/vcctl-gtk/test_phase1_service_api.py", line 95, in <module>
+    success = test_service_api()
+              ^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/test_phase1_service_api.py", line 35, in test_service_api
+    duplicate = gs.duplicate_grading(original.name, 'Copy of ASTM C-33')
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/src/app/services/grading_service.py", line 679, in duplicate_grading
+    raise ServiceError(f"Failed to duplicate grading: {e}")
+app.services.base_service.ServiceError: Failed to duplicate grading: Source grading with ID ASTM C-33 Fine Aggregate not found

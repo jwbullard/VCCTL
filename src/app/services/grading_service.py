@@ -540,3 +540,220 @@ class GradingService(BaseService[Grading, GradingCreate, GradingUpdate]):
         except Exception as e:
             self.logger.error(f"Failed to search grading curves: {e}")
             raise ServiceError(f"Failed to search grading curves: {e}")
+    
+    # Enhanced methods for Phase 1 grading system
+    
+    def save_grading_with_sieve_data(self, name: str, grading_type: str, 
+                                   sieve_data: List[Dict[str, float]], 
+                                   description: str = None, aggregate_id: int = None, 
+                                   is_standard: bool = False) -> Grading:
+        """
+        Save a new grading curve with sieve data.
+        
+        Args:
+            name: Unique name for the grading
+            grading_type: "FINE" or "COARSE"
+            sieve_data: List of {'sieve_size': float, 'percent_passing': float}
+            description: Optional description
+            aggregate_id: Optional reference to aggregate material
+            is_standard: Whether this is a system/standard grading
+            
+        Returns:
+            Created Grading instance
+        """
+        try:
+            with self.db_service.get_session() as session:
+                # Check if name already exists
+                existing = session.query(Grading).filter_by(name=name).first()
+                if existing:
+                    raise AlreadyExistsError(f"Grading with name '{name}' already exists")
+                
+                # Convert string to GradingType enum
+                from app.models.grading import GradingType
+                grade_type = GradingType.FINE if grading_type.upper() == "FINE" else GradingType.COARSE
+                
+                # Create new grading
+                grading = Grading(
+                    name=name,
+                    type=grade_type,
+                    description=description,
+                    aggregate_id=aggregate_id,
+                    is_standard=1 if is_standard else 0
+                )
+                
+                # Set sieve data using the model method
+                if sieve_data:
+                    grading.set_sieve_data(sieve_data)
+                
+                session.add(grading)
+                session.commit()
+                session.refresh(grading)
+                
+                self.logger.info(f"Created grading with sieve data: {name} ({grading_type})")
+                return grading
+                
+        except Exception as e:
+            self.logger.error(f"Failed to save grading with sieve data: {e}")
+            raise ServiceError(f"Failed to save grading: {e}")
+    
+    def get_all_gradings_by_type(self, grading_type: str = None, 
+                                include_standard: bool = True) -> List[Grading]:
+        """
+        Get all grading curves, optionally filtered by type.
+        
+        Args:
+            grading_type: Optional filter by "FINE" or "COARSE"
+            include_standard: Whether to include system/standard gradings
+            
+        Returns:
+            List of Grading instances
+        """
+        try:
+            with self.db_service.get_session() as session:
+                query = session.query(Grading)
+                
+                if grading_type:
+                    from app.models.grading import GradingType
+                    grade_type = GradingType.FINE if grading_type.upper() == "FINE" else GradingType.COARSE
+                    query = query.filter_by(type=grade_type)
+                
+                if not include_standard:
+                    query = query.filter_by(is_standard=0)
+                
+                # Order by type, then by name
+                query = query.order_by(Grading.type, Grading.name)
+                
+                return query.all()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get gradings by type: {e}")
+            raise ServiceError(f"Failed to get gradings: {e}")
+    
+    def duplicate_grading(self, grading_name: str, new_name: str, 
+                         new_description: str = None) -> Grading:
+        """
+        Duplicate an existing grading curve.
+        
+        Args:
+            grading_name: Name of grading to duplicate
+            new_name: Name for the duplicate
+            new_description: Optional description for duplicate
+            
+        Returns:
+            New Grading instance
+        """
+        try:
+            with self.db_service.get_session() as session:
+                source = session.query(Grading).filter_by(name=grading_name).first()
+                if not source:
+                    raise NotFoundError(f"Source grading with name '{grading_name}' not found")
+                
+                # Check if new name already exists
+                existing = session.query(Grading).filter_by(name=new_name).first()
+                if existing:
+                    raise AlreadyExistsError(f"Grading with name '{new_name}' already exists")
+                
+                # Create duplicate
+                duplicate = Grading(
+                    name=new_name,
+                    type=source.type,
+                    description=new_description or f"Copy of {source.name}",
+                    aggregate_id=source.aggregate_id,
+                    is_standard=0  # Duplicates are never standard
+                )
+                
+                # Copy sieve data
+                if hasattr(source, 'sieve_data') and source.sieve_data:
+                    duplicate.sieve_data = source.sieve_data.copy()
+                    duplicate.max_diameter = source.max_diameter
+                
+                session.add(duplicate)
+                session.commit()
+                session.refresh(duplicate)
+                
+                self.logger.info(f"Duplicated grading: {source.name} -> {new_name}")
+                return duplicate
+                
+        except Exception as e:
+            self.logger.error(f"Failed to duplicate grading: {e}")
+            raise ServiceError(f"Failed to duplicate grading: {e}")
+    
+    def create_standard_gradings(self) -> List[Grading]:
+        """
+        Create standard/system grading curves.
+        
+        Returns:
+            List of created standard gradings
+        """
+        standard_gradings = []
+        
+        try:
+            # ASTM C-33 Fine Aggregate Limits
+            astm_fine_data = [
+                {'sieve_size': 4.75, 'percent_passing': 95.0},   # No. 4
+                {'sieve_size': 2.36, 'percent_passing': 80.0},   # No. 8  
+                {'sieve_size': 1.18, 'percent_passing': 50.0},   # No. 16
+                {'sieve_size': 0.60, 'percent_passing': 25.0},   # No. 30
+                {'sieve_size': 0.30, 'percent_passing': 10.0},   # No. 50
+                {'sieve_size': 0.15, 'percent_passing': 2.0},    # No. 100
+            ]
+            
+            try:
+                astm_fine = self.save_grading_with_sieve_data(
+                    name="ASTM C-33 Fine Aggregate",
+                    grading_type="FINE",
+                    sieve_data=astm_fine_data,
+                    description="ASTM C-33 standard fine aggregate grading limits (average)",
+                    is_standard=True
+                )
+                standard_gradings.append(astm_fine)
+            except AlreadyExistsError:
+                pass  # Already exists
+            
+            # ASTM #57 Coarse Aggregate
+            astm_57_data = [
+                {'sieve_size': 25.0, 'percent_passing': 100.0},  # 1 inch
+                {'sieve_size': 19.0, 'percent_passing': 95.0},   # 3/4 inch
+                {'sieve_size': 12.5, 'percent_passing': 25.0},   # 1/2 inch
+                {'sieve_size': 9.5, 'percent_passing': 10.0},    # 3/8 inch
+                {'sieve_size': 4.75, 'percent_passing': 5.0},    # No. 4
+            ]
+            
+            try:
+                astm_57 = self.save_grading_with_sieve_data(
+                    name="ASTM #57 Stone",
+                    grading_type="COARSE",
+                    sieve_data=astm_57_data,
+                    description="ASTM #57 coarse aggregate (3/4 inch to #4)",
+                    is_standard=True
+                )
+                standard_gradings.append(astm_57)
+            except AlreadyExistsError:
+                pass
+            
+            # ASTM #67 Coarse Aggregate
+            astm_67_data = [
+                {'sieve_size': 19.0, 'percent_passing': 100.0},  # 3/4 inch
+                {'sieve_size': 12.5, 'percent_passing': 90.0},   # 1/2 inch
+                {'sieve_size': 9.5, 'percent_passing': 20.0},    # 3/8 inch
+                {'sieve_size': 4.75, 'percent_passing': 5.0},    # No. 4
+            ]
+            
+            try:
+                astm_67 = self.save_grading_with_sieve_data(
+                    name="ASTM #67 Stone",
+                    grading_type="COARSE", 
+                    sieve_data=astm_67_data,
+                    description="ASTM #67 coarse aggregate (3/4 inch to #4, smaller)",
+                    is_standard=True
+                )
+                standard_gradings.append(astm_67)
+            except AlreadyExistsError:
+                pass
+            
+            self.logger.info(f"Created {len(standard_gradings)} standard gradings")
+            return standard_gradings
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create standard gradings: {e}")
+            return standard_gradings

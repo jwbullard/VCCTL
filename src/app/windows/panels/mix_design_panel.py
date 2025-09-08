@@ -53,6 +53,9 @@ class MixDesignPanel(Gtk.Box):
         self.auto_calculate_enabled = True
         self.validation_timer = None
         
+        # Template loading state
+        self.pending_grading_template = None  # Store template to load into next grading dialog
+        
         # Material lists cache
         self.material_lists = {}
         
@@ -1083,6 +1086,31 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Failed to show coarse aggregate grading dialog: {e}")
             self.main_window.update_status(f"Error opening grading dialog: {e}", "error", 5)
     
+    def _on_manage_gradings_clicked(self, button) -> None:
+        """Handle Manage Grading Templates button click."""
+        try:
+            from app.windows.dialogs.grading_management_dialog import GradingManagementDialog
+            
+            # Create and show management dialog
+            dialog = GradingManagementDialog(self.main_window, self.service_container.database_service)
+            response = dialog.run()
+            
+            if response == Gtk.ResponseType.OK:
+                # User selected a grading to load
+                selected_grading = dialog.get_selected_grading()
+                if selected_grading:
+                    # Store the template to load into the next grading dialog
+                    self.pending_grading_template = selected_grading
+                    self.main_window.update_status(
+                        f"Selected grading template: {selected_grading.name}. Open an aggregate grading to apply.", "success", 5
+                    )
+            
+            dialog.destroy()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to show grading management dialog: {e}")
+            self.main_window.update_status(f"Error opening grading management: {e}", "error", 5)
+    
     def _show_aggregate_grading_dialog(self, aggregate_name: str, aggregate_type: str) -> None:
         """Show grading curve dialog for aggregate."""
         try:
@@ -1100,14 +1128,32 @@ class MixDesignPanel(Gtk.Box):
             # Create grading curve widget
             grading_widget = GradingCurveWidget()
             
-            # Get the appropriate grading data attribute name
-            grading_data_attr = f'_{aggregate_type}_aggregate_grading_data'
-            
-            # Load existing grading data if available
-            if hasattr(self, grading_data_attr):
-                grading_data = getattr(self, grading_data_attr)
-                if grading_data:
-                    grading_widget.set_grading_data(grading_data)
+            # Check if there's a pending template to load
+            if self.pending_grading_template:
+                try:
+                    if grading_widget.load_from_grading_template(self.pending_grading_template):
+                        self.main_window.update_status(
+                            f"Loaded template: {self.pending_grading_template.name}", "success", 3
+                        )
+                    else:
+                        self.main_window.update_status(
+                            f"Failed to load template: {self.pending_grading_template.name}", "warning", 3
+                        )
+                except Exception as e:
+                    self.logger.error(f"Error loading pending template: {e}")
+                    self.main_window.update_status(f"Error loading template: {e}", "error", 3)
+                finally:
+                    # Clear the pending template after attempting to load
+                    self.pending_grading_template = None
+            else:
+                # Get the appropriate grading data attribute name
+                grading_data_attr = f'_{aggregate_type}_aggregate_grading_data'
+                
+                # Load existing grading data if available
+                if hasattr(self, grading_data_attr):
+                    grading_data = getattr(self, grading_data_attr)
+                    if grading_data:
+                        grading_widget.set_grading_data(grading_data)
             
             # Add to dialog content area
             content_area = dialog.get_content_area()
@@ -1880,9 +1926,27 @@ class MixDesignPanel(Gtk.Box):
             # Create grading curve widget
             grading_widget = GradingCurveWidget()
             
-            # Load existing grading data if available
-            if row_data['grading_data']:
-                grading_widget.set_grading_data(row_data['grading_data'])
+            # Check if there's a pending template to load
+            if self.pending_grading_template:
+                try:
+                    if grading_widget.load_from_grading_template(self.pending_grading_template):
+                        self.main_window.update_status(
+                            f"Loaded template: {self.pending_grading_template.name}", "success", 3
+                        )
+                    else:
+                        self.main_window.update_status(
+                            f"Failed to load template: {self.pending_grading_template.name}", "warning", 3
+                        )
+                except Exception as e:
+                    self.logger.error(f"Error loading pending template: {e}")
+                    self.main_window.update_status(f"Error loading template: {e}", "error", 3)
+                finally:
+                    # Clear the pending template after attempting to load
+                    self.pending_grading_template = None
+            else:
+                # Load existing grading data if available
+                if row_data['grading_data']:
+                    grading_widget.set_grading_data(row_data['grading_data'])
             
             # Add to dialog content area
             content_area = dialog.get_content_area()
@@ -3537,41 +3601,51 @@ class MixDesignPanel(Gtk.Box):
         self.coarse_agg_grading_button.set_sensitive(False)  # Enable when aggregate is selected
         grid.attach(self.coarse_agg_grading_button, 2, 4, 1, 1)
         
+        # Manage Gradings button - spans across multiple columns for better visibility
+        manage_gradings_button = Gtk.Button("Manage Grading Templates...")
+        manage_gradings_button.set_size_request(-1, -1)
+        manage_gradings_button.set_tooltip_text("Manage saved grading templates")
+        manage_gradings_icon = create_icon_image("folder-open", 16)
+        manage_gradings_button.set_image(manage_gradings_icon)
+        manage_gradings_button.set_image_position(Gtk.PositionType.LEFT)
+        manage_gradings_button.connect("clicked", self._on_manage_gradings_clicked)
+        grid.attach(manage_gradings_button, 0, 5, 3, 1)  # Spans 3 columns for prominence
+        
         # Coarse aggregate shape set
         coarse_agg_shape_label = Gtk.Label("Coarse Aggregate Shape Set:")
         coarse_agg_shape_label.set_halign(Gtk.Align.START)
         coarse_agg_shape_label.set_tooltip_text("Particle shape model for coarse aggregate particles")
-        grid.attach(coarse_agg_shape_label, 0, 5, 1, 1)
+        grid.attach(coarse_agg_shape_label, 0, 6, 1, 1)
         
         self.coarse_agg_shape_combo = Gtk.ComboBoxText()
         coarse_aggregate_shapes = self.microstructure_service.get_coarse_aggregate_shapes()
         for shape_id, shape_desc in coarse_aggregate_shapes.items():
             self.coarse_agg_shape_combo.append(shape_id, shape_desc)
         self.coarse_agg_shape_combo.set_active(0)
-        grid.attach(self.coarse_agg_shape_combo, 1, 5, 1, 1)
+        grid.attach(self.coarse_agg_shape_combo, 1, 6, 1, 1)
         
         # Air content
         air_label = Gtk.Label("Air Content:")
         air_label.set_halign(Gtk.Align.START)
         air_label.set_tooltip_text("Volume fraction of entrained air in mortar/concrete")
-        grid.attach(air_label, 0, 6, 1, 1)
+        grid.attach(air_label, 0, 7, 1, 1)
         
         self.micro_air_content_spin = Gtk.SpinButton.new_with_range(0.0, 0.2, 0.001)
         self.micro_air_content_spin.set_digits(3)
         self.micro_air_content_spin.set_value(0.0)
-        grid.attach(self.micro_air_content_spin, 1, 6, 1, 1)
+        grid.attach(self.micro_air_content_spin, 1, 7, 1, 1)
         
         # Total volume fraction display
         total_vol_label = Gtk.Label("Total Volume Fraction:")
         total_vol_label.set_halign(Gtk.Align.START)
         total_vol_label.set_tooltip_text("Sum of all volume fractions (must equal 1.0)")
         total_vol_label.get_style_context().add_class("dim-label")
-        grid.attach(total_vol_label, 0, 7, 1, 1)
+        grid.attach(total_vol_label, 0, 8, 1, 1)
         
         self.total_volume_label = Gtk.Label("1.000")
         self.total_volume_label.set_halign(Gtk.Align.START)
         self.total_volume_label.get_style_context().add_class("monospace")
-        grid.attach(self.total_volume_label, 1, 7, 1, 1)
+        grid.attach(self.total_volume_label, 1, 8, 1, 1)
         
         frame.add(grid)
         parent.pack_start(frame, False, False, 0)

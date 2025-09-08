@@ -13,6 +13,12 @@ from typing import List, Tuple, Optional, Dict, Any
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Gdk, Pango, cairo
 
+# Import Phase 1 services for template functionality
+from app.services.grading_service import GradingService
+from app.services.service_container import get_service_container
+from app.models.grading import GradingType
+from app.utils.grading_file_utils import grading_file_manager
+
 # Standard sieve sizes (mm)
 STANDARD_SIEVES = [
     (75.0, "75 mm"),
@@ -47,8 +53,20 @@ class GradingCurveWidget(Gtk.Box):
         
         self.logger = logging.getLogger('VCCTL.GradingCurveWidget')
         
+        # Initialize grading service for template functionality
+        try:
+            service_container = get_service_container()
+            self.grading_service = GradingService(service_container.database_service)
+        except Exception as e:
+            self.logger.warning(f"Failed to initialize grading service: {e}")
+            self.grading_service = None
+        
         # Grading data: list of (size_mm, percent_passing)
         self.grading_data = []
+        
+        # Template state
+        self.current_template_name = None
+        self.available_templates = []
         
         # UI state
         self.plot_width = 400
@@ -58,6 +76,7 @@ class GradingCurveWidget(Gtk.Box):
         # Setup UI
         self._setup_ui()
         self._setup_default_data()
+        self._load_available_templates()
         
         self.logger.debug("Grading curve widget initialized")
     
@@ -115,6 +134,50 @@ class GradingCurveWidget(Gtk.Box):
         self.type_combo.set_active(0)
         self.type_combo.connect('changed', self._on_type_changed)
         toolbar_box.pack_start(self.type_combo, False, False, 0)
+        
+        # Template buttons
+        template_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        template_box.get_style_context().add_class("linked")
+        
+        # Load template dropdown
+        self.load_template_combo = Gtk.ComboBoxText()
+        self.load_template_combo.set_tooltip_text("Load from saved grading template")
+        self.load_template_combo.connect('changed', self._on_load_template_changed)
+        template_box.pack_start(self.load_template_combo, False, False, 0)
+        
+        # Save template button
+        self.save_template_button = Gtk.Button(label="Save As Template...")
+        self.save_template_button.set_tooltip_text("Save current grading as reusable template")
+        self.save_template_button.connect('clicked', self._on_save_template_clicked)
+        template_box.pack_start(self.save_template_button, False, False, 0)
+        
+        toolbar_box.pack_end(template_box, False, False, 0)
+        
+        # Add separator
+        separator1 = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        toolbar_box.pack_end(separator1, False, False, 0)
+        
+        # Import/Export buttons
+        io_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        io_box.get_style_context().add_class("linked")
+        
+        # Import button
+        import_button = Gtk.Button(label="Import...")
+        import_button.set_tooltip_text("Import grading curve from .gdg file")
+        import_button.connect('clicked', self._on_import_clicked)
+        io_box.pack_start(import_button, False, False, 0)
+        
+        # Export button
+        export_button = Gtk.Button(label="Export...")
+        export_button.set_tooltip_text("Export grading curve to .gdg file")
+        export_button.connect('clicked', self._on_export_clicked)
+        io_box.pack_start(export_button, False, False, 0)
+        
+        toolbar_box.pack_end(io_box, False, False, 0)
+        
+        # Add separator
+        separator2 = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        toolbar_box.pack_end(separator2, False, False, 0)
         
         # Control buttons
         button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
@@ -272,19 +335,36 @@ class GradingCurveWidget(Gtk.Box):
         """Set the grading data and update the UI."""
         self.grading_data = data.copy()
         
-        # Update sieve entries
+        # Update sieve entries with more flexible matching
         for entry in self.sieve_entries:
             size_mm = entry['size_mm']
             spin = entry['spin']
             
-            # Find matching data point
+            # Find matching data point with flexible tolerance
             percent_passing = 0.0
+            best_match = None
+            best_diff = float('inf')
+            
             for data_size, data_percent in self.grading_data:
-                if abs(data_size - size_mm) < 0.01:
+                # Try exact match first
+                if abs(data_size - size_mm) < 0.001:
                     percent_passing = data_percent
                     break
+                
+                # Track closest match as backup
+                diff = abs(data_size - size_mm)
+                if diff < best_diff and diff < (size_mm * 0.1):  # Within 10% of sieve size
+                    best_diff = diff
+                    best_match = data_percent
             
+            # If no exact match, use closest match if reasonable
+            if percent_passing == 0.0 and best_match is not None:
+                percent_passing = best_match
+            
+            # Block signals while setting value to prevent recursive calls
+            spin.handler_block_by_func(self._on_sieve_value_changed)
             spin.set_value(percent_passing)
+            spin.handler_unblock_by_func(self._on_sieve_value_changed)
         
         # Redraw plot
         self.drawing_area.queue_draw()
@@ -292,6 +372,117 @@ class GradingCurveWidget(Gtk.Box):
     def get_grading_data(self) -> List[Tuple[float, float]]:
         """Get the current grading data."""
         return self.grading_data.copy()
+    
+    def load_from_grading_template(self, grading) -> bool:
+        """Load grading data from a Grading model template.
+        
+        Args:
+            grading: Grading model instance with sieve data
+            
+        Returns:
+            bool: True if loaded successfully, False otherwise
+        """
+        try:
+            if not grading:
+                return False
+                
+            # Get sieve data from the grading model
+            sieve_data = grading.get_sieve_data()
+            if not sieve_data:
+                self.logger.warning(f"No sieve data found in template: {grading.name}")
+                return False
+            
+            # Convert to grading data format [(size_mm, percent_passing), ...]
+            template_data = []
+            for point in sieve_data:
+                size_mm = float(point['sieve_size'])
+                percent_passing = float(point['percent_passing'])
+                template_data.append((size_mm, percent_passing))
+            
+            # Load the data
+            self.set_grading_data(template_data)
+            
+            # Update template selection if template dropdown exists
+            self._update_template_selection(grading.name)
+            
+            self.logger.info(f"Loaded grading template: {grading.name}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load grading template {getattr(grading, 'name', 'Unknown')}: {e}")
+            return False
+    
+    def save_as_template(self, name: str, grading_type: GradingType, description: str = "") -> bool:
+        """Save current grading data as a new template.
+        
+        Args:
+            name: Template name
+            grading_type: Type of grading (FINE or COARSE)
+            description: Optional description
+            
+        Returns:
+            bool: True if saved successfully, False otherwise
+        """
+        try:
+            if not self.grading_service:
+                self.logger.error("Grading service not available")
+                return False
+                
+            if not self.grading_data:
+                self.logger.warning("No grading data to save")
+                return False
+            
+            # Convert grading data to sieve data format
+            sieve_data = []
+            for size_mm, percent_passing in self.grading_data:
+                sieve_data.append({
+                    'sieve_size': size_mm,
+                    'percent_passing': percent_passing
+                })
+            
+            # Create new grading template
+            grading = self.grading_service.create_grading(
+                name=name,
+                grading_type=grading_type,
+                description=description,
+                sieve_data=sieve_data,
+                is_standard=False  # User-created templates are not standard
+            )
+            
+            if grading:
+                # Refresh available templates
+                self._load_available_templates()
+                self._update_template_selection(name)
+                self.logger.info(f"Saved grading template: {name}")
+                return True
+            else:
+                self.logger.error(f"Failed to create grading template: {name}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Failed to save template {name}: {e}")
+            return False
+    
+    def _update_template_selection(self, template_name: str) -> None:
+        """Update template dropdown selection to show the specified template."""
+        if hasattr(self, 'load_template_combo'):
+            # For ComboBoxText, we can use set_active_id with the template name directly
+            try:
+                self.load_template_combo.set_active_id(template_name)
+                self.current_template_name = template_name
+                self.logger.debug(f"Selected template in dropdown: {template_name}")
+            except Exception as e:
+                self.logger.warning(f"Could not select template {template_name} in dropdown: {e}")
+                # Fallback: try to find it manually
+                model = self.load_template_combo.get_model()
+                if model:
+                    for i in range(len(model)):
+                        iter = model.get_iter([i])
+                        template_id = model.get_value(iter, 0)  # ID is in column 0
+                        if template_id == template_name:
+                            self.load_template_combo.set_active_iter(iter)
+                            self.current_template_name = template_name
+                            break
     
     def _update_grading_from_sieves(self) -> None:
         """Update grading data from sieve entries."""
@@ -836,3 +1027,557 @@ class GradingCurveWidget(Gtk.Box):
                     return percent1
         
         return 0.0
+    
+    # Template Management Methods
+    def _load_available_templates(self) -> None:
+        """Load available grading templates into the combo box."""
+        if not self.grading_service:
+            return
+            
+        try:
+            # Remember current selection before clearing
+            preserve_selection = self.current_template_name
+            
+            # Clear current templates
+            self.load_template_combo.remove_all()
+            self.available_templates.clear()
+            
+            # Add "Select template..." placeholder
+            self.load_template_combo.append("", "Select template...")
+            
+            # Get available templates
+            all_gradings = self.grading_service.get_all_gradings_by_type()
+            
+            for grading in all_gradings:
+                # Only include templates with actual sieve data
+                if grading.has_grading_data:
+                    template_id = grading.name
+                    template_label = f"{grading.name}"
+                    
+                    # Add type indicator
+                    if grading.type:
+                        template_label += f" ({grading.type.value})"
+                    
+                    # Add standard indicator
+                    if grading.is_system_grading:
+                        template_label += " [Standard]"
+                    
+                    self.load_template_combo.append(template_id, template_label)
+                    self.available_templates.append(grading)
+            
+            # Restore previous selection or set to placeholder
+            if preserve_selection and preserve_selection in [g.name for g in self.available_templates]:
+                self.logger.debug(f"_load_available_templates: Restoring selection to '{preserve_selection}'")
+                self.load_template_combo.set_active_id(preserve_selection)
+                self.current_template_name = preserve_selection
+                # Verify it worked
+                restored_id = self.load_template_combo.get_active_id()
+                self.logger.debug(f"_load_available_templates: Selection restored, active is now '{restored_id}'")
+            else:
+                self.logger.debug(f"_load_available_templates: No preserved selection or template not found. preserve_selection='{preserve_selection}', available={[g.name for g in self.available_templates]}")
+                self.load_template_combo.set_active_id("")
+                self.current_template_name = None
+            
+            self.logger.debug(f"Loaded {len(self.available_templates)} grading templates")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load available templates: {e}")
+    
+    def _on_load_template_changed(self, combo: Gtk.ComboBoxText) -> None:
+        """Handle template selection from dropdown."""
+        template_name = combo.get_active_id()
+        
+        if not template_name or template_name == "":
+            return
+        
+        try:
+            # Find the selected grading
+            selected_grading = None
+            for grading in self.available_templates:
+                if grading.name == template_name:
+                    selected_grading = grading
+                    break
+            
+            if not selected_grading:
+                self.logger.warning(f"Template not found: {template_name}")
+                return
+            
+            # Load the grading data
+            sieve_data = selected_grading.get_sieve_data()
+            if sieve_data:
+                # Convert to widget format: [(size_mm, percent_passing), ...]
+                grading_points = [(point['sieve_size'], point['percent_passing']) 
+                                for point in sieve_data]
+                
+                # Set the data
+                self.set_grading_data(grading_points)
+                self.current_template_name = template_name
+                
+                # Update UI
+                self.preset_combo.set_active_id("custom")
+                
+                # Emit change signal
+                self.emit('curve-changed')
+                
+                self.logger.info(f"Loaded template: {template_name} ({len(grading_points)} points)")
+            else:
+                self.logger.warning(f"No sieve data in template: {template_name}")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to load template {template_name}: {e}")
+        
+        finally:
+            # Reset combo to placeholder to allow re-selection
+            combo.set_active_id("")
+    
+    def _on_save_template_clicked(self, button: Gtk.Button) -> None:
+        """Handle save template button click."""
+        if not self.grading_service:
+            self._show_error("Service Unavailable", "Grading service not available")
+            return
+        
+        if not self.grading_data or len(self.grading_data) < 2:
+            self._show_error("Insufficient Data", "At least 2 sieve points required to save template")
+            return
+        
+        # Show save dialog
+        self._show_save_template_dialog()
+    
+    def _show_save_template_dialog(self) -> None:
+        """Show dialog to save current grading as template."""
+        # Get parent window
+        parent = self.get_toplevel()
+        if not isinstance(parent, Gtk.Window):
+            parent = None
+        
+        dialog = Gtk.Dialog(
+            title="Save Grading Template",
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL
+        )
+        
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE, Gtk.ResponseType.OK
+        )
+        
+        # Dialog content
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(10)
+        content_area.set_margin_left(20)
+        content_area.set_margin_right(20)
+        content_area.set_margin_top(10)
+        content_area.set_margin_bottom(10)
+        
+        # Info label
+        info_text = f"Save current grading curve as reusable template\n"
+        info_text += f"Current curve has {len(self.grading_data)} sieve points"
+        info_label = Gtk.Label(info_text)
+        content_area.pack_start(info_label, False, False, 0)
+        
+        # Input grid
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(5)
+        content_area.pack_start(grid, False, False, 0)
+        
+        # Name entry
+        grid.attach(Gtk.Label("Name:"), 0, 0, 1, 1)
+        name_entry = Gtk.Entry()
+        name_entry.set_size_request(250, -1)
+        name_entry.set_text(f"Grading_{len(self.grading_data)}_points")
+        name_entry.select_region(0, -1)  # Select all
+        grid.attach(name_entry, 1, 0, 1, 1)
+        
+        # Type combo
+        grid.attach(Gtk.Label("Type:"), 0, 1, 1, 1)
+        type_combo = Gtk.ComboBoxText()
+        type_combo.append("FINE", "Fine Aggregate")
+        type_combo.append("COARSE", "Coarse Aggregate")
+        
+        # Try to guess type from current data
+        if self.grading_data:
+            max_size = max(point[0] for point in self.grading_data)
+            if max_size > 12.5:  # Coarse if largest size > 12.5mm
+                type_combo.set_active_id("COARSE")
+            else:
+                type_combo.set_active_id("FINE")
+        else:
+            type_combo.set_active_id("FINE")
+        
+        grid.attach(type_combo, 1, 1, 1, 1)
+        
+        # Description entry
+        grid.attach(Gtk.Label("Description:"), 0, 2, 1, 1)
+        desc_entry = Gtk.Entry()
+        desc_entry.set_text(f"Grading template with {len(self.grading_data)} sieve points")
+        grid.attach(desc_entry, 1, 2, 1, 1)
+        
+        content_area.show_all()
+        
+        # Run dialog
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            try:
+                # Get values
+                name = name_entry.get_text().strip()
+                grading_type = type_combo.get_active_id()
+                description = desc_entry.get_text().strip()
+                
+                if not name:
+                    raise ValueError("Template name is required")
+                
+                # Convert grading data to service format
+                sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+                             for point in self.grading_data]
+                
+                # Save template
+                saved_grading = self.grading_service.save_grading_with_sieve_data(
+                    name, grading_type, sieve_data, description
+                )
+                
+                # Update current template name BEFORE refreshing
+                self.current_template_name = name
+                self.logger.debug(f"Set current_template_name to: {name}")
+                
+                # Refresh templates multiple times until our new template appears
+                # Sometimes there's a timing issue with database/UI sync
+                max_retries = 3
+                template_found = False
+                
+                for retry in range(max_retries):
+                    self.logger.debug(f"Template refresh attempt {retry + 1}/{max_retries}")
+                    self._load_available_templates()
+                    
+                    # Check if our template is now in the dropdown
+                    model = self.load_template_combo.get_model()
+                    if model:
+                        model_length = model.iter_n_children(None)
+                        self.logger.debug(f"Looking for template '{name}' in {model_length} items")
+                        
+                        for i in range(model_length):
+                            iter = model.get_iter([i])
+                            row_id = model.get_value(iter, 0)  # ID column
+                            row_text = model.get_value(iter, 1)  # Text column
+                            self.logger.debug(f"  Row {i}: ID='{row_id}', Text='{row_text}'")
+                            
+                            if row_id == name:
+                                self.load_template_combo.set_active(i)
+                                self.logger.info(f"Selected template '{name}' at index {i}")
+                                
+                                # Verify it worked
+                                final_active_id = self.load_template_combo.get_active_id()
+                                final_active_text = self.load_template_combo.get_active_text()
+                                self.logger.info(f"Final selection - ID: '{final_active_id}', Text: '{final_active_text}'")
+                                
+                                template_found = True
+                                break
+                        
+                        if template_found:
+                            break
+                        else:
+                            self.logger.warning(f"Attempt {retry + 1}: Template '{name}' not found, retrying...")
+                            # Small delay before retry
+                            import time
+                            time.sleep(0.1)
+                    else:
+                        self.logger.error("No model found for combo box")
+                
+                if not template_found:
+                    self.logger.error(f"Failed to find template '{name}' after {max_retries} attempts")
+                
+                # Show success
+                self._show_info("Template Saved", f"Grading template '{name}' saved successfully")
+                
+                self.logger.info(f"Saved grading template: {name}")
+                
+            except Exception as e:
+                self.logger.error(f"Failed to save template: {e}")
+                self._show_error("Save Failed", str(e))
+        
+        dialog.destroy()
+    
+    def _show_info(self, title: str, message: str) -> None:
+        """Show info dialog."""
+        parent = self.get_toplevel()
+        if not isinstance(parent, Gtk.Window):
+            parent = None
+            
+        dialog = Gtk.MessageDialog(
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text=title
+        )
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
+    
+    def _show_error(self, title: str, message: str) -> None:
+        """Show error dialog."""
+        parent = self.get_toplevel()
+        if not isinstance(parent, Gtk.Window):
+            parent = None
+            
+        dialog = Gtk.MessageDialog(
+            parent=parent,
+            flags=Gtk.DialogFlags.MODAL,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text=title
+        )
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
+    
+    def refresh_templates(self) -> None:
+        """Public method to refresh available templates (useful after external changes)."""
+        self._load_available_templates()
+    
+    # Import/Export Methods
+    def _on_import_clicked(self, button: Gtk.Button) -> None:
+        """Handle import button click."""
+        # File chooser for import
+        parent = self.get_toplevel()
+        if not isinstance(parent, Gtk.Window):
+            parent = None
+            
+        dialog = Gtk.FileChooserDialog(
+            title="Import Grading Curve",
+            parent=parent,
+            action=Gtk.FileChooserAction.OPEN
+        )
+        
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN, Gtk.ResponseType.OK
+        )
+        
+        # Add file filters
+        filter_gdg = Gtk.FileFilter()
+        filter_gdg.set_name("Grading files (*.gdg)")
+        filter_gdg.add_pattern("*.gdg")
+        dialog.add_filter(filter_gdg)
+        
+        filter_csv = Gtk.FileFilter()
+        filter_csv.set_name("CSV files (*.csv)")
+        filter_csv.add_pattern("*.csv")
+        dialog.add_filter(filter_csv)
+        
+        filter_all = Gtk.FileFilter()
+        filter_all.set_name("All files (*)")
+        filter_all.add_pattern("*")
+        dialog.add_filter(filter_all)
+        
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._import_grading_file(filename)
+                
+            except Exception as e:
+                self.logger.error(f"Failed to import grading file: {e}")
+                self._show_error("Import Failed", str(e))
+        
+        dialog.destroy()
+    
+    def _import_grading_file(self, filename: str) -> None:
+        """Import grading data from file."""
+        import os
+        
+        file_ext = os.path.splitext(filename)[1].lower()
+        
+        if file_ext == '.gdg':
+            # Use Phase 1 grading file manager
+            sieve_data = grading_file_manager.read_gdg_file(filename)
+            
+            # Convert to widget format
+            grading_points = [(point['sieve_size'], point['percent_passing']) 
+                            for point in sieve_data]
+            
+        elif file_ext == '.csv':
+            # Handle CSV format
+            grading_points = self._import_csv_file(filename)
+            
+        else:
+            raise ValueError(f"Unsupported file format: {file_ext}")
+        
+        if grading_points:
+            # Load the imported data
+            self.set_grading_data(grading_points)
+            self.current_template_name = None  # Clear template name since it's imported
+            
+            # Update UI
+            self.preset_combo.set_active_id("custom")
+            
+            # Emit change signal
+            self.emit('curve-changed')
+            
+            # Show success
+            base_name = os.path.basename(filename)
+            self._show_info("Import Successful", f"Imported {len(grading_points)} sieve points from {base_name}")
+            
+            self.logger.info(f"Imported grading from {filename} ({len(grading_points)} points)")
+    
+    def _import_csv_file(self, filename: str) -> List[Tuple[float, float]]:
+        """Import grading data from CSV file."""
+        import csv
+        
+        grading_points = []
+        
+        with open(filename, 'r', encoding='utf-8') as f:
+            # Try to detect if file has headers
+            sample = f.read(1024)
+            f.seek(0)
+            
+            sniffer = csv.Sniffer()
+            has_header = sniffer.has_header(sample)
+            
+            reader = csv.reader(f)
+            
+            if has_header:
+                next(reader)  # Skip header row
+            
+            for row_num, row in enumerate(reader, 1):
+                if len(row) < 2:
+                    continue
+                
+                try:
+                    # Expect: sieve_size, percent_passing
+                    size = float(row[0].strip())
+                    percent = float(row[1].strip())
+                    
+                    # Validation
+                    if size < 0:
+                        self.logger.warning(f"Invalid sieve size at row {row_num}: {size}")
+                        continue
+                    
+                    if percent < 0 or percent > 100:
+                        self.logger.warning(f"Invalid percent passing at row {row_num}: {percent}")
+                        continue
+                    
+                    grading_points.append((size, percent))
+                    
+                except (ValueError, IndexError) as e:
+                    self.logger.warning(f"Could not parse row {row_num}: {row} ({e})")
+                    continue
+        
+        if not grading_points:
+            raise ValueError("No valid sieve data found in CSV file")
+        
+        return grading_points
+    
+    def _on_export_clicked(self, button: Gtk.Button) -> None:
+        """Handle export button click."""
+        if not self.grading_data or len(self.grading_data) < 2:
+            self._show_error("Insufficient Data", "At least 2 sieve points required to export")
+            return
+        
+        # File chooser for export location
+        parent = self.get_toplevel()
+        if not isinstance(parent, Gtk.Window):
+            parent = None
+            
+        dialog = Gtk.FileChooserDialog(
+            title="Export Grading Curve",
+            parent=parent,
+            action=Gtk.FileChooserAction.SAVE
+        )
+        
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_SAVE, Gtk.ResponseType.OK
+        )
+        
+        # Add file filters
+        filter_gdg = Gtk.FileFilter()
+        filter_gdg.set_name("Grading files (*.gdg)")
+        filter_gdg.add_pattern("*.gdg")
+        dialog.add_filter(filter_gdg)
+        
+        filter_csv = Gtk.FileFilter()
+        filter_csv.set_name("CSV files (*.csv)")
+        filter_csv.add_pattern("*.csv")
+        dialog.add_filter(filter_csv)
+        
+        # Set default filename
+        if self.current_template_name:
+            default_name = f"{self.current_template_name}.gdg"
+        else:
+            default_name = f"grading_{len(self.grading_data)}_points.gdg"
+        
+        dialog.set_current_name(default_name)
+        
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            filename = dialog.get_filename()
+            try:
+                self._export_grading_file(filename)
+                
+            except Exception as e:
+                self.logger.error(f"Failed to export grading file: {e}")
+                self._show_error("Export Failed", str(e))
+        
+        dialog.destroy()
+    
+    def _export_grading_file(self, filename: str) -> None:
+        """Export grading data to file."""
+        import os
+        
+        file_ext = os.path.splitext(filename)[1].lower()
+        
+        if file_ext == '.gdg':
+            # Use Phase 1 grading file manager
+            # Convert to service format
+            sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+                         for point in self.grading_data]
+            
+            # Write to file
+            file_dir = os.path.dirname(filename)
+            file_base = os.path.splitext(os.path.basename(filename))[0]
+            
+            created_path = grading_file_manager.write_gdg_file(
+                file_dir, file_base, sieve_data, 
+                self.type_combo.get_active_id() if hasattr(self, 'type_combo') else None
+            )
+            
+        elif file_ext == '.csv':
+            # Export as CSV
+            self._export_csv_file(filename)
+            created_path = filename
+            
+        else:
+            # Default to .gdg format
+            filename = os.path.splitext(filename)[0] + '.gdg'
+            sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+                         for point in self.grading_data]
+            
+            file_dir = os.path.dirname(filename)
+            file_base = os.path.splitext(os.path.basename(filename))[0]
+            
+            created_path = grading_file_manager.write_gdg_file(
+                file_dir, file_base, sieve_data,
+                self.type_combo.get_active_id() if hasattr(self, 'type_combo') else None
+            )
+        
+        # Show success
+        base_name = os.path.basename(created_path)
+        self._show_info("Export Successful", f"Exported {len(self.grading_data)} sieve points to {base_name}")
+        
+        self.logger.info(f"Exported grading to {created_path} ({len(self.grading_data)} points)")
+    
+    def _export_csv_file(self, filename: str) -> None:
+        """Export grading data to CSV file."""
+        import csv
+        
+        with open(filename, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            
+            # Write header
+            writer.writerow(['Sieve Size (mm)', 'Percent Passing (%)'])
+            
+            # Write data (sorted by size, largest first)
+            sorted_data = sorted(self.grading_data, key=lambda x: x[0], reverse=True)
+            for size, percent in sorted_data:
+                writer.writerow([f"{size:.3f}", f"{percent:.1f}"])

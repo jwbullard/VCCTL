@@ -1,0 +1,23 @@
+/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
+  warnings.warn(
+2025-09-08 11:03:04,423 - INFO - ============================================================
+2025-09-08 11:03:04,423 - INFO - VCCTL Grading Data Migration
+2025-09-08 11:03:04,423 - INFO - ============================================================
+2025-09-08 11:03:04,423 - INFO - Starting grading data migration...
+2025-09-08 11:03:04,423 - INFO - Database service initialized with: sqlite:////Users/jwbullard/Software/vcctl-gtk/src/data/database/vcctl.db
+2025-09-08 11:03:04,438 - INFO - Database engine created successfully
+2025-09-08 11:03:04,441 - INFO - All database tables created successfully
+2025-09-08 11:03:04,441 - INFO - Initializing default database data...
+2025-09-08 11:03:04,441 - INFO - Session maker created successfully
+2025-09-08 11:03:04,459 - INFO - portland_cement_standard parameters already exist
+2025-09-08 11:03:04,459 - INFO - Default database data initialized successfully
+2025-09-08 11:03:04,459 - INFO - Database initialized successfully
+2025-09-08 11:03:04,460 - ERROR - Database session error: (sqlite3.OperationalError) no such column: grading.sieve_data
+[SQL: SELECT grading.name AS grading_name, grading.type AS grading_type, grading.grading AS grading_grading, grading.sieve_data AS grading_sieve_data, grading.max_diameter AS grading_max_diameter, grading.description AS grading_description, grading.aggregate_id AS grading_aggregate_id, grading.is_standard AS grading_is_standard, grading.created_at AS grading_created_at, grading.modified_at AS grading_modified_at, grading.id AS grading_id, grading.updated_at AS grading_updated_at 
+FROM grading]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-08 11:03:04,460 - ERROR - Migration failed: (sqlite3.OperationalError) no such column: grading.sieve_data
+[SQL: SELECT grading.name AS grading_name, grading.type AS grading_type, grading.grading AS grading_grading, grading.sieve_data AS grading_sieve_data, grading.max_diameter AS grading_max_diameter, grading.description AS grading_description, grading.aggregate_id AS grading_aggregate_id, grading.is_standard AS grading_is_standard, grading.created_at AS grading_created_at, grading.modified_at AS grading_modified_at, grading.id AS grading_id, grading.updated_at AS grading_updated_at 
+FROM grading]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-08 11:03:04,460 - ERROR - Migration failed!
