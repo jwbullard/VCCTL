@@ -588,6 +588,9 @@ class GradingService(BaseService[Grading, GradingCreate, GradingUpdate]):
                 session.add(grading)
                 session.commit()
                 session.refresh(grading)
+                # Force session to expire all cached instances
+                # This ensures subsequent queries get fresh data
+                session.expire_all()
                 
                 self.logger.info(f"Created grading with sieve data: {name} ({grading_type})")
                 return grading

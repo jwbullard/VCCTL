@@ -1037,6 +1037,8 @@ class GradingCurveWidget(Gtk.Box):
         try:
             # Remember current selection before clearing
             preserve_selection = self.current_template_name
+            self.logger.info(f"_load_available_templates: Starting with current_template_name='{self.current_template_name}'")
+            self.logger.info(f"_load_available_templates: preserve_selection='{preserve_selection}'")
             
             # Clear current templates
             self.load_template_combo.remove_all()
@@ -1045,13 +1047,18 @@ class GradingCurveWidget(Gtk.Box):
             # Add "Select template..." placeholder
             self.load_template_combo.append("", "Select template...")
             
-            # Get available templates
+            # Get available templates - force fresh query with no caching
+            # This ensures we see recently committed templates
             all_gradings = self.grading_service.get_all_gradings_by_type()
+            
+            self.logger.info(f"_load_available_templates: Found {len(all_gradings)} total gradings from database")
             
             for grading in all_gradings:
                 # Only include templates with actual sieve data
                 if grading.has_grading_data:
-                    template_id = grading.name
+                    self.logger.info(f"  Grading '{grading.name}' has data, adding to list")
+                    
+                    template_id = grading.name  # Keep ID as just the name
                     template_label = f"{grading.name}"
                     
                     # Add type indicator
@@ -1062,21 +1069,113 @@ class GradingCurveWidget(Gtk.Box):
                     if grading.is_system_grading:
                         template_label += " [Standard]"
                     
+                    self.logger.info(f"  Adding to combo: id='{template_id}', label='{template_label}'")
+                    # DEBUG: Log what we're about to append
+                    self.logger.info(f"  About to call append({template_id}, {template_label})")
                     self.load_template_combo.append(template_id, template_label)
+                    
+                    # DEBUG: Immediately verify what was stored
+                    model = self.load_template_combo.get_model()
+                    if model and len(model) > 0:
+                        last_iter = model.get_iter(len(model) - 1)
+                        stored_id = model.get_value(last_iter, 0)  # ID column
+                        stored_text = model.get_value(last_iter, 1)  # Text column
+                        self.logger.info(f"  Verified stored: id='{stored_id}', text='{stored_text}'")
                     self.available_templates.append(grading)
+                else:
+                    self.logger.info(f"  Grading '{grading.name}' has NO data, skipping")
             
-            # Restore previous selection or set to placeholder
+            # Log available templates for debugging
+            self.logger.info(f"_load_available_templates: Available templates: {[g.name for g in self.available_templates]}")
+            self.logger.info(f"_load_available_templates: Looking for: '{preserve_selection}'")
+            
+            # Restore previous selection or set to placeholder  
             if preserve_selection and preserve_selection in [g.name for g in self.available_templates]:
-                self.logger.debug(f"_load_available_templates: Restoring selection to '{preserve_selection}'")
-                self.load_template_combo.set_active_id(preserve_selection)
-                self.current_template_name = preserve_selection
-                # Verify it worked
-                restored_id = self.load_template_combo.get_active_id()
-                self.logger.debug(f"_load_available_templates: Selection restored, active is now '{restored_id}'")
+                self.logger.info(f"_load_available_templates: Template '{preserve_selection}' found in available templates")
+                
+                # Debug: Check what's actually in the combo box model
+                model = self.load_template_combo.get_model()
+                if model:
+                    model_items = []
+                    for i in range(model.iter_n_children(None)):
+                        iter = model.get_iter([i])
+                        row_id = model.get_value(iter, 0)
+                        row_text = model.get_value(iter, 1)
+                        model_items.append(f"[{i}]: id='{row_id}', text='{row_text}'")
+                    
+                    self.logger.info(f"_load_available_templates: Combo box has {len(model_items)} items: {model_items}")
+                    
+                    # Look for our template - need to match against stored ID which includes type info
+                    found_index = -1
+                    preserve_grading = None
+                    
+                    # Find the grading object for the preserve_selection
+                    for grading in self.available_templates:
+                        if grading.name == preserve_selection:
+                            preserve_grading = grading
+                            break
+                    
+                    if preserve_grading:
+                        # Construct the expected stored ID (same logic as when we append)
+                        expected_id = preserve_grading.name
+                        expected_label = f"{preserve_grading.name}"
+                        if preserve_grading.type:
+                            expected_label += f" ({preserve_grading.type.value})"
+                        if preserve_grading.is_system_grading:
+                            expected_label += " [Standard]"
+                        
+                        self.logger.info(f"Looking for template with expected_id='{expected_id}' or stored_id_match='{expected_label}'")
+                        
+                        # Search for match - try both the intended ID and what might actually be stored
+                        for i in range(model.iter_n_children(None)):
+                            iter = model.get_iter([i])
+                            row_id = model.get_value(iter, 0)
+                            row_text = model.get_value(iter, 1)
+                            
+                            # Try multiple matching strategies
+                            if (row_id == expected_id or  # ID should be plain name
+                                row_id == expected_label or  # But might be full label
+                                row_text == preserve_selection):  # Or match by text
+                                found_index = i
+                                self.logger.info(f"Found '{preserve_selection}' at index {i} (matched via row_id='{row_id}', row_text='{row_text}')")
+                                break
+                    else:
+                        self.logger.warning(f"Could not find grading object for '{preserve_selection}'")
+                    
+                    if found_index == -1:
+                        self.logger.error(f"Template '{preserve_selection}' NOT found in combo box model despite being in available_templates list!")
+                else:
+                    self.logger.error("No combo box model found!")
+                
+                if found_index >= 0:
+                    # Block signal to prevent handler from interfering
+                    self.load_template_combo.handler_block_by_func(self._on_load_template_changed)
+                    
+                    # Use set_active with the index
+                    self.load_template_combo.set_active(found_index)
+                    self.current_template_name = preserve_selection
+                    
+                    # Process pending GTK events to ensure the UI updates
+                    while Gtk.events_pending():
+                        Gtk.main_iteration_do(False)
+                    
+                    # Unblock signal
+                    self.load_template_combo.handler_unblock_by_func(self._on_load_template_changed)
+                    
+                    # Verify it worked
+                    active_index = self.load_template_combo.get_active()
+                    active_id = self.load_template_combo.get_active_id()
+                    active_text = self.load_template_combo.get_active_text()
+                    self.logger.info(f"After setting index {found_index}: active_index={active_index}, id='{active_id}', text='{active_text}'")
+                else:
+                    self.logger.warning(f"Could not find '{preserve_selection}' in combo box model")
+                    self.load_template_combo.set_active(0)
+                    # DON'T reset current_template_name = None here - keep it for retries
             else:
-                self.logger.debug(f"_load_available_templates: No preserved selection or template not found. preserve_selection='{preserve_selection}', available={[g.name for g in self.available_templates]}")
-                self.load_template_combo.set_active_id("")
-                self.current_template_name = None
+                self.logger.info(f"_load_available_templates: No preserved selection or template not found. preserve_selection='{preserve_selection}', available={[g.name for g in self.available_templates]}")
+                self.load_template_combo.set_active(0)  # Set to "Select template..." at index 0
+                if not preserve_selection:
+                    self.current_template_name = None
             
             self.logger.debug(f"Loaded {len(self.available_templates)} grading templates")
             
@@ -1240,51 +1339,56 @@ class GradingCurveWidget(Gtk.Box):
                 self.current_template_name = name
                 self.logger.debug(f"Set current_template_name to: {name}")
                 
-                # Refresh templates multiple times until our new template appears
+                # Force a small delay to ensure database commit is visible
+                # This is a workaround for SQLAlchemy session isolation
+                import time
+                time.sleep(0.1)
+                
+                # Refresh templates and verify the new template appears and is selected
                 # Sometimes there's a timing issue with database/UI sync
                 max_retries = 3
                 template_found = False
                 
                 for retry in range(max_retries):
                     self.logger.debug(f"Template refresh attempt {retry + 1}/{max_retries}")
+                    
+                    # Load templates - this will also set the selection via preserve_selection
                     self._load_available_templates()
                     
-                    # Check if our template is now in the dropdown
-                    model = self.load_template_combo.get_model()
-                    if model:
-                        model_length = model.iter_n_children(None)
-                        self.logger.debug(f"Looking for template '{name}' in {model_length} items")
-                        
-                        for i in range(model_length):
-                            iter = model.get_iter([i])
-                            row_id = model.get_value(iter, 0)  # ID column
-                            row_text = model.get_value(iter, 1)  # Text column
-                            self.logger.debug(f"  Row {i}: ID='{row_id}', Text='{row_text}'")
-                            
-                            if row_id == name:
-                                self.load_template_combo.set_active(i)
-                                self.logger.info(f"Selected template '{name}' at index {i}")
-                                
-                                # Verify it worked
-                                final_active_id = self.load_template_combo.get_active_id()
-                                final_active_text = self.load_template_combo.get_active_text()
-                                self.logger.info(f"Final selection - ID: '{final_active_id}', Text: '{final_active_text}'")
-                                
-                                template_found = True
-                                break
-                        
-                        if template_found:
-                            break
-                        else:
-                            self.logger.warning(f"Attempt {retry + 1}: Template '{name}' not found, retrying...")
-                            # Small delay before retry
-                            import time
-                            time.sleep(0.1)
+                    # Verify the template is selected
+                    active_id = self.load_template_combo.get_active_id()
+                    active_text = self.load_template_combo.get_active_text()
+                    self.logger.info(f"After refresh {retry + 1}: active_id='{active_id}', active_text='{active_text}'")
+                    
+                    if active_id == name:
+                        self.logger.info(f"Template '{name}' successfully selected")
+                        template_found = True
+                        break
                     else:
-                        self.logger.error("No model found for combo box")
+                        self.logger.warning(f"Template '{name}' not selected, retrying...")
+                        # Small delay before retry
+                        import time
+                        time.sleep(0.1)
                 
                 if not template_found:
-                    self.logger.error(f"Failed to find template '{name}' after {max_retries} attempts")
+                    # Last resort: try to manually set the selection
+                    self.logger.warning(f"Auto-selection failed after {max_retries} attempts, trying manual selection")
+                    
+                    # Check if template exists in combo box
+                    model = self.load_template_combo.get_model()
+                    if model:
+                        for i in range(model.iter_n_children(None)):
+                            iter = model.get_iter([i])
+                            row_id = model.get_value(iter, 0)
+                            if row_id == name:
+                                self.load_template_combo.set_active(i)
+                                final_id = self.load_template_combo.get_active_id()
+                                self.logger.info(f"Manual selection: set index {i}, active_id is now '{final_id}'")
+                                template_found = True
+                                break
+                
+                if not template_found:
+                    self.logger.error(f"Failed to select template '{name}' after all attempts")
                 
                 # Show success
                 self._show_info("Template Saved", f"Grading template '{name}' saved successfully")
