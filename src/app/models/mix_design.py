@@ -79,9 +79,17 @@ class MixDesign(Base):
     coarse_aggregate_name = Column(String(128), nullable=True)
     coarse_aggregate_mass = Column(Float, nullable=False, default=0.0)
     
+    # Grading template associations
+    fine_aggregate_grading_template = Column(String(64), nullable=True)
+    coarse_aggregate_grading_template = Column(String(64), nullable=True)
+    
     # Component data stored as JSON
     # Format: [{"material_name": str, "material_type": str, "mass_fraction": float, "volume_fraction": float, "specific_gravity": float}, ...]
     components = Column(JSON, nullable=False, default=list)
+    
+    # Reference water mass for exact mass reconstruction (in kg)
+    # Used to calculate exact total mass: total_mass = water_reference_mass / water_mass_fraction
+    water_reference_mass = Column(Float, nullable=True, default=None)
     
     # Calculated properties stored as JSON
     # Format: {"paste_volume_fraction": float, "powder_volume_fraction": float, "aggregate_volume_fraction": float, ...}
@@ -161,10 +169,17 @@ class MixDesignCreate(BaseModel):
     coarse_aggregate_name: Optional[str] = Field(None, max_length=128)
     coarse_aggregate_mass: float = Field(ge=0.0, le=10.0, default=0.0)
     
+    # Grading template associations
+    fine_aggregate_grading_template: Optional[str] = Field(None, max_length=64)
+    coarse_aggregate_grading_template: Optional[str] = Field(None, max_length=64)
+    
     # Component and properties data
     components: List[MixDesignComponentData] = Field(default_factory=list)
     calculated_properties: Optional[MixDesignPropertiesData] = Field(None)
     notes: Optional[str] = Field(None, max_length=2000)
+    
+    # Reference water mass for exact mass reconstruction
+    water_reference_mass: Optional[float] = Field(None, ge=0.0)
     is_template: bool = Field(default=False)
     
     @field_validator('name')
@@ -257,6 +272,10 @@ class MixDesignUpdate(BaseModel):
     coarse_aggregate_name: Optional[str] = Field(None, max_length=128)
     coarse_aggregate_mass: Optional[float] = Field(None, ge=0.0, le=10.0)
     
+    # Grading template associations
+    fine_aggregate_grading_template: Optional[str] = Field(None, max_length=64)
+    coarse_aggregate_grading_template: Optional[str] = Field(None, max_length=64)
+    
     # Component and properties data
     components: Optional[List[MixDesignComponentData]] = None
     calculated_properties: Optional[MixDesignPropertiesData] = None
@@ -327,6 +346,11 @@ class MixDesignResponse(BaseModel):
     # Coarse aggregate parameters
     coarse_aggregate_name: Optional[str]
     coarse_aggregate_mass: float
+    
+    # Grading template associations
+    fine_aggregate_grading_template: Optional[str]
+    coarse_aggregate_grading_template: Optional[str]
+    
     components: List[MixDesignComponentData]
     calculated_properties: Optional[MixDesignPropertiesData]
     notes: Optional[str]

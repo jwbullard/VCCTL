@@ -107,23 +107,22 @@ class MixDesignValidator:
         components: List[ComponentData], 
         result: ValidationResult
     ) -> None:
-        """Validate that solid component mass fractions sum to 1.0."""
+        """Validate that all component mass fractions sum to 1.0 (Type 3 logic)."""
         if not components:
             result.errors.append("Mix design must have at least one component")
             result.is_valid = False
             return
         
-        # Separate solid components from water
-        solid_components = [c for c in components if c.material_type != 'water']
-        water_components = [c for c in components if c.material_type == 'water']
-        
-        # Validate solid components sum to 1.0
-        solid_mass_total = sum(c.mass_fraction for c in solid_components)
-        if abs(solid_mass_total - 1.0) > cls.MASS_FRACTION_TOLERANCE:
+        # Type 3 mass fractions: ALL components including water sum to 1.0
+        total_mass_fraction = sum(c.mass_fraction for c in components)
+        if abs(total_mass_fraction - 1.0) > cls.MASS_FRACTION_TOLERANCE:
             result.errors.append(
-                f"Solid component mass fractions sum to {solid_mass_total:.3f}, should be 1.0"
+                f"All component mass fractions sum to {total_mass_fraction:.3f}, should be 1.0"
             )
             result.is_valid = False
+        
+        # Separate water components for additional validation
+        water_components = [c for c in components if c.material_type == 'water']
         
         # Validate water component (max 1, non-negative)
         if len(water_components) > 1:
@@ -268,11 +267,11 @@ class MixDesignValidator:
         if not components:
             return False, "No components defined"
         
-        solid_components = [c for c in components if c.material_type != 'water']
-        solid_mass_total = sum(c.mass_fraction for c in solid_components)
+        # Type 3 mass fractions: ALL components including water sum to 1.0
+        total_mass_fraction = sum(c.mass_fraction for c in components)
         
-        if abs(solid_mass_total - 1.0) > cls.MASS_FRACTION_TOLERANCE:
-            return False, f"Solid components sum to {solid_mass_total:.3f}, should be 1.0"
+        if abs(total_mass_fraction - 1.0) > cls.MASS_FRACTION_TOLERANCE:
+            return False, f"All components sum to {total_mass_fraction:.3f}, should be 1.0"
         
         return True, ""
     

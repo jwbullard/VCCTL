@@ -1641,9 +1641,20 @@ class HydrationPanel(Gtk.Box):
                     bridge = MicrostructureHydrationBridge()
                     
                     # Check if microstructure metadata exists (validates microstructure compatibility)
-                    metadata = bridge.load_microstructure_metadata(self.selected_microstructure['operation_name'])
-                    if not metadata:
-                        raise ValueError(f"No metadata found for microstructure: {self.selected_microstructure['operation_name']}")
+                    try:
+                        metadata = bridge.load_microstructure_metadata(self.selected_microstructure['operation_name'])
+                        if not metadata:
+                            raise ValueError(f"❌ CRITICAL DATA TRACKING ISSUE: No metadata found for microstructure: {self.selected_microstructure['operation_name']}\n\n" +
+                                           "This means the microstructure operation was not properly linked to its mix design data.\n" +
+                                           "This is a system bug - the MicrostructureOperation database record was not created.\n\n" +
+                                           "Please recreate the microstructure operation to fix this issue.")
+                    except Exception as e:
+                        self.logger.error(f"❌ Metadata loading failed for {self.selected_microstructure['operation_name']}: {e}")
+                        raise ValueError(f"❌ Cannot validate hydration parameters: Microstructure metadata missing.\n\n" +
+                                       f"Operation: {self.selected_microstructure['operation_name']}\n" +
+                                       f"Error: {str(e)}\n\n" +
+                                       "This indicates the microstructure operation has incomplete data tracking.\n" +
+                                       "Please recreate the microstructure operation.")
                     
                     # Validate parameter completeness (without file generation)
                     self._validate_parameter_completeness(curing_conditions, time_calibration_settings, 
@@ -3299,21 +3310,26 @@ class HydrationPanel(Gtk.Box):
     def _find_microstructure_operation_id(self, microstructure_name: str) -> Optional[int]:
         """Find the database ID of the parent microstructure operation."""
         try:
-            from app.database.service import DatabaseService
             from app.models.operation import Operation, OperationType
             
-            db_service = DatabaseService()
-            with db_service.get_session() as session:
+            with self.service_container.database_service.get_session() as session:
                 # Look for microstructure operation with matching name
+                # Fix: Check for both possible operation types
                 parent_op = session.query(Operation).filter(
                     Operation.name == microstructure_name,
-                    Operation.operation_type == OperationType.MICROSTRUCTURE.value
+                    Operation.operation_type.in_(['MICROSTRUCTURE', 'microstructure_generation'])
                 ).first()
                 
                 if parent_op:
+                    self.logger.info(f"✅ Found parent microstructure operation: {microstructure_name} (ID: {parent_op.id}, Type: {parent_op.operation_type})")
                     return parent_op.id
                 else:
-                    self.logger.warning(f"Parent microstructure operation not found: {microstructure_name}")
+                    self.logger.error(f"❌ Parent microstructure operation not found: {microstructure_name}")
+                    # Log what operations we do have for debugging
+                    all_ops = session.query(Operation).filter(Operation.name == microstructure_name).all()
+                    if all_ops:
+                        for op in all_ops:
+                            self.logger.info(f"   Found operation {microstructure_name} with type: {op.operation_type}")
                     return None
         except Exception as e:
             self.logger.error(f"Error finding parent microstructure operation: {e}")
@@ -3323,26 +3339,27 @@ class HydrationPanel(Gtk.Box):
                                   parent_operation_id: Optional[int]) -> 'Operation':
         """Create hydration operation in database with UI parameters and lineage."""
         try:
-            from app.database.service import DatabaseService
             from app.models.operation import Operation, OperationType, OperationStatus
+            import json
             
-            db_service = DatabaseService()
-            with db_service.get_session() as session:
+            with self.service_container.database_service.get_session() as session:
                 # Create the general operation record
                 operation = Operation(
                     name=operation_name,
                     operation_type=OperationType.HYDRATION.value,
                     status=OperationStatus.QUEUED.value,
-                    stored_ui_parameters=ui_parameters,
+                    stored_ui_parameters=json.dumps(ui_parameters),  # Convert to JSON string
                     parent_operation_id=parent_operation_id  # Phase 3: Lineage tracking
                 )
                 
                 session.add(operation)
                 session.commit()
                 
-                self.logger.info(f"Created hydration operation: {operation_name} (ID: {operation.id})")
+                self.logger.info(f"✅ Created hydration operation: {operation_name} (ID: {operation.id})")
                 if parent_operation_id:
-                    self.logger.info(f"Linked to parent microstructure operation ID: {parent_operation_id}")
+                    self.logger.info(f"✅ Linked to parent microstructure operation ID: {parent_operation_id}")
+                else:
+                    self.logger.warning(f"⚠️  No parent operation linkage for {operation_name}")
                 
                 return operation
                 

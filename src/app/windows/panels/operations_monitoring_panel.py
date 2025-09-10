@@ -2476,8 +2476,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                     # Delete the associated folder if it exists
                     if output_dir:
                         folder_path = Path(output_dir)
-                        self.logger.info(f"DEBUG: Attempting to delete folder: {output_dir}")
-                        self.logger.info(f"DEBUG: Folder exists: {folder_path.exists()}")
+                        self.logger.info(f"🗑️ DELETION DEBUG: Attempting to delete folder: {output_dir}")
+                        self.logger.info(f"🗑️ DELETION DEBUG: Folder path object: {folder_path}")
+                        self.logger.info(f"🗑️ DELETION DEBUG: Is absolute path: {folder_path.is_absolute()}")
+                        self.logger.info(f"🗑️ DELETION DEBUG: Folder exists: {folder_path.exists()}")
+                        self.logger.info(f"🗑️ DELETION DEBUG: Resolved path: {folder_path.resolve()}")
                         if folder_path.exists():
                             try:
                                 import shutil
@@ -3459,13 +3462,20 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _on_delete_operation_clicked(self, button) -> None:
         """Handle delete operation button click."""
+        self.logger.info(f"🗑️ FILE TREE DEBUG: Delete button clicked")
         selection = self.files_view.get_selection()
         model, tree_iter = selection.get_selected()
+        self.logger.info(f"🗑️ FILE TREE DEBUG: Selection - model: {model is not None}, tree_iter: {tree_iter is not None}")
         
         if tree_iter:
-            file_path = model.get_value(tree_iter, 1)  # Path is in column 1
-            file_name = model.get_value(tree_iter, 0)  # Name is in column 0
-            file_type = model.get_value(tree_iter, 2)  # Type is in column 2
+            file_name = model.get_value(tree_iter, 1)  # Name is in column 1
+            file_path = model.get_value(tree_iter, 2)  # Path is in column 2  
+            file_type = model.get_value(tree_iter, 3)  # Type is in column 3
+            
+            self.logger.info(f"🗑️ FILE TREE DEBUG: Selected item - name: '{file_name}', path: '{file_path}', type: '{file_type}'")
+            self.logger.info(f"🗑️ FILE TREE DEBUG: Type check - file_type == 'folder': {file_type == 'folder'}")
+            self.logger.info(f"🗑️ FILE TREE DEBUG: Path check - 'Operations' in file_path: {'Operations' in file_path}")
+            self.logger.info(f"🗑️ FILE TREE DEBUG: Combined condition: {file_type == 'folder' and 'Operations' in file_path}")
             
             if file_type == "folder" and "Operations" in file_path:
                 # Show confirmation dialog
@@ -3491,15 +3501,20 @@ class OperationsMonitoringPanel(Gtk.Box):
                 if response == Gtk.ResponseType.YES:
                     try:
                         import shutil
+                        self.logger.info(f"🗑️ FILE TREE DELETION: Attempting to delete folder: {file_path}")
+                        self.logger.info(f"🗑️ FILE TREE DELETION: Folder exists: {os.path.exists(file_path)}")
                         shutil.rmtree(file_path)
                         self._load_operations_files()  # Refresh the tree
+                        self.logger.info(f"🗑️ FILE TREE DELETION: Successfully deleted folder: {file_path}")
                         self._update_status(f"Deleted operation folder: {file_name}")
                     except Exception as e:
                         self.logger.error(f"Failed to delete operation folder: {e}")
                         self._update_status(f"Error deleting folder: {e}")
             else:
+                self.logger.info(f"🗑️ FILE TREE DEBUG: Selection failed conditions - not deleting")
                 self._update_status("Please select an operation folder to delete")
         else:
+            self.logger.info(f"🗑️ FILE TREE DEBUG: No tree_iter - no selection found")
             self._update_status("No operation selected")
     
     def _on_file_selection_changed(self, selection) -> None:

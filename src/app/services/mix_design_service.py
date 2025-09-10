@@ -124,6 +124,10 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                 calculated_properties=properties_json,
                 notes=mix_design_data.notes,
                 is_template=mix_design_data.is_template,
+                
+                # Reference water mass for exact mass reconstruction
+                water_reference_mass=mix_design_data.water_reference_mass,
+                
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow()
             )
@@ -168,7 +172,8 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                 components=[MixDesignComponentData(**comp) for comp in original.components],
                 calculated_properties=MixDesignPropertiesData(**original.calculated_properties) if original.calculated_properties else None,
                 notes=original.notes,
-                is_template=make_template
+                is_template=make_template,
+                water_reference_mass=original.water_reference_mass
             )
             
             # Create the duplicate

@@ -1006,14 +1006,25 @@ class MixDesignPanel(Gtk.Box):
         
         if response == Gtk.ResponseType.OK:
             # Auto-save the current mix design before generation
-            self.logger.info("Auto-saving mix design before microstructure generation...")
-            saved_mix_design_id = self._auto_save_mix_design_before_generation()
-            if saved_mix_design_id:
-                self.logger.info(f"Mix design auto-saved with ID: {saved_mix_design_id}")
-                self.main_window.update_status("Mix design auto-saved. Starting 3D microstructure generation...", "info", 0)
-            else:
-                self.logger.warning("Auto-save failed, continuing with generation...")
-                self.main_window.update_status("Starting 3D microstructure generation...", "info", 0)
+            self.logger.info("🚨 DEBUG: Starting auto-save process...")
+            self.logger.info(f"🚨 DEBUG: Mix name from UI: '{self.mix_name_entry.get_text().strip()}'")
+            
+            try:
+                saved_mix_design_id = self._auto_save_mix_design_before_generation()
+                self.logger.info(f"🚨 DEBUG: Auto-save returned: {saved_mix_design_id}")
+                
+                if saved_mix_design_id:
+                    self.logger.info(f"✅ Mix design auto-saved with ID: {saved_mix_design_id}")
+                    self.main_window.update_status("Mix design auto-saved. Starting 3D microstructure generation...", "info", 0)
+                else:
+                    self.logger.error("❌ CRITICAL: Auto-save returned None - this will break data tracking!")
+                    self.main_window.update_status("❌ Auto-save failed! Operation will have no mix design data.", "error", 5)
+                    
+            except Exception as e:
+                self.logger.error(f"❌ CRITICAL: Auto-save crashed with exception: {e}")
+                import traceback
+                self.logger.error(f"Full traceback: {traceback.format_exc()}")
+                saved_mix_design_id = None
             
             # Start the actual operation
             self._create_microstructure_input_file(saved_mix_design_id)
@@ -3005,17 +3016,20 @@ class MixDesignPanel(Gtk.Box):
                     
                     # Store UI parameters in the operation for reproducibility
                     if operation_id and ui_parameters:
-                        self._store_ui_parameters_in_operation(operation_id, ui_parameters)
+                        self.logger.info(f"📊 Storing UI parameters for operation_id: {operation_id}")
+                        self._store_ui_parameters_in_operation(str(operation_id), ui_parameters)
                     
                     if operation_id:
                         self.logger.info(f"Successfully launched genmic through Operations panel: {operation_id}")
                         
                         # Create MicrostructureOperation record with all input parameters
                         try:
-                            self._create_microstructure_operation_record(operation_id, self._current_saved_mix_design_id)
-                            self.logger.info("Created MicrostructureOperation database record")
+                            self.logger.info(f"📊 Creating MicrostructureOperation record: operation_id={operation_id}, mix_design_id={self._current_saved_mix_design_id}")
+                            self._create_microstructure_operation_record(str(operation_id), self._current_saved_mix_design_id)
+                            self.logger.info("✅ Created MicrostructureOperation database record")
                         except Exception as e:
-                            self.logger.error(f"Failed to create MicrostructureOperation record: {e}")
+                            self.logger.error(f"❌ Failed to create MicrostructureOperation record: {e}")
+                            # Continue execution - don't fail the whole operation
                         
                         self.main_window.update_status(
                             f"Genmic process started! Monitor progress in Operations tab.", 
@@ -4062,7 +4076,10 @@ class MixDesignPanel(Gtk.Box):
             fine_agg_mass = self.fine_agg_mass_spin.get_value()
             coarse_agg_mass = self.coarse_agg_mass_spin.get_value()
             
-            # Calculate total solid mass (excluding water) for mass fraction calculation
+            # Calculate total concrete mass (including water) for Type 3 mass fraction calculation
+            total_concrete_mass = powder_mass + fine_agg_mass + coarse_agg_mass + water_mass
+            
+            # Keep solid mass for legacy compatibility (genmic calculations)
             total_solid_mass = powder_mass + fine_agg_mass + coarse_agg_mass
             
             for row in self.component_rows:
@@ -4080,9 +4097,9 @@ class MixDesignPanel(Gtk.Box):
                     except (ValueError, TypeError):
                         self.logger.warning(f"Could not parse specific gravity for {material_name}")
                     
-                    # Calculate fractions using total_solid_mass (excluding water)
-                    mass_fraction = mass_kg / total_solid_mass if total_solid_mass > 0 else 0.0
-                    self.logger.info(f"VALIDATION DEBUG: {material_name} - mass_kg={mass_kg}, total_solid_mass={total_solid_mass}, mass_fraction={mass_fraction}")
+                    # Calculate Type 3 mass fractions using total_concrete_mass (including water)
+                    mass_fraction = mass_kg / total_concrete_mass if total_concrete_mass > 0 else 0.0
+                    self.logger.info(f"VALIDATION DEBUG: {material_name} - mass_kg={mass_kg}, total_concrete_mass={total_concrete_mass}, mass_fraction={mass_fraction}")
                     
                     # Simple volume fraction calculation (more accurate calculation done in service)
                     volume_fraction = mass_fraction / specific_gravity
@@ -4098,8 +4115,8 @@ class MixDesignPanel(Gtk.Box):
             # Add aggregate components if they exist
             fine_agg_name = self.fine_agg_combo.get_active_id()
             if fine_agg_name and fine_agg_name != "" and fine_agg_mass > 0:
-                fine_agg_mass_fraction = fine_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
-                self.logger.info(f"VALIDATION DEBUG: {fine_agg_name} - mass_kg={fine_agg_mass}, total_solid_mass={total_solid_mass}, mass_fraction={fine_agg_mass_fraction}")
+                fine_agg_mass_fraction = fine_agg_mass / total_concrete_mass if total_concrete_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: {fine_agg_name} - mass_kg={fine_agg_mass}, total_concrete_mass={total_concrete_mass}, mass_fraction={fine_agg_mass_fraction}")
                 components.append({
                     'material_name': fine_agg_name,
                     'material_type': 'aggregate',
@@ -4110,8 +4127,8 @@ class MixDesignPanel(Gtk.Box):
             
             coarse_agg_name = self.coarse_agg_combo.get_active_id()
             if coarse_agg_name and coarse_agg_name != "" and coarse_agg_mass > 0:
-                coarse_agg_mass_fraction = coarse_agg_mass / total_solid_mass if total_solid_mass > 0 else 0.0
-                self.logger.info(f"VALIDATION DEBUG: {coarse_agg_name} - mass_kg={coarse_agg_mass}, total_solid_mass={total_solid_mass}, mass_fraction={coarse_agg_mass_fraction}")
+                coarse_agg_mass_fraction = coarse_agg_mass / total_concrete_mass if total_concrete_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: {coarse_agg_name} - mass_kg={coarse_agg_mass}, total_concrete_mass={total_concrete_mass}, mass_fraction={coarse_agg_mass_fraction}")
                 components.append({
                     'material_name': coarse_agg_name,
                     'material_type': 'aggregate',
@@ -4120,10 +4137,10 @@ class MixDesignPanel(Gtk.Box):
                     'specific_gravity': 2.65
                 })
             
-            # Add water component - water fraction relative to solids only
+            # Add water component - water fraction relative to total concrete mass (Type 3)
             if water_mass > 0:
-                water_mass_fraction = water_mass / total_solid_mass if total_solid_mass > 0 else 0.0
-                self.logger.info(f"VALIDATION DEBUG: Water - mass_kg={water_mass}, total_solid_mass={total_solid_mass}, mass_fraction={water_mass_fraction}")
+                water_mass_fraction = water_mass / total_concrete_mass if total_concrete_mass > 0 else 0.0
+                self.logger.info(f"VALIDATION DEBUG: Water - mass_kg={water_mass}, total_concrete_mass={total_concrete_mass}, mass_fraction={water_mass_fraction}")
                 components.append({
                     'material_name': 'Water',
                     'material_type': 'water',
@@ -4502,16 +4519,29 @@ class MixDesignPanel(Gtk.Box):
                 else:
                     total_solid_mass_fractions += mass_frac
             
-            # Calculate total solid mass from water mass and water mass fraction
-            if water_mass_fraction > 0:
-                total_powder_mass = total_water_content * total_solid_mass_fractions / water_mass_fraction
-                self.logger.info(f"DEBUG: Calculated total_powder_mass={total_powder_mass} from water_content={total_water_content}, water_fraction={water_mass_fraction}, solid_fractions={total_solid_mass_fractions}")
+            # Check if we have water reference mass for exact reconstruction
+            water_reference_mass = mix_design_data.get('water_reference_mass')
+            if water_reference_mass and water_mass_fraction > 0:
+                # Calculate exact total mass from stored water reference
+                total_mass = water_reference_mass / water_mass_fraction
+                total_powder_mass = total_mass - water_reference_mass
+                self.logger.info(f"DEBUG: Using water reference mass {water_reference_mass} kg, calculated total_mass={total_mass}, total_powder_mass={total_powder_mass}")
+                # Set water content to exact reference value
+                self.water_content_spin.set_value(water_reference_mass)
             else:
-                # Fallback to W/B ratio calculation
-                total_powder_mass = total_water_content / wb_ratio if wb_ratio > 0 else 0.0
-                self.logger.info(f"DEBUG: Fallback total_powder_mass={total_powder_mass} from W/B ratio")
+                # Fallback to old calculation method for mixes without reference mass (backward compatibility)
+                if water_mass_fraction > 0:
+                    total_powder_mass = total_water_content * total_solid_mass_fractions / water_mass_fraction
+                    self.logger.info(f"DEBUG: Fallback calculation - total_powder_mass={total_powder_mass} from water_content={total_water_content}")
+                else:
+                    total_powder_mass = total_water_content / wb_ratio if wb_ratio > 0 else 0.0
+                    self.logger.info(f"DEBUG: W/B ratio fallback - total_powder_mass={total_powder_mass}")
             
-            total_mass = total_powder_mass + total_water_content
+            # For exact mass reconstruction, use water reference mass instead of stored field
+            if water_reference_mass:
+                total_mass = total_powder_mass + water_reference_mass
+            else:
+                total_mass = total_powder_mass + total_water_content
             
             # Process components for UI (skip water - it's handled separately)
             self.logger.info(f"Loading {len(components)} components from mix design: {components}")
@@ -4636,10 +4666,10 @@ class MixDesignPanel(Gtk.Box):
                             self.logger.error(f"Could not restore material '{material_name}' - using default instead")
                             # Keep the default selection from _update_material_names()
                     
-                    # Calculate mass from mass fraction (use total_powder_mass not total_mass)
-                    # Mass fractions in database are relative to solid mass only (excluding water)
+                    # Calculate mass from mass fraction (Type 3: use total_mass including water)
+                    # Mass fractions in database are Type 3: all components including water sum to 1.0
                     mass_fraction = comp_data.get('mass_fraction', 0.0)
-                    component_mass = mass_fraction * total_powder_mass
+                    component_mass = mass_fraction * total_mass
                     self.logger.info(f"Setting component mass: {component_mass} kg (from fraction {mass_fraction} * solid mass {total_powder_mass})")
                     
                     # Set mass
@@ -4728,7 +4758,10 @@ class MixDesignPanel(Gtk.Box):
                 
                 # Component and properties data
                 'components': mix_design.components,
-                'calculated_properties': mix_design.calculated_properties
+                'calculated_properties': mix_design.calculated_properties,
+                
+                # Water reference mass for exact reconstruction  
+                'water_reference_mass': mix_design.water_reference_mass
             }
             
             # Populate UI
@@ -4794,7 +4827,12 @@ class MixDesignPanel(Gtk.Box):
                 self.main_window.update_status(f"Generated unique name '{unique_mix_name}' to prevent overwrite", "info", 2)
             
             # Get current mix design data
+            self.logger.info(f"🚨 DEBUG: Extracting current mix design data...")
             mix_design_data = self._extract_current_mix_design_data()
+            self.logger.info(f"🚨 DEBUG: Extracted data keys: {list(mix_design_data.keys()) if mix_design_data else 'None'}")
+            if mix_design_data:
+                self.logger.info(f"🚨 DEBUG: Components count: {len(mix_design_data.get('components', []))}")
+                self.logger.info(f"🚨 DEBUG: Water-binder ratio: {mix_design_data.get('water_binder_ratio', 'Missing')}")
             
             # Convert components to proper Pydantic models
             from app.models.mix_design import MixDesignCreate, MixDesignComponentData, MixDesignPropertiesData
@@ -4814,6 +4852,9 @@ class MixDesignPanel(Gtk.Box):
             properties = None
             if mix_design_data.get('calculated_properties'):
                 properties = MixDesignPropertiesData(**mix_design_data['calculated_properties'])
+            
+            # Capture water reference mass for exact mass reconstruction
+            water_reference_mass = self.water_content_spin.get_value()
             
             # Create MixDesignCreate object with the converted data
             create_data = MixDesignCreate(
@@ -4844,16 +4885,25 @@ class MixDesignPanel(Gtk.Box):
                 fine_aggregate_name=mix_design_data['fine_aggregate_name'],
                 fine_aggregate_mass=mix_design_data['fine_aggregate_mass'],
                 coarse_aggregate_name=mix_design_data['coarse_aggregate_name'],
-                coarse_aggregate_mass=mix_design_data['coarse_aggregate_mass']
+                coarse_aggregate_mass=mix_design_data['coarse_aggregate_mass'],
+                water_reference_mass=water_reference_mass
             )
             
             # Create new mix design (we know the name is unique now)
-            self.logger.info(f"Auto-saving new mix design: {unique_mix_name}")
+            self.logger.info(f"📊 Auto-saving new mix design: {unique_mix_name}")
+            self.logger.info(f"🚨 DEBUG: About to call mix_design_service.create()")
+            self.logger.info(f"🚨 DEBUG: create_data.name = {create_data.name}")
+            self.logger.info(f"🚨 DEBUG: create_data.components count = {len(create_data.components)}")
+            
             new_design = mix_design_service.create(create_data)
+            self.logger.info(f"🚨 DEBUG: mix_design_service.create() completed successfully")
+            self.logger.info(f"✅ Auto-save successful: {unique_mix_name} (ID: {new_design.id})")
             return new_design.id
             
         except Exception as e:
-            self.logger.error(f"Error auto-saving mix design: {e}")
+            self.logger.error(f"❌ Error auto-saving mix design: {e}")
+            import traceback
+            self.logger.error(f"Full auto-save traceback: {traceback.format_exc()}")
             return None
     
     def _update_mix_design_file_paths(self, mix_name: str, output_dir: str, output_files: List[str]) -> None:
@@ -4998,24 +5048,30 @@ class MixDesignPanel(Gtk.Box):
     def _store_ui_parameters_in_operation(self, operation_id: str, ui_parameters: Dict[str, Any]) -> None:
         """Store UI parameters in the operation for reproducibility."""
         try:
-            from app.database.service import DatabaseService
             from app.models.operation import Operation
+            import json
             
-            db_service = DatabaseService()
-            
-            with db_service.get_session() as session:
-                # Find operation by name (operation_id is actually operation name in this context)
-                operation = session.query(Operation).filter_by(name=operation_id).first()
+            with self.service_container.database_service.get_session() as session:
+                # Find operation by ID (operation_id is actually numeric ID)
+                try:
+                    op_id = int(operation_id)
+                    operation = session.query(Operation).filter_by(id=op_id).first()
+                except ValueError:
+                    # Fallback: try by name if operation_id is not numeric
+                    operation = session.query(Operation).filter_by(name=operation_id).first()
                 
                 if operation:
-                    operation.stored_ui_parameters = ui_parameters
+                    # Convert to JSON string for storage
+                    operation.stored_ui_parameters = json.dumps(ui_parameters)
                     session.commit()
-                    self.logger.info(f"Stored UI parameters for operation: {operation_id}")
+                    self.logger.info(f"✅ Stored UI parameters for operation: {operation_id} (name: {operation.name})")
                 else:
-                    self.logger.warning(f"Operation not found for storing UI parameters: {operation_id}")
+                    self.logger.error(f"❌ Operation not found for storing UI parameters: {operation_id}")
                     
         except Exception as e:
-            self.logger.error(f"Failed to store UI parameters for operation {operation_id}: {e}")
+            self.logger.error(f"❌ Failed to store UI parameters for operation {operation_id}: {e}")
+            import traceback
+            self.logger.error(f"Full traceback: {traceback.format_exc()}")
 
 
 
@@ -5032,16 +5088,24 @@ class MixDesignPanel(Gtk.Box):
             from app.models.microstructure_operation import MicrostructureOperation
             from app.models.operation import Operation
             
-            # Use provided mix design ID if available, otherwise skip creation
+            # CRITICAL FIX: Do not skip creation if mix_design_id is None
+            # Create a warning but proceed to create the record for operation tracking
             if not mix_design_id:
-                self.logger.warning("No mix design ID provided for MicrostructureOperation - skipping creation")
-                return
+                self.logger.warning(f"⚠️  No mix design ID provided for MicrostructureOperation - proceeding with NULL mix_design_id")
             
-            # Get operation from database using string operation_id
+            # Get operation from database using operation_id
             with self.service_container.database_service.get_session() as session:
-                operation = session.query(Operation).filter_by(id=int(operation_id)).first()
+                try:
+                    op_id = int(operation_id)
+                    operation = session.query(Operation).filter_by(id=op_id).first()
+                except ValueError:
+                    # Fallback: try by name if operation_id is not numeric
+                    operation = session.query(Operation).filter_by(name=operation_id).first()
+                
                 if not operation:
-                    raise Exception(f"Operation {operation_id} not found in database")
+                    raise Exception(f"❌ Operation {operation_id} not found in database")
+                
+                self.logger.info(f"📊 Found operation: {operation.name} (ID: {operation.id})")
                 
                 # Get all microstructure parameters from UI
                 microstructure_params = self._get_microstructure_parameters()
@@ -5049,7 +5113,7 @@ class MixDesignPanel(Gtk.Box):
                 # Create MicrostructureOperation record
                 micro_op = MicrostructureOperation(
                     operation_id=operation.id,
-                    mix_design_id=mix_design_id,
+                    mix_design_id=mix_design_id,  # Can be None
                     system_size_x=microstructure_params.get('system_size_x', 100),
                     system_size_y=microstructure_params.get('system_size_y', 100),
                     system_size_z=microstructure_params.get('system_size_z', 100),
@@ -5067,11 +5131,14 @@ class MixDesignPanel(Gtk.Box):
                 session.add(micro_op)
                 session.commit()
                 
-                self.logger.info(f"Created MicrostructureOperation record for operation {operation_id}")
+                self.logger.info(f"✅ Created MicrostructureOperation record: operation_id={operation.id}, mix_design_id={mix_design_id}")
                 
         except Exception as e:
-            self.logger.error(f"Failed to create MicrostructureOperation record: {e}")
-            raise
+            self.logger.error(f"❌ Failed to create MicrostructureOperation record: {e}")
+            import traceback
+            self.logger.error(f"Full traceback: {traceback.format_exc()}")
+            # Don't raise - allow operation to continue even if linking fails
+            # raise
     
     def _load_carbon_icon(self, icon_name: str, size: int = 32):
         """Load a Carbon icon from the icons directory."""
@@ -5097,6 +5164,104 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Failed to load Carbon icon {icon_name}: {e}")
         
         return None
+    
+    def _capture_raw_ui_mass_values(self) -> Dict[str, Any]:
+        """Capture the exact UI mass values for restoration during loading."""
+        try:
+            # Capture powder component masses
+            powder_masses = []
+            for row in self.component_rows:
+                type_str = row['type_combo'].get_active_id()
+                name = row['name_combo'].get_active_id()
+                mass_kg = row['mass_spin'].get_value()
+                
+                if type_str and name and mass_kg > 0:
+                    powder_masses.append({
+                        'name': name,
+                        'type': type_str,
+                        'mass_kg': mass_kg
+                    })
+            
+            # Capture water mass
+            water_mass_kg = self.water_content_spin.get_value()
+            
+            # Return the raw values
+            ui_values = {
+                'powder_masses': powder_masses,
+                'water_mass_kg': water_mass_kg,
+                # Also capture aggregate masses (already stored in separate fields but for completeness)
+                'fine_aggregate_mass_kg': self.fine_agg_mass_spin.get_value(),
+                'coarse_aggregate_mass_kg': self.coarse_agg_mass_spin.get_value()
+            }
+            
+            self.logger.info(f"Captured raw UI values: {ui_values}")
+            return ui_values
+            
+        except Exception as e:
+            self.logger.error(f"Error capturing raw UI values: {e}")
+            return {}
+    
+    def _restore_ui_mass_values(self, ui_mass_values: Dict[str, Any]) -> None:
+        """Restore the exact UI mass values from saved data."""
+        try:
+            self.logger.info(f"Restoring UI mass values: {ui_mass_values}")
+            
+            # Restore powder component masses
+            powder_masses = ui_mass_values.get('powder_masses', [])
+            for i, powder_data in enumerate(powder_masses):
+                # Add new component row
+                row_data = self._create_component_row()
+                self.component_rows.append(row_data)
+                self.components_box.pack_start(row_data['box'], False, False, 0)
+                self.components_box.show_all()
+                
+                # Get the last added row
+                if self.component_rows:
+                    row = self.component_rows[-1]
+                    
+                    # Set material type
+                    material_type = powder_data['type']
+                    type_combo = row['type_combo']
+                    type_model = type_combo.get_model()
+                    
+                    # Find and set the material type
+                    for j in range(len(type_model)):
+                        if type_model[j][0] == material_type:  # ID column
+                            type_combo.set_active(j)
+                            break
+                    
+                    # Update material names based on type selection
+                    self._update_material_names(row)
+                    
+                    # Set material name
+                    material_name = powder_data['name']
+                    name_combo = row['name_combo']
+                    name_model = name_combo.get_model()
+                    
+                    # Find and set the material name
+                    for j in range(len(name_model)):
+                        if name_model[j][0] == material_name:  # ID column
+                            name_combo.set_active(j)
+                            break
+                    
+                    # Set the exact mass value
+                    mass_kg = powder_data['mass_kg']
+                    row['mass_spin'].set_value(mass_kg)
+                    
+                    self.logger.info(f"Restored powder component: {material_name} ({material_type}) = {mass_kg} kg")
+            
+            # Restore water mass
+            water_mass_kg = ui_mass_values.get('water_mass_kg', 0.0)
+            if water_mass_kg > 0:
+                self.water_content_spin.set_value(water_mass_kg)
+                self.logger.info(f"Restored water mass: {water_mass_kg} kg")
+            
+            self.logger.info("UI mass values restoration completed successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Error restoring UI mass values: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _show_mix_design_management_dialog(self) -> None:
         """Show advanced mix design management dialog with bulk operations."""

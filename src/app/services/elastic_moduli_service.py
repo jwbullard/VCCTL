@@ -24,6 +24,8 @@ from app.models.mix_design import MixDesign
 from app.models.aggregate import Aggregate
 from app.services.service_container import ServiceContainer
 from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge, MicrostructureMetadata
+from app.services.elastic_lineage_service import ElasticLineageService, HydratedMicrostructure
+from app.services.elastic_input_generator import ElasticInputGenerator
 
 
 class ElasticModuliService:
@@ -34,6 +36,10 @@ class ElasticModuliService:
         self.database_service = service_container.database_service
         self.bridge = MicrostructureHydrationBridge()
         self.logger = logging.getLogger(__name__)
+        
+        # Initialize new services for Phase 1 implementation
+        self.lineage_service = ElasticLineageService(service_container)
+        self.input_generator = ElasticInputGenerator(self.lineage_service)
         
     def create_operation(
         self,
@@ -73,107 +79,156 @@ class ElasticModuliService:
     def generate_elastic_input_file(
         self,
         operation: ElasticModuliOperation,
+        selected_microstructure: HydratedMicrostructure,
         output_directory: str
     ) -> str:
         """
-        Generate elastic.in input file for C elastic moduli calculation program.
-        
-        Based on generateElasticInputForUser() from ConcreteMeasurementsForm.java
+        Generate elastic.c input file using new Phase 1 lineage-aware system.
         
         Args:
             operation: The elastic moduli operation
+            selected_microstructure: Selected hydrated microstructure with time info
             output_directory: Directory to create the input file in
             
         Returns:
-            Path to the generated elastic.in file
+            Path to the generated elastic_input.txt file
         """
-        output_path = Path(output_directory)
-        output_path.mkdir(parents=True, exist_ok=True)
-        
-        elastic_input_file = output_path / "elastic.in"
-        
-        # Get hydration operation details
-        with self.database_service.get_session() as session:
-            hydration_operation = session.query(Operation).filter_by(
-                id=operation.hydration_operation_id
-            ).first()
-            
-            if not hydration_operation:
-                raise ValueError(f"Hydration operation {operation.hydration_operation_id} not found")
-        
-        # Generate input file content
-        input_content = self._generate_elastic_input_content(operation, hydration_operation)
-        
-        # Write the file
-        with open(elastic_input_file, 'w') as f:
-            f.write(input_content)
-        
-        self.logger.info(f"Generated elastic input file: {elastic_input_file}")
-        return str(elastic_input_file)
+        return self.input_generator.generate_input_file(
+            operation, selected_microstructure, output_directory
+        )
     
-    def _generate_elastic_input_content(
+    def create_operation_with_lineage(
+        self,
+        name: str,
+        hydration_operation_id: int,
+        description: str = ""
+    ) -> Tuple[ElasticModuliOperation, Dict[str, Any]]:
+        """
+        Create elastic moduli operation with complete lineage resolution.
+        
+        Returns both the operation and resolved lineage data for UI display.
+        
+        Args:
+            name: Operation name
+            hydration_operation_id: Source hydration operation ID
+            description: Optional description
+            
+        Returns:
+            Tuple of (operation, lineage_data)
+        """
+        # Resolve lineage chain first to validate completeness
+        lineage = self.lineage_service.resolve_lineage_chain(hydration_operation_id)
+        
+        # Validate lineage completeness
+        validation_errors = self.lineage_service.validate_lineage_completeness(lineage)
+        if validation_errors:
+            raise ValueError(f"Lineage validation failed: {'; '.join(validation_errors)}")
+        
+        # Create the operation with database integration
+        with self.database_service.get_session() as session:
+            # Create base Operation record for tracking
+            base_operation = Operation(
+                name=name,
+                operation_type=OperationType.ELASTIC_MODULI.value,
+                status=OperationStatus.QUEUED.value,
+                parent_operation_id=hydration_operation_id,
+                stored_ui_parameters={
+                    'operation_name': name,
+                    'description': description,
+                    'hydration_operation_id': hydration_operation_id,
+                    'lineage_resolved': True
+                }
+            )
+            
+            session.add(base_operation)
+            session.commit()
+            session.refresh(base_operation)
+            
+            # Create ElasticModuliOperation with pre-populated lineage data
+            elastic_operation = ElasticModuliOperation(
+                name=name,
+                description=description,
+                hydration_operation_id=hydration_operation_id
+            )
+            
+            # Populate from lineage data
+            self._populate_from_lineage(elastic_operation, lineage)
+            
+            session.add(elastic_operation)
+            session.commit()
+            session.refresh(elastic_operation)
+            
+            self.logger.info(f"Created elastic moduli operation with lineage: {name}")
+            return elastic_operation, lineage
+    
+    def discover_hydrated_microstructures(self, hydration_operation_id: int) -> List[HydratedMicrostructure]:
+        """
+        Discover available hydrated microstructures for selection.
+        
+        Args:
+            hydration_operation_id: ID of the hydration operation
+            
+        Returns:
+            List of available hydrated microstructures sorted with final first
+        """
+        with self.database_service.get_session() as session:
+            hydration_op = session.query(Operation).filter_by(id=hydration_operation_id).first()
+            if not hydration_op:
+                raise ValueError(f"Hydration operation {hydration_operation_id} not found")
+            
+            return self.lineage_service.discover_hydrated_microstructures(hydration_op)
+    
+    def validate_input_completeness(
         self,
         operation: ElasticModuliOperation,
-        hydration_operation: Operation
-    ) -> str:
-        """Generate the content for the elastic.in input file."""
+        selected_microstructure: HydratedMicrostructure
+    ) -> List[str]:
+        """
+        Validate that all necessary data is available for input generation.
         
-        lines = []
+        Returns:
+            List of validation error messages (empty if valid)
+        """
+        return self.input_generator.validate_input_completeness(operation, selected_microstructure)
+    
+    def _populate_from_lineage(self, operation: ElasticModuliOperation, lineage: Dict[str, Any]):
+        """
+        Populate operation parameters from resolved lineage data.
         
-        # Image filename (from hydration operation)
-        if operation.image_filename:
-            lines.append(operation.image_filename)
-        else:
-            # Default to hydration operation name + .img
-            lines.append(f"{hydration_operation.name}.img")
+        Args:
+            operation: ElasticModuliOperation to populate
+            lineage: Resolved lineage data from ElasticLineageService
+        """
+        aggregate_props = lineage.get('aggregate_properties', {})
+        volume_fractions = lineage.get('volume_fractions', {})
         
-        # Early age connection (always 1 according to Java code)
-        lines.append(str(operation.early_age_connection or 1))
+        # Set aggregate properties
+        fine_agg = aggregate_props.get('fine_aggregate')
+        if fine_agg:
+            operation.has_fine_aggregate = True
+            operation.fine_aggregate_volume_fraction = fine_agg.volume_fraction
+            operation.fine_aggregate_bulk_modulus = fine_agg.bulk_modulus
+            operation.fine_aggregate_shear_modulus = fine_agg.shear_modulus
+            operation.fine_aggregate_display_name = fine_agg.name
+            operation.fine_aggregate_grading_path = fine_agg.grading_path
         
-        # ITZ flag (1 if has_itz is True, 0 otherwise)
-        lines.append("1" if operation.has_itz else "0")
+        coarse_agg = aggregate_props.get('coarse_aggregate')
+        if coarse_agg:
+            operation.has_coarse_aggregate = True
+            operation.coarse_aggregate_volume_fraction = coarse_agg.volume_fraction
+            operation.coarse_aggregate_bulk_modulus = coarse_agg.bulk_modulus
+            operation.coarse_aggregate_shear_modulus = coarse_agg.shear_modulus
+            operation.coarse_aggregate_display_name = coarse_agg.name
+            operation.coarse_aggregate_grading_path = coarse_agg.grading_path
         
-        # Output directory
-        lines.append(operation.output_directory or ".")
+        # Set volume fractions
+        operation.air_volume_fraction = volume_fractions.get('air_volume_fraction', 0.0)
         
-        # Pimg file path (if available)
-        if operation.pimg_file_path:
-            lines.append(operation.pimg_file_path)
-        else:
-            lines.append("")
+        # Set ITZ calculation flag
+        operation.has_itz = self.lineage_service.get_itz_detection(aggregate_props)
         
-        # Fine aggregate properties
-        if operation.has_fine_aggregate:
-            lines.append("1")  # Has fine aggregate flag
-            lines.append(str(operation.fine_aggregate_volume_fraction or 0.0))
-            lines.append(operation.fine_aggregate_grading_path or "")
-            lines.append(str(operation.fine_aggregate_bulk_modulus or 0.0))
-            lines.append(str(operation.fine_aggregate_shear_modulus or 0.0))
-        else:
-            lines.append("0")  # No fine aggregate
-            lines.append("0.0")
-            lines.append("")
-            lines.append("0.0")
-            lines.append("0.0")
-        
-        # Coarse aggregate properties
-        if operation.has_coarse_aggregate:
-            lines.append("1")  # Has coarse aggregate flag
-            lines.append(str(operation.coarse_aggregate_volume_fraction or 0.0))
-            lines.append(operation.coarse_aggregate_grading_path or "")
-            lines.append(str(operation.coarse_aggregate_bulk_modulus or 0.0))
-            lines.append(str(operation.coarse_aggregate_shear_modulus or 0.0))
-        else:
-            lines.append("0")  # No coarse aggregate
-            lines.append("0.0")
-            lines.append("")
-            lines.append("0.0")
-            lines.append("0.0")
-        
-        # Air volume fraction
-        lines.append(str(operation.air_volume_fraction or 0.0))
-        
-        return "\n".join(lines) + "\n"
+        self.logger.info(f"Populated operation from lineage - ITZ: {operation.has_itz}, "
+                        f"Fine Agg: {operation.has_fine_aggregate}, Coarse Agg: {operation.has_coarse_aggregate}")
     
     def get_all_operations(self) -> List[ElasticModuliOperation]:
         """Get all elastic moduli operations."""

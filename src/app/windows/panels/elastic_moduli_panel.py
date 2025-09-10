@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.services.elastic_moduli_service import ElasticModuliService
+from app.services.elastic_lineage_service import HydratedMicrostructure
 from app.models.elastic_moduli_operation import ElasticModuliOperation
 from app.models.operation import Operation, OperationStatus, OperationType
 from app.utils.icon_utils import create_button_with_icon
@@ -41,9 +42,13 @@ class ElasticModuliPanel(Gtk.Box):
         # Panel state
         self.current_operation = None
         self.available_hydration_operations = []
+        self.available_microstructures = []  # Phase 2: Hydrated microstructures list
+        self.resolved_lineage = None  # Phase 2: Cached lineage data
         
         # UI components
         self.hydration_combo = None
+        self.microstructure_combo = None  # Phase 2: Microstructure time selection
+        self.lineage_info_label = None   # Phase 2: Lineage information display
         self.operation_name_entry = None
         self.image_filename_entry = None
         self.output_dir_entry = None
@@ -147,21 +152,58 @@ class ElasticModuliPanel(Gtk.Box):
         label.set_tooltip_text("Select the completed hydration operation to use as input")
         grid.attach(label, 0, row, 1, 1)
         
+        # Hydration combo with refresh button in a horizontal box
+        hydration_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        
         self.hydration_combo = Gtk.ComboBoxText()
         self.hydration_combo.set_tooltip_text("Choose from completed hydration operations")
         self.hydration_combo.connect("changed", self._on_hydration_selection_changed)
-        grid.attach(self.hydration_combo, 1, row, 2, 1)
+        self.hydration_combo.set_hexpand(True)
+        hydration_box.pack_start(self.hydration_combo, True, True, 0)
+        
+        # Add refresh button
+        refresh_button = Gtk.Button.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        refresh_button.set_tooltip_text("Refresh list of hydration operations")
+        refresh_button.connect("clicked", self._on_refresh_hydration_operations)
+        hydration_box.pack_start(refresh_button, False, False, 0)
+        
+        grid.attach(hydration_box, 1, row, 2, 1)
         
         row += 1
         
-        # Operation name
+        # Microstructure time selection (Phase 2)
+        label = Gtk.Label("Hydrated Microstructure:")
+        label.set_halign(Gtk.Align.START)
+        label.set_tooltip_text("Select which hydrated microstructure time step to use")
+        grid.attach(label, 0, row, 1, 1)
+        
+        self.microstructure_combo = Gtk.ComboBoxText()
+        self.microstructure_combo.set_tooltip_text("Choose from available hydrated microstructures (final or intermediate times)")
+        self.microstructure_combo.connect("changed", self._on_microstructure_selection_changed)
+        self.microstructure_combo.set_sensitive(False)  # Initially disabled until hydration selected
+        grid.attach(self.microstructure_combo, 1, row, 2, 1)
+        
+        row += 1
+        
+        # Lineage information display (Phase 2)
+        self.lineage_info_label = Gtk.Label()
+        self.lineage_info_label.set_markup('<span size="small" style="italic">Select hydration operation to see lineage chain</span>')
+        self.lineage_info_label.set_halign(Gtk.Align.START)
+        self.lineage_info_label.set_line_wrap(True)
+        self.lineage_info_label.set_max_width_chars(80)
+        grid.attach(self.lineage_info_label, 0, row, 3, 1)
+        
+        row += 1
+        
+        # Auto-generated operation name (read-only display)
         label = Gtk.Label("Operation Name:")
         label.set_halign(Gtk.Align.START)
         grid.attach(label, 0, row, 1, 1)
         
         self.operation_name_entry = Gtk.Entry()
-        self.operation_name_entry.set_placeholder_text("e.g., ElasticModuli_MyMix01")
-        self.operation_name_entry.set_tooltip_text("Unique name for this elastic moduli calculation")
+        self.operation_name_entry.set_placeholder_text("Auto-generated from microstructure selection")
+        self.operation_name_entry.set_tooltip_text("Auto-generated: Elastic-{HydrationName}-{TimeStep}")
+        self.operation_name_entry.set_sensitive(False)  # Make read-only
         grid.attach(self.operation_name_entry, 1, row, 2, 1)
         
         frame.add(grid)
@@ -293,6 +335,19 @@ class ElasticModuliPanel(Gtk.Box):
         grid.attach(check_widget, 0, row, 3, 1)
         row += 1
         
+        # Aggregate source label
+        if agg_type == "fine":
+            self.fine_agg_source_label = Gtk.Label()
+            self.fine_agg_source_label.set_markup('<span size="small" style="italic">Source: Not specified</span>')
+            self.fine_agg_source_label.set_halign(Gtk.Align.START)
+            grid.attach(self.fine_agg_source_label, 0, row, 3, 1)
+        else:
+            self.coarse_agg_source_label = Gtk.Label()
+            self.coarse_agg_source_label.set_markup('<span size="small" style="italic">Source: Not specified</span>')
+            self.coarse_agg_source_label.set_halign(Gtk.Align.START)
+            grid.attach(self.coarse_agg_source_label, 0, row, 3, 1)
+        row += 1
+        
         # Volume fraction
         label = Gtk.Label("Volume Fraction:")
         label.set_halign(Gtk.Align.START)
@@ -314,29 +369,48 @@ class ElasticModuliPanel(Gtk.Box):
         grid.attach(spin_widget, 1, row, 2, 1)
         row += 1
         
-        # Grading path
-        label = Gtk.Label("Grading Path:")
+        # Grading information
+        label = Gtk.Label("Grading:")
         label.set_halign(Gtk.Align.START)
         grid.attach(label, 0, row, 1, 1)
         
-        grading_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        grading_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
+        
+        # Path entry (auto-populated, but editable for advanced users)
+        grading_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         
         if agg_type == "fine":
             self.fine_grading_entry = Gtk.Entry()
-            self.fine_grading_entry.set_placeholder_text("Path to grading file")
-            grading_box.pack_start(self.fine_grading_entry, True, True, 0)
+            self.fine_grading_entry.set_placeholder_text("Auto-populated from mix design")
+            grading_hbox.pack_start(self.fine_grading_entry, True, True, 0)
             entry_widget = self.fine_grading_entry
+            
+            # Status label for fine aggregate
+            self.fine_grading_status_label = Gtk.Label()
+            self.fine_grading_status_label.set_markup('<span size="small" style="italic">Auto-populated from database template</span>')
+            self.fine_grading_status_label.set_halign(Gtk.Align.START)
+            status_label = self.fine_grading_status_label
         else:
             self.coarse_grading_entry = Gtk.Entry()
-            self.coarse_grading_entry.set_placeholder_text("Path to grading file")
-            grading_box.pack_start(self.coarse_grading_entry, True, True, 0)
+            self.coarse_grading_entry.set_placeholder_text("Auto-populated from mix design")
+            grading_hbox.pack_start(self.coarse_grading_entry, True, True, 0)
             entry_widget = self.coarse_grading_entry
+            
+            # Status label for coarse aggregate
+            self.coarse_grading_status_label = Gtk.Label()
+            self.coarse_grading_status_label.set_markup('<span size="small" style="italic">Auto-populated from database template</span>')
+            self.coarse_grading_status_label.set_halign(Gtk.Align.START)
+            status_label = self.coarse_grading_status_label
         
         browse_button = Gtk.Button("Browse...")
         browse_button.connect("clicked", self._on_browse_grading_file, agg_type)
-        grading_box.pack_start(browse_button, False, False, 0)
+        browse_button.set_tooltip_text("Optional: Override with custom grading file")
+        grading_hbox.pack_start(browse_button, False, False, 0)
         
-        grid.attach(grading_box, 1, row, 2, 1)
+        grading_vbox.pack_start(grading_hbox, False, False, 0)
+        grading_vbox.pack_start(status_label, False, False, 0)
+        
+        grid.attach(grading_vbox, 1, row, 2, 1)
         row += 1
         
         # Bulk modulus
@@ -418,10 +492,10 @@ class ElasticModuliPanel(Gtk.Box):
         button_box.set_halign(Gtk.Align.CENTER)
         button_box.set_margin_top(20)
         
-        # Generate Input File button
+        # Generate Input File button (Phase 2: Updated with microstructure selection)
         generate_button = create_button_with_icon("Generate Input File", "save")
         generate_button.connect("clicked", self._on_generate_input_file)
-        generate_button.set_tooltip_text("Generate elastic.in input file for calculation")
+        generate_button.set_tooltip_text("Generate elastic_input.txt file with lineage data")
         button_box.pack_start(generate_button, False, False, 0)
         
         # Start Calculation button
@@ -458,10 +532,31 @@ class ElasticModuliPanel(Gtk.Box):
             self.hydration_combo.append("", "Error loading operations")
             self.hydration_combo.set_sensitive(False)
     
+    def _on_refresh_hydration_operations(self, button: Gtk.Button) -> None:
+        """Refresh the list of available hydration operations."""
+        self.logger.info("Refreshing hydration operations list...")
+        
+        # Store current selection to restore if possible
+        current_selection = self.hydration_combo.get_active_id()
+        
+        # Reload operations
+        self._load_available_hydration_operations()
+        
+        # Try to restore previous selection
+        if current_selection:
+            self.hydration_combo.set_active_id(current_selection)
+        
+        self.logger.info(f"Refreshed hydration operations - found {len(self.available_hydration_operations)} operations")
+    
     def _on_hydration_selection_changed(self, combo: Gtk.ComboBoxText) -> None:
-        """Handle hydration operation selection change."""
+        """Handle hydration operation selection change (Phase 2: Lineage-aware)."""
         active_id = combo.get_active_id()
         if not active_id or active_id == "":
+            # Clear dependent fields
+            self.microstructure_combo.set_sensitive(False)
+            self.microstructure_combo.remove_all()
+            self.resolved_lineage = None
+            self._update_lineage_display(None)
             return
         
         try:
@@ -472,66 +567,251 @@ class ElasticModuliPanel(Gtk.Box):
             )
             
             if hydration_operation:
-                self._populate_fields_from_hydration(hydration_operation)
+                # Phase 2: Load lineage and microstructures
+                self._load_lineage_and_microstructures(hydration_id)
                 
         except Exception as e:
             self.logger.error(f"Error handling hydration selection: {e}")
+            self._show_error_dialog(f"Error loading hydration operation data: {str(e)}")
     
-    def _populate_fields_from_hydration(self, hydration_operation: Operation) -> None:
-        """Populate form fields based on selected hydration operation."""
-        # Set operation name (Phase 3: Clean naming without auto-prefixes)
-        # User can override this with their own clean name
-        operation_name = ""  # Let user provide their own clean name
-        self.operation_name_entry.set_text(operation_name)
-        
-        # Set image filename
-        image_filename = f"{hydration_operation.name}.img"
-        self.image_filename_entry.set_text(image_filename)
-        
-        # Set output directory
-        project_root = Path(__file__).parent.parent.parent.parent
-        output_dir = project_root / "Operations" / f"Elastic_{hydration_operation.name}"
-        self.output_dir_entry.set_text(str(output_dir))
-        
-        # Find .pimg file in MICROSTRUCTURE directory (not hydration)
-        # The pimg file is created during microstructure generation
-        microstructure_name = self._get_parent_microstructure_name(hydration_operation)
-        if microstructure_name:
-            microstructure_dir = project_root / "Operations" / microstructure_name
-            if microstructure_dir.exists():
-                pimg_files = list(microstructure_dir.glob("*.pimg"))
-                if pimg_files:
-                    self.pimg_file_entry.set_text(str(pimg_files[0]))
-                    self.logger.info(f"Found pimg file in microstructure directory: {pimg_files[0]}")
-                else:
-                    self.logger.warning(f"No .pimg file found in microstructure directory: {microstructure_dir}")
-            else:
-                self.logger.warning(f"Microstructure directory not found: {microstructure_dir}")
-        else:
-            self.logger.warning(f"Could not determine parent microstructure for hydration operation: {hydration_operation.name}")
-        
-        # **NEW**: Auto-populate aggregate properties from microstructure metadata
+    def _load_lineage_and_microstructures(self, hydration_id: int) -> None:
+        """Load lineage data and available microstructures (Phase 2)."""
         try:
-            # Create a temporary operation object to populate from microstructure data
-            temp_operation = ElasticModuliOperation(
-                name=operation_name,
-                hydration_operation_id=hydration_operation.id,
-                image_filename=image_filename,
-                output_directory=str(output_dir)
-            )
+            # Resolve complete lineage chain
+            self.resolved_lineage = self.elastic_moduli_service.lineage_service.resolve_lineage_chain(hydration_id)
             
-            # Use the service to populate aggregate data from microstructure metadata
-            populated_operation = self.elastic_moduli_service.populate_operation_from_microstructure(
-                temp_operation, hydration_operation
-            )
+            # Update lineage display
+            self._update_lineage_display(self.resolved_lineage)
             
-            # Update UI fields with the populated data
-            self._update_ui_from_operation(populated_operation)
+            # Discover available hydrated microstructures
+            self.available_microstructures = self.elastic_moduli_service.discover_hydrated_microstructures(hydration_id)
             
-            self.logger.info(f"Auto-populated aggregate properties from microstructure metadata")
+            # Populate microstructure combo
+            self.microstructure_combo.remove_all()
+            for i, microstructure in enumerate(self.available_microstructures):
+                display_text = f"{microstructure.time_label}" + (" (Final)" if microstructure.is_final else "")
+                self.microstructure_combo.append(str(i), display_text)
+            
+            if self.available_microstructures:
+                # Auto-select final microstructure (first in list)
+                self.microstructure_combo.set_active(0)
+                self.microstructure_combo.set_sensitive(True)
+                self.logger.info(f"Loaded {len(self.available_microstructures)} hydrated microstructures")
+            else:
+                self.microstructure_combo.append("", "No hydrated microstructures found")
+                self.microstructure_combo.set_sensitive(False)
+                self.logger.warning(f"No hydrated microstructures found for hydration operation {hydration_id}")
+                
+        except Exception as e:
+            self.logger.error(f"Error loading lineage and microstructures: {e}")
+            self.resolved_lineage = None
+            self.available_microstructures = []
+            self._update_lineage_display(None)
+            self.microstructure_combo.remove_all()
+            self.microstructure_combo.append("", f"Error: {str(e)}")
+            self.microstructure_combo.set_sensitive(False)
+    
+    def _update_lineage_display(self, lineage_data) -> None:
+        """Update the lineage information display (Phase 2)."""
+        if not lineage_data:
+            self.lineage_info_label.set_markup('<span size="small" style="italic">Select hydration operation to see lineage chain</span>')
+            return
+        
+        try:
+            # Extract lineage information
+            hydration_op = lineage_data.get('hydration_operation')
+            microstructure_op = lineage_data.get('microstructure_operation')
+            aggregate_props = lineage_data.get('aggregate_properties', {})
+            volume_fractions = lineage_data.get('volume_fractions', {})
+            
+            # Build lineage chain display
+            lineage_parts = []
+            if microstructure_op:
+                lineage_parts.append(f"Microstructure: <b>{microstructure_op.name}</b>")
+            if hydration_op:
+                lineage_parts.append(f"Hydration: <b>{hydration_op.name}</b>")
+            
+            lineage_chain = " → ".join(lineage_parts) + " → Elastic Moduli"
+            
+            # Add aggregate information
+            agg_info = []
+            fine_agg = aggregate_props.get('fine_aggregate')
+            coarse_agg = aggregate_props.get('coarse_aggregate')
+            
+            if fine_agg:
+                agg_info.append(f"Fine: {fine_agg.name} (VF: {fine_agg.volume_fraction:.3f})")
+            if coarse_agg:
+                agg_info.append(f"Coarse: {coarse_agg.name} (VF: {coarse_agg.volume_fraction:.3f})")
+            
+            air_vf = volume_fractions.get('air_volume_fraction', 0.0)
+            if air_vf > 0:
+                agg_info.append(f"Air: {air_vf:.3f}")
+            
+            agg_text = ", ".join(agg_info) if agg_info else "No aggregates"
+            
+            # Combine into display text
+            display_text = f'<span size="small">Lineage: {lineage_chain}\nAggregates: {agg_text}</span>'
+            self.lineage_info_label.set_markup(display_text)
+            
+            self.logger.info(f"Updated lineage display - Aggregates: {len(agg_info)} types")
             
         except Exception as e:
-            self.logger.warning(f"Could not auto-populate from microstructure metadata: {e}")
+            self.logger.error(f"Error updating lineage display: {e}")
+            self.lineage_info_label.set_markup('<span size="small" color="red">Error displaying lineage information</span>')
+    
+    def _on_microstructure_selection_changed(self, combo: Gtk.ComboBoxText) -> None:
+        """Handle microstructure time selection change (Phase 2)."""
+        active_id = combo.get_active_id()
+        if not active_id or active_id == "":
+            return
+        
+        try:
+            microstructure_index = int(active_id)
+            if 0 <= microstructure_index < len(self.available_microstructures):
+                selected_microstructure = self.available_microstructures[microstructure_index]
+                self._populate_fields_from_selection(selected_microstructure)
+                
+        except Exception as e:
+            self.logger.error(f"Error handling microstructure selection: {e}")
+    
+    def _populate_fields_from_selection(self, selected_microstructure: HydratedMicrostructure) -> None:
+        """Populate form fields based on selected microstructure with auto-generated names and relative paths."""
+        if not self.resolved_lineage:
+            self.logger.warning("No lineage data available for populating fields")
+            return
+        
+        hydration_op = self.resolved_lineage.get('hydration_operation')
+        if not hydration_op:
+            self.logger.warning("No hydration operation in lineage data")
+            return
+        
+        # Auto-generate operation name: Elastic-{HydrationName}-{TimeStep}
+        # Extract time step from microstructure time label  
+        time_step = selected_microstructure.time_label
+        if time_step == "Final":
+            time_step = "Final"
+        else:
+            # Extract just the time part (e.g., "144.71h" from "CemLSFMortar.144.71h.23.100")
+            import re
+            time_match = re.search(r'(\d+(?:\.\d+)?h)', time_step)
+            if time_match:
+                time_step = time_match.group(1)
+            else:
+                time_step = time_step.replace('.', '_')  # Fallback
+        
+        operation_name = f"Elastic-{hydration_op.name}-{time_step}"
+        self.operation_name_entry.set_text(operation_name)
+        
+        # Set image filename using selected microstructure path (relative)
+        image_filename = os.path.basename(selected_microstructure.file_path)
+        self.image_filename_entry.set_text(image_filename)
+        
+        # Set hierarchical output directory (relative path)
+        # Format: ./Operations/{HydrationName}/{ElasticOperationName}
+        relative_output_dir = f"./Operations/{hydration_op.name}/{operation_name}"
+        self.output_dir_entry.set_text(relative_output_dir)
+        
+        # Set PIMG file path (relative to project root)
+        # Convert absolute PIMG path to relative path using consistent format
+        if selected_microstructure.pimg_path:
+            project_root = Path(__file__).parent.parent.parent.parent
+            try:
+                pimg_absolute = Path(selected_microstructure.pimg_path)
+                pimg_relative = os.path.relpath(pimg_absolute, project_root)
+                # Ensure consistent relative path format starting with ./
+                if pimg_relative.startswith('../'):
+                    # If path goes up directories, normalize to start from project root
+                    pimg_relative = pimg_relative.replace('../', '', 1)
+                if not pimg_relative.startswith('./'):
+                    pimg_relative = f"./{pimg_relative}"
+                self.pimg_file_entry.set_text(pimg_relative)
+            except Exception as e:
+                self.logger.warning(f"Could not convert PIMG path to relative: {e}")
+                self.pimg_file_entry.set_text(selected_microstructure.pimg_path)
+        
+        # Auto-populate from resolved lineage data
+        self._populate_from_resolved_lineage()
+        
+        self.logger.info(f"Auto-populated fields for operation: {operation_name}")
+    
+    def _populate_from_resolved_lineage(self) -> None:
+        """Populate UI fields from resolved lineage data (Phase 2)."""
+        if not self.resolved_lineage:
+            return
+        
+        try:
+            aggregate_props = self.resolved_lineage.get('aggregate_properties', {})
+            volume_fractions = self.resolved_lineage.get('volume_fractions', {})
+            
+            # Set ITZ calculation based on aggregate presence
+            has_itz = self.elastic_moduli_service.lineage_service.get_itz_detection(aggregate_props)
+            self.has_itz_check.set_active(has_itz)
+            
+            # Set air volume fraction
+            air_vf = volume_fractions.get('air_volume_fraction', 0.0)
+            self.air_volume_spin.set_value(air_vf)
+            
+            # Set fine aggregate properties
+            fine_agg = aggregate_props.get('fine_aggregate')
+            if fine_agg:
+                self.fine_agg_check.set_active(True)
+                self._set_aggregate_controls_sensitive("fine", True)
+                self.fine_volume_spin.set_value(fine_agg.volume_fraction)
+                self.fine_bulk_spin.set_value(fine_agg.bulk_modulus)
+                self.fine_shear_spin.set_value(fine_agg.shear_modulus)
+                if fine_agg.grading_path:
+                    self.fine_grading_entry.set_text(fine_agg.grading_path)
+                    # Update grading status to show auto-populated
+                    self.fine_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
+                else:
+                    self.fine_grading_status_label.set_markup('<span size="small" style="italic" color="orange">⚠ No grading template found</span>')
+                # Update source label
+                self.fine_agg_source_label.set_markup(f'<span size="small" style="italic">Source: <b>{fine_agg.name}</b></span>')
+                self.logger.info(f"Populated fine aggregate: {fine_agg.name} (VF: {fine_agg.volume_fraction:.3f})")
+            else:
+                self.fine_agg_check.set_active(False)
+                self._set_aggregate_controls_sensitive("fine", False)
+                self.fine_agg_source_label.set_markup('<span size="small" style="italic">Source: Not specified</span>')
+            
+            # Set coarse aggregate properties
+            coarse_agg = aggregate_props.get('coarse_aggregate')
+            if coarse_agg:
+                self.coarse_agg_check.set_active(True)
+                self._set_aggregate_controls_sensitive("coarse", True)
+                self.coarse_volume_spin.set_value(coarse_agg.volume_fraction)
+                self.coarse_bulk_spin.set_value(coarse_agg.bulk_modulus)
+                self.coarse_shear_spin.set_value(coarse_agg.shear_modulus)
+                if coarse_agg.grading_path:
+                    self.coarse_grading_entry.set_text(coarse_agg.grading_path)
+                    # Update grading status to show auto-populated
+                    self.coarse_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
+                else:
+                    self.coarse_grading_status_label.set_markup('<span size="small" style="italic" color="orange">⚠ No grading template found</span>')
+                # Update source label
+                self.coarse_agg_source_label.set_markup(f'<span size="small" style="italic">Source: <b>{coarse_agg.name}</b></span>')
+                self.logger.info(f"Populated coarse aggregate: {coarse_agg.name} (VF: {coarse_agg.volume_fraction:.3f})")
+            else:
+                self.coarse_agg_check.set_active(False)
+                self._set_aggregate_controls_sensitive("coarse", False)
+                self.coarse_agg_source_label.set_markup('<span size="small" style="italic">Source: Not specified</span>')
+            
+            # Show success message
+            populated_items = []
+            if fine_agg:
+                populated_items.append(f"fine aggregate ({fine_agg.name})")
+            if coarse_agg:
+                populated_items.append(f"coarse aggregate ({coarse_agg.name})")
+            if air_vf > 0:
+                populated_items.append(f"air content ({air_vf:.1%})")
+            if has_itz:
+                populated_items.append("ITZ calculations")
+                
+            if populated_items:
+                message = f"Auto-populated from lineage: {', '.join(populated_items)}"
+                self.logger.info(message)
+            
+        except Exception as e:
+            self.logger.error(f"Error populating from resolved lineage: {e}")
             # Continue without auto-population - user can fill manually
     
     def _update_ui_from_operation(self, operation: ElasticModuliOperation) -> None:
@@ -684,20 +964,31 @@ class ElasticModuliPanel(Gtk.Box):
         dialog.destroy()
     
     def _on_generate_input_file(self, button: Gtk.Button) -> None:
-        """Handle generate input file button."""
+        """Handle generate input file button (Phase 2: Lineage-aware)."""
         try:
+            # Validate selections
+            if not self._validate_selections():
+                return
+            
+            # Get selected microstructure
+            selected_microstructure = self._get_selected_microstructure()
+            if not selected_microstructure:
+                self._show_error_dialog("Please select a hydrated microstructure")
+                return
+            
+            # Create operation from form
             operation = self._create_operation_from_form()
             if not operation:
                 return
             
-            # Generate input file
+            # Generate input file using Phase 1 services
             output_dir = self.output_dir_entry.get_text().strip()
             if not output_dir:
                 self._show_error_dialog("Output directory is required")
                 return
             
             input_file_path = self.elastic_moduli_service.generate_elastic_input_file(
-                operation, output_dir
+                operation, selected_microstructure, output_dir
             )
             
             self._show_info_dialog(f"Input file generated successfully:\n{input_file_path}")
@@ -707,51 +998,58 @@ class ElasticModuliPanel(Gtk.Box):
             self._show_error_dialog(f"Failed to generate input file:\n{str(e)}")
     
     def _on_start_calculation(self, button: Gtk.Button) -> None:
-        """Handle start calculation button with Phase 3 clean naming and lineage."""
+        """Handle start calculation button (Phase 2: Lineage-aware with microstructure selection)."""
         try:
-            # Phase 3: Clean naming validation
+            # Phase 2: Enhanced validation
+            if not self._validate_selections():
+                return
+            
             operation_name = self.operation_name_entry.get_text().strip()
-            if not operation_name:
-                self._show_error_dialog("Please enter an operation name")
+            # Operation name is auto-generated, should always be present after validation
+            
+            # Get selected microstructure and hydration ID
+            selected_microstructure = self._get_selected_microstructure()
+            if not selected_microstructure:
+                self._show_error_dialog("Please select a hydrated microstructure")
                 return
             
-            # Validate form and create operation object
-            operation = self._create_operation_from_form()
-            if not operation:
-                return
+            hydration_id = int(self.hydration_combo.get_active_id())
             
-            # Phase 3: Capture all UI parameters for reproducibility
-            ui_parameters = self._capture_elastic_ui_parameters()
-            
-            # Phase 3: Find parent hydration operation for lineage
-            hydration_id = self.hydration_combo.get_active_id()
-            parent_operation_id = int(hydration_id) if hydration_id else None
-            
-            # Phase 3: Create general Operation with lineage and UI parameters
-            general_operation = self._create_elastic_operation(
-                operation_name, ui_parameters, parent_operation_id
-            )
-            
-            # Create specific ElasticModuliOperation linked to general operation
-            saved_operation = self.elastic_moduli_service.create_operation(
+            # Phase 2: Use new lineage-aware operation creation
+            elastic_operation, lineage_data = self.elastic_moduli_service.create_operation_with_lineage(
                 name=operation_name,
-                hydration_operation_id=operation.hydration_operation_id,
-                description=operation.description,
-                general_operation_id=general_operation.id if general_operation else None,
-                **operation.to_dict()
+                hydration_operation_id=hydration_id,
+                description=f"Elastic moduli calculation using {selected_microstructure.time_label} microstructure"
             )
             
-            self._show_info_dialog(f"Elastic moduli operation '{operation_name}' created successfully.\nCheck the Operations Tool to monitor progress.")
-            self.logger.info(f"Phase 3: Created elastic operation '{operation_name}' with lineage to hydration operation {parent_operation_id}")
+            # Phase 2: Store selected microstructure information
+            elastic_operation.image_filename = os.path.basename(selected_microstructure.file_path)
+            elastic_operation.pimg_file_path = selected_microstructure.pimg_path
+            
+            # Phase 2: Capture UI parameters for reproducibility
+            ui_parameters = self._capture_elastic_ui_parameters()
+            ui_parameters['selected_microstructure'] = {
+                'file_path': selected_microstructure.file_path,
+                'pimg_path': selected_microstructure.pimg_path,
+                'time_label': selected_microstructure.time_label,
+                'is_final': selected_microstructure.is_final
+            }
+            
+            # TODO: Phase 3 - Create process execution integration
+            # For now, show success message
+            self._show_info_dialog(f"Elastic moduli operation '{operation_name}' created successfully.\n\nUsing microstructure: {selected_microstructure.time_label}\nCheck the Operations Tool to monitor progress.")
+            self.logger.info(f"Phase 2: Created elastic operation '{operation_name}' with lineage and microstructure selection")
             
         except Exception as e:
             self.logger.error(f"Error starting calculation: {e}")
             self._show_error_dialog(f"Failed to start calculation:\n{str(e)}")
     
     def _on_clear_form(self, button: Gtk.Button) -> None:
-        """Handle clear form button."""
+        """Handle clear form button (Phase 2: Include microstructure selection)."""
         # Reset all form fields
         self.hydration_combo.set_active(-1)
+        self.microstructure_combo.remove_all()  # Phase 2: Clear microstructure selection
+        self.microstructure_combo.set_sensitive(False)
         self.operation_name_entry.set_text("")
         self.image_filename_entry.set_text("")
         self.output_dir_entry.set_text("")
@@ -775,6 +1073,45 @@ class ElasticModuliPanel(Gtk.Box):
         # Disable aggregate controls
         self._set_aggregate_controls_sensitive("fine", False)
         self._set_aggregate_controls_sensitive("coarse", False)
+        
+        # Phase 2: Reset lineage data
+        self.resolved_lineage = None
+        self.available_microstructures = []
+        self._update_lineage_display(None)
+    
+    def _validate_selections(self) -> bool:
+        """Validate that all required selections are made (Phase 2)."""
+        # Check hydration operation selection
+        if not self.hydration_combo.get_active_id():
+            self._show_error_dialog("Please select a hydration operation")
+            return False
+        
+        # Check microstructure selection
+        if not self.microstructure_combo.get_active_id() or not self.available_microstructures:
+            self._show_error_dialog("Please select a hydrated microstructure")
+            return False
+        
+        # Check operation name (auto-generated, should always be present)
+        if not self.operation_name_entry.get_text().strip():
+            self._show_error_dialog("Operation name not generated. Please select a microstructure first.")
+            return False
+        
+        return True
+    
+    def _get_selected_microstructure(self) -> Optional[HydratedMicrostructure]:
+        """Get the currently selected microstructure (Phase 2)."""
+        active_id = self.microstructure_combo.get_active_id()
+        if not active_id:
+            return None
+        
+        try:
+            index = int(active_id)
+            if 0 <= index < len(self.available_microstructures):
+                return self.available_microstructures[index]
+        except (ValueError, IndexError):
+            pass
+        
+        return None
     
     def _create_operation_from_form(self) -> Optional[ElasticModuliOperation]:
         """Create ElasticModuliOperation from form data."""
@@ -787,7 +1124,7 @@ class ElasticModuliPanel(Gtk.Box):
         
         operation_name = self.operation_name_entry.get_text().strip()
         if not operation_name:
-            errors.append("Operation name is required")
+            errors.append("Operation name not generated - please select a microstructure")
         
         image_filename = self.image_filename_entry.get_text().strip()
         if not image_filename:
