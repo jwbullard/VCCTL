@@ -146,13 +146,8 @@ class MixDesignPanel(Gtk.Box):
         self.load_button.set_always_show_image(True)
         action_box.pack_start(self.load_button, False, False, 0)
         
-        
-        self.save_button = Gtk.Button(label="Save")
-        save_icon = create_icon_image("save", 16)
-        self.save_button.set_image(save_icon)
-        self.save_button.set_always_show_image(True)
-        self.save_button.get_style_context().add_class("suggested-action")
-        action_box.pack_start(self.save_button, False, False, 0)
+        # Note: Save button removed - auto-save handles all saving automatically
+        # Manual save was redundant since auto-save triggers before every operation
         
         # Reset button to restore defaults
         self.reset_button = Gtk.Button(label="Reset")
@@ -508,7 +503,7 @@ class MixDesignPanel(Gtk.Box):
         # Action buttons
         self.new_button.connect('clicked', self._on_new_mix_clicked)
         self.load_button.connect('clicked', self._on_load_mix_clicked)
-        self.save_button.connect('clicked', self._on_save_mix_clicked)
+        # Save button removed - auto-save handles all saving
         self.reset_button.connect('clicked', self._on_reset_mix_clicked)
         
         # Water controls
@@ -967,13 +962,14 @@ class MixDesignPanel(Gtk.Box):
             self.main_window.update_status(f"Error loading mix designs: {e}", "error", 5)
     
     
-    def _on_save_mix_clicked(self, button) -> None:
-        """Handle save mix button click."""
-        try:
-            self._show_save_mix_dialog()
-        except Exception as e:
-            self.logger.error(f"Error saving mix design: {e}")
-            self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
+    # Manual save method removed - auto-save handles all saving automatically
+    # def _on_save_mix_clicked(self, button) -> None:
+    #     """Handle save mix button click."""
+    #     try:
+    #         self._show_save_mix_dialog()
+    #     except Exception as e:
+    #         self.logger.error(f"Error saving mix design: {e}")
+    #         self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
     
     def _on_create_mix_clicked(self, button) -> None:
         """Handle create mix button click."""
@@ -3816,6 +3812,10 @@ class MixDesignPanel(Gtk.Box):
     # Mix Design Save/Load Methods
     # =============================================================================
     
+    # Manual save dialog removed - auto-save handles all saving automatically
+    # The _show_save_mix_dialog method has been commented out since manual save is no longer needed
+    # Auto-save triggers automatically before microstructure generation
+    '''
     def _show_save_mix_dialog(self) -> None:
         """Show dialog to save current mix design."""
         # Create save dialog
@@ -3898,6 +3898,7 @@ class MixDesignPanel(Gtk.Box):
                 self.main_window.update_status("Mix design name is required", "error", 3)
         
         dialog.destroy()
+    '''
     
     def _show_mix_design_selection_dialog(self) -> None:
         """Show dialog to select and load a saved mix design."""
@@ -4310,6 +4311,8 @@ class MixDesignPanel(Gtk.Box):
         except Exception:
             return 0.0
 
+    # Manual save method removed - auto-save handles all saving automatically
+    '''
     def _save_current_mix_design(self, name: str, description: str, notes: str, is_template: bool) -> None:
         """Save the current mix design to database."""
         try:
@@ -4416,6 +4419,7 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error saving mix design: {e}")
             self.main_window.update_status(f"Error saving mix design: {e}", "error", 5)
+    '''
     
     def _populate_ui_from_mix_design(self, mix_design_data: Dict[str, Any]) -> None:
         """Populate ALL UI controls from mix design data."""
@@ -4481,26 +4485,55 @@ class MixDesignPanel(Gtk.Box):
             fine_agg_shape = mix_design_data.get('fine_aggregate_shape_set', mix_design_data.get('aggregate_shape_set', 'spherical'))
             coarse_agg_shape = mix_design_data.get('coarse_aggregate_shape_set', 'spherical')
             
-            # Find and set cement shape
-            cement_model = self.cement_shape_combo.get_model()
-            for i in range(len(cement_model)):
-                if cement_model[i][0] == cement_shape:
+            self.logger.info(f"DEBUG Shape Loading: cement={cement_shape}, fine={fine_agg_shape}, coarse={coarse_agg_shape}")
+            
+            try:
+                self.logger.info(f"DEBUG: Starting cement shape loading...")
+                # Set shape combos using a simpler approach
+                # Try to find the shape by iterating through combo items
+                cement_found = False
+                cement_count = self.cement_shape_combo.get_model().iter_n_children(None)
+                self.logger.info(f"DEBUG: Cement combo has {cement_count} items")
+                for i in range(cement_count):
                     self.cement_shape_combo.set_active(i)
-                    break
+                    active_id = self.cement_shape_combo.get_active_id()
+                    self.logger.info(f"DEBUG: Cement index {i}: active_id='{active_id}'")
+                    if active_id == cement_shape:
+                        cement_found = True
+                        self.logger.info(f"DEBUG: Set cement shape to index {i} for shape '{cement_shape}'")
+                        break
+                if not cement_found:
+                    self.logger.warning(f"DEBUG: Could not find cement shape '{cement_shape}' in combo box")
+                    self.cement_shape_combo.set_active(0)  # Default to first item
+                self.logger.info(f"DEBUG: Completed cement shape loading")
+            except Exception as e:
+                self.logger.error(f"DEBUG: Error in cement shape loading: {e}")
+                import traceback
+                self.logger.error(f"DEBUG: Traceback: {traceback.format_exc()}")
             
-            # Find and set fine aggregate shape
-            fine_model = self.fine_agg_shape_combo.get_model()
-            for i in range(len(fine_model)):
-                if fine_model[i][0] == fine_agg_shape:
-                    self.fine_agg_shape_combo.set_active(i)
+            # Set fine aggregate shape using simpler approach
+            fine_found = False
+            for i in range(self.fine_agg_shape_combo.get_model().iter_n_children(None)):
+                self.fine_agg_shape_combo.set_active(i)
+                if self.fine_agg_shape_combo.get_active_id() == fine_agg_shape:
+                    fine_found = True
+                    self.logger.info(f"DEBUG: Set fine agg shape to index {i} for shape '{fine_agg_shape}'")
                     break
+            if not fine_found:
+                self.logger.warning(f"DEBUG: Could not find fine agg shape '{fine_agg_shape}' in combo box")
+                self.fine_agg_shape_combo.set_active(0)  # Default to first item
             
-            # Find and set coarse aggregate shape
-            coarse_model = self.coarse_agg_shape_combo.get_model()
-            for i in range(len(coarse_model)):
-                if coarse_model[i][0] == coarse_agg_shape:
-                    self.coarse_agg_shape_combo.set_active(i)
+            # Set coarse aggregate shape using simpler approach
+            coarse_found = False
+            for i in range(self.coarse_agg_shape_combo.get_model().iter_n_children(None)):
+                self.coarse_agg_shape_combo.set_active(i)
+                if self.coarse_agg_shape_combo.get_active_id() == coarse_agg_shape:
+                    coarse_found = True
+                    self.logger.info(f"DEBUG: Set coarse agg shape to index {i} for shape '{coarse_agg_shape}'")
                     break
+            if not coarse_found:
+                self.logger.warning(f"DEBUG: Could not find coarse agg shape '{coarse_agg_shape}' in combo box")
+                self.coarse_agg_shape_combo.set_active(0)  # Default to first item
             
             # Calculate total mass for component mass calculations
             total_water_content = mix_design_data.get('total_water_content', 0.0)
@@ -5014,9 +5047,7 @@ class MixDesignPanel(Gtk.Box):
                 # Advanced parameters
                 'flocculation_enabled': self.flocculation_check.get_active(),
                 'dispersion_factor': self.dispersion_factor_spin.get_value(),
-                'distribution_coefficient': self.distribution_coefficient_spin.get_value(),
-                'minimum_distance': self.minimum_distance_spin.get_value(),
-                'maximum_iterations': self.maximum_iterations_spin.get_value(),
+                # Note: distribution_coefficient, minimum_distance, maximum_iterations widgets don't exist in UI
                 
                 # Auto-calculation settings
                 'auto_calculate_enabled': self.auto_calculate_enabled,

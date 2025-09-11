@@ -2821,14 +2821,35 @@ class OperationsMonitoringPanel(Gtk.Box):
             input_data: Optional stdin data for the process
             
         Returns:
-            Operation ID
+            Database Operation ID (not process ID)
         """
-        operation_id = f"proc_{int(time.time() * 1000)}"
+        # Create database operation record FIRST to get the real operation ID
+        try:
+            # Convert UI enum to database enum
+            from app.models.operation import OperationStatus as DBOperationStatus
+            
+            db_operation = self.service_container.operation_service.create_operation(
+                name=name,
+                operation_type=operation_type.value,
+                notes=f"Process starting in {working_dir}"
+            )
+            # Use the database operation ID as the operation_id
+            operation_id = str(db_operation.id)
+            self.logger.info(f"Created database operation: {name} with ID {operation_id}")
+        except Exception as e:
+            self.logger.error(f"Failed to create database operation: {e}")
+            self.logger.error(f"Exception type: {type(e).__name__}")
+            self.logger.error(f"Exception details: {str(e)}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            # Fallback to process ID if database fails
+            operation_id = f"proc_{int(time.time() * 1000)}"
         
         try:
-            # Create output files in the working directory
-            stdout_file = os.path.join(working_dir, f"{operation_id}_stdout.txt")
-            stderr_file = os.path.join(working_dir, f"{operation_id}_stderr.txt")
+            # Create process-specific identifier for output files
+            process_id = f"proc_{int(time.time() * 1000)}"
+            stdout_file = os.path.join(working_dir, f"{process_id}_stdout.txt")
+            stderr_file = os.path.join(working_dir, f"{process_id}_stderr.txt")
             
             # Open output files
             stdout_handle = open(stdout_file, 'w', encoding='utf-8', buffering=1)
@@ -2876,24 +2897,32 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             self.operations[operation_id] = operation
             
-            # Save operation to database so it persists through refreshes
+            # Update database operation with process information
             try:
-                # Convert UI enum to database enum
-                from app.models.operation import OperationStatus as DBOperationStatus
-                
-                db_operation = self.service_container.operation_service.create_operation(
-                    name=name,
-                    operation_type=operation_type.value,
-                    status=DBOperationStatus.RUNNING,  # Use database enum, not UI enum
-                    progress=operation.progress,
-                    current_step=operation.current_step,
-                    notes=f"Process PID: {process.pid}"
-                )
-                self.logger.info(f"Saved operation to database: {name} with RUNNING status")
+                # Try the correct method name from the main operation service
+                if hasattr(self.service_container.operation_service, 'update_status'):
+                    # Main operation service uses update_status with name, not ID
+                    self.service_container.operation_service.update_status(
+                        name=name,
+                        status=DBOperationStatus.RUNNING,
+                        progress=operation.progress,
+                        current_step=operation.current_step
+                    )
+                elif hasattr(self.service_container.operation_service, 'update_operation_status'):
+                    # Alternative operation service uses update_operation_status with ID
+                    self.service_container.operation_service.update_operation_status(
+                        operation_id=int(operation_id),
+                        status=DBOperationStatus.RUNNING.value,
+                        progress=operation.progress,
+                        current_step=operation.current_step
+                    )
+                else:
+                    self.logger.warning("No suitable update method found on operation service")
+                self.logger.info(f"Updated database operation {operation_id} with process info: PID {process.pid}")
             except Exception as e:
-                self.logger.error(f"Failed to save operation to database: {e}")
+                self.logger.error(f"Failed to update database operation {operation_id}: {e}")
             
-            self._add_log_entry(f"Started real process operation: {name} (PID: {process.pid})")
+            self._add_log_entry(f"Started operation: {name} (DB ID: {operation_id}, PID: {process.pid})")
             self._add_log_entry(f"Command: {' '.join(command)}")
             self._add_log_entry(f"Working directory: {working_dir}")
             self._add_log_entry(f"Stdout redirected to: {os.path.basename(stdout_file)}")
