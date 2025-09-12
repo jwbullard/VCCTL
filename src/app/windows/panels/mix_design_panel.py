@@ -3026,6 +3026,106 @@ class MixDesignPanel(Gtk.Box):
                         except Exception as e:
                             self.logger.error(f"❌ Failed to create MicrostructureOperation record: {e}")
                             # Continue execution - don't fail the whole operation
+                            
+                        # Store microstructure metadata for hydration compatibility
+                        try:
+                            from app.services.microstructure_hydration_bridge import MicrostructureHydrationBridge
+                            bridge = MicrostructureHydrationBridge()
+                            
+                            # Extract parameters from current mix design
+                            current_mix = self._create_mix_design_from_ui()
+                            
+                            # Debug: check what attributes are available
+                            self.logger.info(f"DEBUG: current_mix type: {type(current_mix)}")
+                            self.logger.info(f"DEBUG: current_mix attributes: {dir(current_mix)}")
+                            
+                            # Get system size - try different sources
+                            system_size = 100  # Default fallback
+                            if hasattr(current_mix, 'system_size_x'):
+                                system_size = int(current_mix.system_size_x)
+                                self.logger.info(f"DEBUG: Using system_size_x = {system_size}")
+                            elif hasattr(current_mix, 'system_size'):
+                                system_size = int(current_mix.system_size)
+                                self.logger.info(f"DEBUG: Using system_size = {system_size}")
+                            else:
+                                # Fallback to UI widget values
+                                try:
+                                    system_size = int(self.system_size_x_spin.get_value())
+                                    self.logger.info(f"DEBUG: Using UI system_size_x = {system_size}")
+                                except:
+                                    self.logger.warning(f"DEBUG: Using default system_size = {system_size}")
+                            
+                            # Get resolution
+                            resolution = 1.0  # Default fallback
+                            if hasattr(current_mix, 'resolution'):
+                                resolution = float(current_mix.resolution)
+                                self.logger.info(f"DEBUG: Using resolution = {resolution}")
+                            else:
+                                # Fallback to UI widget value
+                                try:
+                                    resolution = float(self.resolution_spin.get_value())
+                                    self.logger.info(f"DEBUG: Using UI resolution = {resolution}")
+                                except:
+                                    self.logger.warning(f"DEBUG: Using default resolution = {resolution}")
+                            
+                            # Get components and convert to dictionary format
+                            materials_data = []
+                            if hasattr(current_mix, 'components'):
+                                from dataclasses import asdict, is_dataclass
+                                components = current_mix.components
+                                self.logger.info(f"DEBUG: Found {len(components)} components")
+                                
+                                # Convert MixComponent objects to dictionaries
+                                for comp in components:
+                                    if isinstance(comp, dict):
+                                        # Already a dictionary, use as-is
+                                        materials_data.append(comp)
+                                        self.logger.info(f"DEBUG: Component already a dict: {comp.get('material_name', 'Unknown')}")
+                                    elif is_dataclass(comp):
+                                        # Convert dataclass to dictionary using asdict
+                                        comp_dict = asdict(comp)
+                                        
+                                        # Ensure material_type is a string, not an enum
+                                        if 'material_type' in comp_dict and hasattr(comp_dict['material_type'], 'value'):
+                                            comp_dict['material_type'] = comp_dict['material_type'].value
+                                        
+                                        # Rename material_name to name if needed (bridge expects 'name')
+                                        if 'material_name' in comp_dict:
+                                            comp_dict['name'] = comp_dict['material_name']
+                                        
+                                        materials_data.append(comp_dict)
+                                        self.logger.info(f"DEBUG: Converted component {comp_dict.get('name', 'Unknown')} from dataclass to dict")
+                                    else:
+                                        # Fallback for other object types
+                                        comp_dict = {
+                                            'name': getattr(comp, 'material_name', getattr(comp, 'name', 'Unknown')),
+                                            'material_type': str(getattr(comp, 'material_type', 'unknown')),
+                                            'volume_fraction': getattr(comp, 'volume_fraction', 0.0),
+                                            'mass_fraction': getattr(comp, 'mass_fraction', 0.0),
+                                            'specific_gravity': getattr(comp, 'specific_gravity', 2.65)
+                                        }
+                                        materials_data.append(comp_dict)
+                                        self.logger.info(f"DEBUG: Converted component {comp_dict['name']} using fallback method")
+                            
+                            self.logger.info(f"DEBUG: Prepared {len(materials_data)} materials for metadata storage")
+                            
+                            # Store metadata with operation parameters
+                            success = bridge.store_microstructure_metadata(
+                                operation_name=operation_name,
+                                microstructure_file=f"./Operations/{operation_name}/{operation_name}.pimg",  # Expected PIMG location
+                                system_size=system_size,
+                                resolution=resolution,
+                                materials_data=materials_data
+                            )
+                            
+                            if success:
+                                self.logger.info(f"✅ Stored microstructure metadata: {operation_name}_metadata.json")
+                            else:
+                                self.logger.warning(f"⚠️ Failed to store microstructure metadata for {operation_name}")
+                                
+                        except Exception as e:
+                            self.logger.error(f"❌ Failed to store microstructure metadata: {e}")
+                            # Continue execution - metadata storage failure shouldn't stop the operation
                         
                         self.main_window.update_status(
                             f"Genmic process started! Monitor progress in Operations tab.", 

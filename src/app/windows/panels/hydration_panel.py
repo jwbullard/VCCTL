@@ -3472,8 +3472,10 @@ class HydrationPanel(Gtk.Box):
         # Validate time calibration settings
         if time_calibration_settings and 'time_conversion_factor' in time_calibration_settings:
             factor = time_calibration_settings['time_conversion_factor']
-            if not (0.1 <= factor <= 10.0):
-                raise ValueError(f"Time conversion factor must be between 0.1-10.0, got {factor}")
+            # Allow much smaller values for Knudsen parabolic law (units: h⁻²)
+            # Default is 0.00045, so range should accommodate scientific values
+            if not (0.00001 <= factor <= 100.0):
+                raise ValueError(f"Time conversion factor must be between 0.00001-100.0, got {factor}")
         
         # Validate advanced settings ranges
         if advanced_settings:
