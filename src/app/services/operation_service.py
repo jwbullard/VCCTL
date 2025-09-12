@@ -57,14 +57,57 @@ class OperationService:
             return operation
     
     def delete(self, name: str) -> bool:
-        """Delete operation by name."""
+        """Delete operation by name with proper cascade deletion of related records."""
         try:
             with self.db_service.get_session() as session:
                 operation = session.query(Operation).filter(Operation.name == name).first()
                 if operation:
+                    operation_id = operation.id
+                    self.logger.info(f"Deleting operation '{name}' (ID: {operation_id}) with cascade cleanup...")
+                    
+                    # Delete related records first to avoid foreign key constraint errors
+                    try:
+                        # Delete MicrostructureOperation records (but PRESERVE associated MixDesign records)
+                        # MixDesigns with _MixDesign suffix are reusable templates and should persist independently
+                        from ..models.microstructure_operation import MicrostructureOperation
+                        micro_ops = session.query(MicrostructureOperation).filter(MicrostructureOperation.operation_id == operation_id).all()
+                        for micro_op in micro_ops:
+                            self.logger.debug(f"Deleting MicrostructureOperation for operation {name} (PRESERVING MixDesign ID: {micro_op.mix_design_id})")
+                            session.delete(micro_op)
+                    except Exception as e:
+                        self.logger.debug(f"No MicrostructureOperation records to delete for {name}: {e}")
+                    
+                    try:
+                        # Delete HydrationOperation records
+                        from ..models.hydration_operation import HydrationOperation
+                        hydration_ops = session.query(HydrationOperation).filter(HydrationOperation.operation_id == operation_id).all()
+                        for hydration_op in hydration_ops:
+                            session.delete(hydration_op)
+                            self.logger.debug(f"Deleted HydrationOperation for operation {name}")
+                    except Exception as e:
+                        self.logger.debug(f"No HydrationOperation records to delete for {name}: {e}")
+                    
+                    try:
+                        # Delete ElasticModuliOperation records
+                        from ..models.elastic_moduli_operation import ElasticModuliOperation
+                        elastic_ops = session.query(ElasticModuliOperation).filter(ElasticModuliOperation.hydration_operation_id == operation_id).all()
+                        for elastic_op in elastic_ops:
+                            session.delete(elastic_op)
+                            self.logger.debug(f"Deleted ElasticModuliOperation for operation {name}")
+                    except Exception as e:
+                        self.logger.debug(f"No ElasticModuliOperation records to delete for {name}: {e}")
+                    
+                    # Update any child operations that reference this as parent
+                    child_operations = session.query(Operation).filter(Operation.parent_operation_id == operation_id).all()
+                    for child_op in child_operations:
+                        child_op.parent_operation_id = None
+                        self.logger.debug(f"Cleared parent reference for child operation: {child_op.name}")
+                    
+                    # Finally delete the main operation record
                     session.delete(operation)
                     session.commit()
-                    self.logger.info(f"Deleted operation: {name}")
+                    
+                    self.logger.info(f"Successfully deleted operation '{name}' and all related records")
                     return True
                 else:
                     self.logger.warning(f"Operation not found for deletion: {name}")

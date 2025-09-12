@@ -4950,14 +4950,16 @@ class MixDesignPanel(Gtk.Box):
             mix_design_service = MixDesignService(self.service_container.database_service)
             existing_designs = mix_design_service.get_all()
             
-            # Generate unique name to prevent overwriting
-            unique_mix_name = self._generate_unique_mix_name(base_mix_name, existing_designs)
+            # Generate mix design name with _MixDesign suffix for clear separation
+            mix_design_name = f"{base_mix_name}_MixDesign"
+            unique_mix_name = self._generate_unique_mix_name(mix_design_name, existing_designs)
             
-            # Update the UI with the unique name if it changed
-            if unique_mix_name != base_mix_name:
-                self.mix_name_entry.set_text(unique_mix_name)
-                self.logger.info(f"Auto-generated unique name: '{base_mix_name}' → '{unique_mix_name}'")
-                self.main_window.update_status(f"Generated unique name '{unique_mix_name}' to prevent overwrite", "info", 2)
+            # Log the mix design name being saved (but keep operation name in UI unchanged)
+            if unique_mix_name != mix_design_name:
+                self.logger.info(f"Auto-generated unique mix design name: '{mix_design_name}' → '{unique_mix_name}'")
+                self.main_window.update_status(f"Saving mix design as '{unique_mix_name}' for reuse", "info", 2)
+            else:
+                self.main_window.update_status(f"Saving mix design as '{unique_mix_name}' for reuse", "info", 2)
             
             # Get current mix design data
             self.logger.info(f"🚨 DEBUG: Extracting current mix design data...")
