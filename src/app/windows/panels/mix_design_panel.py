@@ -56,6 +56,10 @@ class MixDesignPanel(Gtk.Box):
         # Template loading state
         self.pending_grading_template = None  # Store template to load into next grading dialog
         
+        # Track current grading template names
+        self._fine_aggregate_grading_template_name = None
+        self._coarse_aggregate_grading_template_name = None
+        
         # Material lists cache
         self.material_lists = {}
         
@@ -1136,9 +1140,11 @@ class MixDesignPanel(Gtk.Box):
             grading_widget = GradingCurveWidget()
             
             # Check if there's a pending template to load
+            template_name_to_track = None
             if self.pending_grading_template:
                 try:
                     if grading_widget.load_from_grading_template(self.pending_grading_template):
+                        template_name_to_track = self.pending_grading_template.name
                         self.main_window.update_status(
                             f"Loaded template: {self.pending_grading_template.name}", "success", 3
                         )
@@ -1180,6 +1186,11 @@ class MixDesignPanel(Gtk.Box):
                 grading_data = grading_widget.get_grading_data()
                 setattr(self, grading_data_attr, grading_data)
                 
+                # Save template name if a template was loaded
+                if template_name_to_track:
+                    template_attr = f'_{aggregate_type}_aggregate_grading_template_name'
+                    setattr(self, template_attr, template_name_to_track)
+                
                 # Update the appropriate button tooltip
                 if aggregate_type == "fine":
                     button = self.fine_agg_grading_button
@@ -1187,7 +1198,10 @@ class MixDesignPanel(Gtk.Box):
                     button = self.coarse_agg_grading_button
                 
                 if grading_data:
-                    button.set_tooltip_text(f"Grading curve set ({len(grading_data)} points)")
+                    if template_name_to_track:
+                        button.set_tooltip_text(f"Grading template: {template_name_to_track} ({len(grading_data)} points)")
+                    else:
+                        button.set_tooltip_text(f"Grading curve set ({len(grading_data)} points)")
                 else:
                     button.set_tooltip_text(f"Edit {aggregate_type} aggregate grading curve")
                 
@@ -1808,6 +1822,10 @@ class MixDesignPanel(Gtk.Box):
             self.components_box.remove(row['box'])
         self.component_rows.clear()
         
+        # Clear grading template names
+        self._fine_aggregate_grading_template_name = None
+        self._coarse_aggregate_grading_template_name = None
+        
         # Reset water and air values
         self.wb_ratio_spin.set_value(0.40)
         self.water_content_spin.set_value(0.40)  # Default to match W/B ratio
@@ -1934,9 +1952,11 @@ class MixDesignPanel(Gtk.Box):
             grading_widget = GradingCurveWidget()
             
             # Check if there's a pending template to load
+            template_name_to_track = None
             if self.pending_grading_template:
                 try:
                     if grading_widget.load_from_grading_template(self.pending_grading_template):
+                        template_name_to_track = self.pending_grading_template.name
                         self.main_window.update_status(
                             f"Loaded template: {self.pending_grading_template.name}", "success", 3
                         )
@@ -1973,9 +1993,16 @@ class MixDesignPanel(Gtk.Box):
                 grading_data = grading_widget.get_grading_data()
                 row_data['grading_data'] = grading_data
                 
+                # Store template name if one was loaded (for component aggregates)
+                if template_name_to_track:
+                    row_data['grading_template'] = template_name_to_track
+                
                 # Update UI to indicate grading is set
                 if grading_data:
-                    row_data['grading_button'].set_tooltip_text(f"Grading curve set ({len(grading_data)} points)")
+                    if template_name_to_track:
+                        row_data['grading_button'].set_tooltip_text(f"Grading template: {template_name_to_track} ({len(grading_data)} points)")
+                    else:
+                        row_data['grading_button'].set_tooltip_text(f"Grading curve set ({len(grading_data)} points)")
                 else:
                     row_data['grading_button'].set_tooltip_text("Edit grading curve")
                 
@@ -4205,38 +4232,62 @@ class MixDesignPanel(Gtk.Box):
                     # Simple volume fraction calculation (more accurate calculation done in service)
                     volume_fraction = mass_fraction / specific_gravity
                     
-                    components.append({
+                    # Include grading data for aggregates
+                    component_data = {
                         'material_name': material_name,
                         'material_type': material_type,
                         'mass_fraction': mass_fraction,
                         'volume_fraction': volume_fraction,
                         'specific_gravity': specific_gravity
-                    })
+                    }
+                    
+                    # Add grading data if this is an aggregate with grading data
+                    if material_type == 'aggregate' and row.get('grading_data'):
+                        component_data['grading_data'] = row['grading_data']
+                        # Include template name if available
+                        if row.get('grading_template'):
+                            component_data['grading_template'] = row['grading_template']
+                    
+                    components.append(component_data)
             
             # Add aggregate components if they exist
             fine_agg_name = self.fine_agg_combo.get_active_id()
             if fine_agg_name and fine_agg_name != "" and fine_agg_mass > 0:
                 fine_agg_mass_fraction = fine_agg_mass / total_concrete_mass if total_concrete_mass > 0 else 0.0
                 self.logger.info(f"VALIDATION DEBUG: {fine_agg_name} - mass_kg={fine_agg_mass}, total_concrete_mass={total_concrete_mass}, mass_fraction={fine_agg_mass_fraction}")
-                components.append({
+                
+                fine_agg_data = {
                     'material_name': fine_agg_name,
                     'material_type': 'aggregate',
                     'mass_fraction': fine_agg_mass_fraction,
                     'volume_fraction': fine_agg_mass_fraction / 2.65,  # Default aggregate SG
                     'specific_gravity': 2.65
-                })
+                }
+                
+                # Add grading data if available
+                if hasattr(self, '_fine_aggregate_grading_data') and self._fine_aggregate_grading_data:
+                    fine_agg_data['grading_data'] = self._fine_aggregate_grading_data
+                    
+                components.append(fine_agg_data)
             
             coarse_agg_name = self.coarse_agg_combo.get_active_id()
             if coarse_agg_name and coarse_agg_name != "" and coarse_agg_mass > 0:
                 coarse_agg_mass_fraction = coarse_agg_mass / total_concrete_mass if total_concrete_mass > 0 else 0.0
                 self.logger.info(f"VALIDATION DEBUG: {coarse_agg_name} - mass_kg={coarse_agg_mass}, total_concrete_mass={total_concrete_mass}, mass_fraction={coarse_agg_mass_fraction}")
-                components.append({
+                
+                coarse_agg_data = {
                     'material_name': coarse_agg_name,
                     'material_type': 'aggregate',
                     'mass_fraction': coarse_agg_mass_fraction,
                     'volume_fraction': coarse_agg_mass_fraction / 2.65,  # Default aggregate SG
                     'specific_gravity': 2.65
-                })
+                }
+                
+                # Add grading data if available
+                if hasattr(self, '_coarse_aggregate_grading_data') and self._coarse_aggregate_grading_data:
+                    coarse_agg_data['grading_data'] = self._coarse_aggregate_grading_data
+                    
+                components.append(coarse_agg_data)
             
             # Add water component - water fraction relative to total concrete mass (Type 3)
             if water_mass > 0:
@@ -4350,6 +4401,10 @@ class MixDesignPanel(Gtk.Box):
                 # Coarse aggregate parameters
                 'coarse_aggregate_name': coarse_agg_name,
                 'coarse_aggregate_mass': coarse_agg_mass,
+                
+                # Grading template associations
+                'fine_aggregate_grading_template': getattr(self, '_fine_aggregate_grading_template_name', None),
+                'coarse_aggregate_grading_template': getattr(self, '_coarse_aggregate_grading_template_name', None),
                 
                 # Component and properties data
                 'components': components,
@@ -4687,9 +4742,33 @@ class MixDesignPanel(Gtk.Box):
                     self.logger.info("Skipping water component")
                     continue
                 
-                # Skip aggregate components - they're handled by aggregate controls
+                # Handle aggregate components - extract grading data and skip UI creation
                 if comp_data.get('material_type', '').lower() == 'aggregate':
-                    self.logger.info(f"Skipping aggregate component: {comp_data.get('material_name', '')} - handled by aggregate controls")
+                    agg_name = comp_data.get('material_name', '')
+                    self.logger.info(f"Processing aggregate component: {agg_name}")
+                    
+                    # Extract grading data if present
+                    grading_data = comp_data.get('grading_data')
+                    grading_template = comp_data.get('grading_template')
+                    if grading_data:
+                        # Determine if this is fine or coarse aggregate
+                        if 'fine' in agg_name.lower():
+                            self._fine_aggregate_grading_data = grading_data
+                            if grading_template:
+                                self._fine_aggregate_grading_template_name = grading_template
+                            if hasattr(self, 'fine_agg_grading_button'):
+                                tooltip_text = f"Grading template: {grading_template} ({len(grading_data)} points)" if grading_template else f"Grading curve set ({len(grading_data)} points)"
+                                self.fine_agg_grading_button.set_tooltip_text(tooltip_text)
+                            self.logger.info(f"Loaded fine aggregate grading data: {len(grading_data)} points" + (f" from template: {grading_template}" if grading_template else ""))
+                        elif 'coarse' in agg_name.lower():
+                            self._coarse_aggregate_grading_data = grading_data
+                            if grading_template:
+                                self._coarse_aggregate_grading_template_name = grading_template
+                            if hasattr(self, 'coarse_agg_grading_button'):
+                                tooltip_text = f"Grading template: {grading_template} ({len(grading_data)} points)" if grading_template else f"Grading curve set ({len(grading_data)} points)"
+                                self.coarse_agg_grading_button.set_tooltip_text(tooltip_text)
+                            self.logger.info(f"Loaded coarse aggregate grading data: {len(grading_data)} points" + (f" from template: {grading_template}" if grading_template else ""))
+                    
                     continue
                     
                 # Add new component row
@@ -4807,6 +4886,20 @@ class MixDesignPanel(Gtk.Box):
                     
                     # Set mass
                     row['mass_spin'].set_value(component_mass)
+                    
+                    # Restore grading data for aggregate components
+                    if material_type == 'aggregate':
+                        grading_data = comp_data.get('grading_data')
+                        grading_template = comp_data.get('grading_template')
+                        if grading_data:
+                            row['grading_data'] = grading_data
+                            if grading_template:
+                                row['grading_template'] = grading_template
+                            # Update button tooltip
+                            tooltip_text = f"Grading template: {grading_template} ({len(grading_data)} points)" if grading_template else f"Grading curve set ({len(grading_data)} points)"
+                            row['grading_button'].set_tooltip_text(tooltip_text)
+                            self.logger.info(f"Restored grading data for component aggregate {material_name}: {len(grading_data)} points" + (f" from template: {grading_template}" if grading_template else ""))
+                    
                     self.logger.info(f"Component row setup complete")
             
             # Skip calculation during loading to prevent phantom components
@@ -4823,6 +4916,46 @@ class MixDesignPanel(Gtk.Box):
             loaded_components = [comp.get('material_name', 'Unknown') for comp in components if comp.get('material_type') != 'water']
             if loaded_components:
                 self.logger.info(f"Loaded components: {', '.join(loaded_components)}")
+            
+            # Handle dedicated aggregate grading template loading
+            fine_grading_template = mix_design_data.get('fine_aggregate_grading_template')
+            coarse_grading_template = mix_design_data.get('coarse_aggregate_grading_template')
+            
+            if fine_grading_template:
+                self.logger.info(f"Loading fine aggregate grading template: {fine_grading_template}")
+                # Load grading template data from database
+                try:
+                    from app.services.grading_service import GradingService
+                    grading_service = GradingService(self.service_container.database_service)
+                    template = grading_service.get_by_name(fine_grading_template)
+                    if template and template.grading_data:
+                        self._fine_aggregate_grading_data = template.grading_data
+                        self._fine_aggregate_grading_template_name = fine_grading_template
+                        if hasattr(self, 'fine_agg_grading_button'):
+                            self.fine_agg_grading_button.set_tooltip_text(f"Grading template: {fine_grading_template} ({len(template.grading_data)} points)")
+                        self.logger.info(f"Loaded fine aggregate grading template: {fine_grading_template} with {len(template.grading_data)} points")
+                    else:
+                        self.logger.warning(f"Fine aggregate grading template '{fine_grading_template}' not found or has no data")
+                except Exception as e:
+                    self.logger.error(f"Error loading fine aggregate grading template: {e}")
+            
+            if coarse_grading_template:
+                self.logger.info(f"Loading coarse aggregate grading template: {coarse_grading_template}")
+                # Load grading template data from database
+                try:
+                    from app.services.grading_service import GradingService
+                    grading_service = GradingService(self.service_container.database_service)
+                    template = grading_service.get_by_name(coarse_grading_template)
+                    if template and template.grading_data:
+                        self._coarse_aggregate_grading_data = template.grading_data
+                        self._coarse_aggregate_grading_template_name = coarse_grading_template
+                        if hasattr(self, 'coarse_agg_grading_button'):
+                            self.coarse_agg_grading_button.set_tooltip_text(f"Grading template: {coarse_grading_template} ({len(template.grading_data)} points)")
+                        self.logger.info(f"Loaded coarse aggregate grading template: {coarse_grading_template} with {len(template.grading_data)} points")
+                    else:
+                        self.logger.warning(f"Coarse aggregate grading template '{coarse_grading_template}' not found or has no data")
+                except Exception as e:
+                    self.logger.error(f"Error loading coarse aggregate grading template: {e}")
             
         except Exception as e:
             self.logger.error(f"Error populating UI from mix design: {e}")
@@ -4888,6 +5021,10 @@ class MixDesignPanel(Gtk.Box):
                 # Coarse aggregate parameters
                 'coarse_aggregate_name': getattr(mix_design, 'coarse_aggregate_name', None),
                 'coarse_aggregate_mass': getattr(mix_design, 'coarse_aggregate_mass', 0.0),
+                
+                # Grading template associations
+                'fine_aggregate_grading_template': getattr(mix_design, 'fine_aggregate_grading_template', None),
+                'coarse_aggregate_grading_template': getattr(mix_design, 'coarse_aggregate_grading_template', None),
                 
                 # Component and properties data
                 'components': mix_design.components,

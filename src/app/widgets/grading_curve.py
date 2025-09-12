@@ -61,12 +61,13 @@ class GradingCurveWidget(Gtk.Box):
             self.logger.warning(f"Failed to initialize grading service: {e}")
             self.grading_service = None
         
-        # Grading data: list of (size_mm, percent_passing)
+        # Grading data: list of (size_mm, percent_retained)
         self.grading_data = []
         
         # Template state
         self.current_template_name = None
         self.available_templates = []
+        self._updating_template_selection = False  # Prevent recursive calls
         
         # UI state
         self.plot_width = 400
@@ -213,7 +214,7 @@ class GradingCurveWidget(Gtk.Box):
         size_header.get_style_context().add_class("dim-label")
         header_box.pack_start(size_header, False, False, 0)
         
-        passing_header = Gtk.Label("% Passing")
+        passing_header = Gtk.Label("% Retained")
         passing_header.set_size_request(80, -1)
         passing_header.get_style_context().add_class("dim-label")
         header_box.pack_start(passing_header, False, False, 0)
@@ -255,7 +256,7 @@ class GradingCurveWidget(Gtk.Box):
             size_label_widget.set_halign(Gtk.Align.START)
             entry_box.pack_start(size_label_widget, False, False, 0)
             
-            # Passing percentage entry
+            # Retained percentage entry
             passing_spin = Gtk.SpinButton.new_with_range(0.0, 100.0, 0.1)
             passing_spin.set_digits(1)
             passing_spin.set_size_request(80, -1)
@@ -368,6 +369,10 @@ class GradingCurveWidget(Gtk.Box):
         
         # Redraw plot
         self.drawing_area.queue_draw()
+        
+        # Try to find and select matching template (only if not already updating)
+        if not self._updating_template_selection:
+            self._select_matching_template()
     
     def get_grading_data(self) -> List[Tuple[float, float]]:
         """Get the current grading data."""
@@ -685,6 +690,18 @@ class GradingCurveWidget(Gtk.Box):
             y = self._size_to_y(size, plot_y, plot_height)
             cr.move_to(plot_x - 25, y + 3)
             cr.show_text(f"{size}")
+        
+        # Add axis titles
+        cr.set_font_size(11)
+        # X-axis title
+        cr.move_to(plot_x + plot_width/2 - 40, plot_y + plot_height + 35)
+        cr.show_text("Mass % Retained")
+        # Y-axis title (rotated)
+        cr.save()
+        cr.move_to(plot_x - 35, plot_y + plot_height/2)
+        cr.rotate(-math.pi/2)
+        cr.show_text("Sieve Size (mm)")
+        cr.restore()
     
     def _draw_curve(self, cr, plot_x, plot_y, plot_width, plot_height) -> None:
         """Draw the grading curve."""
@@ -1029,6 +1046,57 @@ class GradingCurveWidget(Gtk.Box):
         return 0.0
     
     # Template Management Methods
+    def _select_matching_template(self) -> None:
+        """Find and select the template that matches current grading data."""
+        if not self.grading_data or not self.available_templates or self._updating_template_selection:
+            return
+        
+        # Set flag to prevent recursive calls
+        self._updating_template_selection = True
+        
+        # Convert current data to comparable format
+        current_points = sorted(self.grading_data, key=lambda x: x[0], reverse=True)
+        
+        for template in self.available_templates:
+            sieve_data = template.get_sieve_data()
+            if not sieve_data:
+                continue
+                
+            # Convert template data to same format
+            template_points = sorted(
+                [(point['sieve_size'], point['percent_passing']) for point in sieve_data],
+                key=lambda x: x[0], reverse=True
+            )
+            
+            # Check if they match (with small tolerance for floating point)
+            if len(current_points) == len(template_points):
+                match = True
+                for (curr_size, curr_percent), (tmpl_size, tmpl_percent) in zip(current_points, template_points):
+                    if abs(curr_size - tmpl_size) > 0.001 or abs(curr_percent - tmpl_percent) > 0.1:
+                        match = False
+                        break
+                
+                if match:
+                    # Found matching template - select it in the dropdown
+                    self.current_template_name = template.name
+                    # Block signal to prevent triggering load
+                    self.load_template_combo.handler_block_by_func(self._on_load_template_changed)
+                    self.load_template_combo.set_active_id(template.name)
+                    self.load_template_combo.handler_unblock_by_func(self._on_load_template_changed)
+                    self.logger.info(f"Selected matching template: {template.name}")
+                    # Clear flag and return
+                    self._updating_template_selection = False
+                    return
+        
+        # No matching template found - clear selection
+        self.current_template_name = None
+        self.load_template_combo.handler_block_by_func(self._on_load_template_changed)
+        self.load_template_combo.set_active_id("")
+        self.load_template_combo.handler_unblock_by_func(self._on_load_template_changed)
+        
+        # Always clear the flag
+        self._updating_template_selection = False
+    
     def _load_available_templates(self) -> None:
         """Load available grading templates into the combo box."""
         if not self.grading_service:
@@ -1186,8 +1254,13 @@ class GradingCurveWidget(Gtk.Box):
         """Handle template selection from dropdown."""
         template_name = combo.get_active_id()
         
-        if not template_name or template_name == "":
+        if not template_name or template_name == "" or self._updating_template_selection:
             return
+        
+        # If user re-selects the same template, allow it (useful for refreshing)
+        if template_name == self.current_template_name:
+            self.logger.info(f"Re-selecting current template: {template_name}")
+            # Continue to load it again
         
         try:
             # Find the selected grading
@@ -1224,10 +1297,12 @@ class GradingCurveWidget(Gtk.Box):
                 
         except Exception as e:
             self.logger.error(f"Failed to load template {template_name}: {e}")
-        
-        finally:
-            # Reset combo to placeholder to allow re-selection
-            combo.set_active_id("")
+            # On error, clear the template state but don't reset selection
+            # This prevents partial state issues
+            self.current_template_name = None
+            
+        # Note: No finally block - we want to keep the selection visible 
+        # to show users which template is currently loaded
     
     def _on_save_template_clicked(self, button: Gtk.Button) -> None:
         """Handle save template button click."""
@@ -1558,7 +1633,7 @@ class GradingCurveWidget(Gtk.Box):
                         continue
                     
                     if percent < 0 or percent > 100:
-                        self.logger.warning(f"Invalid percent passing at row {row_num}: {percent}")
+                        self.logger.warning(f"Invalid percent retained at row {row_num}: {percent}")
                         continue
                     
                     grading_points.append((size, percent))
@@ -1679,7 +1754,7 @@ class GradingCurveWidget(Gtk.Box):
             writer = csv.writer(f)
             
             # Write header
-            writer.writerow(['Sieve Size (mm)', 'Percent Passing (%)'])
+            writer.writerow(['Sieve Size (mm)', 'Percent Retained (%)'])
             
             # Write data (sorted by size, largest first)
             sorted_data = sorted(self.grading_data, key=lambda x: x[0], reverse=True)

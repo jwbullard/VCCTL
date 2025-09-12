@@ -46,6 +46,7 @@ class OperationType(Enum):
     """Types of operations."""
     HYDRATION_SIMULATION = "hydration_simulation"
     MICROSTRUCTURE_GENERATION = "microstructure_generation"
+    ELASTIC_MODULI_CALCULATION = "elastic_moduli_calculation"
     PROPERTY_CALCULATION = "property_calculation"
     DATA_ANALYSIS = "data_analysis"
     FILE_OPERATION = "file_operation"
@@ -4709,6 +4710,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         type_mapping = {
             'HYDRATION': OperationType.HYDRATION_SIMULATION,
             'MICROSTRUCTURE': OperationType.MICROSTRUCTURE_GENERATION,
+            'ELASTIC_MODULI': OperationType.ELASTIC_MODULI_CALCULATION,
             'ANALYSIS': OperationType.PROPERTY_CALCULATION,
             'EXPORT': OperationType.FILE_OPERATION,
             'IMPORT': OperationType.FILE_OPERATION,
@@ -4717,6 +4719,8 @@ class OperationsMonitoringPanel(Gtk.Box):
             'microstructure': OperationType.MICROSTRUCTURE_GENERATION,
             'microstructure_generation': OperationType.MICROSTRUCTURE_GENERATION,
             'hydration_simulation': OperationType.HYDRATION_SIMULATION,
+            'elastic_moduli': OperationType.ELASTIC_MODULI_CALCULATION,
+            'elastic_moduli_calculation': OperationType.ELASTIC_MODULI_CALCULATION,
             'analysis': OperationType.PROPERTY_CALCULATION,
         }
         

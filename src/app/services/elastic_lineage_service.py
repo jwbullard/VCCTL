@@ -44,12 +44,13 @@ class AggregateProperties:
     """Represents aggregate mechanical and physical properties."""
     
     def __init__(self, name: str, bulk_modulus: float, shear_modulus: float, 
-                 volume_fraction: float, grading_path: str = None):
+                 volume_fraction: float, grading_path: str = None, grading_template_name: str = None):
         self.name = name
         self.bulk_modulus = bulk_modulus
         self.shear_modulus = shear_modulus
         self.volume_fraction = volume_fraction
         self.grading_path = grading_path or ""
+        self.grading_template_name = grading_template_name  # Store template name if available
     
     def __repr__(self):
         return f"<AggregateProperties(name='{self.name}', bulk={self.bulk_modulus}, shear={self.shear_modulus}, vf={self.volume_fraction})>"
@@ -97,8 +98,14 @@ class ElasticLineageService:
                     id=hydration_op.parent_operation_id
                 ).first()
                 
-                if microstructure_op and microstructure_op.operation_type != OperationType.MICROSTRUCTURE.value:
-                    raise ValueError(f"Parent operation is not a microstructure operation")
+                # Check if parent is a microstructure operation (handle both canonical and legacy types)
+                microstructure_types = [
+                    OperationType.MICROSTRUCTURE.value,  # "MICROSTRUCTURE"
+                    "microstructure_generation",         # Legacy type from operations panel
+                    "MICROSTRUCTURE_GENERATION"          # Alternative format
+                ]
+                if microstructure_op and microstructure_op.operation_type not in microstructure_types:
+                    raise ValueError(f"Parent operation is not a microstructure operation (type: {microstructure_op.operation_type})")
             
             # Second try: Use stored UI parameters for legacy operations
             if not microstructure_op and hydration_op.stored_ui_parameters:
@@ -166,12 +173,14 @@ class ElasticLineageService:
             ).first()
             
             if fine_agg:
+                fine_template_name = mix_design_data.get('fine_aggregate_grading_template')
                 properties['fine_aggregate'] = AggregateProperties(
                     name=fine_agg.display_name or fine_agg.name,
                     bulk_modulus=fine_agg.bulk_modulus or 30.0,  # Default GPa
                     shear_modulus=fine_agg.shear_modulus or 18.0,
                     volume_fraction=fine_vf,
-                    grading_path=self._get_aggregate_grading_path(fine_agg)
+                    grading_path=self._get_aggregate_grading_path(fine_agg),
+                    grading_template_name=fine_template_name
                 )
                 self.logger.info(f"Resolved fine aggregate: {fine_agg.display_name} (VF: {fine_vf:.3f})")
             else:
@@ -188,12 +197,14 @@ class ElasticLineageService:
             ).first()
             
             if coarse_agg:
+                coarse_template_name = mix_design_data.get('coarse_aggregate_grading_template')
                 properties['coarse_aggregate'] = AggregateProperties(
                     name=coarse_agg.display_name or coarse_agg.name,
                     bulk_modulus=coarse_agg.bulk_modulus or 36.7,  # Default GPa
                     shear_modulus=coarse_agg.shear_modulus or 22.0,
                     volume_fraction=coarse_vf,
-                    grading_path=self._get_aggregate_grading_path(coarse_agg)
+                    grading_path=self._get_aggregate_grading_path(coarse_agg),
+                    grading_template_name=coarse_template_name
                 )
                 self.logger.info(f"Resolved coarse aggregate: {coarse_agg.display_name} (VF: {coarse_vf:.3f})")
             else:

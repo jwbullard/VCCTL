@@ -597,6 +597,11 @@ class ElasticModuliPanel(Gtk.Box):
                 self.microstructure_combo.set_active(0)
                 self.microstructure_combo.set_sensitive(True)
                 self.logger.info(f"Loaded {len(self.available_microstructures)} hydrated microstructures")
+                
+                # Auto-populate UI fields from lineage data AND selected microstructure
+                self._populate_from_resolved_lineage()
+                self._populate_fields_from_selection(self.available_microstructures[0])
+                self.logger.info("Auto-populated UI fields from resolved lineage and selected microstructure")
             else:
                 self.microstructure_combo.append("", "No hydrated microstructures found")
                 self.microstructure_combo.set_sensitive(False)
@@ -761,8 +766,11 @@ class ElasticModuliPanel(Gtk.Box):
                 self.fine_shear_spin.set_value(fine_agg.shear_modulus)
                 if fine_agg.grading_path:
                     self.fine_grading_entry.set_text(fine_agg.grading_path)
-                    # Update grading status to show auto-populated
-                    self.fine_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
+                    # Update grading status to show template name if available
+                    if hasattr(fine_agg, 'grading_template_name') and fine_agg.grading_template_name:
+                        self.fine_grading_status_label.set_markup(f'<span size="small" style="italic" color="green">✓ Template: <b>{fine_agg.grading_template_name}</b></span>')
+                    else:
+                        self.fine_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
                 else:
                     self.fine_grading_status_label.set_markup('<span size="small" style="italic" color="orange">⚠ No grading template found</span>')
                 # Update source label
@@ -783,8 +791,11 @@ class ElasticModuliPanel(Gtk.Box):
                 self.coarse_shear_spin.set_value(coarse_agg.shear_modulus)
                 if coarse_agg.grading_path:
                     self.coarse_grading_entry.set_text(coarse_agg.grading_path)
-                    # Update grading status to show auto-populated
-                    self.coarse_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
+                    # Update grading status to show template name if available
+                    if hasattr(coarse_agg, 'grading_template_name') and coarse_agg.grading_template_name:
+                        self.coarse_grading_status_label.set_markup(f'<span size="small" style="italic" color="green">✓ Template: <b>{coarse_agg.grading_template_name}</b></span>')
+                    else:
+                        self.coarse_grading_status_label.set_markup('<span size="small" style="italic" color="green">✓ Auto-populated from database template</span>')
                 else:
                     self.coarse_grading_status_label.set_markup('<span size="small" style="italic" color="orange">⚠ No grading template found</span>')
                 # Update source label
@@ -1035,10 +1046,20 @@ class ElasticModuliPanel(Gtk.Box):
                 'is_final': selected_microstructure.is_final
             }
             
-            # TODO: Phase 3 - Create process execution integration
-            # For now, show success message
-            self._show_info_dialog(f"Elastic moduli operation '{operation_name}' created successfully.\n\nUsing microstructure: {selected_microstructure.time_label}\nCheck the Operations Tool to monitor progress.")
-            self.logger.info(f"Phase 2: Created elastic operation '{operation_name}' with lineage and microstructure selection")
+            # Launch process through Operations panel
+            success = self._launch_elastic_process(
+                operation_name=operation_name,
+                elastic_operation=elastic_operation, 
+                selected_microstructure=selected_microstructure,
+                ui_parameters=ui_parameters
+            )
+            
+            if success:
+                self._show_info_dialog(f"Elastic moduli operation '{operation_name}' launched successfully.\n\nUsing microstructure: {selected_microstructure.time_label}\nCheck the Operations panel to monitor progress.")
+                self.logger.info(f"Successfully launched elastic operation '{operation_name}'")
+            else:
+                self._show_error_dialog(f"Failed to launch elastic moduli operation '{operation_name}'")
+                self.logger.error(f"Failed to launch elastic operation '{operation_name}'")
             
         except Exception as e:
             self.logger.error(f"Error starting calculation: {e}")
@@ -1112,6 +1133,54 @@ class ElasticModuliPanel(Gtk.Box):
             pass
         
         return None
+    
+    def _launch_elastic_process(self, operation_name: str, elastic_operation: ElasticModuliOperation, 
+                               selected_microstructure, ui_parameters: Dict[str, Any]) -> bool:
+        """Launch elastic moduli process through Operations panel."""
+        try:
+            # Get operations panel reference
+            operations_panel = getattr(self.main_window, 'operations_panel', None)
+            if not operations_panel:
+                self.logger.error("Operations panel not found")
+                return False
+            
+            # Get elastic executable path
+            project_root = Path(__file__).parent.parent.parent.parent.parent
+            elastic_path = project_root / "backend" / "build" / "elastic"
+            if not elastic_path.exists():
+                self.logger.error(f"Elastic executable not found at: {elastic_path}")
+                return False
+            
+            # Create output directory
+            operations_dir = project_root / "Operations" 
+            output_dir = operations_dir / operation_name
+            output_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Generate input file using existing service
+            input_file_path = self.elastic_moduli_service.generate_elastic_input_file(
+                elastic_operation, selected_microstructure, str(output_dir)
+            )
+            
+            # Read input file content for stdin
+            with open(input_file_path, 'r') as f:
+                input_content = f.read()
+            
+            # Launch real process operation
+            from app.windows.panels.operations_monitoring_panel import OperationType
+            operation_id = operations_panel.start_real_process_operation(
+                name=operation_name,
+                operation_type=OperationType.ELASTIC_MODULI_CALCULATION,
+                command=[str(elastic_path)],
+                working_dir=str(output_dir),
+                input_data=input_content
+            )
+            
+            self.logger.info(f"Launched elastic operation '{operation_name}' with ID: {operation_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error launching elastic process: {e}")
+            return False
     
     def _create_operation_from_form(self) -> Optional[ElasticModuliOperation]:
         """Create ElasticModuliOperation from form data."""
