@@ -1,0 +1,54 @@
+{
+  "operation_name": "Riemann02",
+  "microstructure_file": "./Operations/Riemann02/Riemann02.pimg",
+  "system_size": 100,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement151",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2571428571428572,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "Eggs",
+      "material_type": "filler",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.02142857142857143,
+      "specific_gravity": 2.0,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 3,
+      "material_name": "USF-Std",
+      "material_type": "silica_fume",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.0071428571428571435,
+      "specific_gravity": 2.22,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 4,
+      "material_name": "MA114F-3-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.42857142857142855,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 5,
+      "material_name": "MA106B-4-coarse",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2857142857142857,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-15T17:53:11.926529"
+}

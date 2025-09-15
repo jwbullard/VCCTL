@@ -70,10 +70,19 @@
 /*           http://ciks.cbt.nist.gov/~garbocz/manual/man.html              */
 
 #include "include/vcctl.h"
+#include <ctype.h>
+#include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+#ifdef _WIN32
+#define PATH_SEPARATOR "\\"
+#else
+#define PATH_SEPARATOR "/"
+#endif
 
 /* (USER) Change these dimensions - e.g., NX, NY, and NZ                    */
 #define NX DEFAULTSYSTEMSIZE
@@ -88,8 +97,7 @@
 #define SHAPEFACTOR 1.10
 #define MAXSIZECLASSES 500
 #define MAXAGGTYPES 4
-#define NUMFINESOURCES 2
-#define NUMCOARSESOURCES 2
+#define NUMFINESOURCES 1
 
 /* Global variables for cpelas */
 
@@ -144,10 +152,18 @@ double Diam_concelas[MAXSIZECLASSES];
 double Vf_concelas[MAXSIZECLASSES];
 int N_concelas;
 
+/***
+ *   File pointer for log file
+ ***/
+int Verbose_flag;
+char ProgressFileName[500];
+char WorkingDirectory[500];
+char LogFileName[500];
+
 /* Information for progress file (for taskbar functionality */
 
 char Progfilename[MAXSTRING];
-FILE *Fprog;
+FILE *Fprog, *Logfile;
 
 /* Function declarations for concelas */
 
@@ -155,6 +171,157 @@ int concelas(int nagg1, double bulkmod, double shearmod);
 void freallmem_concelas(void);
 void effective(double itzwidth, double kitz, double gitz);
 void slope(double *kk, double *gg, double k, double g);
+
+char *rfc8601_timespec(struct timespec *tv) {
+  char time_str[127];
+  double fractional_seconds;
+  int milliseconds;
+  struct tm tm; // our "broken down time"
+  char *rfc8601;
+
+  rfc8601 = malloc(256);
+
+  memset(&tm, 0, sizeof(struct tm));
+  sprintf(time_str, "%ld UTC", tv->tv_sec);
+
+  // convert our timespec into broken down time
+  strptime(time_str, "%s %U", &tm);
+
+  // do the math to convert nanoseconds to integer milliseconds
+  fractional_seconds = (double)tv->tv_nsec;
+  fractional_seconds /= 1e6;
+  fractional_seconds = round(fractional_seconds);
+  milliseconds = (int)fractional_seconds;
+
+  // print date and time without milliseconds
+  strftime(time_str, sizeof(time_str), "%Y-%m-%dT%H:%M:%S", &tm);
+
+  // add on the fractional seconds and Z for the UTC Timezone
+  sprintf(rfc8601, "%s.%dZ", time_str, milliseconds);
+
+  return rfc8601;
+}
+
+/***
+ *    printHelp
+ *
+ *     Prints a usage message for the program
+ *
+ *     Arguments:    none
+ *     Returns:    0 if okay, nonzero otherwise
+ *
+ *    Calls:        no routines
+ *    Called by:    checkargs
+ ***/
+void printHelp(void) {
+  fprintf(stderr,
+          "\n\nUsage: elastic [-h,--help] [-q,--quiet | -s,--silent]\n");
+  fprintf(stderr, "      -j,--json progress.json -w,--workdir "
+                  "working_directory\n\n");
+  fprintf(stderr, "    progress.json is the name of the progress file for UI "
+                  "processing (required)\n");
+  fprintf(stderr, "    working_directory is the path to the folder that will "
+                  "hold all simulation results (required)\n");
+  fprintf(stderr, "Normal mode: Print progress updates to stderr and end point "
+                  "results to stdout\n");
+  fprintf(stderr, "Quiet mode: Print only end point results to stdout, no "
+                  "progress updates to stderr\n");
+  fprintf(stderr, "Silent mode: Suppress all output except critical errors "
+                  "to stderr\n\n");
+  return;
+}
+/***
+ *    checkargs
+ *
+ *     Check command-line arguments used to invoke disrealnew
+ *
+ *     Arguments:    int argc, char *argv[]
+ *     Returns:    nothing
+ *
+ *    Calls:        no routines
+ *    Called by:    main program
+ ***/
+int checkargs(int argc, char **argv) {
+  int wellformed = 0; /* 0 = false, 1 = true */
+  char *jsonname, *wdirname, *pfilename, lastchar;
+  char buff[MAXSTRING];
+
+  strcpy(WorkingDirectory, "");
+  strcpy(ProgressFileName, "");
+
+  if (argc < 3) {
+    wellformed = 0;
+  }
+
+  // Many of the variables here are defined in the getopts.h system header
+  // file Can define more options here if we want
+
+  /* Default verbosity */
+  Verbose_flag = 2;
+
+  static struct option long_opts[] = {
+      /* These options set a flag */
+      {"verbose", no_argument, &Verbose_flag, 3},
+      {"quiet", no_argument, &Verbose_flag, 1},
+      {"silent", no_argument, &Verbose_flag, 0},
+      /* These options don't set a flag */
+      {"json", required_argument, 0, 'j'},
+      {"workdir", required_argument, 0, 'w'},
+      {"help", no_argument, 0, 'h'},
+      {NULL, 0, 0, 0}};
+
+  int opt_char;
+  int option_index;
+
+  while ((opt_char = getopt_long(argc, argv, "j:w:h", long_opts,
+                                 &option_index)) != -1) {
+    switch (opt_char) {
+    case (0):
+      if (long_opts[option_index].flag != 0) {
+        break;
+      }
+    /* -j or --json */
+    case (int)('j'):
+      wellformed = 1;
+      jsonname = optarg;
+      strcpy(ProgressFileName, jsonname);
+      break;
+    // -w or --workdir
+    case (int)('w'):
+      wdirname = optarg;
+      strcpy(WorkingDirectory, wdirname);
+      break;
+    // -h or --help
+    case (int)('h'):
+      wellformed = 0;
+      break;
+    case (int)('?'):
+      wellformed = 0;
+      break;
+    default:
+      wellformed = 0;
+      break;
+    }
+  }
+
+  if (wellformed != 1 || strlen(ProgressFileName) == 0 ||
+      strlen(WorkingDirectory) == 0) {
+    printHelp();
+    return (1);
+  }
+
+  /* Check if working directory ends in the path separator */
+
+  lastchar = WorkingDirectory[strlen(WorkingDirectory) - 1];
+  if (lastchar != PATH_SEPARATOR[0]) {
+    strcat(WorkingDirectory, PATH_SEPARATOR);
+  }
+  sprintf(LogFileName, "%sdisrealnew.log", WorkingDirectory);
+  strcpy(buff, ProgressFileName);
+  sprintf(ProgressFileName, "%s%s", WorkingDirectory, buff);
+
+  return (0);
+}
 
 /* Freeallmem frees all dynamically allocated memory */
 
@@ -1747,7 +1914,7 @@ void modlayer(int *nagg1) {
   }
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
   int m3, i, j, k, n, nx, ny, nz, nphase, ijk, nxy, i1, j1, k1, npoints, kmax,
       ldemb;
   int kkk, micro, doitz, nagg1, oval;
@@ -1756,13 +1923,54 @@ int main(void) {
   double bulk, shear, young, pois, save;
   float kk, xj, sum = 0.0;
   char phasename[MAXSTRING];
+  char *rfc8601;
+  time_t current_time;
+  clock_t begin, end;
+  struct tm *local_time;
+  struct timespec tv;
   FILE *outfile;
 
-  /*
-              printf("Enter name of progress file: \n");
-              read_string(instring,sizeof(instring));
-          sprintf(Progfilename,"%s",instring);
+  /* Check command-line arguments */
+  checkargs(argc, argv);
+
+  /* Create log file and keep it open throughout */
+  sprintf(LogFileName, "elastic.log");
+  if ((Logfile = fopen(LogFileName, "w")) == NULL) {
+    fprintf(stderr, "\nERROR line 1918:  Could not open %s\n\n", LogFileName);
+    fflush(stderr);
+    exit(1);
+  }
+
+  /* Get the simulation start time */
+
+  begin = clock();
+  current_time = time(NULL);
+
+  /* Get the local time using the current time */
+  local_time = localtime(&current_time);
+
+  /* Display the local time in the log */
+  fprintf(Logfile, "=== BEGIN GENMIC SIMULATION ===");
+  fprintf(Logfile, "\nStart time: %s", asctime(local_time));
+
+  Fprog = filehandler("disrealnew", ProgressFileName, "WRITE");
+  if (!Fprog) {
+    freeallmem();
+    exit(1);
+  }
+  fprintf(Fprog, "json {");
+  /* fprintf(Fprog, "\"cycle\": %d, \"time_hours\": %.2f,", Icyc, Time_cur);
+  fprintf(Fprog, " \"degree_of_hydration\": %.2f, \"timestamp\": ", Alpha_cur);
   */
+
+  if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+    fprintf(stderr, "\nERROR: Error clock_gettime");
+  }
+
+  rfc8601 = rfc8601_timespec(&tv);
+  fprintf(Fprog, "\"%s\"}", rfc8601);
+  fclose(Fprog);
+  free(rfc8601);
 
   /* Initialize global arrays to zero */
 
@@ -2144,7 +2352,7 @@ int main(void) {
   /*  per pixel of gb is less than sqrt(abc).  */
   gtest = (1.e-7) * (double)ns;
 
-  printf("%d %d %d %d\n", nx, ny, nz, ns);
+  fprintf(Logfile, "\n%d %d %d %d", nx, ny, nz, ns);
   fflush(stdout);
 
   /*  Construct the neighbor table, ib(m,n) */
@@ -2192,7 +2400,7 @@ int main(void) {
   /*  Now construct neighbor table according to 1-d labels */
   /*  Matrix ib(m,n) gives the 1-d label of the n'th neighbor (n=0,26) of */
   /*  the node labelled m. */
-  printf("\nConstructing neighbor table now... ");
+  fprintf(Logfile, "\nConstructing neighbor table now... ");
   fflush(stdout);
   nxy = nx * ny;
   for (k = 0; k < nz; k++) {
@@ -2224,7 +2432,7 @@ int main(void) {
       }
     }
   }
-  printf("done\n");
+  fprintf(Logfile, "done");
   fflush(stdout);
 
   /* Count and output the volume fractions of the different phases */
@@ -2233,20 +2441,20 @@ int main(void) {
     if (pix[i] == C3S)
       count++;
   }
-  printf("\nBefore assig, Count C3S = %d", count);
+  fprintf(Logfile, "\nBefore assig, Count C3S = %d", count);
   fflush(stdout);
 
   assig(ns, nphase);
   for (i = 0; i < nphase; i++) {
     if (prob[i] > 0.0) {
-      printf("Phase %d bulk = %lf shear = %lf volume = %lf \n", i,
-             phasemod[i][0], phasemod[i][1], prob[i]);
+      fprintf(Logfile, "\nPhase %d bulk = %lf shear = %lf volume = %lf ", i,
+              phasemod[i][0], phasemod[i][1], prob[i]);
       fflush(stdout);
     }
     sum = sum + prob[i];
   }
 
-  printf("Sum of volume fractions = %f\n", sum);
+  fprintf(Logfile, "\nSum of volume fractions = %f", sum);
   fflush(stdout);
 
   /*  (USER) Set applied strains */
@@ -2322,15 +2530,15 @@ int main(void) {
     }
     /*
 if (doitz) {
-    printf("Doing Configuration %d ...\n",micro);
-    printf("------------------\n",micro);
+    fprintf(Logfile,"\nDoing Configuration %d ...",micro);
+    fprintf(Logfile,"\n------------------");
 }
 */
-    printf("Applied engineering strains:\n");
-    printf("exx   eyy   ezz   exz   eyz   exy\n");
-    printf("%lf %lf %lf %lf %lf %lf\n", exx, eyy, ezz, 2. * exz, 2. * eyz,
-           2. * exy);
-    fflush(stdout);
+    fprintf(Logfile, "\nApplied engineering strains:");
+    fprintf(Logfile, "\nexx   eyy   ezz   exz   eyz   exy");
+    fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf", exx, eyy, ezz, 2. * exz,
+            2. * eyz, 2. * exy);
+    fflush(Logfile);
 
     /* Set up the elastic modulus variables, finite element stiffness matrices,
      */
@@ -2340,14 +2548,14 @@ if (doitz) {
     /*  input in subroutine femat. */
 
     femat(nx, ny, nz, ns, nphase);
-    printf("C is %lf \n", C);
+    fprintf(Logfile, "\nC is %lf", C);
     fflush(stdout);
 
     /* Apply chosen strains as a homogeneous macroscopic strain  */
     /* as the initial condition. */
 
-    printf("Applying homogeneous macroscopic strain now... ");
-    fflush(stdout);
+    fprintf(Logfile, "\nApplying homogeneous macroscopic strain now... ");
+    fflush(Logfile);
     for (k = 0; k < nz; k++) {
       for (j = 0; j < ny; j++) {
         for (i = 0; i < nx; i++) {
@@ -2361,8 +2569,8 @@ if (doitz) {
         }
       }
     }
-    printf(" \n...done\n");
-    fflush(stdout);
+    fprintf(Logfile, " ...done\n");
+    fflush(Logfile);
 
     /*  RELAXATION LOOP */
     /*  (USER) kmax is the maximum number of times dembx will be called, with */
@@ -2380,29 +2588,44 @@ if (doitz) {
         gg += gb[m][m3] * gb[m][m3];
       }
     }
-    printf("Initial energy = %lf gg= %lf gtest = %lf\n", utot, gg, gtest);
+    fprintf(Logfile, "\nInitial energy = %lf gg= %lf gtest = %lf", utot, gg,
+            gtest);
     fflush(stdout);
 
     for (kkk = 0; ((kkk < kmax) && (gg >= gtest)); kkk++) {
 
-      /* Write information to the progress file */
+      /* Update progress file */
 
-      /*
-                      Fprog = filehandler("genmic",Progfilename,"WRITE");
-                  fprintf(Fprog,"%d\t%d",kkk,kmax);
-                  fclose(Fprog);
-      */
+      Fprog = filehandler("disrealnew", ProgressFileName, "WRITE");
+      if (!Fprog) {
+        freeallmem();
+        exit(1);
+      }
+      fprintf(Fprog, "json {");
+      fprintf(Fprog, "\"cycle\": %d, \"maxcycle\": %d,", kkk, kmax);
+      fprintf(Fprog, " \"gradient\": %g, \"timestamp\": ", gg);
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(Fprog, "\"%s\"}", rfc8601);
+      fclose(Fprog);
+      free(rfc8601);
+
+      /* Done updating progress file */
 
       /*  call dembx to go into the conjugate gradient solver */
       /*
-      printf("Calling dembx with gg= %lf gtest = %lf\n",gg,gtest);
-      fflush(stdout);
+      fprintf(Logfile,"\nCalling dembx with gg= %lf gtest = %lf",gg,gtest);
+      fflush(Logfile);
       */
       Lstep = dembx(ns, ldemb, kkk);
       ltot += Lstep;
       /*
-      printf("Out of dembx, Lstep = %d gg = %lf gtest = %lf\n",Lstep,gg,gtest);
-      fflush(stdout);
+      fprintf(Logfile,"\nOut of dembx, Lstep = %d gg = %lf gtest =
+      %lf",Lstep,gg,gtest); fflush(stdout);
       */
       /*  Call energy to compute energy after dembx call. If gg < gtest, this */
       /*  will be the final energy.  If gg is still larger than gtest, then this
@@ -2410,8 +2633,8 @@ if (doitz) {
       /*  will give an intermediate energy with which to check how the  */
       /*  relaxation process is coming along. */
       utot = energy(nx, ny, nz, ns);
-      printf("Energy = %lf gg= %lf gtest = %lf\n", utot, gg, gtest);
-      printf("Number of conjugate steps = %d\n", ltot);
+      fprintf(Logfile, "\nEnergy = %lf gg= %lf gtest = %lf", utot, gg, gtest);
+      fprintf(Logfile, "\nNumber of conjugate steps = %d\n", ltot);
       fflush(stdout);
       /*  If relaxation process is not finished, continue */
       if (gg > gtest) {
@@ -2419,24 +2642,25 @@ if (doitz) {
         /*  and strains as an additional aid to judge how the  */
         /*  relaxation procedure is progressing. */
         stress(nx, ny, nz, ns, doitz, micro, 0);
-        printf("stresses:  xx,yy,zz,xz,yz,xy\n");
-        printf("%lf %lf %lf %lf %lf %lf\n", strxxt / (double)ns,
-               stryyt / (double)ns, strzzt / (double)ns, strxzt / (double)ns,
-               stryzt / (double)ns, strxyt / (double)ns);
-        printf("strains:  xx,yy,zz,xz,yz,xy\n");
-        printf("%lf %lf %lf %lf %lf %lf \n", sxxt / (double)ns,
-               syyt / (double)ns, szzt / (double)ns, sxzt / (double)ns,
-               syzt / (double)ns, sxyt / (double)ns);
+        fprintf(Logfile, "\nstresses:  xx,yy,zz,xz,yz,xy");
+        fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf", strxxt / (double)ns,
+                stryyt / (double)ns, strzzt / (double)ns, strxzt / (double)ns,
+                stryzt / (double)ns, strxyt / (double)ns);
+        fprintf(Logfile, "\nstrains:  xx,yy,zz,xz,yz,xy");
+        fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf ", sxxt / (double)ns,
+                syyt / (double)ns, szzt / (double)ns, sxzt / (double)ns,
+                syzt / (double)ns, sxyt / (double)ns);
         fflush(stdout);
       }
     }
 
     stress(nx, ny, nz, ns, doitz, micro, 1);
-    printf("stresses:  xx,yy,zz,xz,yz,xy\n");
-    printf("%lf %lf %lf %lf %lf %lf\n", strxxt, stryyt, strzzt, strxzt, stryzt,
-           strxyt);
-    printf("strains:  xx,yy,zz,xz,yz,xy\n");
-    printf("%lf %lf %lf %lf %lf %lf \n", sxxt, syyt, szzt, sxzt, syzt, sxyt);
+    fprintf(Logfile, "\nstresses:  xx,yy,zz,xz,yz,xy");
+    fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf", strxxt, stryyt, strzzt,
+            strxzt, stryzt, strxyt);
+    fprintf(Logfile, "\nstrains:  xx,yy,zz,xz,yz,xy");
+    fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf ", sxxt, syyt, szzt, sxzt, syzt,
+            sxyt);
     fflush(stdout);
   }
 
@@ -2450,17 +2674,18 @@ if (doitz) {
     shear = (strxyt / sxyt + strxzt / sxzt + stryzt / syzt) / 3.;
     young = 9. * bulk * shear / (3. * bulk + shear);
     pois = (3. * bulk - 2. * shear) / 2. / (3. * bulk + shear);
-    printf("\nEFFECTIVE MODULI:\n\n");
-    printf("bulk_modulus %lf\n", bulk);
-    printf("shear_modulus %lf\n", shear);
-    printf("Youngs_modulus %lf\n", young);
-    printf("Poissons_ratio %lf\n", pois);
-    printf("\n*****\n");
-    printf("\nRELATIVE CONTRIBUTIONS OF EACH PHASE:\n");
+    fprintf(Logfile, "\nEFFECTIVE MODULI:\n");
+    fprintf(Logfile, "\nbulk_modulus %lf", bulk);
+    fprintf(Logfile, "\nshear_modulus %lf", shear);
+    fprintf(Logfile, "\nYoungs_modulus %lf", young);
+    fprintf(Logfile, "\nPoissons_ratio %lf", pois);
+    fprintf(Logfile, "\n\n*****");
+    fprintf(Logfile, "\nRELATIVE CONTRIBUTIONS OF EACH PHASE:");
 
     outfile = filehandler("cpelas", Outfilename, "WRITE");
     if (!outfile) {
-      printf("\n\nWARNING:  Could not open output file %s", Outfilename);
+      fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
+              Outfilename);
     } else {
 
       fprintf(outfile, "CEMENT PASTE ELASTIC MODULI:\n");
@@ -2478,7 +2703,8 @@ if (doitz) {
 
     outfile = filehandler("cpelas", PCfilename, "WRITE");
     if (!outfile) {
-      printf("\n\nWARNING:  Could not open output file %s", PCfilename);
+      fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
+              PCfilename);
     }
     for (i = 0; i < NSP; i++) {
       if (prob[i] > pthresh) {
@@ -2501,14 +2727,17 @@ if (doitz) {
             (2.0 * ((3.0 * stressall[i][12]) + stressall[i][13]));
 
         id2phasename(i, phasename);
-        printf("Phase %s\n", phasename);
-        printf("\tVfrac %lf\n", prob[i]);
-        printf("\tBulk_Modulus %lf\n", stressall[i][12]);
-        printf("\tBulk_Modulus_Fraction %lf\n", stressall[i][12] / bulk);
-        printf("\tShear_Modulus %lf\n", stressall[i][13]);
-        printf("\tShear_Modulus_Fraction %lf\n", stressall[i][13] / shear);
-        printf("\tYoung_Modulus %lf\n", stressall[i][14]);
-        printf("\tYoung_Modulus_Fraction %lf\n\n", stressall[i][14] / young);
+        fprintf(Logfile, "\nPhase %s", phasename);
+        fprintf(Logfile, "\n\tVfrac %lf", prob[i]);
+        fprintf(Logfile, "\n\tBulk_Modulus %lf", stressall[i][12]);
+        fprintf(Logfile, "\n\tBulk_Modulus_Fraction %lf",
+                stressall[i][12] / bulk);
+        fprintf(Logfile, "\n\tShear_Modulus %lf", stressall[i][13]);
+        fprintf(Logfile, "\n\tShear_Modulus_Fraction %lf",
+                stressall[i][13] / shear);
+        fprintf(Logfile, "\n\tYoung_Modulus %lf", stressall[i][14]);
+        fprintf(Logfile, "\n\tYoung_Modulus_Fraction %lf\n",
+                stressall[i][14] / young);
 
         if (outfile != NULL) {
           fprintf(outfile, "Phase %s\n", phasename);
@@ -2542,10 +2771,11 @@ if (doitz) {
     if ((doitz) && (nagg1 > 0)) {
       outfile = filehandler("cpelas", Layerfilename, "WRITE");
       if (!outfile) {
-        printf("\n\nWARNING:  Could not open output file %s", Layerfilename);
+        fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
+                Layerfilename);
       }
-      printf("*****\n\n");
-      printf("LAYER_DATA:\n\n");
+      fprintf(Logfile, "\n*****\n");
+      fprintf(Logfile, "\nLAYER_DATA:\n");
       xj = -0.5;
       for (i = nagg1 - 1; i >= 0; i--) {
         xj += 1.0;
@@ -2553,10 +2783,10 @@ if (doitz) {
         gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
         young = 9. * kk * gg / (3. * kk + gg);
         pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
-        printf("%.1f %.4f %.4f %.4f %.4f\n", xj, kk, gg, young, pois);
+        fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young, pois);
         fprintf(outfile, "%.1f %.4f %.4f %.4f %.4f\n", xj, kk, gg, young, pois);
       }
-      printf("END");
+      fprintf(Logfile, "\nEND");
       fclose(outfile);
     }
 
@@ -2571,7 +2801,7 @@ if (doitz) {
     */
   }
 
-  printf("\nDone with cement paste calculations.");
+  fprintf(Logfile, "\nDone with cement paste calculations.");
   if (doitz) {
     oval = concelas(nagg1, bulk, shear);
   }
@@ -2593,17 +2823,17 @@ if (doitz) {
 /***************************************************************************/
 int concelas(int nagg1, double bulkmod, double shearmod) {
   register int i, j, m;
-  int itzpix, numfinebins[NUMFINESOURCES], numfinebinstot, cnt;
+  int itzpix, numfinebins, numfinebinstot, cnt;
   int num_fine_sources, num_coarse_sources;
-  int finebegin[NUMFINESOURCES], fineend[NUMFINESOURCES];
-  int coarsebegin[NUMCOARSESOURCES], coarseend[NUMCOARSESOURCES];
-  double poisscem, kcem, ecem, gcem, fine_agg_vf[NUMFINESOURCES];
-  double coarse_agg_vf[NUMCOARSESOURCES], eitz, itzwidth, poissitz, kitz, gitz,
-      tdval, val;
+  int finebegin, fineend;
+  int coarsebegin, coarseend;
+  double poisscem, kcem, ecem, gcem, fine_agg_vf;
+  double coarse_agg_vf, eitz, itzwidth, poissitz, kitz, gitz, tdval, val;
   char ch, buff[MAXSTRING], instring[MAXSTRING];
   char buff1[MAXSTRING];
   char cempsdfile[MAXSTRING];
   char coarsegfile[MAXSTRING], finegfile[MAXSTRING];
+  char *newstring, *newstring1;
   double sum, kfine, kcoarse, gfine, gcoarse, finevftot, coarsevftot;
   double aggfrac, airfrac;
   double target_matrix_vf;
@@ -2630,16 +2860,12 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     ksave[i] = gsave[i] = xx[i] = 0.0;
   }
 
-  for (i = 0; i < NUMFINESOURCES; i++) {
-    fine_agg_vf[i] = 0.0;
-    numfinebins[i] = 0;
-    finebegin[i] = fineend[i] = 0;
-  }
+  fine_agg_vf = 0.0;
+  numfinebins = 0;
+  finebegin = fineend = 0;
 
-  for (i = 0; i < NUMCOARSESOURCES; i++) {
-    coarse_agg_vf[i] = 0.0;
-    coarsebegin[i] = coarseend[i] = 0;
-  }
+  coarse_agg_vf = 0.0;
+  coarsebegin = coarseend = 0;
 
   fpout = filehandler("concelas", Outfilename, "APPEND");
   if (!fpout) {
@@ -2647,9 +2873,9 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     return (1);
   }
 
-  printf("\n\nEnter fully resolved name of cement PSD file: ");
+  fprintf(Logfile, "\n\nEnter fully resolved name of cement PSD file: ");
   read_string(cempsdfile, sizeof(cempsdfile));
-  printf("\n%s\n", cempsdfile);
+  fprintf(Logfile, "\n%s", cempsdfile);
   cempsd = filehandler("concelas", cempsdfile, "READ");
   if (!cempsd) {
     sprintf(buff1, "Could not open cement PSD file %s", cempsdfile);
@@ -2665,8 +2891,8 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
     /* Convert itzwidth to cement paste image pixel widths */
     itzpix = (int)((itzwidth / Res) + 0.5);
-    printf("\n\nCalculated ITZ width is %f micrometers (%d voxels)\n", itzwidth,
-           itzpix);
+    fprintf(Logfile, "\n\nCalculated ITZ width is %f micrometers (%d voxels)",
+            itzwidth, itzpix);
 
     /* Knowing the ITZ width, find average values of
      * the bulk and shear moduli inside the ITZ */
@@ -2685,8 +2911,8 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     eitz = (9.0 * kitz * gitz) / ((3.0 * kitz) + gitz);
     poissitz = ((3.0 * kitz) - (2.0 * gitz)) / (2.0 * ((3.0 * kitz) + gitz));
 
-    printf("\nCalculated bulk modulus of ITZ = %f", kitz);
-    printf("\nCalculated shear modulus of ITZ = %f", gitz);
+    fprintf(Logfile, "\nCalculated bulk modulus of ITZ = %f", kitz);
+    fprintf(Logfile, "\nCalculated shear modulus of ITZ = %f", gitz);
 
     /* Now find values for bulk and shear moduli of bulk paste */
 
@@ -2703,7 +2929,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
   } else {
 
-    printf("\nNo aggregate found in microstructure...");
+    fprintf(Logfile, "\nNo aggregate found in microstructure...");
     itzwidth = 0.0;
     kitz = bulkmod;
     gitz = shearmod;
@@ -2713,17 +2939,17 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
   ecem = (9.0 * kcem * gcem) / ((3.0 * kcem) + gcem);
   poisscem = ((3.0 * kcem) - (2.0 * gcem)) / (2.0 * ((3.0 * kcem) + gcem));
-  printf("\nCalculated bulk modulus of ITZ = %f", kitz);
-  printf("\nCalculated shear modulus of ITZ = %f", gitz);
-  printf("\nCalculated bulk modulus of bulk paste = %f", kcem);
-  printf("\nCalculated shear modulus of bulk paste = %f\n", gcem);
+  fprintf(Logfile, "\nCalculated bulk modulus of ITZ = %f", kitz);
+  fprintf(Logfile, "\nCalculated shear modulus of ITZ = %f", gitz);
+  fprintf(Logfile, "\nCalculated bulk modulus of bulk paste = %f", kcem);
+  fprintf(Logfile, "\nCalculated shear modulus of bulk paste = %f", gcem);
 
   /* Convert itzwidth to mm */
   itzwidth *= 0.001;
-  printf("\nITZ width is %f mm\n", itzwidth);
+  fprintf(Logfile, "\n\nITZ width is %f mm", itzwidth);
 
   /*
-  printf("\nEnter the number of sources of fine aggregate: ");
+  fprintf(Logfile,"\nEnter the number of sources of fine aggregate: ");
   read_string(buff1,sizeof(buff1));
   num_fine_sources = atoi(buff1);
   if (num_fine_sources < 0) num_fine_sources = 0;
@@ -2735,223 +2961,176 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   N_concelas = 0;
   finevftot = coarsevftot = 0.0;
   num_fine_sources = num_coarse_sources = 0;
-  for (m = 0; m < (int)NUMFINESOURCES; m++) {
-    printf("\nEnter volume fraction of fine aggregate %d: ", m + 1);
-    read_string(buff, sizeof(buff));
-    val = atof(buff);
-    if (val > 0) {
-      fine_agg_vf[num_fine_sources] = val;
-      finevftot += fine_agg_vf[num_fine_sources];
-      printf("%f", fine_agg_vf[num_fine_sources]);
+  fprintf(Logfile, "\nEnter volume fraction of fine aggregate %d: ", m + 1);
+  read_string(buff, sizeof(buff));
+  val = atof(buff);
+  if (val > 0) {
+    fine_agg_vf = val;
+    finevftot += fine_agg_vf;
+    fprintf(Logfile, "\n%f", fine_agg_vf);
 
-      finebegin[num_fine_sources] = N_concelas;
-      printf("\nFine aggregate grading file must have three ");
-      printf("\ncolumns of data: one for sieve description, one for ");
-      printf("\nopening diameter (mm) and one for fraction retained.");
-      printf("\nThe columns must be TAB-DELIMITED.");
-      printf("\nEnter fully-resolved name of fine agg grading file: ");
-      read_string(finegfile, sizeof(finegfile));
-      printf("\n%s\n", finegfile);
-      gfile = filehandler("concelas", finegfile, "READ");
-      if (!gfile) {
-        bailout("concelas", "Could not open fine grading file");
-        return (1);
-      }
-      printf("\nEnter BULK modulus for fine aggregate %d (in GPa): ",
-             num_fine_sources + 1);
-      read_string(buff, sizeof(buff));
-      kfine = atof(buff);
-      printf("%f", kfine);
-      printf("\nEnter SHEAR modulus for fine aggregate %d (in GPa): ",
-             num_fine_sources + 1);
-      read_string(buff, sizeof(buff));
-      gfine = atof(buff);
-      printf("%f", gfine);
-
-      ch = getc(gfile);
-      if (ch != '0' && ch != '1' && ch != '2' && ch != '3' && ch != '4' &&
-          ch != 5 && ch != 6 && ch != 7 && ch != 8 && ch != 9) {
-        fread_string(gfile, instring); /* read and discard header */
-      } else {
-        rewind(gfile);
-      }
-      cnt = 0;
-      while (!feof(gfile)) {
-        for (i = 0; i < 3; i++) {
-          j = 0;
-          ch = getc(gfile);
-          if (!feof(gfile)) {
-            while (ch != '\t' && ch != '\n' && !feof(gfile)) {
-              buff[j] = ch;
-              ch = getc(gfile);
-              j++;
-            }
-            buff[j] = '\0';
-            if (i == 1) {
-              Diam_concelas[N_concelas] = atof(buff);
-            } else if (i == 2) {
-              Vf_concelas[N_concelas] =
-                  fine_agg_vf[num_fine_sources] * (atof(buff));
-              sum += Vf_concelas[N_concelas];
-              K_concelas[N_concelas] = kfine;
-              Ki_concelas[N_concelas] = kfine;
-              G_concelas[N_concelas] = gfine;
-              Gi_concelas[N_concelas] = gfine;
-              printf("\n%d: Diam = %f, Vf = %f, sum = %f", N_concelas,
-                     Diam_concelas[N_concelas], Vf_concelas[N_concelas], sum);
-              N_concelas++;
-              cnt++;
-            }
-          }
-        }
-      }
-
-      fclose(gfile);
-      numfinebins[num_fine_sources] = cnt;
-      fineend[num_fine_sources] = N_concelas;
-      num_fine_sources++;
+    finebegin = N_concelas;
+    fprintf(Logfile, "\nFine aggregate grading file must have two ");
+    fprintf(Logfile,
+            "\ncolumns of data: one for opening diameter (mm) and one for "
+            "fraction retained.");
+    fprintf(Logfile, "\nThe columns must be COMMA-DELIMITED.");
+    fprintf(Logfile, "\nEnter name of fine agg grading file: ");
+    read_string(finegfile, sizeof(finegfile));
+    fprintf(Logfile, "\n%s", finegfile);
+    gfile = filehandler("concelas", finegfile, "READ");
+    if (!gfile) {
+      bailout("concelas", "Could not open fine grading file");
+      return (1);
     }
+    fprintf(Logfile, "\n\nEnter BULK modulus for fine aggregate %d (in GPa): ",
+            num_fine_sources + 1);
+    read_string(buff, sizeof(buff));
+    kfine = atof(buff);
+    fprintf(Logfile, "\n%f", kfine);
+    fprintf(Logfile, "\nEnter SHEAR modulus for fine aggregate %d (in GPa): ",
+            num_fine_sources + 1);
+    read_string(buff, sizeof(buff));
+    gfine = atof(buff);
+    fprintf(Logfile, "\n%f", gfine);
+
+    /* Read mandatory header for grading file and discard it */
+    fread_string(gfile, instring); /* read and discard header */
+
+    while (!feof(gfile)) {
+      fread_string(gfile, instring); /* read and discard header */
+      if (!feof(gfile)) {
+        newstring = strtok(instring, ",");
+        Diam_concelas[N_concelas] = atof(newstring);
+        newstring = strtok(NULL, ",");
+        Vf_concelas[N_concelas] = fine_agg_vf * (atof(newstring));
+        sum += Vf_concelas[N_concelas];
+        K_concelas[N_concelas] = kfine;
+        Ki_concelas[N_concelas] = kfine;
+        G_concelas[N_concelas] = gfine;
+        Gi_concelas[N_concelas] = gfine;
+        fprintf(Logfile, "\n%d: Diam = %f, Vf = %f, sum = %f", N_concelas,
+                Diam_concelas[N_concelas], Vf_concelas[N_concelas], sum);
+        N_concelas++;
+      }
+    }
+
+    fclose(gfile);
+    numfinebins = cnt;
+    fineend = N_concelas;
+    num_fine_sources++;
   }
   numfinebinstot = N_concelas;
 
-  /*
-  printf("\nEnter the number of sources of coarse aggregate: ");
-  read_string(buff1,sizeof(buff1));
-  num_coarse_sources = atoi(buff1);
-  if (num_coarse_sources < 0) num_coarse_sources = 0;
-  if (num_coarse_sources > (int)NUMCOARSESOURCES) num_coarse_sources =
-  (int)NUMCOARSESOURCES;
-  */
+  fprintf(Logfile, "\n\nEnter volume fraction of coarse aggregate %d: ",
+          num_coarse_sources + 1);
+  read_string(buff, sizeof(buff));
+  val = atof(buff);
+  if (val > 0) {
+    coarse_agg_vf = val;
+    coarsevftot = coarse_agg_vf;
+    fprintf(Logfile, "\n%f", coarse_agg_vf);
 
-  for (m = 0; m < (int)NUMCOARSESOURCES; m++) {
-    printf("\n\nEnter volume fraction of coarse aggregate %d: ",
-           num_coarse_sources + 1);
-    read_string(buff, sizeof(buff));
-    val = atof(buff);
-    if (val > 0) {
-      coarse_agg_vf[num_coarse_sources] = val;
-      coarsevftot = coarse_agg_vf[num_coarse_sources];
-      printf("%f", coarse_agg_vf[num_coarse_sources]);
-
-      coarsebegin[num_coarse_sources] = N_concelas;
-      printf("\nCoarse aggregate grading file must have three ");
-      printf("\ncolumns of data: one for sieve description, one for ");
-      printf("\nopening diameter (mm) and one for fraction retained.");
-      printf("\nThe columns must be TAB-DELIMITED.");
-      printf("\n\nEnter fully-resolved name of coarse agg grading file: ");
-      read_string(coarsegfile, sizeof(coarsegfile));
-      printf("\n%s\n", coarsegfile);
-      gfile = filehandler("concelas", coarsegfile, "READ");
-      if (!gfile) {
-        bailout("concelas", "Could not open coarse grading file");
-        return (1);
-      }
-      printf("\nEnter BULK modulus for coarse aggregate %d (in GPa): ",
-             num_coarse_sources + 1);
-      read_string(buff, sizeof(buff));
-      kcoarse = atof(buff);
-      printf("%f", kcoarse);
-      printf("\nEnter SHEAR modulus for coarse aggregate %d (in GPa): ",
-             num_coarse_sources + 1);
-      read_string(buff, sizeof(buff));
-      gcoarse = atof(buff);
-      printf("%f", gcoarse);
-
-      ch = getc(gfile);
-      if (ch != '0' && ch != '1' && ch != '2' && ch != '3' && ch != '4' &&
-          ch != 5 && ch != 6 && ch != 7 && ch != 8 && ch != 9) {
-        fread_string(gfile, instring); /* read and discard header */
-      } else {
-        rewind(gfile);
-      }
-      while (!feof(gfile)) {
-        for (i = 0; i < 3; i++) {
-          j = 0;
-          ch = getc(gfile);
-          if (!feof(gfile)) {
-            while (ch != '\t' && ch != '\n' && !feof(gfile)) {
-              buff[j] = ch;
-              ch = getc(gfile);
-              j++;
-            }
-            buff[j] = '\0';
-            if (i == 1) {
-              Diam_concelas[N_concelas] = atof(buff);
-            } else if (i == 2) {
-              Vf_concelas[N_concelas] =
-                  coarse_agg_vf[num_coarse_sources] * (atof(buff));
-              sum += Vf_concelas[N_concelas];
-              K_concelas[N_concelas] = kcoarse;
-              Ki_concelas[N_concelas] = kcoarse;
-              G_concelas[N_concelas] = gcoarse;
-              Gi_concelas[N_concelas] = gcoarse;
-              printf("\n%d: Diam = %f, Vf = %f, sum = %f", N_concelas,
-                     Diam_concelas[N_concelas], Vf_concelas[N_concelas], sum);
-              N_concelas++;
-            }
-          }
-        }
-      }
-
-      fclose(gfile);
-      coarseend[num_coarse_sources] = N_concelas;
-      num_coarse_sources++;
+    coarsebegin = N_concelas;
+    fprintf(Logfile, "\nCoarse aggregate grading file must have two ");
+    fprintf(Logfile,
+            "\ncolumns of data: one for opening diameter (mm) and one for "
+            "fraction retained.");
+    fprintf(Logfile, "\nThe columns must be COMMA DELIMITED.");
+    fprintf(Logfile, "\n\nEnter name of coarse agg grading file: ");
+    read_string(coarsegfile, sizeof(coarsegfile));
+    fprintf(Logfile, "\n%s\n", coarsegfile);
+    gfile = filehandler("concelas", coarsegfile, "READ");
+    if (!gfile) {
+      bailout("concelas", "Could not open coarse grading file");
+      return (1);
     }
+    fprintf(Logfile, "\nEnter BULK modulus for coarse aggregate %d (in GPa): ",
+            num_coarse_sources + 1);
+    read_string(buff, sizeof(buff));
+    kcoarse = atof(buff);
+    fprintf(Logfile, "\n%f", kcoarse);
+    fprintf(Logfile, "\nEnter SHEAR modulus for coarse aggregate %d (in GPa): ",
+            num_coarse_sources + 1);
+    read_string(buff, sizeof(buff));
+    gcoarse = atof(buff);
+    fprintf(Logfile, "\n%f", gcoarse);
+
+    /* Read mandatory header for grading file and discard it */
+    fread_string(gfile, instring); /* read and discard header */
+
+    while (!feof(gfile)) {
+      fread_string(gfile, instring); /* read and discard header */
+      if (!feof(gfile)) {
+        newstring = strtok(instring, ",");
+        Diam_concelas[N_concelas] = atof(newstring);
+        newstring = strtok(NULL, ",");
+        Vf_concelas[N_concelas] = coarse_agg_vf * (atof(newstring));
+        sum += Vf_concelas[N_concelas];
+        K_concelas[N_concelas] = kcoarse;
+        Ki_concelas[N_concelas] = kcoarse;
+        G_concelas[N_concelas] = gcoarse;
+        Gi_concelas[N_concelas] = gcoarse;
+        fprintf(Logfile, "\n%d: Diam = %f, Vf = %f, sum = %f", N_concelas,
+                Diam_concelas[N_concelas], Vf_concelas[N_concelas], sum);
+        N_concelas++;
+      }
+    }
+
+    fclose(gfile);
+    coarseend = N_concelas;
+    num_coarse_sources++;
   }
 
   /* Bubble sort on each aggregate type individually, then assigne average
    * diameters */
 
-  for (m = 0; m < num_fine_sources; m++) {
-    for (i = finebegin[m]; i < fineend[m]; i++) {
-      for (j = (i + 1); j < fineend[m]; j++) {
-        if (Diam_concelas[i] < Diam_concelas[j]) {
-          tdval = Diam_concelas[i];
-          Diam_concelas[i] = Diam_concelas[j];
-          Diam_concelas[j] = tdval;
-          tdval = Vf_concelas[i];
-          Vf_concelas[i] = Vf_concelas[j];
-          Vf_concelas[j] = tdval;
-          tdval = K_concelas[i];
-          K_concelas[i] = K_concelas[j];
-          K_concelas[j] = tdval;
-          tdval = Ki_concelas[i];
-          Ki_concelas[i] = Ki_concelas[j];
-          Ki_concelas[j] = tdval;
-          tdval = G_concelas[i];
-          G_concelas[i] = G_concelas[j];
-          G_concelas[j] = tdval;
-          tdval = Gi_concelas[i];
-          Gi_concelas[i] = Gi_concelas[j];
-          Gi_concelas[j] = tdval;
-        }
+  for (i = finebegin; i < fineend; i++) {
+    for (j = (i + 1); j < fineend; j++) {
+      if (Diam_concelas[i] < Diam_concelas[j]) {
+        tdval = Diam_concelas[i];
+        Diam_concelas[i] = Diam_concelas[j];
+        Diam_concelas[j] = tdval;
+        tdval = Vf_concelas[i];
+        Vf_concelas[i] = Vf_concelas[j];
+        Vf_concelas[j] = tdval;
+        tdval = K_concelas[i];
+        K_concelas[i] = K_concelas[j];
+        K_concelas[j] = tdval;
+        tdval = Ki_concelas[i];
+        Ki_concelas[i] = Ki_concelas[j];
+        Ki_concelas[j] = tdval;
+        tdval = G_concelas[i];
+        G_concelas[i] = G_concelas[j];
+        G_concelas[j] = tdval;
+        tdval = Gi_concelas[i];
+        Gi_concelas[i] = Gi_concelas[j];
+        Gi_concelas[j] = tdval;
       }
     }
   }
 
-  for (m = 0; m < num_coarse_sources; m++) {
-    for (i = coarsebegin[m]; i < coarseend[m]; i++) {
-      for (j = (i + 1); j < coarseend[m]; j++) {
-        if (Diam_concelas[i] < Diam_concelas[j]) {
-          tdval = Diam_concelas[i];
-          Diam_concelas[i] = Diam_concelas[j];
-          Diam_concelas[j] = tdval;
-          tdval = Vf_concelas[i];
-          Vf_concelas[i] = Vf_concelas[j];
-          Vf_concelas[j] = tdval;
-          tdval = K_concelas[i];
-          K_concelas[i] = K_concelas[j];
-          K_concelas[j] = tdval;
-          tdval = Ki_concelas[i];
-          Ki_concelas[i] = Ki_concelas[j];
-          Ki_concelas[j] = tdval;
-          tdval = G_concelas[i];
-          G_concelas[i] = G_concelas[j];
-          G_concelas[j] = tdval;
-          tdval = Gi_concelas[i];
-          Gi_concelas[i] = Gi_concelas[j];
-          Gi_concelas[j] = tdval;
-        }
+  for (i = coarsebegin; i < coarseend; i++) {
+    for (j = (i + 1); j < coarseend; j++) {
+      if (Diam_concelas[i] < Diam_concelas[j]) {
+        tdval = Diam_concelas[i];
+        Diam_concelas[i] = Diam_concelas[j];
+        Diam_concelas[j] = tdval;
+        tdval = Vf_concelas[i];
+        Vf_concelas[i] = Vf_concelas[j];
+        Vf_concelas[j] = tdval;
+        tdval = K_concelas[i];
+        K_concelas[i] = K_concelas[j];
+        K_concelas[j] = tdval;
+        tdval = Ki_concelas[i];
+        Ki_concelas[i] = Ki_concelas[j];
+        Ki_concelas[j] = tdval;
+        tdval = G_concelas[i];
+        G_concelas[i] = G_concelas[j];
+        G_concelas[j] = tdval;
+        tdval = Gi_concelas[i];
+        Gi_concelas[i] = Gi_concelas[j];
+        Gi_concelas[j] = tdval;
       }
     }
   }
@@ -2961,19 +3140,15 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
    * between the sieve opening and the opening of the next largest
    * sieve */
 
-  for (m = 0; m < num_fine_sources; m++) {
-    for (i = finebegin[m] + 1; i < fineend[m]; i++) {
-      Diam_concelas[i] = 0.5 * (Diam_concelas[i] + Diam_concelas[i - 1]);
-    }
-    Diam_concelas[finebegin[m]] *= 1.10;
+  for (i = finebegin + 1; i < fineend; i++) {
+    Diam_concelas[i] = 0.5 * (Diam_concelas[i] + Diam_concelas[i - 1]);
   }
+  Diam_concelas[finebegin] *= 1.10;
 
-  for (m = 0; m < num_coarse_sources; m++) {
-    for (i = coarsebegin[m] + 1; i < coarseend[m]; i++) {
-      Diam_concelas[i] = 0.5 * (Diam_concelas[i] + Diam_concelas[i - 1]);
-    }
-    Diam_concelas[coarsebegin[m]] *= 1.10;
+  for (i = coarsebegin + 1; i < coarseend; i++) {
+    Diam_concelas[i] = 0.5 * (Diam_concelas[i] + Diam_concelas[i - 1]);
   }
+  Diam_concelas[coarsebegin] *= 1.10;
 
   /* Final bubble sort on entire aggregate distribution */
 
@@ -3003,8 +3178,8 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   }
 
   if (fabs(sum - 1.0) > 0.005) {
-    printf("\n\nVolume fraction data sums to %.4f ...", sum);
-    printf("\nWill now renormalize the data to 1.0 ...");
+    fprintf(Logfile, "\n\nVolume fraction data sums to %.4f ...", sum);
+    fprintf(Logfile, "\nWill now renormalize the data to 1.0 ...");
 
     for (i = 0; i < N_concelas; i++) {
       Vf_concelas[i] /= sum;
@@ -3013,21 +3188,21 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
   /* Print final normalized total aggregate grading */
 
-  printf("\n\nNORMALIZED AGGREGATE GRADING:");
+  fprintf(Logfile, "\n\nNORMALIZED AGGREGATE GRADING:");
   for (i = 0; i < N_concelas; i++) {
-    printf("\nDiam = %f Vf = %f", Diam_concelas[i], Vf_concelas[i]);
+    fprintf(Logfile, "\nDiam = %f Vf = %f", Diam_concelas[i], Vf_concelas[i]);
   }
-  printf("\n");
+  fprintf(Logfile, "\n");
 
   aggfrac = finevftot + coarsevftot;
-  printf("\nTotal aggregate volume fraction = %f", aggfrac);
+  fprintf(Logfile, "\nTotal aggregate volume fraction = %f", aggfrac);
   fprintf(fpout, "\nCONCRETE ELASTIC MODULI INFORMATION:\n");
   fprintf(fpout, "\taggfrac: %f\n", aggfrac);
 
-  printf("\n\nEnter the volume fraction of air: ");
+  fprintf(Logfile, "\n\nEnter the volume fraction of air: ");
   read_string(buff, sizeof(buff));
   airfrac = atof(buff);
-  printf("\n%f, Setting it to zero now...", airfrac);
+  fprintf(Logfile, "\n%f, Setting it to zero now...", airfrac);
   fprintf(fpout, "\tairfrac: %f\n", airfrac);
 
   for (i = 0; i < N_concelas; i++) {
@@ -3056,26 +3231,26 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     slope(&kk, &gg, k, g);
     q1 = -h * g * gg / xx[i];
     r1 = -h * k * kk / xx[i];
-    printf("\n\t Iteration %d: q1 = %f, r1 = %f", i, q1, r1);
+    fprintf(Logfile, "\n\t Iteration %d: q1 = %f, r1 = %f", i, q1, r1);
 
     slope(&kk, &gg, k + r1 / 2.0, g + q1 / 2.0);
     q2 = -h * (g + q1 / 2.0) * gg / (xx[i] + (0.50 * h));
     r2 = -h * (k + r1 / 2.0) * kk / (xx[i] + (0.50 * h));
-    printf("\n\t Iteration %d: q2 = %f, r2 = %f", i, q2, r2);
+    fprintf(Logfile, "\n\t Iteration %d: q2 = %f, r2 = %f", i, q2, r2);
 
     slope(&kk, &gg, k + r2 / 2.0, g + q2 / 2.0);
     q3 = -h * (g + q2 / 2.0) * gg / (xx[i] + (0.50 * h));
     r3 = -h * (k + r2 / 2.0) * kk / (xx[i] + (0.50 * h));
-    printf("\n\t Iteration %d: q3 = %f, r3 = %f", i, q3, r3);
+    fprintf(Logfile, "\n\t Iteration %d: q3 = %f, r3 = %f", i, q3, r3);
 
     slope(&kk, &gg, k + r3, g + q3);
     q4 = -h * (g + q3) * gg / (xx[i] + h);
     r4 = -h * (k + r3) * kk / (xx[i] + h);
-    printf("\n\t Iteration %d: q4 = %f, r4 = %f", i, q4, r4);
+    fprintf(Logfile, "\n\t Iteration %d: q4 = %f, r4 = %f", i, q4, r4);
 
     q5 = (q1 + (2.0 * q2) + (2.0 * q3) + q4) / 6.0;
     r5 = (r1 + (2.0 * r2) + (2.0 * r3) + r4) / 6.0;
-    printf("\n\t Iteration %d: q5 = %f, r5 = %f", i, q5, r5);
+    fprintf(Logfile, "\n\t Iteration %d: q5 = %f, r5 = %f", i, q5, r5);
 
     g += q5;
     k += r5;
@@ -3086,7 +3261,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     ksave[i + 1] = k;
     xk = k;
     xg = g;
-    printf("\n\t Iteration %d: k = %f, g = %f", i, k, g);
+    fprintf(Logfile, "\n\t Iteration %d: k = %f, g = %f", i, k, g);
     fflush(stdout);
     if (xx[i + 1] < target_matrix_vf) {
       z = (target_matrix_vf - xx[i]) / (xx[i + 1] - xx[i]);
@@ -3137,7 +3312,7 @@ void effective(double itzwidth, double kitz, double gitz) {
   register int i;
   double ba, c, nui, nuitz, geff, eta1, eta2, eta3, aa, bb, cc, gg, arg;
 
-  printf("\nIn function effective:");
+  fprintf(Logfile, "\nIn function effective:");
   nuitz = 0;
   for (i = 0; i <= N_concelas; i++) {
 
@@ -3158,11 +3333,11 @@ void effective(double itzwidth, double kitz, double gitz) {
 
     K_concelas[i] += kitz;
 
-    printf("\nK_concelas[%d] = %f, nui = %f, nuitz = %f", i, K_concelas[i], nui,
-           nuitz);
+    fprintf(Logfile, "\nK_concelas[%d] = %f, nui = %f, nuitz = %f", i,
+            K_concelas[i], nui, nuitz);
 
     geff = G_concelas[i] / gitz - 1.0;
-    printf(", geff[%d] = %f", i, geff);
+    fprintf(Logfile, ", geff[%d] = %f", i, geff);
 
     eta1 =
         geff * (7.0 - 10.0 * nuitz) * (7.0 + 5.0 * nui) + 105.0 * (nui - nuitz);
@@ -3211,7 +3386,7 @@ void effective(double itzwidth, double kitz, double gitz) {
     }
 
     G_concelas[i] = gg * gitz;
-    printf(", G_concelas[%d] = %f", i, G_concelas[i]);
+    fprintf(Logfile, ", G_concelas[%d] = %f", i, G_concelas[i]);
   }
   fflush(stdout);
 

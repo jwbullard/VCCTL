@@ -1250,6 +1250,10 @@ class GradingCurveWidget(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to load available templates: {e}")
     
+    def get_current_template_name(self) -> Optional[str]:
+        """Get the currently selected template name, if any."""
+        return self.current_template_name
+    
     def _on_load_template_changed(self, combo: Gtk.ComboBoxText) -> None:
         """Handle template selection from dropdown."""
         template_name = combo.get_active_id()

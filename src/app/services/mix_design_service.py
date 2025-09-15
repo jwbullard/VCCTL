@@ -119,6 +119,10 @@ class MixDesignService(BaseService[MixDesign, MixDesignCreate, MixDesignUpdate])
                 coarse_aggregate_name=mix_design_data.coarse_aggregate_name,
                 coarse_aggregate_mass=mix_design_data.coarse_aggregate_mass,
                 
+                # Grading template associations
+                fine_aggregate_grading_template=mix_design_data.fine_aggregate_grading_template,
+                coarse_aggregate_grading_template=mix_design_data.coarse_aggregate_grading_template,
+                
                 # Component and properties data
                 components=components_json,
                 calculated_properties=properties_json,

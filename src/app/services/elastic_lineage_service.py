@@ -68,7 +68,7 @@ class ElasticLineageService:
         project_root = Path(__file__).parent.parent.parent.parent
         self.operations_dir = project_root / "Operations"
     
-    def resolve_lineage_chain(self, hydration_operation_id: int) -> Dict[str, Any]:
+    def resolve_lineage_chain(self, hydration_operation_id: int, output_directory: str = None) -> Dict[str, Any]:
         """
         Resolve complete lineage chain from hydration operation.
         
@@ -132,7 +132,7 @@ class ElasticLineageService:
             mix_design_data = self._get_mix_design_data_from_microstructure_operation(session, microstructure_op)
             
             # 4. Resolve aggregate properties from mix design
-            aggregate_properties = self._resolve_aggregate_properties(session, mix_design_data)
+            aggregate_properties = self._resolve_aggregate_properties(session, mix_design_data, output_directory)
             
             # 5. Calculate volume fractions from mix design components
             volume_fractions = self._calculate_volume_fractions(mix_design_data)
@@ -148,7 +148,7 @@ class ElasticLineageService:
             self.logger.info(f"Resolved lineage chain for hydration operation {hydration_operation_id}")
             return lineage
     
-    def _resolve_aggregate_properties(self, session: Session, mix_design_data: Dict[str, Any]) -> Dict[str, Optional[AggregateProperties]]:
+    def _resolve_aggregate_properties(self, session: Session, mix_design_data: Dict[str, Any], output_directory: str = None) -> Dict[str, Optional[AggregateProperties]]:
         """Resolve aggregate properties from mix design data and database."""
         properties = {
             'fine_aggregate': None,
@@ -174,15 +174,16 @@ class ElasticLineageService:
             
             if fine_agg:
                 fine_template_name = mix_design_data.get('fine_aggregate_grading_template')
+                self.logger.info(f"🔍 Fine template name from mix design: {fine_template_name}")
                 properties['fine_aggregate'] = AggregateProperties(
                     name=fine_agg.display_name or fine_agg.name,
                     bulk_modulus=fine_agg.bulk_modulus or 30.0,  # Default GPa
                     shear_modulus=fine_agg.shear_modulus or 18.0,
                     volume_fraction=fine_vf,
-                    grading_path=self._get_aggregate_grading_path(fine_agg),
+                    grading_path=self._get_aggregate_grading_path(fine_agg, output_directory),
                     grading_template_name=fine_template_name
                 )
-                self.logger.info(f"Resolved fine aggregate: {fine_agg.display_name} (VF: {fine_vf:.3f})")
+                self.logger.info(f"Resolved fine aggregate: {fine_agg.display_name} (VF: {fine_vf:.3f}) with template: {fine_template_name}")
             else:
                 self.logger.warning(f"Fine aggregate '{fine_agg_name}' not found in database")
         
@@ -198,21 +199,22 @@ class ElasticLineageService:
             
             if coarse_agg:
                 coarse_template_name = mix_design_data.get('coarse_aggregate_grading_template')
+                self.logger.info(f"🔍 Coarse template name from mix design: {coarse_template_name}")
                 properties['coarse_aggregate'] = AggregateProperties(
                     name=coarse_agg.display_name or coarse_agg.name,
                     bulk_modulus=coarse_agg.bulk_modulus or 36.7,  # Default GPa
                     shear_modulus=coarse_agg.shear_modulus or 22.0,
                     volume_fraction=coarse_vf,
-                    grading_path=self._get_aggregate_grading_path(coarse_agg),
+                    grading_path=self._get_aggregate_grading_path(coarse_agg, output_directory),
                     grading_template_name=coarse_template_name
                 )
-                self.logger.info(f"Resolved coarse aggregate: {coarse_agg.display_name} (VF: {coarse_vf:.3f})")
+                self.logger.info(f"Resolved coarse aggregate: {coarse_agg.display_name} (VF: {coarse_vf:.3f}) with template: {coarse_template_name}")
             else:
                 self.logger.warning(f"Coarse aggregate '{coarse_agg_name}' not found in database")
         
         return properties
     
-    def _get_aggregate_grading_path(self, aggregate: Aggregate) -> str:
+    def _get_aggregate_grading_path(self, aggregate: Aggregate, output_directory: str = None) -> str:
         """Get grading file path for aggregate by creating temporary .gdg file from database templates."""
         try:
             # Import grading model
@@ -263,19 +265,24 @@ class ElasticLineageService:
             
             # Create grading file in operation directory where elastic.c can find it
             import os
+            from pathlib import Path
             
-            # Put grading file in the same directory as other elastic moduli inputs
-            # This will be refined in Phase 3 to use the specific operation folder
-            # For now, use a pattern that will work: ./Operations/{HydrationName}/
+            # Create grading filename
             grading_filename = f"{aggregate.display_name}_{agg_type_str}_grading.gdg"
             
-            # For Phase 2, put it in a location that will be accessible to elastic.c
-            # This should be in the same directory as other operation files
-            temp_grading_path = f"./{grading_filename}"  # Relative to operation working directory
-            
-            # Create the actual file in the operations base directory for now
-            # Phase 3 will move this to the specific operation folder
-            actual_file_path = self.operations_dir / grading_filename
+            # Determine where to create the file
+            if output_directory:
+                # Use the specified output directory (proper location)
+                output_path = Path(output_directory)
+                output_path.mkdir(parents=True, exist_ok=True)
+                actual_file_path = output_path / grading_filename
+                # Return path relative to output directory for display
+                temp_grading_path = f"./{grading_filename}"  # Relative to operation working directory
+            else:
+                # Fallback to operations base directory
+                actual_file_path = self.operations_dir / grading_filename
+                # Return path indicating it's in operations directory
+                temp_grading_path = f"./Operations/{grading_filename}"
             
             # Convert sieve data to .gdg format manually (since we can't call grading.to_gdg_format())
             lines = []
@@ -625,6 +632,10 @@ class ElasticLineageService:
                 'fine_aggregate_mass': mix_design.fine_aggregate_mass,
                 'coarse_aggregate_name': mix_design.coarse_aggregate_name,
                 'coarse_aggregate_mass': mix_design.coarse_aggregate_mass,
+                
+                # Grading template associations
+                'fine_aggregate_grading_template': mix_design.fine_aggregate_grading_template,
+                'coarse_aggregate_grading_template': mix_design.coarse_aggregate_grading_template,
             }
             
             # Convert components to list format for volume fraction calculation

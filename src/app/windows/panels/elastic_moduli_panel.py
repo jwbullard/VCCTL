@@ -162,7 +162,7 @@ class ElasticModuliPanel(Gtk.Box):
         hydration_box.pack_start(self.hydration_combo, True, True, 0)
         
         # Add refresh button
-        refresh_button = Gtk.Button.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        refresh_button = create_button_with_icon("", "refresh", 16)
         refresh_button.set_tooltip_text("Refresh list of hydration operations")
         refresh_button.connect("clicked", self._on_refresh_hydration_operations)
         hydration_box.pack_start(refresh_button, False, False, 0)
@@ -577,6 +577,9 @@ class ElasticModuliPanel(Gtk.Box):
     def _load_lineage_and_microstructures(self, hydration_id: int) -> None:
         """Load lineage data and available microstructures (Phase 2)."""
         try:
+            # Store hydration ID for later re-resolution with output directory
+            self._current_hydration_id = hydration_id
+            
             # Resolve complete lineage chain
             self.resolved_lineage = self.elastic_moduli_service.lineage_service.resolve_lineage_chain(hydration_id)
             
@@ -734,6 +737,16 @@ class ElasticModuliPanel(Gtk.Box):
                 self.logger.warning(f"Could not convert PIMG path to relative: {e}")
                 self.pimg_file_entry.set_text(selected_microstructure.pimg_path)
         
+        # Re-resolve lineage with output directory for accurate grading file paths
+        if hasattr(self, '_current_hydration_id'):
+            try:
+                self.resolved_lineage = self.elastic_moduli_service.lineage_service.resolve_lineage_chain(
+                    self._current_hydration_id, relative_output_dir
+                )
+                self.logger.info(f"Re-resolved lineage with output directory: {relative_output_dir}")
+            except Exception as e:
+                self.logger.warning(f"Error re-resolving lineage with output directory: {e}")
+        
         # Auto-populate from resolved lineage data
         self._populate_from_resolved_lineage()
         
@@ -765,7 +778,10 @@ class ElasticModuliPanel(Gtk.Box):
                 self.fine_bulk_spin.set_value(fine_agg.bulk_modulus)
                 self.fine_shear_spin.set_value(fine_agg.shear_modulus)
                 if fine_agg.grading_path:
-                    self.fine_grading_entry.set_text(fine_agg.grading_path)
+                    # Show the file will be in the output directory, not Operations/
+                    import os.path
+                    filename = os.path.basename(fine_agg.grading_path)
+                    self.fine_grading_entry.set_text(f"./{filename}")  # Will be in output directory
                     # Update grading status to show template name if available
                     if hasattr(fine_agg, 'grading_template_name') and fine_agg.grading_template_name:
                         self.fine_grading_status_label.set_markup(f'<span size="small" style="italic" color="green">✓ Template: <b>{fine_agg.grading_template_name}</b></span>')
@@ -790,7 +806,10 @@ class ElasticModuliPanel(Gtk.Box):
                 self.coarse_bulk_spin.set_value(coarse_agg.bulk_modulus)
                 self.coarse_shear_spin.set_value(coarse_agg.shear_modulus)
                 if coarse_agg.grading_path:
-                    self.coarse_grading_entry.set_text(coarse_agg.grading_path)
+                    # Show the file will be in the output directory, not Operations/
+                    import os.path
+                    filename = os.path.basename(coarse_agg.grading_path)
+                    self.coarse_grading_entry.set_text(f"./{filename}")  # Will be in output directory
                     # Update grading status to show template name if available
                     if hasattr(coarse_agg, 'grading_template_name') and coarse_agg.grading_template_name:
                         self.coarse_grading_status_label.set_markup(f'<span size="small" style="italic" color="green">✓ Template: <b>{coarse_agg.grading_template_name}</b></span>')
@@ -841,7 +860,10 @@ class ElasticModuliPanel(Gtk.Box):
             if operation.fine_aggregate_volume_fraction is not None:
                 self.fine_volume_spin.set_value(operation.fine_aggregate_volume_fraction)
             if operation.fine_aggregate_grading_path:
-                self.fine_grading_entry.set_text(operation.fine_aggregate_grading_path)
+                # Show the file will be in the output directory, not Operations/
+                import os.path
+                filename = os.path.basename(operation.fine_aggregate_grading_path)
+                self.fine_grading_entry.set_text(f"./{filename}")  # Will be in output directory
             if operation.fine_aggregate_bulk_modulus is not None:
                 self.fine_bulk_spin.set_value(operation.fine_aggregate_bulk_modulus)
             if operation.fine_aggregate_shear_modulus is not None:
@@ -861,7 +883,10 @@ class ElasticModuliPanel(Gtk.Box):
             if operation.coarse_aggregate_volume_fraction is not None:
                 self.coarse_volume_spin.set_value(operation.coarse_aggregate_volume_fraction)
             if operation.coarse_aggregate_grading_path:
-                self.coarse_grading_entry.set_text(operation.coarse_aggregate_grading_path)
+                # Show the file will be in the output directory, not Operations/
+                import os.path
+                filename = os.path.basename(operation.coarse_aggregate_grading_path)
+                self.coarse_grading_entry.set_text(f"./{filename}")  # Will be in output directory
             if operation.coarse_aggregate_bulk_modulus is not None:
                 self.coarse_bulk_spin.set_value(operation.coarse_aggregate_bulk_modulus)
             if operation.coarse_aggregate_shear_modulus is not None:

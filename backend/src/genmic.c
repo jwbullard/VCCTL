@@ -387,7 +387,7 @@ int Simwall = 0;
 int Wallpos = 50;
 
 /***
- *   File pointer for progress file
+ *   File pointer for log file
  ***/
 char LogFileName[MAXSTRING];
 FILE *Logfile;

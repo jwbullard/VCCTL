@@ -112,6 +112,9 @@ class MixDesignComponentData(BaseModel):
     mass_fraction: float = Field(ge=0.0, le=1.0)
     volume_fraction: float = Field(ge=0.0, le=1.0)
     specific_gravity: float = Field(gt=0.0, le=10.0)
+    # Optional grading data for aggregates
+    grading_data: Optional[List[List[float]]] = Field(None, description="Grading curve data as list of [sieve_size, percent_retained] pairs")
+    grading_template: Optional[str] = Field(None, max_length=64, description="Name of grading template used")
 
 
 class MixDesignPropertiesData(BaseModel):

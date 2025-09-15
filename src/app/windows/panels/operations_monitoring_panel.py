@@ -2443,23 +2443,33 @@ class OperationsMonitoringPanel(Gtk.Box):
                         operation_source = ''
                         self.logger.info(f"DEBUG: Operation {operation.name} has no metadata")
                     
-                    # For database operations (hydration simulations), construct the folder path if not already set
-                    if operation_source == 'database' and not output_dir:
-                        # Operations folder is typically Operations/{operation_name}
-                        # From panels/operations_monitoring_panel.py: parent = windows, parent = app, parent = src, parent = vcctl-gtk
-                        project_root = Path(__file__).parent.parent.parent.parent.parent
-                        operations_dir = project_root / "Operations"
-                        potential_folder = operations_dir / operation.name
-                        if potential_folder.exists():
-                            output_dir = str(potential_folder)
-                            self.logger.info(f"Found operation folder for {operation.name}: {output_dir}")
+                    # Always try to find the standard Operations folder regardless of metadata
+                    # This ensures orphaned folders get cleaned up even if metadata is missing/incorrect
+                    project_root = Path(__file__).parent.parent.parent.parent.parent
+                    operations_dir = project_root / "Operations"
+                    standard_folder = operations_dir / operation.name
                     
-                    # For database operations, also check if output_directory gives us a relative path to make absolute
-                    if operation_source == 'database' and output_dir and not Path(output_dir).is_absolute():
-                        # From panels/operations_monitoring_panel.py: parent = windows, parent = app, parent = src, parent = vcctl-gtk
-                        project_root = Path(__file__).parent.parent.parent.parent.parent
-                        output_dir = str(project_root / output_dir)
-                        self.logger.info(f"Made absolute path for {operation.name}: {output_dir}")
+                    # Use the metadata output_dir if available and valid, otherwise use standard location
+                    if output_dir and Path(output_dir).exists():
+                        # Use existing metadata path
+                        self.logger.info(f"Using metadata output_dir for {operation.name}: {output_dir}")
+                    elif standard_folder.exists():
+                        # Use standard Operations folder location
+                        output_dir = str(standard_folder)
+                        self.logger.info(f"Using standard Operations folder for {operation.name}: {output_dir}")
+                    else:
+                        # Try to make relative paths absolute
+                        if output_dir and not Path(output_dir).is_absolute():
+                            absolute_path = project_root / output_dir
+                            if absolute_path.exists():
+                                output_dir = str(absolute_path)
+                                self.logger.info(f"Made relative path absolute for {operation.name}: {output_dir}")
+                            else:
+                                self.logger.warning(f"Neither metadata path nor standard folder exists for {operation.name}")
+                                output_dir = None
+                        else:
+                            self.logger.warning(f"No valid folder path found for operation {operation.name}")
+                            output_dir = None
                     
                     # Always try to delete from database (operations may exist in both JSON and database)
                     try:
@@ -2500,6 +2510,9 @@ class OperationsMonitoringPanel(Gtk.Box):
                     failed_count += 1
                     meaningful_name = self._get_meaningful_operation_name(operation)
                     self.logger.error(f"Error deleting operation '{meaningful_name}': {e}")
+            
+            # Clean up any orphaned folders after deletion
+            self._cleanup_orphaned_folders()
             
             # Refresh the UI
             self._update_operations_list()
@@ -4305,6 +4318,49 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.logger.error(f"Error during validation: {e}")
             self._update_status(f"Error during validation: {e}")
 
+    def _cleanup_orphaned_folders(self) -> None:
+        """Remove operation folders that don't have corresponding database records."""
+        try:
+            # Get all database operation names
+            operation_service = self.service_container.operation_service
+            db_operations = operation_service.get_all()
+            db_operation_names = {op.name for op in db_operations}
+            
+            # Get all folder names in Operations directory
+            project_root = Path(__file__).parent.parent.parent.parent.parent
+            operations_dir = project_root / "Operations"
+            
+            if not operations_dir.exists():
+                return
+                
+            orphaned_folders = []
+            for item in operations_dir.iterdir():
+                if item.is_dir():
+                    folder_name = item.name
+                    # Skip special folders
+                    if folder_name in ['grading_files', '.git', '__pycache__']:
+                        continue
+                    # Check if folder has a corresponding database operation
+                    if folder_name not in db_operation_names:
+                        orphaned_folders.append(item)
+            
+            # Remove orphaned folders
+            removed_count = 0
+            for folder in orphaned_folders:
+                try:
+                    import shutil
+                    shutil.rmtree(folder)
+                    self.logger.info(f"🗑️ CLEANUP: Removed orphaned folder: {folder.name}")
+                    removed_count += 1
+                except Exception as e:
+                    self.logger.error(f"🗑️ CLEANUP: Failed to remove orphaned folder {folder.name}: {e}")
+            
+            if removed_count > 0:
+                self.logger.info(f"🗑️ CLEANUP: Removed {removed_count} orphaned operation folders")
+                
+        except Exception as e:
+            self.logger.error(f"Error during orphaned folder cleanup: {e}")
+    
     def cleanup(self) -> None:
         """Cleanup resources."""
         self.logger.info("Starting operations monitoring panel cleanup...")

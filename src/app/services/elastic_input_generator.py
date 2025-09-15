@@ -46,7 +46,7 @@ class ElasticInputGenerator:
             Path to generated input file
         """
         # Resolve lineage data
-        lineage = self.lineage_service.resolve_lineage_chain(operation.hydration_operation_id)
+        lineage = self.lineage_service.resolve_lineage_chain(operation.hydration_operation_id, output_directory)
         
         # Create output directory
         output_path = Path(output_directory)

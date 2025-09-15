@@ -1,0 +1,54 @@
+{
+  "operation_name": "Riemann04",
+  "microstructure_file": "./Operations/Riemann04/Riemann04.pimg",
+  "system_size": 120,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cementotc",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2571428571428572,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "Pork",
+      "material_type": "filler",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.017142857142857144,
+      "specific_gravity": 2.8,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 3,
+      "material_name": "NormalLimestone",
+      "material_type": "limestone",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.011428571428571429,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 4,
+      "material_name": "MA106A-1-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.42857142857142855,
+      "specific_gravity": 2.64,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 5,
+      "material_name": "MA99BC-5-coarse",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2857142857142857,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-15T18:05:08.220122"
+}
