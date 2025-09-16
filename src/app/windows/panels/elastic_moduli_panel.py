@@ -1034,9 +1034,9 @@ class ElasticModuliPanel(Gtk.Box):
             self._show_error_dialog(f"Failed to generate input file:\n{str(e)}")
     
     def _on_start_calculation(self, button: Gtk.Button) -> None:
-        """Handle start calculation button (Phase 2: Lineage-aware with microstructure selection)."""
+        """Handle start calculation button (Phase 3: Database operation with lineage tracking)."""
         try:
-            # Phase 2: Enhanced validation
+            # Phase 3: Enhanced validation
             if not self._validate_selections():
                 return
             
@@ -1051,18 +1051,7 @@ class ElasticModuliPanel(Gtk.Box):
             
             hydration_id = int(self.hydration_combo.get_active_id())
             
-            # Phase 2: Use new lineage-aware operation creation
-            elastic_operation, lineage_data = self.elastic_moduli_service.create_operation_with_lineage(
-                name=operation_name,
-                hydration_operation_id=hydration_id,
-                description=f"Elastic moduli calculation using {selected_microstructure.time_label} microstructure"
-            )
-            
-            # Phase 2: Store selected microstructure information
-            elastic_operation.image_filename = os.path.basename(selected_microstructure.file_path)
-            elastic_operation.pimg_file_path = selected_microstructure.pimg_path
-            
-            # Phase 2: Capture UI parameters for reproducibility
+            # Phase 3: Capture UI parameters for storage
             ui_parameters = self._capture_elastic_ui_parameters()
             ui_parameters['selected_microstructure'] = {
                 'file_path': selected_microstructure.file_path,
@@ -1071,17 +1060,34 @@ class ElasticModuliPanel(Gtk.Box):
                 'is_final': selected_microstructure.is_final
             }
             
-            # Launch process through Operations panel
-            success = self._launch_elastic_process(
+            # Phase 3: Create ElasticModuliOperation with required image_filename
+            # Extract filename and paths before creating database record
+            image_filename = os.path.basename(selected_microstructure.file_path) if selected_microstructure else "microstructure.img"
+            pimg_file_path = selected_microstructure.pimg_path if selected_microstructure else None
+
+            # Create the operation with the required fields to avoid NOT NULL constraint
+            elastic_operation, lineage_data = self.elastic_moduli_service.create_operation_with_lineage(
+                name=operation_name,
+                hydration_operation_id=hydration_id,
+                description=f"Elastic moduli calculation using {selected_microstructure.time_label} microstructure",
+                image_filename=image_filename,
+                pimg_file_path=pimg_file_path
+            )
+            
+            # Launch process through Operations panel (let it create database operation)
+            operation_id = self._launch_elastic_process(
                 operation_name=operation_name,
+                hydration_id=hydration_id,  # For linking parent operation
                 elastic_operation=elastic_operation, 
                 selected_microstructure=selected_microstructure,
                 ui_parameters=ui_parameters
             )
             
+            success = operation_id is not None
+            
             if success:
                 self._show_info_dialog(f"Elastic moduli operation '{operation_name}' launched successfully.\n\nUsing microstructure: {selected_microstructure.time_label}\nCheck the Operations panel to monitor progress.")
-                self.logger.info(f"Successfully launched elastic operation '{operation_name}'")
+                self.logger.info(f"Successfully launched elastic operation '{operation_name}' with database ID: {operation_id}")
             else:
                 self._show_error_dialog(f"Failed to launch elastic moduli operation '{operation_name}'")
                 self.logger.error(f"Failed to launch elastic operation '{operation_name}'")
@@ -1159,26 +1165,37 @@ class ElasticModuliPanel(Gtk.Box):
         
         return None
     
-    def _launch_elastic_process(self, operation_name: str, elastic_operation: ElasticModuliOperation, 
-                               selected_microstructure, ui_parameters: Dict[str, Any]) -> bool:
-        """Launch elastic moduli process through Operations panel."""
+    def _launch_elastic_process(self, operation_name: str, hydration_id: int, 
+                               elastic_operation: ElasticModuliOperation, 
+                               selected_microstructure, ui_parameters: Dict[str, Any]) -> Optional[str]:
+        """Launch elastic moduli process through Operations panel (Phase 3)."""
         try:
             # Get operations panel reference
             operations_panel = getattr(self.main_window, 'operations_panel', None)
             if not operations_panel:
                 self.logger.error("Operations panel not found")
-                return False
+                return None
             
             # Get elastic executable path
             project_root = Path(__file__).parent.parent.parent.parent.parent
-            elastic_path = project_root / "backend" / "build" / "elastic"
+            elastic_path = project_root / "backend" / "bin" / "elastic"
             if not elastic_path.exists():
                 self.logger.error(f"Elastic executable not found at: {elastic_path}")
-                return False
+                return None
             
-            # Create output directory
-            operations_dir = project_root / "Operations" 
-            output_dir = operations_dir / operation_name
+            # Create output directory nested inside hydration operation folder
+            # Need to get the hydration operation name to create proper nesting
+            hydration_name = self._get_hydration_operation_name(hydration_id)
+            operations_dir = project_root / "Operations"
+
+            if hydration_name:
+                # Nest elastic operation inside hydration folder
+                output_dir = operations_dir / hydration_name / operation_name
+            else:
+                # Fallback to flat structure if we can't find hydration name
+                output_dir = operations_dir / operation_name
+                self.logger.warning(f"Could not find hydration operation name for ID {hydration_id}, using flat structure")
+
             output_dir.mkdir(parents=True, exist_ok=True)
             
             # Generate input file using existing service
@@ -1190,22 +1207,80 @@ class ElasticModuliPanel(Gtk.Box):
             with open(input_file_path, 'r') as f:
                 input_content = f.read()
             
-            # Launch real process operation
+            # Launch real process operation (let it create database operation)
+            # Elastic executable requires -j and -w command line arguments
+            # Use relative paths to avoid path duplication
             from app.windows.panels.operations_monitoring_panel import OperationType
+            progress_file = "elastic_progress.json"  # Relative to working directory
+
             operation_id = operations_panel.start_real_process_operation(
                 name=operation_name,
                 operation_type=OperationType.ELASTIC_MODULI_CALCULATION,
-                command=[str(elastic_path)],
+                command=[
+                    str(elastic_path),
+                    "-j", progress_file,  # Progress JSON file (relative path)
+                    "-w", "."  # Working directory (current directory)
+                ],
                 working_dir=str(output_dir),
-                input_data=input_content
+                input_data=input_content  # Input still provided via stdin
             )
             
-            self.logger.info(f"Launched elastic operation '{operation_name}' with ID: {operation_id}")
-            return True
+            # Phase 3: Update database operation with UI parameters and parent linkage
+            if operation_id:
+                self._update_elastic_operation_metadata(
+                    operation_id=operation_id,
+                    ui_parameters=ui_parameters,
+                    parent_operation_id=hydration_id
+                )
+            
+            self.logger.info(f"Phase 3: Launched elastic operation '{operation_name}' with database ID: {operation_id}")
+            return operation_id
             
         except Exception as e:
             self.logger.error(f"Error launching elastic process: {e}")
-            return False
+            return None
+    
+    def _get_hydration_operation_name(self, hydration_id: int) -> Optional[str]:
+        """Get the name of a hydration operation by its ID."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation
+
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                hydration_op = session.query(Operation).filter_by(id=hydration_id).first()
+                if hydration_op:
+                    return hydration_op.name
+            return None
+        except Exception as e:
+            self.logger.error(f"Error getting hydration operation name: {e}")
+            return None
+
+    def _update_elastic_operation_metadata(self, operation_id: str, ui_parameters: Dict[str, Any],
+                                          parent_operation_id: int) -> None:
+        """Update the database operation with UI parameters and parent linkage (Phase 3)."""
+        try:
+            from app.database.service import DatabaseService
+            from app.models.operation import Operation
+            
+            db_service = DatabaseService()
+            with db_service.get_session() as session:
+                # Convert operation_id to int if it's a string
+                op_id = int(operation_id) if isinstance(operation_id, str) else operation_id
+                
+                db_operation = session.query(Operation).filter_by(id=op_id).first()
+                if db_operation:
+                    # Update with UI parameters for reproducibility
+                    db_operation.stored_ui_parameters = ui_parameters
+                    # Link to parent hydration operation
+                    db_operation.parent_operation_id = parent_operation_id
+                    session.commit()
+                    self.logger.info(f"Updated elastic operation {operation_id} with metadata and parent linkage to {parent_operation_id}")
+                else:
+                    self.logger.warning(f"Database operation {operation_id} not found for metadata update")
+                    
+        except Exception as e:
+            self.logger.error(f"Error updating elastic operation metadata: {e}")
     
     def _create_operation_from_form(self) -> Optional[ElasticModuliOperation]:
         """Create ElasticModuliOperation from form data."""

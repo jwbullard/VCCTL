@@ -1,13 +1,13 @@
 /************************  elastic.c ***************************************/
 /* BACKGROUND                                                              */
-/* This is a control program to call cpelas.c (see below) and then, when   */
+/* This is a control program to call elastic.c (see below) and then, when   */
 /* that program is finished, to pass control to concelas.c (see below) to  */
 /* calculate concrete elastic properties and compressive strength          */
 /*                                                                         */
 /* Programmer:  Dr. Jeffrey W. Bullard (NIST/BFRL)- (301)975.5725          */
 /*                                                                         */
 /***************************************************************************/
-/* **********************  cpelas.c  ************************************** */
+/* **********************  elastic.c  ************************************** */
 /* BACKGROUND                                                               */
 /* Programmer: Dr. Edward J. Garboczi (NIST/BFRL)- (301)975-6708            */
 /* C conversion by: Dale P. Bentz (NIST) (301)975-5865                      */
@@ -99,7 +99,7 @@
 #define MAXAGGTYPES 4
 #define NUMFINESOURCES 1
 
-/* Global variables for cpelas */
+/* Global variables for elastic */
 
 char Outfolder[MAXSTRING];
 char Outfilename[MAXSTRING], PCfilename[MAXSTRING], Layerfilename[MAXSTRING];
@@ -369,46 +369,46 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   FILE *fpout;
 
   /* Get user input for filename to read in microstructure */
-  printf("Enter full path and name of file with input microstructure: ");
+  fprintf(Logfile,
+          "\nEnter full path and name of file with input microstructure: ");
   read_string(filein, sizeof(filein));
-  printf("\n%s\n", filein);
+  fprintf(Logfile, "\n%s", filein);
 
   /* Determine the separator character */
 
-  printf("Enter whether to break connections between\n");
-  printf("anhydrous cement particles (1) or not (0): ");
+  fprintf(Logfile, "\nEnter whether to break connections between");
+  fprintf(Logfile, "\nanhydrous cement particles (1) or not (0): ");
   read_string(buff, sizeof(buff));
   /* Sever = atoi(buff); */
   Sever = 1;
-  printf("\n%d (set automatically, not your fault.\n", Sever);
-  printf("ITZ Calculation? (1 for Yes, 0 for No): ");
+  fprintf(Logfile, "\n%d (set automatically, not your fault.", Sever);
+  fprintf(Logfile, "\nITZ Calculation? (1 for Yes, 0 for No): ");
   read_string(buff, sizeof(buff));
   *doitz = atoi(buff);
-  printf("\n%d\n", *doitz);
-  fflush(stdout);
-  printf("Enter name of folder to output data files");
-  printf("\n(Include final separator in path) ");
+  fprintf(Logfile, "%d", *doitz);
+  fflush(Logfile);
+  fprintf(Logfile, "\nEnter name of folder to output data files");
+  fprintf(Logfile, "\n(Include final separator in path): ");
   read_string(Outfolder, sizeof(Outfolder));
   Filesep = Outfolder[strlen(Outfolder) - 1];
-  if ((Filesep != '/') && (Filesep != '\\')) {
-    printf("\nNo final file separator detected.  Using /");
-    Filesep = '/';
+  if (Filesep != PATH_SEPARATOR[0]) {
+    fprintf(stderr, "\nIncorrect file separator detected.  Using %c",
+            PATH_SEPARATOR[0]);
+    Filesep = PATH_SEPARATOR[0];
   }
-  printf("\n%s\n", Outfolder);
-  printf("Enter fully resolved name of file to output calculated effective "
-         "moduli: ");
   sprintf(Outfilename, "%sEffectiveModuli.dat", Outfolder);
-  printf("\nEffective elastic moduli will be printed to file %s\n",
-         Outfilename);
+  fprintf(Logfile, "\nEffective elastic moduli will be printed to file %s",
+          Outfilename);
   sprintf(PCfilename, "%sPhaseContributions.dat", Outfolder);
-  printf("\nRelative phase contributions will be printed to file %s\n",
-         PCfilename);
+  fprintf(Logfile, "\nRelative phase contributions will be printed to file %s",
+          PCfilename);
   if (*doitz) {
     sprintf(Layerfilename, "%sITZmoduli.dat", Outfolder);
-    printf("\nEffective moduli as function of distance normal to");
-    printf("\n\taggregate surface will be printed to file %s\n", Layerfilename);
+    fprintf(Logfile, "\nEffective moduli as function of distance normal to");
+    fprintf(Logfile, "\n\taggregate surface will be printed to file %s",
+            Layerfilename);
   }
-  infile = filehandler("cpelas", filein, "READ");
+  infile = filehandler("elastic", filein, "READ");
   if (!infile) {
     freeallmem();
     exit(1);
@@ -424,15 +424,15 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
 
   if (read_imgheader(infile, &Version, &Xsyssize, &Ysyssize, &Zsyssize, &Res)) {
     fclose(infile);
-    bailout("cpelas", "Error reading image header");
+    bailout("elastic", "Error reading image header");
     freeallmem();
     exit(1);
   }
 
   Syspix = Xsyssize * Ysyssize * Zsyssize;
 
-  printf("\nSyspix = %d", Syspix);
-  fflush(stdout);
+  fprintf(Logfile, "\nSyspix = %d", Syspix);
+  fflush(Logfile);
 
   nx = Xsyssize;
   ny = Ysyssize;
@@ -462,8 +462,8 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
 
   if (!u || !gb || !b || !h || !ib || !pix || !part) {
     freeallmem();
-    bailout("cpelas", "Memory allocation failure");
-    fflush(stdout);
+    bailout("elastic", "Memory allocation failure");
+    fflush(Logfile);
     exit(1);
   }
 
@@ -485,8 +485,8 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
 
     if (!Vv || !Aa || !A || !A1 || !K || !G || !Cc) {
       freeallmem();
-      bailout("cpelas", "Memory allocation failure");
-      fflush(stdout);
+      bailout("elastic", "Memory allocation failure");
+      fflush(Logfile);
       exit(1);
     }
   }
@@ -497,17 +497,16 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
    */
   /*  reading it in from a file, this should be done inside this subroutine. */
 
-  printf("\nReading image file now... ");
-  fflush(stdout);
+  fprintf(Logfile, "\nReading image file now... ");
+  fflush(Logfile);
   foundagg = 0;
   count = 0;
   nxy = Xsyssize * Ysyssize;
-  for (k = 0; k < Zsyssize; k++) {
-    m1 = k * nxy;
+  for (i = 0; i < Xsyssize; i++) {
     for (j = 0; j < Ysyssize; j++) {
       m2 = j * Xsyssize;
-      for (i = 0; i < Xsyssize; i++) {
-        m = m1 + m2 + i;
+      for (k = 0; k < Zsyssize; k++) {
+        m = (k * nxy) + m2 + i;
         fscanf(infile, "%s", instring);
         oinval = atoi(instring);
         inval = convert_id(oinval, Version);
@@ -525,17 +524,18 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
           foundagg = 1;
 
           /***
-           *	VCCTL forces aggregate to be in yz plane when
+           *	VCCTL forces aggregate to be in xy plane when
            *	microstructure is created
            ***/
 
-          if (i < *nagg1)
-            *nagg1 = i;
+          if (k < *nagg1)
+            *nagg1 = k;
         }
 
         if ((inval < 0) || (inval > NSP)) {
           sprintf(buff, "Phase label in pix has value of %d", inval);
-          bailout("cpelas", buff);
+          bailout("elastic", buff);
+          fflush(stderr);
           fflush(stdout);
           exit(1);
         }
@@ -544,8 +544,8 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   }
 
   fclose(infile);
-  printf(" done.  Count of C3S = %d\n", count);
-  fflush(stdout);
+  fprintf(Logfile, " done.  Count of C3S = %d", count);
+  fflush(Logfile);
 
   count = 0;
   for (m = 0; m < Xsyssize * Ysyssize * Zsyssize; m++) {
@@ -553,21 +553,21 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
       count++;
   }
 
-  printf("Now using pix, Count of C3S = %d\n", count);
-  fflush(stdout);
+  fprintf(Logfile, "\nNow using pix, Count of C3S = %d", count);
+  fflush(Logfile);
 
   if (!foundagg)
     *nagg1 = (Xsyssize / 2);
 
-  printf("nagg1 = %d\n", *nagg1);
-  fflush(stdout);
+  fprintf(Logfile, "\nnagg1 = %d", *nagg1);
+  fflush(Logfile);
   /* Get user input for filename to read in particle ids */
-  printf("Enter name of file with particle ids \n");
+  fprintf(Logfile, "\nEnter name of file with particle ids: ");
   read_string(pfilein, sizeof(pfilein));
-  printf("%s\n", pfilein);
-  fflush(stdout);
+  fprintf(Logfile, "%s", pfilein);
+  fflush(Logfile);
   if (Sever) {
-    pinfile = filehandler("cpelas", pfilein, "READ");
+    pinfile = filehandler("elastic", pfilein, "READ");
     if (!pinfile) {
       freeallmem();
       exit(1);
@@ -584,11 +584,11 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
     if (pix[m] == C3S)
       count++;
   }
-  printf("After breakflocs, Count of C3S = %d\n", count);
-  fflush(stdout);
+  fprintf(Logfile, "\nAfter breakflocs, Count of C3S = %d", count);
+  fflush(Logfile);
 
   fpout = fopen("newcem.img", "w");
-  fprintf(fpout, "Version: 7.0\n");
+  fprintf(fpout, "Version: 10.0\n");
   fprintf(fpout, "X_Size: %d\n", Xsyssize);
   fprintf(fpout, "Y_Size: %d\n", Ysyssize);
   fprintf(fpout, "Z_Size: %d\n", Zsyssize);
@@ -618,9 +618,11 @@ void assig(int ns, int nphase) {
       count++;
   }
 
-  printf("\nNumber of %d pixels found is %f or %d", C3S, prob[C3S], count);
-  printf("\nns = %d, so vfrac[%d] = %f", ns, C3S, (prob[C3S] / ((double)ns)));
-  fflush(stdout);
+  fprintf(Logfile, "\nNumber of %d pixels found is %f or %d", C3S, prob[C3S],
+          count);
+  fprintf(Logfile, "\nns = %d, so vfrac[%d] = %f", ns, C3S,
+          (prob[C3S] / ((double)ns)));
+  fflush(Logfile);
   /* Convert from phase count to volume fraction */
   for (i = 0; i < nphase; i++) {
     prob[i] /= (double)ns;
@@ -1910,7 +1912,7 @@ void modlayer(int *nagg1) {
     xj += 1.0;
     kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
     ggg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
-    printf("%.1f,%.4f,%.4f\n", xj, kk, ggg);
+    fprintf(Logfile, "\n%.1f,%.4f,%.4f", xj, kk, ggg);
   }
 }
 
@@ -2353,7 +2355,7 @@ int main(int argc, char *argv[]) {
   gtest = (1.e-7) * (double)ns;
 
   fprintf(Logfile, "\n%d %d %d %d", nx, ny, nz, ns);
-  fflush(stdout);
+  fflush(Logfile);
 
   /*  Construct the neighbor table, ib(m,n) */
 
@@ -2401,7 +2403,7 @@ int main(int argc, char *argv[]) {
   /*  Matrix ib(m,n) gives the 1-d label of the n'th neighbor (n=0,26) of */
   /*  the node labelled m. */
   fprintf(Logfile, "\nConstructing neighbor table now... ");
-  fflush(stdout);
+  fflush(Logfile);
   nxy = nx * ny;
   for (k = 0; k < nz; k++) {
     for (j = 0; j < ny; j++) {
@@ -2433,7 +2435,7 @@ int main(int argc, char *argv[]) {
     }
   }
   fprintf(Logfile, "done");
-  fflush(stdout);
+  fflush(Logfile);
 
   /* Count and output the volume fractions of the different phases */
   count = 0;
@@ -2442,20 +2444,20 @@ int main(int argc, char *argv[]) {
       count++;
   }
   fprintf(Logfile, "\nBefore assig, Count C3S = %d", count);
-  fflush(stdout);
+  fflush(Logfile);
 
   assig(ns, nphase);
   for (i = 0; i < nphase; i++) {
     if (prob[i] > 0.0) {
       fprintf(Logfile, "\nPhase %d bulk = %lf shear = %lf volume = %lf ", i,
               phasemod[i][0], phasemod[i][1], prob[i]);
-      fflush(stdout);
+      fflush(Logfile);
     }
     sum = sum + prob[i];
   }
 
   fprintf(Logfile, "\nSum of volume fractions = %f", sum);
-  fflush(stdout);
+  fflush(Logfile);
 
   /*  (USER) Set applied strains */
   /*  Actual shear strain applied in do 1050 loop is exy, exz, and eyz as */
@@ -2549,7 +2551,7 @@ if (doitz) {
 
     femat(nx, ny, nz, ns, nphase);
     fprintf(Logfile, "\nC is %lf", C);
-    fflush(stdout);
+    fflush(Logfile);
 
     /* Apply chosen strains as a homogeneous macroscopic strain  */
     /* as the initial condition. */
@@ -2590,7 +2592,7 @@ if (doitz) {
     }
     fprintf(Logfile, "\nInitial energy = %lf gg= %lf gtest = %lf", utot, gg,
             gtest);
-    fflush(stdout);
+    fflush(Logfile);
 
     for (kkk = 0; ((kkk < kmax) && (gg >= gtest)); kkk++) {
 
@@ -2635,7 +2637,7 @@ if (doitz) {
       utot = energy(nx, ny, nz, ns);
       fprintf(Logfile, "\nEnergy = %lf gg= %lf gtest = %lf", utot, gg, gtest);
       fprintf(Logfile, "\nNumber of conjugate steps = %d\n", ltot);
-      fflush(stdout);
+      fflush(Logfile);
       /*  If relaxation process is not finished, continue */
       if (gg > gtest) {
         /*  If relaxation process will continue, compute and output stresses */
@@ -2650,7 +2652,7 @@ if (doitz) {
         fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf ", sxxt / (double)ns,
                 syyt / (double)ns, szzt / (double)ns, sxzt / (double)ns,
                 syzt / (double)ns, sxyt / (double)ns);
-        fflush(stdout);
+        fflush(Logfile);
       }
     }
 
@@ -2661,7 +2663,7 @@ if (doitz) {
     fprintf(Logfile, "\nstrains:  xx,yy,zz,xz,yz,xy");
     fprintf(Logfile, "\n%lf %lf %lf %lf %lf %lf ", sxxt, syyt, szzt, sxzt, syzt,
             sxyt);
-    fflush(stdout);
+    fflush(Logfile);
   }
 
   if (npoints == 1) {
@@ -2682,7 +2684,7 @@ if (doitz) {
     fprintf(Logfile, "\n\n*****");
     fprintf(Logfile, "\nRELATIVE CONTRIBUTIONS OF EACH PHASE:");
 
-    outfile = filehandler("cpelas", Outfilename, "WRITE");
+    outfile = filehandler("elastic", Outfilename, "WRITE");
     if (!outfile) {
       fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
               Outfilename);
@@ -2701,7 +2703,7 @@ if (doitz) {
      *	of each phase in the microstructure
      ***/
 
-    outfile = filehandler("cpelas", PCfilename, "WRITE");
+    outfile = filehandler("elastic", PCfilename, "WRITE");
     if (!outfile) {
       fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
               PCfilename);
@@ -2769,7 +2771,7 @@ if (doitz) {
      ***/
 
     if ((doitz) && (nagg1 > 0)) {
-      outfile = filehandler("cpelas", Layerfilename, "WRITE");
+      outfile = filehandler("elastic", Layerfilename, "WRITE");
       if (!outfile) {
         fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
                 Layerfilename);
@@ -2832,7 +2834,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   char ch, buff[MAXSTRING], instring[MAXSTRING];
   char buff1[MAXSTRING];
   char cempsdfile[MAXSTRING];
-  char coarsegfile[MAXSTRING], finegfile[MAXSTRING];
+  char coarsegfile[500], finegfile[500];
   char *newstring, *newstring1;
   double sum, kfine, kcoarse, gfine, gcoarse, finevftot, coarsevftot;
   double aggfrac, airfrac;
@@ -2961,7 +2963,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   N_concelas = 0;
   finevftot = coarsevftot = 0.0;
   num_fine_sources = num_coarse_sources = 0;
-  fprintf(Logfile, "\nEnter volume fraction of fine aggregate %d: ", m + 1);
+  fprintf(Logfile, "\nEnter volume fraction of fine aggregate: ");
   read_string(buff, sizeof(buff));
   val = atof(buff);
   if (val > 0) {
@@ -2978,6 +2980,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     fprintf(Logfile, "\nEnter name of fine agg grading file: ");
     read_string(finegfile, sizeof(finegfile));
     fprintf(Logfile, "\n%s", finegfile);
+    fflush(Logfile);
     gfile = filehandler("concelas", finegfile, "READ");
     if (!gfile) {
       bailout("concelas", "Could not open fine grading file");
@@ -2998,7 +3001,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     fread_string(gfile, instring); /* read and discard header */
 
     while (!feof(gfile)) {
-      fread_string(gfile, instring); /* read and discard header */
+      fread_string(gfile, instring);
       if (!feof(gfile)) {
         newstring = strtok(instring, ",");
         Diam_concelas[N_concelas] = atof(newstring);
@@ -3022,8 +3025,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   }
   numfinebinstot = N_concelas;
 
-  fprintf(Logfile, "\n\nEnter volume fraction of coarse aggregate %d: ",
-          num_coarse_sources + 1);
+  fprintf(Logfile, "\n\nEnter volume fraction of coarse aggregate");
   read_string(buff, sizeof(buff));
   val = atof(buff);
   if (val > 0) {
@@ -3080,6 +3082,17 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     fclose(gfile);
     coarseend = N_concelas;
     num_coarse_sources++;
+  } else {
+    fprintf(Logfile, "\nEnter BULK modulus for coarse aggregate %d (in GPa): ",
+            num_coarse_sources + 1);
+    read_string(buff, sizeof(buff));
+    kcoarse = atof(buff);
+    fprintf(Logfile, "\n%f", kcoarse);
+    fprintf(Logfile, "\nEnter SHEAR modulus for coarse aggregate %d (in GPa): ",
+            num_coarse_sources + 1);
+    read_string(buff, sizeof(buff));
+    gcoarse = atof(buff);
+    fprintf(Logfile, "\n%f", gcoarse);
   }
 
   /* Bubble sort on each aggregate type individually, then assigne average
@@ -3262,7 +3275,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     xk = k;
     xg = g;
     fprintf(Logfile, "\n\t Iteration %d: k = %f, g = %f", i, k, g);
-    fflush(stdout);
+    fflush(Logfile);
     if (xx[i + 1] < target_matrix_vf) {
       z = (target_matrix_vf - xx[i]) / (xx[i + 1] - xx[i]);
       xg = gsave[i] + (z * (gsave[i + 1] - gsave[i]));
@@ -3388,7 +3401,7 @@ void effective(double itzwidth, double kitz, double gitz) {
     G_concelas[i] = gg * gitz;
     fprintf(Logfile, ", G_concelas[%d] = %f", i, G_concelas[i]);
   }
-  fflush(stdout);
+  fflush(Logfile);
 
   return;
 }

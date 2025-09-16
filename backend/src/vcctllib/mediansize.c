@@ -23,34 +23,27 @@
 #include <stdlib.h>
 
 double mediansize(FILE *fpin) {
-  char ch, buff[MAXSTRING], instring[MAXSTRING];
+  char *instring, *newstring;
   double vollo, diamlo, diamhi, volhi;
   double answer = -1.0;
 
   if (!fpin)
     return (answer);
 
-  ch = getc(fpin);
-  if (ch != '0' && ch != '1' && ch != '2' && ch != '3' && ch != '4' &&
-      ch != '5' && ch != '6' && ch != '7' && ch != '8' && ch != '9') {
-    fread_string(fpin, instring); /* read and discard header */
-  } else {
-    rewind(fpin);
-  }
-
   diamhi = volhi = 0.0;
-  while (!feof(fpin) && answer < 0.0) {
-    fscanf(fpin, "%s %s", buff, instring);
+  while (!feof(fpin)) {
+    fread_string(fpin, instring); /* read and discard header */
     if (!feof(fpin)) {
+      newstring = strtok(instring, ",");
       diamlo = diamhi;
       vollo = volhi;
-      diamhi = atof(buff);
-      volhi += atof(instring);
+      diamhi = atof(newstring);
+      newstring = strtok(NULL, ",");
+      volhi += atof(newstring);
       if (volhi >= 0.5) {
         answer = diamlo + (diamhi - diamlo) * (0.5 - vollo) / (volhi - vollo);
       }
     }
   }
-
   return (answer);
 }

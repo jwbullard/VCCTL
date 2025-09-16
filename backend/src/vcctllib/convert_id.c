@@ -298,15 +298,13 @@ int convert_id(int curid, float version) {
       }
     }
     break;
-  case 4:
+  default:
     if (curid > 4 && curid < 50) {
       newid = curid + 2;
       break;
     } else if (curid >= 50) {
       newid = curid + 3;
     }
-    break;
-  default:
     break;
   }
 

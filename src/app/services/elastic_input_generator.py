@@ -116,8 +116,13 @@ class ElasticInputGenerator:
         # Response 5: "Enter name of file with particle ids"
         responses.append(pimg_path)
         
-        # If ITZ calculation is enabled, add aggregate data
+        # If ITZ calculation is enabled, add concrete (concelas) data
         if has_itz:
+            # Response 6 (concelas function): "Enter fully resolved name of cement PSD file:"
+            # Find cement PSD file in the source microstructure operation folder
+            cement_psd_path = self._find_cement_psd_file(lineage, output_directory)
+            responses.append(cement_psd_path)
+
             # Fine aggregate data (up to NUMFINESOURCES=2)
             if fine_agg:
                 # "Enter volume fraction of fine aggregate 1:"
@@ -128,12 +133,10 @@ class ElasticInputGenerator:
                 responses.append(str(fine_agg.bulk_modulus))   # Bulk modulus (GPa)
                 responses.append(str(fine_agg.shear_modulus))  # Shear modulus (GPa)
                 
-                # Grading file path (relative)
+                # Grading file path (already relative from grading path generation)
                 if fine_agg.grading_path:
-                    grading_relative = self.lineage_service.convert_to_relative_path(
-                        fine_agg.grading_path, output_directory
-                    )
-                    responses.append(grading_relative)
+                    # The grading_path is already relative to the operation directory
+                    responses.append(fine_agg.grading_path)
                 else:
                     responses.append("")  # No grading file
             else:
@@ -152,12 +155,10 @@ class ElasticInputGenerator:
                 responses.append(str(coarse_agg.bulk_modulus))   # Bulk modulus (GPa)
                 responses.append(str(coarse_agg.shear_modulus))  # Shear modulus (GPa)
                 
-                # Grading file path
+                # Grading file path (already relative from grading path generation)
                 if coarse_agg.grading_path:
-                    grading_relative = self.lineage_service.convert_to_relative_path(
-                        coarse_agg.grading_path, output_directory
-                    )
-                    responses.append(grading_relative)
+                    # The grading_path is already relative to the operation directory
+                    responses.append(coarse_agg.grading_path)
                 else:
                     responses.append("")  # No grading file
             else:
@@ -172,7 +173,39 @@ class ElasticInputGenerator:
         
         self.logger.info(f"Generated {len(responses)} input responses for elastic.c")
         return responses
-    
+
+    def _find_cement_psd_file(self, lineage: Dict[str, Any], elastic_output_directory: str) -> str:
+        """Find cement PSD file in the source microstructure operation folder."""
+        try:
+            # Get the microstructure operation name from lineage
+            microstructure_name = lineage.get('microstructure_operation_name')
+            if not microstructure_name:
+                self.logger.warning("No microstructure operation name in lineage, using default cement PSD path")
+                return "./cement_psd.dat"
+
+            # Construct path to microstructure operation folder
+            from pathlib import Path
+            elastic_dir = Path(elastic_output_directory)
+            project_root = elastic_dir.parent.parent  # Go up from Operations/HydrationName/ElasticName to project root
+            microstructure_folder = project_root / "Operations" / microstructure_name
+            cement_psd_file = microstructure_folder / "cement_psd.dat"
+
+            # Convert to relative path from elastic operation directory
+            if cement_psd_file.exists():
+                # Create relative path from elastic directory to cement PSD file
+                relative_path = self.lineage_service.convert_to_relative_path(
+                    str(cement_psd_file), elastic_output_directory
+                )
+                self.logger.info(f"Found cement PSD file: {relative_path}")
+                return relative_path
+            else:
+                self.logger.warning(f"Cement PSD file not found at {cement_psd_file}, using default")
+                return "./cement_psd.dat"
+
+        except Exception as e:
+            self.logger.error(f"Error finding cement PSD file: {e}")
+            return "./cement_psd.dat"
+
     def _write_input_summary(
         self,
         summary_file_path: Path,

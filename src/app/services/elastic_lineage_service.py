@@ -284,16 +284,22 @@ class ElasticLineageService:
                 # Return path indicating it's in operations directory
                 temp_grading_path = f"./Operations/{grading_filename}"
             
-            # Convert sieve data to .gdg format manually (since we can't call grading.to_gdg_format())
+            # Convert sieve data to .gdg format in CSV with header (as required by elastic.c)
             lines = []
+            # Add CSV header as required
+            lines.append("Opening_diameter_mm,Fraction_retained")
+
             # Sort by sieve size (largest first for standard format)
             sorted_points = sorted(grading_sieve_data, key=lambda x: x[0], reverse=True)
-            
+
             for point in sorted_points:
                 size_mm = point[0]
                 percent_passing = point[1]
-                lines.append(f"{size_mm}\t{percent_passing}")
-            
+                # Convert from percent passing to fraction retained
+                percent_retained = 100.0 - percent_passing
+                fraction_retained = percent_retained / 100.0
+                lines.append(f"{size_mm:.3f},{fraction_retained:.6f}")
+
             gdg_content = '\n'.join(lines)
             
             # Write to file in operations directory

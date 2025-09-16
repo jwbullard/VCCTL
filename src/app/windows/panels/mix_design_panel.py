@@ -2999,8 +2999,16 @@ class MixDesignPanel(Gtk.Box):
                 return
             
             self.logger.info(f"Saved microstructure input file: {filename}")
+
+            # Create cement PSD file for future elastic calculations
+            try:
+                self._create_cement_psd_file(mix_folder_path)
+                self.logger.info(f"Created cement PSD file for elastic calculations")
+            except Exception as e:
+                self.logger.warning(f"Failed to create cement PSD file: {e}")
+
             self.main_window.update_status(f"Input file created, starting 3D microstructure generation...", "info", 3)
-            
+
             # Execute genmic program immediately
             self.logger.info(f"Starting genmic execution...")
             try:
@@ -3016,6 +3024,155 @@ class MixDesignPanel(Gtk.Box):
             self.logger.error(f"Failed to save input file: {e}")
             self.main_window.update_status(f"Error saving file: {e}", "error", 5)
     
+    def _create_cement_psd_file(self, mix_folder_path: str) -> None:
+        """Create cement PSD file for elastic calculations in the required CSV format."""
+        try:
+            # Get cement material from current mix to extract PSD data
+            current_mix = self.mix_service.get_current_mix()
+            if not current_mix or not current_mix.components:
+                # Use default cement PSD if no mix data available
+                self.logger.warning("No current mix data, using default cement PSD")
+                psd_data = self._generate_default_cement_psd()
+            else:
+                # Find cement component in mix
+                cement_component = None
+                for component in current_mix.components:
+                    if hasattr(component, 'material_type') and component.material_type.value == 'cement':
+                        cement_component = component
+                        break
+
+                if cement_component:
+                    # Extract PSD from cement component
+                    psd_data = self._extract_cement_psd_from_component(cement_component)
+                else:
+                    # Use default if no cement found
+                    self.logger.warning("No cement component found, using default cement PSD")
+                    psd_data = self._generate_default_cement_psd()
+
+            # Write PSD file in required CSV format
+            psd_file_path = os.path.join(mix_folder_path, "cement_psd.dat")
+            with open(psd_file_path, 'w') as f:
+                # Write CSV header as required
+                f.write("Diameter_micrometers,Volume_Fraction\n")
+
+                # Write data in comma-delimited format
+                for diameter_um, volume_fraction in psd_data:
+                    f.write(f"{diameter_um:.3f},{volume_fraction:.6f}\n")
+
+            self.logger.info(f"Created cement PSD file: {psd_file_path}")
+
+        except Exception as e:
+            self.logger.error(f"Error creating cement PSD file: {e}")
+            raise
+
+    def _generate_default_cement_psd(self) -> List[Tuple[float, float]]:
+        """Generate a default cement PSD with typical Portland cement distribution."""
+        # Typical Portland cement PSD (diameter in micrometers, volume fraction)
+        # Based on typical cement fineness with Blaine ~350 m²/kg
+        return [
+            (1.0, 0.05),    # Very fine particles
+            (2.0, 0.08),
+            (4.0, 0.12),
+            (8.0, 0.15),
+            (16.0, 0.20),
+            (32.0, 0.18),
+            (45.0, 0.12),
+            (63.0, 0.08),
+            (90.0, 0.02)    # Coarser particles
+        ]
+
+    def _extract_cement_psd_from_component(self, cement_component) -> List[Tuple[float, float]]:
+        """Extract PSD data from cement component in the required format."""
+        try:
+            # Check if component has PSD data
+            if hasattr(cement_component, 'psd_mode') and cement_component.psd_mode:
+                if cement_component.psd_mode == 'custom' and cement_component.psd_custom_points:
+                    # Parse custom PSD points and convert to micrometers
+                    import json
+                    custom_points = json.loads(cement_component.psd_custom_points)
+
+                    # Convert from whatever units to micrometers and normalize to volume fractions
+                    psd_data = []
+                    total_volume = sum(point[1] for point in custom_points)
+
+                    for diameter, volume_pct in custom_points:
+                        # Assume diameter is already in micrometers
+                        # Convert percentage to fraction
+                        volume_fraction = volume_pct / 100.0 if total_volume > 10 else volume_pct
+                        psd_data.append((float(diameter), float(volume_fraction)))
+
+                    return psd_data
+
+                elif cement_component.psd_mode == 'rosin_rammler':
+                    # Convert Rosin-Rammler to discrete points
+                    return self._convert_rosin_rammler_to_psd_data(
+                        cement_component.psd_d50,
+                        cement_component.psd_n,
+                        cement_component.psd_dmax
+                    )
+
+                elif cement_component.psd_mode == 'log_normal':
+                    # Convert log-normal to discrete points
+                    return self._convert_log_normal_to_psd_data(
+                        cement_component.psd_d50,
+                        cement_component.psd_n
+                    )
+
+            # Fallback to default if no valid PSD data
+            self.logger.warning("No valid PSD data in cement component, using default")
+            return self._generate_default_cement_psd()
+
+        except Exception as e:
+            self.logger.error(f"Error extracting cement PSD: {e}")
+            return self._generate_default_cement_psd()
+
+    def _convert_rosin_rammler_to_psd_data(self, d50: float, n: float, dmax: float) -> List[Tuple[float, float]]:
+        """Convert Rosin-Rammler parameters to discrete PSD data."""
+        import math
+
+        # Generate diameter bins
+        diameters = [1, 2, 4, 8, 16, 32, 45, 63, 90, min(dmax, 125)]
+        psd_data = []
+
+        prev_cum_frac = 0.0
+        for i, d in enumerate(diameters):
+            # Rosin-Rammler cumulative distribution
+            cum_frac = 1.0 - math.exp(-((d/d50)**n))
+
+            # Volume fraction in this bin
+            bin_frac = cum_frac - prev_cum_frac
+            psd_data.append((float(d), float(bin_frac)))
+
+            prev_cum_frac = cum_frac
+
+        return psd_data
+
+    def _convert_log_normal_to_psd_data(self, d50: float, sigma: float) -> List[Tuple[float, float]]:
+        """Convert log-normal parameters to discrete PSD data."""
+        import math
+
+        # Generate diameter bins
+        diameters = [1, 2, 4, 8, 16, 32, 45, 63, 90, 125]
+        psd_data = []
+
+        # Log-normal parameters
+        mu = math.log(d50)
+
+        prev_cum_frac = 0.0
+        for d in diameters:
+            # Log-normal cumulative distribution (simplified)
+            x = (math.log(d) - mu) / sigma
+            # Approximate error function for cumulative normal distribution
+            cum_frac = 0.5 * (1.0 + math.tanh(x / math.sqrt(2)))
+
+            # Volume fraction in this bin
+            bin_frac = cum_frac - prev_cum_frac
+            psd_data.append((float(d), float(bin_frac)))
+
+            prev_cum_frac = cum_frac
+
+        return psd_data
+
     def _execute_genmic(self, input_file: str, output_dir: str, saved_mix_design_id: Optional[int] = None) -> None:
         """Execute genmic program with input file and redirect output to same directory."""
         

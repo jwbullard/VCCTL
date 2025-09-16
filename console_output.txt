@@ -1,341 +1,799 @@
 /Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
   warnings.warn(
-2025-09-15 13:57:22,857 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
-2025-09-15 13:57:22,922 - VCCTL - INFO - Application startup
-2025-09-15 13:57:22,922 - VCCTL - INFO - Application activated
-2025-09-15 13:57:22,923 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
-2025-09-15 13:57:22,929 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
-2025-09-15 13:57:22,942 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-15 13:57:22,942 - VCCTL.ThemeManager - INFO - Theme manager initialized
-2025-09-15 13:57:22,943 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
-2025-09-15 13:57:22,943 - VCCTL.AccessibilityManager - INFO - Screen reader detected
-2025-09-15 13:57:22,944 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
-2025-09-15 13:57:22,944 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
-2025-09-15 13:57:22,944 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-15 13:57:22,944 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-15 13:57:22,945 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-15 13:57:22,945 - VCCTL.UIPolish - INFO - UI Polish manager initialized
-2025-09-15 13:57:23,083 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
-2025-09-15 13:57:23,095 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
-2025-09-15 13:57:23,103 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
-2025-09-15 13:57:23,262 - VCCTL.Database - INFO - Database engine created successfully
-2025-09-15 13:57:23,265 - VCCTL.Database - INFO - All database tables created successfully
-2025-09-15 13:57:23,265 - VCCTL.Database - INFO - Initializing default database data...
-2025-09-15 13:57:23,265 - VCCTL.Database - INFO - Session maker created successfully
-2025-09-15 13:57:23,284 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
-2025-09-15 13:57:23,285 - VCCTL.Database - INFO - Default database data initialized successfully
-2025-09-15 13:57:23,285 - VCCTL.Database - INFO - Database initialized successfully
-2025-09-15 13:57:23,301 - VCCTL.MaterialTable - INFO - Loaded 53 materials
-2025-09-15 13:57:23,301 - VCCTL.MaterialTable - INFO - Material table initialized
-2025-09-15 13:57:23,305 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 37 cement, 7 aggregate
-2025-09-15 13:57:23,305 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
-2025-09-15 13:57:23,306 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
-2025-09-15 13:57:23,307 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
-2025-09-15 13:57:23,318 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-09-15 13:57:23,318 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
-2025-09-15 13:57:23,318 - VCCTL.HydrationService - INFO - Hydration service initialized
-2025-09-15 13:57:23,318 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-09-15 13:57:23,319 - VCCTL.HydrationPanel - INFO - Found 4 microstructures
-2025-09-15 13:57:23,351 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
-2025-09-15 13:57:23,354 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
-2025-09-15 13:57:23,359 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
-2025-09-15 13:57:23,366 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
-2025-09-15 13:57:23,366 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
-2025-09-15 13:57:23,366 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
-2025-09-15 13:57:23,366 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-15 13:57:23,367 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-15 13:57:23,367 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
-2025-09-15 13:57:23,368 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
-2025-09-15 13:57:23,368 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
-2025-09-15 13:57:23,369 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
-2025-09-15 13:57:23,369 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
-2025-09-15 13:57:23,369 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
-2025-09-15 13:57:23,370 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
-2025-09-15 13:57:23,373 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
-2025-09-15 13:57:23,374 - VCCTL.FileBrowser - INFO - File browser widget initialized
-2025-09-15 13:57:23,376 - VCCTL.FileManagementPanel - INFO - File management panel initialized
-2025-09-15 13:57:23,381 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: restart from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/restart.svg
-2025-09-15 13:57:23,382 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: restart (32x32)
-2025-09-15 13:57:23,382 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: folder--open from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/folder--open.svg
-2025-09-15 13:57:23,382 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: folder--open (32x32)
-2025-09-15 13:57:23,382 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: trash-can from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/trash-can.svg
-2025-09-15 13:57:23,382 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: trash-can (32x32)
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Software/vcctl-gtk
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Found 14 total items in Operations directory
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Found 9 operation directories: ['C151-Mortar', 'CemLSFMortar', 'CemLimestoneMortar', 'HY-Cem151-Mortar', 'HY-Riemann07', 'HYCLM', 'HYCLM-35', 'Riemann07', 'grading_files']
-2025-09-15 13:57:23,383 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: C151-Mortar
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for C151-Mortar with 14 files
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemLSFMortar
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemLSFMortar with 13 files
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemLimestoneMortar
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemLimestoneMortar with 14 files
-2025-09-15 13:57:23,384 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-Cem151-Mortar
-2025-09-15 13:57:23,385 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-Cem151-Mortar with 49 files
-2025-09-15 13:57:23,385 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-Riemann07
-2025-09-15 13:57:23,385 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-Riemann07 with 46 files
-2025-09-15 13:57:23,385 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYCLM
-2025-09-15 13:57:23,386 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYCLM with 129 files
-2025-09-15 13:57:23,386 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYCLM-35
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYCLM-35 with 131 files
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Riemann07
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Riemann07 with 13 files
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: grading_files
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for grading_files with 1 files
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 9 operations
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
-2025-09-15 13:57:23,388 - VCCTL.OperationsMonitoringPanel - INFO - Adding 9 operations to display
-2025-09-15 13:57:23,396 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
+2025-09-16 15:30:49,992 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-09-16 15:30:50,058 - VCCTL - INFO - Application startup
+2025-09-16 15:30:50,059 - VCCTL - INFO - Application activated
+2025-09-16 15:30:50,059 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-09-16 15:30:50,065 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-09-16 15:30:50,081 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-09-16 15:30:50,081 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-09-16 15:30:50,082 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-09-16 15:30:50,082 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-09-16 15:30:50,082 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-09-16 15:30:50,082 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-09-16 15:30:50,082 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-09-16 15:30:50,082 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-09-16 15:30:50,083 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-09-16 15:30:50,083 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-09-16 15:30:50,232 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
+2025-09-16 15:30:50,245 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
+2025-09-16 15:30:50,253 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
+2025-09-16 15:30:50,427 - VCCTL.Database - INFO - Database engine created successfully
+2025-09-16 15:30:50,430 - VCCTL.Database - INFO - All database tables created successfully
+2025-09-16 15:30:50,430 - VCCTL.Database - INFO - Initializing default database data...
+2025-09-16 15:30:50,430 - VCCTL.Database - INFO - Session maker created successfully
+2025-09-16 15:30:50,449 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-09-16 15:30:50,449 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-09-16 15:30:50,450 - VCCTL.Database - INFO - Database initialized successfully
+2025-09-16 15:30:50,468 - VCCTL.MaterialTable - INFO - Loaded 53 materials
+2025-09-16 15:30:50,468 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-09-16 15:30:50,472 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 37 cement, 7 aggregate
+2025-09-16 15:30:50,472 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-09-16 15:30:50,473 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-09-16 15:30:50,474 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-09-16 15:30:50,483 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-09-16 15:30:50,483 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-09-16 15:30:50,483 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-09-16 15:30:50,483 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-09-16 15:30:50,484 - VCCTL.HydrationPanel - INFO - Found 6 microstructures
+2025-09-16 15:30:50,514 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
+2025-09-16 15:30:50,516 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-09-16 15:30:50,521 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
+2025-09-16 15:30:50,528 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
+2025-09-16 15:30:50,528 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-09-16 15:30:50,528 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-09-16 15:30:50,528 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-09-16 15:30:50,529 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-09-16 15:30:50,529 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
+2025-09-16 15:30:50,530 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
+2025-09-16 15:30:50,530 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
+2025-09-16 15:30:50,531 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
+2025-09-16 15:30:50,531 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
+2025-09-16 15:30:50,531 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
+2025-09-16 15:30:50,532 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
+2025-09-16 15:30:50,535 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-09-16 15:30:50,536 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-09-16 15:30:50,538 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-09-16 15:30:50,542 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: restart from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/restart.svg
+2025-09-16 15:30:50,543 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: restart (32x32)
+2025-09-16 15:30:50,543 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: folder--open from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/folder--open.svg
+2025-09-16 15:30:50,543 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: folder--open (32x32)
+2025-09-16 15:30:50,543 - VCCTL.OperationsMonitoringPanel - INFO - Attempting to load Carbon icon: trash-can from /Users/jwbullard/Software/vcctl-gtk/icons/carbon/32/trash-can.svg
+2025-09-16 15:30:50,543 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded Carbon icon: trash-can (32x32)
+2025-09-16 15:30:50,544 - VCCTL.OperationsMonitoringPanel - INFO - === Starting _load_operations_files ===
+2025-09-16 15:30:50,544 - VCCTL.OperationsMonitoringPanel - INFO - Project root: /Users/jwbullard/Software/vcctl-gtk
+2025-09-16 15:30:50,544 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-16 15:30:50,544 - VCCTL.OperationsMonitoringPanel - INFO - Operations directory exists: True
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Attempt 1: scanning operations directory
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Found 16 total items in Operations directory
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Found 13 operation directories: ['C151-Mortar', 'CemLSFMortar', 'CemLimestoneMortar', 'HY-Cem151-Mortar', 'HY-Riemann07', 'HY-Riemann08', 'HYCLM', 'HYCLM-35', 'HydrationOf-Mortar151', 'Mortar151', 'Riemann07', 'Riemann07_MixDesign_copy', 'grading_files']
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: C151-Mortar
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for C151-Mortar with 14 files
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemLSFMortar
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemLSFMortar with 13 files
+2025-09-16 15:30:50,545 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: CemLimestoneMortar
+2025-09-16 15:30:50,546 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for CemLimestoneMortar with 14 files
+2025-09-16 15:30:50,546 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-Cem151-Mortar
+2025-09-16 15:30:50,546 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-Cem151-Mortar with 49 files
+2025-09-16 15:30:50,546 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-Riemann07
+2025-09-16 15:30:50,547 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-Riemann07 with 46 files
+2025-09-16 15:30:50,547 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HY-Riemann08
+2025-09-16 15:30:50,547 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HY-Riemann08 with 38 files
+2025-09-16 15:30:50,547 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYCLM
+2025-09-16 15:30:50,549 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYCLM with 129 files
+2025-09-16 15:30:50,549 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HYCLM-35
+2025-09-16 15:30:50,550 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HYCLM-35 with 131 files
+2025-09-16 15:30:50,550 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: HydrationOf-Mortar151
+2025-09-16 15:30:50,550 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for HydrationOf-Mortar151 with 41 files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Mortar151
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Mortar151 with 15 files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Riemann07
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Riemann07 with 13 files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: Riemann07_MixDesign_copy
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for Riemann07_MixDesign_copy with 13 files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Building data for operation directory: grading_files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Successfully built data for grading_files with 1 files
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Successfully gathered data for 13 operations
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - === Updating display ===
+2025-09-16 15:30:50,551 - VCCTL.OperationsMonitoringPanel - INFO - Adding 13 operations to display
+2025-09-16 15:30:50,562 - VCCTL.OperationsMonitoringPanel - INFO - === Display update complete ===
 
-2025-09-15 13:57:23,397 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:57:23,406 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:57:23,406 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
-2025-09-15 13:57:23,407 - VCCTL.OperationsMonitoringPanel - INFO - Found 9 operations in database
-2025-09-15 13:57:23,407 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 9 operations from database (0 failed)
-2025-09-15 13:57:23,408 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
-2025-09-15 13:57:23,408 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
-2025-09-15 13:57:23,408 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 9 total operations, 0 running
-2025-09-15 13:57:23,408 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
-2025-09-15 13:57:23,409 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 13:57:23,409 - VCCTL.ResultsPanel - INFO - Results panel initialized
-2025-09-15 13:57:23,410 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-15 13:57:23,410 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-15 13:57:23,410 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM-35
-2025-09-15 13:57:23,411 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM-35' - found 131 files
-2025-09-15 13:57:23,411 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,411 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' classified as Hydration (time-series files)
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM-35' of type 'Hydration Simulation'
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07' - found 13 files
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07' of type 'Microstructure Generation'
-2025-09-15 13:57:23,412 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Cem151-Mortar
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Cem151-Mortar' - found 49 files
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' classified as Hydration (time-series files)
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Cem151-Mortar' of type 'Hydration Simulation'
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: grading_files
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
-2025-09-15 13:57:23,413 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
-2025-09-15 13:57:23,414 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
-2025-09-15 13:57:23,414 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
-2025-09-15 13:57:23,414 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM
-2025-09-15 13:57:23,415 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM' - found 129 files
-2025-09-15 13:57:23,415 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,415 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' classified as Hydration (time-series files)
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM' of type 'Hydration Simulation'
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: C151-Mortar
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-Mortar' - found 14 files
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-Mortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLimestoneMortar
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLimestoneMortar' - found 14 files
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,416 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLimestoneMortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLSFMortar
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLSFMortar' - found 13 files
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLSFMortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,417 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann07
-2025-09-15 13:57:23,418 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann07' - found 52 files
-2025-09-15 13:57:23,418 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,418 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' classified as Hydration (time-series files)
-2025-09-15 13:57:23,419 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann07' of type 'Hydration Simulation'
-2025-09-15 13:57:23,419 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 9 results from Operations folder
-2025-09-15 13:57:23,424 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-15 13:57:23,425 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-15 13:57:23,426 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-15 13:57:23,426 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-15 13:57:23,598 - VCCTL.MainWindow - INFO - Main window initialized
-2025-09-15 13:57:23,628 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
-2025-09-15 13:57:23,628 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-15 13:57:23,628 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-15 13:57:23,628 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM-35
-2025-09-15 13:57:23,629 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM-35' - found 131 files
-2025-09-15 13:57:23,629 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,629 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' classified as Hydration (time-series files)
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM-35' of type 'Hydration Simulation'
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07' - found 13 files
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07' of type 'Microstructure Generation'
-2025-09-15 13:57:23,631 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Cem151-Mortar
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Cem151-Mortar' - found 49 files
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' classified as Hydration (time-series files)
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Cem151-Mortar' of type 'Hydration Simulation'
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: grading_files
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
-2025-09-15 13:57:23,632 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
-2025-09-15 13:57:23,633 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
-2025-09-15 13:57:23,633 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM
-2025-09-15 13:57:23,633 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM' - found 129 files
-2025-09-15 13:57:23,633 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,633 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' classified as Hydration (time-series files)
-2025-09-15 13:57:23,634 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM' of type 'Hydration Simulation'
-2025-09-15 13:57:23,634 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: C151-Mortar
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-Mortar' - found 14 files
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-Mortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLimestoneMortar
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLimestoneMortar' - found 14 files
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLimestoneMortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,635 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLSFMortar
-2025-09-15 13:57:23,636 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLSFMortar' - found 13 files
-2025-09-15 13:57:23,636 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' - time_series_img: False, csv: False, img: True
-2025-09-15 13:57:23,636 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' classified as Microstructure (IMG only)
-2025-09-15 13:57:23,636 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLSFMortar' of type 'Microstructure Generation'
-2025-09-15 13:57:23,636 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann07
-2025-09-15 13:57:23,637 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann07' - found 52 files
-2025-09-15 13:57:23,637 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' - time_series_img: True, csv: True, img: True
-2025-09-15 13:57:23,637 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' classified as Hydration (time-series files)
-2025-09-15 13:57:23,638 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann07' of type 'Hydration Simulation'
-2025-09-15 13:57:23,638 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 9 results from Operations folder
-2025-09-15 13:57:23,818 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-15 13:57:23,819 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-09-16 15:30:50,564 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:30:50,574 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:30:50,575 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-09-16 15:30:50,575 - VCCTL.OperationsMonitoringPanel - INFO - Found 14 operations in database
+2025-09-16 15:30:50,575 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 14 operations from database (0 failed)
+2025-09-16 15:30:50,576 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
+2025-09-16 15:30:50,576 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-09-16 15:30:50,576 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 14 total operations, 0 running
+2025-09-16 15:30:50,576 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-09-16 15:30:50,577 - VCCTL.ResultsPanel - INFO - Results panel initialized
+2025-09-16 15:30:50,578 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-09-16 15:30:50,578 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-16 15:30:50,578 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 14→14 total
+2025-09-16 15:30:50,578 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM-35
+2025-09-16 15:30:50,579 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM-35' - found 131 files
+2025-09-16 15:30:50,579 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,579 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' classified as Hydration (time-series files)
+2025-09-16 15:30:50,580 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM-35' of type 'Hydration Simulation'
+2025-09-16 15:30:50,580 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07
+2025-09-16 15:30:50,580 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07' - found 13 files
+2025-09-16 15:30:50,580 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,580 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07' of type 'Microstructure Generation'
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07_MixDesign_copy
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07_MixDesign_copy' - found 13 files
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07_MixDesign_copy' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07_MixDesign_copy' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07_MixDesign_copy' of type 'Microstructure Generation'
+2025-09-16 15:30:50,581 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Cem151-Mortar
+2025-09-16 15:30:50,582 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Cem151-Mortar' - found 49 files
+2025-09-16 15:30:50,582 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,582 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' classified as Hydration (time-series files)
+2025-09-16 15:30:50,582 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Cem151-Mortar' of type 'Hydration Simulation'
+2025-09-16 15:30:50,582 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: grading_files
+2025-09-16 15:30:50,583 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
+2025-09-16 15:30:50,583 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
+2025-09-16 15:30:50,583 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
+2025-09-16 15:30:50,583 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
+2025-09-16 15:30:50,583 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM
+2025-09-16 15:30:50,584 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM' - found 129 files
+2025-09-16 15:30:50,584 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,584 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' classified as Hydration (time-series files)
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM' of type 'Hydration Simulation'
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: C151-Mortar
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-Mortar' - found 14 files
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-Mortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,585 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Mortar151
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Mortar151' - found 15 files
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: 'Mortar151' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: 'Mortar151' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Mortar151' of type 'Microstructure Generation'
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLimestoneMortar
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLimestoneMortar' - found 14 files
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,586 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLimestoneMortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLSFMortar
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLSFMortar' - found 13 files
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLSFMortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,587 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann08
+2025-09-16 15:30:50,588 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann08' - found 51 files
+2025-09-16 15:30:50,588 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann08' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,588 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann08' classified as Hydration (time-series files)
+2025-09-16 15:30:50,589 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann08' of type 'Hydration Simulation'
+2025-09-16 15:30:50,589 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann07
+2025-09-16 15:30:50,590 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann07' - found 52 files
+2025-09-16 15:30:50,590 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,590 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' classified as Hydration (time-series files)
+2025-09-16 15:30:50,591 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann07' of type 'Hydration Simulation'
+2025-09-16 15:30:50,591 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HydrationOf-Mortar151
+2025-09-16 15:30:50,591 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-Mortar151' - found 41 files
+2025-09-16 15:30:50,591 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-Mortar151' classified as Hydration (folder name)
+2025-09-16 15:30:50,591 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-Mortar151' of type 'Hydration Simulation'
+2025-09-16 15:30:50,592 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 13 results from Operations folder
+2025-09-16 15:30:50,596 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-09-16 15:30:50,597 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-09-16 15:30:50,598 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-09-16 15:30:50,598 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-09-16 15:30:50,773 - VCCTL.MainWindow - INFO - Main window initialized
+2025-09-16 15:30:50,815 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
+2025-09-16 15:30:50,815 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-09-16 15:30:50,815 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-09-16 15:30:50,815 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM-35
+2025-09-16 15:30:50,816 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM-35' - found 131 files
+2025-09-16 15:30:50,816 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,816 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM-35' classified as Hydration (time-series files)
+2025-09-16 15:30:50,817 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM-35' of type 'Hydration Simulation'
+2025-09-16 15:30:50,817 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07' - found 13 files
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07' of type 'Microstructure Generation'
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Riemann07_MixDesign_copy
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Riemann07_MixDesign_copy' - found 13 files
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07_MixDesign_copy' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: 'Riemann07_MixDesign_copy' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Riemann07_MixDesign_copy' of type 'Microstructure Generation'
+2025-09-16 15:30:50,818 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Cem151-Mortar
+2025-09-16 15:30:50,819 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Cem151-Mortar' - found 49 files
+2025-09-16 15:30:50,819 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,819 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Cem151-Mortar' classified as Hydration (time-series files)
+2025-09-16 15:30:50,819 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Cem151-Mortar' of type 'Hydration Simulation'
+2025-09-16 15:30:50,819 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: grading_files
+2025-09-16 15:30:50,820 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
+2025-09-16 15:30:50,820 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
+2025-09-16 15:30:50,820 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
+2025-09-16 15:30:50,820 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
+2025-09-16 15:30:50,820 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HYCLM
+2025-09-16 15:30:50,821 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HYCLM' - found 129 files
+2025-09-16 15:30:50,821 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,821 - VCCTL.ResultsPanel - INFO - Results panel: 'HYCLM' classified as Hydration (time-series files)
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HYCLM' of type 'Hydration Simulation'
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: C151-Mortar
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-Mortar' - found 14 files
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-Mortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-Mortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,822 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: Mortar151
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Mortar151' - found 15 files
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: 'Mortar151' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: 'Mortar151' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Mortar151' of type 'Microstructure Generation'
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLimestoneMortar
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLimestoneMortar' - found 14 files
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLimestoneMortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLimestoneMortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,823 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: CemLSFMortar
+2025-09-16 15:30:50,824 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'CemLSFMortar' - found 13 files
+2025-09-16 15:30:50,824 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' - time_series_img: False, csv: False, img: True
+2025-09-16 15:30:50,824 - VCCTL.ResultsPanel - INFO - Results panel: 'CemLSFMortar' classified as Microstructure (IMG only)
+2025-09-16 15:30:50,824 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'CemLSFMortar' of type 'Microstructure Generation'
+2025-09-16 15:30:50,824 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann08
+2025-09-16 15:30:50,825 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann08' - found 51 files
+2025-09-16 15:30:50,825 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann08' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,825 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann08' classified as Hydration (time-series files)
+2025-09-16 15:30:50,826 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann08' of type 'Hydration Simulation'
+2025-09-16 15:30:50,826 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HY-Riemann07
+2025-09-16 15:30:50,827 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HY-Riemann07' - found 52 files
+2025-09-16 15:30:50,827 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' - time_series_img: True, csv: True, img: True
+2025-09-16 15:30:50,827 - VCCTL.ResultsPanel - INFO - Results panel: 'HY-Riemann07' classified as Hydration (time-series files)
+2025-09-16 15:30:50,828 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HY-Riemann07' of type 'Hydration Simulation'
+2025-09-16 15:30:50,828 - VCCTL.ResultsPanel - INFO - Results panel: Found result folder: HydrationOf-Mortar151
+2025-09-16 15:30:50,828 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-Mortar151' - found 41 files
+2025-09-16 15:30:50,828 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-Mortar151' classified as Hydration (folder name)
+2025-09-16 15:30:50,829 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-Mortar151' of type 'Hydration Simulation'
+2025-09-16 15:30:50,829 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 13 results from Operations folder
+2025-09-16 15:30:50,997 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-09-16 15:30:50,997 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-09-16 15:30:56,552 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:30:56,552 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:30:56,552 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:30:56,552 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:30:56,553 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:30:56,554 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:30:56,554 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:30:56,554 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: /Users/jwbullard/Software/vcctl-gtk/Operations/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:30:56,554 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:30:56,554 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:30:56,554 - VCCTL.ElasticModuliPanel - INFO - Updated lineage display - Aggregates: 2 types
+2025-09-16 15:30:56,555 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: /Users/jwbullard/Software/vcctl-gtk/Operations/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - Using original .pimg file: /Users/jwbullard/Software/vcctl-gtk/Operations/Mortar151/Mortar151.pimg
+2025-09-16 15:30:56,556 - app.services.elastic_lineage_service - INFO - Found 11 hydrated microstructures for HydrationOf-Mortar151
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:30:56,558 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:30:56,559 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-Final/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:30:56,559 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:30:56,559 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Re-resolved lineage with output directory: ./Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-Final
+2025-09-16 15:30:56,559 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Populated fine aggregate: MA106A-1-fine (VF: 0.237)
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Auto-populated from lineage: fine aggregate (MA106A-1-fine), air content (4.0%), ITZ calculations
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Auto-populated fields for operation: Elastic-HydrationOf-Mortar151-Final
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Loaded 11 hydrated microstructures
+2025-09-16 15:30:56,559 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Populated fine aggregate: MA106A-1-fine (VF: 0.237)
+2025-09-16 15:30:56,559 - VCCTL.ElasticModuliPanel - INFO - Auto-populated from lineage: fine aggregate (MA106A-1-fine), air content (4.0%), ITZ calculations
+2025-09-16 15:30:56,560 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:30:56,560 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:30:56,560 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:30:56,560 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:30:56,560 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-Final/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:30:56,561 - VCCTL.ElasticModuliPanel - INFO - Re-resolved lineage with output directory: ./Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-Final
+2025-09-16 15:30:56,561 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:30:56,561 - VCCTL.ElasticModuliPanel - INFO - Populated fine aggregate: MA106A-1-fine (VF: 0.237)
+2025-09-16 15:30:56,561 - VCCTL.ElasticModuliPanel - INFO - Auto-populated from lineage: fine aggregate (MA106A-1-fine), air content (4.0%), ITZ calculations
+2025-09-16 15:30:56,561 - VCCTL.ElasticModuliPanel - INFO - Auto-populated fields for operation: Elastic-HydrationOf-Mortar151-Final
+2025-09-16 15:30:56,561 - VCCTL.ElasticModuliPanel - INFO - Auto-populated UI fields from resolved lineage and selected microstructure
+2025-09-16 15:31:01,463 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:31:01,463 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:31:01,463 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:31:01,463 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:31:01,464 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:31:01,464 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:31:01,464 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:31:01,466 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:31:01,466 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:31:01,466 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:31:01,466 - VCCTL.ElasticModuliPanel - INFO - Re-resolved lineage with output directory: ./Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h
+2025-09-16 15:31:01,466 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:31:01,466 - VCCTL.ElasticModuliPanel - INFO - Populated fine aggregate: MA106A-1-fine (VF: 0.237)
+2025-09-16 15:31:01,466 - VCCTL.ElasticModuliPanel - INFO - Auto-populated from lineage: fine aggregate (MA106A-1-fine), air content (4.0%), ITZ calculations
+2025-09-16 15:31:01,466 - VCCTL.ElasticModuliPanel - INFO - Auto-populated fields for operation: Elastic-HydrationOf-Mortar151-579.70h
+2025-09-16 15:31:09,397 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:31:09,397 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:31:09,397 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:31:09,397 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: /Users/jwbullard/Software/vcctl-gtk/Operations/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:31:09,398 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:31:09,400 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:31:09,400 - app.services.elastic_moduli_service - INFO - Populated operation from lineage - ITZ: True, Fine Agg: True, Coarse Agg: None
+2025-09-16 15:31:09,402 - app.services.elastic_moduli_service - INFO - Created elastic moduli operation with lineage: Elastic-HydrationOf-Mortar151-579.70h
+2025-09-16 15:31:09,402 - VCCTL.Database - INFO - Database service initialized with: sqlite:////Users/jwbullard/Software/vcctl-gtk/src/data/database/vcctl.db
+2025-09-16 15:31:09,403 - VCCTL.Database - INFO - Database engine created successfully
+2025-09-16 15:31:09,404 - VCCTL.Database - INFO - All database tables created successfully
+2025-09-16 15:31:09,404 - VCCTL.Database - INFO - Initializing default database data...
+2025-09-16 15:31:09,404 - VCCTL.Database - INFO - Session maker created successfully
+2025-09-16 15:31:09,405 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-09-16 15:31:09,405 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-09-16 15:31:09,405 - VCCTL.Database - INFO - Database initialized successfully
+2025-09-16 15:31:09,406 - app.services.elastic_lineage_service - INFO - Successfully loaded mix design data for Mortar151_MixDesign: 3 components
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Fine template name from mix design: AFineGrading
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Looking for fine grading template for aggregate: MA106A-1-fine
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Aggregate ID: 1, Type: 2
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Step 1 - By aggregate ID: Not found
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Step 2 - Standard template: Found
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - 🔍 Found grading: ASTM C-33 Fine Aggregate (sieve_data: Yes)
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - Created grading file for MA106A-1-fine: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h/MA106A-1-fine_fine_grading.gdg
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - Resolved fine aggregate: MA106A-1-fine (VF: 0.237) with template: AFineGrading
+2025-09-16 15:31:09,407 - app.services.elastic_lineage_service - INFO - Resolved lineage chain for hydration operation 20
+2025-09-16 15:31:09,408 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:31:09,408 - app.services.elastic_input_generator - WARNING - No microstructure operation name in lineage, using default cement PSD path
+2025-09-16 15:31:09,408 - app.services.elastic_input_generator - INFO - Generated 15 input responses for elastic.c
+2025-09-16 15:31:09,408 - app.services.elastic_lineage_service - INFO - ITZ detection: True
+2025-09-16 15:31:09,408 - app.services.elastic_input_generator - INFO - Generated elastic input file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h/elastic_input.txt
+2025-09-16 15:31:09,409 - VCCTL.Database - ERROR - Database session error: (sqlite3.IntegrityError) UNIQUE constraint failed: operations.name
+[SQL: INSERT INTO operations (name, operation_type, status, queued_at, started_at, completed_at, progress, current_step, error_message, notes, parent_operation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Elastic-HydrationOf-Mortar151-579.70h', 'elastic_moduli_calculation', 'QUEUED', '2025-09-16 20:31:09.408620', None, None, 0.0, None, None, 'Process starting in /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h', None, '2025-09-16 20:31:09.408933', '2025-09-16 20:31:09.408933')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-09-16 15:31:09,409 - VCCTL.OperationsMonitoringPanel - ERROR - Failed to create database operation: (sqlite3.IntegrityError) UNIQUE constraint failed: operations.name
+[SQL: INSERT INTO operations (name, operation_type, status, queued_at, started_at, completed_at, progress, current_step, error_message, notes, parent_operation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Elastic-HydrationOf-Mortar151-579.70h', 'elastic_moduli_calculation', 'QUEUED', '2025-09-16 20:31:09.408620', None, None, 0.0, None, None, 'Process starting in /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h', None, '2025-09-16 20:31:09.408933', '2025-09-16 20:31:09.408933')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-09-16 15:31:09,409 - VCCTL.OperationsMonitoringPanel - ERROR - Exception type: IntegrityError
+2025-09-16 15:31:09,409 - VCCTL.OperationsMonitoringPanel - ERROR - Exception details: (sqlite3.IntegrityError) UNIQUE constraint failed: operations.name
+[SQL: INSERT INTO operations (name, operation_type, status, queued_at, started_at, completed_at, progress, current_step, error_message, notes, parent_operation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Elastic-HydrationOf-Mortar151-579.70h', 'elastic_moduli_calculation', 'QUEUED', '2025-09-16 20:31:09.408620', None, None, 0.0, None, None, 'Process starting in /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h', None, '2025-09-16 20:31:09.408933', '2025-09-16 20:31:09.408933')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2025-09-16 15:31:09,415 - VCCTL.OperationsMonitoringPanel - ERROR - Traceback: Traceback (most recent call last):
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlite3.IntegrityError: UNIQUE constraint failed: operations.name
+
+The above exception was the direct cause of the following exception:
+
 Traceback (most recent call last):
-  File "/Users/jwbullard/Software/vcctl-gtk/src/app/windows/panels/elastic_moduli_panel.py", line 947, in _on_browse_output_dir
-    Gtk.STOCK_SELECT, Gtk.ResponseType.OK
-    ^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/overrides/__init__.py", line 37, in __getattr__
-    return getattr(self._introspection_module, name)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/module.py", line 127, in __getattr__
-    raise AttributeError("%r object has no attribute %r" % (
-AttributeError: 'gi.repository.Gtk' object has no attribute 'STOCK_SELECT'
-Traceback (most recent call last):
-  File "/Users/jwbullard/Software/vcctl-gtk/src/app/windows/panels/elastic_moduli_panel.py", line 947, in _on_browse_output_dir
-    Gtk.STOCK_SELECT, Gtk.ResponseType.OK
-    ^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/overrides/__init__.py", line 37, in __getattr__
-    return getattr(self._introspection_module, name)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/module.py", line 127, in __getattr__
-    raise AttributeError("%r object has no attribute %r" % (
-AttributeError: 'gi.repository.Gtk' object has no attribute 'STOCK_SELECT'
-Traceback (most recent call last):
-  File "/Users/jwbullard/Software/vcctl-gtk/src/app/windows/panels/elastic_moduli_panel.py", line 947, in _on_browse_output_dir
-    Gtk.STOCK_SELECT, Gtk.ResponseType.OK
-    ^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/overrides/__init__.py", line 37, in __getattr__
-    return getattr(self._introspection_module, name)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/gi/module.py", line 127, in __getattr__
-    raise AttributeError("%r object has no attribute %r" % (
-AttributeError: 'gi.repository.Gtk' object has no attribute 'STOCK_SELECT'
-2025-09-15 13:57:52,971 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 504.4697936213707, 'current_memory_mb': 649.71875}
-2025-09-15 13:57:53,536 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 31: 9 total operations, 0 running
-2025-09-15 13:57:53,939 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:57:53,947 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:58:23,023 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 254.18190961484004, 'current_memory_mb': 651.6875}
-2025-09-15 13:58:23,673 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 61: 9 total operations, 0 running
-2025-09-15 13:58:23,675 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 13:58:23,939 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:58:23,957 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:58:53,075 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 169.53948904773645, 'current_memory_mb': 651.890625}
-2025-09-15 13:58:53,811 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 91: 9 total operations, 0 running
-2025-09-15 13:58:53,939 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:58:53,958 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:59:23,127 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 128.52617830249295, 'current_memory_mb': 654.671875}
-2025-09-15 13:59:23,942 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:59:23,958 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 121: 9 total operations, 0 running
-2025-09-15 13:59:23,960 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 13:59:23,963 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:59:53,189 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 103.36776932398875, 'current_memory_mb': 656.0625}
-2025-09-15 13:59:53,943 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 13:59:53,961 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 13:59:54,100 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 151: 9 total operations, 0 running
-2025-09-15 14:00:23,945 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:00:23,963 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:00:24,244 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 181: 9 total operations, 0 running
-2025-09-15 14:00:24,248 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:00:53,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:00:53,964 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:00:54,385 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 211: 9 total operations, 0 running
-2025-09-15 14:01:24,522 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 241: 9 total operations, 0 running
-2025-09-15 14:01:24,525 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:01:28,940 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:01:28,957 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:01:54,656 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 271: 9 total operations, 0 running
-2025-09-15 14:01:58,941 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:01:58,958 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:02:24,785 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 301: 9 total operations, 0 running
-2025-09-15 14:02:24,787 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:02:28,944 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:02:28,961 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:02:54,936 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 331: 9 total operations, 0 running
-2025-09-15 14:02:58,946 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:02:58,964 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:03:25,068 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 361: 9 total operations, 0 running
-2025-09-15 14:03:25,071 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:03:33,939 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:03:33,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:03:55,213 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 391: 9 total operations, 0 running
-2025-09-15 14:04:03,941 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:04:03,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:04:25,340 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 421: 9 total operations, 0 running
-2025-09-15 14:04:25,343 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:04:33,941 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:04:33,951 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:04:55,478 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 451: 9 total operations, 0 running
-2025-09-15 14:05:08,939 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:05:08,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:05:25,627 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 481: 9 total operations, 0 running
-2025-09-15 14:05:25,630 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 9→9 total
-2025-09-15 14:05:38,940 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-15 14:05:38,948 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-15 14:05:55,762 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 511: 9 total operations, 0 running
+  File "/Users/jwbullard/Software/vcctl-gtk/src/app/windows/panels/operations_monitoring_panel.py", line 2845, in start_real_process_operation
+    db_operation = self.service_container.operation_service.create_operation(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/src/app/services/operation_service.py", line 54, in create_operation
+    session.commit()
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2032, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1313, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1288, in _prepare_impl
+    self.session.flush()
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4345, in flush
+    self._flush(objects)
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4480, in _flush
+    with util.safe_reraise():
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4441, in _flush
+    flush_context.execute()
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: operations.name
+[SQL: INSERT INTO operations (name, operation_type, status, queued_at, started_at, completed_at, progress, current_step, error_message, notes, parent_operation_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('Elastic-HydrationOf-Mortar151-579.70h', 'elastic_moduli_calculation', 'QUEUED', '2025-09-16 20:31:09.408620', None, None, 0.0, None, None, 'Process starting in /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-Mortar151/Elastic-HydrationOf-Mortar151-579.70h', None, '2025-09-16 20:31:09.408933', '2025-09-16 20:31:09.408933')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+2025-09-16 15:31:09,429 - VCCTL.OperationsMonitoringPanel - INFO - Updated database operation proc_1758054669415 with process info: PID 16059
+2025-09-16 15:31:09,429 - VCCTL.Database - INFO - Database service initialized with: sqlite:////Users/jwbullard/Software/vcctl-gtk/src/data/database/vcctl.db
+2025-09-16 15:31:09,430 - VCCTL.Database - INFO - Database engine created successfully
+2025-09-16 15:31:09,432 - VCCTL.Database - INFO - All database tables created successfully
+2025-09-16 15:31:09,432 - VCCTL.Database - INFO - Initializing default database data...
+2025-09-16 15:31:09,432 - VCCTL.Database - INFO - Session maker created successfully
+2025-09-16 15:31:09,433 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-09-16 15:31:09,433 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-09-16 15:31:09,433 - VCCTL.Database - INFO - Database initialized successfully
+2025-09-16 15:31:09,433 - VCCTL.Database - ERROR - Database session error: invalid literal for int() with base 10: 'proc_1758054669415'
+2025-09-16 15:31:09,433 - VCCTL.ElasticModuliPanel - ERROR - Error updating elastic operation metadata: invalid literal for int() with base 10: 'proc_1758054669415'
+2025-09-16 15:31:09,433 - VCCTL.ElasticModuliPanel - INFO - Phase 3: Launched elastic operation 'Elastic-HydrationOf-Mortar151-579.70h' with database ID: proc_1758054669415
+2025-09-16 15:31:09,672 - VCCTL.OperationsMonitoringPanel - INFO - Updated 1 existing operations from database: ['HY-Riemann08']
+2025-09-16 15:31:10,750 - VCCTL.ElasticModuliPanel - INFO - Successfully launched elastic operation 'Elastic-HydrationOf-Mortar151-579.70h' with database ID: proc_1758054669415
+2025-09-16 15:31:20,114 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 502.27657347620584, 'current_memory_mb': 648.28125}
+2025-09-16 15:31:20,755 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 31: 15 total operations, 1 running
+2025-09-16 15:31:20,757 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:31:20,770 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:31:50,139 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 253.68549215425804, 'current_memory_mb': 650.859375}
+2025-09-16 15:31:50,944 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:31:50,956 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:31:50,992 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 61: 15 total operations, 1 running
+2025-09-16 15:31:50,994 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 1→1 running, 15→15 total
+2025-09-16 15:32:20,165 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 169.2774012657735, 'current_memory_mb': 651.078125}
+2025-09-16 15:32:20,944 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:32:20,955 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:32:21,203 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 91: 15 total operations, 1 running
+2025-09-16 15:32:50,191 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 129.08410196775216, 'current_memory_mb': 655.328125}
+2025-09-16 15:32:50,945 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:32:50,957 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:32:51,426 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 121: 15 total operations, 1 running
+2025-09-16 15:32:51,428 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 1→1 running, 15→15 total
+2025-09-16 15:33:20,217 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 104.39855093151614, 'current_memory_mb': 658.15625}
+2025-09-16 15:33:20,945 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:33:20,956 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:33:21,649 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 151: 15 total operations, 1 running
+2025-09-16 15:33:42,807 - VCCTL.OperationsMonitoringPanel - INFO - Process proc_1758054669415 (Elastic-HydrationOf-Mortar151-579.70h) has ended
+2025-09-16 15:33:42,807 - VCCTL.OperationsMonitoringPanel - INFO - Process proc_1758054669415 exit code: 0
+2025-09-16 15:33:42,807 - VCCTL.OperationsMonitoringPanel - INFO - Process proc_1758054669415 marked as COMPLETED via file verification (fallback)
+2025-09-16 15:33:42,811 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 1→0 running, 15→15 total
+2025-09-16 15:33:50,267 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 88.3160436084049, 'current_memory_mb': 662.109375}
+2025-09-16 15:33:50,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:33:50,972 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:33:51,859 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 181: 15 total operations, 0 running
+2025-09-16 15:33:51,862 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:34:20,317 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 76.4983035230351, 'current_memory_mb': 664.9375}
+2025-09-16 15:34:20,950 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:34:20,977 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:34:22,046 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 211: 15 total operations, 0 running
+2025-09-16 15:34:50,377 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 67.31270788867882, 'current_memory_mb': 666.46875}
+2025-09-16 15:34:50,950 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:34:50,980 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:34:52,227 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 241: 15 total operations, 0 running
+2025-09-16 15:34:52,229 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:35:20,425 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 60.45554883485352, 'current_memory_mb': 669.296875}
+2025-09-16 15:35:20,950 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:35:20,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:35:22,437 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 271: 15 total operations, 0 running
+2025-09-16 15:35:50,952 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:35:50,973 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:35:52,620 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 301: 15 total operations, 0 running
+2025-09-16 15:35:52,624 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:36:20,952 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:36:20,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:36:22,833 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 331: 15 total operations, 0 running
+2025-09-16 15:36:50,953 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:36:50,973 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:36:52,972 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 361: 15 total operations, 0 running
+2025-09-16 15:36:52,974 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:37:20,954 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:37:20,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:37:23,110 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 391: 15 total operations, 0 running
+2025-09-16 15:37:50,956 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:37:50,983 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:37:53,280 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 421: 15 total operations, 0 running
+2025-09-16 15:37:53,283 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:38:20,959 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:38:20,982 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:38:23,438 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 451: 15 total operations, 0 running
+2025-09-16 15:38:50,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:38:50,983 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:38:53,588 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 481: 15 total operations, 0 running
+2025-09-16 15:38:53,590 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:39:20,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:39:20,988 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:39:23,735 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 511: 15 total operations, 0 running
+2025-09-16 15:39:50,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:39:50,976 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:39:53,898 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 541: 15 total operations, 0 running
+2025-09-16 15:39:53,900 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:40:20,965 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:40:20,975 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:40:24,055 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 571: 15 total operations, 0 running
+2025-09-16 15:40:50,969 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:40:50,984 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:40:54,213 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 601: 15 total operations, 0 running
+2025-09-16 15:40:54,215 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:41:20,970 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:41:21,012 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:41:24,387 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 631: 15 total operations, 0 running
+2025-09-16 15:41:50,970 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:41:50,990 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:41:54,550 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 661: 15 total operations, 0 running
+2025-09-16 15:41:54,551 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:42:20,972 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:42:20,991 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:42:24,722 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 691: 15 total operations, 0 running
+2025-09-16 15:42:50,974 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:42:50,991 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:42:54,870 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 721: 15 total operations, 0 running
+2025-09-16 15:42:54,872 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:43:20,976 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:43:20,993 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:43:25,016 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 751: 15 total operations, 0 running
+2025-09-16 15:43:55,195 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 781: 15 total operations, 0 running
+2025-09-16 15:43:55,197 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:43:55,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:43:55,985 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:44:25,356 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 811: 15 total operations, 0 running
+2025-09-16 15:44:25,962 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:44:25,986 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:44:55,519 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 841: 15 total operations, 0 running
+2025-09-16 15:44:55,521 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:44:55,964 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:44:55,985 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:45:25,678 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 871: 15 total operations, 0 running
+2025-09-16 15:45:25,964 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:45:25,986 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:45:55,820 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 901: 15 total operations, 0 running
+2025-09-16 15:45:55,821 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:45:55,967 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:45:55,977 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:46:21,452 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 61.059458816640145, 'current_memory_mb': 812.28125}
+2025-09-16 15:46:25,967 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:46:25,977 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:46:25,983 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 931: 15 total operations, 0 running
+2025-09-16 15:46:51,482 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 61.3308545728141, 'current_memory_mb': 813.578125}
+2025-09-16 15:46:55,968 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:46:55,978 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:46:56,131 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 961: 15 total operations, 0 running
+2025-09-16 15:46:56,133 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:47:21,514 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 61.084047996479526, 'current_memory_mb': 815.0625}
+2025-09-16 15:47:26,291 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 991: 15 total operations, 0 running
+2025-09-16 15:47:30,959 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:47:30,970 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:47:51,544 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 60.707073358055595, 'current_memory_mb': 815.46875}
+2025-09-16 15:47:56,455 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1021: 15 total operations, 0 running
+2025-09-16 15:47:56,456 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:48:00,959 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:48:00,975 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:48:21,592 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 68.20491501759004, 'current_memory_mb': 815.484375}
+2025-09-16 15:48:26,612 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1051: 15 total operations, 0 running
+2025-09-16 15:48:30,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:48:30,970 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:48:51,623 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 74.15274361537868, 'current_memory_mb': 813.421875}
+2025-09-16 15:48:56,766 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1081: 15 total operations, 0 running
+2025-09-16 15:48:56,767 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:49:00,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:49:00,972 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:49:26,917 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1111: 15 total operations, 0 running
+2025-09-16 15:49:30,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:49:30,971 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:49:57,068 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1141: 15 total operations, 0 running
+2025-09-16 15:49:57,069 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:50:00,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:50:00,972 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:50:27,246 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1171: 15 total operations, 0 running
+2025-09-16 15:50:30,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:50:30,972 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:50:57,425 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1201: 15 total operations, 0 running
+2025-09-16 15:50:57,428 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:51:00,961 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:51:00,978 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:51:27,583 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1231: 15 total operations, 0 running
+2025-09-16 15:51:30,962 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:51:30,973 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:51:57,731 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1261: 15 total operations, 0 running
+2025-09-16 15:51:57,733 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:52:00,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:52:00,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:52:27,895 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1291: 15 total operations, 0 running
+2025-09-16 15:52:30,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:52:30,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:52:58,043 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1321: 15 total operations, 0 running
+2025-09-16 15:52:58,044 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:53:00,964 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:53:00,987 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:53:28,191 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1351: 15 total operations, 0 running
+2025-09-16 15:53:30,964 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:53:30,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:53:58,357 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1381: 15 total operations, 0 running
+2025-09-16 15:53:58,359 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:54:00,965 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:54:00,981 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:54:28,517 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1411: 15 total operations, 0 running
+2025-09-16 15:54:30,965 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:54:30,980 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:54:58,676 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1441: 15 total operations, 0 running
+2025-09-16 15:54:58,678 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:55:00,966 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:55:00,978 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:55:28,831 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1471: 15 total operations, 0 running
+2025-09-16 15:55:30,966 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:55:30,976 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:55:58,990 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1501: 15 total operations, 0 running
+2025-09-16 15:55:58,991 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:56:00,967 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:56:00,980 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:56:29,146 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1531: 15 total operations, 0 running
+2025-09-16 15:56:30,967 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:56:30,981 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:56:59,305 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1561: 15 total operations, 0 running
+2025-09-16 15:56:59,310 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:57:05,960 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:57:05,971 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:57:29,461 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1591: 15 total operations, 0 running
+2025-09-16 15:57:35,961 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:57:35,972 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:57:59,621 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1621: 15 total operations, 0 running
+2025-09-16 15:57:59,624 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:58:05,962 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:58:05,973 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:58:29,770 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1651: 15 total operations, 0 running
+2025-09-16 15:58:35,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:58:35,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:58:59,908 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1681: 15 total operations, 0 running
+2025-09-16 15:58:59,909 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 15:59:05,964 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:59:05,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 15:59:30,044 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1711: 15 total operations, 0 running
+2025-09-16 15:59:35,965 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 15:59:35,976 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:00:00,209 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1741: 15 total operations, 0 running
+2025-09-16 16:00:00,212 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:00:05,966 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:00:05,983 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:00:30,377 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1771: 15 total operations, 0 running
+2025-09-16 16:00:40,962 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:00:40,975 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:01:00,529 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1801: 15 total operations, 0 running
+2025-09-16 16:01:00,530 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:01:10,962 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:01:10,976 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:01:30,678 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1831: 15 total operations, 0 running
+2025-09-16 16:01:40,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:01:40,973 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:02:00,830 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1861: 15 total operations, 0 running
+2025-09-16 16:02:00,832 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:02:10,963 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:02:10,974 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:02:30,984 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1891: 15 total operations, 0 running
+2025-09-16 16:02:45,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:02:45,959 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:03:01,123 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1921: 15 total operations, 0 running
+2025-09-16 16:03:01,124 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:03:15,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:03:15,958 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:03:31,297 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1951: 15 total operations, 0 running
+2025-09-16 16:03:50,941 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:03:50,951 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:04:01,458 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1981: 15 total operations, 0 running
+2025-09-16 16:04:01,462 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:04:20,942 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:04:20,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:04:31,633 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2011: 15 total operations, 0 running
+2025-09-16 16:04:50,942 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:04:50,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:05:01,812 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2041: 15 total operations, 0 running
+2025-09-16 16:05:01,815 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:05:20,942 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:05:20,952 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:05:31,962 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2071: 15 total operations, 0 running
+2025-09-16 16:05:50,943 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:05:50,957 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:06:02,130 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2101: 15 total operations, 0 running
+2025-09-16 16:06:02,131 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:06:20,943 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:06:20,956 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:06:32,283 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2131: 15 total operations, 0 running
+2025-09-16 16:06:50,943 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:06:50,979 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:07:02,452 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2161: 15 total operations, 0 running
+2025-09-16 16:07:02,454 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:07:20,946 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:07:20,963 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:07:32,596 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2191: 15 total operations, 0 running
+2025-09-16 16:07:50,947 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:07:50,977 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:08:02,743 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2221: 15 total operations, 0 running
+2025-09-16 16:08:02,745 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:08:20,947 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:08:20,975 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:08:32,895 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2251: 15 total operations, 0 running
+2025-09-16 16:08:50,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:08:50,962 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:09:03,041 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2281: 15 total operations, 0 running
+2025-09-16 16:09:03,042 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:09:20,948 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:09:20,959 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:09:33,178 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2311: 15 total operations, 0 running
+2025-09-16 16:09:50,949 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:09:50,978 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:10:03,321 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2341: 15 total operations, 0 running
+2025-09-16 16:10:03,323 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total
+2025-09-16 16:10:20,949 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:10:20,963 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:10:33,477 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2371: 15 total operations, 0 running
+2025-09-16 16:10:50,950 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-09-16 16:10:50,977 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-09-16 16:11:03,624 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 2401: 15 total operations, 0 running
+2025-09-16 16:11:03,625 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 15→15 total

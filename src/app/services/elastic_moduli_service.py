@@ -101,7 +101,9 @@ class ElasticModuliService:
         self,
         name: str,
         hydration_operation_id: int,
-        description: str = ""
+        description: str = "",
+        image_filename: Optional[str] = None,
+        pimg_file_path: Optional[str] = None
     ) -> Tuple[ElasticModuliOperation, Dict[str, Any]]:
         """
         Create elastic moduli operation with complete lineage resolution.
@@ -145,10 +147,28 @@ class ElasticModuliService:
             session.refresh(base_operation)
             
             # Create ElasticModuliOperation with pre-populated lineage data
+            # Set default output directory nested inside hydration operation folder
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent.parent.parent
+
+            # Get hydration operation name for proper nesting
+            hydration_op = session.query(Operation).filter_by(id=hydration_operation_id).first()
+            if hydration_op and hydration_op.name:
+                # Nest elastic operation inside hydration folder
+                default_output_dir = str(project_root / "Operations" / hydration_op.name / name)
+            else:
+                # Fallback to flat structure
+                default_output_dir = str(project_root / "Operations" / name)
+
             elastic_operation = ElasticModuliOperation(
                 name=name,
                 description=description,
-                hydration_operation_id=hydration_operation_id
+                hydration_operation_id=hydration_operation_id,
+                image_filename=image_filename or "microstructure.img",  # Provide default if not specified
+                pimg_file_path=pimg_file_path,
+                output_directory=default_output_dir,  # Set required output directory
+                early_age_connection=1,  # Default value for required field
+                has_itz=True  # Default value - can be overridden later
             )
             
             # Populate from lineage data
