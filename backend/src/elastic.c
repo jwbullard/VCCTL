@@ -233,7 +233,7 @@ void printHelp(void) {
 /***
  *    checkargs
  *
- *     Check command-line arguments used to invoke disrealnew
+ *     Check command-line arguments used to invoke elastic
  *
  *     Arguments:    int argc, char *argv[]
  *     Returns:    nothing
@@ -316,7 +316,7 @@ int checkargs(int argc, char **argv) {
   if (lastchar != PATH_SEPARATOR[0]) {
     strcat(WorkingDirectory, PATH_SEPARATOR);
   }
-  sprintf(LogFileName, "%sdisrealnew.log", WorkingDirectory);
+  sprintf(LogFileName, "%selastic.log", WorkingDirectory);
   strcpy(buff, ProgressFileName);
   sprintf(ProgressFileName, "%s%s", WorkingDirectory, buff);
 
@@ -1955,7 +1955,7 @@ int main(int argc, char *argv[]) {
   fprintf(Logfile, "=== BEGIN GENMIC SIMULATION ===");
   fprintf(Logfile, "\nStart time: %s", asctime(local_time));
 
-  Fprog = filehandler("disrealnew", ProgressFileName, "WRITE");
+  Fprog = filehandler("elastic", ProgressFileName, "WRITE");
   if (!Fprog) {
     freeallmem();
     exit(1);
@@ -2598,7 +2598,7 @@ if (doitz) {
 
       /* Update progress file */
 
-      Fprog = filehandler("disrealnew", ProgressFileName, "WRITE");
+      Fprog = filehandler("elastic", ProgressFileName, "WRITE");
       if (!Fprog) {
         freeallmem();
         exit(1);
@@ -2965,37 +2965,36 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   num_fine_sources = num_coarse_sources = 0;
   fprintf(Logfile, "\nEnter volume fraction of fine aggregate: ");
   read_string(buff, sizeof(buff));
-  val = atof(buff);
-  if (val > 0) {
-    fine_agg_vf = val;
-    finevftot += fine_agg_vf;
-    fprintf(Logfile, "\n%f", fine_agg_vf);
+  fine_agg_vf = atof(buff);
+  finevftot = fine_agg_vf;
+  fprintf(Logfile, "\n%f", fine_agg_vf);
 
-    finebegin = N_concelas;
-    fprintf(Logfile, "\nFine aggregate grading file must have two ");
-    fprintf(Logfile,
-            "\ncolumns of data: one for opening diameter (mm) and one for "
-            "fraction retained.");
-    fprintf(Logfile, "\nThe columns must be COMMA-DELIMITED.");
-    fprintf(Logfile, "\nEnter name of fine agg grading file: ");
-    read_string(finegfile, sizeof(finegfile));
-    fprintf(Logfile, "\n%s", finegfile);
-    fflush(Logfile);
+  finebegin = N_concelas;
+  fprintf(Logfile, "\nFine aggregate grading file must have two ");
+  fprintf(Logfile,
+          "\ncolumns of data: one for opening diameter (mm) and one for "
+          "fraction retained.");
+  fprintf(Logfile, "\nThe columns must be COMMA-DELIMITED.");
+  fprintf(Logfile, "\nEnter name of fine agg grading file: ");
+  read_string(finegfile, sizeof(finegfile));
+  fprintf(Logfile, "\n%s", finegfile);
+  fflush(Logfile);
+  fprintf(Logfile, "\n\nEnter BULK modulus for fine aggregate (in GPa): ");
+  fflush(Logfile);
+  read_string(buff, sizeof(buff));
+  kfine = atof(buff);
+  fprintf(Logfile, "\n%f", kfine);
+  fprintf(Logfile, "\nEnter SHEAR modulus for fine aggregate (in GPa): ");
+  read_string(buff, sizeof(buff));
+  gfine = atof(buff);
+  fprintf(Logfile, "\n%f", gfine);
+  fflush(Logfile);
+  if (val > 0) {
     gfile = filehandler("concelas", finegfile, "READ");
     if (!gfile) {
       bailout("concelas", "Could not open fine grading file");
       return (1);
     }
-    fprintf(Logfile, "\n\nEnter BULK modulus for fine aggregate %d (in GPa): ",
-            num_fine_sources + 1);
-    read_string(buff, sizeof(buff));
-    kfine = atof(buff);
-    fprintf(Logfile, "\n%f", kfine);
-    fprintf(Logfile, "\nEnter SHEAR modulus for fine aggregate %d (in GPa): ",
-            num_fine_sources + 1);
-    read_string(buff, sizeof(buff));
-    gfine = atof(buff);
-    fprintf(Logfile, "\n%f", gfine);
 
     /* Read mandatory header for grading file and discard it */
     fread_string(gfile, instring); /* read and discard header */
@@ -3028,36 +3027,33 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   fprintf(Logfile, "\n\nEnter volume fraction of coarse aggregate");
   read_string(buff, sizeof(buff));
   val = atof(buff);
-  if (val > 0) {
-    coarse_agg_vf = val;
-    coarsevftot = coarse_agg_vf;
-    fprintf(Logfile, "\n%f", coarse_agg_vf);
+  coarse_agg_vf = val;
+  coarsevftot = coarse_agg_vf;
+  fprintf(Logfile, "\n%f", coarse_agg_vf);
+  coarsebegin = N_concelas;
+  fprintf(Logfile, "\nCoarse aggregate grading file must have two ");
+  fprintf(Logfile,
+          "\ncolumns of data: one for opening diameter (mm) and one for "
+          "fraction retained.");
+  fprintf(Logfile, "\nThe columns must be COMMA DELIMITED.");
+  fprintf(Logfile, "\n\nEnter name of coarse agg grading file: ");
+  read_string(coarsegfile, sizeof(coarsegfile));
+  fprintf(Logfile, "\n%s\n", coarsegfile);
+  fprintf(Logfile, "\nEnter BULK modulus for coarse aggregate (in GPa): ");
+  read_string(buff, sizeof(buff));
+  kcoarse = atof(buff);
+  fprintf(Logfile, "\n%f", kcoarse);
+  fprintf(Logfile, "\nEnter SHEAR modulus for coarse aggregate (in GPa): ");
+  read_string(buff, sizeof(buff));
+  gcoarse = atof(buff);
+  fprintf(Logfile, "\n%f", gcoarse);
 
-    coarsebegin = N_concelas;
-    fprintf(Logfile, "\nCoarse aggregate grading file must have two ");
-    fprintf(Logfile,
-            "\ncolumns of data: one for opening diameter (mm) and one for "
-            "fraction retained.");
-    fprintf(Logfile, "\nThe columns must be COMMA DELIMITED.");
-    fprintf(Logfile, "\n\nEnter name of coarse agg grading file: ");
-    read_string(coarsegfile, sizeof(coarsegfile));
-    fprintf(Logfile, "\n%s\n", coarsegfile);
+  if (coarse_agg_vf > 0.0) {
     gfile = filehandler("concelas", coarsegfile, "READ");
     if (!gfile) {
       bailout("concelas", "Could not open coarse grading file");
       return (1);
     }
-    fprintf(Logfile, "\nEnter BULK modulus for coarse aggregate %d (in GPa): ",
-            num_coarse_sources + 1);
-    read_string(buff, sizeof(buff));
-    kcoarse = atof(buff);
-    fprintf(Logfile, "\n%f", kcoarse);
-    fprintf(Logfile, "\nEnter SHEAR modulus for coarse aggregate %d (in GPa): ",
-            num_coarse_sources + 1);
-    read_string(buff, sizeof(buff));
-    gcoarse = atof(buff);
-    fprintf(Logfile, "\n%f", gcoarse);
-
     /* Read mandatory header for grading file and discard it */
     fread_string(gfile, instring); /* read and discard header */
 
@@ -3080,22 +3076,11 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     }
 
     fclose(gfile);
-    coarseend = N_concelas;
-    num_coarse_sources++;
-  } else {
-    fprintf(Logfile, "\nEnter BULK modulus for coarse aggregate %d (in GPa): ",
-            num_coarse_sources + 1);
-    read_string(buff, sizeof(buff));
-    kcoarse = atof(buff);
-    fprintf(Logfile, "\n%f", kcoarse);
-    fprintf(Logfile, "\nEnter SHEAR modulus for coarse aggregate %d (in GPa): ",
-            num_coarse_sources + 1);
-    read_string(buff, sizeof(buff));
-    gcoarse = atof(buff);
-    fprintf(Logfile, "\n%f", gcoarse);
   }
+  coarseend = N_concelas;
+  num_coarse_sources++;
 
-  /* Bubble sort on each aggregate type individually, then assigne average
+  /* Bubble sort on each aggregate type individually, then assign average
    * diameters */
 
   for (i = finebegin; i < fineend; i++) {
@@ -3215,7 +3200,6 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   fprintf(Logfile, "\n\nEnter the volume fraction of air: ");
   read_string(buff, sizeof(buff));
   airfrac = atof(buff);
-  fprintf(Logfile, "\n%f, Setting it to zero now...", airfrac);
   fprintf(fpout, "\tairfrac: %f\n", airfrac);
 
   for (i = 0; i < N_concelas; i++) {
@@ -3303,6 +3287,22 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   /*  Re-fit again 20 March 2013 */
   cylinder_strngth = 3.0e-4 * pow(xe, 3.0586);
 
+  fprintf(Logfile, "\tMatrix_vol_frac: %.4f\n", target_matrix_vf);
+  fprintf(Logfile, "\tEff_Young_mod: %.4f GPa\n", xe);
+  fprintf(Logfile, "\tEff_Shear_mod: %.4f GPa\n", xg);
+  fprintf(Logfile, "\tEff_Bulk_mod: %.4f GPa\n", xk);
+  fprintf(Logfile,
+          "\tMortar_Cylinder_Compressive_strength (power fit): %.4f MPa\n",
+          cylinder_strngth);
+  fprintf(Logfile, "\tMortar_Cube_Compressive_strength (power fit): %.4f MPa\n",
+          mortar_cube_strngth);
+  fprintf(Logfile,
+          "\tConcrete_Cube_Compressive_strength (power fit): %.4f MPa\n",
+          concrete_cube_strngth);
+  fprintf(Logfile,
+          "\tConcrete_Cylinder_Compressive_strength (0.62*cube): %.4f MPa\n",
+          concrete_cube_strngth * 0.624);
+  fflush(Logfile);
   fprintf(fpout, "\tMatrix_vol_frac: %.4f\n", target_matrix_vf);
   fprintf(fpout, "\tEff_Young_mod: %.4f GPa\n", xe);
   fprintf(fpout, "\tEff_Shear_mod: %.4f GPa\n", xg);

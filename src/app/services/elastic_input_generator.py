@@ -123,49 +123,51 @@ class ElasticInputGenerator:
             cement_psd_path = self._find_cement_psd_file(lineage, output_directory)
             responses.append(cement_psd_path)
 
-            # Fine aggregate data (up to NUMFINESOURCES=2)
+            # Fine aggregate data (only one source supported)
+            # Always output all four values regardless of volume fraction
             if fine_agg:
-                # "Enter volume fraction of fine aggregate 1:"
+                # "Enter volume fraction of fine aggregate:"
                 responses.append(str(fine_agg.volume_fraction))
-                
-                # Additional fine aggregate prompts based on elastic.c logic
-                responses.append(fine_agg.name)  # Aggregate name/description
-                responses.append(str(fine_agg.bulk_modulus))   # Bulk modulus (GPa)
-                responses.append(str(fine_agg.shear_modulus))  # Shear modulus (GPa)
-                
-                # Grading file path (already relative from grading path generation)
+
+                # Grading file path - elastic.c now always reads this
                 if fine_agg.grading_path:
                     # The grading_path is already relative to the operation directory
                     responses.append(fine_agg.grading_path)
                 else:
-                    responses.append("")  # No grading file
+                    responses.append("./dummy.gdg")  # Placeholder file path
+
+                # Bulk and shear modulus - elastic.c now always reads these
+                responses.append(str(fine_agg.bulk_modulus))   # Bulk modulus (GPa)
+                responses.append(str(fine_agg.shear_modulus))  # Shear modulus (GPa)
             else:
-                responses.append("0.0")  # No fine aggregate
+                # No fine aggregate - still provide all four values
+                responses.append("0.0")           # Volume fraction = 0
+                responses.append("./dummy.gdg")   # Placeholder grading file
+                responses.append("30.0")          # Default bulk modulus
+                responses.append("18.0")          # Default shear modulus
             
-            # Second fine aggregate (usually not used)
-            responses.append("0.0")
-            
-            # Coarse aggregate data (up to NUMCOARSESOURCES=2)
+            # Coarse aggregate data (only one source supported)
+            # Always output all four values regardless of volume fraction
             if coarse_agg:
-                # "Enter volume fraction of coarse aggregate 1:"
+                # "Enter volume fraction of coarse aggregate:"
                 responses.append(str(coarse_agg.volume_fraction))
-                
-                # Additional coarse aggregate prompts
-                responses.append(coarse_agg.name)  # Aggregate name/description
-                responses.append(str(coarse_agg.bulk_modulus))   # Bulk modulus (GPa)
-                responses.append(str(coarse_agg.shear_modulus))  # Shear modulus (GPa)
-                
-                # Grading file path (already relative from grading path generation)
+
+                # Grading file path - elastic.c now always reads this
                 if coarse_agg.grading_path:
                     # The grading_path is already relative to the operation directory
                     responses.append(coarse_agg.grading_path)
                 else:
-                    responses.append("")  # No grading file
+                    responses.append("./dummy.gdg")  # Placeholder file path
+
+                # Bulk and shear modulus - elastic.c now always reads these
+                responses.append(str(coarse_agg.bulk_modulus))   # Bulk modulus (GPa)
+                responses.append(str(coarse_agg.shear_modulus))  # Shear modulus (GPa)
             else:
-                responses.append("0.0")  # No coarse aggregate
-            
-            # Second coarse aggregate (usually not used)
-            responses.append("0.0")
+                # No coarse aggregate - still provide all four values
+                responses.append("0.0")           # Volume fraction = 0
+                responses.append("./dummy.gdg")   # Placeholder grading file
+                responses.append("36.7")          # Default bulk modulus
+                responses.append("22.0")          # Default shear modulus
             
             # "Enter the volume fraction of air:"
             air_fraction = volume_fractions.get('air_volume_fraction', 0.0)
