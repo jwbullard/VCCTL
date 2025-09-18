@@ -1702,7 +1702,23 @@ class HydrationPanel(Gtk.Box):
                 operation_name, selected_microstructure, curing_conditions,
                 time_calibration, advanced_settings, db_modifications
             )
-            
+
+            # Auto-save hydration configuration before execution
+            self.logger.info("🚨 Starting hydration autosave process...")
+            try:
+                saved_hydration_id = self._auto_save_hydration_before_execution(
+                    operation_name, selected_microstructure, curing_conditions,
+                    time_calibration, advanced_settings, db_modifications, ui_parameters
+                )
+                if saved_hydration_id:
+                    self.logger.info(f"✅ Hydration configuration auto-saved with ID: {saved_hydration_id}")
+                    self._update_status("Hydration configuration auto-saved. Starting simulation...", "info", 2)
+                else:
+                    self.logger.warning("⚠️ Hydration autosave failed, but continuing with simulation")
+            except Exception as e:
+                self.logger.error(f"❌ Hydration autosave error: {e}")
+                # Continue with simulation even if autosave fails
+
             # Phase 3: Create database operation with UI parameters and lineage
             parent_operation_id = self._find_microstructure_operation_id(selected_microstructure['name'])
             operation = self._create_hydration_operation(operation_name, ui_parameters, parent_operation_id)
@@ -3032,29 +3048,29 @@ class HydrationPanel(Gtk.Box):
             error_dialog.destroy()
     
     def _show_load_parameters_dialog(self) -> None:
-        """Show dialog to load saved hydration parameters."""
+        """Show dialog to load saved hydration operations."""
         try:
-            # Get service container and parameter set service
-            container = get_service_container()
-            param_service = HydrationParameterSetService(container.database_service)
-            
-            # Get all parameter sets
-            param_sets = param_service.get_all()
-            
-            if not param_sets:
+            # Get service container and saved hydration service
+            from app.services.saved_hydration_service import SavedHydrationOperationService
+            saved_hydration_service = SavedHydrationOperationService(self.service_container.database_service)
+
+            # Get all saved hydration operations
+            saved_hydrations = saved_hydration_service.get_all()
+
+            if not saved_hydrations:
                 info_dialog = Gtk.MessageDialog(
                     self.get_toplevel(),
                     Gtk.DialogFlags.MODAL,
                     Gtk.MessageType.INFO,
                     Gtk.ButtonsType.OK,
-                    "No saved parameter sets found. Save some parameters first."
+                    "No saved hydration operations found. Complete a hydration operation first to enable loading."
                 )
                 info_dialog.run()
                 info_dialog.destroy()
                 return
-            
+
             dialog = Gtk.Dialog(
-                title="Load Hydration Parameters",
+                title="Load Hydration Operation",
                 parent=self.get_toplevel(),
                 flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT
             )
@@ -3062,50 +3078,57 @@ class HydrationPanel(Gtk.Box):
                 Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                 Gtk.STOCK_OPEN, Gtk.ResponseType.OK
             )
-            dialog.set_default_size(600, 400)
-            
+            dialog.set_default_size(700, 450)
+
             content_area = dialog.get_content_area()
             content_area.set_spacing(10)
             content_area.set_margin_left(20)
             content_area.set_margin_right(20)
             content_area.set_margin_top(20)
             content_area.set_margin_bottom(20)
-            
+
             # Create list view
-            liststore = Gtk.ListStore(int, str, str, str, bool)  # id, name, description, created_at, is_template
-            
-            for param_set in param_sets:
+            liststore = Gtk.ListStore(int, str, str, str, str, bool)  # id, name, description, source_microstructure, created_at, is_template
+
+            for saved_hydration in saved_hydrations:
                 liststore.append([
-                    param_set.id,
-                    param_set.name,
-                    param_set.description or "",
-                    param_set.created_at.strftime("%Y-%m-%d %H:%M"),
-                    param_set.is_template
+                    saved_hydration.id,
+                    saved_hydration.name,
+                    saved_hydration.description or "",
+                    saved_hydration.source_microstructure_name or "Unknown",
+                    saved_hydration.created_at.strftime("%Y-%m-%d %H:%M"),
+                    saved_hydration.is_template
                 ])
             
             tree_view = Gtk.TreeView(model=liststore)
             tree_view.set_headers_visible(True)
-            
+
             # Name column
             name_renderer = Gtk.CellRendererText()
             name_column = Gtk.TreeViewColumn("Name", name_renderer, text=1)
             name_column.set_expand(True)
             tree_view.append_column(name_column)
-            
+
             # Description column
             desc_renderer = Gtk.CellRendererText()
             desc_column = Gtk.TreeViewColumn("Description", desc_renderer, text=2)
             desc_column.set_expand(True)
             tree_view.append_column(desc_column)
-            
+
+            # Source Microstructure column
+            source_renderer = Gtk.CellRendererText()
+            source_column = Gtk.TreeViewColumn("Source Microstructure", source_renderer, text=3)
+            source_column.set_expand(True)
+            tree_view.append_column(source_column)
+
             # Created column
             created_renderer = Gtk.CellRendererText()
-            created_column = Gtk.TreeViewColumn("Created", created_renderer, text=3)
+            created_column = Gtk.TreeViewColumn("Created", created_renderer, text=4)
             tree_view.append_column(created_column)
-            
+
             # Template column
             template_renderer = Gtk.CellRendererToggle()
-            template_column = Gtk.TreeViewColumn("Template", template_renderer, active=4)
+            template_column = Gtk.TreeViewColumn("Template", template_renderer, active=5)
             tree_view.append_column(template_column)
             
             # Scrolled window
@@ -3123,11 +3146,22 @@ class HydrationPanel(Gtk.Box):
                 model, tree_iter = selection.get_selected()
                 
                 if tree_iter is not None:
-                    param_set_id = model[tree_iter][0]
+                    saved_hydration_id = model[tree_iter][0]
                     dialog.destroy()
-                    
-                    # Load the selected parameter set
-                    self._load_parameter_set(param_set_id)
+
+                    # Load the selected saved hydration operation
+                    self._load_saved_hydration_operation(saved_hydration_id)
+
+                    # Show success message like Mix Design panel does
+                    success_dialog = Gtk.MessageDialog(
+                        self.get_toplevel(),
+                        Gtk.DialogFlags.MODAL,
+                        Gtk.MessageType.INFO,
+                        Gtk.ButtonsType.OK,
+                        f"Hydration operation loaded successfully!"
+                    )
+                    success_dialog.run()
+                    success_dialog.destroy()
                 else:
                     error_dialog = Gtk.MessageDialog(
                         dialog,
@@ -3493,3 +3527,246 @@ class HydrationPanel(Gtk.Box):
                     raise ValueError(f"Parameter modification values must be between 0.01-100.0, got {value} for {param_name}")
         
         self.logger.info("Parameter completeness validation passed")
+
+    def _auto_save_hydration_before_execution(self, operation_name: str, selected_microstructure: Dict[str, Any],
+                                            curing_conditions: Dict[str, Any], time_calibration: Dict[str, Any],
+                                            advanced_settings: Dict[str, Any], db_modifications: Dict[str, Any],
+                                            ui_parameters: Dict[str, Any]) -> Optional[int]:
+        """
+        Auto-save hydration configuration before execution.
+        Similar to mix design autosave functionality.
+        Returns the saved hydration operation ID if successful.
+        """
+        try:
+            from datetime import datetime
+
+            # Prepare hydration configuration for autosave
+            max_time = self.max_time_spin.get_value()
+
+            # Get temperature profile data
+            temperature_profile = {}
+            if hasattr(self, 'temperature_profile_combo'):
+                profile_name = self.temperature_profile_combo.get_active_text()
+                if profile_name and profile_name != "Select profile...":
+                    temperature_profile = {
+                        'name': profile_name,
+                        'data': getattr(self, 'current_temperature_profile_data', {})
+                    }
+
+            hydration_config = {
+                'operation_name': operation_name,
+                'source_microstructure': selected_microstructure,
+                'max_time_hours': max_time,
+                'curing_conditions': curing_conditions,
+                'time_calibration': time_calibration,
+                'advanced_settings': advanced_settings,
+                'temperature_profile': temperature_profile,
+                'database_modifications': db_modifications,
+                'ui_parameters': ui_parameters,
+                'timestamp': datetime.now().isoformat()
+            }
+
+            # Use the saved hydration service for autosave
+            from app.services.saved_hydration_service import SavedHydrationOperationService
+            saved_hydration_service = SavedHydrationOperationService(self.service_container.database_service)
+
+            saved_hydration_id = saved_hydration_service.auto_save_before_execution(hydration_config)
+
+            if saved_hydration_id:
+                self.logger.info(f"✅ Hydration auto-saved with ID: {saved_hydration_id}")
+                return saved_hydration_id
+            else:
+                self.logger.warning("⚠️ Hydration autosave returned None")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"❌ Hydration autosave failed: {e}")
+            import traceback
+            self.logger.error(f"Full autosave traceback: {traceback.format_exc()}")
+            return None
+
+    def _load_saved_hydration_operation(self, saved_hydration_id: int) -> None:
+        """Load a complete saved hydration operation and restore all UI settings."""
+        try:
+            from app.services.saved_hydration_service import SavedHydrationOperationService
+            saved_hydration_service = SavedHydrationOperationService(self.service_container.database_service)
+
+            # Get saved hydration operation from database
+            saved_hydration = saved_hydration_service.get_by_id(saved_hydration_id)
+            if not saved_hydration:
+                raise ValueError(f"Saved hydration operation with ID {saved_hydration_id} not found")
+
+            # Restore operation name
+            self.operation_name_entry.set_text(saved_hydration.name)
+
+            # Restore max time
+            self.max_time_spin.set_value(saved_hydration.max_time_hours)
+
+            # Restore source microstructure selection if possible
+            # Note: This would require finding the microstructure in the list
+            # For now, we'll just show the name but user may need to reselect
+            self.logger.info(f"Loading hydration operation based on source microstructure: {saved_hydration.source_microstructure_name}")
+
+            # Restore UI parameters if available
+            if saved_hydration.ui_parameters:
+                ui_params = saved_hydration.ui_parameters
+                self._restore_ui_from_parameters(ui_params)
+
+            # Restore curing conditions
+            if saved_hydration.curing_conditions:
+                self._restore_curing_conditions(saved_hydration.curing_conditions)
+
+            # Restore time calibration
+            if saved_hydration.time_calibration:
+                self._restore_time_calibration(saved_hydration.time_calibration)
+
+            # Restore advanced settings
+            if saved_hydration.advanced_settings:
+                self._restore_advanced_settings(saved_hydration.advanced_settings)
+
+            # Restore database modifications
+            if saved_hydration.database_modifications:
+                self._restore_database_modifications(saved_hydration.database_modifications)
+
+            # Show success message
+            self._update_status(f"Loaded hydration operation: {saved_hydration.name}", "info", 3)
+            self.logger.info(f"✅ Successfully loaded saved hydration operation: {saved_hydration.name}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to load saved hydration operation: {e}")
+            error_dialog = Gtk.MessageDialog(
+                self.get_toplevel(),
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.ERROR,
+                Gtk.ButtonsType.OK,
+                f"Failed to load hydration operation: {e}"
+            )
+            error_dialog.run()
+            error_dialog.destroy()
+
+    def _restore_ui_from_parameters(self, ui_params: Dict[str, Any]) -> None:
+        """Restore UI controls from saved parameters."""
+        try:
+            self.logger.info(f"Restoring UI from saved parameters...")
+
+            # Restore operation name (if not already set)
+            if 'operation_name' in ui_params:
+                self.operation_name_entry.set_text(ui_params['operation_name'])
+
+            # Restore curing conditions
+            if 'curing_conditions' in ui_params:
+                self._restore_curing_conditions(ui_params['curing_conditions'])
+
+            # Restore time calibration
+            if 'time_calibration' in ui_params:
+                self._restore_time_calibration(ui_params['time_calibration'])
+
+            # Restore advanced settings
+            if 'advanced_settings' in ui_params:
+                self._restore_advanced_settings(ui_params['advanced_settings'])
+
+            # Restore database modifications
+            if 'database_modifications' in ui_params:
+                self._restore_database_modifications(ui_params['database_modifications'])
+
+            self.logger.info("✅ UI restoration completed successfully")
+
+        except Exception as e:
+            self.logger.error(f"Error restoring UI from parameters: {e}")
+            import traceback
+            self.logger.error(f"Full restore traceback: {traceback.format_exc()}")
+
+    def _restore_curing_conditions(self, curing_conditions: Dict[str, Any]) -> None:
+        """Restore curing conditions UI controls."""
+        try:
+            self.logger.debug("Restoring curing conditions...")
+
+            # Restore temperature profile if present
+            if 'temperature_profile' in curing_conditions:
+                profile_data = curing_conditions['temperature_profile']
+                if profile_data and 'points' in profile_data:
+                    points = []
+                    for point_data in profile_data['points']:
+                        points.append(TemperaturePoint(
+                            point_data['time_hours'],
+                            point_data['temperature_celsius']
+                        ))
+
+                    self.current_profile = TemperatureProfile(
+                        name=profile_data.get('name', 'Restored Profile'),
+                        description=profile_data.get('description', 'Restored from saved operation'),
+                        points=points
+                    )
+                    self._update_profile_display()
+                    self.logger.debug(f"Restored temperature profile: {self.current_profile.name}")
+
+        except Exception as e:
+            self.logger.error(f"Error restoring curing conditions: {e}")
+
+    def _restore_time_calibration(self, time_calibration: Dict[str, Any]) -> None:
+        """Restore time calibration UI controls."""
+        try:
+            self.logger.debug("Restoring time calibration...")
+
+            # Restore time conversion factor
+            if 'time_conversion_factor' in time_calibration:
+                factor = time_calibration['time_conversion_factor']
+                self.time_conversion_spin.set_value(factor)
+                self.logger.debug(f"Restored time conversion factor: {factor}")
+
+        except Exception as e:
+            self.logger.error(f"Error restoring time calibration: {e}")
+
+    def _restore_advanced_settings(self, advanced_settings: Dict[str, Any]) -> None:
+        """Restore advanced settings UI controls."""
+        try:
+            self.logger.debug("Restoring advanced settings...")
+
+            # Restore C3A fraction
+            if 'c3a_fraction' in advanced_settings:
+                self.c3a_fraction_spin.set_value(advanced_settings['c3a_fraction'])
+
+            # Restore formation flags
+            if 'ettringite_formation' in advanced_settings:
+                self.ettringite_check.set_active(advanced_settings['ettringite_formation'])
+
+            if 'csh2_formation' in advanced_settings:
+                self.csh2_flag_check.set_active(advanced_settings['csh2_formation'])
+
+            if 'ch_formation' in advanced_settings:
+                self.ch_flag_check.set_active(advanced_settings['ch_formation'])
+
+            if 'ph_computation' in advanced_settings:
+                self.ph_active_check.set_active(advanced_settings['ph_computation'])
+
+            # Restore random seed
+            if 'random_seed' in advanced_settings:
+                self.random_seed_spin.set_value(advanced_settings['random_seed'])
+
+            self.logger.debug("Advanced settings restored successfully")
+
+        except Exception as e:
+            self.logger.error(f"Error restoring advanced settings: {e}")
+
+    def _restore_database_modifications(self, database_modifications: Dict[str, Any]) -> None:
+        """Restore database modifications UI controls."""
+        try:
+            self.logger.debug("Restoring database modifications...")
+
+            # Clear existing modifications first
+            if hasattr(self, 'database_params_store'):
+                self.database_params_store.clear()
+
+            # Restore each database parameter modification
+            for param_name, new_value in database_modifications.items():
+                if hasattr(self, 'database_params_store'):
+                    # Add parameter to the store for display
+                    iter_obj = self.database_params_store.append()
+                    self.database_params_store.set(iter_obj, 0, param_name)
+                    self.database_params_store.set(iter_obj, 1, str(new_value))
+                    self.database_params_store.set(iter_obj, 2, "")  # Original value (to be looked up)
+
+            self.logger.debug(f"Restored {len(database_modifications)} database parameter modifications")
+
+        except Exception as e:
+            self.logger.error(f"Error restoring database modifications: {e}")

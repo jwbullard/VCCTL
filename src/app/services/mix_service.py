@@ -191,52 +191,70 @@ class MixService:
         return self._get_material_specific_gravity(material_name, material_type)
     
     def _calculate_volume_fractions(self, mix_design: MixDesign) -> None:
-        """Calculate volume fractions from mass fractions and specific gravities."""
+        """
+        Calculate volume fractions using the correct equation:
+        φⱼ = [(1 - φₐᵢᵣ) × mⱼ/ρⱼ] / [Σᵢ mᵢ/ρᵢ]
+
+        Where:
+        - φⱼ = volume fraction of component j
+        - φₐᵢᵣ = air volume fraction
+        - mⱼ = mass of component j (mass fraction in this case)
+        - ρⱼ = density (specific gravity) of component j
+        """
         try:
-            # Calculate absolute volumes (mass_fraction / specific_gravity)
-            absolute_volumes = []
-            
+            air_volume_fraction = mix_design.air_content
+
+            # Calculate absolute volumes for all components (mᵢ/ρᵢ)
+            component_absolute_volumes = []
             for component in mix_design.components:
                 if component.specific_gravity > 0:
                     absolute_volume = component.mass_fraction / component.specific_gravity
                 else:
                     absolute_volume = 0.0
-                absolute_volumes.append(absolute_volume)
-            
+                component_absolute_volumes.append(absolute_volume)
+
             # Calculate water absolute volume (water SG = 1.0)
             water_absolute_volume = mix_design.total_water_content / 1.0
-            
-            # Calculate total solid volume (all materials + water)
-            total_solid_volume = sum(absolute_volumes) + water_absolute_volume
-            
-            # Air content is a volume fraction of total concrete volume
-            # Total concrete volume = solid volume / (1 - air_volume_fraction)
-            air_volume_fraction = mix_design.air_content
-            if air_volume_fraction < 1.0 and air_volume_fraction >= 0:
-                total_concrete_volume = total_solid_volume / (1.0 - air_volume_fraction)
-            else:
-                total_concrete_volume = total_solid_volume
-            
-            # Calculate volume fractions relative to total concrete volume
-            if total_concrete_volume > 0:
+
+            # Calculate total absolute volume: Σᵢ mᵢ/ρᵢ (sum of all components + water)
+            total_absolute_volume = sum(component_absolute_volumes) + water_absolute_volume
+
+            self.logger.debug(f"Volume fraction calculation:")
+            self.logger.debug(f"  Air volume fraction: {air_volume_fraction:.4f}")
+            self.logger.debug(f"  Total absolute volume (Σ mᵢ/ρᵢ): {total_absolute_volume:.6f}")
+
+            # Apply the correct equation: φⱼ = [(1 - φₐᵢᵣ) × mⱼ/ρⱼ] / [Σᵢ mᵢ/ρᵢ]
+            if total_absolute_volume > 0:
+                # Calculate volume fractions for each component
                 for i, component in enumerate(mix_design.components):
-                    component.volume_fraction = absolute_volumes[i] / total_concrete_volume
-                
-                # Store volume fractions - all should sum to 1.0
-                mix_design.water_volume_fraction = water_absolute_volume / total_concrete_volume
+                    component.volume_fraction = ((1.0 - air_volume_fraction) * component_absolute_volumes[i]) / total_absolute_volume
+                    self.logger.debug(f"  {component.material_name}: mass_frac={component.mass_fraction:.4f}, "
+                                    f"abs_vol={component_absolute_volumes[i]:.6f}, vol_frac={component.volume_fraction:.6f}")
+
+                # Calculate water volume fraction
+                mix_design.water_volume_fraction = ((1.0 - air_volume_fraction) * water_absolute_volume) / total_absolute_volume
+                self.logger.debug(f"  Water: mass_frac={mix_design.total_water_content:.4f}, "
+                                f"abs_vol={water_absolute_volume:.6f}, vol_frac={mix_design.water_volume_fraction:.6f}")
+
+                # Air volume fraction remains as specified
                 mix_design.air_volume_fraction = air_volume_fraction
-                
+
                 # Verify the calculation sums to 1.0
-                total_calc = sum(comp.volume_fraction for comp in mix_design.components) + mix_design.water_volume_fraction + mix_design.air_volume_fraction
-                self.logger.debug(f"Volume fraction calculation check: {total_calc:.6f} (should be ~1.0)")
-                
+                total_calc = (sum(comp.volume_fraction for comp in mix_design.components) +
+                            mix_design.water_volume_fraction + mix_design.air_volume_fraction)
+                self.logger.debug(f"  Total volume fractions: {total_calc:.6f} (should be ~1.0)")
+
+                if abs(total_calc - 1.0) > 0.001:
+                    self.logger.warning(f"Volume fractions don't sum to 1.0: {total_calc:.6f}")
+
             else:
                 # Fallback for edge case
+                self.logger.warning("Total absolute volume is zero - using fallback values")
                 for component in mix_design.components:
                     component.volume_fraction = 0.0
                 mix_design.water_volume_fraction = 0.0
                 mix_design.air_volume_fraction = 0.0
-            
+
         except Exception as e:
             self.logger.error(f"Failed to calculate volume fractions: {e}")
             raise ServiceError(f"Volume fraction calculation failed: {e}")

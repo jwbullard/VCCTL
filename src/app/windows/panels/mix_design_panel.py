@@ -5265,7 +5265,11 @@ class MixDesignPanel(Gtk.Box):
             
             # Populate UI
             self._populate_ui_from_mix_design(mix_data)
-            
+
+            # IMPORTANT: Recalculate volume fractions with the updated equation
+            # This ensures loaded mix designs use the correct volume fraction calculation
+            self._recalculate_volume_fractions_after_load(mix_design)
+
             # Set mix name with "_copy" suffix
             copy_name = f"{mix_design.name}_copy"
             self.mix_name_entry.set_text(copy_name)
@@ -5276,6 +5280,44 @@ class MixDesignPanel(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Error loading mix design: {e}")
             self.main_window.update_status(f"Error loading mix design: {e}", "error", 5)
+
+    def _recalculate_volume_fractions_after_load(self, mix_design) -> None:
+        """
+        Recalculate volume fractions using the updated equation after loading a mix design.
+        This ensures that old mix designs use the corrected volume fraction calculation.
+        """
+        try:
+            # Get current mix service to use updated calculation
+            from app.services.mix_service import MixService
+            mix_service = MixService(self.service_container.database_service)
+
+            # Recalculate volume fractions using the updated equation
+            mix_service._calculate_volume_fractions(mix_design)
+
+            # Update UI with recalculated values
+            self._update_ui_with_recalculated_fractions(mix_design)
+
+            self.logger.info("Recalculated volume fractions with updated equation")
+
+        except Exception as e:
+            self.logger.error(f"Error recalculating volume fractions: {e}")
+
+    def _update_ui_with_recalculated_fractions(self, mix_design) -> None:
+        """Update UI elements that display volume fractions with recalculated values."""
+        try:
+            # Update any UI elements that show volume fractions
+            # This might include status labels, property displays, etc.
+
+            # Log the recalculated values for verification
+            for component in mix_design.components:
+                if hasattr(component, 'material_type') and component.material_type.name == 'AGGREGATE':
+                    self.logger.info(f"Recalculated {component.material_name} volume fraction: {component.volume_fraction:.6f}")
+
+            # Trigger any UI updates that depend on volume fractions
+            self._update_calculated_properties()
+
+        except Exception as e:
+            self.logger.error(f"Error updating UI with recalculated fractions: {e}")
     
     
     def _generate_unique_mix_name(self, base_name: str, existing_designs: List) -> str:

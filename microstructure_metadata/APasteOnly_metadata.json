@@ -1,0 +1,18 @@
+{
+  "operation_name": "APasteOnly",
+  "microstructure_file": "./Operations/APasteOnly/APasteOnly.pimg",
+  "system_size": 100,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement140",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 1.0,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-18T13:57:52.274049"
+}

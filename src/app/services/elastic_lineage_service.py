@@ -292,22 +292,43 @@ class ElasticLineageService:
             # Sort by sieve size (largest first for standard format)
             sorted_points = sorted(grading_sieve_data, key=lambda x: x[0], reverse=True)
 
-            for point in sorted_points:
+            # Calculate individual mass fractions retained on each sieve
+            # We need to convert from cumulative passing to individual retained amounts
+            for i, point in enumerate(sorted_points):
                 size_mm = point[0]
                 percent_passing = point[1]
-                # Convert from percent passing to fraction retained
-                percent_retained = 100.0 - percent_passing
-                fraction_retained = percent_retained / 100.0
-                lines.append(f"{size_mm:.3f},{fraction_retained:.6f}")
+
+                if i == 0:
+                    # First (largest) sieve: retained = 100 - percent_passing
+                    fraction_retained_on_sieve = (100.0 - percent_passing) / 100.0
+                else:
+                    # For subsequent sieves: retained = previous_passing - current_passing
+                    previous_percent_passing = sorted_points[i-1][1]
+                    fraction_retained_on_sieve = (previous_percent_passing - percent_passing) / 100.0
+
+                # Ensure non-negative values
+                fraction_retained_on_sieve = max(0.0, fraction_retained_on_sieve)
+
+                lines.append(f"{size_mm:.3f},{fraction_retained_on_sieve:.6f}")
+
+            # Add pan (material passing through smallest sieve)
+            if sorted_points:
+                smallest_sieve_passing = sorted_points[-1][1]  # Last point has smallest passing
+                pan_fraction = smallest_sieve_passing / 100.0
+                if pan_fraction > 0.0:
+                    lines.append(f"0.000,{pan_fraction:.6f}")
 
             gdg_content = '\n'.join(lines)
-            
+
             # Write to file in operations directory
             with open(actual_file_path, 'w') as f:
                 f.write(gdg_content)
-            
+
+            # Verify fractions sum to 1.0
+            total_fraction = sum(float(line.split(',')[1]) for line in lines[1:])  # Skip header
             self.logger.info(f"Created grading file for {aggregate.display_name}: {actual_file_path}")
-            self.logger.debug(f"Grading template used: {grading_name} with {len(grading_sieve_data)} sieve points")
+            self.logger.info(f"Grading template used: {grading_name} with {len(grading_sieve_data)} sieve points")
+            self.logger.info(f"Total fraction retained: {total_fraction:.6f} (should be ~1.0)")
             
             return temp_grading_path
             
@@ -326,28 +347,23 @@ class ElasticLineageService:
         # Try to get from direct fields first
         volume_fractions['air_volume_fraction'] = mix_design_data.get('air_volume_fraction', 0.0)
         
-        # Extract from components JSON if available
+        # Don't use component volume fractions as they might be incorrect
+        # We'll calculate them correctly below using masses and densities
         components = mix_design_data.get('components', [])
         if isinstance(components, list):
+            self.logger.info(f"🔍 Found {len(components)} components in mix design data")
             for component in components:
                 if not isinstance(component, dict):
                     continue
-                    
+
                 material_type = component.get('material_type', '').lower()
                 material_name = component.get('material_name', '').lower()
                 volume_fraction = component.get('volume_fraction', 0.0)
-                
-                # Check if it's an aggregate by material_type
-                if material_type == 'aggregate':
-                    # Determine if it's fine or coarse by name
-                    if 'fine' in material_name:
-                        volume_fractions['fine_aggregate_volume_fraction'] += volume_fraction
-                    elif 'coarse' in material_name:
-                        volume_fractions['coarse_aggregate_volume_fraction'] += volume_fraction
-                    else:
-                        # Default to fine if not specified
-                        volume_fractions['fine_aggregate_volume_fraction'] += volume_fraction
-                elif 'air' in material_type:
+
+                self.logger.info(f"  Component: {material_name}, type={material_type}, vf={volume_fraction:.4f} (will recalculate)")
+
+                # Only extract air content from components
+                if 'air' in material_type:
                     volume_fractions['air_volume_fraction'] += volume_fraction
         
         # Also try calculated properties
@@ -361,12 +377,88 @@ class ElasticLineageService:
         fine_mass = mix_design_data.get('fine_aggregate_mass', 0.0)
         coarse_mass = mix_design_data.get('coarse_aggregate_mass', 0.0)
         
-        if fine_mass > 0 and volume_fractions['fine_aggregate_volume_fraction'] == 0.0:
-            # Rough approximation using typical aggregate density
-            volume_fractions['fine_aggregate_volume_fraction'] = fine_mass / 2650.0  # kg/m³
-        
-        if coarse_mass > 0 and volume_fractions['coarse_aggregate_volume_fraction'] == 0.0:
-            volume_fractions['coarse_aggregate_volume_fraction'] = coarse_mass / 2650.0
+        # Log current state before correction
+        self.logger.info(f"🔍 Before correction: fine_vf={volume_fractions['fine_aggregate_volume_fraction']:.4f}, "
+                        f"coarse_vf={volume_fractions['coarse_aggregate_volume_fraction']:.4f}, "
+                        f"fine_mass={fine_mass:.2f}, coarse_mass={coarse_mass:.2f}")
+
+        # ALWAYS recalculate volume fractions when we have mass data
+        # The components might have incorrect volume fractions from the UI
+        if (fine_mass > 0 or coarse_mass > 0):
+            # Get air content (default to 0.02 if not specified)
+            air_content = volume_fractions.get('air_volume_fraction', 0.02)
+
+            # We need to properly calculate volume fractions accounting for all solids
+            # Don't trust the volume fractions from components as they might be wrong
+
+            # Use typical densities
+            fine_density = 2650.0  # kg/m³ (typical for sand)
+            coarse_density = 2650.0  # kg/m³ (typical for gravel)
+            cement_density = 3150.0  # kg/m³ (typical for cement)
+            water_density = 1000.0  # kg/m³
+
+            # Try to estimate total solid volume from known data
+            # If we have total_water_content and water_binder_ratio, we can estimate cement mass
+            total_water = mix_design_data.get('total_water_content', 0.0)
+            w_b_ratio = mix_design_data.get('water_binder_ratio', 0.0)
+
+            if total_water > 0 and w_b_ratio > 0:
+                # Estimate cement mass from water content and w/b ratio
+                cement_mass = total_water / w_b_ratio
+            else:
+                # Use a typical cement mass if we can't calculate it
+                # Assume cement is roughly equal to fine aggregate for a typical mix
+                cement_mass = fine_mass if fine_mass > 0 else 300.0  # kg/m³
+
+            # Calculate sum of (mass/density) for ALL components
+            sum_mass_over_density = 0.0
+
+            # Add cement
+            if cement_mass > 0:
+                sum_mass_over_density += cement_mass / cement_density
+
+            # Add water
+            if total_water > 0:
+                sum_mass_over_density += total_water / water_density
+
+            # Add aggregates
+            if fine_mass > 0:
+                sum_mass_over_density += fine_mass / fine_density
+            if coarse_mass > 0:
+                sum_mass_over_density += coarse_mass / coarse_density
+
+            # Apply corrected equation if we have valid data
+            if sum_mass_over_density > 0:
+                correction_factor = (1 - air_content) / sum_mass_over_density
+
+                # Validate correction factor
+                import math
+                if math.isnan(correction_factor) or math.isinf(correction_factor):
+                    self.logger.error(f"Invalid correction factor: {correction_factor}")
+                    correction_factor = 1.0  # Use safe default
+
+                self.logger.info(f"🔍 Calculation details:")
+                self.logger.info(f"  - Air content: {air_content:.4f}")
+                self.logger.info(f"  - Cement mass: {cement_mass:.2f} kg/m³")
+                self.logger.info(f"  - Water mass: {total_water:.2f} kg/m³")
+                self.logger.info(f"  - Fine aggregate mass: {fine_mass:.2f} kg/m³")
+                self.logger.info(f"  - Coarse aggregate mass: {coarse_mass:.2f} kg/m³")
+                self.logger.info(f"  - Sum(mass/density): {sum_mass_over_density:.6f}")
+                self.logger.info(f"  - Correction factor: {correction_factor:.6f}")
+
+                if fine_mass > 0:
+                    fine_vf = (fine_mass / fine_density) * correction_factor
+                    # Ensure volume fraction is within valid range [0, 1]
+                    fine_vf = max(0.0, min(1.0, fine_vf))
+                    volume_fractions['fine_aggregate_volume_fraction'] = fine_vf
+                    self.logger.info(f"  → Fine VF = ({fine_mass}/{fine_density}) * {correction_factor:.6f} = {fine_vf:.4f}")
+
+                if coarse_mass > 0:
+                    coarse_vf = (coarse_mass / coarse_density) * correction_factor
+                    # Ensure volume fraction is within valid range [0, 1]
+                    coarse_vf = max(0.0, min(1.0, coarse_vf))
+                    volume_fractions['coarse_aggregate_volume_fraction'] = coarse_vf
+                    self.logger.info(f"  → Coarse VF = ({coarse_mass}/{coarse_density}) * {correction_factor:.6f} = {coarse_vf:.4f}")
         
         return volume_fractions
     

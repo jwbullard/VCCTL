@@ -28,6 +28,7 @@ from app.models.temperature_profile import TemperatureProfileDB
 from app.models.elastic_moduli_operation import ElasticModuliOperation
 from app.models.microstructure_operation import MicrostructureOperation
 from app.models.hydration_operation import HydrationOperation
+from app.models.saved_hydration_operation import SavedHydrationOperation, SavedHydrationOperationCreate, SavedHydrationOperationUpdate, SavedHydrationOperationResponse
 
 # Export all models for easy importing
 __all__ = [
@@ -54,6 +55,7 @@ __all__ = [
     'ElasticModuliOperation',
     'MicrostructureOperation',
     'HydrationOperation',
+    'SavedHydrationOperation',
     
     # Pydantic Create Models
     'CementCreate',
@@ -70,6 +72,7 @@ __all__ = [
     'AggregateSieveCreate',
     'MixDesignCreate',
     'HydrationParameterSetCreate',
+    'SavedHydrationOperationCreate',
     
     # Pydantic Update Models
     'CementUpdate',
@@ -86,6 +89,7 @@ __all__ = [
     'AggregateSieveUpdate',
     'MixDesignUpdate',
     'HydrationParameterSetUpdate',
+    'SavedHydrationOperationUpdate',
     
     # Pydantic Response Models
     'CementResponse',
@@ -102,6 +106,7 @@ __all__ = [
     'AggregateSieveResponse',
     'MixDesignResponse',
     'HydrationParameterSetResponse',
+    'SavedHydrationOperationResponse',
     
     # Enumerations
     'GradingType',
@@ -136,6 +141,7 @@ def get_all_models():
         ElasticModuliOperation,
         MicrostructureOperation,
         HydrationOperation,
+        SavedHydrationOperation,
     ]
 
 
