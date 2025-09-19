@@ -14,7 +14,160 @@
 
 **Status: ELASTIC MODULI CALCULATIONS SUCCESSFULLY RUNNING ✅ - Complete End-to-End Functionality**
 
-## Session Status Update (September 17, 2025 - ELASTIC MODULI COMPLETION SESSION)
+## Session Status Update (September 19, 2025 - ELASTIC VISUALIZATION & GENMIC FIX SESSION)
+
+### **Session Summary:**
+Major session that fixed critical elastic progress tracking issues, resolved application crashes, updated backend JSON formats, implemented elastic results visualization, and fixed genmic command-line arguments. All three operation types (microstructure, hydration, elastic) now have proper JSON progress tracking and elastic results can be viewed through dedicated UI dialogs.
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Fixed Elastic Progress Directory Detection ✅**
+- **Problem**: Elastic progress wasn't updating - stuck at "Process started" at 5% despite JSON updates
+- **Root Cause**: `_get_operation_directory` only worked for database-sourced operations
+- **Solution**: Made directory detection work for all operations regardless of source
+- **Result**: Elastic progress now updates in real-time showing cycles and convergence
+
+#### **2. Resolved Application Crash During Elastic Computation ✅**
+- **Problem**: "Python quit unexpectedly" crash with GTK critical errors and 88MB/min memory growth
+- **Root Cause**: Excessive database writes (every second) even when progress hadn't changed
+- **Solution**: Only update database when progress actually changes (>0.1% threshold)
+- **Result**: Stable operation without crashes or memory leaks
+
+#### **3. Backend JSON Progress Format Updates ✅**
+- **genmic.c**: User updated to use JSON format with steps and percent_complete
+- **elastic.c**: User added convergence-based percent_complete using gradient values
+- **UI Parsers**: Updated to handle new JSON formats for all operation types
+- **Result**: Accurate progress tracking based on actual computation state
+
+#### **4. Elastic Results Visualization Implementation ✅**
+- **Created EffectiveModuliViewer**: Dialog for viewing composite elastic moduli in formatted table
+- **Created ITZAnalysisViewer**: Interactive dialog with data table and matplotlib plotting
+- **Results Panel Integration**: Added buttons for elastic results when elastic operations selected
+- **Nested Operation Support**: Fixed scanning to include elastic operations in hydration folders
+- **Result**: Complete visualization capabilities for elastic calculation outputs
+
+#### **5. Fixed genmic Command-Line Arguments ✅**
+- **Problem**: genmic launched without required -j and -w flags for JSON progress
+- **Solution**: Updated launch command to include: `genmic -j genmic_progress.json -w .`
+- **Result**: Microstructure generation now has proper JSON progress tracking
+
+### **🔧 TECHNICAL IMPLEMENTATION DETAILS:**
+
+#### **File: `src/app/windows/panels/operations_monitoring_panel.py`**
+- **Fixed Directory Detection** (lines 1632-1639): Made `_get_operation_directory` work for all operations
+- **Database Update Optimization** (lines 1848-1853): Added threshold check to prevent excessive writes
+- **JSON Parser Updates**: Modified `_update_microstructure_progress` and `_update_elastic_progress` for new formats
+
+#### **File: `src/app/services/elastic_progress_parser.py`**
+- **Convergence Progress**: Updated to use `percent_complete` field directly from elastic.c
+
+#### **File: `src/app/windows/panels/results_panel.py`**
+- **Nested Operation Scanning** (lines 125-130): Added scanning for elastic operations in hydration folders
+- **Elastic Operation Detection** (lines 473-491): Enhanced `_determine_result_type` for elastic operations
+- **Visualization Buttons** (lines 242-295): Added buttons for EffectiveModuli and ITZ analysis
+
+#### **New Files Created:**
+- **`src/app/windows/dialogs/effective_moduli_viewer.py`**: Complete dialog for viewing EffectiveModuli.csv
+- **`src/app/windows/dialogs/itz_analysis_viewer.py`**: Interactive ITZ analysis with plotting capabilities
+
+#### **File: `src/app/windows/panels/mix_design_panel.py`**
+- **genmic Launch Fix** (lines 3220-3228): Added `-j genmic_progress.json -w .` flags to command
+
+### **📊 CURRENT CAPABILITIES:**
+
+**✅ FULLY WORKING:**
+- **Elastic Progress Tracking**: Real-time updates with convergence-based progress
+- **Application Stability**: No crashes or memory leaks during operations
+- **JSON Progress for All Types**: Microstructure, hydration, and elastic all use JSON
+- **Elastic Results Visualization**: Complete UI for viewing calculation outputs
+- **Nested Operation Support**: Elastic operations visible in Results panel
+
+### **📋 STATUS:**
+
+**✅ COMPLETED IN THIS SESSION:**
+- Fixed elastic progress tracking stuck at 5%
+- Resolved application crashes during computation
+- Implemented elastic results visualization dialogs
+- Fixed genmic command-line arguments
+- Updated UI parsers for new backend JSON formats
+
+**🎯 SYSTEM STATUS:**
+The VCCTL system now has complete elastic moduli functionality with proper progress tracking, stable operation, and comprehensive results visualization. All three operation types use consistent JSON-based progress monitoring.
+
+## Session Status Update (September 18, 2025 - ELASTIC PROGRESS TRACKING SESSION)
+
+### **Session Summary:**
+Completed standardization of JSON progress tracking for all operations and fixed the elastic moduli progress tracking issue. The problem was that elastic operations weren't showing real-time progress information from their JSON files in the Operations panel "Current Step" field. Successfully diagnosed and fixed the operation type mapping issue that was preventing elastic progress updates.
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Standardized JSON Progress Tracking for All Operations ✅**
+- **Goal**: Eliminate time-based estimation in favor of JSON progress tracking across all operation types
+- **Implementation**: Removed time-based fallback code and implemented dedicated progress parsers for each operation type
+- **Result**: All operations now use consistent JSON-based progress monitoring without time-based estimation interference
+
+#### **2. Fixed Elastic Progress Tracking Operation Type Mismatch ✅**
+- **Problem**: Elastic operations showed "Initializing simulation" instead of real-time cycle information from JSON files
+- **Root Cause**: Operations monitoring panel was checking for `OperationType.ELASTIC_MODULI_CALCULATION` but database operations have type `"ELASTIC_MODULI"` which gets mapped to the local enum through type_mapping
+- **Solution**: Corrected the operation type comparison to use the properly mapped enum value
+- **Result**: Elastic operations now display real-time progress like "Computing elastic moduli - cycle 19/40 (47.5%, gradient: 0.20)"
+
+#### **3. Enhanced Elastic Progress Display with Detailed Information ✅**
+- **Enhanced Current Step Text**: Shows cycle progress, completion percentage, and gradient values from JSON
+- **Real-time Updates**: Progress information updates as the elastic_progress.json file changes
+- **Debug Logging**: Added comprehensive logging to help troubleshoot progress tracking issues
+- **Database Integration**: Progress updates properly save to database for persistence
+
+#### **4. Preserved Existing Progress Tracking Functionality ✅**
+- **Hydration Operations**: Maintained existing progress.json parsing with simulation_time/target_time
+- **Microstructure Operations**: Preserved genmic progress file parsing with PROGRESS format
+- **Type Mapping**: Verified that database operation types correctly map to UI enum values through existing type_mapping logic
+
+### **🔧 TECHNICAL IMPLEMENTATION DETAILS:**
+
+#### **File: `src/app/windows/panels/operations_monitoring_panel.py`**
+- **Removed Time-Based Estimation Fallback** (lines 1712-1736): Eliminated problematic code that was overriding JSON progress
+- **Enhanced `_update_elastic_progress()` Method** (lines 1914-1961):
+  - Added comprehensive debug logging for directory detection and JSON parsing
+  - Enhanced current step descriptions with cycle, percentage, and gradient information
+  - Improved error handling with traceback logging
+- **Implemented Missing Progress Methods**:
+  - **`_update_microstructure_progress()`**: Uses existing genmic progress parsing logic
+  - **`_update_hydration_progress()`**: Parses progress.json with simulation_time/target_time fields
+  - **`_update_generic_progress()`**: Flexible JSON parser for other operation types
+
+#### **Operation Type Mapping Verification:**
+- **Database Values**: `"ELASTIC_MODULI"`, `"HYDRATION"`, `"microstructure_generation"`
+- **UI Enum Mapping**: Database types automatically convert to local enum values via type_mapping
+- **Comparison Logic**: Uses mapped enum values for consistent operation type detection
+
+### **📊 CURRENT CAPABILITIES:**
+
+**✅ WORKING:**
+- **Elastic Progress Tracking**: Real-time cycle information, progress percentage, and gradient display
+- **JSON Progress Architecture**: All operations use JSON-based progress monitoring
+- **Nested Operation Directory Detection**: Correctly finds elastic operations in hydration folders
+- **Enhanced Debug Logging**: Comprehensive logging for troubleshooting progress issues
+- **Database Persistence**: All progress updates properly save to database
+
+**🎯 EXPECTED RESULTS:**
+When elastic operations run, the Current Step field should display:
+- **Running**: "Computing elastic moduli - cycle X/40 (Y.Z%, gradient: N.NN)"
+- **Complete**: "Elastic calculation complete - 40/40 cycles (100%)"
+
+### **📋 REMAINING TODO ITEMS:**
+
+**⏳ PENDING TASKS:**
+- **Add elastic results visualization to Results panel** - Enable viewing of EffectiveModuli.dat and related output files
+- **Implement elastic operation completion detection** - Automatic status updates when calculations finish
+
+### **🧪 TESTING STATUS:**
+- **Code Syntax**: Verified - no compilation errors
+- **Directory Detection**: Tested - correctly finds `Operations/HY-Elk/Elastic-HY-Elk-Final/`
+- **JSON File Access**: Verified - elastic_progress.json exists and contains proper data
+- **User Testing**: Pending - requires application restart to test operation type fix
+
+## Previous Session Status Update (September 17, 2025 - ELASTIC MODULI COMPLETION SESSION)
 
 ### **Session Summary:**
 Breakthrough session that achieved the final milestone for elastic moduli calculations. Successfully resolved all remaining input file generation issues, fixed database unique constraint problems, and completed the integration between VCCTL UI and elastic.c backend. Multiple successful elastic moduli calculations have been verified, marking the completion of a fully working elastic moduli system.

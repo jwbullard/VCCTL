@@ -1605,36 +1605,49 @@ class OperationsMonitoringPanel(Gtk.Box):
             is_database_sourced = hasattr(operation, 'metadata') and operation.metadata.get('source') == 'database'
             has_process_handle = hasattr(operation, 'process') and operation.process is not None
             
-            # For database-sourced operations, check if they have stdout files to monitor
-            can_monitor_stdout = False
-            if is_database_sourced and operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
-                # Check if stdout files exist for this operation
-                try:
-                    import glob
-                    import os
-                    operation_name = operation.name
-                    if operation_name.endswith(" Microstructure"):
-                        base_name = operation_name.replace(" Microstructure", "")
-                        # Phase 2: Clean naming - operation name is already clean, use as-is
-                        folder_name = base_name
-                    else:
-                        # For non-microstructure operations, use name as-is
-                        folder_name = operation_name
-                        
-                        operations_dir = os.path.join("Operations", folder_name)
-                        if os.path.exists(operations_dir):
-                            # Check for both stdout files and progress files
-                            stdout_files = glob.glob(os.path.join(operations_dir, "proc_*_stdout.txt"))
-                            progress_file = os.path.join(operations_dir, "genmic_progress.txt")
-                            
-                            if stdout_files or os.path.exists(progress_file):
-                                can_monitor_stdout = True
-                except Exception as e:
-                    pass
-            
-            # Only skip if database-sourced AND no process handle AND no stdout files to monitor
-            if is_database_sourced and not has_process_handle and not can_monitor_stdout:
+            # For database-sourced operations, check if they have files to monitor
+            can_monitor_progress = False
+            if is_database_sourced:
+                self.logger.debug(f"Checking monitoring capability for database operation: {operation.name}, type: {operation.operation_type}")
+                if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
+                    # Check if stdout files exist for this operation
+                    try:
+                        import glob
+                        import os
+                        operation_name = operation.name
+                        if operation_name.endswith(" Microstructure"):
+                            base_name = operation_name.replace(" Microstructure", "")
+                            # Phase 2: Clean naming - operation name is already clean, use as-is
+                            folder_name = base_name
+                        else:
+                            # For non-microstructure operations, use name as-is
+                            folder_name = operation_name
+
+                            operations_dir = os.path.join("Operations", folder_name)
+                            if os.path.exists(operations_dir):
+                                # Check for both stdout files and progress files
+                                stdout_files = glob.glob(os.path.join(operations_dir, "proc_*_stdout.txt"))
+                                progress_file = os.path.join(operations_dir, "genmic_progress.txt")
+
+                                if stdout_files or os.path.exists(progress_file):
+                                    can_monitor_progress = True
+                    except Exception as e:
+                        pass
+                elif operation.operation_type == OperationType.ELASTIC_MODULI_CALCULATION:
+                    # Elastic operations should always be monitored for progress updates
+                    can_monitor_progress = True
+                    self.logger.debug(f"Elastic operation {operation.name} will be monitored for progress")
+                elif operation.operation_type == OperationType.HYDRATION_SIMULATION:
+                    # Hydration operations should always be monitored for progress updates
+                    can_monitor_progress = True
+                    self.logger.debug(f"Hydration operation {operation.name} will be monitored for progress")
+
+            # Only skip if database-sourced AND no process handle AND no progress monitoring capability
+            if is_database_sourced and not has_process_handle and not can_monitor_progress:
+                self.logger.debug(f"Skipping monitoring for {operation.name}: db_sourced={is_database_sourced}, has_process={has_process_handle}, can_monitor={can_monitor_progress}")
                 continue
+            else:
+                self.logger.debug(f"Will monitor {operation.name}: db_sourced={is_database_sourced}, has_process={has_process_handle}, can_monitor={can_monitor_progress}")
                 
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
                 # Parse stdout for GENMIC_PROGRESS messages (for genmic operations)
@@ -1696,66 +1709,22 @@ class OperationsMonitoringPanel(Gtk.Box):
                         operation.cpu_usage = process_info['cpu_percent']
                         operation.memory_usage = process_info['memory_mb']
                     
-                    # Update progress based on elapsed time (time-based estimation)
-                    # Skip ALL time-based estimation for microstructure operations (using progress messages)
+                    # Update progress based on operation type - All operations use JSON progress tracking
+                    self.logger.debug(f"Updating progress for {operation.name}, type: {operation.operation_type}, status: {operation.status}")
                     if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
-                        # Microstructure operations use genmic progress messages - skip time-based estimation
-                        pass
-                    elif operation.start_time and operation.estimated_duration:
-                        elapsed = current_time - operation.start_time
-                        # Progress based on estimated duration, capped at 95% until completion
-                        time_progress = min(0.95, elapsed.total_seconds() / operation.estimated_duration.total_seconds())
-                        operation.progress = max(operation.progress, time_progress)
-                        
-                        # Update step-based progress and current step description
-                        if time_progress < 0.15:
-                            step_desc = "Initializing simulation"
-                            operation.completed_steps = 0
-                        elif time_progress < 0.35:
-                            step_desc = "Parsing input and setting up geometry"
-                            operation.completed_steps = 1
-                        elif time_progress < 0.85:
-                            step_desc = "Generating 3D microstructure"
-                            operation.completed_steps = 2
-                        else:
-                            step_desc = "Finalizing output files"
-                            operation.completed_steps = 3
-                            
-                        # Combine step description with resource usage
-                        if process_info:
-                            operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
-                        else:
-                            operation.current_step = f"{step_desc}..."
-                        
-                        # Save progress updates to database
-                        self._update_operation_in_database(operation)
-                            
-                    elif operation.start_time:
-                        # If no estimated duration, use a simple time-based progress (slower)
-                        elapsed = current_time - operation.start_time
-                        # Assume most operations take around 5 minutes, progress more slowly
-                        time_progress = min(0.90, elapsed.total_seconds() / (5 * 60))
-                        operation.progress = max(operation.progress, time_progress)
-                        
-                        # Simple step progression
-                        if time_progress < 0.25:
-                            step_desc = "Processing"
-                            operation.completed_steps = 1
-                        elif time_progress < 0.75:
-                            step_desc = "Generating microstructure"
-                            operation.completed_steps = 2
-                        else:
-                            step_desc = "Completing"
-                            operation.completed_steps = 3
-                            
-                        # Combine step description with resource usage
-                        if process_info:
-                            operation.current_step = f"{step_desc} (CPU: {operation.cpu_usage:.1f}%, MEM: {operation.memory_usage:.0f}MB)"
-                        else:
-                            operation.current_step = f"{step_desc}..."
-                        
-                        # Save progress updates to database
-                        self._update_operation_in_database(operation)
+                        # Microstructure operations use genmic progress messages from stdout
+                        self.logger.debug(f"Calling _update_microstructure_progress for {operation.name}")
+                        self._update_microstructure_progress(operation)
+                    elif operation.operation_type == OperationType.ELASTIC_MODULI_CALCULATION:
+                        # Elastic operations use elastic_progress.json files
+                        self.logger.debug(f"Calling _update_elastic_progress for {operation.name}")
+                        self._update_elastic_progress(operation)
+                    elif operation.operation_type == OperationType.HYDRATION_SIMULATION:
+                        # Hydration operations use progress.json files
+                        self._update_hydration_progress(operation)
+                    else:
+                        # Other operation types use generic JSON progress monitoring
+                        self._update_generic_progress(operation)
         
         # Synchronize with active hydration simulations to get detailed progress
         self._sync_with_active_hydration_simulations()
@@ -1957,6 +1926,289 @@ class OperationsMonitoringPanel(Gtk.Box):
         except Exception as e:
             self.logger.warning(f"Error parsing simple progress: {e}")
             return False
+
+    def _update_elastic_progress(self, operation) -> None:
+        """Update progress for elastic moduli calculations using JSON progress file."""
+        try:
+            # Import the elastic progress parser
+            from app.services.elastic_progress_parser import ElasticProgressParser
+
+            if not hasattr(self, '_elastic_parser'):
+                self._elastic_parser = ElasticProgressParser()
+
+            # Determine operation directory
+            operation_dir = self._get_operation_directory(operation)
+            self.logger.debug(f"DEBUG Elastic Progress: Operation '{operation.name}' directory: {operation_dir}")
+
+            if not operation_dir:
+                self.logger.debug(f"DEBUG Elastic Progress: No directory found for operation '{operation.name}'")
+                return
+
+            # Monitor progress file
+            progress = self._elastic_parser.monitor_progress_file(operation_dir, operation.name)
+            self.logger.debug(f"DEBUG Elastic Progress: Parsed progress for '{operation.name}': {progress}")
+
+            if progress:
+                # Update operation progress
+                old_progress = operation.progress
+                old_step = operation.current_step
+                operation.progress = progress.percent_complete / 100.0
+
+                # Update current step description with detailed information
+                if progress.is_complete:
+                    operation.current_step = f"Elastic calculation complete - {progress.cycle}/{progress.max_cycle} cycles (100%)"
+                else:
+                    # Show quantitative convergence progress rather than just cycle count
+                    if hasattr(progress, 'gradient') and progress.gradient > 0:
+                        operation.current_step = f"Computing elastic moduli - {progress.percent_complete:.1f}% converged (cycle {progress.cycle}/{progress.max_cycle}, gradient: {progress.gradient:.2f})"
+                    else:
+                        operation.current_step = f"Computing elastic moduli - {progress.percent_complete:.1f}% converged (cycle {progress.cycle}/{progress.max_cycle})"
+
+                # Update completed steps based on progress
+                if operation.total_steps > 0:
+                    operation.completed_steps = int(operation.progress * operation.total_steps)
+
+                # Only update database if progress or step actually changed (avoid excessive DB writes)
+                progress_changed = abs(operation.progress - old_progress) > 0.001  # 0.1% threshold
+                step_changed = operation.current_step != old_step
+
+                if progress_changed or step_changed:
+                    self.logger.info(f"Updated elastic progress for {operation.name}: {progress.percent_complete:.1f}% (was {old_progress*100:.1f}%)")
+                    self.logger.info(f"Current step updated to: {operation.current_step}")
+
+                    # Update database only when necessary
+                    self._update_operation_in_database(operation)
+                else:
+                    self.logger.debug(f"No significant change in progress for {operation.name}, skipping database update")
+            else:
+                self.logger.info(f"DEBUG Elastic Progress: No progress data found for '{operation.name}'")
+
+        except Exception as e:
+            self.logger.error(f"Error updating elastic progress for {operation.name}: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+
+    def _update_microstructure_progress(self, operation) -> None:
+        """Update progress for microstructure generation using JSON progress files."""
+        try:
+            # Determine operation directory
+            operation_dir = self._get_operation_directory(operation)
+            self.logger.debug(f"DEBUG Microstructure Progress: Operation '{operation.name}' directory: {operation_dir}")
+
+            if not operation_dir:
+                self.logger.debug(f"DEBUG Microstructure Progress: No directory found for operation '{operation.name}'")
+                return
+
+            # Look for progress.json file (new JSON format)
+            import os
+            import json
+            progress_file = os.path.join(operation_dir, "progress.json")
+
+            if os.path.exists(progress_file):
+                try:
+                    with open(progress_file, 'r') as f:
+                        content = f.read().strip()
+
+                    # Handle "json " prefix format
+                    if content.startswith("json "):
+                        json_content = content[5:]  # Remove "json " prefix
+                    else:
+                        json_content = content
+
+                    data = json.loads(json_content)
+
+                    # Extract progress information from genmic format
+                    if 'percent_complete' in data and 'step' in data:
+                        old_progress = operation.progress
+                        old_step = operation.current_step
+
+                        progress = data['percent_complete'] / 100.0
+                        step_description = data['step']
+
+                        operation.progress = progress
+                        operation.current_step = f"Microstructure: {step_description}"
+
+                        # Update completed steps based on progress
+                        if operation.total_steps > 0:
+                            operation.completed_steps = int(operation.progress * operation.total_steps)
+
+                        # Check for completion
+                        if progress >= 1.0:
+                            from datetime import datetime
+                            operation.status = OperationStatus.COMPLETED
+                            operation.end_time = datetime.now()
+                            operation.current_step = "Microstructure generation complete"
+
+                        # Only update database if progress or step actually changed
+                        progress_changed = abs(operation.progress - old_progress) > 0.001
+                        step_changed = operation.current_step != old_step
+
+                        if progress_changed or step_changed:
+                            self.logger.info(f"Updated microstructure progress for {operation.name}: {progress*100:.1f}% - {step_description}")
+                            self._update_operation_in_database(operation)
+                        else:
+                            self.logger.debug(f"No significant change in microstructure progress for {operation.name}")
+
+                except (json.JSONDecodeError, KeyError) as e:
+                    self.logger.debug(f"Could not parse microstructure progress JSON: {e}")
+                    # Fall back to old text format parsing if JSON parsing fails
+                    self._parse_operation_stdout(operation)
+            else:
+                # Fall back to old progress file parsing if JSON doesn't exist
+                self.logger.debug(f"No progress.json found, trying old format for {operation.name}")
+                self._parse_operation_stdout(operation)
+
+        except Exception as e:
+            self.logger.error(f"Error updating microstructure progress for {operation.name}: {e}")
+
+    def _update_hydration_progress(self, operation) -> None:
+        """Update progress for hydration simulation using progress.json files."""
+        try:
+            # Determine operation directory
+            operation_dir = self._get_operation_directory(operation)
+            if not operation_dir:
+                return
+
+            # Look for progress.json file
+            import os
+            import json
+            progress_file = os.path.join(operation_dir, "progress.json")
+
+            if os.path.exists(progress_file):
+                with open(progress_file, 'r') as f:
+                    data = json.load(f)
+
+                # Extract progress information
+                if 'simulation_time' in data and 'target_time' in data:
+                    current_time = data['simulation_time']
+                    target_time = data['target_time']
+
+                    if target_time > 0:
+                        progress = min(1.0, current_time / target_time)
+                        operation.progress = progress
+
+                        # Update current step description
+                        if progress >= 1.0:
+                            operation.current_step = f"Hydration complete ({current_time:.2f}h of {target_time:.2f}h)"
+                        else:
+                            operation.current_step = f"Hydrating ({current_time:.2f}h of {target_time:.2f}h)"
+
+                        # Update completed steps based on progress
+                        if operation.total_steps > 0:
+                            operation.completed_steps = int(operation.progress * operation.total_steps)
+
+                        self.logger.debug(f"Updated hydration progress for {operation.name}: {progress*100:.1f}%")
+
+        except Exception as e:
+            self.logger.error(f"Error updating hydration progress for {operation.name}: {e}")
+
+    def _update_generic_progress(self, operation) -> None:
+        """Update progress for generic operations using JSON progress files."""
+        try:
+            # Determine operation directory
+            operation_dir = self._get_operation_directory(operation)
+            if not operation_dir:
+                return
+
+            # Look for common progress file names
+            import os
+            import json
+
+            progress_files = ["progress.json", "operation_progress.json", "status.json"]
+
+            for progress_filename in progress_files:
+                progress_file = os.path.join(operation_dir, progress_filename)
+
+                if os.path.exists(progress_file):
+                    try:
+                        with open(progress_file, 'r') as f:
+                            data = json.load(f)
+
+                        # Try to extract progress from common field names
+                        progress = None
+                        current_step = None
+
+                        # Common progress field names
+                        for progress_field in ['progress', 'percent_complete', 'completion']:
+                            if progress_field in data:
+                                progress = float(data[progress_field])
+                                if progress > 1.0:  # Convert percentage to fraction
+                                    progress /= 100.0
+                                break
+
+                        # Common step field names
+                        for step_field in ['current_step', 'status', 'message', 'description']:
+                            if step_field in data:
+                                current_step = str(data[step_field])
+                                break
+
+                        # Update operation if we found progress information
+                        if progress is not None:
+                            operation.progress = min(1.0, max(0.0, progress))
+
+                            if current_step:
+                                operation.current_step = current_step
+                            else:
+                                operation.current_step = f"Processing ({progress*100:.1f}% complete)"
+
+                            # Update completed steps based on progress
+                            if operation.total_steps > 0:
+                                operation.completed_steps = int(operation.progress * operation.total_steps)
+
+                            self.logger.debug(f"Updated generic progress for {operation.name}: {progress*100:.1f}%")
+                            break
+
+                    except (json.JSONDecodeError, ValueError, KeyError) as e:
+                        self.logger.debug(f"Could not parse progress from {progress_filename}: {e}")
+                        continue
+
+        except Exception as e:
+            self.logger.error(f"Error updating generic progress for {operation.name}: {e}")
+
+    def _get_operation_directory(self, operation) -> Optional[str]:
+        """Get the directory path for an operation."""
+        try:
+            operation_name = operation.name
+            import os
+
+            # First, try to find the operation directory regardless of source
+            # Check if it's a nested elastic operation
+            if operation_name.startswith('Elastic-'):
+                # Look for nested structure: Operations/HydrationName/ElasticName/
+                operations_base = "Operations"
+                for parent_dir in os.listdir(operations_base):
+                    parent_path = os.path.join(operations_base, parent_dir)
+                    if os.path.isdir(parent_path):
+                        elastic_path = os.path.join(parent_path, operation_name)
+                        if os.path.exists(elastic_path):
+                            self.logger.debug(f"Found nested elastic directory: {elastic_path}")
+                            return elastic_path
+
+            # Check direct operation directory
+            direct_path = os.path.join("Operations", operation_name)
+            if os.path.exists(direct_path):
+                self.logger.debug(f"Found direct operation directory: {direct_path}")
+                return direct_path
+
+            # For process operations, try working directory if available
+            if hasattr(operation, 'process') and hasattr(operation, 'working_dir'):
+                if os.path.exists(operation.working_dir):
+                    self.logger.debug(f"Using process working directory: {operation.working_dir}")
+                    return operation.working_dir
+
+            # Try metadata directory if available
+            if hasattr(operation, 'metadata') and operation.metadata.get('output_directory'):
+                meta_dir = operation.metadata['output_directory']
+                if os.path.exists(meta_dir):
+                    self.logger.debug(f"Using metadata directory: {meta_dir}")
+                    return meta_dir
+
+            self.logger.debug(f"No directory found for operation {operation_name}")
+            return None
+
+        except Exception as e:
+            self.logger.error(f"Error getting operation directory for {operation.name}: {e}")
+            return None
 
     def _update_operations_list(self) -> None:
         """Update the operations list view efficiently without clearing."""
@@ -4787,15 +5039,18 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Calculate progress and default current step
         progress = 0.0
         current_step = ""
-        
+
         if ui_status == OperationStatus.COMPLETED:
             progress = 1.0
             current_step = "Process completed"
         elif ui_status == OperationStatus.RUNNING:
-            progress = 0.5  # Rough estimate
+            # Use a small initial progress for running operations to indicate they've started
+            progress = 0.05  # 5% - indicates process has started
             # Set a meaningful default step for running operations
             if ui_type == OperationType.HYDRATION_SIMULATION:
                 current_step = "Hydration simulation in progress..."
+            elif ui_type == OperationType.ELASTIC_MODULI_CALCULATION:
+                current_step = "Process started"  # This will be updated by JSON progress tracking
             else:
                 current_step = "Operation in progress..."
         elif ui_status == OperationStatus.PENDING:

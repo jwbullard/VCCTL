@@ -3629,7 +3629,7 @@ class HydrationPanel(Gtk.Box):
                 self._restore_database_modifications(saved_hydration.database_modifications)
 
             # Show success message
-            self._update_status(f"Loaded hydration operation: {saved_hydration.name}", "info", 3)
+            self._update_status(f"Loaded hydration operation: {saved_hydration.name}")
             self.logger.info(f"✅ Successfully loaded saved hydration operation: {saved_hydration.name}")
 
         except Exception as e:
@@ -3681,6 +3681,28 @@ class HydrationPanel(Gtk.Box):
         try:
             self.logger.debug("Restoring curing conditions...")
 
+            # Restore initial temperature
+            if 'initial_temperature_celsius' in curing_conditions:
+                self.initial_temp_spin.set_value(curing_conditions['initial_temperature_celsius'])
+
+            # Restore thermal mode
+            if 'thermal_mode' in curing_conditions:
+                thermal_mode = curing_conditions['thermal_mode']
+                if thermal_mode == 'isothermal':
+                    self.isothermal_radio.set_active(True)
+                elif thermal_mode == 'adiabatic':
+                    self.adiabatic_radio.set_active(True)
+                elif thermal_mode == 'temperature_profile':
+                    self.temperature_profile_radio.set_active(True)
+
+            # Restore moisture mode
+            if 'moisture_mode' in curing_conditions:
+                moisture_mode = curing_conditions['moisture_mode']
+                if moisture_mode == 'saturated':
+                    self.saturated_radio.set_active(True)
+                else:  # sealed
+                    self.sealed_radio.set_active(True)
+
             # Restore temperature profile if present
             if 'temperature_profile' in curing_conditions:
                 profile_data = curing_conditions['temperature_profile']
@@ -3699,6 +3721,23 @@ class HydrationPanel(Gtk.Box):
                     )
                     self._update_profile_display()
                     self.logger.debug(f"Restored temperature profile: {self.current_profile.name}")
+
+            # Also check for temperature profile data in alternate format
+            elif 'temperature_profile_data' in curing_conditions:
+                profile_data = curing_conditions['temperature_profile_data']
+                if profile_data:
+                    points = []
+                    for time_hours, temp_celsius in profile_data:
+                        points.append(TemperaturePoint(time_hours, temp_celsius))
+
+                    self.current_profile = TemperatureProfile(
+                        name='Restored Profile',
+                        description='Restored from saved operation',
+                        points=points
+                    )
+                    self._update_profile_display()
+
+            self.logger.debug("Curing conditions restored successfully")
 
         except Exception as e:
             self.logger.error(f"Error restoring curing conditions: {e}")
@@ -3726,18 +3765,60 @@ class HydrationPanel(Gtk.Box):
             if 'c3a_fraction' in advanced_settings:
                 self.c3a_fraction_spin.set_value(advanced_settings['c3a_fraction'])
 
-            # Restore formation flags
-            if 'ettringite_formation' in advanced_settings:
-                self.ettringite_check.set_active(advanced_settings['ettringite_formation'])
+            # Restore CSH seeds
+            if 'csh_seeds' in advanced_settings:
+                self.csh_seeds_spin.set_value(advanced_settings['csh_seeds'])
 
-            if 'csh2_formation' in advanced_settings:
+            # Restore alpha max
+            if 'alpha_max' in advanced_settings:
+                self.alpha_max_spin.set_value(advanced_settings['alpha_max'])
+
+            # Restore activation energies
+            if 'e_act_cement' in advanced_settings:
+                self.e_act_spin.set_value(advanced_settings['e_act_cement'])
+
+            if 'e_act_pozzolan' in advanced_settings:
+                self.e_act_pozz_spin.set_value(advanced_settings['e_act_pozzolan'])
+
+            if 'e_act_slag' in advanced_settings:
+                self.e_act_slag_spin.set_value(advanced_settings['e_act_slag'])
+
+            # Restore output frequencies
+            if 'burn_frequency' in advanced_settings:
+                self.burn_freq_spin.set_value(advanced_settings['burn_frequency'])
+
+            if 'setting_frequency' in advanced_settings:
+                self.set_freq_spin.set_value(advanced_settings['setting_frequency'])
+
+            if 'physical_frequency' in advanced_settings:
+                self.phyd_freq_spin.set_value(advanced_settings['physical_frequency'])
+
+            if 'movie_frequency' in advanced_settings:
+                self.movie_freq_spin.set_value(advanced_settings['movie_frequency'])
+
+            # Restore output settings
+            if 'save_interval_hours' in advanced_settings:
+                self.save_interval_spin.set_value(advanced_settings['save_interval_hours'])
+
+            # Restore formation flags (converting from int to bool if needed)
+            if 'csh2_flag' in advanced_settings:
+                self.csh2_flag_check.set_active(bool(advanced_settings['csh2_flag']))
+            elif 'csh2_formation' in advanced_settings:
                 self.csh2_flag_check.set_active(advanced_settings['csh2_formation'])
 
-            if 'ch_formation' in advanced_settings:
+            if 'ch_flag' in advanced_settings:
+                self.ch_flag_check.set_active(bool(advanced_settings['ch_flag']))
+            elif 'ch_formation' in advanced_settings:
                 self.ch_flag_check.set_active(advanced_settings['ch_formation'])
 
-            if 'ph_computation' in advanced_settings:
+            if 'ph_active' in advanced_settings:
+                self.ph_active_check.set_active(bool(advanced_settings['ph_active']))
+            elif 'ph_computation' in advanced_settings:
                 self.ph_active_check.set_active(advanced_settings['ph_computation'])
+
+            # Restore ettringite formation
+            if 'ettringite_formation' in advanced_settings:
+                self.ettringite_check.set_active(advanced_settings['ettringite_formation'])
 
             # Restore random seed
             if 'random_seed' in advanced_settings:

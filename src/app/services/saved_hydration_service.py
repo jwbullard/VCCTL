@@ -25,13 +25,13 @@ class SavedHydrationOperationService(BaseService):
     """Service for managing saved hydration operations."""
 
     def __init__(self, database_service: DatabaseService):
-        super().__init__(database_service)
+        super().__init__(SavedHydrationOperation, database_service)
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def create(self, hydration_data: SavedHydrationOperationCreate) -> SavedHydrationOperation:
         """Create a new saved hydration operation."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 saved_hydration = SavedHydrationOperation(**hydration_data.model_dump())
                 session.add(saved_hydration)
                 session.commit()
@@ -50,7 +50,7 @@ class SavedHydrationOperationService(BaseService):
     def get_all(self, include_templates: bool = True) -> List[SavedHydrationOperation]:
         """Get all saved hydration operations."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 query = session.query(SavedHydrationOperation)
                 if not include_templates:
                     query = query.filter(SavedHydrationOperation.is_template == False)
@@ -64,7 +64,7 @@ class SavedHydrationOperationService(BaseService):
     def get_by_id(self, hydration_id: int) -> Optional[SavedHydrationOperation]:
         """Get a saved hydration operation by ID."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 return session.query(SavedHydrationOperation).filter(
                     SavedHydrationOperation.id == hydration_id
                 ).first()
@@ -76,7 +76,7 @@ class SavedHydrationOperationService(BaseService):
     def get_by_name(self, name: str) -> Optional[SavedHydrationOperation]:
         """Get a saved hydration operation by name."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 return session.query(SavedHydrationOperation).filter(
                     SavedHydrationOperation.name == name
                 ).first()
@@ -88,7 +88,7 @@ class SavedHydrationOperationService(BaseService):
     def update(self, hydration_id: int, hydration_data: SavedHydrationOperationUpdate) -> Optional[SavedHydrationOperation]:
         """Update an existing saved hydration operation."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 saved_hydration = session.query(SavedHydrationOperation).filter(
                     SavedHydrationOperation.id == hydration_id
                 ).first()
@@ -118,7 +118,7 @@ class SavedHydrationOperationService(BaseService):
     def delete(self, hydration_id: int) -> bool:
         """Delete a saved hydration operation."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 saved_hydration = session.query(SavedHydrationOperation).filter(
                     SavedHydrationOperation.id == hydration_id
                 ).first()
@@ -139,7 +139,7 @@ class SavedHydrationOperationService(BaseService):
     def delete_by_name(self, name: str) -> bool:
         """Delete a saved hydration operation by name."""
         try:
-            with self.database_service.get_session() as session:
+            with self.db_service.get_session() as session:
                 saved_hydration = session.query(SavedHydrationOperation).filter(
                     SavedHydrationOperation.name == name
                 ).first()

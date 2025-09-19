@@ -1,5 +1,6 @@
 /******************************************************
  *
+ *
  * Program genmic.c to generate three-dimensional cement
  * and gypsum particles in a 3-D box with periodic boundaries,
  * and optionally to distribute clinker phases within the
@@ -20,6 +21,7 @@
  *
  *******************************************************/
 #include "include/vcctl.h"
+#include <getopt.h>
 #include <math.h>
 #include <setjmp.h>
 #include <stdio.h>
@@ -27,10 +29,21 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef _WIN32
+#define PATH_SEPARATOR "\\"
+#else
+#define PATH_SEPARATOR "/"
+#endif
+
 /* Global variables for distrib3d return address workaround */
 jmp_buf distrib3d_jmpbuf;
 int distrib3d_success = 0;
 FILE *ProgressFile;
+
+/* Command line argument data */
+int Verbose_flag;
+char ProgressFileName[500];
+char WorkingDirectory[500];
 
 /* #define DEBUG */
 
@@ -433,7 +446,8 @@ char *rfc8601_timespec(struct timespec *tv);
  *    Function declarations for distrib3d function
  ***/
 
-void checkargs(int argc, char *argv[]);
+int checkargs(int argc, char **argv);
+void printHelp(void);
 int maketemp(int size);
 void phcount(void);
 int surfpix(int xin, int yin, int zin);
@@ -456,10 +470,11 @@ int main(int argc, char *argv[]) {
   int fadchoice;
   int nseed;
   char instring[MAXSTRING];
-  char *rfc8601;
-  struct tm *local_time;
+  char *rfc8601, *name, *newstring;
   time_t current_time;
   clock_t begin, end;
+  struct tm *local_time;
+  struct timespec tv;
   double time_spent = 0.0;
   int ig, jg, kg;
 
@@ -524,6 +539,23 @@ int main(int argc, char *argv[]) {
    *    Present menu and execute user choice
    ***/
 
+  ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
+  if (!ProgressFile) {
+    freegenmic();
+    bailout("genmic", "Could not open progress log file");
+  }
+  fprintf(ProgressFile, "json {");
+  fprintf(ProgressFile, "\"step\": \"Initializing\", \"percent_complete\": 1,");
+  fprintf(ProgressFile, " \"timestamp\": ");
+
+  if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+    fprintf(stderr, "\nERROR: Error clock_gettime");
+  }
+
+  rfc8601 = rfc8601_timespec(&tv);
+  fprintf(ProgressFile, "\"%s\"}", rfc8601);
+  fclose(ProgressFile);
+
   do {
     fprintf(Logfile, "\nInput User Choice");
     fprintf(Logfile, "\n  %d) Exit", EXIT);
@@ -571,16 +603,43 @@ int main(int argc, char *argv[]) {
         }
       }
 
-      ProgressFile = filehandler("genmic", "genmic_progress.txt", "WRITE");
+      ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
       if (!ProgressFile) {
         freegenmic();
         bailout("genmic", "Could not open progress log file");
       }
-      fprintf(ProgressFile, "PROGRESS: 0.05 System size configured");
-      fflush(ProgressFile);
+      fprintf(ProgressFile, "json {");
+      fprintf(ProgressFile,
+              "\"step\": \"Allocating size\", \"percent_complete\": 5,");
+      fprintf(ProgressFile, " \"timestamp\": ");
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(ProgressFile, "\"%s\"}", rfc8601);
       fclose(ProgressFile);
+      free(rfc8601);
       break;
     case ADDPART:
+      ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
+      if (!ProgressFile) {
+        freegenmic();
+        bailout("genmic", "Could not open progress log file");
+      }
+      fprintf(ProgressFile, "json {");
+      fprintf(ProgressFile,
+              "\"step\": \"Adding particles\", \"percent_complete\": 50,");
+      fprintf(ProgressFile, " \"timestamp\": ");
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(ProgressFile, "\"%s\"}", rfc8601);
+      fclose(ProgressFile);
       create();
       break;
     case FLOCC:
@@ -597,20 +656,20 @@ int main(int argc, char *argv[]) {
       break;
     case ADDAGG:
       Simwall = 1;
-      Wallpos = (int)(Xsyssize / 2);
-      for (kg = 0; kg < Zsyssize; kg++) {
-        for (jg = 0; jg < Ysyssize; jg++) {
-          Cement.val[getInt3dindex(Cement, Wallpos, jg, kg)] = TMPAGGID;
-          Cemreal.val[getInt3dindex(Cemreal, Wallpos, jg, kg)] = INERTAGG;
-          Cement.val[getInt3dindex(Cement, Wallpos - 1, jg, kg)] = TMPAGGID;
-          Cemreal.val[getInt3dindex(Cemreal, Wallpos - 1, jg, kg)] = INERTAGG;
-          if (Xsyssize % 2 != 0) {
-            Cement.val[getInt3dindex(Cement, Wallpos + 1, jg, kg)] = TMPAGGID;
-            Cemreal.val[getInt3dindex(Cemreal, Wallpos + 1, jg, kg)] = INERTAGG;
+      Wallpos = (int)(Zsyssize / 2);
+      for (jg = 0; jg < Ysyssize; jg++) {
+        for (ig = 0; ig < Xsyssize; ig++) {
+          Cement.val[getInt3dindex(Cement, ig, jg, Wallpos)] = TMPAGGID;
+          Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos)] = INERTAGG;
+          Cement.val[getInt3dindex(Cement, ig, jg, Wallpos - 1)] = TMPAGGID;
+          Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos - 1)] = INERTAGG;
+          if (Zsyssize % 2 != 0) {
+            Cement.val[getInt3dindex(Cement, ig, jg, Wallpos + 1)] = TMPAGGID;
+            Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos + 1)] = INERTAGG;
           }
         }
       }
-      Binderpix = (Xsyssize - 1) * Ysyssize * Zsyssize;
+      Binderpix = (Zsyssize - 1) * Ysyssize * Xsyssize;
       break;
     case CONNECTIVITY:
       connect();
@@ -623,16 +682,23 @@ int main(int argc, char *argv[]) {
       }
       break;
     case DISTRIB:
-      ProgressFile = filehandler("genmic", "genmic_progress.txt", "WRITE");
+      ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
       if (!ProgressFile) {
         freegenmic();
         bailout("genmic", "Could not open progress log file");
       }
-      fprintf(ProgressFile, "PROGRESS: 0.65 Distributing phases");
-      fflush(ProgressFile);
+      fprintf(ProgressFile, "json {");
+      fprintf(ProgressFile, "\"step\": \"Distributing clinker phases\", "
+                            "\"percent_complete\": 65,");
+      fprintf(ProgressFile, " \"timestamp\": ");
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(ProgressFile, "\"%s\"}", rfc8601);
       fclose(ProgressFile);
-      /* GODZILLA STOPPED WITH PROGRESS FILE HERE. YANK THE PREVIOUS 8 LINES AND
-       * PASTE EVERYWHERE PROGRESS IS MONITORED */
 
       /* Set up longjmp target for distrib3d return address workaround */
       distrib3d_success = 0;
@@ -684,13 +750,23 @@ int main(int argc, char *argv[]) {
       /* Check to see that the correct number of C3S pixels is there */
       break;
     case OUTPUTMIC:
-      ProgressFile = filehandler("genmic", "genmic_progress.txt", "WRITE");
+      ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
       if (!ProgressFile) {
         freegenmic();
         bailout("genmic", "Could not open progress log file");
       }
-      fprintf(ProgressFile, "PROGRESS: 0.85 Writing output files");
-      fflush(ProgressFile);
+      fprintf(ProgressFile, "json {");
+      fprintf(
+          ProgressFile,
+          "\"step\": \"Writing microstructure\", \"percent_complete\": 95,");
+      fprintf(ProgressFile, " \"timestamp\": ");
+
+      if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+        fprintf(stderr, "\nERROR: Error clock_gettime");
+      }
+
+      rfc8601 = rfc8601_timespec(&tv);
+      fprintf(ProgressFile, "\"%s\"}", rfc8601);
       fclose(ProgressFile);
       outmic();
       break;
@@ -723,13 +799,21 @@ int main(int argc, char *argv[]) {
   fflush(Logfile);
   fclose(Logfile);
 
-  ProgressFile = filehandler("genmic", "genmic_progress.txt", "WRITE");
+  ProgressFile = filehandler("genmic", ProgressFileName, "WRITE");
   if (!ProgressFile) {
     freegenmic();
     bailout("genmic", "Could not open progress log file");
   }
-  fprintf(ProgressFile, "PROGRESS: 1.00 Generation complete");
-  fflush(ProgressFile);
+  fprintf(ProgressFile, "json {");
+  fprintf(ProgressFile, "\"step\": \"Complete\", \"percent_complete\": 100,");
+  fprintf(ProgressFile, " \"timestamp\": ");
+
+  if ((clock_gettime(CLOCK_REALTIME, &tv))) {
+    fprintf(stderr, "\nERROR: Error clock_gettime");
+  }
+
+  rfc8601 = rfc8601_timespec(&tv);
+  fprintf(ProgressFile, "\"%s\"}", rfc8601);
   fclose(ProgressFile);
   freegenmic();
   return (0);
@@ -746,16 +830,114 @@ int main(int argc, char *argv[]) {
  *    Calls:        no routines
  *    Called by:    main program
  ***/
-void checkargs(int argc, char *argv[]) {
-  register unsigned int i;
+int checkargs(int argc, char **argv) {
+  int wellformed = 0; /* 0 = false, 1 = true */
+  char *jsonname, *wdirname, *pfilename, lastchar;
+  char buff[MAXSTRING];
 
-  /* Is verbose output requested? */
+  strcpy(WorkingDirectory, "");
+  strcpy(ProgressFileName, "");
 
-  Verbose = 0;
-  for (i = 1; i < argc; i++) {
-    if ((!strcmp(argv[i], "-v")) || (!strcmp(argv[i], "--verbose")))
-      Verbose = 1;
+  if (argc < 2) {
+    wellformed = 0;
   }
+
+  // Many of the variables here are defined in the getopts.h system header
+  // file Can define more options here if we want
+
+  /* Default verbosity */
+  Verbose_flag = 2;
+
+  static struct option long_opts[] = {
+      /* These options set a flag */
+      {"verbose", no_argument, &Verbose_flag, 3},
+      {"quiet", no_argument, &Verbose_flag, 1},
+      {"silent", no_argument, &Verbose_flag, 0},
+      /* These options don't set a flag */
+      {"json", required_argument, 0, 'j'},
+      {"workdir", required_argument, 0, 'w'},
+      {"help", no_argument, 0, 'h'},
+      {NULL, 0, 0, 0}};
+
+  int opt_char;
+  int option_index;
+
+  while ((opt_char = getopt_long(argc, argv, "j:w:h", long_opts,
+                                 &option_index)) != -1) {
+    switch (opt_char) {
+    case (0):
+      if (long_opts[option_index].flag != 0) {
+        break;
+      }
+    /* -j or --json */
+    case (int)('j'):
+      wellformed = 1;
+      jsonname = optarg;
+      strcpy(ProgressFileName, jsonname);
+      break;
+    // -w or --workdir
+    case (int)('w'):
+      wdirname = optarg;
+      strcpy(WorkingDirectory, wdirname);
+      break;
+    // -h or --help
+    case (int)('h'):
+      wellformed = 0;
+      break;
+    case (int)('?'):
+      wellformed = 0;
+      break;
+    default:
+      wellformed = 0;
+      break;
+    }
+  }
+
+  if (wellformed != 1 || strlen(ProgressFileName) == 0 ||
+      strlen(WorkingDirectory) == 0) {
+    printHelp();
+    return (1);
+  }
+
+  /* Check if working directory ends in the path separator */
+
+  lastchar = WorkingDirectory[strlen(WorkingDirectory) - 1];
+  if (lastchar != PATH_SEPARATOR[0]) {
+    strcat(WorkingDirectory, PATH_SEPARATOR);
+  }
+  sprintf(LogFileName, "%sgenmic.log", WorkingDirectory);
+  strcpy(buff, ProgressFileName);
+  sprintf(ProgressFileName, "%s%s", WorkingDirectory, buff);
+
+  return (0);
+}
+
+/***
+ *    printHelp
+ *
+ *     Prints a usage message for the program
+ *
+ *     Arguments:    none
+ *     Returns:    0 if okay, nonzero otherwise
+ *
+ *    Calls:        no routines
+ *    Called by:    checkargs
+ ***/
+void printHelp(void) {
+  fprintf(stderr, "\n\nUsage: genmic [-h,--help] [-q,--quiet | -s,--silent]\n");
+  fprintf(stderr, "      -j,--json progress.json -w,--workdir "
+                  "working_directory\n\n");
+  fprintf(stderr, "    progress.json is the name of the progress file for UI "
+                  "processing (required)\n");
+  fprintf(stderr, "    working_directory is the path to the folder that will "
+                  "hold all simulation results (required)\n");
+  fprintf(stderr, "Normal mode: Print progress updates to stderr and end point "
+                  "results to stdout\n");
+  fprintf(stderr, "Quiet mode: Print only end point results to stdout, no "
+                  "progress updates to stderr\n");
+  fprintf(stderr, "Silent mode: Suppress all output except critical errors "
+                  "to stderr\n\n");
+  return;
 }
 
 /***

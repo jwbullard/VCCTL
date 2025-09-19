@@ -3218,10 +3218,11 @@ class MixDesignPanel(Gtk.Box):
                         input_content = f.read()
                     
                     # Launch real process operation with clean naming
+                    # Include -j flag for JSON progress tracking and -w for working directory
                     operation_id = operations_panel.start_real_process_operation(
                         name=operation_name,
                         operation_type=OperationType.MICROSTRUCTURE_GENERATION,
-                        command=[genmic_path],
+                        command=[genmic_path, '-j', 'genmic_progress.json', '-w', '.'],
                         working_dir=output_dir,
                         input_data=input_content
                     )

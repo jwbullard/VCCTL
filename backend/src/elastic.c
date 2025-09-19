@@ -107,11 +107,14 @@ char Filesep;
 double **u, **gb, **b, **h;
 double ***Aa, **A, **Vv, ***A1, *K, *G, **Cc;
 double cmod[NSP][6][6], dk[NSP][8][3][8][3];
-double phasemod[NSP][2], prob[NSP], gg = 0.0, gtest = 0.0;
+double phasemod[NSP][2], prob[NSP], gg = 0.0, gginit = 0.0, gtest = 0.0;
+double percent_complete = 0.0;
 short int in[27], jjn[27], kn[27];
 int **ib;
 short int *pix, *part;
 
+double *stressxx, *stressyy, *stresszz, *stressxz, *stressyz, *stressxy;
+double *strainxx, *strainyy, *strainzz, *strainxz, *strainyz, *strainxy;
 double strxx, stryy, strzz, strxz, stryz, strxy;
 double exx, eyy, ezz, exz, eyz, exy;
 double stressall[NSP][16];
@@ -338,6 +341,30 @@ void freeallmem(void) {
     free_irect(ib, Syspix);
   if (pix)
     free_sivector(pix);
+  if (stressxx)
+    free_dvector(stressxx);
+  if (stressyy)
+    free_dvector(stressyy);
+  if (stresszz)
+    free_dvector(stresszz);
+  if (stressxz)
+    free_dvector(stressxz);
+  if (stressyz)
+    free_dvector(stressyz);
+  if (stressxy)
+    free_dvector(stressxy);
+  if (strainxx)
+    free_dvector(strainxx);
+  if (strainyy)
+    free_dvector(strainyy);
+  if (strainzz)
+    free_dvector(strainzz);
+  if (strainxz)
+    free_dvector(strainxz);
+  if (strainyz)
+    free_dvector(strainyz);
+  if (strainxy)
+    free_dvector(strainxy);
   if (part)
     free_sivector(part);
   if (Aa)
@@ -396,14 +423,14 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
             PATH_SEPARATOR[0]);
     Filesep = PATH_SEPARATOR[0];
   }
-  sprintf(Outfilename, "%sEffectiveModuli.dat", Outfolder);
+  sprintf(Outfilename, "%sEffectiveModuli.csv", Outfolder);
   fprintf(Logfile, "\nEffective elastic moduli will be printed to file %s",
           Outfilename);
-  sprintf(PCfilename, "%sPhaseContributions.dat", Outfolder);
+  sprintf(PCfilename, "%sPhaseContributions.csv", Outfolder);
   fprintf(Logfile, "\nRelative phase contributions will be printed to file %s",
           PCfilename);
   if (*doitz) {
-    sprintf(Layerfilename, "%sITZmoduli.dat", Outfolder);
+    sprintf(Layerfilename, "%sITZmoduli.csv", Outfolder);
     fprintf(Logfile, "\nEffective moduli as function of distance normal to");
     fprintf(Logfile, "\n\taggregate surface will be printed to file %s",
             Layerfilename);
@@ -459,8 +486,22 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   ib = irect(Syspix, 27);
   pix = sivector(Syspix);
   part = sivector(Syspix);
+  stressxx = dvector(Syspix);
+  stressyy = dvector(Syspix);
+  stresszz = dvector(Syspix);
+  stressxz = dvector(Syspix);
+  stressyz = dvector(Syspix);
+  stressxy = dvector(Syspix);
+  strainxx = dvector(Syspix);
+  strainyy = dvector(Syspix);
+  strainzz = dvector(Syspix);
+  strainxz = dvector(Syspix);
+  strainyz = dvector(Syspix);
+  strainxy = dvector(Syspix);
 
-  if (!u || !gb || !b || !h || !ib || !pix || !part) {
+  if (!u || !gb || !b || !h || !ib || !pix || !part || !stressxx || !stressyy ||
+      !stresszz || !stressxz || !stressyz || !stressxy || !strainxx ||
+      !strainyy || !strainzz || !strainxz || !strainyz || !strainxy) {
     freeallmem();
     bailout("elastic", "Memory allocation failure");
     fflush(Logfile);
@@ -504,9 +545,8 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   nxy = Xsyssize * Ysyssize;
   for (i = 0; i < Xsyssize; i++) {
     for (j = 0; j < Ysyssize; j++) {
-      m2 = j * Xsyssize;
       for (k = 0; k < Zsyssize; k++) {
-        m = (k * nxy) + m2 + i;
+        m = (k * nxy) + (j * Xsyssize) + i;
         fscanf(infile, "%s", instring);
         oinval = atoi(instring);
         inval = convert_id(oinval, Version);
@@ -521,6 +561,9 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
          ***/
 
         if (inval == INERTAGG) {
+          fprintf(Logfile, "\nINERTAGG (%d) found at (%d,%d,%d)", INERTAGG, i,
+                  j, k);
+          fflush(Logfile);
           foundagg = 1;
 
           /***
@@ -863,7 +906,7 @@ void femat(int nx, int ny, int nz, int ns, int nphase) {
 
   for (j = 1; j <= (ny - 1); j++) {
     for (k = 0; k < (nz - 1); k++) {
-      m = nxy * k + j * nx - 1;
+      m = (nxy * k) + (j * nx) - 1;
       for (nn = 0; nn < 3; nn++) {
         for (mm = 0; mm < 8; mm++) {
           sum = 0.0;
@@ -1222,7 +1265,7 @@ void stress(int nx, int ny, int nz, int ns, int doitz, int micro, int ilast) {
   double uu[8][3];
   double dndx[8], dndy[8], dndz[8], es[6][8][3];
   int nxy, nyz, n1, n2, n3, k, j, i, mm, n8, n;
-  int m;
+  int m, mpix;
   double str11, str12, str13, str22, str23, str33;
   double s11, s12, s13, s22, s23, s33;
 
@@ -1438,6 +1481,19 @@ void stress(int nx, int ny, int nz, int ns, int doitz, int micro, int ilast) {
          *	(see below)
          ***/
 
+        stressxx[m] = str11;
+        stressyy[m] = str22;
+        stresszz[m] = str33;
+        stressxy[m] = str12;
+        stressxz[m] = str13;
+        stressyz[m] = str23;
+        strainxx[m] = s11;
+        strainyy[m] = s22;
+        strainzz[m] = s33;
+        strainxy[m] = s12;
+        strainxz[m] = s13;
+        strainyz[m] = s23;
+
         strxxt += str11;
         stryyt += str22;
         strzzt += str33;
@@ -1568,10 +1624,6 @@ int dembx(int ns, int ldemb, int kkk) {
   int m3, ijk, j, n;
   int m;
 
-  /*
-  printf("In dembx now, ldemb = %d gg = %lf gtest = %lf...\n",ldemb,gg,gtest);
-  fflush(stdout);
-  */
   /*  Initialize the conjugate direction vector on first call to dembx only */
   /*  For calls to dembx after the first, we want to continue using the  */
   /*  value of h determined in the previous call. Of course, if npoints is */
@@ -1922,6 +1974,7 @@ int main(int argc, char *argv[]) {
   int kkk, micro, doitz, nagg1, oval;
   int m, ns, m1, ltot = 0, Lstep, count;
   double utot, x, y, z;
+  double enrgy;
   double bulk, shear, young, pois, save;
   float kk, xj, sum = 0.0;
   char phasename[MAXSTRING];
@@ -1961,9 +2014,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   fprintf(Fprog, "json {");
-  /* fprintf(Fprog, "\"cycle\": %d, \"time_hours\": %.2f,", Icyc, Time_cur);
-  fprintf(Fprog, " \"degree_of_hydration\": %.2f, \"timestamp\": ", Alpha_cur);
-  */
 
   if ((clock_gettime(CLOCK_REALTIME, &tv))) {
     fprintf(stderr, "\nERROR: Error clock_gettime");
@@ -2428,7 +2478,7 @@ int main(int argc, char *argv[]) {
           } else if (k1 >= nz) {
             k1 -= nz;
           }
-          m1 = nxy * k1 + nx * j1 + i1;
+          m1 = (nxy * k1) + (nx * j1) + i1;
           ib[m][n] = m1;
         }
       }
@@ -2593,6 +2643,7 @@ if (doitz) {
     fprintf(Logfile, "\nInitial energy = %lf gg= %lf gtest = %lf", utot, gg,
             gtest);
     fflush(Logfile);
+    gginit = gg;
 
     for (kkk = 0; ((kkk < kmax) && (gg >= gtest)); kkk++) {
 
@@ -2605,7 +2656,10 @@ if (doitz) {
       }
       fprintf(Fprog, "json {");
       fprintf(Fprog, "\"cycle\": %d, \"maxcycle\": %d,", kkk, kmax);
-      fprintf(Fprog, " \"gradient\": %g, \"timestamp\": ", gg);
+      /* percent_complete = 100.0 * (1.0 - (gg - gtest) / (gginit - gtest)); */
+      percent_complete = 100.0 * ((float)(kkk) / (float)(kmax));
+      fprintf(Fprog,
+              " \"percent_complete\": %g, \"timestamp\": ", percent_complete);
 
       if ((clock_gettime(CLOCK_REALTIME, &tv))) {
         fprintf(stderr, "\nERROR: Error clock_gettime");
@@ -2690,108 +2744,134 @@ if (doitz) {
               Outfilename);
     } else {
 
-      fprintf(outfile, "CEMENT PASTE ELASTIC MODULI:\n");
-      fprintf(outfile, "\tbulk_modulus %lf GPa\n", bulk);
-      fprintf(outfile, "\tshear_modulus %lf GPa\n", shear);
-      fprintf(outfile, "\tYoungs_modulus %lf GPa\n", young);
-      fprintf(outfile, "\tPoissons_ratio %lf\n", pois);
+      fprintf(outfile, "paste_bulk_modulus,%lf,GPa", bulk);
+      fprintf(outfile, "\npaste_shear_modulus,%lf,GPa", shear);
+      fprintf(outfile, "\npaste_Youngs_modulus,%lf,GPa", young);
+      fprintf(outfile, "\npaste_Poissons_ratio,%lf", pois);
       fclose(outfile);
     }
 
-    /***
-     *	Compute contribution to the global moduli
-     *	of each phase in the microstructure
-     ***/
-
-    outfile = filehandler("elastic", PCfilename, "WRITE");
+    outfile = filehandler("elastic", "energy.img", "WRITE");
     if (!outfile) {
-      fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
-              PCfilename);
-    }
-    for (i = 0; i < NSP; i++) {
-      if (prob[i] > pthresh) {
-        stressall[i][12] =
-            (stressall[i][0] + stressall[i][1] + stressall[i][2]) /
-            (exx + eyy + ezz);
-        stressall[i][12] /= 3.0;
+      fprintf(stderr, "\n\nWARNING:  Could not open output file energy.img");
+    } else {
 
-        stressall[i][13] = (stressall[i][3] / exy);
-        stressall[i][13] += (stressall[i][4] / exz);
-        stressall[i][13] += (stressall[i][5] / eyz);
-        stressall[i][13] /= 6.0; /* Divide by extra 2.0 because global shear
-                                    strains are doubled */
-
-        stressall[i][14] = (9.0 * stressall[i][12] * stressall[i][13]) /
-                           ((3.0 * stressall[i][12]) + stressall[i][13]);
-
-        stressall[i][15] =
-            ((3.0 * stressall[i][12]) - (2.0 * stressall[i][13])) /
-            (2.0 * ((3.0 * stressall[i][12]) + stressall[i][13]));
-
-        id2phasename(i, phasename);
-        fprintf(Logfile, "\nPhase %s", phasename);
-        fprintf(Logfile, "\n\tVfrac %lf", prob[i]);
-        fprintf(Logfile, "\n\tBulk_Modulus %lf", stressall[i][12]);
-        fprintf(Logfile, "\n\tBulk_Modulus_Fraction %lf",
-                stressall[i][12] / bulk);
-        fprintf(Logfile, "\n\tShear_Modulus %lf", stressall[i][13]);
-        fprintf(Logfile, "\n\tShear_Modulus_Fraction %lf",
-                stressall[i][13] / shear);
-        fprintf(Logfile, "\n\tYoung_Modulus %lf", stressall[i][14]);
-        fprintf(Logfile, "\n\tYoung_Modulus_Fraction %lf\n",
-                stressall[i][14] / young);
-
-        if (outfile != NULL) {
-          fprintf(outfile, "Phase %s\n", phasename);
-          fprintf(outfile, "\tVfrac %lf\n", prob[i]);
-          fprintf(outfile, "\tBulk_Modulus %lf\n", stressall[i][12]);
-          fprintf(outfile, "\tBulk_Modulus_Fraction %lf\n",
-                  stressall[i][12] / bulk);
-          fprintf(outfile, "\tShear_Modulus %lf\n", stressall[i][13]);
-          fprintf(outfile, "\tShear_Modulus_Fraction %lf\n",
-                  stressall[i][13] / shear);
-          fprintf(outfile, "\tYoung_Modulus %lf\n", stressall[i][14]);
-          fprintf(outfile, "\tYoung_Modulus_Fraction %lf\n\n",
-                  stressall[i][14] / young);
+      fprintf(outfile, "Version: 10.0");
+      fprintf(outfile, "\nX_Size: %d", Xsyssize);
+      fprintf(outfile, "\nY_Size: %d", Ysyssize);
+      fprintf(outfile, "\nZ_Size: %d", Zsyssize);
+      fprintf(outfile, "\nImage_Resolution: 1.00");
+      for (i = 0; i < Xsyssize; i++) {
+        for (j = 0; j < Ysyssize; j++) {
+          for (k = 0; k < Zsyssize; k++) {
+            m = (nxy * k) + (Xsyssize * j) + i;
+            enrgy = 0.5 *
+                    ((stressxx[m] * strainyy[m]) + (stressyy[m] * strainyy[m]) +
+                     (stresszz[m] * strainyy[m]) + (stressxy[m] * strainxy[m]) +
+                     (stressxz[m] * strainxz[m]) + (stressyz[m] * strainyz[m]));
+            fprintf(outfile, "\n%f", enrgy);
+          }
+          fclose(outfile);
         }
       }
-    }
+      /***
+       *	Compute contribution to the global moduli
+       *	of each phase in the microstructure
+       ***/
 
-    if (outfile != NULL)
-      fclose(outfile);
-
-    /***
-     *	Now, if ITZ calculation turned on, then we have to output
-     *	the layer-by-layer average values of K and G
-     ***/
-
-    /***
-     *	Now average on both sides of aggregate, plot 1st pixel at x = 0.5,
-     *	2nd pixel at x = 1.5, etc.
-     ***/
-
-    if ((doitz) && (nagg1 > 0)) {
-      outfile = filehandler("elastic", Layerfilename, "WRITE");
+      outfile = filehandler("elastic", PCfilename, "WRITE");
       if (!outfile) {
         fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
-                Layerfilename);
+                PCfilename);
       }
-      fprintf(Logfile, "\n*****\n");
-      fprintf(Logfile, "\nLAYER_DATA:\n");
-      xj = -0.5;
-      for (i = nagg1 - 1; i >= 0; i--) {
-        xj += 1.0;
-        kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
-        gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
-        young = 9. * kk * gg / (3. * kk + gg);
-        pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
-        fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young, pois);
-        fprintf(outfile, "%.1f %.4f %.4f %.4f %.4f\n", xj, kk, gg, young, pois);
-      }
-      fprintf(Logfile, "\nEND");
-      fclose(outfile);
-    }
+      for (i = 0; i < NSP; i++) {
+        if (prob[i] > pthresh) {
+          stressall[i][12] =
+              (stressall[i][0] + stressall[i][1] + stressall[i][2]) /
+              (exx + eyy + ezz);
+          stressall[i][12] /= 3.0;
 
+          stressall[i][13] = (stressall[i][3] / exy);
+          stressall[i][13] += (stressall[i][4] / exz);
+          stressall[i][13] += (stressall[i][5] / eyz);
+          stressall[i][13] /= 6.0; /* Divide by extra 2.0 because global shear
+                                      strains are doubled */
+
+          stressall[i][14] = (9.0 * stressall[i][12] * stressall[i][13]) /
+                             ((3.0 * stressall[i][12]) + stressall[i][13]);
+
+          stressall[i][15] =
+              ((3.0 * stressall[i][12]) - (2.0 * stressall[i][13])) /
+              (2.0 * ((3.0 * stressall[i][12]) + stressall[i][13]));
+
+          id2phasename(i, phasename);
+          fprintf(Logfile, "\nPhase %s", phasename);
+          fprintf(Logfile, "\n\tVfrac %lf", prob[i]);
+          fprintf(Logfile, "\n\tBulk_Modulus %lf", stressall[i][12]);
+          fprintf(Logfile, "\n\tBulk_Modulus_Fraction %lf",
+                  stressall[i][12] / bulk);
+          fprintf(Logfile, "\n\tShear_Modulus %lf", stressall[i][13]);
+          fprintf(Logfile, "\n\tShear_Modulus_Fraction %lf",
+                  stressall[i][13] / shear);
+          fprintf(Logfile, "\n\tYoung_Modulus %lf", stressall[i][14]);
+          fprintf(Logfile, "\n\tYoung_Modulus_Fraction %lf\n",
+                  stressall[i][14] / young);
+
+          if (outfile != NULL) {
+            fprintf(outfile, "Phase %s\n", phasename);
+            fprintf(outfile, "\tVfrac %lf\n", prob[i]);
+            fprintf(outfile, "\tBulk_Modulus %lf\n", stressall[i][12]);
+            fprintf(outfile, "\tBulk_Modulus_Fraction %lf\n",
+                    stressall[i][12] / bulk);
+            fprintf(outfile, "\tShear_Modulus %lf\n", stressall[i][13]);
+            fprintf(outfile, "\tShear_Modulus_Fraction %lf\n",
+                    stressall[i][13] / shear);
+            fprintf(outfile, "\tYoung_Modulus %lf\n", stressall[i][14]);
+            fprintf(outfile, "\tYoung_Modulus_Fraction %lf\n\n",
+                    stressall[i][14] / young);
+          }
+        }
+      }
+
+      if (outfile != NULL)
+        fclose(outfile);
+
+      /***
+       *	Now, if ITZ calculation turned on, then we have to output
+       *	the layer-by-layer average values of K and G
+       ***/
+
+      /***
+       *	Now average on both sides of aggregate, plot 1st pixel at x =
+       * 0.5, 2nd pixel at x = 1.5, etc.
+       ***/
+
+      if ((doitz) && (nagg1 > 0)) {
+        outfile = filehandler("elastic", Layerfilename, "WRITE");
+        if (!outfile) {
+          fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
+                  Layerfilename);
+        }
+        fprintf(Logfile, "\n*****\n");
+        fprintf(Logfile, "\nLAYER_DATA:\n");
+        xj = -0.5;
+        fprintf(outfile, "Distance (um),Bulk Modulus (GPa),Shear Modulus "
+                         "(GPa),Young's Modulus (GPa),Poisson's ratio");
+        for (i = nagg1 - 1; i >= 0; i--) {
+          xj += 1.0;
+          kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
+          gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
+          young = 9. * kk * gg / (3. * kk + gg);
+          pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
+          fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young,
+                  pois);
+          fprintf(outfile, "\n%.1f,%.4f,%.4f,%.4f,%.4f", xj, kk, gg, young,
+                  pois);
+        }
+        fprintf(Logfile, "\nEND");
+        fclose(outfile);
+      }
+    }
   } else {
 
     /***
@@ -2805,6 +2885,10 @@ if (doitz) {
 
   fprintf(Logfile, "\nDone with cement paste calculations.");
   if (doitz) {
+    fprintf(Logfile,
+            "\nHeading into concelas with nagg1 = %d, bulk = %f, shear = %f",
+            nagg1, bulk, shear);
+    fflush(Logfile);
     oval = concelas(nagg1, bulk, shear);
   }
 
@@ -2812,15 +2896,16 @@ if (doitz) {
   return (0);
 }
 
-/************************ concelas.c ***************************************/
-/* BACKGROUND                                                              */
-/* This function takes elastic data on a cement binder, together with      */
-/* grading and elastic properties of coarse and fine aggregate, to         */
-/* estimate the effective elastic properties and compressive strength of   */
-/* the concrete or mortar                                                  */
+/************************ concelas.c
+ * ***************************************/
+/* BACKGROUND */
+/* This function takes elastic data on a cement binder, together with */
+/* grading and elastic properties of coarse and fine aggregate, to */
+/* estimate the effective elastic properties and compressive strength of */
+/* the concrete or mortar */
 /*                                                                         */
-/* Programmer:  Dr. Edward J. Garboczi (NIST/BFRL)- (301)975.6708          */
-/* C-conversion by Dr. Jeffrey W. Bullard           (301)975.5725          */
+/* Programmer:  Dr. Edward J. Garboczi (NIST/BFRL)- (301)975.6708 */
+/* C-conversion by Dr. Jeffrey W. Bullard           (301)975.5725 */
 /*                                                                         */
 /***************************************************************************/
 int concelas(int nagg1, double bulkmod, double shearmod) {
@@ -2871,7 +2956,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
   fpout = filehandler("concelas", Outfilename, "APPEND");
   if (!fpout) {
-    bailout("concelas", "Could not open file Concrete.dat");
+    bailout("concelas", "Could not open file EffectiveModuli.csv");
     return (1);
   }
 
@@ -2893,8 +2978,10 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
     /* Convert itzwidth to cement paste image pixel widths */
     itzpix = (int)((itzwidth / Res) + 0.5);
-    fprintf(Logfile, "\n\nCalculated ITZ width is %f micrometers (%d voxels)",
-            itzwidth, itzpix);
+    fprintf(
+        Logfile,
+        "\n\nCalculated ITZ width is %f micrometers (%d voxels), nagg1 = %d",
+        itzwidth, itzpix, nagg1);
 
     /* Knowing the ITZ width, find average values of
      * the bulk and shear moduli inside the ITZ */
@@ -2928,6 +3015,8 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     gg *= (1.0 / ((double)(nagg1 - itzpix)));
     kcem = kk;
     gcem = gg;
+    fprintf(Logfile, "\nCalculated bulk modulus of paste = %f", kcem);
+    fprintf(Logfile, "\nCalculated shear modulus of paste = %f", gcem);
 
   } else {
 
@@ -3194,13 +3283,12 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
   aggfrac = finevftot + coarsevftot;
   fprintf(Logfile, "\nTotal aggregate volume fraction = %f", aggfrac);
-  fprintf(fpout, "\nCONCRETE ELASTIC MODULI INFORMATION:\n");
-  fprintf(fpout, "\taggfrac: %f\n", aggfrac);
+  fprintf(fpout, "\nconcrete_aggfrac,%f,", aggfrac);
 
   fprintf(Logfile, "\n\nEnter the volume fraction of air: ");
   read_string(buff, sizeof(buff));
   airfrac = atof(buff);
-  fprintf(fpout, "\tairfrac: %f\n", airfrac);
+  fprintf(fpout, "\nconcrete_airfrac,%f,", airfrac);
 
   for (i = 0; i < N_concelas; i++) {
     Vf_concelas[i] *= (aggfrac / (aggfrac + airfrac));
@@ -3228,7 +3316,10 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     slope(&kk, &gg, k, g);
     q1 = -h * g * gg / xx[i];
     r1 = -h * k * kk / xx[i];
-    fprintf(Logfile, "\n\t Iteration %d: q1 = %f, r1 = %f", i, q1, r1);
+    fprintf(
+        Logfile,
+        "\n\t Iteration %d: h = %f, g = %f, gg = %f, xx = %f, q1 = %f, r1 = %f",
+        i, h, g, gg, xx[i], q1, r1);
 
     slope(&kk, &gg, k + r1 / 2.0, g + q1 / 2.0);
     q2 = -h * (g + q1 / 2.0) * gg / (xx[i] + (0.50 * h));
@@ -3269,10 +3360,12 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     }
   }
 
-  /*  Fit for MORTAR cube strength below comes from Luca Valentini, U. Padua */
+  /*  Fit for MORTAR cube strength below comes from Luca Valentini, U. Padua
+   */
   /* mortar_cube_strngth = 0.003315 * pow(xe,2.642); */
 
-  /*  Fit for MORTAR cube strength below is for SCG mortars only prior to 2012
+  /*  Fit for MORTAR cube strength below is for SCG mortars only prior to
+   * 2012
    */
   /*  Re-fit February 2013 */
   mortar_cube_strngth = 5.0e-4 * pow(xe, 3.18577);
@@ -3282,7 +3375,8 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   /*  Re-fit again 20 March 2013 */
   concrete_cube_strngth = 5.0e-4 * pow(xe, 3.0586);
 
-  /*  Fit for CONCRETE cylinder strength below comes from Pichet S., SCG/SRI */
+  /*  Fit for CONCRETE cylinder strength below comes from Pichet S., SCG/SRI
+   */
   /*  Re-fit February 2013 */
   /*  Re-fit again 20 March 2013 */
   cylinder_strngth = 3.0e-4 * pow(xe, 3.0586);
@@ -3303,19 +3397,17 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
           "\tConcrete_Cylinder_Compressive_strength (0.62*cube): %.4f MPa\n",
           concrete_cube_strngth * 0.624);
   fflush(Logfile);
-  fprintf(fpout, "\tMatrix_vol_frac: %.4f\n", target_matrix_vf);
-  fprintf(fpout, "\tEff_Young_mod: %.4f GPa\n", xe);
-  fprintf(fpout, "\tEff_Shear_mod: %.4f GPa\n", xg);
-  fprintf(fpout, "\tEff_Bulk_mod: %.4f GPa\n", xk);
-  fprintf(fpout,
-          "\tMortar_Cylinder_Compressive_strength (power fit): %.4f MPa\n",
+  fprintf(fpout, "\nconcrete_Matrix_vol_frac,%.4f,", target_matrix_vf);
+  fprintf(fpout, "\nconcrete_bulk_mod: %.4f,GPa", xk);
+  fprintf(fpout, "\nconcrete_shear_mod,%.4f,GPa", xg);
+  fprintf(fpout, "\nconcrete_Young_mod,%.4f,GPa", xe);
+  fprintf(fpout, "\nmortar_cylinder_compressive_strength,%.4f,MPa",
           cylinder_strngth);
-  fprintf(fpout, "\tMortar_Cube_Compressive_strength (power fit): %.4f MPa\n",
+  fprintf(fpout, "\nmortar_cube_compressive_strength,%.4f,MPa",
           mortar_cube_strngth);
-  fprintf(fpout, "\tConcrete_Cube_Compressive_strength (power fit): %.4f MPa\n",
+  fprintf(fpout, "\nconcrete_cube_compressive_strength,%.4f,MPa\n",
           concrete_cube_strngth);
-  fprintf(fpout,
-          "\tConcrete_Cylinder_Compressive_strength (0.62*cube): %.4f MPa\n",
+  fprintf(fpout, "\nconcrete_cylinder_compressive_strength,%.4f,MPa\n",
           concrete_cube_strngth * 0.624);
   fclose(fpout);
   return (0);
@@ -3420,6 +3512,12 @@ void slope(double *kk, double *gg, double k, double g) {
     *gg += (Vf_concelas[i] *
             (5.0 * (k + (q * g)) * (G_concelas[i] - g) /
              (3.0 * g * (k + (t * g)) + 2.0 * G_concelas[i] * (k + 2.0 * g))));
+    fprintf(Logfile,
+            "\n\t\tSlope i = %d, SHAPEFACTOR = %f, Vf_concelas = %f, k = %f, q "
+            "= %f,g = %f,G_concelas = %f, K_concelas = %f, t = %f",
+            i, SHAPEFACTOR, Vf_concelas[i], k, q, g, G_concelas[i],
+            K_concelas[i], t);
+    fflush(Logfile);
   }
 
   *kk *= SHAPEFACTOR;

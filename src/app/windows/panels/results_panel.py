@@ -239,32 +239,92 @@ class ResultsPanel(Gtk.Box):
             buttons_grid.attach(self.view_3d_button, button_col, 0, 1, 1)
             button_col += 1
         
+        # Elastic Moduli Results buttons (for elastic operations)
+        is_elastic = self._is_elastic_operation(operation)
+        self.logger.info(f"Results panel: Operation '{operation.name}' is elastic operation: {is_elastic}")
+        if is_elastic:
+            # Effective Moduli Summary button
+            has_effective_moduli = self._has_effective_moduli(operation)
+            if has_effective_moduli:
+                self.effective_moduli_button = Gtk.Button()
+                self.effective_moduli_button.set_size_request(200, 60)
+
+                button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+
+                icon_label = Gtk.Label()
+                icon_label.set_markup('<span size="x-large">🔧</span>')
+                button_box.pack_start(icon_label, False, False, 0)
+
+                text_label = Gtk.Label()
+                text_label.set_markup('<b>Effective Moduli</b>')
+                button_box.pack_start(text_label, False, False, 0)
+
+                desc_label = Gtk.Label()
+                desc_label.set_markup('<small>View composite elastic\nmoduli summary</small>')
+                desc_label.set_justify(Gtk.Justification.CENTER)
+                button_box.pack_start(desc_label, False, False, 0)
+
+                self.effective_moduli_button.add(button_box)
+                self.effective_moduli_button.connect('clicked', self._on_effective_moduli_clicked)
+                self.effective_moduli_button.set_tooltip_text("View effective elastic moduli for paste and concrete")
+
+                buttons_grid.attach(self.effective_moduli_button, button_col, 0, 1, 1)
+                button_col += 1
+
+            # ITZ Analysis button
+            has_itz_moduli = self._has_itz_moduli(operation)
+            if has_itz_moduli:
+                self.itz_analysis_button = Gtk.Button()
+                self.itz_analysis_button.set_size_request(200, 60)
+
+                button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+
+                icon_label = Gtk.Label()
+                icon_label.set_markup('<span size="x-large">📈</span>')
+                button_box.pack_start(icon_label, False, False, 0)
+
+                text_label = Gtk.Label()
+                text_label.set_markup('<b>ITZ Analysis</b>')
+                button_box.pack_start(text_label, False, False, 0)
+
+                desc_label = Gtk.Label()
+                desc_label.set_markup('<small>Moduli vs distance\nfrom aggregate surface</small>')
+                desc_label.set_justify(Gtk.Justification.CENTER)
+                button_box.pack_start(desc_label, False, False, 0)
+
+                self.itz_analysis_button.add(button_box)
+                self.itz_analysis_button.connect('clicked', self._on_itz_analysis_clicked)
+                self.itz_analysis_button.set_tooltip_text("Analyze elastic moduli variation in interfacial transition zone")
+
+                buttons_grid.attach(self.itz_analysis_button, button_col, 0, 1, 1)
+                button_col += 1
+
         # Data Plotting button
         has_csv = self._has_csv_data(operation)
         self.logger.info(f"Results panel: Operation '{operation.name}' has CSV data: {has_csv}")
         if has_csv:
             self.plot_data_button = Gtk.Button()
             self.plot_data_button.set_size_request(200, 60)
-            
+
             button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-            
+
             icon_label = Gtk.Label()
             icon_label.set_markup('<span size="x-large">📊</span>')
             button_box.pack_start(icon_label, False, False, 0)
-            
+
             text_label = Gtk.Label()
             text_label.set_markup('<b>Plot Data</b>')
             button_box.pack_start(text_label, False, False, 0)
-            
+
             desc_label = Gtk.Label()
             desc_label.set_markup('<small>Interactive plotting of\nsimulation data variables</small>')
             desc_label.set_justify(Gtk.Justification.CENTER)
             button_box.pack_start(desc_label, False, False, 0)
-            
+
             self.plot_data_button.add(button_box)
             self.plot_data_button.connect('clicked', self._on_plot_data_clicked)
             self.plot_data_button.set_tooltip_text("Create plots from simulation data CSV files")
-            
+
             buttons_grid.attach(self.plot_data_button, button_col, 0, 1, 1)
             button_col += 1
         
@@ -469,13 +529,28 @@ class ResultsPanel(Gtk.Box):
             self.logger.info(f"Results panel: Scanning Operations directory: {operations_dir}")
             
             # Get all subdirectories in Operations folder - these are our results
+            # Also scan for nested elastic operations (e.g., Operations/HY-Elk/Elastic-HY-Elk-657.89h/)
+            all_result_folders = []
+
             for result_folder in operations_dir.iterdir():
                 if not result_folder.is_dir():
                     continue
-                    
+
+                # Add top-level operation folder
+                all_result_folders.append(result_folder)
+
+                # Check for nested elastic operations inside this folder
+                for nested_folder in result_folder.iterdir():
+                    if (nested_folder.is_dir() and
+                        nested_folder.name.startswith('Elastic-')):
+                        self.logger.info(f"Results panel: Found nested elastic operation: {nested_folder.name}")
+                        all_result_folders.append(nested_folder)
+
+            # Process all found result folders
+            for result_folder in all_result_folders:
                 result_name = result_folder.name
-                self.logger.info(f"Results panel: Found result folder: {result_name}")
-                
+                self.logger.info(f"Results panel: Processing result folder: {result_name}")
+
                 # Determine result type based on folder contents and name patterns
                 result_type = self._determine_result_type(result_folder)
                 
@@ -534,7 +609,18 @@ class ResultsPanel(Gtk.Box):
             
             self.logger.info(f"Results panel: Analyzing '{result_folder.name}' - found {len(file_names)} files")
             
-            # First check: Explicit hydration folder names
+            # First check: Elastic moduli operations
+            if folder_name.startswith('elastic-') or 'elastic' in folder_name:
+                # Check for elastic-specific files
+                has_effective_moduli = any('effectivemoduli.csv' in fname for fname in file_names)
+                has_itz_moduli = any('itzmoduli.csv' in fname for fname in file_names)
+                has_elastic_progress = any('elastic_progress.json' in fname for fname in file_names)
+
+                if has_effective_moduli or has_itz_moduli or has_elastic_progress:
+                    self.logger.info(f"Results panel: '{result_folder.name}' classified as Elastic Moduli (files detected)")
+                    return "Elastic Moduli"
+
+            # Second check: Explicit hydration folder names
             if any(pattern in folder_name for pattern in ['hydration', 'hydrationsim']):
                 self.logger.info(f"Results panel: '{result_folder.name}' classified as Hydration (folder name)")
                 return "Hydration Simulation"
@@ -758,7 +844,102 @@ class ResultsPanel(Gtk.Box):
             dialog.format_secondary_text(f"Failed to open data plotter: {e}")
             dialog.run()
             dialog.destroy()
-    
+
+    def _on_effective_moduli_clicked(self, button) -> None:
+        """Handle Effective Moduli button click."""
+        if not self.selected_operation:
+            return
+
+        try:
+            # Import here to avoid circular imports
+            from app.windows.dialogs.effective_moduli_viewer import EffectiveModuliViewer
+
+            # Create and show the effective moduli viewer dialog
+            viewer = EffectiveModuliViewer(
+                parent=self.get_toplevel(),
+                operation=self.selected_operation
+            )
+            viewer.run()
+            viewer.destroy()
+
+        except Exception as e:
+            self.logger.error(f"Error opening effective moduli viewer: {e}")
+            # Show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Opening Effective Moduli Viewer"
+            )
+            dialog.format_secondary_text(f"Failed to open effective moduli viewer: {e}")
+            dialog.run()
+            dialog.destroy()
+
+    def _on_itz_analysis_clicked(self, button) -> None:
+        """Handle ITZ Analysis button click."""
+        if not self.selected_operation:
+            return
+
+        try:
+            # Import here to avoid circular imports
+            from app.windows.dialogs.itz_analysis_viewer import ITZAnalysisViewer
+
+            # Create and show the ITZ analysis viewer dialog
+            viewer = ITZAnalysisViewer(
+                parent=self.get_toplevel(),
+                operation=self.selected_operation
+            )
+            viewer.run()
+            viewer.destroy()
+
+        except Exception as e:
+            self.logger.error(f"Error opening ITZ analysis viewer: {e}")
+            # Show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Opening ITZ Analysis Viewer"
+            )
+            dialog.format_secondary_text(f"Failed to open ITZ analysis viewer: {e}")
+            dialog.run()
+            dialog.destroy()
+
+    def _is_elastic_operation(self, operation) -> bool:
+        """Check if operation is an elastic moduli calculation."""
+        if hasattr(operation, 'operation_type'):
+            op_type_str = str(operation.operation_type)
+            return 'ELASTIC' in op_type_str.upper()
+        if hasattr(operation, 'type'):
+            op_type_str = str(operation.type)
+            return 'ELASTIC' in op_type_str.upper()
+        # Check operation name as fallback
+        return operation.name.startswith('Elastic-') if hasattr(operation, 'name') else False
+
+    def _has_effective_moduli(self, operation) -> bool:
+        """Check if operation has EffectiveModuli.csv file."""
+        try:
+            operation_dir = self._get_operation_output_dir(operation)
+            if operation_dir:
+                effective_moduli_file = Path(operation_dir) / "EffectiveModuli.csv"
+                return effective_moduli_file.exists()
+            return False
+        except Exception:
+            return False
+
+    def _has_itz_moduli(self, operation) -> bool:
+        """Check if operation has ITZmoduli.csv file."""
+        try:
+            operation_dir = self._get_operation_output_dir(operation)
+            if operation_dir:
+                itz_moduli_file = Path(operation_dir) / "ITZmoduli.csv"
+                return itz_moduli_file.exists()
+            return False
+        except Exception:
+            return False
+
     def refresh_operations_list(self) -> None:
         """Public method to refresh the operations list (called from Operations panel)."""
         self._load_completed_operations()

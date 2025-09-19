@@ -1,0 +1,36 @@
+{
+  "operation_name": "Elk",
+  "microstructure_file": "./Operations/Elk/Elk.pimg",
+  "system_size": 110,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement151",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2857142857142857,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "MA106A-1-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.42857142857142855,
+      "specific_gravity": 2.64,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 3,
+      "material_name": "MA99BC-5-coarse",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2857142857142857,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-18T21:31:48.161367"
+}
