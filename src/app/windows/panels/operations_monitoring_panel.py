@@ -1650,9 +1650,10 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self.logger.debug(f"Will monitor {operation.name}: db_sourced={is_database_sourced}, has_process={has_process_handle}, can_monitor={can_monitor_progress}")
                 
             if operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
-                # Parse stdout for GENMIC_PROGRESS messages (for genmic operations)
-                self._parse_operation_stdout(operation)
-                
+                # Note: Progress parsing is now handled by operation-specific methods below
+                # (_update_microstructure_progress, _update_hydration_progress, _update_elastic_progress)
+                # So we don't need to call _parse_operation_stdout here anymore
+
                 # Check if process is still running (unless already marked complete by progress parser)
                 if operation.status == OperationStatus.COMPLETED:
                     # Already completed by progress parser, skip further processing
@@ -1999,15 +2000,28 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self.logger.debug(f"DEBUG Microstructure Progress: No directory found for operation '{operation.name}'")
                 return
 
-            # Look for progress.json file (new JSON format)
+            # Look for genmic_progress.json file (new JSON format from genmic -j flag)
             import os
             import json
-            progress_file = os.path.join(operation_dir, "progress.json")
+            progress_file = os.path.join(operation_dir, "genmic_progress.json")
+
+            self.logger.debug(f"DEBUG Microstructure Progress: Looking for {progress_file}")
 
             if os.path.exists(progress_file):
+                self.logger.debug(f"DEBUG Microstructure Progress: Found progress file")
                 try:
+                    # Check if file has content before trying to read (prevents read errors on empty files)
+                    if os.path.getsize(progress_file) == 0:
+                        self.logger.debug(f"DEBUG Microstructure Progress: Skipping empty file")
+                        return
+
                     with open(progress_file, 'r') as f:
                         content = f.read().strip()
+                        if not content:
+                            self.logger.debug(f"DEBUG Microstructure Progress: Skipping file with no content")
+                            return
+
+                    self.logger.debug(f"DEBUG Microstructure Progress: Raw content: {content[:200]}")
 
                     # Handle "json " prefix format
                     if content.startswith("json "):
@@ -2016,6 +2030,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                         json_content = content
 
                     data = json.loads(json_content)
+                    self.logger.debug(f"DEBUG Microstructure Progress: Parsed JSON data: {data}")
 
                     # Extract progress information from genmic format
                     if 'percent_complete' in data and 'step' in data:
@@ -2051,12 +2066,18 @@ class OperationsMonitoringPanel(Gtk.Box):
 
                 except (json.JSONDecodeError, KeyError) as e:
                     self.logger.debug(f"Could not parse microstructure progress JSON: {e}")
-                    # Fall back to old text format parsing if JSON parsing fails
-                    self._parse_operation_stdout(operation)
+                    # Don't fall back to old format if JSON exists but has parse errors
+                    # This prevents oscillation between old and new progress values
             else:
-                # Fall back to old progress file parsing if JSON doesn't exist
-                self.logger.debug(f"No progress.json found, trying old format for {operation.name}")
-                self._parse_operation_stdout(operation)
+                # Only fall back to old format if JSON file truly doesn't exist
+                # Check if we should use old format (no JSON file but has old progress file)
+                import os
+                old_progress_file = os.path.join(operation_dir, "genmic_progress.txt")
+                if os.path.exists(old_progress_file):
+                    self.logger.debug(f"No genmic_progress.json found, using old text format for {operation.name}")
+                    self._parse_operation_stdout(operation)
+                else:
+                    self.logger.debug(f"No progress files found for {operation.name}")
 
         except Exception as e:
             self.logger.error(f"Error updating microstructure progress for {operation.name}: {e}")
@@ -2075,8 +2096,25 @@ class OperationsMonitoringPanel(Gtk.Box):
             progress_file = os.path.join(operation_dir, "progress.json")
 
             if os.path.exists(progress_file):
-                with open(progress_file, 'r') as f:
-                    data = json.load(f)
+                try:
+                    # Check if file has content before trying to read
+                    if os.path.getsize(progress_file) == 0:
+                        return  # Skip empty files
+
+                    with open(progress_file, 'r') as f:
+                        content = f.read().strip()
+                        if not content:
+                            return  # Skip files with only whitespace
+
+                        # Handle "json " prefix format if present
+                        if content.startswith("json "):
+                            content = content[5:]
+
+                        data = json.loads(content)
+                except (OSError, IOError, json.JSONDecodeError) as read_error:
+                    # File might be being written to, or corrupted, just skip this update
+                    self.logger.debug(f"Skipping hydration progress read for {operation.name}: {read_error}")
+                    return
 
                 # Extract progress information
                 if 'simulation_time' in data and 'target_time' in data:
@@ -4889,25 +4927,48 @@ class OperationsMonitoringPanel(Gtk.Box):
             for op_folder in operations_dir.iterdir():
                 if not op_folder.is_dir():
                     continue
-                    
-                progress_file = op_folder / "genmic_progress.txt"
-                if not progress_file.exists():
+
+                # Try JSON file first (new format), then fall back to text
+                json_progress_file = op_folder / "genmic_progress.json"
+                txt_progress_file = op_folder / "genmic_progress.txt"
+
+                progress_val = None
+                message = None
+
+                # Prefer JSON format
+                if json_progress_file.exists():
+                    try:
+                        import json
+                        content = json_progress_file.read_text().strip()
+                        # Handle "json " prefix format
+                        if content.startswith("json "):
+                            content = content[5:]
+                        data = json.loads(content)
+                        if 'percent_complete' in data and 'step' in data:
+                            progress_val = data['percent_complete'] / 100.0
+                            message = data['step']
+                    except (json.JSONDecodeError, KeyError) as e:
+                        self.logger.debug(f"Failed to parse JSON progress for {op_folder.name}: {e}")
+
+                # Only use text format if JSON doesn't exist or failed
+                if progress_val is None and txt_progress_file.exists():
+                    try:
+                        content = txt_progress_file.read_text().strip()
+                        if content.startswith("PROGRESS:"):
+                            # Parse: "PROGRESS: 0.65 Distributing phases"
+                            data = content[9:].strip()  # Remove "PROGRESS: "
+                            parts = data.split(' ', 1)
+                            if len(parts) >= 2:
+                                progress_val = float(parts[0])
+                                message = parts[1]
+                    except Exception as e:
+                        self.logger.debug(f"Failed to parse text progress for {op_folder.name}: {e}")
+
+                # Skip if no progress data found
+                if progress_val is None or message is None:
                     continue
-                
+
                 try:
-                    # Read progress file
-                    content = progress_file.read_text().strip()
-                    if not content.startswith("PROGRESS:"):
-                        continue
-                    
-                    # Parse: "PROGRESS: 0.65 Distributing phases"
-                    data = content[9:].strip()  # Remove "PROGRESS: "
-                    parts = data.split(' ', 1)
-                    if len(parts) < 2:
-                        continue
-                    
-                    progress_val = float(parts[0])
-                    message = parts[1]
                     
                     # Phase 2: Use clean operation naming without genmic_input_ prefix
                     # Find matching operation
@@ -4945,8 +5006,11 @@ class OperationsMonitoringPanel(Gtk.Box):
                         if abs(progress_val - old_progress) > 0.01:
                             self.logger.info(f"SIMPLE UPDATE: {operation_name} -> {progress_val:.1%} - {message}")
                         
-                        # Always force UI update and database update
-                        self._update_operations_list()
+                        # Schedule UI update on main thread (thread-safe)
+                        from gi.repository import GLib
+                        GLib.idle_add(self._update_operations_list)
+
+                        # Database update is thread-safe
                         self._update_operation_in_database(matching_op)
                 
                 except Exception as e:

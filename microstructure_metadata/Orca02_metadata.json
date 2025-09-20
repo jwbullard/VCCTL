@@ -1,0 +1,45 @@
+{
+  "operation_name": "Orca02",
+  "microstructure_file": "./Operations/Orca02/Orca02.pimg",
+  "system_size": 120,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement151",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.2714285714285714,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "NormalLimestone",
+      "material_type": "limestone",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.008571428571428572,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 3,
+      "material_name": "Poop",
+      "material_type": "filler",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.005714285714285714,
+      "specific_gravity": 4.0,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 4,
+      "material_name": "MA106A-1-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.7142857142857143,
+      "specific_gravity": 2.64,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-20T03:36:38.116584"
+}

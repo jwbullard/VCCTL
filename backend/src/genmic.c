@@ -1,6 +1,5 @@
 /******************************************************
  *
- *
  * Program genmic.c to generate three-dimensional cement
  * and gypsum particles in a 3-D box with periodic boundaries,
  * and optionally to distribute clinker phases within the
@@ -656,20 +655,20 @@ int main(int argc, char *argv[]) {
       break;
     case ADDAGG:
       Simwall = 1;
-      Wallpos = (int)(Zsyssize / 2);
-      for (jg = 0; jg < Ysyssize; jg++) {
-        for (ig = 0; ig < Xsyssize; ig++) {
-          Cement.val[getInt3dindex(Cement, ig, jg, Wallpos)] = TMPAGGID;
-          Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos)] = INERTAGG;
-          Cement.val[getInt3dindex(Cement, ig, jg, Wallpos - 1)] = TMPAGGID;
-          Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos - 1)] = INERTAGG;
-          if (Zsyssize % 2 != 0) {
-            Cement.val[getInt3dindex(Cement, ig, jg, Wallpos + 1)] = TMPAGGID;
-            Cemreal.val[getInt3dindex(Cemreal, ig, jg, Wallpos + 1)] = INERTAGG;
+      Wallpos = (int)(Xsyssize / 2);
+      for (kg = 0; kg < Zsyssize; kg++) {
+        for (jg = 0; jg < Ysyssize; jg++) {
+          Cement.val[getInt3dindex(Cement, Wallpos, jg, kg)] = TMPAGGID;
+          Cemreal.val[getInt3dindex(Cemreal, Wallpos, jg, kg)] = INERTAGG;
+          Cement.val[getInt3dindex(Cement, Wallpos - 1, jg, kg)] = TMPAGGID;
+          Cemreal.val[getInt3dindex(Cemreal, Wallpos - 1, jg, kg)] = INERTAGG;
+          if (Xsyssize % 2 != 0) {
+            Cement.val[getInt3dindex(Cement, Wallpos + 1, jg, kg)] = TMPAGGID;
+            Cemreal.val[getInt3dindex(Cemreal, Wallpos + 1, jg, kg)] = INERTAGG;
           }
         }
       }
-      Binderpix = (Zsyssize - 1) * Ysyssize * Xsyssize;
+      Binderpix = (Xsyssize - 1) * Ysyssize * Zsyssize;
       break;
     case CONNECTIVITY:
       connect();

@@ -545,8 +545,9 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   nxy = Xsyssize * Ysyssize;
   for (i = 0; i < Xsyssize; i++) {
     for (j = 0; j < Ysyssize; j++) {
+      m2 = j * Xsyssize;
       for (k = 0; k < Zsyssize; k++) {
-        m = (k * nxy) + (j * Xsyssize) + i;
+        m = (k * nxy) + m2 + i;
         fscanf(infile, "%s", instring);
         oinval = atoi(instring);
         inval = convert_id(oinval, Version);
@@ -906,7 +907,7 @@ void femat(int nx, int ny, int nz, int ns, int nphase) {
 
   for (j = 1; j <= (ny - 1); j++) {
     for (k = 0; k < (nz - 1); k++) {
-      m = (nxy * k) + (j * nx) - 1;
+      m = nxy * k + j * nx - 1;
       for (nn = 0; nn < 3; nn++) {
         for (mm = 0; mm < 8; mm++) {
           sum = 0.0;
@@ -1265,7 +1266,7 @@ void stress(int nx, int ny, int nz, int ns, int doitz, int micro, int ilast) {
   double uu[8][3];
   double dndx[8], dndy[8], dndz[8], es[6][8][3];
   int nxy, nyz, n1, n2, n3, k, j, i, mm, n8, n;
-  int m, mpix;
+  int m;
   double str11, str12, str13, str22, str23, str33;
   double s11, s12, s13, s22, s23, s33;
 
@@ -1624,6 +1625,10 @@ int dembx(int ns, int ldemb, int kkk) {
   int m3, ijk, j, n;
   int m;
 
+  /*
+  printf("In dembx now, ldemb = %d gg = %lf gtest = %lf...\n",ldemb,gg,gtest);
+  fflush(stdout);
+  */
   /*  Initialize the conjugate direction vector on first call to dembx only */
   /*  For calls to dembx after the first, we want to continue using the  */
   /*  value of h determined in the previous call. Of course, if npoints is */
@@ -2014,6 +2019,9 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
   fprintf(Fprog, "json {");
+  /* fprintf(Fprog, "\"cycle\": %d, \"time_hours\": %.2f,", Icyc, Time_cur);
+  fprintf(Fprog, " \"degree_of_hydration\": %.2f, \"timestamp\": ", Alpha_cur);
+  */
 
   if ((clock_gettime(CLOCK_REALTIME, &tv))) {
     fprintf(stderr, "\nERROR: Error clock_gettime");
@@ -2478,7 +2486,7 @@ int main(int argc, char *argv[]) {
           } else if (k1 >= nz) {
             k1 -= nz;
           }
-          m1 = (nxy * k1) + (nx * j1) + i1;
+          m1 = nxy * k1 + nx * j1 + i1;
           ib[m][n] = m1;
         }
       }
@@ -2774,103 +2782,100 @@ if (doitz) {
           fclose(outfile);
         }
       }
-      /***
-       *	Compute contribution to the global moduli
-       *	of each phase in the microstructure
-       ***/
+    }
 
-      outfile = filehandler("elastic", PCfilename, "WRITE");
+    /***
+     *	Compute contribution to the global moduli
+     *	of each phase in the microstructure
+     ***/
+
+    outfile = filehandler("elastic", PCfilename, "WRITE");
+    if (!outfile) {
+      fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
+              PCfilename);
+    }
+    for (i = 0; i < NSP; i++) {
+      if (prob[i] > pthresh) {
+        stressall[i][12] =
+            (stressall[i][0] + stressall[i][1] + stressall[i][2]) /
+            (exx + eyy + ezz);
+        stressall[i][12] /= 3.0;
+
+        stressall[i][13] = (stressall[i][3] / exy);
+        stressall[i][13] += (stressall[i][4] / exz);
+        stressall[i][13] += (stressall[i][5] / eyz);
+        stressall[i][13] /= 6.0; /* Divide by extra 2.0 because global shear
+                                    strains are doubled */
+
+        stressall[i][14] = (9.0 * stressall[i][12] * stressall[i][13]) /
+                           ((3.0 * stressall[i][12]) + stressall[i][13]);
+
+        stressall[i][15] =
+            ((3.0 * stressall[i][12]) - (2.0 * stressall[i][13])) /
+            (2.0 * ((3.0 * stressall[i][12]) + stressall[i][13]));
+
+        id2phasename(i, phasename);
+        fprintf(Logfile, "\nPhase %s", phasename);
+        fprintf(Logfile, "\n\tVfrac %lf", prob[i]);
+        fprintf(Logfile, "\n\tBulk_Modulus %lf", stressall[i][12]);
+        fprintf(Logfile, "\n\tBulk_Modulus_Fraction %lf",
+                stressall[i][12] / bulk);
+        fprintf(Logfile, "\n\tShear_Modulus %lf", stressall[i][13]);
+        fprintf(Logfile, "\n\tShear_Modulus_Fraction %lf",
+                stressall[i][13] / shear);
+        fprintf(Logfile, "\n\tYoung_Modulus %lf", stressall[i][14]);
+        fprintf(Logfile, "\n\tYoung_Modulus_Fraction %lf\n",
+                stressall[i][14] / young);
+
+        if (outfile != NULL) {
+          fprintf(outfile, "Phase %s\n", phasename);
+          fprintf(outfile, "\tVfrac %lf\n", prob[i]);
+          fprintf(outfile, "\tBulk_Modulus %lf\n", stressall[i][12]);
+          fprintf(outfile, "\tBulk_Modulus_Fraction %lf\n",
+                  stressall[i][12] / bulk);
+          fprintf(outfile, "\tShear_Modulus %lf\n", stressall[i][13]);
+          fprintf(outfile, "\tShear_Modulus_Fraction %lf\n",
+                  stressall[i][13] / shear);
+          fprintf(outfile, "\tYoung_Modulus %lf\n", stressall[i][14]);
+          fprintf(outfile, "\tYoung_Modulus_Fraction %lf\n\n",
+                  stressall[i][14] / young);
+        }
+      }
+    }
+
+    if (outfile != NULL)
+      fclose(outfile);
+
+    /***
+     *	Now, if ITZ calculation turned on, then we have to output
+     *	the layer-by-layer average values of K and G
+     ***/
+
+    /***
+     *	Now average on both sides of aggregate, plot 1st pixel at x =
+     * 0.5, 2nd pixel at x = 1.5, etc.
+     ***/
+
+    if ((doitz) && (nagg1 > 0)) {
+      outfile = filehandler("elastic", Layerfilename, "WRITE");
       if (!outfile) {
         fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
-                PCfilename);
+                Layerfilename);
       }
-      for (i = 0; i < NSP; i++) {
-        if (prob[i] > pthresh) {
-          stressall[i][12] =
-              (stressall[i][0] + stressall[i][1] + stressall[i][2]) /
-              (exx + eyy + ezz);
-          stressall[i][12] /= 3.0;
-
-          stressall[i][13] = (stressall[i][3] / exy);
-          stressall[i][13] += (stressall[i][4] / exz);
-          stressall[i][13] += (stressall[i][5] / eyz);
-          stressall[i][13] /= 6.0; /* Divide by extra 2.0 because global shear
-                                      strains are doubled */
-
-          stressall[i][14] = (9.0 * stressall[i][12] * stressall[i][13]) /
-                             ((3.0 * stressall[i][12]) + stressall[i][13]);
-
-          stressall[i][15] =
-              ((3.0 * stressall[i][12]) - (2.0 * stressall[i][13])) /
-              (2.0 * ((3.0 * stressall[i][12]) + stressall[i][13]));
-
-          id2phasename(i, phasename);
-          fprintf(Logfile, "\nPhase %s", phasename);
-          fprintf(Logfile, "\n\tVfrac %lf", prob[i]);
-          fprintf(Logfile, "\n\tBulk_Modulus %lf", stressall[i][12]);
-          fprintf(Logfile, "\n\tBulk_Modulus_Fraction %lf",
-                  stressall[i][12] / bulk);
-          fprintf(Logfile, "\n\tShear_Modulus %lf", stressall[i][13]);
-          fprintf(Logfile, "\n\tShear_Modulus_Fraction %lf",
-                  stressall[i][13] / shear);
-          fprintf(Logfile, "\n\tYoung_Modulus %lf", stressall[i][14]);
-          fprintf(Logfile, "\n\tYoung_Modulus_Fraction %lf\n",
-                  stressall[i][14] / young);
-
-          if (outfile != NULL) {
-            fprintf(outfile, "Phase %s\n", phasename);
-            fprintf(outfile, "\tVfrac %lf\n", prob[i]);
-            fprintf(outfile, "\tBulk_Modulus %lf\n", stressall[i][12]);
-            fprintf(outfile, "\tBulk_Modulus_Fraction %lf\n",
-                    stressall[i][12] / bulk);
-            fprintf(outfile, "\tShear_Modulus %lf\n", stressall[i][13]);
-            fprintf(outfile, "\tShear_Modulus_Fraction %lf\n",
-                    stressall[i][13] / shear);
-            fprintf(outfile, "\tYoung_Modulus %lf\n", stressall[i][14]);
-            fprintf(outfile, "\tYoung_Modulus_Fraction %lf\n\n",
-                    stressall[i][14] / young);
-          }
-        }
+      fprintf(Logfile, "\n*****\n");
+      fprintf(Logfile, "\nLAYER_DATA:\n");
+      xj = -0.5;
+      for (i = nagg1 - 1; i >= 0; i--) {
+        xj += 1.0;
+        kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
+        gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
+        young = 9. * kk * gg / (3. * kk + gg);
+        pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
+        fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young, pois);
+        fprintf(outfile, "%.1f %.4f %.4f %.4f %.4f\n", xj, kk, gg, young, pois);
       }
-
-      if (outfile != NULL)
-        fclose(outfile);
-
-      /***
-       *	Now, if ITZ calculation turned on, then we have to output
-       *	the layer-by-layer average values of K and G
-       ***/
-
-      /***
-       *	Now average on both sides of aggregate, plot 1st pixel at x =
-       * 0.5, 2nd pixel at x = 1.5, etc.
-       ***/
-
-      if ((doitz) && (nagg1 > 0)) {
-        outfile = filehandler("elastic", Layerfilename, "WRITE");
-        if (!outfile) {
-          fprintf(stderr, "\n\nWARNING:  Could not open output file %s",
-                  Layerfilename);
-        }
-        fprintf(Logfile, "\n*****\n");
-        fprintf(Logfile, "\nLAYER_DATA:\n");
-        xj = -0.5;
-        fprintf(outfile, "Distance (um),Bulk Modulus (GPa),Shear Modulus "
-                         "(GPa),Young's Modulus (GPa),Poisson's ratio");
-        for (i = nagg1 - 1; i >= 0; i--) {
-          xj += 1.0;
-          kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
-          gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
-          young = 9. * kk * gg / (3. * kk + gg);
-          pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
-          fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young,
-                  pois);
-          fprintf(outfile, "\n%.1f,%.4f,%.4f,%.4f,%.4f", xj, kk, gg, young,
-                  pois);
-        }
-        fprintf(Logfile, "\nEND");
-        fclose(outfile);
-      }
+      fprintf(Logfile, "\nEND");
+      fclose(outfile);
     }
   } else {
 
@@ -2885,10 +2890,6 @@ if (doitz) {
 
   fprintf(Logfile, "\nDone with cement paste calculations.");
   if (doitz) {
-    fprintf(Logfile,
-            "\nHeading into concelas with nagg1 = %d, bulk = %f, shear = %f",
-            nagg1, bulk, shear);
-    fflush(Logfile);
     oval = concelas(nagg1, bulk, shear);
   }
 
@@ -2978,10 +2979,10 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
     /* Convert itzwidth to cement paste image pixel widths */
     itzpix = (int)((itzwidth / Res) + 0.5);
-    fprintf(
-        Logfile,
-        "\n\nCalculated ITZ width is %f micrometers (%d voxels), nagg1 = %d",
-        itzwidth, itzpix, nagg1);
+    fprintf(Logfile,
+            "\n\nCalculated ITZ width is %f micrometers (%d voxels), nagg1 "
+            "= %d",
+            itzwidth, itzpix, nagg1);
 
     /* Knowing the ITZ width, find average values of
      * the bulk and shear moduli inside the ITZ */
@@ -3316,10 +3317,10 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
     slope(&kk, &gg, k, g);
     q1 = -h * g * gg / xx[i];
     r1 = -h * k * kk / xx[i];
-    fprintf(
-        Logfile,
-        "\n\t Iteration %d: h = %f, g = %f, gg = %f, xx = %f, q1 = %f, r1 = %f",
-        i, h, g, gg, xx[i], q1, r1);
+    fprintf(Logfile,
+            "\n\t Iteration %d: h = %f, g = %f, gg = %f, xx = %f, q1 = %f, "
+            "r1 = %f",
+            i, h, g, gg, xx[i], q1, r1);
 
     slope(&kk, &gg, k + r1 / 2.0, g + q1 / 2.0);
     q2 = -h * (g + q1 / 2.0) * gg / (xx[i] + (0.50 * h));
