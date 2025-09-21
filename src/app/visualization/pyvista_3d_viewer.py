@@ -254,7 +254,7 @@ class PyVistaViewer3D(Gtk.Box):
         self.mode_combo = Gtk.ComboBoxText()
         self.mode_combo.append("volume", "Volume Rendering")
         self.mode_combo.append("isosurface", "Isosurface")
-        self.mode_combo.append("points", "Point Cloud")
+        self.mode_combo.append("points", "Pixel Art")
         self.mode_combo.append("wireframe", "Wireframe")
         self.mode_combo.set_active_id("volume")
         self.mode_combo.connect('changed', self._on_rendering_mode_changed)

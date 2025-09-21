@@ -472,7 +472,7 @@ class MixDesignPanel(Gtk.Box):
             self.fine_agg_combo.remove_all()
             self.fine_agg_combo.append("", "-- Select Fine Aggregate --")
             fine_aggregates = self.mix_service.get_fine_aggregates()
-            for aggregate_name in fine_aggregates:
+            for aggregate_name in sorted(fine_aggregates):
                 self.fine_agg_combo.append(aggregate_name, aggregate_name)
             # Set default to highest fine aggregate in list (last item), or placeholder if no aggregates
             if fine_aggregates:
@@ -484,7 +484,7 @@ class MixDesignPanel(Gtk.Box):
             self.coarse_agg_combo.remove_all()
             self.coarse_agg_combo.append("", "-- Select Coarse Aggregate --")
             coarse_aggregates = self.mix_service.get_coarse_aggregates()
-            for aggregate_name in coarse_aggregates:
+            for aggregate_name in sorted(coarse_aggregates):
                 self.coarse_agg_combo.append(aggregate_name, aggregate_name)
             # Set default to highest coarse aggregate in list (last item), or placeholder if no aggregates
             if coarse_aggregates:
@@ -642,8 +642,8 @@ class MixDesignPanel(Gtk.Box):
             material_type = MaterialType(material_type_str)
             materials = self.material_lists.get(material_type, [])
             
-            # Populate name combo
-            for material_name in materials:
+            # Populate name combo in alphabetical order
+            for material_name in sorted(materials):
                 name_combo.append(material_name, material_name)
             
             # Set smart defaults based on material type

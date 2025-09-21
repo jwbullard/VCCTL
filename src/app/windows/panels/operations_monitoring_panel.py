@@ -1813,6 +1813,55 @@ class OperationsMonitoringPanel(Gtk.Box):
                         self.logger.info(f"Operation {operation.name} not complete - img:{img_exists}, pimg:{pimg_exists}")
                         return False
             
+            # For hydration operations, check for actual completion indicators
+            elif operation.operation_type == OperationType.HYDRATION_SIMULATION:
+                # Hydration operations should only be considered complete if they reach their target time
+                # or if there are specific completion files
+                operation_dir = self._get_operation_directory(operation)
+                if operation_dir:
+                    import os
+                    import json
+
+                    # Check if there's a progress.json with completion status
+                    progress_file = os.path.join(operation_dir, "progress.json")
+                    if os.path.exists(progress_file):
+                        try:
+                            with open(progress_file, 'r') as f:
+                                content = f.read().strip()
+                                if content.startswith("json "):
+                                    content = content[5:]
+                                data = json.loads(content)
+
+                                # Get current time and target time to determine completion
+                                current_time = data.get('time_hours', 0)
+
+                                # Get target time from stored parameters
+                                target_time = None
+                                if hasattr(operation, 'stored_ui_parameters') and operation.stored_ui_parameters:
+                                    try:
+                                        params = json.loads(operation.stored_ui_parameters) if isinstance(operation.stored_ui_parameters, str) else operation.stored_ui_parameters
+                                        target_time = params.get('max_time', None)
+                                    except:
+                                        pass
+
+                                if not target_time:
+                                    target_time = 168.0  # Default 7 days
+
+                                # Only consider complete if we've reached at least 95% of target time
+                                if current_time >= (target_time * 0.95):
+                                    self.logger.info(f"Hydration operation {operation.name} verified complete - reached {current_time:.2f}h of {target_time:.2f}h target")
+                                    return True
+                                else:
+                                    self.logger.info(f"Hydration operation {operation.name} not complete - only {current_time:.2f}h of {target_time:.2f}h target")
+                                    return False
+                        except Exception as e:
+                            self.logger.warning(f"Error reading hydration progress for completion check: {e}")
+                            return False
+
+                # If no progress file or other issues, don't assume completion
+                self.logger.info(f"Hydration operation {operation.name} - no completion indicators found")
+                return False
+
             # For other operation types, assume completion based on process exit
             return True
             
@@ -2116,26 +2165,42 @@ class OperationsMonitoringPanel(Gtk.Box):
                     self.logger.debug(f"Skipping hydration progress read for {operation.name}: {read_error}")
                     return
 
-                # Extract progress information
-                if 'simulation_time' in data and 'target_time' in data:
-                    current_time = data['simulation_time']
-                    target_time = data['target_time']
+                # Extract progress information from hydration progress.json format
+                if 'time_hours' in data:
+                    current_time = data['time_hours']
+                    cycle = data.get('cycle', 0)
+                    doh = data.get('degree_of_hydration', 0.0)
 
+                    # Get target time from operation parameters (max_time)
+                    target_time = None
+                    if hasattr(operation, 'stored_ui_parameters') and operation.stored_ui_parameters:
+                        try:
+                            import json
+                            params = json.loads(operation.stored_ui_parameters) if isinstance(operation.stored_ui_parameters, str) else operation.stored_ui_parameters
+                            target_time = params.get('max_time', None)
+                        except:
+                            pass
+
+                    # Fallback to default simulation time if not available
+                    if not target_time:
+                        target_time = 168.0  # Default 7 days
+
+                    # Calculate progress based on time
                     if target_time > 0:
                         progress = min(1.0, current_time / target_time)
                         operation.progress = progress
 
-                        # Update current step description
+                        # Update current step description with hydration-specific info
                         if progress >= 1.0:
-                            operation.current_step = f"Hydration complete ({current_time:.2f}h of {target_time:.2f}h)"
+                            operation.current_step = f"Hydration complete - Cycle {cycle}, DOH: {doh:.3f}"
                         else:
-                            operation.current_step = f"Hydrating ({current_time:.2f}h of {target_time:.2f}h)"
+                            operation.current_step = f"Cycle {cycle}, Time: {current_time:.2f}h of {target_time:.2f}h, DOH: {doh:.3f}"
 
                         # Update completed steps based on progress
                         if operation.total_steps > 0:
                             operation.completed_steps = int(operation.progress * operation.total_steps)
 
-                        self.logger.debug(f"Updated hydration progress for {operation.name}: {progress*100:.1f}%")
+                        self.logger.debug(f"Updated hydration progress for {operation.name}: {progress*100:.1f}% (cycle {cycle}, time {current_time:.2f}h/{target_time:.2f}h)")
 
         except Exception as e:
             self.logger.error(f"Error updating hydration progress for {operation.name}: {e}")

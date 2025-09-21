@@ -272,7 +272,7 @@ class HydrationPanel(Gtk.Box):
         # Initialize time calibration mode display
         self._on_aging_mode_changed(self.aging_time_radio)
         
-        # Register for simulation progress updates
+        # Register for simulation progress updates (needed for Operations panel tracking)
         self.hydration_service.add_progress_callback(self._on_simulation_progress)
         
         # Initialize thermal mode UI state now that all elements are created
@@ -290,9 +290,6 @@ class HydrationPanel(Gtk.Box):
         
         # Create simulation control area
         self._create_simulation_controls()
-        
-        # Create progress monitoring area
-        self._create_progress_area()
     
     def _create_header(self) -> None:
         """Create the panel header."""
@@ -324,7 +321,43 @@ class HydrationPanel(Gtk.Box):
         desc_label.set_halign(Gtk.Align.START)
         desc_label.get_style_context().add_class("dim-label")
         header_box.pack_start(desc_label, False, False, 0)
-        
+
+        # Operation name and controls (like Mix Design panel)
+        controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        controls_box.set_margin_top(10)
+
+        # Operation name entry
+        name_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        name_label = Gtk.Label("Operation Name:")
+        name_label.set_size_request(100, -1)
+        self.operation_name_entry = Gtk.Entry()
+        self.operation_name_entry.set_placeholder_text("Enter operation name...")
+        self.operation_name_entry.set_size_request(250, -1)
+        self.operation_name_entry.set_tooltip_text("Custom name for this hydration simulation")
+        name_box.pack_start(name_label, False, False, 0)
+        name_box.pack_start(self.operation_name_entry, False, False, 0)
+        controls_box.pack_start(name_box, False, False, 0)
+
+        # Action buttons
+        action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+        action_box.get_style_context().add_class("linked")
+
+        self.load_params_button = create_button_with_icon("Load", "folder--open", 16)
+        self.load_params_button.set_tooltip_text("Load saved hydration parameters")
+        action_box.pack_start(self.load_params_button, False, False, 0)
+
+        self.reset_button = create_button_with_icon("Reset", "refresh", 16)
+        self.reset_button.set_tooltip_text("Reset all parameters to default values")
+        action_box.pack_start(self.reset_button, False, False, 0)
+
+        self.save_params_button = create_button_with_icon("Save", "save", 16)
+        self.save_params_button.get_style_context().add_class("suggested-action")
+        self.save_params_button.set_tooltip_text("Save current hydration parameters")
+        action_box.pack_start(self.save_params_button, False, False, 0)
+
+        controls_box.pack_start(action_box, False, False, 0)
+        header_box.pack_start(controls_box, False, False, 0)
+
         self.pack_start(header_box, False, False, 0)
         
         # Separator
@@ -1039,37 +1072,8 @@ class HydrationPanel(Gtk.Box):
         control_box.set_margin_left(15)
         control_box.set_margin_right(15)
         
-        # Operation name input
-        name_label = Gtk.Label("Operation Name:")
-        name_label.set_halign(Gtk.Align.END)
-        control_box.pack_start(name_label, False, False, 0)
-        
-        self.operation_name_entry = Gtk.Entry()
-        self.operation_name_entry.set_placeholder_text("Enter operation name (optional)")
-        self.operation_name_entry.set_width_chars(25)
-        self.operation_name_entry.set_tooltip_text("Custom name for this hydration simulation (leave blank for auto-generated)")
-        control_box.pack_start(self.operation_name_entry, False, False, 0)
-        
-        # Spacer between name and validation
-        control_box.pack_start(Gtk.Box(), False, False, 10)
-        
-        # Save/Load buttons (following Mix Design pattern)
-        save_load_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-        save_load_box.get_style_context().add_class("linked")
-        
-        self.load_params_button = create_button_with_icon("Load", "folder--open", 16)
-        self.load_params_button.set_tooltip_text("Load saved hydration parameters")
-        save_load_box.pack_start(self.load_params_button, False, False, 0)
-        
-        self.save_params_button = create_button_with_icon("Save", "save", 16)
-        self.save_params_button.get_style_context().add_class("suggested-action")
-        self.save_params_button.set_tooltip_text("Save current hydration parameters")
-        save_load_box.pack_start(self.save_params_button, False, False, 0)
-        
-        control_box.pack_start(save_load_box, False, False, 0)
-        
-        # Spacer
-        control_box.pack_start(Gtk.Box(), False, False, 10)
+        # Spacer before validation and action buttons
+        control_box.pack_start(Gtk.Box(), True, True, 0)
         
         # Validation and estimation
         self.validate_button = Gtk.Button(label="Validate Parameters")
@@ -1105,130 +1109,6 @@ class HydrationPanel(Gtk.Box):
         
         self.pack_start(control_box, False, False, 0)
     
-    def _create_progress_area(self) -> None:
-        """Create simulation progress monitoring area."""
-        # Separator
-        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        self.pack_start(separator, False, False, 0)
-        
-        # Progress area
-        progress_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=15)
-        progress_box.set_margin_top(10)
-        progress_box.set_margin_bottom(10)
-        progress_box.set_margin_left(15)
-        progress_box.set_margin_right(15)
-        
-        # Left side: Progress bars and status
-        left_progress = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        left_progress.set_size_request(200, -1)  # Reduced from 300 to allow narrower windows
-        
-        # Overall progress
-        overall_label = Gtk.Label("Overall Progress:")
-        overall_label.set_halign(Gtk.Align.START)
-        left_progress.pack_start(overall_label, False, False, 0)
-        
-        self.overall_progress = Gtk.ProgressBar()
-        self.overall_progress.set_text("0%")
-        self.overall_progress.set_show_text(True)
-        left_progress.pack_start(self.overall_progress, False, False, 0)
-        
-        # Current operation
-        self.operation_label = Gtk.Label("Ready to start simulation")
-        self.operation_label.set_halign(Gtk.Align.START)
-        self.operation_label.get_style_context().add_class("dim-label")
-        left_progress.pack_start(self.operation_label, False, False, 0)
-        
-        # Performance metrics
-        metrics_grid = Gtk.Grid()
-        metrics_grid.set_row_spacing(5)
-        metrics_grid.set_column_spacing(10)
-        
-        # Elapsed time
-        elapsed_label = Gtk.Label("Elapsed:")
-        elapsed_label.set_halign(Gtk.Align.START)
-        metrics_grid.attach(elapsed_label, 0, 0, 1, 1)
-        
-        self.elapsed_time_label = Gtk.Label("00:00:00")
-        self.elapsed_time_label.set_halign(Gtk.Align.START)
-        self.elapsed_time_label.get_style_context().add_class("monospace")
-        metrics_grid.attach(self.elapsed_time_label, 1, 0, 1, 1)
-        
-        # Remaining time
-        remaining_label = Gtk.Label("Remaining:")
-        remaining_label.set_halign(Gtk.Align.START)
-        metrics_grid.attach(remaining_label, 0, 1, 1, 1)
-        
-        self.remaining_time_label = Gtk.Label("--:--:--")
-        self.remaining_time_label.set_halign(Gtk.Align.START)
-        self.remaining_time_label.get_style_context().add_class("monospace")
-        metrics_grid.attach(self.remaining_time_label, 1, 1, 1, 1)
-        
-        # Cycles per second
-        rate_label = Gtk.Label("Rate:")
-        rate_label.set_halign(Gtk.Align.START)
-        metrics_grid.attach(rate_label, 0, 2, 1, 1)
-        
-        self.rate_label = Gtk.Label("-- cycles/s")
-        self.rate_label.set_halign(Gtk.Align.START)
-        self.rate_label.get_style_context().add_class("monospace")
-        metrics_grid.attach(self.rate_label, 1, 2, 1, 1)
-        
-        left_progress.pack_start(metrics_grid, False, False, 0)
-        
-        # Right side: Hydration metrics
-        right_progress = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        right_progress.set_size_request(200, -1)  # Reduced from 300 to allow narrower windows
-        
-        metrics_frame = Gtk.Frame(label="Hydration Metrics")
-        metrics_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        metrics_vbox.set_margin_top(10)
-        metrics_vbox.set_margin_bottom(10)
-        metrics_vbox.set_margin_left(10)
-        metrics_vbox.set_margin_right(10)
-        
-        # Degree of hydration
-        doh_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        doh_label = Gtk.Label("Degree of Hydration:")
-        doh_box.pack_start(doh_label, False, False, 0)
-        
-        self.doh_value_label = Gtk.Label("0.00")
-        self.doh_value_label.set_halign(Gtk.Align.END)
-        self.doh_value_label.get_style_context().add_class("monospace")
-        doh_box.pack_end(self.doh_value_label, False, False, 0)
-        
-        metrics_vbox.pack_start(doh_box, False, False, 0)
-        
-        # Heat released
-        heat_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        heat_label = Gtk.Label("Heat Released (J/g):")
-        heat_box.pack_start(heat_label, False, False, 0)
-        
-        self.heat_value_label = Gtk.Label("0.0")
-        self.heat_value_label.set_halign(Gtk.Align.END)
-        self.heat_value_label.get_style_context().add_class("monospace")
-        heat_box.pack_end(self.heat_value_label, False, False, 0)
-        
-        metrics_vbox.pack_start(heat_box, False, False, 0)
-        
-        # Chemical shrinkage
-        shrinkage_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        shrinkage_label = Gtk.Label("Chemical Shrinkage:")
-        shrinkage_box.pack_start(shrinkage_label, False, False, 0)
-        
-        self.shrinkage_value_label = Gtk.Label("0.000")
-        self.shrinkage_value_label.set_halign(Gtk.Align.END)
-        self.shrinkage_value_label.get_style_context().add_class("monospace")
-        shrinkage_box.pack_end(self.shrinkage_value_label, False, False, 0)
-        
-        metrics_vbox.pack_start(shrinkage_box, False, False, 0)
-        
-        metrics_frame.add(metrics_vbox)
-        right_progress.pack_start(metrics_frame, False, False, 0)
-        
-        progress_box.pack_start(left_progress, False, False, 0)
-        progress_box.pack_start(right_progress, False, False, 0)
-        
-        self.pack_start(progress_box, False, False, 0)
     
     def _connect_signals(self) -> None:
         """Connect UI signals."""
@@ -1280,6 +1160,7 @@ class HydrationPanel(Gtk.Box):
         # Control signals
         self.save_params_button.connect('clicked', self._on_save_params_clicked)
         self.load_params_button.connect('clicked', self._on_load_params_clicked)
+        self.reset_button.connect('clicked', self._on_reset_clicked)
         self.validate_button.connect('clicked', self._on_validate_clicked)
         self.start_button.connect('clicked', self._on_start_clicked)
         self.pause_button.connect('clicked', self._on_pause_clicked)
@@ -1894,24 +1775,13 @@ class HydrationPanel(Gtk.Box):
                 return f"{sanitized_name}_{self._get_timestamp()}"
     
     def _on_simulation_progress(self, operation_name: str, progress_data) -> None:
-        """Handle simulation progress updates."""
+        """Handle simulation progress updates - store data for Operations panel."""
         if progress_data and operation_name == self.current_operation_name:
-            # Store latest progress for UI updates
+            # Store latest progress for Operations panel tracking
             self.latest_progress = progress_data
-            
-            # Handle both dict and HydrationProgress object formats
-            if hasattr(progress_data, 'get'):  # Dictionary format
-                cycle = progress_data.get('cycle', 0)
-                time_hours = progress_data.get('time_hours', 0.0)
-                doh = progress_data.get('degree_of_hydration', 0.0)
-            else:  # HydrationProgress object format
-                cycle = getattr(progress_data, 'cycle', 0)
-                time_hours = getattr(progress_data, 'time_hours', 0.0)
-                doh = getattr(progress_data, 'degree_of_hydration', 0.0)
-            
-            status_text = f"Cycle {cycle}, Time: {time_hours:.2f}h, DOH: {doh:.3f}"
-            GLib.idle_add(self._update_status, status_text)
-    
+
+            # The actual display of progress is handled by the Operations panel
+            # We just need to maintain the progress data here
     def _on_pause_clicked(self, button) -> None:
         """Handle pause simulation button click."""
         # TODO: Implement pause functionality
@@ -2064,174 +1934,18 @@ class HydrationPanel(Gtk.Box):
         self.validate_button.set_sensitive(not running)
     
     def _start_progress_updates(self) -> None:
-        """Start periodic progress updates."""
-        if self.progress_update_timeout:
-            GLib.source_remove(self.progress_update_timeout)
-        
-        self.progress_update_timeout = GLib.timeout_add(
-            100,  # Update every 100ms
-            self._update_progress_display
-        )
-    
+        """Start periodic progress updates - removed for UI consistency."""
+        pass  # Progress monitoring moved to Operations panel
+
     def _stop_progress_updates(self) -> None:
-        """Stop periodic progress updates."""
-        if self.progress_update_timeout:
-            GLib.source_remove(self.progress_update_timeout)
-            self.progress_update_timeout = None
-    
+        """Stop periodic progress updates - removed for UI consistency."""
+        pass  # Progress monitoring moved to Operations panel
+
     def _update_progress_display(self) -> bool:
-        """Update progress display (called periodically)."""
-        if not self.simulation_running or not self.current_operation_name:
-            return True  # Continue timeout
-        
-        # Calculate elapsed time
-        elapsed_seconds = 0
-        if self.simulation_start_time:
-            elapsed_seconds = time.time() - self.simulation_start_time
-            elapsed_h = int(elapsed_seconds // 3600)
-            elapsed_m = int((elapsed_seconds % 3600) // 60)
-            elapsed_s = int(elapsed_seconds % 60)
-            self.elapsed_time_label.set_text(f"{elapsed_h:02d}:{elapsed_m:02d}:{elapsed_s:02d}")
-        
-        # Use latest progress from HydrationExecutorService
-        progress = self.latest_progress
-        if progress:
-            # Handle both dict and object formats
-            if hasattr(progress, 'get'):  # Dictionary format
-                cycle = progress.get('cycle', 0)
-                max_cycles = progress.get('max_cycles', 2000)
-                time_hours = progress.get('time_hours', 0.0)
-                doh = progress.get('degree_of_hydration', 0.0)
-                temperature = progress.get('temperature_celsius', 25.0)
-                ph = progress.get('ph', 12.5)
-                heat_cumulative = progress.get('heat_cumulative', 0.0)
-                percent_complete = progress.get('percent_complete', 0.0)
-            else:  # HydrationProgress object format
-                cycle = getattr(progress, 'cycle', 0)
-                max_cycles = getattr(progress, 'max_cycles', 2000)
-                time_hours = getattr(progress, 'time_hours', 0.0)
-                doh = getattr(progress, 'degree_of_hydration', 0.0)
-                temperature = getattr(progress, 'temperature_celsius', 25.0)
-                ph = getattr(progress, 'ph', 12.5)
-                heat_cumulative = getattr(progress, 'heat_cumulative', 0.0)
-                percent_complete = getattr(progress, 'percent_complete', 0.0)
-            
-            # Update progress bar - use time-based calculation for accuracy
-            if percent_complete > 0:
-                # Use the calculated percent_complete from HydrationExecutorService
-                progress_fraction = percent_complete / 100.0
-                self.overall_progress.set_fraction(progress_fraction)
-                self.overall_progress.set_text(f"{percent_complete:.1f}%")
-            else:
-                # Fallback: calculate from time vs max_time (more accurate than cycles)
-                max_time_hours = self.max_time_spin.get_value() if hasattr(self, 'max_time_spin') else 168.0
-                if time_hours > 0 and max_time_hours > 0:
-                    progress_percentage = min((time_hours / max_time_hours) * 100.0, 100.0)
-                    progress_fraction = progress_percentage / 100.0
-                    self.overall_progress.set_fraction(progress_fraction)
-                    self.overall_progress.set_text(f"{progress_percentage:.1f}%")
-                else:
-                    self.overall_progress.set_fraction(0.0)
-                    self.overall_progress.set_text("0.0%")
-            
-            # Update operation label
-            self.operation_label.set_text(f"Running simulation - Cycle {cycle}/{max_cycles}")
-            
-            # Use remaining time from progress data (time-based, not cycle-based)
-            try:
-                # Debug: Print what we have in latest_progress
-                if self.latest_progress:
-                    print(f"DEBUG: latest_progress exists, estimated_time_remaining = {getattr(self.latest_progress, 'estimated_time_remaining', 'NOT FOUND')}")
-                else:
-                    print("DEBUG: latest_progress is None")
-                
-                if (self.latest_progress and 
-                    hasattr(self.latest_progress, 'estimated_time_remaining') and 
-                    self.latest_progress.estimated_time_remaining is not None):
-                    
-                    remaining_hours = float(self.latest_progress.estimated_time_remaining)
-                    print(f"DEBUG: Using time-based remaining time: {remaining_hours} hours")
-                    if remaining_hours > 0:
-                        remaining_seconds_total = remaining_hours * 3600
-                        remaining_h = int(remaining_seconds_total // 3600)
-                        remaining_m = int((remaining_seconds_total % 3600) // 60)
-                        remaining_s = int(remaining_seconds_total % 60)
-                        print(f"DEBUG: Conversion: {remaining_hours}h -> {remaining_seconds_total:.1f}s -> {remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
-                        self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
-                    else:
-                        print(f"DEBUG: remaining_hours <= 0, showing 00:00:00")
-                        self.remaining_time_label.set_text("00:00:00")
-                else:
-                    # Fallback to cycle-based calculation if progress data is not available
-                    print(f"DEBUG: Using cycle-based fallback calculation")
-                    if cycle > 0 and elapsed_seconds > 0:
-                        cycles_per_second = cycle / elapsed_seconds
-                        remaining_cycles = max_cycles - cycle
-                        remaining_seconds = remaining_cycles / cycles_per_second if cycles_per_second > 0 else 0
-                        print(f"DEBUG: Cycle-based: {remaining_cycles} remaining cycles, {cycles_per_second:.2f} cycles/s, {remaining_seconds:.0f} seconds remaining")
-                        if remaining_seconds > 0:
-                            remaining_h = int(remaining_seconds // 3600)
-                            remaining_m = int((remaining_seconds % 3600) // 60)
-                            remaining_s = int(remaining_seconds % 60)
-                            self.remaining_time_label.set_text(f"{remaining_h:02d}:{remaining_m:02d}:{remaining_s:02d}")
-                        else:
-                            self.remaining_time_label.set_text("--:--:--")
-                    else:
-                        self.remaining_time_label.set_text("--:--:--")
-            except Exception as e:
-                # Log error and fallback to showing unknown time
-                print(f"Error calculating remaining time: {e}")
-                self.remaining_time_label.set_text("--:--:--")
-            
-            # Update rate using cycles if available
-            if cycle > 0 and elapsed_seconds > 0:
-                cycles_per_second = cycle / elapsed_seconds
-                self.rate_label.set_text(f"{cycles_per_second:.2f} cycles/s")
-            else:
-                self.rate_label.set_text("-- cycles/s")
-            
-            # Update hydration metrics
-            self.doh_value_label.set_text(f"{doh:.3f}")
-            # Convert heat from kJ/kg to J/g (divide by 1000)
-            heat_j_per_g = heat_cumulative / 1000.0 if heat_cumulative > 0 else 0.0
-            self.heat_value_label.set_text(f"{heat_j_per_g:.1f}")
-            # Chemical shrinkage - estimate based on degree of hydration
-            # Typical value: 0.063 mL/g of cement at full hydration
-            chemical_shrinkage = doh * 0.063 if doh > 0 else 0.0
-            self.shrinkage_value_label.set_text(f"{chemical_shrinkage:.3f}")
-        else:
-            # No progress data yet, show initial state
-            self.overall_progress.set_fraction(0.0)
-            self.overall_progress.set_text("0.0%")
-            self.operation_label.set_text("Starting simulation...")
-            self.remaining_time_label.set_text("--:--:--")
-            self.rate_label.set_text("-- cycles/s")
-            
-            # Reset hydration metrics to initial values
-            self.doh_value_label.set_text("0.000")
-            self.heat_value_label.set_text("0.0")
-            self.shrinkage_value_label.set_text("0.000")
-        
-        # Check if simulation process is still running
-        executor = self.service_container.hydration_executor_service
-        if self.current_operation_name not in executor.active_simulations:
-            # Simulation has finished
-            self.simulation_running = False
-            self._update_simulation_controls(False)
-            self._stop_progress_updates()
-            self._update_status("Simulation completed")
-            
-            # Final update with last known values
-            if progress:
-                self.operation_label.set_text("Simulation completed")
-                self.remaining_time_label.set_text("00:00:00")
-                self.rate_label.set_text("-- cycles/s")
-            
-            return False  # Stop timeout
-        
-        return True  # Continue timeout
-    
-    
+        """Update progress display - removed for UI consistency."""
+        # All progress monitoring is now handled in the Operations panel
+        return False  # Stop timeout
+
     def _on_draw_temperature_plot(self, widget, cr) -> bool:
         """Draw temperature profile plot. (DEPRECATED: Now using matplotlib plot widget)"""
         # This method is deprecated - now using HydrationPlotWidget
@@ -2860,7 +2574,82 @@ class HydrationPanel(Gtk.Box):
             )
             dialog.run()
             dialog.destroy()
-    
+
+    def _on_reset_clicked(self, button) -> None:
+        """Handle reset button click."""
+        # Show confirmation dialog
+        dialog = Gtk.MessageDialog(
+            self.get_toplevel(),
+            Gtk.DialogFlags.MODAL,
+            Gtk.MessageType.QUESTION,
+            Gtk.ButtonsType.YES_NO,
+            "Reset all parameters to default values?"
+        )
+        dialog.format_secondary_text(
+            "This will reset all hydration parameters to their default values. "
+            "Any unsaved changes will be lost."
+        )
+
+        response = dialog.run()
+        dialog.destroy()
+
+        if response == Gtk.ResponseType.YES:
+            try:
+                self._reset_to_defaults()
+                self._update_status("Parameters reset to default values")
+            except Exception as e:
+                self.logger.error(f"Error resetting parameters: {e}")
+                error_dialog = Gtk.MessageDialog(
+                    self.get_toplevel(),
+                    Gtk.DialogFlags.MODAL,
+                    Gtk.MessageType.ERROR,
+                    Gtk.ButtonsType.OK,
+                    f"Failed to reset parameters: {e}"
+                )
+                error_dialog.run()
+                error_dialog.destroy()
+
+    def _reset_to_defaults(self) -> None:
+        """Reset all hydration parameters to default values."""
+        # Clear operation name
+        self.operation_name_entry.set_text("")
+
+        # Core simulation parameters
+        self.alpha_max_spin.set_value(1.0)
+        self.max_time_spin.set_value(168.0)  # 7 days
+
+        # Time calibration mode - set to Knudsen parabolic
+        self.aging_time_radio.set_active(True)
+        self.time_conversion_spin.set_value(0.00045)
+
+        # Thermal conditions - set to isothermal
+        self.isothermal_radio.set_active(True)
+        self.initial_temp_spin.set_value(25.0)
+
+        # Load default temperature profile
+        self._load_default_parameters()
+
+        # Output parameters
+        self.save_interval_spin.set_value(72.0)
+        self.movie_freq_spin.set_value(72.0)
+
+        # Advanced parameters
+        self.random_seed_spin.set_value(-12345)
+        self.c3a_fraction_spin.set_value(0.0)
+        self.csh_seeds_spin.set_value(0.0)
+        self.e_act_spin.set_value(40.0)
+        self.e_act_pozz_spin.set_value(83.1)
+        self.e_act_slag_spin.set_value(50.0)
+        self.burn_freq_spin.set_value(1.0)
+
+        # Reset checkboxes to default states
+        self.csh2_flag_check.set_active(False)
+        self.ch_flag_check.set_active(False)
+        self.ph_active_check.set_active(False)
+
+        # Clear validation
+        self._clear_validation()
+
     def _extract_current_parameters(self) -> Dict[str, Any]:
         """Extract current hydration parameters from UI controls."""
         # Core simulation parameters
@@ -3293,6 +3082,7 @@ class HydrationPanel(Gtk.Box):
     def cleanup(self) -> None:
         """Cleanup resources when panel is destroyed."""
         self._stop_progress_updates()
+        # Keep callback cleanup for proper resource management
         self.hydration_service.remove_progress_callback(self._on_simulation_progress)
     
     # Phase 3: Clean Naming and Lineage Methods

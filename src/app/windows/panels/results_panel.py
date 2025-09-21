@@ -116,7 +116,10 @@ class ResultsPanel(Gtk.Box):
         """Create the scrollable list of completed operations."""
         # Create list store: name, type, completion_date, operation_object
         self.operation_liststore = Gtk.ListStore(str, str, str, object)
-        
+
+        # Setup sorting for the list store
+        self._setup_column_sorting()
+
         # Create tree view
         self.operation_treeview = Gtk.TreeView(model=self.operation_liststore)
         self.operation_treeview.set_headers_visible(True)
@@ -128,20 +131,26 @@ class ResultsPanel(Gtk.Box):
         name_column = Gtk.TreeViewColumn("Result Name", name_renderer, text=0)
         name_column.set_resizable(True)
         name_column.set_min_width(200)
+        name_column.set_sort_column_id(0)  # Enable sorting by column 0
+        name_column.set_clickable(True)
         self.operation_treeview.append_column(name_column)
-        
+
         # Type column
         type_renderer = Gtk.CellRendererText()
         type_column = Gtk.TreeViewColumn("Type", type_renderer, text=1)
         type_column.set_resizable(True)
         type_column.set_min_width(120)
+        type_column.set_sort_column_id(1)  # Enable sorting by column 1
+        type_column.set_clickable(True)
         self.operation_treeview.append_column(type_column)
-        
+
         # Completion date column
         date_renderer = Gtk.CellRendererText()
         date_column = Gtk.TreeViewColumn("Last Modified", date_renderer, text=2)
         date_column.set_resizable(True)
         date_column.set_min_width(120)
+        date_column.set_sort_column_id(2)  # Enable sorting by column 2
+        date_column.set_clickable(True)
         self.operation_treeview.append_column(date_column)
         
         # Scrolled window
@@ -149,7 +158,93 @@ class ResultsPanel(Gtk.Box):
         self.operation_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.operation_scrolled.set_size_request(-1, 150)
         self.operation_scrolled.add(self.operation_treeview)
-    
+
+    def _setup_column_sorting(self) -> None:
+        """Setup sorting functions for the operation list columns."""
+        # Enable default sorting for name and type columns (string comparison)
+        self.operation_liststore.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.operation_liststore.set_sort_func(0, self._sort_by_name, None)
+        self.operation_liststore.set_sort_func(1, self._sort_by_type, None)
+        self.operation_liststore.set_sort_func(2, self._sort_by_date, None)
+
+    def _sort_by_name(self, model, iter1, iter2, user_data):
+        """Sort function for the name column."""
+        name1 = model.get_value(iter1, 0).lower()
+        name2 = model.get_value(iter2, 0).lower()
+        if name1 < name2:
+            return -1
+        elif name1 > name2:
+            return 1
+        else:
+            return 0
+
+    def _sort_by_type(self, model, iter1, iter2, user_data):
+        """Sort function for the type column."""
+        type1 = model.get_value(iter1, 1).lower()
+        type2 = model.get_value(iter2, 1).lower()
+        if type1 < type2:
+            return -1
+        elif type1 > type2:
+            return 1
+        else:
+            return 0
+
+    def _sort_by_date(self, model, iter1, iter2, user_data):
+        """Sort function for the date column."""
+        import datetime
+
+        date1_str = model.get_value(iter1, 2)
+        date2_str = model.get_value(iter2, 2)
+
+        # Parse date strings - handle different formats gracefully
+        try:
+            # Try to parse as ISO format first (YYYY-MM-DD HH:MM:SS)
+            if ' ' in date1_str:
+                date1 = datetime.datetime.strptime(date1_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                date1 = datetime.datetime.strptime(date1_str, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            try:
+                # Try alternative formats
+                date1 = datetime.datetime.strptime(date1_str, '%m/%d/%Y')
+            except (ValueError, TypeError):
+                # If parsing fails, use string comparison as fallback
+                date1_str = str(date1_str)
+                date2_str = str(date2_str)
+                if date1_str < date2_str:
+                    return -1
+                elif date1_str > date2_str:
+                    return 1
+                else:
+                    return 0
+
+        try:
+            if ' ' in date2_str:
+                date2 = datetime.datetime.strptime(date2_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                date2 = datetime.datetime.strptime(date2_str, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            try:
+                date2 = datetime.datetime.strptime(date2_str, '%m/%d/%Y')
+            except (ValueError, TypeError):
+                # Fallback to string comparison
+                date1_str = str(date1_str)
+                date2_str = str(date2_str)
+                if date1_str < date2_str:
+                    return -1
+                elif date1_str > date2_str:
+                    return 1
+                else:
+                    return 0
+
+        # Compare parsed dates
+        if date1 < date2:
+            return -1
+        elif date1 > date2:
+            return 1
+        else:
+            return 0
+
     def _create_results_area(self) -> None:
         """Create the results analysis area."""
         self.results_frame = Gtk.Frame(label="Analysis Tools")
@@ -297,6 +392,34 @@ class ResultsPanel(Gtk.Box):
                 self.itz_analysis_button.set_tooltip_text("Analyze elastic moduli variation in interfacial transition zone")
 
                 buttons_grid.attach(self.itz_analysis_button, button_col, 0, 1, 1)
+                button_col += 1
+
+            # Strain Energy 3D Visualization button
+            has_strain_energy = self._has_strain_energy(operation)
+            if has_strain_energy:
+                self.strain_energy_button = Gtk.Button()
+                self.strain_energy_button.set_size_request(200, 60)
+
+                button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+
+                icon_label = Gtk.Label()
+                icon_label.set_markup('<span size="x-large">🔥</span>')
+                button_box.pack_start(icon_label, False, False, 0)
+
+                text_label = Gtk.Label()
+                text_label.set_markup('<b>Strain Energy 3D</b>')
+                button_box.pack_start(text_label, False, False, 0)
+
+                desc_label = Gtk.Label()
+                desc_label.set_markup('<small>3D heat map visualization\nof elastic strain energy</small>')
+                desc_label.set_justify(Gtk.Justification.CENTER)
+                button_box.pack_start(desc_label, False, False, 0)
+
+                self.strain_energy_button.add(button_box)
+                self.strain_energy_button.connect('clicked', self._on_strain_energy_clicked)
+                self.strain_energy_button.set_tooltip_text("View 3D heat map of elastic strain energy distribution")
+
+                buttons_grid.attach(self.strain_energy_button, button_col, 0, 1, 1)
                 button_col += 1
 
         # Data Plotting button
@@ -907,6 +1030,66 @@ class ResultsPanel(Gtk.Box):
             dialog.run()
             dialog.destroy()
 
+    def _on_strain_energy_clicked(self, button) -> None:
+        """Handle Strain Energy 3D button click."""
+        if not self.selected_operation:
+            return
+
+        try:
+            # Import here to avoid circular imports
+            from app.windows.dialogs.elastic_strain_viewer import ElasticStrainViewer
+
+            # Find the strain energy .img file using the same logic as detection
+            operation_dir = self._get_operation_output_dir(self.selected_operation)
+            if not operation_dir:
+                raise Exception("Operation output directory not found")
+
+            operation_dir_path = Path(operation_dir)
+            strain_energy_file = None
+
+            # Pattern 1: {operation_name}.img
+            test_file = operation_dir_path / f"{self.selected_operation.name}.img"
+            if test_file.exists():
+                strain_energy_file = test_file
+            else:
+                # Pattern 2: Any Elastic-*.img file in the directory
+                for img_file in operation_dir_path.glob("Elastic-*.img"):
+                    strain_energy_file = img_file
+                    break
+
+                # Pattern 3: Check for any .img file that's not newcem.img
+                if not strain_energy_file:
+                    for img_file in operation_dir_path.glob("*.img"):
+                        if img_file.name != "newcem.img":
+                            strain_energy_file = img_file
+                            break
+
+            if not strain_energy_file:
+                raise Exception("No strain energy .img file found in operation directory")
+
+            # Create and show the strain energy viewer dialog
+            viewer = ElasticStrainViewer(
+                parent_window=self.get_toplevel(),
+                operation_name=self.selected_operation.name,
+                img_file_path=str(strain_energy_file)
+            )
+            viewer.run()
+            viewer.destroy()
+
+        except Exception as e:
+            self.logger.error(f"Error opening strain energy viewer: {e}")
+            # Show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=self.get_toplevel(),
+                flags=0,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text="Error Opening Strain Energy Viewer"
+            )
+            dialog.format_secondary_text(f"Failed to open strain energy viewer: {e}")
+            dialog.run()
+            dialog.destroy()
+
     def _is_elastic_operation(self, operation) -> bool:
         """Check if operation is an elastic moduli calculation."""
         if hasattr(operation, 'operation_type'):
@@ -936,6 +1119,33 @@ class ResultsPanel(Gtk.Box):
             if operation_dir:
                 itz_moduli_file = Path(operation_dir) / "ITZmoduli.csv"
                 return itz_moduli_file.exists()
+            return False
+        except Exception:
+            return False
+
+    def _has_strain_energy(self, operation) -> bool:
+        """Check if operation has strain energy .img file."""
+        try:
+            operation_dir = self._get_operation_output_dir(operation)
+            if operation_dir:
+                # Look for .img files that match the elastic operation pattern
+                # Try multiple patterns: operation.name.img or Elastic-*.img files
+                operation_dir_path = Path(operation_dir)
+
+                # Pattern 1: {operation_name}.img
+                strain_energy_file = operation_dir_path / f"{operation.name}.img"
+                if strain_energy_file.exists():
+                    return True
+
+                # Pattern 2: Any Elastic-*.img file in the directory
+                for img_file in operation_dir_path.glob("Elastic-*.img"):
+                    return True
+
+                # Pattern 3: Check for any .img file that's not newcem.img (microstructure)
+                for img_file in operation_dir_path.glob("*.img"):
+                    if img_file.name != "newcem.img":
+                        return True
+
             return False
         except Exception:
             return False
