@@ -19,24 +19,71 @@ from app.services.service_container import get_service_container
 from app.models.grading import GradingType
 from app.utils.grading_file_utils import grading_file_manager
 
-# Standard sieve sizes (mm)
-STANDARD_SIEVES = [
-    (75.0, "75 mm"),
-    (63.0, "63 mm"),
-    (50.0, "50 mm"),
-    (37.5, "37.5 mm"),
-    (25.0, "25 mm"),
-    (19.0, "19 mm"),
-    (12.5, "12.5 mm"),
-    (9.5, "9.5 mm"),
-    (4.75, "No. 4"),
-    (2.36, "No. 8"),
-    (1.18, "No. 16"),
-    (0.60, "No. 30"),
-    (0.30, "No. 50"),
-    (0.15, "No. 100"),
-    (0.075, "No. 200")
+# Fine aggregate sieve sizes (mm) - based on user specifications
+FINE_AGGREGATE_SIEVES = [
+    (4.75, "No. 4"),  # 4.000 - 4.75 mm range
+    (4.00, "No. 5"),  # 4.000 - 4.5 mm (using 4.00 as opening)
+    (3.35, "No. 6"),  # 3.350 - 4.000 mm
+    (2.80, "No. 7"),  # 2.800 - 3.350 mm
+    (2.36, "No. 8"),  # 2.360 - 2.800 mm
+    (2.00, "No. 10"), # 2.000 - 2.360 mm
+    (1.70, "No. 12"), # 1.700 - 2.000 mm
+    (1.40, "No. 14"), # 1.400 - 1.700 mm
+    (1.18, "No. 16"), # 1.180 - 1.400 mm
+    (1.00, "No. 18"), # 1.000 - 1.180 mm
+    (0.850, "No. 20"), # 0.850 - 1.000 mm
+    (0.710, "No. 25"), # 0.710 - 0.850 mm
+    (0.600, "No. 30"), # 0.600 - 0.710 mm
+    (0.500, "No. 35"), # 0.500 - 0.600 mm
+    (0.425, "No. 40"), # 0.425 - 0.500 mm
+    (0.355, "No. 45"), # 0.355 - 0.425 mm
+    (0.300, "No. 50"), # 0.300 - 0.355 mm
+    (0.250, "No. 60"), # 0.250 - 0.300 mm
+    (0.212, "No. 70"), # 0.212 - 0.250 mm
+    (0.180, "No. 80"), # 0.180 - 0.212 mm
+    (0.150, "No. 100"), # 0.150 - 0.180 mm
+    (0.125, "No. 120"), # 0.125 - 0.150 mm
+    (0.106, "No. 140"), # 0.106 - 0.125 mm
+    (0.090, "No. 170"), # 0.090 - 0.106 mm
+    (0.075, "No. 200"), # 0.075 - 0.090 mm
+    (0.063, "No. 230"), # 0.063 - 0.075 mm
+    (0.053, "No. 270"), # 0.053 - 0.063 mm
+    (0.045, "No. 325"), # 0.045 - 0.053 mm
+    (0.038, "No. 400"), # 0.038 - 0.045 mm
+    (0.032, "No. 450"), # 0.032 - 0.038 mm
+    (0.025, "No. 500"), # 0.025 - 0.032 mm
+    (0.020, "No. 635"), # 0.020 - 0.025 mm
 ]
+
+# Coarse aggregate sieve sizes (mm) - based on user specifications
+COARSE_AGGREGATE_SIEVES = [
+    (100.0, '4"'),        # 100.000 - 110.0 mm
+    (90.0, '3-1/2"'),     # 90.000 - 100.000 mm
+    (75.0, '3"'),         # 75.000 - 90.000 mm
+    (63.0, '2-1/2"'),     # 63.000 - 75.000 mm
+    (53.0, '2.12"'),      # 53.000 - 63.000 mm
+    (50.0, '2"'),         # 50.000 - 53.000 mm
+    (45.0, '1-3/4"'),     # 45.000 - 50.000 mm
+    (37.5, '1-1/2"'),     # 37.500 - 45.000 mm
+    (31.5, '1-1/4"'),     # 31.500 - 37.500 mm
+    (26.5, '1.06"'),      # 26.500 - 31.500 mm
+    (25.0, '1"'),         # 25.000 - 26.500 mm
+    (22.4, '7/8"'),       # 22.400 - 25.000 mm
+    (19.0, '3/4"'),       # 19.000 - 22.400 mm
+    (16.0, '5/8"'),       # 16.000 - 19.000 mm
+    (13.2, '0.530"'),     # 13.200 - 16.000 mm
+    (12.5, '1/2"'),       # 12.500 - 13.200 mm
+    (11.2, '7/16"'),      # 11.200 - 12.500 mm
+    (9.5, '3/8"'),        # 9.500 - 11.200 mm
+    (8.0, '5/16"'),       # 8.000 - 9.500 mm
+    (6.7, '0.265"'),      # 6.700 - 8.000 mm
+    (6.3, '1/4"'),        # 6.300 - 6.700 mm
+    (5.6, 'No. 3-1/2'),   # 5.600 - 6.300 mm
+    (4.75, 'No. 4'),      # 4.750 - 5.600 mm
+]
+
+# Default to coarse aggregate sieves for backward compatibility
+STANDARD_SIEVES = COARSE_AGGREGATE_SIEVES
 
 
 class GradingCurveWidget(Gtk.Box):
@@ -47,12 +94,23 @@ class GradingCurveWidget(Gtk.Box):
         'curve-changed': (GObject.SignalFlags.RUN_FIRST, None, ()),
     }
     
-    def __init__(self):
-        """Initialize the grading curve widget."""
+    def __init__(self, aggregate_type='coarse'):
+        """Initialize the grading curve widget.
+
+        Args:
+            aggregate_type: Either 'fine' or 'coarse' to determine sieve set
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        
+
         self.logger = logging.getLogger('VCCTL.GradingCurveWidget')
-        
+
+        # Set the aggregate type and corresponding sieves
+        self.aggregate_type = aggregate_type.lower()
+        if self.aggregate_type == 'fine':
+            self.sieves = FINE_AGGREGATE_SIEVES
+        else:
+            self.sieves = COARSE_AGGREGATE_SIEVES
+
         # Initialize grading service for template functionality
         try:
             service_container = get_service_container()
@@ -60,7 +118,7 @@ class GradingCurveWidget(Gtk.Box):
         except Exception as e:
             self.logger.warning(f"Failed to initialize grading service: {e}")
             self.grading_service = None
-        
+
         # Grading data: list of (size_mm, percent_retained)
         self.grading_data = []
         
@@ -244,8 +302,8 @@ class GradingCurveWidget(Gtk.Box):
     def _create_sieve_entries(self) -> None:
         """Create sieve entry rows."""
         self.sieve_entries = []
-        
-        for size_mm, size_label in STANDARD_SIEVES:
+
+        for size_mm, size_label in self.sieves:
             entry_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
             entry_box.set_margin_top(1)
             entry_box.set_margin_bottom(1)
@@ -342,29 +400,29 @@ class GradingCurveWidget(Gtk.Box):
             spin = entry['spin']
             
             # Find matching data point with flexible tolerance
-            percent_passing = 0.0
+            percent_retained = 0.0
             best_match = None
             best_diff = float('inf')
-            
+
             for data_size, data_percent in self.grading_data:
                 # Try exact match first
                 if abs(data_size - size_mm) < 0.001:
-                    percent_passing = data_percent
+                    percent_retained = data_percent
                     break
-                
+
                 # Track closest match as backup
                 diff = abs(data_size - size_mm)
                 if diff < best_diff and diff < (size_mm * 0.1):  # Within 10% of sieve size
                     best_diff = diff
                     best_match = data_percent
-            
+
             # If no exact match, use closest match if reasonable
-            if percent_passing == 0.0 and best_match is not None:
-                percent_passing = best_match
-            
+            if percent_retained == 0.0 and best_match is not None:
+                percent_retained = best_match
+
             # Block signals while setting value to prevent recursive calls
             spin.handler_block_by_func(self._on_sieve_value_changed)
-            spin.set_value(percent_passing)
+            spin.set_value(percent_retained)
             spin.handler_unblock_by_func(self._on_sieve_value_changed)
         
         # Redraw plot
@@ -397,12 +455,12 @@ class GradingCurveWidget(Gtk.Box):
                 self.logger.warning(f"No sieve data found in template: {grading.name}")
                 return False
             
-            # Convert to grading data format [(size_mm, percent_passing), ...]
+            # Convert to grading data format [(size_mm, percent_retained), ...]
             template_data = []
             for point in sieve_data:
                 size_mm = float(point['sieve_size'])
-                percent_passing = float(point['percent_passing'])
-                template_data.append((size_mm, percent_passing))
+                percent_retained = float(point['percent_retained'])
+                template_data.append((size_mm, percent_retained))
             
             # Load the data
             self.set_grading_data(template_data)
@@ -439,10 +497,10 @@ class GradingCurveWidget(Gtk.Box):
             
             # Convert grading data to sieve data format
             sieve_data = []
-            for size_mm, percent_passing in self.grading_data:
+            for size_mm, percent_retained in self.grading_data:
                 sieve_data.append({
                     'sieve_size': size_mm,
-                    'percent_passing': percent_passing
+                    'percent_retained': percent_retained
                 })
             
             # Create new grading template
@@ -492,17 +550,18 @@ class GradingCurveWidget(Gtk.Box):
     def _update_grading_from_sieves(self) -> None:
         """Update grading data from sieve entries."""
         self.grading_data.clear()
-        
+
         for entry in self.sieve_entries:
             size_mm = entry['size_mm']
-            percent_passing = entry['spin'].get_value()
-            
-            if percent_passing > 0:  # Only include non-zero values
-                self.grading_data.append((size_mm, percent_passing))
-        
+            percent_retained = entry['spin'].get_value()
+
+            # Include all sieves for proper template storage and interpolation
+            # This ensures the full sieve set is available for elastic calculations
+            self.grading_data.append((size_mm, percent_retained))
+
         # Sort by size (largest first)
         self.grading_data.sort(reverse=True)
-        
+
         # Emit signal
         self.emit('curve-changed')
     
@@ -864,12 +923,12 @@ class GradingCurveWidget(Gtk.Box):
             
             # Extract data
             sizes = np.array([size for size, _ in self.grading_data])
-            percent_passing = np.array([percent for _, percent in self.grading_data])
+            percent_retained = np.array([percent for _, percent in self.grading_data])
             
             # Remove zero values
-            mask = (sizes > 0) & (percent_passing > 0) & (percent_passing < 100)
+            mask = (sizes > 0) & (percent_retained > 0) & (percent_retained < 100)
             sizes = sizes[mask]
-            percent_passing = percent_passing[mask]
+            percent_retained = percent_retained[mask]
             
             if len(sizes) < 3:
                 return {}
@@ -883,7 +942,7 @@ class GradingCurveWidget(Gtk.Box):
             m_guess = 0.5
             
             # Fit curve
-            popt, pcov = curve_fit(gates_gaudin, sizes, percent_passing, 
+            popt, pcov = curve_fit(gates_gaudin, sizes, percent_retained,
                                  p0=[k_guess, m_guess], maxfev=2000)
             
             k, m = popt
@@ -899,7 +958,7 @@ class GradingCurveWidget(Gtk.Box):
             return {
                 'type': 'gates_gaudin',
                 'parameters': {'k': k, 'm': m},
-                'r_squared': self._calculate_r_squared(sizes, percent_passing, 
+                'r_squared': self._calculate_r_squared(sizes, percent_retained,
                                                      gates_gaudin(sizes, k, m))
             }
             
@@ -917,13 +976,13 @@ class GradingCurveWidget(Gtk.Box):
             
             # Extract data
             sizes = np.array([math.log10(size) for size, _ in self.grading_data if size > 0])
-            percent_passing = np.array([percent for size, percent in self.grading_data if size > 0])
+            percent_retained = np.array([percent for size, percent in self.grading_data if size > 0])
             
             if len(sizes) < degree + 1:
                 return {}
             
             # Fit polynomial
-            coeffs = np.polyfit(sizes, percent_passing, degree)
+            coeffs = np.polyfit(sizes, percent_retained, degree)
             
             # Generate fitted curve
             size_range = np.logspace(np.min(sizes), np.max(sizes), 50)
@@ -937,7 +996,7 @@ class GradingCurveWidget(Gtk.Box):
             
             # Calculate R-squared
             predicted = np.polyval(coeffs, sizes)
-            r_squared = self._calculate_r_squared(percent_passing, predicted, predicted)
+            r_squared = self._calculate_r_squared(percent_retained, predicted, predicted)
             
             return {
                 'type': 'polynomial',
@@ -999,10 +1058,10 @@ class GradingCurveWidget(Gtk.Box):
                     if proportion <= 0:
                         continue
                     
-                    # Interpolate percent passing at target size
-                    percent_passing = self._interpolate_percent_passing(grading, target_size)
-                    
-                    total_weighted_passing += percent_passing * proportion
+                    # Interpolate percent retained at target size
+                    percent_retained = self._interpolate_percent_retained(grading, target_size)
+
+                    total_weighted_passing += percent_retained * proportion
                     total_weight += proportion
                 
                 if total_weight > 0:
@@ -1015,8 +1074,8 @@ class GradingCurveWidget(Gtk.Box):
             self.logger.error(f"Grading blending failed: {e}")
             return []
     
-    def _interpolate_percent_passing(self, grading: List[Tuple[float, float]], target_size: float) -> float:
-        """Interpolate percent passing at a target sieve size."""
+    def _interpolate_percent_retained(self, grading: List[Tuple[float, float]], target_size: float) -> float:
+        """Interpolate percent retained at a target sieve size."""
         if not grading:
             return 0.0
         
@@ -1064,7 +1123,7 @@ class GradingCurveWidget(Gtk.Box):
                 
             # Convert template data to same format
             template_points = sorted(
-                [(point['sieve_size'], point['percent_passing']) for point in sieve_data],
+                [(point['sieve_size'], point['percent_retained']) for point in sieve_data],
                 key=lambda x: x[0], reverse=True
             )
             
@@ -1281,8 +1340,8 @@ class GradingCurveWidget(Gtk.Box):
             # Load the grading data
             sieve_data = selected_grading.get_sieve_data()
             if sieve_data:
-                # Convert to widget format: [(size_mm, percent_passing), ...]
-                grading_points = [(point['sieve_size'], point['percent_passing']) 
+                # Convert to widget format: [(size_mm, percent_retained), ...]
+                grading_points = [(point['sieve_size'], point['percent_retained'])
                                 for point in sieve_data]
                 
                 # Set the data
@@ -1406,7 +1465,7 @@ class GradingCurveWidget(Gtk.Box):
                     raise ValueError("Template name is required")
                 
                 # Convert grading data to service format
-                sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+                sieve_data = [{'sieve_size': point[0], 'percent_retained': point[1]}
                              for point in self.grading_data]
                 
                 # Save template
@@ -1576,7 +1635,7 @@ class GradingCurveWidget(Gtk.Box):
             sieve_data = grading_file_manager.read_gdg_file(filename)
             
             # Convert to widget format
-            grading_points = [(point['sieve_size'], point['percent_passing']) 
+            grading_points = [(point['sieve_size'], point['percent_retained'])
                             for point in sieve_data]
             
         elif file_ext == '.csv':
@@ -1627,7 +1686,7 @@ class GradingCurveWidget(Gtk.Box):
                     continue
                 
                 try:
-                    # Expect: sieve_size, percent_passing
+                    # Expect: sieve_size, percent_retained
                     size = float(row[0].strip())
                     percent = float(row[1].strip())
                     
@@ -1713,7 +1772,7 @@ class GradingCurveWidget(Gtk.Box):
         if file_ext == '.gdg':
             # Use Phase 1 grading file manager
             # Convert to service format
-            sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+            sieve_data = [{'sieve_size': point[0], 'percent_retained': point[1]}
                          for point in self.grading_data]
             
             # Write to file
@@ -1733,7 +1792,7 @@ class GradingCurveWidget(Gtk.Box):
         else:
             # Default to .gdg format
             filename = os.path.splitext(filename)[0] + '.gdg'
-            sieve_data = [{'sieve_size': point[0], 'percent_passing': point[1]} 
+            sieve_data = [{'sieve_size': point[0], 'percent_retained': point[1]}
                          for point in self.grading_data]
             
             file_dir = os.path.dirname(filename)

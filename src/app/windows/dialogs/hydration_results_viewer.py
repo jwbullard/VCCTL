@@ -163,10 +163,10 @@ class HydrationResultsViewer(Gtk.Dialog):
         next_button.connect('clicked', self._on_next_clicked)
         button_box.pack_start(next_button, False, False, 0)
         
-        # Export view button
-        export_button = Gtk.Button(label="Export View")
-        export_button.connect('clicked', self._on_export_clicked)
-        button_box.pack_start(export_button, False, False, 0)
+        # Export view button - REMOVED (non-functional, working version available in PyVista viewer)
+        # export_button = Gtk.Button(label="Export View")
+        # export_button.connect('clicked', self._on_export_clicked)
+        # button_box.pack_start(export_button, False, False, 0)
         
     def _load_microstructure_files(self) -> None:
         """Load and sort all time-series microstructure files."""

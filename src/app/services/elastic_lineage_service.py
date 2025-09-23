@@ -180,7 +180,7 @@ class ElasticLineageService:
                     bulk_modulus=fine_agg.bulk_modulus or 30.0,  # Default GPa
                     shear_modulus=fine_agg.shear_modulus or 18.0,
                     volume_fraction=fine_vf,
-                    grading_path=self._get_aggregate_grading_path(fine_agg, output_directory),
+                    grading_path=self._get_aggregate_grading_path(fine_agg, output_directory, fine_template_name),
                     grading_template_name=fine_template_name
                 )
                 self.logger.info(f"Resolved fine aggregate: {fine_agg.display_name} (VF: {fine_vf:.3f}) with template: {fine_template_name}")
@@ -205,7 +205,7 @@ class ElasticLineageService:
                     bulk_modulus=coarse_agg.bulk_modulus or 36.7,  # Default GPa
                     shear_modulus=coarse_agg.shear_modulus or 22.0,
                     volume_fraction=coarse_vf,
-                    grading_path=self._get_aggregate_grading_path(coarse_agg, output_directory),
+                    grading_path=self._get_aggregate_grading_path(coarse_agg, output_directory, coarse_template_name),
                     grading_template_name=coarse_template_name
                 )
                 self.logger.info(f"Resolved coarse aggregate: {coarse_agg.display_name} (VF: {coarse_vf:.3f}) with template: {coarse_template_name}")
@@ -214,7 +214,7 @@ class ElasticLineageService:
         
         return properties
     
-    def _get_aggregate_grading_path(self, aggregate: Aggregate, output_directory: str = None) -> str:
+    def _get_aggregate_grading_path(self, aggregate: Aggregate, output_directory: str = None, template_name: str = None) -> str:
         """Get grading file path for aggregate by creating temporary .gdg file from database templates."""
         try:
             # Import grading model
@@ -229,26 +229,37 @@ class ElasticLineageService:
             
             # Get database session properly
             with self.database_service.get_session() as session:
-                # Try to find a grading template by aggregate ID first
-                grading = session.query(Grading).filter(
-                    Grading.aggregate_id == aggregate.id
-                ).first()
-                self.logger.info(f"🔍 Step 1 - By aggregate ID: {'Found' if grading else 'Not found'}")
-                
+                grading = None
+
+                # Step 1: Try to find grading template by specific name (if provided)
+                if template_name:
+                    grading = session.query(Grading).filter(
+                        Grading.name == template_name,
+                        Grading.type == grading_type
+                    ).first()
+                    self.logger.info(f"🔍 Step 1 - By template name '{template_name}': {'Found' if grading else 'Not found'}")
+
                 if not grading:
-                    # Try to find a standard grading template by type
+                    # Step 2: Try to find a grading template by aggregate ID
+                    grading = session.query(Grading).filter(
+                        Grading.aggregate_id == aggregate.id
+                    ).first()
+                    self.logger.info(f"🔍 Step 2 - By aggregate ID: {'Found' if grading else 'Not found'}")
+
+                if not grading:
+                    # Step 3: Try to find a standard grading template by type
                     grading = session.query(Grading).filter(
                         Grading.type == grading_type,
                         Grading.is_standard == 1
                     ).first()
-                    self.logger.info(f"🔍 Step 2 - Standard template: {'Found' if grading else 'Not found'}")
-                    
+                    self.logger.info(f"🔍 Step 3 - Standard template: {'Found' if grading else 'Not found'}")
+
                 if not grading:
-                    # Try to find ANY grading template of the correct type
+                    # Step 4: Try to find ANY grading template of the correct type
                     grading = session.query(Grading).filter(
                         Grading.type == grading_type
                     ).first()
-                    self.logger.info(f"🔍 Step 3 - Any template: {'Found' if grading else 'Not found'}")
+                    self.logger.info(f"🔍 Step 4 - Any template: {'Found' if grading else 'Not found'}")
                 
                 # Session will auto-close when we exit this block, so get the data we need
                 if grading and grading.sieve_data:
@@ -292,31 +303,35 @@ class ElasticLineageService:
             # Sort by sieve size (largest first for standard format)
             sorted_points = sorted(grading_sieve_data, key=lambda x: x[0], reverse=True)
 
-            # Calculate individual mass fractions retained on each sieve
-            # We need to convert from cumulative passing to individual retained amounts
+            # DEBUG: Log the raw grading data we received
+            self.logger.info(f"DEBUG: Raw grading data for {aggregate.display_name} (template: {grading_name}):")
+            for i, point in enumerate(sorted_points[:5]):  # Show first 5 points
+                self.logger.info(f"  [{i}] Size: {point[0]:.3f}mm, Value: {point[1]:.1f}")
+
+            # DEBUG: Also log what the total looks like
+            total_value = sum(point[1] for point in sorted_points)
+            self.logger.info(f"  Total of all values: {total_value:.1f} (if this is 0, template has bad data)")
+
+            # Calculate mass fractions for each sieve
+            # Database templates now store individual percent retained data
             for i, point in enumerate(sorted_points):
                 size_mm = point[0]
-                percent_passing = point[1]
+                percent_retained = point[1]  # This is individual % retained on this sieve
 
-                if i == 0:
-                    # First (largest) sieve: retained = 100 - percent_passing
-                    fraction_retained_on_sieve = (100.0 - percent_passing) / 100.0
-                else:
-                    # For subsequent sieves: retained = previous_passing - current_passing
-                    previous_percent_passing = sorted_points[i-1][1]
-                    fraction_retained_on_sieve = (previous_percent_passing - percent_passing) / 100.0
+                # Convert percent retained directly to fraction
+                fraction_retained_on_sieve = percent_retained / 100.0
 
                 # Ensure non-negative values
                 fraction_retained_on_sieve = max(0.0, fraction_retained_on_sieve)
 
+                # DEBUG: Log the calculation for first few sieves
+                if i < 5:
+                    self.logger.info(f"  Sieve {size_mm:.3f}mm: {percent_retained:.1f}% retained -> {fraction_retained_on_sieve:.6f} fraction retained")
+
                 lines.append(f"{size_mm:.3f},{fraction_retained_on_sieve:.6f}")
 
-            # Add pan (material passing through smallest sieve)
-            if sorted_points:
-                smallest_sieve_passing = sorted_points[-1][1]  # Last point has smallest passing
-                pan_fraction = smallest_sieve_passing / 100.0
-                if pan_fraction > 0.0:
-                    lines.append(f"0.000,{pan_fraction:.6f}")
+            # No pan entry needed when using individual percent retained
+            # All material should be accounted for in the sieve fractions
 
             gdg_content = '\n'.join(lines)
 

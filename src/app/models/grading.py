@@ -45,7 +45,7 @@ class Grading(Base):
     grading = Column(LargeBinary, nullable=True, doc="Legacy binary grading data")
     
     # NEW: JSON field for structured sieve data
-    sieve_data = Column(JSON, nullable=True, doc="Sieve analysis data as [(size_mm, percent_passing), ...]")
+    sieve_data = Column(JSON, nullable=True, doc="Sieve analysis data as [(size_mm, percent_retained), ...]")
     
     # Maximum particle diameter
     max_diameter = Column(Float, nullable=True, doc="Maximum particle diameter (mm)")
@@ -106,14 +106,14 @@ class Grading(Base):
     
     @property
     def sieve_points(self) -> List[tuple]:
-        """Get sieve data as list of (size_mm, percent_passing) tuples."""
+        """Get sieve data as list of (size_mm, percent_retained) tuples."""
         if self.sieve_data:
             return [tuple(point) for point in self.sieve_data]
         return []
     
     @sieve_points.setter
     def sieve_points(self, points: List[tuple]):
-        """Set sieve data from list of (size_mm, percent_passing) tuples."""
+        """Set sieve data from list of (size_mm, percent_retained) tuples."""
         if points:
             self.sieve_data = [list(point) for point in points]
             # Update max diameter from largest sieve size
@@ -129,7 +129,7 @@ class Grading(Base):
         Expected format: tab-separated values with sieve size and percent passing.
         
         Returns:
-            List of dictionaries with 'sieve_size' and 'percent_passing' keys
+            List of dictionaries with 'sieve_size' and 'percent_retained' keys
         """
         if not self.grading_text:
             return None
@@ -144,10 +144,10 @@ class Grading(Base):
                     if len(parts) >= 2:
                         try:
                             sieve_size = float(parts[0])
-                            percent_passing = float(parts[1])
+                            percent_retained = float(parts[1])
                             sieve_data.append({
                                 'sieve_size': sieve_size,
-                                'percent_passing': percent_passing
+                                'percent_retained': percent_retained
                             })
                         except ValueError:
                             continue  # Skip invalid lines
@@ -160,9 +160,9 @@ class Grading(Base):
     def set_grading_data(self, sieve_data: List[Dict[str, float]]):
         """
         Set grading data from sieve analysis format.
-        
+
         Args:
-            sieve_data: List of dictionaries with 'sieve_size' and 'percent_passing'
+            sieve_data: List of dictionaries with 'sieve_size' and 'percent_retained'
         """
         if not sieve_data:
             self.grading_text = None
@@ -171,8 +171,8 @@ class Grading(Base):
         lines = []
         for item in sieve_data:
             sieve_size = item.get('sieve_size', 0.0)
-            percent_passing = item.get('percent_passing', 0.0)
-            lines.append(f"{sieve_size}\t{percent_passing}")
+            percent_retained = item.get('percent_retained', 0.0)
+            lines.append(f"{sieve_size}\t{percent_retained}")
         
         self.grading_text = '\n'.join(lines)
     
@@ -184,7 +184,7 @@ class Grading(Base):
         
         # Check that percent passing values are between 0 and 100
         for item in sieve_data:
-            percent = item.get('percent_passing', 0)
+            percent = item.get('percent_retained', 0)
             if percent < 0 or percent > 100:
                 return False
         
@@ -194,13 +194,13 @@ class Grading(Base):
             if size < 0:
                 return False
         
-        # Check that percent passing generally decreases with sieve size
-        # (larger sieves should have higher percent passing)
+        # Check that percent retained values are reasonable
+        # (no specific monotonic requirement for individual retained percentages)
         sorted_data = sorted(sieve_data, key=lambda x: x['sieve_size'], reverse=True)
         for i in range(1, len(sorted_data)):
-            if sorted_data[i]['percent_passing'] > sorted_data[i-1]['percent_passing']:
-                # Allow some tolerance for measurement errors
-                if sorted_data[i]['percent_passing'] - sorted_data[i-1]['percent_passing'] > 5:
+            if sorted_data[i]['percent_retained'] > sorted_data[i-1]['percent_retained']:
+                # Allow normal variations in percent retained
+                if sorted_data[i]['percent_retained'] - sorted_data[i-1]['percent_retained'] > 100:
                     return False
         
         return True
@@ -210,7 +210,7 @@ class Grading(Base):
         Get sieve data in dictionary format from JSON field.
         
         Returns:
-            List of dictionaries with 'sieve_size' and 'percent_passing' keys
+            List of dictionaries with 'sieve_size' and 'percent_retained' keys
         """
         if not self.sieve_data:
             return None
@@ -220,7 +220,7 @@ class Grading(Base):
             if len(point) >= 2:
                 result.append({
                     'sieve_size': float(point[0]),
-                    'percent_passing': float(point[1])
+                    'percent_retained': float(point[1])
                 })
         
         return result if result else None
@@ -230,7 +230,7 @@ class Grading(Base):
         Set sieve data from dictionary format to JSON field.
         
         Args:
-            sieve_data: List of dictionaries with 'sieve_size' and 'percent_passing'
+            sieve_data: List of dictionaries with 'sieve_size' and 'percent_retained'
         """
         if not sieve_data:
             self.sieve_data = None
@@ -241,7 +241,7 @@ class Grading(Base):
         points = []
         for item in sieve_data:
             size = float(item.get('sieve_size', 0.0))
-            percent = float(item.get('percent_passing', 0.0))
+            percent = float(item.get('percent_retained', 0.0))
             points.append([size, percent])
         
         self.sieve_data = points
@@ -256,7 +256,7 @@ class Grading(Base):
         Convert sieve data to .gdg file format.
         
         Returns:
-            Tab-delimited string: "size_mm\tpercent_passing\n..."
+            Tab-delimited string: "size_mm\tpercent_retained\n..."
         """
         if not self.sieve_data:
             return ""
@@ -267,8 +267,8 @@ class Grading(Base):
         
         for point in sorted_points:
             size_mm = point[0]
-            percent_passing = point[1]
-            lines.append(f"{size_mm}\t{percent_passing}")
+            percent_retained = point[1]
+            lines.append(f"{size_mm}\t{percent_retained}")
         
         return '\n'.join(lines)
     

@@ -330,10 +330,23 @@ class ElasticModuliService:
     def get_available_hydration_operations(self) -> List[Operation]:
         """Get all completed hydration operations available for elastic moduli calculations."""
         with self.database_service.get_session() as session:
-            return session.query(Operation).filter(
+            # Debug: Log what we're looking for
+            self.logger.info(f"DEBUG: Looking for operations with type='{OperationType.HYDRATION.value}' and status='{OperationStatus.COMPLETED.value}'")
+
+            # Debug: Check what's actually in the database
+            all_ops = session.query(Operation).all()
+            self.logger.info(f"DEBUG: Found {len(all_ops)} total operations:")
+            for op in all_ops:
+                self.logger.info(f"  ID {op.id}: {op.name} - type='{op.operation_type}', status='{op.status}'")
+
+            # Get the filtered results
+            results = session.query(Operation).filter(
                 Operation.operation_type == OperationType.HYDRATION.value,
                 Operation.status == OperationStatus.COMPLETED.value
             ).all()
+
+            self.logger.info(f"DEBUG: Found {len(results)} matching hydration operations")
+            return results
     
     def populate_operation_from_hydration(
         self,

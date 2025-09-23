@@ -1135,9 +1135,9 @@ class MixDesignPanel(Gtk.Box):
             dialog.add_button("Apply", Gtk.ResponseType.OK)
             dialog.set_default_response(Gtk.ResponseType.OK)
             dialog.set_default_size(800, 600)
-            
-            # Create grading curve widget
-            grading_widget = GradingCurveWidget()
+
+            # Create grading curve widget with appropriate aggregate type
+            grading_widget = GradingCurveWidget(aggregate_type=aggregate_type)
             
             # Check if there's a pending template to load
             template_name_to_track = None
@@ -1974,9 +1974,10 @@ class MixDesignPanel(Gtk.Box):
             dialog.add_button("Apply", Gtk.ResponseType.OK)
             dialog.set_default_response(Gtk.ResponseType.OK)
             dialog.set_default_size(800, 600)
-            
-            # Create grading curve widget
-            grading_widget = GradingCurveWidget()
+
+            # Create grading curve widget (default to coarse for generic aggregates)
+            # This is for aggregates in the mix components table where type is not specified
+            grading_widget = GradingCurveWidget(aggregate_type='coarse')
             
             # Check if there's a pending template to load
             template_name_to_track = None

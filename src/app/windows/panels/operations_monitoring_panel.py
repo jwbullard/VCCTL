@@ -725,17 +725,17 @@ class OperationsMonitoringPanel(Gtk.Box):
         # Operation Details tab
         self._create_operation_details_tab()
         
-        # System Resources tab
-        self._create_system_resources_tab()
+        # System Resources tab - HIDDEN to free up horizontal space
+        # self._create_system_resources_tab()
         
         # Operation Logs tab
         self._create_operation_logs_tab()
         
-        # Performance Metrics tab
-        self._create_performance_metrics_tab()
+        # Performance Metrics tab - HIDDEN to free up horizontal space
+        # self._create_performance_metrics_tab()
         
-        # Operations Files tab
-        self._create_operations_files_tab()
+        # Operations Files tab - HIDDEN (functionality available in main Files tab)
+        # self._create_operations_files_tab()
         
         # Results Analysis Dashboard tab
         self._create_results_analysis_tab()

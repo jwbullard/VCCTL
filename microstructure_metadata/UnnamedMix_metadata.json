@@ -1,0 +1,27 @@
+{
+  "operation_name": "UnnamedMix",
+  "microstructure_file": "./Operations/UnnamedMix/UnnamedMix.pimg",
+  "system_size": 100,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement141",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.26666666666666666,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "MA99BC-5-coarse",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.7333333333333333,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-22T21:58:36.414758"
+}

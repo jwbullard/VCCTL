@@ -1,0 +1,27 @@
+{
+  "operation_name": "TestGradings",
+  "microstructure_file": "./Operations/TestGradings/TestGradings.pimg",
+  "system_size": 120,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement151",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.26666666666666666,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "MA106A-1-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.7333333333333333,
+      "specific_gravity": 2.64,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-22T16:24:27.433472"
+}
