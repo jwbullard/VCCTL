@@ -1241,7 +1241,97 @@ Major architectural improvements completed:
 - ✅ **Hydration Tool**: Complete integration with parameter files and progress monitoring
 - ✅ **3D Visualization**: PyVista integration for microstructure analysis
 
-**Ready for**: Systematic PSD database normalization and advanced feature development
+**Ready for**: System finalization, user documentation, and packaging
+
+---
+
+## Session Status Update (September 23, 2025 - GRADING SYSTEM FINALIZATION SESSION)
+
+### **Session Summary:**
+Complete grading system implementation with separate fine/coarse sieve sets, percent retained conversion, and UI improvements. Successfully resolved all grading-related issues and prepared the system for final packaging and distribution.
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Separate Sieve Sets Implementation ✅**
+- **Problem**: Both fine and coarse aggregates used the same sieve set, which was inconvenient for users
+- **Solution**: Implemented separate sieve sets based on user specifications
+- **Fine Aggregates**: 32 sieves (No. 4 through No. 635)
+- **Coarse Aggregates**: 23 sieves (4" through No. 4)
+- **Result**: Users now have appropriate sieve sets for each aggregate type
+
+#### **2. Complete Percent Retained Conversion ✅**
+- **Problem**: User requested complete elimination of "percent passing" logic throughout system
+- **Solution**: Systematically converted entire system to use "percent retained" consistently
+- **Database Models**: Updated all field names and methods
+- **UI Widgets**: Converted all variables and display labels
+- **Service Layer**: Fixed elastic lineage service to treat data as individual percent retained
+- **Result**: System now uses consistent percent retained terminology everywhere
+
+#### **3. Database Architecture Improvements ✅**
+- **Grading Table Migration**: Migrated from name as primary key to proper ID INTEGER PRIMARY KEY
+- **Unique Constraints**: Added unique constraint on (name, type) combination
+- **Data Cleanup**: Deleted corrupted templates and obsolete mix designs
+- **Result**: Clean database with proper relational integrity
+
+#### **4. UI Improvements ✅**
+- **Operations Panel**: Hidden Files, Performance, and System Resources tabs to free up horizontal space
+- **3D Results Dialog**: Removed duplicate non-functional Export View button from bottom of dialog
+- **Grading Management**: Confirmed existing "Manage Grading Templates..." functionality is fully implemented
+- **Result**: Cleaner, more efficient user interface
+
+### **🔧 CRITICAL FIX - Elastic Lineage Service:**
+
+The most critical fix was updating the elastic lineage service to correctly interpret grading data:
+
+**OLD (Incorrect):**
+```python
+# Treated data as cumulative percent passing
+percent_passing = point[1]
+fraction_retained = (previous_passing - percent_passing) / 100.0
+```
+
+**NEW (Correct):**
+```python
+# Treats data as individual percent retained
+percent_retained = point[1]
+fraction_retained = percent_retained / 100.0
+```
+
+### **📊 CURRENT CAPABILITIES:**
+
+**✅ FULLY WORKING:**
+- Separate fine/coarse sieve sets with proper user defaults
+- Complete percent retained implementation throughout system
+- Proper database architecture with ID-based primary keys
+- Clean templates and mix designs for fresh start
+- Enhanced UI with optimized space usage
+- Elastic calculations receive correct grading data
+
+### **📋 FILES MODIFIED:**
+
+**Core Implementation:**
+- `src/app/widgets/grading_curve.py` - Sieve sets, percent retained conversion
+- `src/app/models/grading.py` - Database model field name updates
+- `src/app/services/elastic_lineage_service.py` - Fixed conversion logic
+- `src/app/windows/panels/mix_design_panel.py` - Aggregate type passing
+
+**UI Improvements:**
+- `src/app/windows/panels/operations_monitoring_panel.py` - Hidden tabs
+- `src/app/windows/dialogs/hydration_results_viewer.py` - Removed duplicate button
+
+### **🎯 SYSTEM STATUS:**
+
+**GRADING SYSTEM: PRODUCTION READY ✅**
+- All grading system improvements complete and verified working
+- Ready for elastic.c backend fixes and final system packaging
+- System provides robust grading functionality with clear percent retained terminology
+
+### **📦 NEXT STEPS:**
+1. **Fix elastic.c backend code** (User's next priority)
+2. **Finalization and user documentation**
+3. **System packaging for distribution**
+
+**Status**: Grading system finalization complete. All requested features implemented and tested. Ready for final elastic.c fixes before packaging.
 
 ---
 *Historical development context (Phases 1-3 implementation details, debugging sessions, integration work) archived for performance optimization.*
