@@ -1,0 +1,45 @@
+{
+  "operation_name": "C152-C109",
+  "microstructure_file": "./Operations/C152-C109/C152-C109.pimg",
+  "system_size": 120,
+  "resolution": 1.0,
+  "materials": [
+    {
+      "phase_id": 1,
+      "material_name": "cement152",
+      "material_type": "cement",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.24000000000000002,
+      "specific_gravity": 3.15,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 2,
+      "material_name": "USF-Std",
+      "material_type": "silica_fume",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.008,
+      "specific_gravity": 2.22,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 3,
+      "material_name": "NormalLimestone",
+      "material_type": "limestone",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.018666666666666668,
+      "specific_gravity": 2.65,
+      "psd_parameters": {}
+    },
+    {
+      "phase_id": 4,
+      "material_name": "MA106A-1-fine",
+      "material_type": "aggregate",
+      "volume_fraction": 0.0,
+      "mass_fraction": 0.7333333333333333,
+      "specific_gravity": 2.64,
+      "psd_parameters": {}
+    }
+  ],
+  "generation_timestamp": "2025-09-29T19:09:57.973497"
+}

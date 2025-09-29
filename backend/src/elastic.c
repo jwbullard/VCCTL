@@ -70,6 +70,7 @@
 /*           http://ciks.cbt.nist.gov/~garbocz/manual/man.html              */
 
 #include "include/vcctl.h"
+#include "include/vcctlfuncs.h"
 #include <ctype.h>
 #include <getopt.h>
 #include <math.h>
@@ -572,8 +573,8 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
            *	microstructure is created
            ***/
 
-          if (k < *nagg1)
-            *nagg1 = k;
+          if (i < *nagg1)
+            *nagg1 = i;
         }
 
         if ((inval < 0) || (inval > NSP)) {
@@ -632,13 +633,9 @@ void ppixel(int nphase, int *doitz, int *nagg1) {
   fflush(Logfile);
 
   fpout = fopen("newcem.img", "w");
-  fprintf(fpout, "Version: 10.0\n");
-  fprintf(fpout, "X_Size: %d\n", Xsyssize);
-  fprintf(fpout, "Y_Size: %d\n", Ysyssize);
-  fprintf(fpout, "Z_Size: %d\n", Zsyssize);
-  fprintf(fpout, "Image_Resolution: 1.00\n");
+  write_imgheader(fpout, Xsyssize, Ysyssize, Zsyssize, 1.0);
   for (m = 0; m < Xsyssize * Ysyssize * Zsyssize; m++) {
-    fprintf(fpout, "%d\n", pix[m]);
+    fprintf(fpout, "\n%d", pix[m]);
   }
   fclose(fpout);
 }
@@ -2764,24 +2761,23 @@ if (doitz) {
       fprintf(stderr, "\n\nWARNING:  Could not open output file energy.img");
     } else {
 
-      fprintf(outfile, "Version: 10.0");
-      fprintf(outfile, "\nX_Size: %d", Xsyssize);
-      fprintf(outfile, "\nY_Size: %d", Ysyssize);
-      fprintf(outfile, "\nZ_Size: %d", Zsyssize);
-      fprintf(outfile, "\nImage_Resolution: 1.00");
+      fprintf(Logfile, "\nPrinting strain energy field (%d, %d, %d)", Xsyssize,
+              Ysyssize, Zsyssize);
+      fflush(Logfile);
+      write_imgheader(outfile, Xsyssize, Ysyssize, Zsyssize, 1.0);
       for (i = 0; i < Xsyssize; i++) {
         for (j = 0; j < Ysyssize; j++) {
           for (k = 0; k < Zsyssize; k++) {
             m = (nxy * k) + (Xsyssize * j) + i;
             enrgy = 0.5 *
-                    ((stressxx[m] * strainyy[m]) + (stressyy[m] * strainyy[m]) +
-                     (stresszz[m] * strainyy[m]) + (stressxy[m] * strainxy[m]) +
+                    ((stressxx[m] * strainxx[m]) + (stressyy[m] * strainyy[m]) +
+                     (stresszz[m] * strainzz[m]) + (stressxy[m] * strainxy[m]) +
                      (stressxz[m] * strainxz[m]) + (stressyz[m] * strainyz[m]));
             fprintf(outfile, "\n%f", enrgy);
           }
-          fclose(outfile);
         }
       }
+      fclose(outfile);
     }
 
     /***
@@ -2865,16 +2861,37 @@ if (doitz) {
       fprintf(Logfile, "\n*****\n");
       fprintf(Logfile, "\nLAYER_DATA:\n");
       xj = -0.5;
-      for (i = nagg1 - 1; i >= 0; i--) {
+      for (i = nagg1 - 1; i > 0; i--) {
         xj += 1.0;
+        fprintf(Logfile, "\nK[%d] = %f, ", i, K[i]);
+        fflush(Logfile);
+        fprintf(Logfile, "K[%d] = %f, ", Xsyssize - i - 1, K[Xsyssize - i - 1]);
+        fflush(Logfile);
+        fprintf(Logfile, "G[%d] = %f, ", i, G[i]);
+        fflush(Logfile);
+        fprintf(Logfile, "G[%d] = %f, ", Xsyssize - i - 1, G[Xsyssize - i - 1]);
         kk = 0.50 * (K[i] + K[Xsyssize - i - 1]);
         gg = 0.50 * (G[i] + G[Xsyssize - i - 1]);
+        fprintf(Logfile, "\n%.1f %.4f %.4f ", xj, kk, gg);
+        fflush(Logfile);
+        if (i == (nagg1 - 1)) {
+          fprintf(outfile, "Distance (um),Bulk Modulus (GPa),Shear Modulus "
+                           "(GPa),Elastic Modulus (GPa),Poisson Ratio");
+          fprintf(outfile, "\n%.1f,%.4f,%.4f,", xj, kk, gg);
+        } else {
+          fprintf(outfile, "\n%.1f,%.4f,%.4f,", xj, kk, gg);
+        }
+        fflush(Logfile);
+        fflush(outfile);
         young = 9. * kk * gg / (3. * kk + gg);
         pois = (3. * kk - 2. * gg) / 2. / (3. * kk + gg);
-        fprintf(Logfile, "\n%.1f %.4f %.4f %.4f %.4f", xj, kk, gg, young, pois);
-        fprintf(outfile, "%.1f %.4f %.4f %.4f %.4f\n", xj, kk, gg, young, pois);
+        fprintf(Logfile, "%.4f %.4f", young, pois);
+        fprintf(outfile, "%.4f,%.4f", young, pois);
+        fflush(Logfile);
+        fflush(outfile);
       }
       fprintf(Logfile, "\nEND");
+      fflush(Logfile);
       fclose(outfile);
     }
   } else {
@@ -2889,6 +2906,7 @@ if (doitz) {
   }
 
   fprintf(Logfile, "\nDone with cement paste calculations.");
+  fflush(Logfile);
   if (doitz) {
     oval = concelas(nagg1, bulk, shear);
   }
@@ -2962,16 +2980,24 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   }
 
   fprintf(Logfile, "\n\nEnter fully resolved name of cement PSD file: ");
+  fflush(Logfile);
   read_string(cempsdfile, sizeof(cempsdfile));
   fprintf(Logfile, "\n%s", cempsdfile);
+  fflush(Logfile);
   cempsd = filehandler("concelas", cempsdfile, "READ");
   if (!cempsd) {
+    fprintf(Logfile, "\nCould not open cement PSD file %s", cempsdfile);
+    fflush(Logfile);
     sprintf(buff1, "Could not open cement PSD file %s", cempsdfile);
     warning("concelas", buff1);
     warning("concelas", "Using median cement PSD of 15 micrometers");
     itzwidth = 10.0;
   } else {
+    fprintf(Logfile, "\nEntering mediansize function with valid file pointer");
+    fflush(Logfile);
     itzwidth = mediansize(cempsd);
+    fprintf(Logfile, "\nFound median cement particle size of %f", itzwidth);
+    fflush(Logfile);
     fclose(cempsd);
   }
 
@@ -2983,6 +3009,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
             "\n\nCalculated ITZ width is %f micrometers (%d voxels), nagg1 "
             "= %d",
             itzwidth, itzpix, nagg1);
+    fflush(Logfile);
 
     /* Knowing the ITZ width, find average values of
      * the bulk and shear moduli inside the ITZ */
@@ -3003,6 +3030,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
 
     fprintf(Logfile, "\nCalculated bulk modulus of ITZ = %f", kitz);
     fprintf(Logfile, "\nCalculated shear modulus of ITZ = %f", gitz);
+    fflush(Logfile);
 
     /* Now find values for bulk and shear moduli of bulk paste */
 
@@ -3079,7 +3107,7 @@ int concelas(int nagg1, double bulkmod, double shearmod) {
   gfine = atof(buff);
   fprintf(Logfile, "\n%f", gfine);
   fflush(Logfile);
-  if (val > 0) {
+  if (fine_agg_vf > 0) {
     gfile = filehandler("concelas", finegfile, "READ");
     if (!gfile) {
       bailout("concelas", "Could not open fine grading file");
@@ -3513,12 +3541,6 @@ void slope(double *kk, double *gg, double k, double g) {
     *gg += (Vf_concelas[i] *
             (5.0 * (k + (q * g)) * (G_concelas[i] - g) /
              (3.0 * g * (k + (t * g)) + 2.0 * G_concelas[i] * (k + 2.0 * g))));
-    fprintf(Logfile,
-            "\n\t\tSlope i = %d, SHAPEFACTOR = %f, Vf_concelas = %f, k = %f, q "
-            "= %f,g = %f,G_concelas = %f, K_concelas = %f, t = %f",
-            i, SHAPEFACTOR, Vf_concelas[i], k, q, g, G_concelas[i],
-            K_concelas[i], t);
-    fflush(Logfile);
   }
 
   *kk *= SHAPEFACTOR;

@@ -596,15 +596,14 @@ class ElasticModuliPanel(Gtk.Box):
                 self.microstructure_combo.append(str(i), display_text)
             
             if self.available_microstructures:
-                # Auto-select final microstructure (first in list)
-                self.microstructure_combo.set_active(0)
+                # Don't auto-select any microstructure - let user choose
+                self.microstructure_combo.set_active(-1)  # No selection
                 self.microstructure_combo.set_sensitive(True)
                 self.logger.info(f"Loaded {len(self.available_microstructures)} hydrated microstructures")
-                
-                # Auto-populate UI fields from lineage data AND selected microstructure
+
+                # Only populate lineage data, not microstructure-specific fields
                 self._populate_from_resolved_lineage()
-                self._populate_fields_from_selection(self.available_microstructures[0])
-                self.logger.info("Auto-populated UI fields from resolved lineage and selected microstructure")
+                self.logger.info("Populated UI fields from resolved lineage (waiting for user microstructure selection)")
             else:
                 self.microstructure_combo.append("", "No hydrated microstructures found")
                 self.microstructure_combo.set_sensitive(False)

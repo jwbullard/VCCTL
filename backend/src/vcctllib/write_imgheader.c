@@ -33,11 +33,11 @@ int write_imgheader(FILE *fpout, int xsize, int ysize, int zsize, float res) {
     return (status);
   }
 
-  fprintf(fpout, "%s %s\n", VERSIONSTRING, VERSIONNUMBER);
-  fprintf(fpout, "%s %d\n", XSIZESTRING, xsize);
-  fprintf(fpout, "%s %d\n", YSIZESTRING, ysize);
-  fprintf(fpout, "%s %d\n", ZSIZESTRING, zsize);
-  fprintf(fpout, "%s %4.2f\n", IMGRESSTRING, res);
+  fprintf(fpout, "%s %s", VERSIONSTRING, VERSIONNUMBER);
+  fprintf(fpout, "\n%s %d", XSIZESTRING, xsize);
+  fprintf(fpout, "\n%s %d", YSIZESTRING, ysize);
+  fprintf(fpout, "\n%s %d", ZSIZESTRING, zsize);
+  fprintf(fpout, "\n%s %4.2f", IMGRESSTRING, res);
 
   return (status);
 }

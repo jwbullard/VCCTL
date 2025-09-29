@@ -28,7 +28,7 @@
  *	particular file was created
  ***/
 #define VERSIONSTRING "Version:"
-#define VERSIONNUMBER "7.0"
+#define VERSIONNUMBER "10.0"
 
 #define MAXSTRING 500 /* maximum length of strings */
 

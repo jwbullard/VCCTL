@@ -3006,7 +3006,10 @@ class MixDesignPanel(Gtk.Box):
                 self._create_cement_psd_file(mix_folder_path)
                 self.logger.info(f"Created cement PSD file for elastic calculations")
             except Exception as e:
-                self.logger.warning(f"Failed to create cement PSD file: {e}")
+                self.logger.error(f"Failed to create cement PSD file: {e}")
+                import traceback
+                self.logger.error(f"Cement PSD creation traceback: {traceback.format_exc()}")
+                # Continue with microstructure generation even if cement PSD creation fails
 
             self.main_window.update_status(f"Input file created, starting 3D microstructure generation...", "info", 3)
 
@@ -3051,7 +3054,7 @@ class MixDesignPanel(Gtk.Box):
                     psd_data = self._generate_default_cement_psd()
 
             # Write PSD file in required CSV format
-            psd_file_path = os.path.join(mix_folder_path, "cement_psd.dat")
+            psd_file_path = os.path.join(mix_folder_path, "cement_psd.csv")
             with open(psd_file_path, 'w') as f:
                 # Write CSV header as required
                 f.write("Diameter_micrometers,Volume_Fraction\n")

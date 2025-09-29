@@ -221,22 +221,61 @@ class ITZAnalysisViewer(Gtk.Dialog):
         """Parse the ITZmoduli.csv file."""
         data = []
 
-        with open(csv_file, 'r') as f:
-            csv_reader = csv.DictReader(f)
-            for row in csv_reader:
-                try:
-                    data_row = {
-                        'distance': float(row['Distance (um)']),
-                        'bulk_modulus': float(row['Bulk Modulus (GPa)']),
-                        'shear_modulus': float(row[' Shear Modulus (GPa)']),  # Note the space
-                        'youngs_modulus': float(row['Young\'s Modulus (GPa)']),
-                        'poissons_ratio': float(row['Poisson\'s ratio'])
-                    }
-                    data.append(data_row)
-                except (ValueError, KeyError) as e:
-                    self.logger.warning(f"Skipping invalid row: {row}, error: {e}")
+        try:
+            with open(csv_file, 'r') as f:
+                # First, try to detect if the file has headers
+                first_line = f.readline().strip()
+                f.seek(0)  # Reset to beginning
 
-        return data
+                # Check if first line contains headers (non-numeric first field)
+                try:
+                    float(first_line.split(',')[0])
+                    has_headers = False
+                    self.logger.info("ITZ CSV file detected without headers")
+                except ValueError:
+                    has_headers = True
+                    self.logger.info("ITZ CSV file detected with headers")
+
+                if has_headers:
+                    # Use DictReader for files with headers
+                    csv_reader = csv.DictReader(f)
+                    for row in csv_reader:
+                        try:
+                            data_row = {
+                                'distance': float(row['Distance (um)']),
+                                'bulk_modulus': float(row['Bulk Modulus (GPa)']),
+                                'shear_modulus': float(row['Shear Modulus (GPa)']),  # Removed the space
+                                'youngs_modulus': float(row['Elastic Modulus (GPa)']),  # Changed name
+                                'poissons_ratio': float(row['Poisson Ratio'])  # Match your file header
+                            }
+                            data.append(data_row)
+                        except (ValueError, KeyError) as e:
+                            self.logger.warning(f"Skipping invalid row: {row}, error: {e}")
+                else:
+                    # Use regular reader for files without headers (assume column order)
+                    csv_reader = csv.reader(f)
+                    for row_num, row in enumerate(csv_reader):
+                        try:
+                            if len(row) >= 5:
+                                data_row = {
+                                    'distance': float(row[0]),
+                                    'bulk_modulus': float(row[1]),
+                                    'shear_modulus': float(row[2]),
+                                    'youngs_modulus': float(row[3]),
+                                    'poissons_ratio': float(row[4])
+                                }
+                                data.append(data_row)
+                            else:
+                                self.logger.warning(f"Row {row_num + 1} has insufficient columns: {row}")
+                        except (ValueError, IndexError) as e:
+                            self.logger.warning(f"Skipping invalid row {row_num + 1}: {row}, error: {e}")
+
+            self.logger.info(f"Successfully parsed {len(data)} rows from ITZ CSV file")
+            return data
+
+        except Exception as e:
+            self.logger.error(f"Error parsing ITZ CSV file: {e}")
+            return []
 
     def _populate_treeview(self):
         """Populate the tree view with ITZ data."""

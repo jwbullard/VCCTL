@@ -165,15 +165,21 @@ class ElasticLineageService:
         # Resolve fine aggregate
         fine_vf = volume_fractions.get('fine_aggregate_volume_fraction', 0.0)
         fine_mass = mix_design_data.get('fine_aggregate_mass', 0.0)
-        
-        if fine_agg_name and (fine_vf > 0.0 or fine_mass > 0.0):
+
+        # More robust detection: include if we have a name AND either mass OR volume fraction OR grading template
+        fine_template_name = mix_design_data.get('fine_aggregate_grading_template')
+        should_include_fine = (fine_agg_name and
+                              (fine_vf > 0.0 or fine_mass > 0.0 or fine_template_name))
+
+        self.logger.info(f"🔍 Fine aggregate detection: name='{fine_agg_name}', vf={fine_vf:.4f}, mass={fine_mass:.2f}, template='{fine_template_name}', include={should_include_fine}")
+
+        if should_include_fine:
             fine_agg = session.query(Aggregate).filter(
                 (Aggregate.display_name == fine_agg_name) | 
                 (Aggregate.name == fine_agg_name)
             ).first()
             
             if fine_agg:
-                fine_template_name = mix_design_data.get('fine_aggregate_grading_template')
                 self.logger.info(f"🔍 Fine template name from mix design: {fine_template_name}")
                 properties['fine_aggregate'] = AggregateProperties(
                     name=fine_agg.display_name or fine_agg.name,
@@ -190,15 +196,21 @@ class ElasticLineageService:
         # Resolve coarse aggregate
         coarse_vf = volume_fractions.get('coarse_aggregate_volume_fraction', 0.0)
         coarse_mass = mix_design_data.get('coarse_aggregate_mass', 0.0)
-        
-        if coarse_agg_name and (coarse_vf > 0.0 or coarse_mass > 0.0):
+
+        # More robust detection: include if we have a name AND either mass OR volume fraction OR grading template
+        coarse_template_name = mix_design_data.get('coarse_aggregate_grading_template')
+        should_include_coarse = (coarse_agg_name and
+                                (coarse_vf > 0.0 or coarse_mass > 0.0 or coarse_template_name))
+
+        self.logger.info(f"🔍 Coarse aggregate detection: name='{coarse_agg_name}', vf={coarse_vf:.4f}, mass={coarse_mass:.2f}, template='{coarse_template_name}', include={should_include_coarse}")
+
+        if should_include_coarse:
             coarse_agg = session.query(Aggregate).filter(
                 (Aggregate.display_name == coarse_agg_name) | 
                 (Aggregate.name == coarse_agg_name)
             ).first()
             
             if coarse_agg:
-                coarse_template_name = mix_design_data.get('coarse_aggregate_grading_template')
                 self.logger.info(f"🔍 Coarse template name from mix design: {coarse_template_name}")
                 properties['coarse_aggregate'] = AggregateProperties(
                     name=coarse_agg.display_name or coarse_agg.name,

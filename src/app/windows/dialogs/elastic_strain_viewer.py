@@ -67,7 +67,7 @@ class ElasticStrainViewer(Gtk.Dialog):
         self.threshold_min = 0.0
         self.threshold_max = 1.0
         self.show_colorbar = True
-        self.subsample_factor = 2  # For performance
+        self.subsample_factor = 1  # Default to full resolution (no subsampling)
 
         # Setup dialog
         self.set_default_size(1200, 800)
@@ -170,6 +170,31 @@ class ElasticStrainViewer(Gtk.Dialog):
         max_box.pack_start(max_label, False, False, 0)
         max_box.pack_start(self.max_scale, True, True, 0)
         thresh_box.pack_start(max_box, False, False, 0)
+
+        # Performance settings frame
+        perf_frame = Gtk.Frame(label="Performance Settings")
+        perf_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        perf_box.set_margin_left(10)
+        perf_box.set_margin_right(10)
+        perf_box.set_margin_top(10)
+        perf_box.set_margin_bottom(10)
+        perf_frame.add(perf_box)
+        controls_box.pack_start(perf_frame, False, False, 0)
+
+        # Subsampling factor
+        subsample_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        subsample_label = Gtk.Label("Subsampling:")
+        subsample_label.set_size_request(100, -1)
+        subsample_label.set_halign(Gtk.Align.START)
+        self.subsample_combo = Gtk.ComboBoxText()
+        self.subsample_combo.append_text("Full Resolution (1)")
+        self.subsample_combo.append_text("Half Resolution (2)")
+        self.subsample_combo.append_text("Quarter Resolution (4)")
+        self.subsample_combo.set_active(0)  # Default to full resolution
+        self.subsample_combo.connect('changed', self._on_subsample_changed)
+        subsample_box.pack_start(subsample_label, False, False, 0)
+        subsample_box.pack_start(self.subsample_combo, True, True, 0)
+        perf_box.pack_start(subsample_box, False, False, 0)
 
         # Statistics frame
         stats_frame = Gtk.Frame(label="Strain Energy Statistics")
@@ -364,13 +389,16 @@ class ElasticStrainViewer(Gtk.Dialog):
             # Create subplot with 3D projection
             ax = self.figure.add_subplot(111, projection='3d')
 
-            # Subsample for performance if needed
+            # Subsample for performance if needed (only for very large datasets)
             data = self.strain_data
-            if self.strain_data.size > 100**3:
+            # Only subsample if dataset is larger than 200^3 (8 million voxels) and subsample factor > 1
+            if self.strain_data.size > 200**3 and self.subsample_factor > 1:
                 data = self.strain_data[::self.subsample_factor,
                                        ::self.subsample_factor,
                                        ::self.subsample_factor]
-                self.logger.info(f"Subsampled data to shape: {data.shape}")
+                self.logger.info(f"Subsampled data from {self.strain_data.shape} to {data.shape} (factor: {self.subsample_factor})")
+            else:
+                self.logger.info(f"Using full resolution data: {data.shape}")
 
             # Create coordinate arrays (1-based indexing to match expected ranges)
             z_dim, y_dim, x_dim = data.shape
@@ -492,6 +520,19 @@ class ElasticStrainViewer(Gtk.Dialog):
         """Handle threshold change."""
         self.threshold_min = self.min_scale.get_value() / 100.0
         self.threshold_max = self.max_scale.get_value() / 100.0
+        self.render_3d()
+
+    def _on_subsample_changed(self, combo):
+        """Handle subsampling factor change."""
+        active_text = combo.get_active_text()
+        if "Full Resolution (1)" in active_text:
+            self.subsample_factor = 1
+        elif "Half Resolution (2)" in active_text:
+            self.subsample_factor = 2
+        elif "Quarter Resolution (4)" in active_text:
+            self.subsample_factor = 4
+
+        self.logger.info(f"Subsampling factor changed to: {self.subsample_factor}")
         self.render_3d()
 
     def _on_view_changed(self, button, view):

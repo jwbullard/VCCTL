@@ -54,12 +54,15 @@ class ElasticInputGenerator:
         
         # Generate input file content
         input_lines = self._generate_input_responses(
-            operation, 
+            operation,
             selected_microstructure,
             lineage,
             output_directory
         )
-        
+
+        # Copy cement PSD file to hydration operation directory (parent of elastic)
+        self._copy_cement_psd_file(lineage, output_directory)
+
         # Write input file
         input_file_path = output_path / "elastic_input.txt"
         with open(input_file_path, 'w') as f:
@@ -177,36 +180,119 @@ class ElasticInputGenerator:
         return responses
 
     def _find_cement_psd_file(self, lineage: Dict[str, Any], elastic_output_directory: str) -> str:
-        """Find cement PSD file in the source microstructure operation folder."""
+        """Find cement PSD file in the parent hydration operation directory."""
+        try:
+            from pathlib import Path
+            elastic_dir = Path(elastic_output_directory)
+            hydration_dir = elastic_dir.parent  # Go up one level to hydration directory
+
+            # Look for cement PSD file in the hydration directory
+            cement_psd_file = hydration_dir / "cement_psd.csv"
+
+            # Check if it exists in the hydration directory
+            if cement_psd_file.exists():
+                # Return relative path from elastic directory to cement PSD file (up one level)
+                relative_path = "../cement_psd.csv"
+                self.logger.info(f"Found cement PSD file in hydration directory: {relative_path}")
+                return relative_path
+            else:
+                # If not found, try to find it from microstructure operation
+                microstructure_name = lineage.get('microstructure_operation_name')
+                if microstructure_name:
+                    project_root = hydration_dir.parent  # Go up to Operations directory
+                    microstructure_folder = project_root / microstructure_name
+                    source_cement_psd_file = microstructure_folder / "cement_psd.csv"
+
+                    if source_cement_psd_file.exists():
+                        # Create relative path from elastic directory to microstructure cement PSD file
+                        relative_path = self.lineage_service.convert_to_relative_path(
+                            str(source_cement_psd_file), elastic_output_directory
+                        )
+                        self.logger.warning(f"Cement PSD not in hydration dir, using microstructure path: {relative_path}")
+                        return relative_path
+
+                self.logger.warning("Cement PSD file not found, using default path")
+                return "../cement_psd.csv"  # Reference parent directory even if file doesn't exist yet
+
+        except Exception as e:
+            self.logger.error(f"Error finding cement PSD file: {e}")
+            return "../cement_psd.csv"  # Reference parent directory as default
+
+    def _copy_cement_psd_file(self, lineage: Dict[str, Any], elastic_output_directory: str) -> str:
+        """Copy cement PSD file from microstructure operation to hydration operation directory."""
         try:
             # Get the microstructure operation name from lineage
             microstructure_name = lineage.get('microstructure_operation_name')
             if not microstructure_name:
-                self.logger.warning("No microstructure operation name in lineage, using default cement PSD path")
-                return "./cement_psd.dat"
+                self.logger.warning("No microstructure operation name in lineage")
+                # Create in hydration directory, not elastic directory
+                hydration_dir = Path(elastic_output_directory).parent
+                return self._create_default_cement_psd_file(str(hydration_dir))
 
             # Construct path to microstructure operation folder
-            from pathlib import Path
             elastic_dir = Path(elastic_output_directory)
-            project_root = elastic_dir.parent.parent  # Go up from Operations/HydrationName/ElasticName to project root
-            microstructure_folder = project_root / "Operations" / microstructure_name
-            cement_psd_file = microstructure_folder / "cement_psd.dat"
+            hydration_dir = elastic_dir.parent  # Go up one level to hydration directory
+            project_root = hydration_dir.parent  # Go up to Operations directory
+            microstructure_folder = project_root / microstructure_name
+            source_cement_psd_file = microstructure_folder / "cement_psd.csv"
 
-            # Convert to relative path from elastic operation directory
-            if cement_psd_file.exists():
-                # Create relative path from elastic directory to cement PSD file
-                relative_path = self.lineage_service.convert_to_relative_path(
-                    str(cement_psd_file), elastic_output_directory
-                )
-                self.logger.info(f"Found cement PSD file: {relative_path}")
-                return relative_path
+            # Destination path in HYDRATION operation directory (one level up from elastic)
+            dest_cement_psd_file = hydration_dir / "cement_psd.csv"
+
+            # Only copy if it doesn't already exist in the hydration directory
+            if not dest_cement_psd_file.exists():
+                if source_cement_psd_file.exists():
+                    # Copy the file
+                    import shutil
+                    shutil.copy2(source_cement_psd_file, dest_cement_psd_file)
+                    self.logger.info(f"Copied cement PSD file from {source_cement_psd_file} to {dest_cement_psd_file}")
+                else:
+                    self.logger.warning(f"Source cement PSD file not found at {source_cement_psd_file}")
+                    self._create_default_cement_psd_file(str(hydration_dir))
             else:
-                self.logger.warning(f"Cement PSD file not found at {cement_psd_file}, using default")
-                return "./cement_psd.dat"
+                self.logger.info(f"Cement PSD file already exists in hydration directory: {dest_cement_psd_file}")
+
+            return str(dest_cement_psd_file)
 
         except Exception as e:
-            self.logger.error(f"Error finding cement PSD file: {e}")
-            return "./cement_psd.dat"
+            self.logger.error(f"Error copying cement PSD file: {e}")
+            hydration_dir = Path(elastic_output_directory).parent
+            return self._create_default_cement_psd_file(str(hydration_dir))
+
+    def _create_default_cement_psd_file(self, output_directory: str) -> str:
+        """Create a default cement PSD file in the specified directory (usually hydration directory)."""
+        try:
+            output_dir = Path(output_directory)
+            dest_cement_psd_file = output_dir / "cement_psd.csv"
+
+            # Generate default cement PSD data (typical Portland cement distribution)
+            default_psd_data = [
+                (1.0, 0.05),    # Very fine particles
+                (2.0, 0.08),
+                (4.0, 0.12),
+                (8.0, 0.15),
+                (16.0, 0.20),
+                (32.0, 0.18),
+                (45.0, 0.12),
+                (63.0, 0.08),
+                (90.0, 0.02)    # Coarser particles
+            ]
+
+            # Write PSD file in required CSV format
+            with open(dest_cement_psd_file, 'w') as f:
+                # Write CSV header as required by elastic.c
+                f.write("Diameter_micrometers,Volume_Fraction\n")
+
+                # Write data in comma-delimited format
+                for diameter_um, volume_fraction in default_psd_data:
+                    f.write(f"{diameter_um:.3f},{volume_fraction:.6f}\n")
+
+            self.logger.info(f"Created default cement PSD file: {dest_cement_psd_file}")
+            return str(dest_cement_psd_file)
+
+        except Exception as e:
+            self.logger.error(f"Error creating default cement PSD file: {e}")
+            raise
 
     def _write_input_summary(
         self,

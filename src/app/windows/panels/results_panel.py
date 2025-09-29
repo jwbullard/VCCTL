@@ -1036,8 +1036,8 @@ class ResultsPanel(Gtk.Box):
             return
 
         try:
-            # Import here to avoid circular imports
-            from app.windows.dialogs.elastic_strain_viewer import ElasticStrainViewer
+            # Import here to avoid circular imports - use PyVista-based viewer
+            from app.windows.dialogs.pyvista_strain_viewer import PyVistaStrainViewer
 
             # Find the strain energy .img file using the same logic as detection
             operation_dir = self._get_operation_output_dir(self.selected_operation)
@@ -1047,28 +1047,34 @@ class ResultsPanel(Gtk.Box):
             operation_dir_path = Path(operation_dir)
             strain_energy_file = None
 
-            # Pattern 1: {operation_name}.img
-            test_file = operation_dir_path / f"{self.selected_operation.name}.img"
+            # Look for energy.img file (new naming convention after elastic.c fix)
+            test_file = operation_dir_path / "energy.img"
             if test_file.exists():
                 strain_energy_file = test_file
             else:
-                # Pattern 2: Any Elastic-*.img file in the directory
-                for img_file in operation_dir_path.glob("Elastic-*.img"):
-                    strain_energy_file = img_file
-                    break
+                # Fall back to old patterns for backward compatibility
+                # Pattern 1: {operation_name}.img
+                test_file = operation_dir_path / f"{self.selected_operation.name}.img"
+                if test_file.exists():
+                    strain_energy_file = test_file
+                else:
+                    # Pattern 2: Any Elastic-*.img file in the directory
+                    for img_file in operation_dir_path.glob("Elastic-*.img"):
+                        strain_energy_file = img_file
+                        break
 
-                # Pattern 3: Check for any .img file that's not newcem.img
-                if not strain_energy_file:
-                    for img_file in operation_dir_path.glob("*.img"):
-                        if img_file.name != "newcem.img":
-                            strain_energy_file = img_file
-                            break
+                    # Pattern 3: Check for any .img file that's not newcem.img
+                    if not strain_energy_file:
+                        for img_file in operation_dir_path.glob("*.img"):
+                            if img_file.name != "newcem.img":
+                                strain_energy_file = img_file
+                                break
 
             if not strain_energy_file:
                 raise Exception("No strain energy .img file found in operation directory")
 
-            # Create and show the strain energy viewer dialog
-            viewer = ElasticStrainViewer(
+            # Create and show the PyVista strain energy viewer dialog
+            viewer = PyVistaStrainViewer(
                 parent_window=self.get_toplevel(),
                 operation_name=self.selected_operation.name,
                 img_file_path=str(strain_energy_file)
@@ -1129,9 +1135,14 @@ class ResultsPanel(Gtk.Box):
             operation_dir = self._get_operation_output_dir(operation)
             if operation_dir:
                 # Look for .img files that match the elastic operation pattern
-                # Try multiple patterns: operation.name.img or Elastic-*.img files
                 operation_dir_path = Path(operation_dir)
 
+                # Check for energy.img file (new naming convention after elastic.c fix)
+                energy_file = operation_dir_path / "energy.img"
+                if energy_file.exists():
+                    return True
+
+                # Fall back to old patterns for backward compatibility
                 # Pattern 1: {operation_name}.img
                 strain_energy_file = operation_dir_path / f"{operation.name}.img"
                 if strain_energy_file.exists():

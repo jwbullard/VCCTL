@@ -4759,7 +4759,7 @@ void outmic(void) {
           valout = (int)(POROSITY);
         }
         */
-        fprintf(outfile, "%d\n", valout);
+        fprintf(outfile, "\n%d", valout);
         valout = Cement.val[getInt3dindex(Cement, ix, iy, iz)];
         if (valout == (int)(TMPAGGID)) {
           valout = (int)(POROSITY);
@@ -4767,7 +4767,7 @@ void outmic(void) {
           valout = (int)(POROSITY);
         }
 
-        fprintf(partfile, "%d\n", valout);
+        fprintf(partfile, "\n%d", valout);
       }
     }
   }
