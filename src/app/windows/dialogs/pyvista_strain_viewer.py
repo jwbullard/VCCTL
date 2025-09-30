@@ -114,7 +114,7 @@ class PyVistaStrainViewer(Gtk.Dialog):
         self.mode_combo = Gtk.ComboBoxText()
         self.mode_combo.append_text("Volume Rendering")
         self.mode_combo.append_text("Isosurface")
-        self.mode_combo.append_text("Point Cloud")
+        self.mode_combo.append_text("Pixel Art")
         self.mode_combo.set_active(0)  # Default to volume rendering
         self.mode_combo.connect('changed', self._on_mode_changed)
         mode_box.pack_start(mode_label, False, False, 0)
@@ -136,7 +136,7 @@ class PyVistaStrainViewer(Gtk.Dialog):
         vis_box.pack_start(cmap_box, False, False, 0)
 
         # Threshold controls frame
-        thresh_frame = Gtk.Frame(label="Strain Energy Range")
+        thresh_frame = Gtk.Frame(label="Normalized Strain Energy Range")
         thresh_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         thresh_box.set_margin_left(10)
         thresh_box.set_margin_right(10)
@@ -721,11 +721,16 @@ class PyVistaStrainViewer(Gtk.Dialog):
         """Add isosurface rendering to PyVista plotter."""
         try:
             if hasattr(self.pyvista_viewer, 'plotter') and self.pyvista_viewer.plotter:
+                # Apply cross-sections if enabled
+                mesh = grid
+                if hasattr(self.pyvista_viewer, 'cross_section_enabled'):
+                    mesh = self._apply_cross_sections(grid)
+
                 # Create isosurfaces at different strain energy levels
                 iso_values = np.linspace(0.1, 0.9, 5)  # 5 isosurface levels
 
                 for i, iso_val in enumerate(iso_values):
-                    contour = grid.contour([iso_val], scalars="strain_energy")
+                    contour = mesh.contour([iso_val], scalars="strain_energy")
                     if contour.n_points > 0:
                         color_val = colormap(iso_val)[:3]  # RGB without alpha
                         self.pyvista_viewer.plotter.add_mesh(
@@ -745,6 +750,10 @@ class PyVistaStrainViewer(Gtk.Dialog):
             if hasattr(self.pyvista_viewer, 'plotter') and self.pyvista_viewer.plotter:
                 # Extract points with non-zero strain energy
                 threshold = grid.threshold(0.001, scalars="strain_energy")
+
+                # Apply cross-sections if enabled
+                if hasattr(self.pyvista_viewer, 'cross_section_enabled'):
+                    threshold = self._apply_cross_sections(threshold)
 
                 if threshold.n_points > 0:
                     self.pyvista_viewer.plotter.add_mesh(
@@ -805,7 +814,7 @@ Std Dev: {data_std:.2e}</small>"""
             self.rendering_mode = 'volume'
         elif "Isosurface" in active_text:
             self.rendering_mode = 'isosurface'
-        elif "Point" in active_text:
+        elif "Pixel" in active_text or "Point" in active_text:
             self.rendering_mode = 'points'
 
         self.logger.info(f"Rendering mode changed to: {self.rendering_mode}")

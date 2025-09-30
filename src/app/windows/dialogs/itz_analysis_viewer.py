@@ -312,23 +312,194 @@ class ITZAnalysisViewer(Gtk.Dialog):
             distances = [row['distance'] for row in self.itz_data]
             values = [row[property_key] for row in self.itz_data]
 
-            # Create plot
-            ax.plot(distances, values, 'bo-', linewidth=2, markersize=6)
+            # Create main data plot
+            ax.plot(distances, values, 'bo-', linewidth=2, markersize=6, label='Data')
             ax.set_xlabel('Distance from Aggregate Surface (μm)')
             ax.set_ylabel(property_label)
             ax.set_title(f'ITZ {property_label} vs Distance')
             ax.grid(True, alpha=0.3)
 
-            # Add trend line if we have enough points
-            if len(distances) > 2:
-                z = np.polyfit(distances, values, 1)
-                p = np.poly1d(z)
-                ax.plot(distances, p(distances), "r--", alpha=0.8,
-                       label=f'Trend: y = {z[0]:.4f}x + {z[1]:.4f}')
-                ax.legend()
+            # Calculate ITZ width (median cement particle size)
+            itz_width = self._calculate_itz_width()
+            self.logger.info(f"ITZ width calculated: {itz_width}")
+
+            if itz_width is not None:
+                self.logger.info(f"Adding ITZ width line at {itz_width:.2f} μm")
+                # Add vertical dashed line at ITZ width
+                ax.axvline(x=itz_width, color='green', linestyle='--', linewidth=2,
+                          label=f'ITZ Width: {itz_width:.2f} μm')
+
+                # Calculate average property values within and outside ITZ
+                avg_within_itz, avg_outside_itz = self._calculate_property_averages(
+                    distances, values, itz_width
+                )
+
+                if avg_within_itz is not None and avg_outside_itz is not None:
+                    # Add horizontal dashed lines for averages
+                    ax.axhline(y=avg_within_itz, color='orange', linestyle='--', linewidth=1.5,
+                              alpha=0.7, label=f'Avg within ITZ: {avg_within_itz:.4f}')
+                    ax.axhline(y=avg_outside_itz, color='purple', linestyle='--', linewidth=1.5,
+                              alpha=0.7, label=f'Avg outside ITZ: {avg_outside_itz:.4f}')
+                else:
+                    self.logger.warning("ITZ width calculated but property averages could not be computed")
+            else:
+                self.logger.warning("ITZ width could not be calculated - cement_psd.csv may be missing")
+
+            ax.legend(loc='best')
 
         self.figure.tight_layout()
         self.canvas.draw()
+
+    def _calculate_itz_width(self) -> Optional[float]:
+        """
+        Calculate ITZ width as the median cement particle size from cement_psd.csv.
+        Returns the 50th percentile particle diameter in micrometers.
+        """
+        try:
+            # Find cement_psd.csv file in operation directory
+            operation_dir = self._get_operation_directory()
+            self.logger.info(f"ITZ width calculation: operation_dir = {operation_dir}")
+            if not operation_dir:
+                self.logger.warning("Could not find operation directory for cement PSD")
+                return None
+
+            # Look for cement_psd.csv in the operation directory
+            cement_psd_file = Path(operation_dir) / "cement_psd.csv"
+            self.logger.info(f"ITZ width calculation: looking for {cement_psd_file}")
+
+            if not cement_psd_file.exists():
+                # If not found in elastic operation directory, try parent hydration directory
+                parent_dir = Path(operation_dir).parent
+                cement_psd_file = parent_dir / "cement_psd.csv"
+                self.logger.info(f"ITZ width calculation: not found, trying parent directory: {cement_psd_file}")
+
+                if not cement_psd_file.exists():
+                    self.logger.warning(f"cement_psd.csv not found in {operation_dir} or parent directory")
+                    # List files in directory for debugging
+                    try:
+                        files = list(Path(operation_dir).glob("*"))
+                        self.logger.info(f"Files in {operation_dir}: {[f.name for f in files]}")
+                        parent_files = list(parent_dir.glob("*"))
+                        self.logger.info(f"Files in parent {parent_dir}: {[f.name for f in parent_files]}")
+                    except Exception as e:
+                        self.logger.error(f"Error listing directory: {e}")
+                    return None
+
+            self.logger.info(f"Found cement_psd.csv at {cement_psd_file}")
+
+            # Read PSD data
+            diameters = []
+            volume_fractions = []
+
+            with open(cement_psd_file, 'r') as f:
+                csv_reader = csv.reader(f)
+                # Skip header if present
+                first_line = next(csv_reader, None)
+                if first_line:
+                    try:
+                        # Try to parse as numeric data
+                        diameters.append(float(first_line[0]))
+                        volume_fractions.append(float(first_line[1]))
+                    except ValueError:
+                        # First line was a header, skip it
+                        pass
+
+                # Read remaining data
+                for row in csv_reader:
+                    if len(row) >= 2:
+                        try:
+                            diameters.append(float(row[0]))
+                            volume_fractions.append(float(row[1]))
+                        except ValueError:
+                            continue
+
+            if not diameters or not volume_fractions:
+                self.logger.warning("No valid PSD data found in cement_psd.csv")
+                return None
+
+            # Calculate cumulative volume fractions
+            total_volume = sum(volume_fractions)
+            if total_volume == 0:
+                self.logger.warning("Total volume in PSD is zero")
+                return None
+
+            # Normalize volume fractions
+            normalized_fractions = [vf / total_volume for vf in volume_fractions]
+
+            # Calculate cumulative distribution
+            cumulative = []
+            cumsum = 0.0
+            for vf in normalized_fractions:
+                cumsum += vf
+                cumulative.append(cumsum)
+
+            # Find median (50th percentile) by interpolation
+            median_diameter = None
+            for i in range(len(cumulative) - 1):
+                if cumulative[i] <= 0.5 <= cumulative[i + 1]:
+                    # Linear interpolation between points
+                    fraction = (0.5 - cumulative[i]) / (cumulative[i + 1] - cumulative[i])
+                    median_diameter = diameters[i] + fraction * (diameters[i + 1] - diameters[i])
+                    break
+
+            # Handle edge cases
+            if median_diameter is None:
+                if cumulative[-1] < 0.5:
+                    median_diameter = diameters[-1]
+                elif cumulative[0] > 0.5:
+                    median_diameter = diameters[0]
+                else:
+                    # Use simple average as fallback
+                    median_diameter = sum(d * vf for d, vf in zip(diameters, normalized_fractions))
+
+            self.logger.info(f"Calculated ITZ width (median cement particle size): {median_diameter:.2f} μm")
+            return median_diameter
+
+        except Exception as e:
+            self.logger.error(f"Error calculating ITZ width from cement PSD: {e}")
+            return None
+
+    def _calculate_property_averages(self, distances: List[float], values: List[float],
+                                    itz_width: float) -> Tuple[Optional[float], Optional[float]]:
+        """
+        Calculate average property values within and outside the ITZ.
+
+        Args:
+            distances: List of distance values from aggregate surface
+            values: List of property values corresponding to distances
+            itz_width: ITZ width threshold in micrometers
+
+        Returns:
+            Tuple of (average within ITZ, average outside ITZ)
+        """
+        try:
+            if not distances or not values or len(distances) != len(values):
+                return None, None
+
+            # Separate data into within and outside ITZ
+            within_itz_values = []
+            outside_itz_values = []
+
+            for dist, val in zip(distances, values):
+                if dist <= itz_width:
+                    within_itz_values.append(val)
+                else:
+                    outside_itz_values.append(val)
+
+            # Calculate averages
+            avg_within = np.mean(within_itz_values) if within_itz_values else None
+            avg_outside = np.mean(outside_itz_values) if outside_itz_values else None
+
+            if avg_within is not None:
+                self.logger.info(f"Average within ITZ (≤{itz_width:.2f} μm): {avg_within:.4f}")
+            if avg_outside is not None:
+                self.logger.info(f"Average outside ITZ (>{itz_width:.2f} μm): {avg_outside:.4f}")
+
+            return avg_within, avg_outside
+
+        except Exception as e:
+            self.logger.error(f"Error calculating property averages: {e}")
+            return None, None
 
     def _on_property_changed(self, combo):
         """Handle property selection change."""

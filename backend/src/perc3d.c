@@ -62,6 +62,11 @@ struct BurnProps {
   int isPercInZ;
 };
 
+/* DFS stack structure for connectivity analysis */
+typedef struct {
+  int x, y, z;
+} StackPoint;
+
 int burn3d(int npix, struct BurnProps *burnprops);
 
 int main(int argc, char *argv[]) {
@@ -364,16 +369,15 @@ int burn3d(int npix, struct BurnProps *burnprops) {
           /***
            * DEPTH-FIRST SEARCH (DFS) CONNECTIVITY ALGORITHM
            * Efficiently finds all connected voxels using minimal memory
+           * Use a reasonable stack size to avoid memory exhaustion
+           * Stack size of 10000 = ~120KB per component
            ***/
 
-          typedef struct {
-            int x, y, z;
-          } StackPoint;
-
-#define DFS_STACK_SIZE 500000
+#define DFS_STACK_SIZE 10000
           StackPoint *dfs_stack =
               (StackPoint *)malloc(DFS_STACK_SIZE * sizeof(StackPoint));
           if (!dfs_stack) {
+            fprintf(stderr, "Error: Could not allocate DFS stack (size=%d)\n", DFS_STACK_SIZE);
             return (MEMERR);
           }
 

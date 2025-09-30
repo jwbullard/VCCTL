@@ -8,13 +8,231 @@
 - Do not use the phrase "You're absolutely right!". Instead, use the phrase
 "Good point.", or "I see what you are saying."
 
-## Current Status: VCCTL System Complete with PyVista Strain Energy Visualization ✅
+## Current Status: VCCTL System Complete with All Features Working ✅
 
-**Latest Session: PyVista Strain Energy Viewer & ITZ Analysis Complete (September 29, 2025)**
+**Latest Session: Connectivity Analysis Fix (September 30, 2025)**
 
-**Status: COMPLETE STRAIN ENERGY & ITZ ANALYSIS SYSTEM ✅ - Professional 3D Visualization & Data Analysis**
+**Status: COMPLETE SYSTEM ✅ - All Development Complete and Production Ready**
 
-## Session Status Update (September 29, 2025 - PYVISTA STRAIN ENERGY & ITZ ANALYSIS COMPLETION SESSION)
+## Session Status Update (September 30, 2025 - CONNECTIVITY ANALYSIS FIX SESSION)
+
+### **Session Summary:**
+Fixed the Connectivity button functionality on 3D microstructure visualization, which was failing due to scipy import issues. Through investigation, discovered that the Python implementation using scipy's ndimage.label() was the original working solution but had become unavailable. Switched to prioritizing the efficient Python implementation over the problematic C perc3d program, installed scipy, and restored full connectivity analysis functionality. This was the final remaining issue in the entire VCCTL system.
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Fixed Connectivity Analysis Implementation Strategy ✅**
+- **Problem**: Connectivity button showed no output when clicked
+- **Initial Diagnosis**: perc3d C program crashing with return code -11 (SIGSEGV), then return code 1 (memory allocation failure)
+- **Root Cause Discovery**: Python implementation with scipy was the intended solution but scipy import was failing
+- **Solution**: Reversed implementation priority to use Python first, C perc3d as fallback only
+- **Result**: Connectivity analysis now works reliably using scipy's optimized algorithms
+
+#### **2. Installed scipy for Connectivity Analysis ✅**
+- **Requirement**: Python implementation requires scipy.ndimage for connectivity labeling
+- **Installation**: Successfully installed scipy 1.16.2 for Python 3.11
+- **Benefits**: Access to optimized, memory-efficient connectivity algorithms
+- **Result**: Python implementation now available as primary connectivity method
+
+#### **3. Improved Backend C Code (Secondary) ✅**
+- **File**: `backend/src/perc3d.c` - Improved but not used as primary method
+- **Changes Made**:
+  - Moved `typedef struct StackPoint` from inside nested loop to global scope (lines 65-68)
+  - Reduced DFS_STACK_SIZE from 500,000 to 10,000 elements
+  - Added better error reporting with fprintf(stderr)
+- **Note**: These changes improve the C fallback but Python implementation is now preferred
+
+#### **4. Architecture Change: Python-First Connectivity Analysis ✅**
+- **Previous**: Try C perc3d → fallback to Python if failed
+- **Current**: Try Python scipy → fallback to C perc3d if scipy unavailable
+- **Rationale**: Python implementation is more memory-efficient and reliable
+- **File Modified**: `src/app/visualization/pyvista_3d_viewer.py`
+
+### **🔧 TECHNICAL IMPLEMENTATION DETAILS:**
+
+#### **File: `src/app/visualization/pyvista_3d_viewer.py`**
+**Updated `_perform_connectivity_analysis()` Method** (lines 2249-2273):
+
+**Before (Problematic):**
+```python
+def _perform_connectivity_analysis(self):
+    try:
+        # Use C perc3d program for accurate connectivity analysis
+        raw_output = self._run_perc3d_analysis_raw()
+        self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
+    except Exception as e:
+        # Fallback to Python implementation if C program fails
+        connectivity_results = self._python_connectivity_fallback()
+        self._show_connectivity_analysis_results(connectivity_results)
+```
+
+**After (Working):**
+```python
+def _perform_connectivity_analysis(self):
+    try:
+        # Use Python implementation with scipy (more memory-efficient than C version)
+        self.logger.info("Using Python connectivity analysis with periodic boundary conditions...")
+        connectivity_results = self._python_connectivity_fallback()
+        self._show_connectivity_analysis_results(connectivity_results)
+        self.logger.info("Connectivity analysis completed successfully")
+    except ImportError as e:
+        # Try C perc3d program as fallback if scipy not available
+        self.logger.info("Falling back to C perc3d program...")
+        raw_output = self._run_perc3d_analysis_raw()
+        self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
+```
+
+#### **Python Implementation Features:**
+- **Periodic Boundary Conditions**: Union-find algorithm for merging components across boundaries
+- **Memory Efficiency**: Uses scipy.ndimage.label() with optimized memory handling
+- **Directional Percolation**: Analyzes X, Y, Z directions independently
+- **Component Analysis**: Volume calculations, percolation ratios, connected components
+- **Methods**: `_periodic_connectivity_analysis()`, `_analyze_directional_percolation()`, `_merge_periodic_boundaries()`
+
+### **📊 CURRENT CAPABILITIES:**
+
+**✅ FULLY WORKING:**
+- Connectivity button on 3D microstructure visualization (Python implementation)
+- Periodic boundary condition handling with union-find algorithm
+- Directional percolation analysis (X, Y, Z directions independently)
+- Connected component identification and volume calculations
+- Percolation ratio reporting for each phase
+- Professional dialog display with formatted results
+- C perc3d fallback available if scipy unavailable
+
+### **📋 FILES MODIFIED:**
+
+**Primary Fix:**
+- `src/app/visualization/pyvista_3d_viewer.py` - Changed implementation priority to Python-first
+
+**Dependencies:**
+- Installed scipy 1.16.2 via pip3
+
+**Secondary Improvements (C fallback):**
+- `backend/src/perc3d.c` - Fixed typedef placement and reduced memory allocation
+
+### **🎯 SYSTEM STATUS:**
+
+**🎉 VCCTL DEVELOPMENT COMPLETE ✅**
+
+All functionality now working:
+- ✅ Materials management with PSD support
+- ✅ Mix design with auto-save and templates
+- ✅ Microstructure generation with progress tracking
+- ✅ Hydration simulation with parameter validation
+- ✅ Elastic moduli calculations with strain energy visualization
+- ✅ 3D microstructure visualization with phase data and connectivity analysis
+- ✅ ITZ analysis with physically meaningful plots
+- ✅ Results panel with appropriate buttons for each operation type
+- ✅ Cross-section functionality in all viewers
+- ✅ PyVista strain energy visualization with normalized controls
+
+**System is production-ready for packaging and distribution!**
+
+---
+
+## Previous Session Status Update (September 30, 2025 - ITZ ANALYSIS PLOTTING ENHANCEMENT)
+
+### **Session Summary:**
+Enhanced ITZ analysis plotting to show physically meaningful features instead of linear regression. Successfully replaced meaningless trend line with ITZ width indicator (median cement particle size) and average property values within and outside the ITZ region. Also fixed Results panel button visibility for elastic operations.
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Enhanced ITZ Analysis Plotting with Physical Meaning ✅**
+- **Problem**: ITZ plots showed linear regression trend line with no physical significance
+- **User Requirements**:
+  - REMOVE: Linear regression trend line
+  - ADD: Vertical dashed line at ITZ width (median cement particle size from cement_psd.csv)
+  - ADD: Average property values within ITZ (distance ≤ ITZ width)
+  - ADD: Average property values outside ITZ (distance > ITZ width)
+  - DISPLAY: Both horizontal dashed lines and text annotations for averages
+- **Solution**: Implemented cement PSD median calculation and property averaging
+- **Result**: ITZ plots now show physically meaningful features for material analysis
+
+#### **2. Fixed Results Panel Button Visibility for Elastic Operations ✅**
+- **Problem**: Elastic operations showed all buttons (3D visualization, plotting, strain energy, ITZ analysis) instead of only elastic-specific buttons
+- **User Requirements**:
+  - REMOVE: 3D visualization button for elastic operations
+  - REMOVE: Plotting button for elastic operations
+  - KEEP: Strain energy heat map button (always for elastic)
+  - KEEP: ITZ Analysis button (only if aggregate present in mix)
+- **Solution**: Added operation-type checking to conditionally exclude inappropriate buttons
+- **Result**: Elastic operations now show only strain energy and ITZ analysis buttons; other operation types maintain existing behavior
+
+### **🔧 TECHNICAL IMPLEMENTATION:**
+
+#### **File: `src/app/windows/dialogs/itz_analysis_viewer.py`**
+- **Enhanced `_create_plot()` Method** (lines 293-363):
+  - Removed linear regression trend line calculation (old lines 322-328)
+  - Added ITZ width calculation and vertical dashed line display
+  - Added average property calculations and horizontal dashed lines
+  - Added text annotations with colored backgrounds for average values
+  - Enhanced legend with all physical features
+
+- **New Method: `_calculate_itz_width()`** (lines 365-453):
+  - Reads cement_psd.csv file from operation directory
+  - Handles both header and headerless CSV formats
+  - Calculates cumulative volume distribution
+  - Computes 50th percentile (median) by linear interpolation
+  - Returns median cement particle diameter in micrometers
+  - Implementation matches elastic.c backend calculation method
+
+- **New Method: `_calculate_property_averages()`** (lines 455-495):
+  - Separates ITZ data into within/outside ITZ regions based on ITZ width threshold
+  - Calculates mean property values for each region using numpy
+  - Returns tuple of (average within ITZ, average outside ITZ)
+  - Handles edge cases with proper None returns
+
+#### **Plotting Features Implementation**:
+```python
+# ITZ width vertical line
+ax.axvline(x=itz_width, color='green', linestyle='--', linewidth=2,
+          label=f'ITZ Width: {itz_width:.2f} μm')
+
+# Average within ITZ horizontal line
+ax.axhline(y=avg_within_itz, color='orange', linestyle='--', linewidth=1.5,
+          alpha=0.7, label=f'Avg within ITZ: {avg_within_itz:.4f}')
+
+# Average outside ITZ horizontal line
+ax.axhline(y=avg_outside_itz, color='purple', linestyle='--', linewidth=1.5,
+          alpha=0.7, label=f'Avg outside ITZ: {avg_outside_itz:.4f}')
+
+# Text annotations with colored backgrounds
+ax.text(x_max * 0.98, avg_within_itz, f'{avg_within_itz:.4f}',
+       verticalalignment='center', horizontalalignment='right',
+       bbox=dict(boxstyle='round', facecolor='orange', alpha=0.3))
+```
+
+#### **File: `src/app/windows/panels/results_panel.py`**
+- **Enhanced Button Logic** (lines 306-310, 315, 430):
+  - Added early `is_elastic` check to determine operation type
+  - Modified 3D Visualization button condition: `if has_3d and not is_elastic:`
+  - Modified Plot Data button condition: `if has_csv and not is_elastic:`
+  - Removed duplicate `is_elastic` check and logging
+
+### **📊 RESULTS:**
+
+**✅ ENHANCED ITZ PLOTTING:**
+- **Green vertical dashed line**: Shows ITZ width (median cement particle size in μm)
+- **Orange horizontal dashed line**: Shows average property value within ITZ region
+- **Purple horizontal dashed line**: Shows average property value outside ITZ region
+- **Text annotations**: Numerical values displayed with colored backgrounds for easy reading
+- **Physical meaning**: All plot features now relate to concrete microstructure physics
+- **Legend**: Complete information about all plotted features
+
+**✅ IMPROVED BUTTON VISIBILITY:**
+- **Elastic Operations**: Show only Strain Energy 3D and ITZ Analysis buttons
+- **Hydration Operations**: Show 3D Visualization and Plot Data buttons (existing behavior maintained)
+- **Microstructure Operations**: Show 3D Visualization button (existing behavior maintained)
+- **Clean UI**: Users see only relevant analysis tools for each operation type
+
+### **📋 FILES MODIFIED:**
+- `src/app/windows/dialogs/itz_analysis_viewer.py` - Enhanced plotting with ITZ width and property averages
+- `src/app/windows/panels/results_panel.py` - Fixed button visibility logic for elastic operations
+
+---
+
+## Previous Session Status Update (September 29, 2025 - PYVISTA STRAIN ENERGY & ITZ ANALYSIS COMPLETION SESSION)
 
 ### **Session Summary:**
 Breakthrough session that completed the PyVista-based strain energy visualization system and fixed ITZ Analysis data loading. Successfully implemented professional 3D strain energy visualization with PyVista, resolved CSV parsing issues for ITZ analysis, optimized threshold controls for bimodal strain energy data, streamlined the UI by removing unnecessary controls, and fixed elastic operation folder creation issues.

@@ -304,39 +304,41 @@ class ResultsPanel(Gtk.Box):
         buttons_grid.set_halign(Gtk.Align.CENTER)
         
         button_col = 0  # Track column position for buttons
-        
-        # 3D Visualization button
+
+        # Check if this is an elastic operation to exclude certain buttons
+        is_elastic = self._is_elastic_operation(operation)
+        self.logger.info(f"Results panel: Operation '{operation.name}' is elastic operation: {is_elastic}")
+
+        # 3D Visualization button (NOT for elastic operations)
         has_3d = self._has_3d_results(operation)
         self.logger.info(f"Results panel: Operation '{operation.name}' has 3D results: {has_3d}")
-        if has_3d:
+        if has_3d and not is_elastic:
             self.view_3d_button = Gtk.Button()
             self.view_3d_button.set_size_request(200, 60)
-            
+
             button_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-            
+
             icon_label = Gtk.Label()
             icon_label.set_markup('<span size="x-large">🎮</span>')
             button_box.pack_start(icon_label, False, False, 0)
-            
+
             text_label = Gtk.Label()
             text_label.set_markup('<b>View 3D Results</b>')
             button_box.pack_start(text_label, False, False, 0)
-            
+
             desc_label = Gtk.Label()
             desc_label.set_markup('<small>Interactive 3D microstructure\nevolution visualization</small>')
             desc_label.set_justify(Gtk.Justification.CENTER)
             button_box.pack_start(desc_label, False, False, 0)
-            
+
             self.view_3d_button.add(button_box)
             self.view_3d_button.connect('clicked', self._on_view_3d_results_clicked)
             self.view_3d_button.set_tooltip_text("View 3D microstructure evolution from hydration simulation results")
-            
+
             buttons_grid.attach(self.view_3d_button, button_col, 0, 1, 1)
             button_col += 1
         
         # Elastic Moduli Results buttons (for elastic operations)
-        is_elastic = self._is_elastic_operation(operation)
-        self.logger.info(f"Results panel: Operation '{operation.name}' is elastic operation: {is_elastic}")
         if is_elastic:
             # Effective Moduli Summary button
             has_effective_moduli = self._has_effective_moduli(operation)
@@ -422,10 +424,10 @@ class ResultsPanel(Gtk.Box):
                 buttons_grid.attach(self.strain_energy_button, button_col, 0, 1, 1)
                 button_col += 1
 
-        # Data Plotting button
+        # Data Plotting button (NOT for elastic operations)
         has_csv = self._has_csv_data(operation)
         self.logger.info(f"Results panel: Operation '{operation.name}' has CSV data: {has_csv}")
-        if has_csv:
+        if has_csv and not is_elastic:
             self.plot_data_button = Gtk.Button()
             self.plot_data_button.set_size_request(200, 60)
 

@@ -2247,29 +2247,30 @@ Distance: {distance_um:.2f} μm"""
                 self.logger.error(f"Python fallback also failed: {fallback_e}")
     
     def _perform_connectivity_analysis(self):
-        """Perform connectivity analysis using C perc3d program."""
+        """Perform connectivity analysis using efficient Python implementation."""
         if self.voxel_data is None:
             self.logger.warning("No voxel data available for connectivity analysis")
             return
-        
+
         try:
-            # Use C perc3d program for accurate connectivity analysis
-            raw_output = self._run_perc3d_analysis_raw()
-            
-            # Display raw output directly (preserves UTF-8 formatting)
-            self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
-            
-            self.logger.info("Connectivity analysis completed using C perc3d program")
-            
+            # Use Python implementation with scipy (more memory-efficient than C version)
+            self.logger.info("Using Python connectivity analysis with periodic boundary conditions...")
+            connectivity_results = self._python_connectivity_fallback()
+            self._show_connectivity_analysis_results(connectivity_results)
+            self.logger.info("Connectivity analysis completed successfully")
+
+        except ImportError as e:
+            self.logger.error(f"scipy not available for connectivity analysis: {e}")
+            # Try C perc3d program as fallback
+            try:
+                self.logger.info("Falling back to C perc3d program...")
+                raw_output = self._run_perc3d_analysis_raw()
+                self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
+                self.logger.info("Connectivity analysis completed using C perc3d program")
+            except Exception as fallback_e:
+                self.logger.error(f"C perc3d fallback also failed: {fallback_e}")
         except Exception as e:
             self.logger.error(f"Connectivity analysis failed: {e}")
-            # Fallback to Python implementation if C program fails
-            try:
-                self.logger.info("Falling back to Python implementation...")
-                connectivity_results = self._python_connectivity_fallback()
-                self._show_connectivity_analysis_results(connectivity_results)
-            except Exception as fallback_e:
-                self.logger.error(f"Python fallback also failed: {fallback_e}")
 
     def _python_connectivity_fallback(self):
         """Python fallback for connectivity analysis."""
