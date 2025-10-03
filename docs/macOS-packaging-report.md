@@ -15,6 +15,7 @@ The VCCTL application has been successfully packaged for macOS using PyInstaller
 - **Minimum macOS:** 10.14 (Mojave)
 - **Python Version:** 3.11.13
 - **PyInstaller Version:** 6.16.0
+- **C Executables Included:** 7 binaries (genmic, disrealnew, elastic, genaggpack, perc3d, stat3d, oneimage)
 
 ---
 
@@ -95,6 +96,31 @@ project_root = Path(SPECPATH).absolute()
 - Windows: `~/AppData/Local/VCCTL/config`
 - Linux: `~/.config/vcctl/config`
 
+### Issue 5: Missing C Executables
+**Problem:** Initial package did not include C executables required for VCCTL operations
+
+**Solution:** Added all C executables to the `binaries` section in `vcctl.spec`:
+```python
+binaries=[
+    ('backend/bin/genmic', 'backend/bin/'),
+    ('backend/bin/disrealnew', 'backend/bin/'),
+    ('backend/bin/elastic', 'backend/bin/'),
+    ('backend/bin/genaggpack', 'backend/bin/'),
+    ('backend/bin/perc3d', 'backend/bin/'),
+    ('backend/bin/stat3d', 'backend/bin/'),
+    ('backend/bin/oneimage', 'backend/bin/'),
+],
+```
+
+These executables are ARM64 Mach-O binaries compiled for macOS and are required for:
+- `genmic` - Microstructure generation
+- `disrealnew` - Hydration simulation
+- `elastic` - Elastic moduli calculations
+- `genaggpack` - Aggregate packing
+- `perc3d` - Connectivity/percolation analysis
+- `stat3d` - Microstructure statistics
+- `oneimage` - Image processing
+
 ---
 
 ## 📝 Files Modified
@@ -103,10 +129,11 @@ project_root = Path(SPECPATH).absolute()
 1. `vcctl.spec` - PyInstaller specification file (fixed SPECPATH)
 2. `hooks/hook-PIL.py` - Custom hook to handle PIL dylib conflicts
 3. `docs/macOS-packaging-report.md` - This documentation
+4. `build_macos.sh` - Automated build script with all fixes
 
 ### Modified Files:
 1. `src/app/config/config_manager.py` - Added PyInstaller detection for config paths
-2. `vcctl.spec` - Added jaraco dependencies to hiddenimports
+2. `vcctl.spec` - Added jaraco dependencies to hiddenimports and C executables to binaries
 
 ---
 
