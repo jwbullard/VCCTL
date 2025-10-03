@@ -61,9 +61,25 @@ class ConfigManager:
     
     def _get_platform_config_dir(self) -> Path:
         """Get configuration directory relative to application directory."""
-        # Use a config subdirectory relative to the current working directory
-        # This makes the application portable and self-contained
-        return Path.cwd() / "config"
+        import sys
+
+        # Check if running as a PyInstaller bundle
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            # Running in a PyInstaller bundle - use user's home directory
+            from pathlib import Path as PPath
+            import platform
+
+            if platform.system() == 'Darwin':  # macOS
+                config_dir = PPath.home() / 'Library' / 'Application Support' / 'VCCTL' / 'config'
+            elif platform.system() == 'Windows':
+                config_dir = PPath.home() / 'AppData' / 'Local' / 'VCCTL' / 'config'
+            else:  # Linux
+                config_dir = PPath.home() / '.config' / 'vcctl' / 'config'
+            return config_dir
+        else:
+            # Running in development mode - use config subdirectory relative to CWD
+            # This makes the application portable and self-contained
+            return Path.cwd() / "config"
     
     def _load_configurations(self) -> None:
         """Load all configuration sections."""
