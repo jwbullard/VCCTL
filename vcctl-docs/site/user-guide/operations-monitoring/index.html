@@ -1,0 +1,2415 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/user-guide/operations-monitoring/">
+      
+      
+        <link rel="prev" href="../results-visualization/">
+      
+      
+        <link rel="next" href="../../workflows/basic-concrete-simulation/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Operations Monitoring - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#operations-monitoring" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Operations Monitoring
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../materials-management/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../workflows/basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../materials-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mix-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elastic-calculations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-operations-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Operations Panel
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-the-operations-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding the Operations List
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding the Operations List">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-information-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Information Columns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-status-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Status Indicators
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring Progress
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring Progress">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#progress-percentage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Progress Percentage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current-step-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current Step Information
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#controlling-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Controlling Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controlling Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pausing-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pausing Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resuming-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resuming Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canceling-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Canceling Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleting Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operation-types-and-behaviors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Types and Behaviors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operation Types and Behaviors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#microstructure-generation-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Microstructure Generation Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydration-simulation-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hydration Simulation Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic-moduli-calculation-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elastic Moduli Calculation Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrent-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concurrent Operations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Concurrent Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-multiple-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Multiple Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-and-resource-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority and Resource Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-stuck-at-same-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Stuck at Same Progress
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-failed-unexpectedly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Failed Unexpectedly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cannot-pause-or-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Pause or Resume
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleted-operation-still-appears" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleted Operation Still Appears
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-management-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Management Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-operation-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Operation Lineage
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Operation Lineage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parent-child-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parent-Child Relationships
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewing-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Lineage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-parent-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleting Parent Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtering-and-searching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filtering and Searching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exporting-operation-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting Operation Information
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Actions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-meanings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status Meanings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typical-operation-durations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typical Operation Durations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="operations-monitoring">Operations Monitoring<a class="headerlink" href="#operations-monitoring" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The <strong>Operations</strong> panel in VCCTL provides centralized monitoring and management of all running, paused, and completed simulations. Whether you're generating microstructures, running hydration simulations, or calculating elastic moduli, this panel gives you real-time visibility into progress, status, and control over execution.</p>
+<p><strong>Key capabilities:</strong></p>
+<ul>
+<li>Monitor real-time progress of all operations</li>
+<li>View detailed status and current step information</li>
+<li>Pause and resume long-running simulations</li>
+<li>Cancel operations that are no longer needed</li>
+<li>Delete completed operations and their data</li>
+<li>Track multiple concurrent operations simultaneously</li>
+</ul>
+<hr>
+<h2 id="accessing-the-operations-panel">Accessing the Operations Panel<a class="headerlink" href="#accessing-the-operations-panel" title="Permanent link">¶</a></h2>
+<ol>
+<li>Click the <strong>Operations</strong> tab in the left sidebar</li>
+<li>The panel displays a list of all operations in your workspace</li>
+<li>Operations are organized chronologically with most recent at top</li>
+<li>Each row shows key information: name, type, status, progress, and actions</li>
+</ol>
+<p><img alt="Operations Panel Overview" src="../../assets/images/screenshots/operations/operations-panel-overview.png"></p>
+<hr>
+<h2 id="understanding-the-operations-list">Understanding the Operations List<a class="headerlink" href="#understanding-the-operations-list" title="Permanent link">¶</a></h2>
+<p>Each operation in the list displays comprehensive status information:</p>
+<h3 id="operation-information-columns">Operation Information Columns<a class="headerlink" href="#operation-information-columns" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Name</strong></td>
+<td>Operation name you provided during creation</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Operation type (Microstructure, Hydration, Elastic Moduli)</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Current state (Queued, Running, Paused, Completed, Failed)</td>
+</tr>
+<tr>
+<td><strong>Progress</strong></td>
+<td>Completion percentage (0-100%)</td>
+</tr>
+<tr>
+<td><strong>Current Step</strong></td>
+<td>Detailed description of current activity</td>
+</tr>
+<tr>
+<td><strong>Start Time</strong></td>
+<td>When operation began execution</td>
+</tr>
+<tr>
+<td><strong>Actions</strong></td>
+<td>Control buttons (Pause/Resume, Cancel, Delete)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operation-status-indicators">Operation Status Indicators<a class="headerlink" href="#operation-status-indicators" title="Permanent link">¶</a></h3>
+<p><strong>🔵 Queued</strong> (Blue):
+- Operation created but not yet started
+- Waiting for system resources or user action
+- No computational work being performed</p>
+<p><strong>🟢 Running</strong> (Green):
+- Operation actively executing
+- Progress updates in real-time
+- Current step shows specific activity</p>
+<p><img alt="Running Operation" src="../../assets/images/screenshots/operations/operations-running.png"></p>
+<p><strong>🟡 Paused</strong> (Yellow):
+- Operation temporarily suspended
+- Can be resumed from current state
+- No computational resources consumed</p>
+<p><img alt="Paused Operation" src="../../assets/images/screenshots/operations/operations-paused.png"></p>
+<p><strong>✅ Completed</strong> (Green checkmark):
+- Operation finished successfully
+- Results available for viewing
+- Ready for deletion if no longer needed</p>
+<p><img alt="Completed Operation" src="../../assets/images/screenshots/operations/operations-completed.png"></p>
+<p><strong>❌ Failed</strong> (Red X):
+- Operation encountered an error and stopped
+- Check logs for error details
+- May need parameter adjustment and restart</p>
+<hr>
+<h2 id="monitoring-progress">Monitoring Progress<a class="headerlink" href="#monitoring-progress" title="Permanent link">¶</a></h2>
+<p>Real-time progress information helps you understand what each operation is doing and estimate completion time.</p>
+<h3 id="progress-percentage">Progress Percentage<a class="headerlink" href="#progress-percentage" title="Permanent link">¶</a></h3>
+<p>The <strong>Progress</strong> column shows overall completion as a percentage:</p>
+<ul>
+<li><strong>0% to 10%</strong>: Initialization (loading data, setting up)</li>
+<li><strong>10% to 90%</strong>: Main computation phase</li>
+<li><strong>90% to 100%</strong>: Finalization (writing output, cleanup)</li>
+</ul>
+<p><strong>Typical Progress Patterns:</strong></p>
+<ul>
+<li><strong>Microstructure Generation</strong>: Steady linear progress through particle placement</li>
+<li><strong>Hydration Simulation</strong>: Progress based on simulation time vs target time</li>
+<li><strong>Elastic Calculations</strong>: Iterative solver progress through cycles</li>
+</ul>
+<h3 id="current-step-information">Current Step Information<a class="headerlink" href="#current-step-information" title="Permanent link">¶</a></h3>
+<p>The <strong>Current Step</strong> field provides detailed activity descriptions:</p>
+<p><strong>Microstructure Operations:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Placing particles - 45.2% complete (step 5623/12436)
+</span></code></pre></div>
+<p><strong>Hydration Operations:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Simulating hydration at 72.5 hours (target: 168.0 hours) - 43%
+</span></code></pre></div>
+<p><strong>Elastic Operations:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Computing elastic moduli - cycle 18/40 (45.0%, gradient: 0.15)
+</span></code></pre></div>
+<p><img alt="Progress Details" src="../../assets/images/screenshots/operations/operations-progress-details.png"></p>
+<div class="admonition tip">
+<p class="admonition-title">Estimating Completion Time</p>
+<p>For linear operations (microstructure, hydration), you can estimate remaining time:</p>
+<p><strong>Remaining Time ≈ (Elapsed Time / Progress) × (1 - Progress)</strong></p>
+<p>Example: If 30% complete after 10 minutes, expect ~23 more minutes.</p>
+</div>
+<hr>
+<h2 id="controlling-operations">Controlling Operations<a class="headerlink" href="#controlling-operations" title="Permanent link">¶</a></h2>
+<p>Manage operation execution with pause, resume, cancel, and delete actions.</p>
+<h3 id="pausing-operations">Pausing Operations<a class="headerlink" href="#pausing-operations" title="Permanent link">¶</a></h3>
+<p>Temporarily suspend an operation to free up system resources or prioritize other work.</p>
+<p><strong>To pause an operation:</strong></p>
+<ol>
+<li>Locate a single-click on the running operation in the list</li>
+<li>Click the <strong>"Pause"</strong> button in the Actions toolbar</li>
+<li>Status changes to <strong>Paused</strong> (yellow indicator)</li>
+<li>Operation stops immediately but preserves current state</li>
+</ol>
+<p><strong>When to use pause:</strong></p>
+<ul>
+<li>Need to run other high-priority simulations</li>
+<li>System running low on memory or CPU</li>
+<li>Want to adjust parameters before continuing (not currently supported - would need restart)</li>
+<li>Need to shut down computer but want to continue later</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Pause Limitations</p>
+<p>Pausing saves the current state, but you cannot modify parameters of a paused operation. To change parameters, you must cancel the operation and create a new one with updated settings.</p>
+</div>
+<h3 id="resuming-operations">Resuming Operations<a class="headerlink" href="#resuming-operations" title="Permanent link">¶</a></h3>
+<p>Continue a paused operation from where it left off.</p>
+<p><strong>To resume an operation:</strong></p>
+<ol>
+<li>Locate and single-click on the paused operation in the list</li>
+<li>Click the <strong>"Pause"</strong> button in the Actions toolbar</li>
+<li>Status changes back to <strong>Running</strong> (green indicator)</li>
+<li>Computation continues from paused state</li>
+</ol>
+<p><strong>Resume behavior:</strong></p>
+<ul>
+<li>Microstructure: Continues particle placement</li>
+<li>Hydration: Continues time evolution</li>
+<li>Elastic: Continues iterative solver cycles</li>
+</ul>
+<h3 id="canceling-operations">Canceling Operations<a class="headerlink" href="#canceling-operations" title="Permanent link">¶</a></h3>
+<p>Stop an operation permanently if you no longer need the results or want to start over with different parameters.</p>
+<p><strong>To cancel an operation:</strong></p>
+<ol>
+<li>Locate and single-click on the running or paused operation</li>
+<li>Click the <strong>"Cancel/Stop"</strong> button in the Actions toolbar</li>
+<li>Confirmation dialog appears asking "Are you sure?"</li>
+<li>Click <strong>"Yes"</strong> to confirm cancellation</li>
+</ol>
+<p><strong>Effects of cancellation:</strong></p>
+<ul>
+<li>Operation stops immediately</li>
+<li>Partial results are preserved in Operations folder</li>
+<li>Database record remains but marked as canceled</li>
+<li>Cannot resume a canceled operation</li>
+<li>Can delete the operation to remove all data</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Cancellation is Permanent</p>
+<p>Once canceled, an operation cannot be resumed. You would need to create and start a new operation with the same parameters if you want to try again.</p>
+</div>
+<h3 id="deleting-operations">Deleting Operations<a class="headerlink" href="#deleting-operations" title="Permanent link">¶</a></h3>
+<p>Remove completed, failed, or canceled operations from the database and optionally delete their output files.</p>
+<p><strong>To delete an operation:</strong></p>
+<ol>
+<li>Locate and single-click on the operation you want to remove</li>
+<li>Click the <strong>"Delete"</strong> button (trash icon) in the Actions column</li>
+<li>Confirmation dialog appears</li>
+</ol>
+<p><strong>When to delete:</strong></p>
+<ul>
+<li>Test operations no longer needed</li>
+<li>Failed operations you won't troubleshoot</li>
+<li>Completed operations you've already archived elsewhere</li>
+<li>Free up disk space by removing large output files</li>
+</ul>
+<p><strong>What gets deleted:</strong></p>
+<ul>
+<li>Database record (operation metadata, parameters, lineage)</li>
+<li>Operation folder in <code>Operations/</code> directory (if selected)</li>
+<li>All output files (microstructures, snapshots, results, logs)</li>
+</ul>
+<div class="admonition danger">
+<p class="admonition-title">Deletion is Permanent</p>
+<p>Deleted files cannot be recovered unless you have backups. Export any important data before deleting!</p>
+</div>
+<hr>
+<h2 id="operation-types-and-behaviors">Operation Types and Behaviors<a class="headerlink" href="#operation-types-and-behaviors" title="Permanent link">¶</a></h2>
+<p>Different operation types have unique monitoring characteristics.</p>
+<h3 id="microstructure-generation-operations">Microstructure Generation Operations<a class="headerlink" href="#microstructure-generation-operations" title="Permanent link">¶</a></h3>
+<p><strong>Typical Duration:</strong> 2 minutes  to 30 minutes (depends on system size and
+particle shape)</p>
+<p><strong>Progress Indicators:</strong>
+- Shows particle placement count
+- Progress based on total particles to place
+- Relatively predictable completion time</p>
+<p><strong>Current Step Examples:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Placing particles - 12.5% (placing C₃S particles)
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Placing particles - 45.3% (placing fine aggregate)
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Finalizing microstructure - 98.2%
+</span></code></pre></div>
+<p><strong>Completion Criteria:</strong>
+- All particles successfully placed
+- System reaches target volume fractions
+- Output files written (<code>.pimg</code>, <code>psd</code> files)</p>
+<h3 id="hydration-simulation-operations">Hydration Simulation Operations<a class="headerlink" href="#hydration-simulation-operations" title="Permanent link">¶</a></h3>
+<p><strong>Typical Duration:</strong> 10 minutes to several hours (depends on target time)</p>
+<p><strong>Progress Indicators:</strong>
+- Shows current simulation time vs target time
+- Progress = (Current Time / Target Time) × 100%
+- May slow down at later stages due to densification</p>
+<p><strong>Current Step Examples:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Simulating hydration at 12.5 hours (target: 168.0 hours) - 7.4%
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Simulating hydration at 96.3 hours (target: 168.0 hours) - 57.3%
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>Writing snapshot at 168.0 hours - 100%
+</span></code></pre></div>
+<p><strong>Completion Criteria:</strong>
+- Simulation reaches target time
+- Degree of hydration calculated
+- All time snapshots saved
+- Output files written</p>
+<p><strong>Special Considerations:</strong>
+- Multiple snapshots saved during execution
+- Can be very long-running (days for 90+ days simulation)
+- Progress may be non-linear (slows at high degrees of hydration)</p>
+<h3 id="elastic-moduli-calculation-operations">Elastic Moduli Calculation Operations<a class="headerlink" href="#elastic-moduli-calculation-operations" title="Permanent link">¶</a></h3>
+<p><strong>Typical Duration:</strong> 5 minutes to 15 minutes (depends on microstructure size)</p>
+<p><strong>Progress Indicators:</strong>
+- Shows cycle number out of total cycles (typically 40)
+- Progress = (Current Cycle / Total Cycles) × 100%
+- Includes convergence gradient value</p>
+<p><strong>Current Step Examples:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Computing elastic moduli - cycle 5/40 (12.5%, gradient: 0.45)
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>Computing elastic moduli - cycle 25/40 (62.5%, gradient: 0.08)
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>Finalizing calculation - 100%
+</span></code></pre></div>
+<p><strong>Completion Criteria:</strong>
+- All solver cycles completed
+- Convergence achieved (gradient &lt; threshold)
+- Effective moduli calculated
+- Output files written (EffectiveModuli.csv, strain energy data)</p>
+<p><strong>Convergence Monitoring:</strong>
+- Gradient value should decrease over cycles
+- Lower gradient = better convergence
+- Target gradient typically &lt; 0.05 for good results</p>
+<hr>
+<h2 id="concurrent-operations">Concurrent Operations<a class="headerlink" href="#concurrent-operations" title="Permanent link">¶</a></h2>
+<p>VCCTL supports running multiple operations simultaneously with automatic resource management.</p>
+<h3 id="running-multiple-operations">Running Multiple Operations<a class="headerlink" href="#running-multiple-operations" title="Permanent link">¶</a></h3>
+<p><strong>To start concurrent operations:</strong></p>
+<ol>
+<li>Create and start first operation from any panel</li>
+<li>Switch to different panel and create second operation</li>
+<li>Both operations appear in Operations panel</li>
+<li>System automatically manages CPU and memory allocation</li>
+</ol>
+<p><strong>Recommended Limits:</strong></p>
+<ul>
+<li><strong>Microstructure + Hydration</strong>: Both can run concurrently</li>
+<li><strong>2-3 Hydrations</strong>: If system has sufficient RAM (8+ GB)</li>
+<li><strong>Elastic + Hydration</strong>: Both are CPU-intensive, may slow each other</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">System Resources</p>
+<p>Running too many concurrent operations can:</p>
+<ul>
+<li>Slow down all operations (CPU contention)</li>
+<li>Cause memory issues (swapping to disk)</li>
+<li>Make system unresponsive</li>
+</ul>
+<p>Monitor your system performance and limit concurrent operations accordingly.</p>
+</div>
+<h3 id="priority-and-resource-management">Priority and Resource Management<a class="headerlink" href="#priority-and-resource-management" title="Permanent link">¶</a></h3>
+<p>VCCTL does not currently implement operation priority levels. All operations receive equal CPU time from the operating system's scheduler.</p>
+<p><strong>Best Practices:</strong></p>
+<ul>
+<li>Start most important operation first</li>
+<li>Pause low-priority operations if system slows</li>
+<li>Run overnight for long hydrations</li>
+<li>Use smaller system sizes for test runs</li>
+</ul>
+<hr>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="operation-stuck-at-same-progress">Operation Stuck at Same Progress<a class="headerlink" href="#operation-stuck-at-same-progress" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong>
+- Progress percentage not changing for extended period
+- Current step text not updating</p>
+<p><strong>Possible Causes:</strong></p>
+<ol>
+<li><strong>Long computation phase</strong>: Some operations have phases that take disproportionately long (e.g., elastic convergence)</li>
+<li><strong>System resource contention</strong>: Other programs consuming CPU/memory</li>
+<li><strong>Disk I/O bottleneck</strong>: Slow disk writing snapshots</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Wait longer (some phases genuinely take time)</li>
+<li>Close other applications to free resources</li>
+<li>Check system monitor for CPU/memory usage</li>
+<li>If truly stuck (&gt;1 hour with no progress), cancel and restart</li>
+</ul>
+<h3 id="operation-failed-unexpectedly">Operation Failed Unexpectedly<a class="headerlink" href="#operation-failed-unexpectedly" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong>
+- Status changes to Failed (red X)
+- Progress stops</p>
+<p><strong>Common Causes:</strong></p>
+<ol>
+<li><strong>Invalid parameters</strong>: Check console logs for error messages</li>
+<li><strong>Insufficient memory</strong>: Operation ran out of RAM</li>
+<li><strong>Disk full</strong>: No space to write output files</li>
+<li><strong>File permissions</strong>: Cannot write to Operations folder</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Review operation parameters before restarting</li>
+<li>Reduce system size if memory issue</li>
+<li>Free up disk space</li>
+<li>Check Operations folder permissions</li>
+</ul>
+<h3 id="cannot-pause-or-resume">Cannot Pause or Resume<a class="headerlink" href="#cannot-pause-or-resume" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong>
+- Pause button does nothing
+- Resume button grayed out</p>
+<p><strong>Possible Causes:</strong></p>
+<ol>
+<li><strong>Operation in transition</strong>: Status changing between states</li>
+<li><strong>Backend process not responding</strong>: Rare but possible</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Wait a few seconds and try again</li>
+<li>If persistent, cancel operation and restart</li>
+<li>Restart VCCTL application if problem continues</li>
+</ul>
+<h3 id="deleted-operation-still-appears">Deleted Operation Still Appears<a class="headerlink" href="#deleted-operation-still-appears" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms:</strong>
+- Deleted operation reappears after refresh
+- Database shows operation still exists</p>
+<p><strong>Possible Causes:</strong></p>
+<ol>
+<li><strong>Database sync delay</strong>: Sometimes takes a moment to update</li>
+<li><strong>File lock</strong>: Output files still open by viewer</li>
+</ol>
+<p><strong>Solutions:</strong></p>
+<ul>
+<li>Refresh the operations list manually</li>
+<li>Close any open result viewers for that operation</li>
+<li>Restart VCCTL if issue persists</li>
+</ul>
+<hr>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="operation-management-strategy">Operation Management Strategy<a class="headerlink" href="#operation-management-strategy" title="Permanent link">¶</a></h3>
+<p><strong>Organization:</strong></p>
+<ol>
+<li><strong>Use descriptive names</strong>: Include date, mix type, or purpose</li>
+<li>Good: "TypeI-25C-28day-v2"</li>
+<li>
+<p>Poor: "test1", "new", "final"</p>
+</li>
+<li>
+<p><strong>Document parameters</strong>: Take notes on special settings used</p>
+</li>
+<li>
+<p><strong>Regular cleanup</strong>: Delete test operations weekly</p>
+</li>
+<li>
+<p><strong>Archive important results</strong>: Export data before deleting operations</p>
+</li>
+</ol>
+<p><strong>Monitoring Workflow:</strong></p>
+<ol>
+<li><strong>Start operation</strong>: Configure and launch from appropriate panel</li>
+<li><strong>Quick check</strong>: Verify operation appears in Operations panel as Running</li>
+<li><strong>Periodic monitoring</strong>: Check progress every 15-30 minutes for long operations</li>
+<li><strong>Completion verification</strong>: Confirm Completed status and check results</li>
+<li><strong>Cleanup</strong>: Delete operation after archiving results</li>
+</ol>
+<h3 id="resource-optimization">Resource Optimization<a class="headerlink" href="#resource-optimization" title="Permanent link">¶</a></h3>
+<p><strong>For Long Operations (&gt;1 hour):</strong></p>
+<ul>
+<li>Run overnight or during low-usage periods</li>
+<li>Don't run other intensive programs simultaneously</li>
+<li>Ensure adequate cooling if running on laptop</li>
+<li>Consider using cloud/HPC if available</li>
+</ul>
+<p><strong>For Multiple Operations:</strong></p>
+<ul>
+<li>Stagger start times by 5-10 minutes</li>
+<li>Monitor system resources (Activity Monitor / Task Manager)</li>
+<li>Prioritize scientifically important over test runs</li>
+</ul>
+<h3 id="data-management">Data Management<a class="headerlink" href="#data-management" title="Permanent link">¶</a></h3>
+<p><strong>Regular Maintenance:</strong></p>
+<ol>
+<li><strong>Weekly</strong>: Delete test and failed operations</li>
+<li><strong>Monthly</strong>: Archive completed operations' data to external storage</li>
+<li><strong>Before major work</strong>: Clean up old operations to ensure disk space</li>
+</ol>
+<p><strong>Export Strategy:</strong></p>
+<ul>
+<li>Export critical data immediately after completion</li>
+<li>Keep exported CSVs organized by project/date</li>
+<li>Document which operations correspond to which data files</li>
+</ul>
+<hr>
+<h2 id="understanding-operation-lineage">Understanding Operation Lineage<a class="headerlink" href="#understanding-operation-lineage" title="Permanent link">¶</a></h2>
+<p>VCCTL automatically tracks relationships between operations, creating a lineage chain.</p>
+<h3 id="parent-child-relationships">Parent-Child Relationships<a class="headerlink" href="#parent-child-relationships" title="Permanent link">¶</a></h3>
+<p><strong>Microstructure → Hydration:</strong></p>
+<ul>
+<li>Microstructure is parent</li>
+<li>Hydration is child</li>
+<li>Hydration stored in nested folder: <code>Operations/MicrostructureName/HydrationName/</code></li>
+</ul>
+<p><strong>Hydration → Elastic:</strong></p>
+<ul>
+<li>Hydration is parent</li>
+<li>Elastic is child</li>
+<li>Elastic stored in nested folder: <code>Operations/HydrationName/ElasticName/</code></li>
+</ul>
+<h3 id="viewing-lineage">Viewing Lineage<a class="headerlink" href="#viewing-lineage" title="Permanent link">¶</a></h3>
+<p>The Operations panel shows nested structure:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>📁 Microstructure: TypeI-Paste-100x100x100
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  📁 Hydration: HY-TypeI-25C-28day
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    📄 Elastic: Elastic-HY-TypeI-Final
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    📄 Elastic: Elastic-HY-TypeI-7day
+</span></code></pre></div>
+<p><strong>Benefits of Lineage:</strong></p>
+<ul>
+<li>Automatically organizes related operations</li>
+<li>Preserves parameter inheritance</li>
+<li>Makes it easy to trace workflow</li>
+<li>Simplifies data management</li>
+</ul>
+<h3 id="deleting-parent-operations">Deleting Parent Operations<a class="headerlink" href="#deleting-parent-operations" title="Permanent link">¶</a></h3>
+<p><strong>Warning:</strong> Deleting a parent operation can affect children.</p>
+<p><strong>Options when deleting parent:</strong></p>
+<ol>
+<li><strong>Delete parent only</strong>: Children remain but lose context</li>
+<li><strong>Delete parent and all children</strong>: Entire lineage removed</li>
+<li><strong>Delete parent but keep children</strong>: Must manually move child folders</li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">Cascade Deletion</p>
+<p>If you choose "Delete database record and files" for a parent operation, all child operations and their files will also be deleted. This cannot be undone!</p>
+</div>
+<hr>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">¶</a></h2>
+<h3 id="filtering-and-searching">Filtering and Searching<a class="headerlink" href="#filtering-and-searching" title="Permanent link">¶</a></h3>
+<p>While not currently implemented in the UI, you can manually search operations:</p>
+<p><strong>By Name:</strong> Scroll through list or use browser's find function (Ctrl+F / Cmd+F)</p>
+<p><strong>By Type:</strong> Look for type column indicators</p>
+<p><strong>By Status:</strong> Group visually by color-coded status indicators</p>
+<h3 id="exporting-operation-information">Exporting Operation Information<a class="headerlink" href="#exporting-operation-information" title="Permanent link">¶</a></h3>
+<p>To create a summary of all operations:</p>
+<ol>
+<li>View Operations panel</li>
+<li>Take screenshot or manually record operation details</li>
+<li>Export results data from each operation individually via Results panel</li>
+</ol>
+<p><strong>Future Enhancement Opportunity:</strong> Batch export of operation metadata to CSV for record-keeping.</p>
+<h3 id="log-files">Log Files<a class="headerlink" href="#log-files" title="Permanent link">¶</a></h3>
+<p>Each operation generates log files in its folder:</p>
+<p><strong>Location:</strong> <code>Operations/[OperationName]/console_output.txt</code></p>
+<p><strong>Contents:</strong>
+- Detailed execution log
+- Parameter values used
+- Warning and error messages
+- Timing information
+- Debug output (if enabled)</p>
+<p><strong>Accessing Logs:</strong></p>
+<ol>
+<li>Navigate to Operations folder in file browser</li>
+<li>Open operation subfolder</li>
+<li>View <code>console_output.txt</code> with text editor</li>
+</ol>
+<p><strong>When to Check Logs:</strong></p>
+<ul>
+<li>Operation failed unexpectedly</li>
+<li>Results seem incorrect</li>
+<li>Need to debug parameters</li>
+<li>Report issues to developers</li>
+</ul>
+<hr>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">¶</a></h2>
+<p>The Operations Monitoring panel provides:</p>
+<ul>
+<li>✅ Real-time visibility into all running simulations</li>
+<li>✅ Progress tracking with detailed status information</li>
+<li>✅ Control over execution (pause, resume, cancel)</li>
+<li>✅ Organization of multiple concurrent operations</li>
+<li>✅ Management of completed operations and data</li>
+<li>✅ Automatic lineage tracking for related operations</li>
+</ul>
+<p>These capabilities enable you to:</p>
+<ul>
+<li><strong>Monitor</strong> multiple operations efficiently</li>
+<li><strong>Control</strong> computational resources effectively</li>
+<li><strong>Manage</strong> workflow and data organization</li>
+<li><strong>Troubleshoot</strong> problems quickly</li>
+<li><strong>Optimize</strong> system performance</li>
+</ul>
+<div class="admonition success">
+<p class="admonition-title">Workflow Integration</p>
+<p>The Operations panel integrates with all other VCCTL panels:</p>
+<ul>
+<li>Start operations from Materials, Mix Design, Hydration, or Elastic panels</li>
+<li>Monitor progress here in Operations panel</li>
+<li>View results through Results panel</li>
+<li>Complete workflow: Create → Monitor → Analyze</li>
+</ul>
+</div>
+<hr>
+<h2 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">¶</a></h2>
+<h3 id="common-actions">Common Actions<a class="headerlink" href="#common-actions" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Steps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Check progress</td>
+<td>View Progress column percentage and Current Step text</td>
+</tr>
+<tr>
+<td>Pause operation</td>
+<td>Click Pause button in Actions column</td>
+</tr>
+<tr>
+<td>Resume operation</td>
+<td>Click Resume button for paused operation</td>
+</tr>
+<tr>
+<td>Cancel operation</td>
+<td>Click Cancel → Confirm with Yes</td>
+</tr>
+<tr>
+<td>Delete operation</td>
+<td>Click Delete → Choose record only or record+files</td>
+</tr>
+<tr>
+<td>View results</td>
+<td>Switch to Results panel, select completed operation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="status-meanings">Status Meanings<a class="headerlink" href="#status-meanings" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>Actions Available</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Queued</td>
+<td>Not started</td>
+<td>Cancel, Delete</td>
+</tr>
+<tr>
+<td>Running</td>
+<td>Currently executing</td>
+<td>Pause, Cancel</td>
+</tr>
+<tr>
+<td>Paused</td>
+<td>Temporarily stopped</td>
+<td>Resume, Cancel, Delete</td>
+</tr>
+<tr>
+<td>Completed</td>
+<td>Finished successfully</td>
+<td>Delete, View Results</td>
+</tr>
+<tr>
+<td>Failed</td>
+<td>Error occurred</td>
+<td>Delete, Check Logs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="typical-operation-durations">Typical Operation Durations<a class="headerlink" href="#typical-operation-durations" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Operation Type</th>
+<th>System Size</th>
+<th>Typical Duration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Microstructure</td>
+<td>100³ voxels</td>
+<td>2-5 minutes</td>
+</tr>
+<tr>
+<td>Microstructure</td>
+<td>200³ voxels</td>
+<td>10-20 minutes</td>
+</tr>
+<tr>
+<td>Hydration</td>
+<td>7 days</td>
+<td>15-30 minutes</td>
+</tr>
+<tr>
+<td>Hydration</td>
+<td>28 days</td>
+<td>1-2 hours</td>
+</tr>
+<tr>
+<td>Hydration</td>
+<td>90 days</td>
+<td>3-6 hours</td>
+</tr>
+<tr>
+<td>Elastic</td>
+<td>Any size</td>
+<td>5-15 minutes</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Duration Variability</p>
+<p>Actual durations depend on:
+- CPU speed and core count
+- Available RAM
+- Disk I/O speed
+- Number of concurrent operations
+- Mix complexity (number of components)</p>
+</div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../results-visualization/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Results Visualization">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Results Visualization
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../workflows/basic-concrete-simulation/" class="md-footer__link md-footer__link--next" aria-label="Next: Basic Concrete Simulation">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Basic Concrete Simulation
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

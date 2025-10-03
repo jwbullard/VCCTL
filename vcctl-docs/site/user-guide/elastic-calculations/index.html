@@ -1,0 +1,2380 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/user-guide/elastic-calculations/">
+      
+      
+        <link rel="prev" href="../hydration-simulation/">
+      
+      
+        <link rel="next" href="../results-visualization/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Elastic Calculations - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#elastic-calculations" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Elastic Calculations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../materials-management/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../workflows/basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../materials-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mix-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-elastic-moduli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Elastic Moduli
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-elastic-calculations-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Elastic Calculations Panel
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-select-source-hydration-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Select Source Hydration Operation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Select Source Hydration Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#selecting-a-hydration-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Selecting a Hydration Operation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-choose-microstructure-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Choose Microstructure Snapshot
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Choose Microstructure Snapshot">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-microstructures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Microstructures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-a-microstructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Selecting a Microstructure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-configure-aggregate-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Configure Aggregate Properties
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Configure Aggregate Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fine-aggregate-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fine Aggregate Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coarse-aggregate-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coarse Aggregate Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typical-aggregate-elastic-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typical Aggregate Elastic Properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-start-elastic-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4: Start Elastic Calculation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Start Elastic Calculation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#starting-the-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Starting the Calculation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculation-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculation Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring Progress
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-view-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5: View Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: View Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accessing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#effective-elastic-moduli" class="md-nav__link">
+    <span class="md-ellipsis">
+      Effective Elastic Moduli
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exporting-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#strain-energy-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strain Energy Visualization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Strain Energy Visualization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-3d-strain-energy-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening 3D Strain Energy Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-strain-energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Strain Energy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visualization-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualization Controls
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-strain-energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Strain Energy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interfacial-transition-zone-itz-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interfacial Transition Zone (ITZ) Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Interfacial Transition Zone (ITZ) Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-itz-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening ITZ Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-itz" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding the ITZ
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itz-plot-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      ITZ Plot Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-itz-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting ITZ Results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exporting-itz-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting ITZ Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analyzing-elastic-property-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analyzing Elastic Property Evolution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analyzing Elastic Property Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workflow-for-time-series-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow for Time Series Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typical-evolution-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typical Evolution Patterns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calculation-fails-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculation Fails to Start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculation-doesnt-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculation Doesn't Complete
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unrealistic-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unrealistic Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analysis Planning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#result-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Result Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#computational-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Computational Efficiency
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Topics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#effect-of-aggregate-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      Effect of Aggregate Content
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#effect-of-water-cement-ratio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Effect of Water-Cement Ratio
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temperature-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temperature Effects
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="elastic-calculations">Elastic Calculations<a class="headerlink" href="#elastic-calculations" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The Elastic Calculations panel in VCCTL enables you to compute the <strong>elastic moduli</strong> (bulk modulus, shear modulus, elastic modulus, and Poisson's ratio) of cement paste microstructures at various stages of hydration. These calculations use finite element analysis to determine how the microstructure's mechanical properties evolve as cement hydrates.</p>
+<p><strong>Key capabilities:</strong></p>
+<ul>
+<li>Calculate effective elastic properties of hydrated microstructures</li>
+<li>Visualize 3D strain energy distributions</li>
+<li>Examine interfacial transition zone (ITZ) effects on elastic moduli</li>
+<li>Export results for further analysis</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Prerequisites</p>
+<p>Before performing elastic calculations, you must have completed at least one hydration simulation. Elastic calculations are performed on microstructure snapshots saved during hydration.</p>
+</div>
+<hr>
+<h2 id="understanding-elastic-moduli">Understanding Elastic Moduli<a class="headerlink" href="#understanding-elastic-moduli" title="Permanent link">¶</a></h2>
+<p>VCCTL computes four fundamental elastic properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Symbol</th>
+<th>Description</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulk Modulus</strong></td>
+<td><span class="arithmatex">\(K\)</span></td>
+<td>Resistance to hydrostatic stress</td>
+<td>GPa</td>
+</tr>
+<tr>
+<td><strong>Shear Modulus</strong></td>
+<td><span class="arithmatex">\(G\)</span></td>
+<td>Resistance to shape change</td>
+<td>GPa</td>
+</tr>
+<tr>
+<td><strong>Elastic Modulus</strong></td>
+<td><span class="arithmatex">\(E\)</span></td>
+<td>Resistance to axial deformation (Young's modulus)</td>
+<td>GPa</td>
+</tr>
+<tr>
+<td><strong>Poisson's Ratio</strong></td>
+<td><span class="arithmatex">\(\nu\)</span></td>
+<td>Ratio of transverse to axial strain</td>
+<td>dimensionless</td>
+</tr>
+</tbody>
+</table>
+<p>These properties are related by:</p>
+<div class="arithmatex">\[E = \frac{9KG}{3K + G}\]</div>
+<div class="arithmatex">\[\nu = \frac{3K - 2G}{2(3K + G)}\]</div>
+<hr>
+<h2 id="accessing-the-elastic-calculations-panel">Accessing the Elastic Calculations Panel<a class="headerlink" href="#accessing-the-elastic-calculations-panel" title="Permanent link">¶</a></h2>
+<ol>
+<li>Click the <strong>Elastic Moduli</strong> tab in the left sidebar</li>
+<li>The panel displays three main sections:</li>
+<li><strong>Hydration Operation Selection</strong>: Choose source hydration</li>
+<li><strong>Microstructure Selection</strong>: Select specific hydration time</li>
+<li><strong>Aggregate Properties</strong>: Configure aggregate elastic properties</li>
+</ol>
+<p><img alt="Elastic Calculations Panel Overview" src="../../assets/images/screenshots/elastic/elastic-panel-overview.png"></p>
+<hr>
+<h2 id="step-1-select-source-hydration-operation">Step 1: Select Source Hydration Operation<a class="headerlink" href="#step-1-select-source-hydration-operation" title="Permanent link">¶</a></h2>
+<p>The first step is to choose which hydration operation contains the microstructures you want to analyze.</p>
+<h3 id="selecting-a-hydration-operation">Selecting a Hydration Operation<a class="headerlink" href="#selecting-a-hydration-operation" title="Permanent link">¶</a></h3>
+<ol>
+<li>Click the <strong>"Select Hydration Operation..."</strong> dropdown at the top of the panel</li>
+<li>Choose from available hydration operations (e.g., "HY-StandardMix-25C")</li>
+<li>The panel will automatically scan for available microstructure snapshots</li>
+</ol>
+<p><img alt="Selecting Hydration Operation" src="../../assets/images/screenshots/elastic/elastic-hydration-selection.png"></p>
+<div class="admonition note">
+<p class="admonition-title">Nested Operations</p>
+<p>Elastic calculations are stored within their corresponding hydration operation folder structure: <code>Operations/HydrationName/ElasticName/</code></p>
+</div>
+<hr>
+<h2 id="step-2-choose-microstructure-snapshot">Step 2: Choose Microstructure Snapshot<a class="headerlink" href="#step-2-choose-microstructure-snapshot" title="Permanent link">¶</a></h2>
+<p>After selecting a hydration operation, choose which microstructure snapshot to analyze. These snapshots represent the cement paste microstructure at different hydration times.</p>
+<h3 id="available-microstructures">Available Microstructures<a class="headerlink" href="#available-microstructures" title="Permanent link">¶</a></h3>
+<p>The microstructure list shows all the 3D microstructures from which to choose
+for this hydration operation. The hydration time (in hours) is embedded within
+each name. For example <code>MyMix.168.09h.25.100</code> corresponds to hydration of the
+microstructure MyMix, hydrated for 168.09 h at 25 °C.</p>
+<h3 id="selecting-a-microstructure">Selecting a Microstructure<a class="headerlink" href="#selecting-a-microstructure" title="Permanent link">¶</a></h3>
+<ol>
+<li>Browse the list of available microstructures</li>
+<li>Click to select the desired hydration time</li>
+<li>The aggregate properties section will populate automatically</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Typical Analysis Times</p>
+<p>Common hydration times for elastic analysis:</p>
+<ul>
+<li><strong>1 day (24h)</strong>: Early-age properties</li>
+<li><strong>7 days (168h)</strong>: Development stage</li>
+<li><strong>28 days (672h)</strong>: Standard reference age</li>
+<li><strong>Final</strong>: Ultimate properties at the final output hydration time</li>
+</ul>
+</div>
+<hr>
+<h2 id="step-3-configure-aggregate-properties">Step 3: Configure Aggregate Properties<a class="headerlink" href="#step-3-configure-aggregate-properties" title="Permanent link">¶</a></h2>
+<p>If your mix design includes aggregates, you must specify their elastic properties. VCCTL auto-populates these values from your mix design but allows modifications.</p>
+<h3 id="fine-aggregate-properties">Fine Aggregate Properties<a class="headerlink" href="#fine-aggregate-properties" title="Permanent link">¶</a></h3>
+<p><img alt="Aggregate Properties Configuration" src="../../assets/images/screenshots/elastic/elastic-aggregate-properties.png"></p>
+<p><strong>Volume Fraction</strong>:</p>
+<ul>
+<li>Automatically calculated from mix design</li>
+<li>Represents fraction of total volume occupied by fine aggregate</li>
+</ul>
+<p><strong>Grading Template</strong>:</p>
+<ul>
+<li>Shows the particle size distribution template used</li>
+<li>Displays "Auto-populated from database template" if using default values</li>
+</ul>
+<p><strong>Elastic Properties</strong>:</p>
+<ul>
+<li><strong>Bulk Modulus</strong> (GPa): Typical values 35-40 GPa for silica sand</li>
+<li><strong>Shear Modulus</strong> (GPa): Typical values 25-30 GPa for silica sand</li>
+</ul>
+<h3 id="coarse-aggregate-properties">Coarse Aggregate Properties<a class="headerlink" href="#coarse-aggregate-properties" title="Permanent link">¶</a></h3>
+<p>Similar configuration as fine aggregate:</p>
+<ul>
+<li>Volume fraction from mix design</li>
+<li>Grading template reference</li>
+<li>Bulk and shear moduli (typically slightly higher than fine aggregate)</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">No Aggregate Adjustments</p>
+<p>If your mix contains no aggregates, these sections will be empty. The calculation will proceed analyzing paste-only elastic properties.</p>
+</div>
+<h3 id="typical-aggregate-elastic-properties">Typical Aggregate Elastic Properties<a class="headerlink" href="#typical-aggregate-elastic-properties" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aggregate Type</th>
+<th>Bulk Modulus (GPa)</th>
+<th>Shear Modulus (GPa)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Silica sand/gravel</td>
+<td>37</td>
+<td>29</td>
+</tr>
+<tr>
+<td>Limestone</td>
+<td>50</td>
+<td>30</td>
+</tr>
+<tr>
+<td>Granite</td>
+<td>40</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Basalt</td>
+<td>60</td>
+<td>35</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="step-4-start-elastic-calculation">Step 4: Start Elastic Calculation<a class="headerlink" href="#step-4-start-elastic-calculation" title="Permanent link">¶</a></h2>
+<p>Once you've configured all parameters, launch the calculation.</p>
+<h3 id="starting-the-calculation">Starting the Calculation<a class="headerlink" href="#starting-the-calculation" title="Permanent link">¶</a></h3>
+<ol>
+<li>Click the <strong>"Start Calculation"</strong> button at the bottom of the panel</li>
+<li>A dialog appears prompting for an operation name</li>
+<li>Enter a descriptive name (e.g., "Elastic-StandardMix-28days")</li>
+<li>Click <strong>"OK"</strong> to begin</li>
+</ol>
+<p><img alt="Start Calculation Dialog" src="../../assets/images/screenshots/elastic/elastic-start-dialog.png"></p>
+<div class="admonition tip">
+<p class="admonition-title">Naming Convention</p>
+<p>Use descriptive names that include:</p>
+<ul>
+<li>Source hydration operation</li>
+<li>Hydration time analyzed</li>
+<li>Any special conditions</li>
+</ul>
+<p>Example: <code>Elastic-HY-TypeIPaste-7day</code></p>
+</div>
+<h3 id="calculation-process">Calculation Process<a class="headerlink" href="#calculation-process" title="Permanent link">¶</a></h3>
+<p>The elastic moduli calculation performs the following steps:</p>
+<ol>
+<li><strong>Load Microstructure</strong>: Reads the 3D microstructure from the hydration snapshot</li>
+<li><strong>Read Cement PSD</strong>: Loads cement particle size distribution as an aid to
+   estimating interfacial transition zone thickness</li>
+<li><strong>Generate Grading Files</strong>: Creates aggregate size distribution files if needed</li>
+<li><strong>Assign Properties</strong>: Maps elastic properties to each phase in microstructure</li>
+<li><strong>Iterative Solver</strong>: Performs finite element iterations (typically 40 cycles)</li>
+<li><strong>Convergence Check</strong>: Monitors gradient values for solution convergence</li>
+<li><strong>Generate Results</strong>: Outputs effective moduli and strain energy data</li>
+</ol>
+<h3 id="monitoring-progress">Monitoring Progress<a class="headerlink" href="#monitoring-progress" title="Permanent link">¶</a></h3>
+<p>Switch to the <strong>Operations</strong> panel to monitor calculation progress:</p>
+<ul>
+<li><strong>Current Cycle</strong>: Shows iteration number (e.g., "15/40")</li>
+<li><strong>Progress Percentage</strong>: Completion status</li>
+<li><strong>Gradient Value</strong>: Convergence indicator (lower is better)</li>
+</ul>
+<p><img alt="Elastic Calculation Progress" src="../../assets/images/screenshots/elastic/elastic-progress.png"></p>
+<div class="admonition note">
+<p class="admonition-title">Calculation Time</p>
+<p>Elastic calculations typically take 5-15 minutes depending on:</p>
+<ul>
+<li>Microstructure size (larger systems take longer)</li>
+<li>Number of phases present</li>
+<li>Convergence rate</li>
+</ul>
+</div>
+<hr>
+<h2 id="step-5-view-results">Step 5: View Results<a class="headerlink" href="#step-5-view-results" title="Permanent link">¶</a></h2>
+<p>Once the calculation completes, view and analyze the results through the <strong>Results</strong> panel.</p>
+<h3 id="accessing-results">Accessing Results<a class="headerlink" href="#accessing-results" title="Permanent link">¶</a></h3>
+<ol>
+<li>Switch to the <strong>Results</strong> panel in the left sidebar</li>
+<li>Locate your elastic operation in the list</li>
+<li>Available analysis buttons beneath the operation list</li>
+</ol>
+<h3 id="effective-elastic-moduli">Effective Elastic Moduli<a class="headerlink" href="#effective-elastic-moduli" title="Permanent link">¶</a></h3>
+<p>Click <strong>"View Effective Moduli"</strong> to see the computed composite properties.</p>
+<p><img alt="Effective Elastic Moduli Results" src="../../assets/images/screenshots/elastic/elastic-effective-moduli.png"></p>
+<p>The results table displays:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bulk Modulus</strong></td>
+<td>e.g., 18.5 GPa</td>
+<td>Overall resistance to compression</td>
+</tr>
+<tr>
+<td><strong>Shear Modulus</strong></td>
+<td>e.g., 11.2 GPa</td>
+<td>Overall resistance to shear</td>
+</tr>
+<tr>
+<td><strong>Elastic Modulus</strong></td>
+<td>e.g., 28.3 GPa</td>
+<td>Young's modulus (most commonly reported)</td>
+</tr>
+<tr>
+<td><strong>Poisson's Ratio</strong></td>
+<td>e.g., 0.26</td>
+<td>Lateral strain ratio</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition success">
+<p class="admonition-title">Typical Values</p>
+<p>For mature cement paste (28 days):</p>
+<ul>
+<li>Elastic modulus: 18 GPa to 25 GPa (paste only)</li>
+<li>Elastic modulus: 25 GPa to 40 GPa (with aggregates)</li>
+<li>Poisson's ratio: 0.20 to 0.30</li>
+</ul>
+</div>
+<h3 id="exporting-results">Exporting Results<a class="headerlink" href="#exporting-results" title="Permanent link">¶</a></h3>
+<p>Click <strong>"Export"</strong> to save results to CSV format for:</p>
+<ul>
+<li>Plotting elastic moduli evolution over time</li>
+<li>Comparison with experimental measurements</li>
+<li>Integration with structural analysis software</li>
+</ul>
+<hr>
+<h2 id="strain-energy-visualization">Strain Energy Visualization<a class="headerlink" href="#strain-energy-visualization" title="Permanent link">¶</a></h2>
+<p>The strain energy distribution reveals stress concentrations and mechanical behavior within the microstructure.</p>
+<h3 id="opening-3d-strain-energy-viewer">Opening 3D Strain Energy Viewer<a class="headerlink" href="#opening-3d-strain-energy-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>In the <strong>Results</strong> panel, select your elastic operation</li>
+<li>Click <strong>"View Strain Energy 3D"</strong></li>
+<li>The PyVista 3D viewer opens with strain energy heat map</li>
+</ol>
+<h3 id="understanding-strain-energy">Understanding Strain Energy<a class="headerlink" href="#understanding-strain-energy" title="Permanent link">¶</a></h3>
+<p><strong>Strain energy density</strong> represents the elastic energy stored per unit volume when the material is deformed. Higher values indicate:</p>
+<ul>
+<li>Stress concentration points</li>
+<li>Phase boundaries with property mismatches</li>
+<li>Potential crack initiation sites</li>
+</ul>
+<h3 id="visualization-controls">Visualization Controls<a class="headerlink" href="#visualization-controls" title="Permanent link">¶</a></h3>
+<p><strong>Threshold Range</strong>:</p>
+<ul>
+<li>Adjust <strong>Min</strong> and <strong>Max</strong> sliders to focus on specific energy ranges</li>
+<li>Strain energy is normalized (0.0 to 1.0 scale)</li>
+</ul>
+<p><strong>Preset Views</strong>:</p>
+<ul>
+<li><strong>Bulk Material (0-0.02)</strong>: View majority of material with low strain energy</li>
+<li><strong>High Energy Hotspots (0.1-1.0)</strong>: Focus on stress concentration regions</li>
+<li><strong>Full Range (0-1.0)</strong>: See entire strain energy spectrum</li>
+</ul>
+<p><strong>Rendering Mode</strong>:</p>
+<ul>
+<li><strong>Isosurface</strong>: Shows 3D surfaces of constant strain energy</li>
+<li><strong>Volume</strong>: Displays semi-transparent volume rendering</li>
+</ul>
+<p><strong>Cross Sections</strong>:</p>
+<ul>
+<li><strong>X/Y/Z Plane</strong>: Toggle clipping planes to view internal structure</li>
+<li>Adjust slider to move clipping plane position</li>
+</ul>
+<h3 id="interpreting-strain-energy">Interpreting Strain Energy<a class="headerlink" href="#interpreting-strain-energy" title="Permanent link">¶</a></h3>
+<p><strong>Low strain energy (blue/green regions)</strong>:</p>
+<ul>
+<li>Indicates relatively uniform stress distribution</li>
+<li>Typically found in bulk cement paste or aggregates</li>
+</ul>
+<p><strong>High strain energy (yellow/red regions)</strong>:</p>
+<ul>
+<li>Stress concentrations at phase boundaries</li>
+<li>Interfacial transition zones (ITZ) around aggregates</li>
+<li>Pores and voids acting as stress concentrators</li>
+<li>Potential microcracking locations under load</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Analysis Strategy</p>
+<p>Start with "High Energy Hotspots" preset to identify critical regions, then switch to "Full Range" to see overall distribution context.</p>
+</div>
+<hr>
+<h2 id="interfacial-transition-zone-itz-analysis">Interfacial Transition Zone (ITZ) Analysis<a class="headerlink" href="#interfacial-transition-zone-itz-analysis" title="Permanent link">¶</a></h2>
+<p>If your mix contains aggregates, the ITZ analysis reveals how elastic properties vary with distance from aggregate surfaces.</p>
+<h3 id="opening-itz-analysis">Opening ITZ Analysis<a class="headerlink" href="#opening-itz-analysis" title="Permanent link">¶</a></h3>
+<ol>
+<li>In the <strong>Results</strong> panel, select your elastic operation</li>
+<li>Click <strong>"View ITZ Analysis"</strong></li>
+<li>The ITZ analysis dialog opens with data table and plot</li>
+</ol>
+<p><img alt="ITZ Analysis Results" src="../assets/images/screenshots/elastic/itz-analysis.png"></p>
+<h3 id="understanding-the-itz">Understanding the ITZ<a class="headerlink" href="#understanding-the-itz" title="Permanent link">¶</a></h3>
+<p>The <strong>interfacial transition zone</strong> is a region of altered microstructure around aggregate particles, typically characterized by:</p>
+<ul>
+<li>Higher porosity than bulk paste</li>
+<li>Different hydration product proportions</li>
+<li>Lower mechanical properties</li>
+<li>Width typically 10 μm to 50 μm</li>
+</ul>
+<h3 id="itz-plot-features">ITZ Plot Features<a class="headerlink" href="#itz-plot-features" title="Permanent link">¶</a></h3>
+<p><img alt="ITZ Property Plot" src="../../assets/images/screenshots/elastic/elastic-itz-plot.png"></p>
+<p>The plot shows how elastic properties (<em>e.g.</em>, bulk modulus, shear modulus) vary with distance from aggregate surfaces:</p>
+<p><strong>Data Points (blue)</strong>:</p>
+<ul>
+<li>Each point represents a voxel's property vs. distance from nearest aggregate</li>
+<li>Scatter shows microstructural heterogeneity</li>
+</ul>
+<p><strong>ITZ Width Line (green dashed vertical)</strong>:</p>
+<ul>
+<li>Located at the median cement particle diameter</li>
+<li>Represents the characteristic ITZ extent</li>
+<li>Calculated from cement particle size distribution</li>
+</ul>
+<p><strong>Average Property Lines (horizontal dashed)</strong>:</p>
+<ul>
+<li><strong>Orange line</strong>: Average property within ITZ (distance ≤ ITZ width)</li>
+<li><strong>Purple line</strong>: Average property outside ITZ (distance &gt; ITZ width)</li>
+<li>Shows quantitative difference between ITZ and bulk properties</li>
+</ul>
+<p><strong>Text Annotations</strong>:</p>
+<ul>
+<li>Display exact average values for easy comparison</li>
+<li>Colored backgrounds match corresponding lines</li>
+</ul>
+<h3 id="interpreting-itz-results">Interpreting ITZ Results<a class="headerlink" href="#interpreting-itz-results" title="Permanent link">¶</a></h3>
+<p><strong>Property decrease in ITZ</strong>:</p>
+<ul>
+<li>Values drop near aggregate surfaces (distance ≈ 0)</li>
+<li>Lower properties due to increased porosity</li>
+<li>Indicates potential weak zone for crack propagation</li>
+</ul>
+<p><strong>Property recovery in bulk</strong>:</p>
+<ul>
+<li>Values increase with distance from aggregates</li>
+<li>Plateau at bulk paste properties</li>
+<li>Distance at which properties stabilize indicates effective ITZ width</li>
+</ul>
+<p><strong>Comparison to experiments</strong>:</p>
+<ul>
+<li>ITZ width typically 10 μm to 50 μm in real concrete</li>
+<li>Modulus reductions of 20% to 40% is common in ITZ</li>
+<li>Data can validate simulation against experimental measurements</li>
+</ul>
+<h3 id="exporting-itz-data">Exporting ITZ Data<a class="headerlink" href="#exporting-itz-data" title="Permanent link">¶</a></h3>
+<ol>
+<li>Click <strong>"Export Data"</strong> in the ITZ analysis dialog</li>
+<li>Saves CSV file with columns:</li>
+<li>Distance from aggregate (μm)</li>
+<li>Bulk modulus (GPa)</li>
+<li>Shear modulus (GPa)</li>
+<li>Elastic modulus (GPa)</li>
+<li>Poisson's ratio</li>
+<li>Use for further analysis or publication-quality plotting</li>
+</ol>
+<hr>
+<h2 id="analyzing-elastic-property-evolution">Analyzing Elastic Property Evolution<a class="headerlink" href="#analyzing-elastic-property-evolution" title="Permanent link">¶</a></h2>
+<p>To understand how mechanical properties develop during hydration, perform elastic calculations at multiple time points.</p>
+<h3 id="workflow-for-time-series-analysis">Workflow for Time Series Analysis<a class="headerlink" href="#workflow-for-time-series-analysis" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Select multiple microstructures</strong> from the same hydration operation:</li>
+<li>
+<p>1 day, 7 days, 28 days, <em>etc</em>.</p>
+</li>
+<li>
+<p><strong>Run elastic calculations</strong> for each time point:</p>
+</li>
+<li>Use consistent aggregate properties</li>
+<li>
+<p>Use systematic naming (<em>e.g.</em>, "Elastic-Mix-1d", "Elastic-Mix-7d")</p>
+</li>
+<li>
+<p><strong>Export results</strong> from each calculation</p>
+</li>
+<li>
+<p><strong>Plot evolution</strong>:</p>
+</li>
+<li>Time (days) on X-axis</li>
+<li>Elastic modulus (GPa) on Y-axis</li>
+<li>Compare simulation to experimental data</li>
+</ol>
+<h3 id="typical-evolution-patterns">Typical Evolution Patterns<a class="headerlink" href="#typical-evolution-patterns" title="Permanent link">¶</a></h3>
+<p><strong>Early age (0 days to 3 days)</strong>:</p>
+<ul>
+<li>Rapid increase in elastic modulus</li>
+<li>Properties develop as hydration products form</li>
+<li>Rate depends on cement composition and temperature</li>
+</ul>
+<p><strong>Development period (3 days  to 28 days)</strong>:</p>
+<ul>
+<li>Continued increase at decreasing rate</li>
+<li>Most strength gain occurs here</li>
+<li>Properties approach 80-90% of ultimate</li>
+</ul>
+<p><strong>Long term (28+ days)</strong>:</p>
+<ul>
+<li>Asymptotic approach to final properties</li>
+<li>Very slow continued development</li>
+<li>Ultimate properties depend on water-cement ratio</li>
+</ul>
+<hr>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="calculation-fails-to-start">Calculation Fails to Start<a class="headerlink" href="#calculation-fails-to-start" title="Permanent link">¶</a></h3>
+<p><strong>No microstructures available</strong>:</p>
+<ul>
+<li>Ensure you've completed a hydration simulation first</li>
+<li>Check that hydration operation generated snapshots</li>
+<li>Verify Operations folder contains hydration results</li>
+</ul>
+<p><strong>Missing aggregate properties</strong>:</p>
+<ul>
+<li>If calculation requires aggregates, all properties must be specified</li>
+<li>Use default values if unsure (bulk: 37 GPa, shear: 29 GPa)</li>
+</ul>
+<h3 id="calculation-doesnt-complete">Calculation Doesn't Complete<a class="headerlink" href="#calculation-doesnt-complete" title="Permanent link">¶</a></h3>
+<p><strong>Slow convergence</strong>:</p>
+<ul>
+<li>Check progress panel for gradient values</li>
+<li>If gradient not decreasing, microstructure may have issues</li>
+<li>Try with different microstructure snapshot</li>
+</ul>
+<p><strong>Memory issues</strong>:</p>
+<ul>
+<li>Large microstructures (&gt;200×200×200) may require significant RAM</li>
+<li>Consider using smaller system sizes in mix design</li>
+</ul>
+<h3 id="unrealistic-results">Unrealistic Results<a class="headerlink" href="#unrealistic-results" title="Permanent link">¶</a></h3>
+<p><strong>Elastic modulus too high or too low</strong>:</p>
+<ul>
+<li>Verify aggregate elastic properties are reasonable</li>
+<li>Check that microstructure hydration reached expected degree</li>
+<li>Ensure proper units (GPa for moduli)</li>
+</ul>
+<p><strong>ITZ analysis shows no variation</strong>:</p>
+<ul>
+<li>Requires aggregates in mix design</li>
+<li>ITZ effects may be subtle at early ages</li>
+<li>Ensure sufficient spatial resolution in microstructure</li>
+</ul>
+<hr>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="analysis-planning">Analysis Planning<a class="headerlink" href="#analysis-planning" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Choose representative times</strong>: 1d, 3d, 7d, 28d standard sequence</li>
+<li><strong>Consistent properties</strong>: Use same aggregate values for all times</li>
+<li><strong>Systematic naming</strong>: Include hydration time in operation names</li>
+<li><strong>Document settings</strong>: Record all parameters for reproducibility</li>
+</ol>
+<h3 id="result-validation">Result Validation<a class="headerlink" href="#result-validation" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Compare to experiments</strong>: Match simulation conditions to lab tests</li>
+<li><strong>Check property relationships</strong>: Verify Poisson's ratio in reasonable range (0.15-0.35)</li>
+<li><strong>Assess convergence</strong>: Final gradient should be &lt; 0.05</li>
+<li><strong>Cross-check</strong>: Ensure elastic modulus matches expected range for mix</li>
+</ol>
+<h3 id="computational-efficiency">Computational Efficiency<a class="headerlink" href="#computational-efficiency" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Run in sequence</strong>: Multiple elastic calculations can run simultaneously</li>
+<li><strong>Monitor progress</strong>: Check Operations panel to detect problems early</li>
+<li><strong>Archive results</strong>: Export data after successful calculations</li>
+<li><strong>Clean old operations</strong>: Remove test calculations to keep database organized</li>
+</ol>
+<hr>
+<h2 id="advanced-topics">Advanced Topics<a class="headerlink" href="#advanced-topics" title="Permanent link">¶</a></h2>
+<h3 id="effect-of-aggregate-content">Effect of Aggregate Content<a class="headerlink" href="#effect-of-aggregate-content" title="Permanent link">¶</a></h3>
+<p>Higher aggregate volume fractions increase overall elastic modulus:</p>
+<ul>
+<li>Pure paste: ~18 GPa to 25 GPa at 28 days</li>
+<li>With 30% aggregates: ~30 GPa to 35 GPa at 28 days</li>
+<li>With 60% aggregates: ~35 GPa to 45 GPa at 28 days</li>
+</ul>
+<p>The relationship is <strong>non-linear</strong> due to ITZ effects and particle interactions.</p>
+<h3 id="effect-of-water-cement-ratio">Effect of Water-Cement Ratio<a class="headerlink" href="#effect-of-water-cement-ratio" title="Permanent link">¶</a></h3>
+<p>Lower w/c ratios produce higher elastic moduli:</p>
+<ul>
+<li>w/c = 0.30: ~25 GPa to 28 GPa (paste at 28d)</li>
+<li>w/c = 0.40: ~20 GPa to 23 GPa</li>
+<li>w/c = 0.50: ~16 GPa to 19 GPa</li>
+</ul>
+<p>This occurs because lower w/c ratios have:</p>
+<ul>
+<li>Less porosity at given hydration degree</li>
+<li>Denser hydration product structure</li>
+<li>Better load transfer between particles</li>
+</ul>
+<h3 id="temperature-effects">Temperature Effects<a class="headerlink" href="#temperature-effects" title="Permanent link">¶</a></h3>
+<p>Temperature affects hydration rate but <strong>not</strong> intrinsic phase properties:</p>
+<ul>
+<li>Higher temperature: faster property development</li>
+<li>Same ultimate properties at full hydration</li>
+<li>Elastic moduli at same degree of hydration are nearly identical</li>
+</ul>
+<p>Perform calculations on microstructures at <strong>same degree of hydration</strong> for valid temperature comparisons, not same chronological age.</p>
+<hr>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">¶</a></h2>
+<p>The Elastic Calculations feature in VCCTL provides:</p>
+<ul>
+<li>✅ Accurate prediction of cement paste mechanical properties</li>
+<li>✅ 3D visualization of strain energy distributions</li>
+<li>✅ ITZ analysis showing property gradients near aggregates</li>
+<li>✅ Time evolution data for property development studies</li>
+<li>✅ Validation data for comparison with experimental measurements</li>
+</ul>
+<p>These calculations enable you to:</p>
+<ul>
+<li><strong>Predict</strong> mechanical performance before physical testing</li>
+<li><strong>Optimize</strong> mix designs for target elastic moduli</li>
+<li><strong>Understand</strong> microstructural features affecting properties</li>
+<li><strong>Validate</strong> simulation accuracy against experiments</li>
+<li><strong>Publish</strong> high-quality micromechanics research</li>
+</ul>
+<div class="admonition success">
+<p class="admonition-title">Next Steps</p>
+<p>After completing elastic calculations, explore:</p>
+<ul>
+<li><a href="../results-visualization/">Results Visualization</a> - View all operation outputs</li>
+<li><a href="../operations-monitoring/">Operations Monitoring</a> - Manage calculations</li>
+</ul>
+</div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../hydration-simulation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Hydration Simulation">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Hydration Simulation
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../results-visualization/" class="md-footer__link md-footer__link--next" aria-label="Next: Results Visualization">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Results Visualization
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

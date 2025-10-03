@@ -26,6 +26,7 @@ from app.utils.error_handling import get_error_handler, ErrorCategory, ErrorSeve
 from app.utils.performance_monitor import get_performance_monitor, profile_function
 from app.ui import create_ui_polish_manager, UIPolishManager
 from app.help import create_help_system, HelpManager, HelpDialog, TooltipManager
+from app.help.documentation_viewer import get_documentation_viewer
 from app.utils.icon_utils import set_image_custom_icon
 
 
@@ -279,11 +280,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         troubleshooting_item = Gtk.MenuItem(label="Troubleshooting")
         troubleshooting_item.connect('activate', self._on_troubleshooting_clicked)
         help_submenu.append(troubleshooting_item)
-        
-        examples_item = Gtk.MenuItem(label="Examples")
-        examples_item.connect('activate', self._on_examples_clicked)
-        help_submenu.append(examples_item)
-        
+
         help_submenu.append(Gtk.SeparatorMenuItem())
         
         about_item = Gtk.MenuItem(label="About VCCTL")
@@ -710,12 +707,8 @@ Services:"""
     
     def _on_user_guide_clicked(self, widget: Gtk.Widget) -> None:
         """Open user guide."""
-        self._show_help_dialog("interface")
-    
-    def _on_examples_clicked(self, widget: Gtk.Widget) -> None:
-        """Show examples dialog."""
-        # TODO: Implement examples browser
-        self.update_status("Examples browser will be implemented", "info", 3)
+        doc_viewer = get_documentation_viewer()
+        doc_viewer.open_user_guide(None, self)
     
     def _on_about_clicked(self, widget: Gtk.Widget) -> None:
         """Show about dialog."""
@@ -1303,15 +1296,18 @@ This GTK3 desktop application provides an intuitive interface for:</span>
     
     def _on_help_contents_clicked(self, menu_item):
         """Handle help contents menu item."""
-        self._show_help_dialog()
-    
+        doc_viewer = get_documentation_viewer()
+        doc_viewer.open_documentation("index.html", self)
+
     def _on_getting_started_clicked(self, menu_item):
         """Handle getting started menu item."""
-        self._show_help_dialog("overview")
-    
+        doc_viewer = get_documentation_viewer()
+        doc_viewer.open_getting_started(self)
+
     def _on_troubleshooting_clicked(self, menu_item):
         """Handle troubleshooting menu item."""
-        self._show_help_dialog("common_issues")
+        doc_viewer = get_documentation_viewer()
+        doc_viewer.open_documentation("workflows/troubleshooting/index.html", self)
     
     def _show_help_dialog(self, topic_id: str = None):
         """Show the help dialog with optional topic."""

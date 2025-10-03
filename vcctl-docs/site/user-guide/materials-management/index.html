@@ -1,0 +1,2326 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/user-guide/materials-management/">
+      
+      
+        <link rel="prev" href="../../getting-started/">
+      
+      
+        <link rel="next" href="../mix-design/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Materials Management - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#materials-management" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Materials Management
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../workflows/basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#supported-material-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Material Types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#materials-panel-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Materials Panel Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Materials Panel Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toolbar" class="md-nav__link">
+    <span class="md-ellipsis">
+      Toolbar
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#materials-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      Materials List
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#context-menu" class="md-nav__link">
+    <span class="md-ellipsis">
+      Context Menu
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-and-editing-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Editing Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating and Editing Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cement-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cement Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cement Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#physical-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Physical Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase Composition
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#particle-size-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Particle Size Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Aggregate Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Aggregate Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-properties_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#physical-properties_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Physical Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fly-ash-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fly Ash Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fly Ash Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slag-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slag Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Slag Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-info_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#silica-fume-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Silica Fume Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Silica Fume Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-info_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limestone-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limestone Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Limestone Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-info_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filler-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filler Materials
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filler Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-info_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#properties_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-settings_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Settings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#particle-size-distributions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Particle Size Distributions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Particle Size Distributions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rosin-rammler-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rosin-Rammler Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-normal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Log-Normal Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fuller-thompson-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fuller-Thompson Distribution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Distribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#material-naming" class="md-nav__link">
+    <span class="md-ellipsis">
+      Material Naming
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#property-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Property Accuracy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#psd-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      PSD Selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mix-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elastic-calculations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="materials-management">Materials Management<a class="headerlink" href="#materials-management" title="Permanent link">¶</a></h1>
+<p>The Materials panel is your central hub for defining and managing the raw materials used in concrete mix designs. VCCTL supports six material types with complete property definitions and particle size distribution (PSD) configurations.</p>
+<p><img alt="Materials Panel Overview" src="../../assets/images/screenshots/materials/materials-panel-overview.png"></p>
+<h2 id="supported-material-types">Supported Material Types<a class="headerlink" href="#supported-material-types" title="Permanent link">¶</a></h2>
+<p>VCCTL supports six material types, each with specific properties:</p>
+<ol>
+<li><strong>Cement</strong> - Portland cement and blended cements with Bogue phase composition</li>
+<li><strong>Aggregate</strong> - Fine and coarse aggregates with grading curves</li>
+<li><strong>Fly Ash</strong> - Class F and Class C fly ash supplementary cementitious materials</li>
+<li><strong>Slag</strong> - Ground granulated blast-furnace slag (GGBFS)</li>
+<li><strong>Silica Fume</strong> - Ultra-fine pozzolanic material</li>
+<li><strong>Limestone</strong> - Limestone powder filler material</li>
+<li><strong>Filler</strong> - General inert filler materials</li>
+</ol>
+<h2 id="materials-panel-interface">Materials Panel Interface<a class="headerlink" href="#materials-panel-interface" title="Permanent link">¶</a></h2>
+<h3 id="toolbar">Toolbar<a class="headerlink" href="#toolbar" title="Permanent link">¶</a></h3>
+<p>The Materials toolbar provides quick access to common operations:</p>
+<ul>
+<li><strong>Filter</strong> - filter the displayed list by material type</li>
+<li><strong>+ Add</strong> - Create new material of any type</li>
+</ul>
+<h3 id="materials-list">Materials List<a class="headerlink" href="#materials-list" title="Permanent link">¶</a></h3>
+<p>The main list displays all available materials with:</p>
+<ul>
+<li><strong>Material Name</strong> - User-defined identifier</li>
+<li><strong>Type</strong> - Material category (Cement, Aggregate, etc.)</li>
+<li><strong>Specific gravity</strong></li>
+<li><strong>Date created</strong> and <strong>Date modified</strong></li>
+</ul>
+<p><img alt="Materials List - Cement" src="../../assets/images/screenshots/materials/materials-list-cement.png"></p>
+<p>You can switch between material types using the filter dropdown or search by name.</p>
+<p><img alt="Materials List - Aggregates" src="../../assets/images/screenshots/materials/materials-list-aggregates.png"></p>
+<h3 id="context-menu">Context Menu<a class="headerlink" href="#context-menu" title="Permanent link">¶</a></h3>
+<p>Right-click any material for quick access to operations:</p>
+<p><img alt="Materials Context Menu" src="../../assets/images/screenshots/materials/materials-context-menu.png"></p>
+<ul>
+<li><strong>Edit Material</strong> - Modify material properties</li>
+<li><strong>Duplicate Material</strong> - Create a copy with modified name</li>
+<li><strong>Delete Material</strong> - Remove from database (with confirmation)</li>
+<li><strong>Export Material</strong> - Disabled for now</li>
+</ul>
+<h2 id="creating-and-editing-materials">Creating and Editing Materials<a class="headerlink" href="#creating-and-editing-materials" title="Permanent link">¶</a></h2>
+<h3 id="general-workflow">General Workflow<a class="headerlink" href="#general-workflow" title="Permanent link">¶</a></h3>
+<ol>
+<li>Click <strong>"+ Add"</strong> in the toolbar</li>
+<li>Select material type from dropdown</li>
+<li>Enter material name (must be unique)</li>
+<li>Fill in properties across multiple tabs:</li>
+<li><strong>Basic</strong> - Essential identification and basic properties</li>
+<li><strong>Chemical Properties</strong> - composition </li>
+<li><strong>Physical Properties</strong> - density and particle size distribution</li>
+<li><strong>PSD</strong> - Particle size distribution configuration</li>
+<li><strong>Advanced</strong> - Additional parameters and settings</li>
+<li>Click <strong>Save</strong> to store material in database</li>
+</ol>
+<h3 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">¶</a></h3>
+<p>VCCTL validates all material properties:</p>
+<ul>
+<li><strong>Required fields</strong> - Must be filled before saving</li>
+<li><strong>Numeric ranges</strong> - Properties must be physically reasonable</li>
+<li><strong>Name uniqueness</strong> - No duplicate material names allowed</li>
+<li><strong>PSD consistency</strong> - Distribution parameters must be valid</li>
+</ul>
+<h2 id="cement-materials">Cement Materials<a class="headerlink" href="#cement-materials" title="Permanent link">¶</a></h2>
+<p>Cement is the primary binder in concrete. VCCTL supports detailed cement characterization including phase composition and particle size distribution.</p>
+<h3 id="basic-properties">Basic Properties<a class="headerlink" href="#basic-properties" title="Permanent link">¶</a></h3>
+<p><img alt="Cement Dialog - Basic" src="../../assets/images/screenshots/materials/cement-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier (e.g., "OPC Type I", "ASTM C150-TypeII")</li>
+<li><strong>Description</strong> - Optional detailed notes</li>
+</ul>
+<h3 id="physical-properties">Physical Properties<a class="headerlink" href="#physical-properties" title="Permanent link">¶</a></h3>
+<p><img alt="Cement Dialog - Properties" src="../../assets/images/screenshots/materials/cement-dialog-properties.png"></p>
+<ul>
+<li><strong>Bulk Density</strong> - Typically 3100-3200 kg/m³ for Portland cement</li>
+<li><strong>Specific Gravity</strong> - Typically 3.10-3.20 for Portland cement</li>
+<li><strong>Blaine Fineness</strong> - Surface area in m²/kg (typically 300-400 m²/kg)</li>
+</ul>
+<h3 id="phase-composition">Phase Composition<a class="headerlink" href="#phase-composition" title="Permanent link">¶</a></h3>
+<p><img alt="Cement Dialog - Composition" src="../../assets/images/screenshots/materials/cement-dialog-composition.png"></p>
+<p>Enter clinker phase composition (mass percentages must sum to 100):</p>
+<ul>
+<li><strong>C3S (Alite)</strong> - Tricalcium silicate (typically 50% to 70%)</li>
+<li><strong>C2S (Belite)</strong> - Dicalcium silicate (typically 10% to 30%)</li>
+<li><strong>C3A (Aluminate)</strong> - Tricalcium aluminate (typically 5% to 15%)</li>
+<li><strong>C4AF (Ferrite)</strong> - Tetracalcium aluminoferrite (typically 5% toi 15%)</li>
+<li><strong>Gypsum</strong>, <strong>Hemihydrate</strong>, and <strong>Anhydrite</strong> - Calcium sulfates (typically sums to 3% to 6%)</li>
+</ul>
+<p><strong>Typical Composition Examples:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Cement Type</th>
+<th>C3S</th>
+<th>C2S</th>
+<th>C3A</th>
+<th>C4AF</th>
+<th>Gypsum</th>
+<th>Inert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type I (General)</td>
+<td>55%</td>
+<td>18%</td>
+<td>10%</td>
+<td>8%</td>
+<td>5%</td>
+<td>4%</td>
+</tr>
+<tr>
+<td>Type II (Moderate sulfate)</td>
+<td>50%</td>
+<td>22%</td>
+<td>6%</td>
+<td>11%</td>
+<td>5%</td>
+<td>6%</td>
+</tr>
+<tr>
+<td>Type III (High early)</td>
+<td>60%</td>
+<td>12%</td>
+<td>12%</td>
+<td>8%</td>
+<td>5%</td>
+<td>3%</td>
+</tr>
+<tr>
+<td>Type IV (Low heat)</td>
+<td>40%</td>
+<td>40%</td>
+<td>4%</td>
+<td>12%</td>
+<td>4%</td>
+<td>0%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="particle-size-distribution">Particle Size Distribution<a class="headerlink" href="#particle-size-distribution" title="Permanent link">¶</a></h3>
+<p><img alt="Cement Dialog - PSD" src="../../assets/images/screenshots/materials/cement-dialog-psd.png"></p>
+<p>Configure cement particle size distribution (see <a href="#particle-size-distributions">PSD Configuration</a> section for details).</p>
+<p>Typical cement PSD parameters:
+- <strong>Distribution Type</strong>: Rosin-Rammler
+- <strong>Minimum Size</strong>: 0.5 μm
+- <strong>Maximum Size</strong>: 50-100 μm
+- <strong>Characteristic Size</strong>: 10-20 μm (related to Blaine fineness)
+- <strong>Spread Parameter</strong>: 0.8-1.2</p>
+<h3 id="advanced-settings">Advanced Settings<a class="headerlink" href="#advanced-settings" title="Permanent link">¶</a></h3>
+<p><img alt="Cement Dialog - Advanced" src="../../assets/images/screenshots/materials/cement-dialog-advanced.png"></p>
+<ul>
+<li><strong>Heat of Hydration</strong> - Enthalpy values for each phase (J/g)</li>
+<li><strong>Dissolution Kinetics</strong> - Rate parameters for hydration model</li>
+<li><strong>Custom Properties</strong> - Additional material-specific parameters</li>
+</ul>
+<h2 id="aggregate-materials">Aggregate Materials<a class="headerlink" href="#aggregate-materials" title="Permanent link">¶</a></h2>
+<p>Aggregates (sand and gravel) provide volume and structural integrity. VCCTL supports detailed grading curve definitions.</p>
+<h3 id="basic-properties_1">Basic Properties<a class="headerlink" href="#basic-properties_1" title="Permanent link">¶</a></h3>
+<p><img alt="Aggregate Dialog - Basic" src="../../assets/images/screenshots/materials/aggregate-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional, good for describing source and mineralogy</li>
+<li><strong>Specific Gravity</strong> - Fine aggregate or Coarse aggregate</li>
+</ul>
+<h3 id="physical-properties_1">Physical Properties<a class="headerlink" href="#physical-properties_1" title="Permanent link">¶</a></h3>
+<p><img alt="Aggregate Dialog - Properties" src="../../assets/images/screenshots/materials/aggregate-dialog-properties.png"></p>
+<ul>
+<li><strong>Shape Data</strong> - Basic statistics of shape characteristics for length, width,
+  and thickness</li>
+<li><strong>Image</strong> - A photograph of representative aggregate particles</li>
+<li><strong>Mechanical Properties</strong> - Shear modulus, bulk modulus, and relative
+diffusion coeffient (conductivity)</li>
+<li><strong>Description</strong> - Optional information about the aggregate</li>
+</ul>
+<h3 id="advanced-settings_1">Advanced Settings<a class="headerlink" href="#advanced-settings_1" title="Permanent link">¶</a></h3>
+<p><img alt="Aggregate Dialog - Advanced" src="../../assets/images/screenshots/materials/aggregate-dialog-advanced.png"></p>
+<ul>
+<li>Optional data about the provenance, location, naming conventions, or any other
+  useful information</li>
+</ul>
+<h2 id="fly-ash-materials">Fly Ash Materials<a class="headerlink" href="#fly-ash-materials" title="Permanent link">¶</a></h2>
+<p>Fly ash is a pozzolanic supplementary cementitious material produced from coal combustion.</p>
+<h3 id="basic-info">Basic Info<a class="headerlink" href="#basic-info" title="Permanent link">¶</a></h3>
+<p><img alt="Fly Ash Dialog - Basic" src="../../assets/images/screenshots/materials/fly-ash-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional notes</li>
+<li><strong>Source</strong> - Origin, manufacturer, or supplier information</li>
+</ul>
+<h3 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">¶</a></h3>
+<p><img alt="Fly Ash Dialog - Properties" src="../../assets/images/screenshots/materials/fly-ash-dialog-properties.png"></p>
+<ul>
+<li><strong>Chemical Composition</strong> - primary oxide mass percentages</li>
+<li><strong>Alkali Characteristics</strong> - sodium and potassium oxide content<ul>
+<li><strong>Note</strong>: the mass percentages of primary oxides and alklali oxides should
+  total 100</li>
+</ul>
+</li>
+<li><strong>Classification</strong> - ASTM class of the ash (F, C, or N)</li>
+<li><strong>Activation energy</strong> - Temperature dependence of ash reaction rates</li>
+<li><strong>Particle Size Distribution</strong> - Rosin-Rammler, Log-Normal, Fuller-Thompson, or custom
+    user-defined data</li>
+</ul>
+<h3 id="advanced-settings_2">Advanced Settings<a class="headerlink" href="#advanced-settings_2" title="Permanent link">¶</a></h3>
+<p><img alt="Fly Ash Dialog - Advanced" src="../../assets/images/screenshots/materials/fly-ash-dialog-advanced.png"></p>
+<ul>
+<li><strong>Metadata</strong> - Useful information on the provenance, naming conventions,
+case studies, or other helpful properties</li>
+<li><strong>Performance Properties</strong> - Optional information and cautions</li>
+</ul>
+<h2 id="slag-materials">Slag Materials<a class="headerlink" href="#slag-materials" title="Permanent link">¶</a></h2>
+<p>Ground granulated blast-furnace slag (GGBFS) is a latent hydraulic binder.</p>
+<h3 id="basic-info_1">Basic Info<a class="headerlink" href="#basic-info_1" title="Permanent link">¶</a></h3>
+<p><img alt="Slag Dialog - Basic" src="../../assets/images/screenshots/materials/slag-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional notes</li>
+<li><strong>Source</strong> - Origin, manufacturer, or supplier information</li>
+<li><strong>Specific Gravity</strong> - Typically 2.85-2.95</li>
+<li><strong>Glass Content</strong> - typically &gt; 95% by mass</li>
+</ul>
+<h3 id="properties_1">Properties<a class="headerlink" href="#properties_1" title="Permanent link">¶</a></h3>
+<p><img alt="Slag Dialog - Properties" src="../../assets/images/screenshots/materials/slag-dialog-properties.png"></p>
+<ul>
+<li><strong>Chemical Composition</strong> - primary oxide mass percentages (should total 100)</li>
+<li><strong>Activation energy</strong> - Temperature dependence of ash reaction rates</li>
+<li><strong>Reactivity Factor</strong> - Bias in reaction rates relative to a VCCTL baseline</li>
+<li><strong>Particle Size Distribution</strong> - Rosin-Rammler, Log-Normal, Fuller-Thompson, or custom
+    user-defined data</li>
+</ul>
+<h3 id="advanced-settings_3">Advanced Settings<a class="headerlink" href="#advanced-settings_3" title="Permanent link">¶</a></h3>
+<p><img alt="Slag Dialog - Advanced" src="../../assets/images/screenshots/materials/slag-dialog-advanced.png"></p>
+<ul>
+<li><strong>Metadata</strong> - Useful information on the provenance, naming conventions,
+case studies, or other helpful properties</li>
+<li><strong>Ratio Characteristics</strong> - Calculated from user input</li>
+</ul>
+<h2 id="silica-fume-materials">Silica Fume Materials<a class="headerlink" href="#silica-fume-materials" title="Permanent link">¶</a></h2>
+<p>Silica fume (microsilica) is a pozzolanic, silica-rich material with ultrafine
+primary particles. It is typically used in "undensified" or "densified" form,
+the latter being an intentional hard agglomeration of the ultrafine primary
+particles into much larger spheroidal granules that are often difficult to
+break down mechanically.</p>
+<h3 id="basic-info_2">Basic Info<a class="headerlink" href="#basic-info_2" title="Permanent link">¶</a></h3>
+<p><img alt="Silica Fume Dialog - Basic" src="../../assets/images/screenshots/materials/silica-fume-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional notes</li>
+<li><strong>Source</strong> - Origin, manufacturer, or supplier information</li>
+<li><strong>Specific Gravity</strong> - Typically 2.85-2.95</li>
+<li><strong>SiO2 Content</strong> - Weight percentage on a total solids basis</li>
+<li><strong>Specific Surface Area</strong> - typically &gt; 25000 m²/kg</li>
+</ul>
+<h3 id="properties_2">Properties<a class="headerlink" href="#properties_2" title="Permanent link">¶</a></h3>
+<p><img alt="Silica Fume Dialog - Properties" src="../../assets/images/screenshots/materials/silica-fume-dialog-properties.png"></p>
+<ul>
+<li>
+<p>Silica fume particle size distribution (see <a href="#particle-size-distributions">PSD Configuration</a> section for details).</p>
+</li>
+<li>
+<p>Typical cement PSD parameters:</p>
+<ul>
+<li><strong>Distribution Type</strong>: Rosin-Rammler</li>
+<li><strong>Minimum Size</strong>: 0.5 μm</li>
+<li><strong>Maximum Size</strong>: 10 μm</li>
+<li><strong>Characteristic Size</strong>: 5.0 μm</li>
+</ul>
+</li>
+</ul>
+<h3 id="advanced-settings_4">Advanced Settings<a class="headerlink" href="#advanced-settings_4" title="Permanent link">¶</a></h3>
+<p><img alt="Silica Fume Dialog - Advanced" src="../../assets/images/screenshots/materials/silica-fume-dialog-advanced.png"></p>
+<ul>
+<li><strong>Metadata</strong> - A text field for writing notes on provenance, case studies, or
+  anything else relevant to the material.</li>
+</ul>
+<h2 id="limestone-materials">Limestone Materials<a class="headerlink" href="#limestone-materials" title="Permanent link">¶</a></h2>
+<p>Limestone powder is an inert or slightly reactive filler material.</p>
+<h3 id="basic-info_3">Basic Info<a class="headerlink" href="#basic-info_3" title="Permanent link">¶</a></h3>
+<p><img alt="Limestone Dialog - Basic" src="../../assets/images/screenshots/materials/limestone-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional notes</li>
+<li><strong>Source</strong> - Origin, manufacturer, or supplier information</li>
+<li><strong>Specific Gravity</strong> - Typically 2.6 to 2.65</li>
+<li><strong>CaCO3 Content</strong> - Weight percentage on a total solids basis</li>
+<li><strong>Specific Surface Area</strong> - typically &gt; 25000 m²/kg</li>
+</ul>
+<h3 id="properties_3">Properties<a class="headerlink" href="#properties_3" title="Permanent link">¶</a></h3>
+<p><img alt="Limestone Dialog - Properties" src="../../assets/images/screenshots/materials/limestone-dialog-properties.png"></p>
+<ul>
+<li>
+<p><strong>Activation Energy</strong> - Typically 45 kJ/mol to  55 kJ/molg</p>
+</li>
+<li>
+<p>Limestone particle size distribution (see <a href="#particle-size-distributions">PSD Configuration</a> section for details).</p>
+</li>
+<li>
+<p>Typical cement PSD parameters:</p>
+<ul>
+<li><strong>Distribution Type</strong>: Rosin-Rammler</li>
+<li><strong>Minimum Size</strong>: 0.5 μm</li>
+<li><strong>Maximum Size</strong>: 60 μm</li>
+<li><strong>Characteristic Size</strong>: 30 μm</li>
+</ul>
+</li>
+</ul>
+<h3 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Metadata</strong> - A text field for writing notes on provenance, case studies, or
+  anything else relevant to the material.</li>
+</ul>
+<p><img alt="Limestone Dialog - Advanced" src="../../assets/images/screenshots/materials/limestone-dialog-advanced.png"></p>
+<h2 id="filler-materials">Filler Materials<a class="headerlink" href="#filler-materials" title="Permanent link">¶</a></h2>
+<p>Generic inert filler materials for volume and physical effects.</p>
+<h3 id="basic-info_4">Basic Info<a class="headerlink" href="#basic-info_4" title="Permanent link">¶</a></h3>
+<p><img alt="Filler Dialog - Basic" src="../../assets/images/screenshots/materials/filler-dialog-basic.png"></p>
+<ul>
+<li><strong>Name</strong> - Unique identifier</li>
+<li><strong>Description</strong> - Optional notes</li>
+<li><strong>Source</strong> - Origin, manufacturer, or supplier information</li>
+<li><strong>Specific Gravity</strong> - Typically 2.0 to 4.5</li>
+<li><strong>Filler Type</strong> - Select glass or inert from the dropdown</li>
+<li><strong>Specific Surface Area</strong> - 0.1 m²/kg to 5 m²/kg</li>
+</ul>
+<h3 id="properties_4">Properties<a class="headerlink" href="#properties_4" title="Permanent link">¶</a></h3>
+<p><img alt="Filler Dialog - Properties" src="../../assets/images/screenshots/materials/filler-dialog-properties.png"></p>
+<ul>
+<li><strong>Water Absorption</strong> - Mass percent on a solid mass basis (not currently used)</li>
+<li>
+<p><strong>Color</strong> - Choose best match from dropdown (not currently used)</p>
+</li>
+<li>
+<p>Filler particle size distribution (see <a href="#particle-size-distributions">PSD Configuration</a> section for details).</p>
+</li>
+<li>
+<p>Typical cement PSD parameters:</p>
+<ul>
+<li><strong>Distribution Type</strong>: Rosin-Rammler</li>
+<li><strong>Minimum Size</strong>: 0.5 μm</li>
+<li><strong>Maximum Size</strong>: 60 μm</li>
+<li><strong>Characteristic Size</strong>: 30 μm</li>
+</ul>
+</li>
+</ul>
+<h3 id="advanced-settings_5">Advanced Settings<a class="headerlink" href="#advanced-settings_5" title="Permanent link">¶</a></h3>
+<p><img alt="Filler Dialog - Advanced" src="../../assets/images/screenshots/materials/filler-dialog-advanced.png"></p>
+<ul>
+<li><strong>Metadata</strong> - A text field for writing notes on provenance, case studies, or
+  anything else relevant to the material.</li>
+</ul>
+<h2 id="particle-size-distributions">Particle Size Distributions<a class="headerlink" href="#particle-size-distributions" title="Permanent link">¶</a></h2>
+<p>VCCTL supports four particle size distribution (PSD) models for powdered materials (cement, fly ash, slag, silica fume, limestone, filler).</p>
+<h3 id="rosin-rammler-distribution">Rosin-Rammler Distribution<a class="headerlink" href="#rosin-rammler-distribution" title="Permanent link">¶</a></h3>
+<p><img alt="PSD Rosin-Rammler Example" src="../../assets/images/screenshots/materials/psd-rosin-rammler-example.png"></p>
+<p>The Rosin-Rammler (Weibull) distribution is commonly used for ground materials:</p>
+<div class="arithmatex">\[P(d) = 1 - \exp\left[-\left(\frac{d}{d_c}\right)^n\right]\]</div>
+<p>Where:
+- <span class="arithmatex">\(P(d)\)</span> = Cumulative percent passing diameter <span class="arithmatex">\(d\)</span>
+- <span class="arithmatex">\(d_c\)</span> = Characteristic size (typically 63.2% passing)
+- <span class="arithmatex">\(n\)</span> = Spread parameter (uniformity coefficient)</p>
+<p><strong>Parameters:</strong>
+- <strong>Minimum Size</strong> - Smallest particle diameter (μm)
+- <strong>Maximum Size</strong> - Largest particle diameter (μm)
+- <strong>Characteristic Size</strong> - <span class="arithmatex">\(d_c\)</span> in μm (typically 10 μm  to 20 μm for cement)
+- <strong>Spread Parameter</strong> - <span class="arithmatex">\(n\)</span> dimensionless (typically 0.8 to 1.2)</p>
+<p><strong>Typical Values:</strong>
+- <strong>Cement</strong>: <span class="arithmatex">\(d_c\)</span> = 15 μm, <span class="arithmatex">\(n\)</span> = 1.0
+- <strong>Fly Ash</strong>: <span class="arithmatex">\(d_c\)</span> = 20 μm, <span class="arithmatex">\(n\)</span> = 1.1
+- <strong>Slag</strong>: <span class="arithmatex">\(d_c\)</span> = 12 μm, <span class="arithmatex">\(n\)</span> = 0.9</p>
+<h3 id="log-normal-distribution">Log-Normal Distribution<a class="headerlink" href="#log-normal-distribution" title="Permanent link">¶</a></h3>
+<p><img alt="PSD Log-Normal Example" src="../../assets/images/screenshots/materials/psd-log-normal-example.png"></p>
+<p>The log-normal distribution is suitable for materials with symmetric distribution on log scale:</p>
+<div class="arithmatex">\[P(d) = \frac{1}{2}\left[1 + \text{erf}\left(\frac{\ln(d) - \mu}{\sigma\sqrt{2}}\right)\right]\]</div>
+<p>Where:
+- <span class="arithmatex">\(\mu\)</span> = Mean of natural logarithm of diameter
+- <span class="arithmatex">\(\sigma\)</span> = Standard deviation of natural logarithm</p>
+<p><strong>Parameters:</strong>
+- <strong>Minimum Size</strong> - Smallest particle diameter (μm)
+- <strong>Maximum Size</strong> - Largest particle diameter (μm)
+- <strong>Median Size</strong> - <span class="arithmatex">\(d_{50}\)</span> in μm (50% passing size)
+- <strong>Standard Deviation</strong> - <span class="arithmatex">\(\sigma\)</span> dimensionless (spread parameter)</p>
+<p><strong>Typical Values:</strong>
+- <strong>Median Size</strong>: 10 μm to 30 μm for cementitious materials
+- <strong>Standard Deviation</strong>: 0.3 to 0.7</p>
+<h3 id="fuller-thompson-distribution">Fuller-Thompson Distribution<a class="headerlink" href="#fuller-thompson-distribution" title="Permanent link">¶</a></h3>
+<p><img alt="PSD Fuller-Thompson Example" src="../../assets/images/screenshots/materials/psd-fuller-thompson-example.png"></p>
+<p>The Fuller-Thompson distribution follows a power law:</p>
+<div class="arithmatex">\[P(d) = \left(\frac{d}{d_{max}}\right)^q\]</div>
+<p>Where:
+- <span class="arithmatex">\(d_{max}\)</span> = Maximum particle size
+- <span class="arithmatex">\(q\)</span> = Distribution exponent (typically 0.5 for Fuller's ideal curve)</p>
+<p><strong>Parameters:</strong>
+- <strong>Minimum Size</strong> - Smallest particle diameter (μm)
+- <strong>Maximum Size</strong> - Largest particle diameter (μm)
+- <strong>Exponent</strong> - <span class="arithmatex">\(q\)</span> dimensionless (typically 0.4 to 0.6)</p>
+<p><strong>Applications:</strong>
+- Ideal aggregate grading (<span class="arithmatex">\(q\)</span> = 0.5)
+- Cement fineness distributions with adjusted exponent</p>
+<h3 id="custom-distribution">Custom Distribution<a class="headerlink" href="#custom-distribution" title="Permanent link">¶</a></h3>
+<p><img alt="PSD Custom Example" src="../../assets/images/screenshots/materials/psd-custom-example.png"></p>
+<p>For materials with measured PSD data, enter custom cumulative distribution:</p>
+<p><strong>Data Entry:</strong>
+1. Enter particle diameter (μm) in first column
+2. Enter cumulative percent passing in second column
+3. Data points must be in ascending order by size
+4. Typically 5-20 data points provide good resolution</p>
+<p><strong>Typical Data:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Diameter (μm)    Percent Passing
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>1.0              5.0
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>2.0              12.0
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>5.0              28.0
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>10.0             50.0
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>20.0             75.0
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>50.0             95.0
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>100.0            100.0
+</span></code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="material-naming">Material Naming<a class="headerlink" href="#material-naming" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Be Descriptive</strong> - Include key characteristics in name</li>
+<li><strong>Use Consistent Convention</strong> - Establish naming scheme for your project</li>
+<li><strong>Avoid Special Characters</strong> - Use alphanumeric and hyphens/underscores only</li>
+</ul>
+<p><strong>Good Examples:</strong>
+- <code>OPC-TypeI-380m2kg</code>
+- <code>FlyAsh-ClassF-CaO8pct</code>
+- <code>Slag-Grade100-450m2kg</code>
+- <code>FineAgg-Silica-FM2.8</code></p>
+<h3 id="property-accuracy">Property Accuracy<a class="headerlink" href="#property-accuracy" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Use Test Data</strong> - Measure properties when possible</li>
+<li><strong>Typical Values</strong> - Use literature values for preliminary studies</li>
+<li><strong>Document Sources</strong> - Add notes about data origin in Description field</li>
+<li><strong>Validate Consistency</strong> - Check that related properties make sense together</li>
+</ul>
+<h3 id="psd-selection">PSD Selection<a class="headerlink" href="#psd-selection" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Rosin-Rammler</strong> - Best for ground materials (cement, slag, limestone)</li>
+<li><strong>Log-Normal</strong> - Good for materials with measured data</li>
+<li><strong>Fuller-Thompson</strong> - Best for aggregates with ideal grading</li>
+<li><strong>Custom</strong> - Use when you have measured PSD data</li>
+</ul>
+<h3 id="database-management">Database Management<a class="headerlink" href="#database-management" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Regular Backups</strong> - VCCTL stores materials in SQLite database</li>
+<li><strong>Material Library</strong> - Build comprehensive library for your common materials</li>
+<li><strong>Duplication</strong> - Use Duplicate feature to create material variations</li>
+<li><strong>Deletion</strong> - Only delete materials not used in any saved mix designs</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">¶</a></h3>
+<p><strong>Problem</strong>: Cannot save material - "Name already exists"
+<strong>Solution</strong>: Choose a unique material name or delete/rename existing material</p>
+<p><strong>Problem</strong>: PSD graph not updating
+<strong>Solution</strong>: Ensure all PSD parameters are filled and click Update or Save</p>
+<p><strong>Problem</strong>: Phase composition doesn't sum to 100%
+<strong>Solution</strong>: Adjust phase percentages to total exactly 100.0%</p>
+<p><strong>Problem</strong>: Unrealistic property values rejected
+<strong>Solution</strong>: Check value ranges - VCCTL validates against physical limits</p>
+<h3 id="validation-errors">Validation Errors<a class="headerlink" href="#validation-errors" title="Permanent link">¶</a></h3>
+<p>VCCTL performs comprehensive validation:</p>
+<ul>
+<li><strong>Numeric Ranges</strong> - Density 1000-5000 kg/m³, specific gravity 1.0-5.0</li>
+<li><strong>Composition Sums</strong> - Cement phases must sum to 100%</li>
+<li><strong>PSD Consistency</strong> - Min &lt; characteristic/median &lt; max size</li>
+<li><strong>Required Fields</strong> - Name, material type, and key properties must be filled</li>
+</ul>
+<hr>
+<p><strong>Next Steps:</strong>
+- <strong><a href="../mix-design/">Mix Design</a></strong> - Learn how to combine materials into concrete mixes
+- <strong><a href="../microstructure-generation/">Microstructure Generation</a></strong> - Generate 3D particle arrangements from materials
+- <strong><a href="../reference/parameters.md">Parameter Reference</a></strong> - Detailed parameter descriptions and ranges</p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../getting-started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Getting Started
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../mix-design/" class="md-footer__link md-footer__link--next" aria-label="Next: Mix Design">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Mix Design
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

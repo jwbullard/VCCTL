@@ -1,1084 +1,263 @@
 /Users/jwbullard/Software/vcctl-gtk/vcctl-clean-env/lib/python3.11/site-packages/pyvista/plotting/utilities/xvfb.py:48: PyVistaDeprecationWarning: This function is deprecated and will be removed in future version of PyVista. Use vtk-osmesa instead.
   warnings.warn(
-2025-09-30 15:00:47,443 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
-2025-09-30 15:00:47,500 - VCCTL - INFO - Application startup
-2025-09-30 15:00:47,500 - VCCTL - INFO - Application activated
-2025-09-30 15:00:47,500 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
-2025-09-30 15:00:47,507 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
-2025-09-30 15:00:47,525 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-30 15:00:47,526 - VCCTL.ThemeManager - INFO - Theme manager initialized
-2025-09-30 15:00:47,527 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
-2025-09-30 15:00:47,527 - VCCTL.AccessibilityManager - INFO - Screen reader detected
-2025-09-30 15:00:47,527 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
-2025-09-30 15:00:47,527 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
-2025-09-30 15:00:47,527 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-30 15:00:47,527 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
-2025-09-30 15:00:47,528 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
-2025-09-30 15:00:47,528 - VCCTL.UIPolish - INFO - UI Polish manager initialized
-2025-09-30 15:00:47,650 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
-2025-09-30 15:00:47,661 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
-2025-09-30 15:00:47,668 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
-2025-09-30 15:00:47,819 - VCCTL.Database - INFO - Database engine created successfully
-2025-09-30 15:00:47,823 - VCCTL.Database - INFO - All database tables created successfully
-2025-09-30 15:00:47,823 - VCCTL.Database - INFO - Initializing default database data...
-2025-09-30 15:00:47,823 - VCCTL.Database - INFO - Session maker created successfully
-2025-09-30 15:00:47,841 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
-2025-09-30 15:00:47,841 - VCCTL.Database - INFO - Default database data initialized successfully
-2025-09-30 15:00:47,841 - VCCTL.Database - INFO - Database initialized successfully
-2025-09-30 15:00:47,856 - VCCTL.MaterialTable - INFO - Loaded 47 materials
-2025-09-30 15:00:47,856 - VCCTL.MaterialTable - INFO - Material table initialized
-2025-09-30 15:00:47,859 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
-2025-09-30 15:00:47,859 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
-2025-09-30 15:00:47,860 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
-2025-09-30 15:00:47,861 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
-2025-09-30 15:00:47,869 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
-2025-09-30 15:00:47,869 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
-2025-09-30 15:00:47,869 - VCCTL.HydrationService - INFO - Hydration service initialized
-2025-09-30 15:00:47,869 - VCCTL.PlotManager - INFO - PlotManager initialized
-2025-09-30 15:00:47,870 - VCCTL.HydrationPanel - INFO - Found 2 microstructures
-2025-09-30 15:00:47,897 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
-2025-09-30 15:00:47,899 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
-2025-09-30 15:00:47,902 - app.services.elastic_moduli_service - INFO - DEBUG: Looking for operations with type='HYDRATION' and status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO - DEBUG: Found 5 total operations:
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO -   ID 1: C151-C109 - type='microstructure_generation', status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO -   ID 2: HydrationOf-C151-C109 - type='HYDRATION', status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO -   ID 4: C152-C109 - type='microstructure_generation', status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO -   ID 5: HydrationOf-C152-C109 - type='HYDRATION', status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO -   ID 6: Elastic-HydrationOf-C152-C109-504.84h - type='ELASTIC_MODULI', status='COMPLETED'
-2025-09-30 15:00:47,903 - app.services.elastic_moduli_service - INFO - DEBUG: Found 2 matching hydration operations
-2025-09-30 15:00:47,904 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
-2025-09-30 15:00:47,910 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
-2025-09-30 15:00:47,910 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
-2025-09-30 15:00:47,910 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
-2025-09-30 15:00:47,910 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-30 15:00:47,911 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
-2025-09-30 15:00:47,911 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
-2025-09-30 15:00:47,911 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
-2025-09-30 15:00:47,912 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
-2025-09-30 15:00:47,912 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
-2025-09-30 15:00:47,912 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
-2025-09-30 15:00:47,913 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
-2025-09-30 15:00:47,913 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
-2025-09-30 15:00:47,916 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
-2025-09-30 15:00:47,917 - VCCTL.FileBrowser - INFO - File browser widget initialized
-2025-09-30 15:00:47,919 - VCCTL.FileManagementPanel - INFO - File management panel initialized
-2025-09-30 15:00:47,923 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Found 5 operations in database
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 5 operations from database (0 failed)
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 5 total operations, 0 running
-2025-09-30 15:00:47,928 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
-2025-09-30 15:00:47,929 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:00:47,929 - VCCTL.ResultsPanel - INFO - Results panel initialized
-2025-09-30 15:00:47,929 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-30 15:00:47,929 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109' - found 16 files
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:00:47,930 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' classified as Microstructure (IMG only)
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109' of type 'Microstructure Generation'
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: grading_files
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109' - found 44 files
-2025-09-30 15:00:47,931 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109' classified as Hydration (folder name)
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109' of type 'Hydration Simulation'
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-504.84h' - found 12 files
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-504.84h' classified as Elastic Moduli (files detected)
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-504.84h' of type 'Elastic Moduli'
-2025-09-30 15:00:47,932 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C151-C109
-2025-09-30 15:00:47,933 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C151-C109' - found 45 files
-2025-09-30 15:00:47,933 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C151-C109' classified as Hydration (folder name)
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C151-C109' of type 'Hydration Simulation'
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-Final' - found 1 files
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-Final' classified as Hydration (folder name)
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-Final' of type 'Hydration Simulation'
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-673.32h' - found 13 files
-2025-09-30 15:00:47,934 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-673.32h' classified as Elastic Moduli (files detected)
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-673.32h' of type 'Elastic Moduli'
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C151-C109
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-C109' - found 15 files
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' classified as Microstructure (IMG only)
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-C109' of type 'Microstructure Generation'
-2025-09-30 15:00:47,935 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 8 results from Operations folder
-2025-09-30 15:00:47,939 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-30 15:00:47,940 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-30 15:00:47,940 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
-2025-09-30 15:00:47,941 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
-2025-09-30 15:00:48,097 - VCCTL.MainWindow - INFO - Main window initialized
-2025-09-30 15:00:48,127 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:00:48,128 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109' - found 16 files
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' classified as Microstructure (IMG only)
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109' of type 'Microstructure Generation'
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: grading_files
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
-2025-09-30 15:00:48,129 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109
-2025-09-30 15:00:48,130 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109' - found 44 files
-2025-09-30 15:00:48,130 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109' classified as Hydration (folder name)
-2025-09-30 15:00:48,130 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109' of type 'Hydration Simulation'
-2025-09-30 15:00:48,130 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-504.84h' - found 12 files
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-504.84h' classified as Elastic Moduli (files detected)
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-504.84h' of type 'Elastic Moduli'
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C151-C109
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C151-C109' - found 45 files
-2025-09-30 15:00:48,131 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C151-C109' classified as Hydration (folder name)
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C151-C109' of type 'Hydration Simulation'
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-Final' - found 1 files
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-Final' classified as Hydration (folder name)
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-Final' of type 'Hydration Simulation'
-2025-09-30 15:00:48,132 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-673.32h' - found 13 files
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-673.32h' classified as Elastic Moduli (files detected)
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-673.32h' of type 'Elastic Moduli'
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C151-C109
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-C109' - found 15 files
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' classified as Microstructure (IMG only)
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-C109' of type 'Microstructure Generation'
-2025-09-30 15:00:48,133 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 8 results from Operations folder
-2025-09-30 15:00:48,190 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:48,371 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-30 15:00:48,371 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
-2025-09-30 15:00:48,937 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:49,943 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:50,950 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:51,955 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:52,959 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:53,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:00:53,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:00:53,965 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:54,973 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:55,977 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:56,982 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:57,989 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:00:58,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:00:58,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:00:58,995 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:00,001 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:01,007 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:02,011 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:03,012 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:03,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:03,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:04,020 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:05,022 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:06,028 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:07,034 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:08,039 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:08,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:08,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:09,045 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:10,053 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:11,059 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:12,060 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:13,064 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:13,306 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:13,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:13,881 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
-2025-09-30 15:01:13,881 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109' - found 16 files
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:01:13,882 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' classified as Microstructure (IMG only)
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109' of type 'Microstructure Generation'
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: grading_files
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
-2025-09-30 15:01:13,883 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109
-2025-09-30 15:01:13,884 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109' - found 44 files
-2025-09-30 15:01:13,884 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109' classified as Hydration (folder name)
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109' of type 'Hydration Simulation'
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-504.84h
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-504.84h' - found 12 files
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-504.84h' classified as Elastic Moduli (files detected)
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-504.84h' of type 'Elastic Moduli'
-2025-09-30 15:01:13,885 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C151-C109
-2025-09-30 15:01:13,886 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C151-C109' - found 45 files
-2025-09-30 15:01:13,886 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C151-C109' classified as Hydration (folder name)
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C151-C109' of type 'Hydration Simulation'
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-Final
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-Final' - found 1 files
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-Final' classified as Hydration (folder name)
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-Final' of type 'Hydration Simulation'
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-673.32h
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-673.32h' - found 13 files
-2025-09-30 15:01:13,887 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-673.32h' classified as Elastic Moduli (files detected)
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-673.32h' of type 'Elastic Moduli'
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C151-C109
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-C109' - found 15 files
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' - time_series_img: False, csv: False, img: True
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' classified as Microstructure (IMG only)
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-C109' of type 'Microstructure Generation'
-2025-09-30 15:01:13,888 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 8 results from Operations folder
-2025-09-30 15:01:14,070 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:15,076 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:16,084 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:17,088 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:17,577 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 319.67488103012096, 'current_memory_mb': 564.234375}
-2025-09-30 15:01:17,577 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C151-C109' is elastic operation: False
-2025-09-30 15:01:17,577 - VCCTL.ResultsPanel - INFO - Results panel: Checking 3D results for 'HydrationOf-C151-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C151-C109
-2025-09-30 15:01:17,578 - VCCTL.ResultsPanel - INFO - Results panel: Found in 'HydrationOf-C151-C109': 8 hydration img files, 2 final img files, 1 regular img files
-2025-09-30 15:01:17,578 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C151-C109' has 3D results: True
-2025-09-30 15:01:17,578 - VCCTL.ResultsPanel - INFO - Results panel: Checking CSV data for 'HydrationOf-C151-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C151-C109
-2025-09-30 15:01:17,578 - VCCTL.ResultsPanel - INFO - Results panel: Found 4 CSV files in 'HydrationOf-C151-C109'
-2025-09-30 15:01:17,578 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C151-C109' has CSV data: True
-2025-09-30 15:01:17,579 - VCCTL.ResultsPanel - INFO - Results panel: Checking 3D results for 'HydrationOf-C151-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C151-C109
-2025-09-30 15:01:17,579 - VCCTL.ResultsPanel - INFO - Results panel: Found in 'HydrationOf-C151-C109': 8 hydration img files, 2 final img files, 1 regular img files
-2025-09-30 15:01:17,579 - VCCTL.ResultsPanel - INFO - Results panel: Checking CSV data for 'HydrationOf-C151-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C151-C109
-2025-09-30 15:01:17,579 - VCCTL.ResultsPanel - INFO - Results panel: Found 4 CSV files in 'HydrationOf-C151-C109'
-2025-09-30 15:01:18,093 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 31: 5 total operations, 0 running
-2025-09-30 15:01:18,098 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:18,307 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:18,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:18,396 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C152-C109' is elastic operation: False
-2025-09-30 15:01:18,396 - VCCTL.ResultsPanel - INFO - Results panel: Checking 3D results for 'HydrationOf-C152-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109
-2025-09-30 15:01:18,397 - VCCTL.ResultsPanel - INFO - Results panel: Found in 'HydrationOf-C152-C109': 8 hydration img files, 2 final img files, 1 regular img files
-2025-09-30 15:01:18,397 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C152-C109' has 3D results: True
-2025-09-30 15:01:18,397 - VCCTL.ResultsPanel - INFO - Results panel: Checking CSV data for 'HydrationOf-C152-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109
-2025-09-30 15:01:18,398 - VCCTL.ResultsPanel - INFO - Results panel: Found 5 CSV files in 'HydrationOf-C152-C109'
-2025-09-30 15:01:18,398 - VCCTL.ResultsPanel - INFO - Results panel: Operation 'HydrationOf-C152-C109' has CSV data: True
-2025-09-30 15:01:18,398 - VCCTL.ResultsPanel - INFO - Results panel: Checking 3D results for 'HydrationOf-C152-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109
-2025-09-30 15:01:18,398 - VCCTL.ResultsPanel - INFO - Results panel: Found in 'HydrationOf-C152-C109': 8 hydration img files, 2 final img files, 1 regular img files
-2025-09-30 15:01:18,399 - VCCTL.ResultsPanel - INFO - Results panel: Checking CSV data for 'HydrationOf-C152-C109' in directory: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109
-2025-09-30 15:01:18,399 - VCCTL.ResultsPanel - INFO - Results panel: Found 5 CSV files in 'HydrationOf-C152-C109'
-2025-09-30 15:01:19,101 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:19,627 - VCCTL.PyVistaViewer3D - INFO - PyVista headless plotter created successfully
-2025-09-30 15:01:19,630 - VCCTL.PyVistaViewer3D - INFO - PyVista 3D viewer initialized
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found initial microstructure: C152-C109.img
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found time-series file: C152-C109.img.673.32h.25.100 at 673.32h
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found time-series file: C152-C109.img.336.14h.25.100 at 336.14h
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found time-series file: C152-C109.img.168.09h.25.100 at 168.09h
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found time-series file: C152-C109.img.504.84h.25.100 at 504.84h
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Found final microstructure: HydrationOf_C152-C109.img.25.100
-2025-09-30 15:01:19,631 - app.windows.dialogs.hydration_results_viewer - INFO - Loaded 6 microstructure files
-2025-09-30 15:01:19,646 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img
-2025-09-30 15:01:19,977 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:20,012 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:20,016 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  8  9 10 13 33]
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Loaded 39 VCCTL phase colors
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Loading 39 colors from colors.csv for initial load
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 0: Porosity = RGB(0, 25, 25)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 1: C3S = RGB(42, 42, 210)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 2: C2S = RGB(139, 79, 19)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 3: C3A = RGB(178, 178, 178)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 4: C4AF = RGB(253, 253, 253)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 5: K2SO4 = RGB(255, 0, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 6: Na2SO4 = RGB(255, 20, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 7: Gypsum = RGB(255, 255, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 8: Hemihydrate = RGB(255, 240, 86)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 9: Anhydrite = RGB(255, 255, 128)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 10: Sfume = RGB(40, 173, 75)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 11: Inert Filler = RGB(238, 174, 238)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 12: Slag = RGB(255, 165, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 13: Aggregate = RGB(255, 192, 65)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 14: ASG = RGB(255, 165, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 15: CAS2 = RGB(0, 0, 128)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 16: Silica(am) = RGB(26, 100, 26)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 17: FA-C3A = RGB(64, 64, 64)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 18: Generic Flyash = RGB(64, 64, 64)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 19: Portlandite = RGB(7, 72, 142)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 20: CSH = RGB(245, 222, 179)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 21: C3AH6 = RGB(150, 150, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 22: AFt = RGB(127, 0, 255)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 23: AFt-Fe = RGB(127, 0, 255)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 24: AFm = RGB(244, 70, 203)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 25: FH3 = RGB(64, 128, 128)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 26: Pozzolanic CSH = RGB(174, 237, 237)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 27: Slag CSH = RGB(128, 250, 128)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 28: CaCl2 = RGB(255, 170, 128)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 29: Friedel Salt = RGB(255, 0, 255)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 30: Straetlingite = RGB(64, 64, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 31: Secondary Gypsum = RGB(255, 255, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 32: Absorbed Gypsum = RGB(255, 255, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 33: CACO3 = RGB(0, 204, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 34: AFmc = RGB(250, 198, 220)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 35: Brucite = RGB(26, 103, 26)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 36: Free lime = RGB(128, 255, 0)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 37: Orth. C3A = RGB(178, 178, 178)
-2025-09-30 15:01:20,027 - app.windows.dialogs.hydration_results_viewer - INFO - Phase 55: Void = RGB(0, 0, 0)
-2025-09-30 15:01:20,028 - app.windows.dialogs.hydration_results_viewer - INFO - Loading voxel data into PyVista viewer...
-2025-09-30 15:01:21,157 - VCCTL.PyVistaViewer3D - INFO - >>> Starting render to GTK
-2025-09-30 15:01:21,157 - VCCTL.PyVistaViewer3D - INFO - >>> Taking screenshot...
-2025-09-30 15:01:21,349 - VCCTL.PyVistaViewer3D - INFO - >>> Screenshot result: (900, 1200, 3)
-2025-09-30 15:01:21,349 - VCCTL.PyVistaViewer3D - INFO - >>> Converting to GTK display...
-2025-09-30 15:01:21,410 - VCCTL.PyVistaViewer3D - INFO - >>> Updating GTK image widget...
-2025-09-30 15:01:21,674 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:21,674 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:21,674 - VCCTL.PyVistaViewer3D - INFO - >>> GTK image widget updated and display refreshed
-2025-09-30 15:01:21,714 - VCCTL.PyVistaViewer3D - INFO - >>> Render to GTK completed successfully
-2025-09-30 15:01:21,714 - VCCTL.PyVistaViewer3D - INFO - Loaded voxel data: (100, 100, 120), 13 phases
-2025-09-30 15:01:21,714 - app.windows.dialogs.hydration_results_viewer - INFO - PyVista load_voxel_data returned: True
-2025-09-30 15:01:21,715 - app.windows.dialogs.hydration_results_viewer - INFO - Starting background preloading of 6 microstructures...
-2025-09-30 15:01:21,715 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img
-2025-09-30 15:01:22,062 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:22,097 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:22,101 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  8  9 10 13 33]
-2025-09-30 15:01:22,112 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading microstructure 2/6: 168.09h
-2025-09-30 15:01:22,113 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img.168.09h.25.100
-2025-09-30 15:01:22,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:22,486 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:22,519 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:22,525 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  8  9 10 13 19 20 21 22 23 24 25 26 31 32 33 34]
-2025-09-30 15:01:22,534 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading microstructure 3/6: 336.14h
-2025-09-30 15:01:22,534 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img.336.14h.25.100
-2025-09-30 15:01:22,894 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:22,927 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:22,935 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  9 10 13 19 20 21 22 23 24 25 26 31 32 33 34]
-2025-09-30 15:01:22,945 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading microstructure 4/6: 504.84h
-2025-09-30 15:01:22,945 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img.504.84h.25.100
-2025-09-30 15:01:23,299 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:23,331 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:23,332 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:23,333 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:23,334 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:01:23,339 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  9 10 13 19 20 21 22 23 24 25 26 31 32 33 34]
-2025-09-30 15:01:23,349 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading microstructure 5/6: 673.32h
-2025-09-30 15:01:23,349 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/C152-C109.img.673.32h.25.100
-2025-09-30 15:01:23,712 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:23,747 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:23,755 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  9 10 13 19 20 21 22 23 24 25 26 31 32 33 34]
-2025-09-30 15:01:23,766 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading microstructure 6/6: 999999.0h
-2025-09-30 15:01:23,766 - app.windows.dialogs.hydration_results_viewer - INFO - Reading microstructure file: /Users/jwbullard/Software/vcctl-gtk/Operations/HydrationOf-C152-C109/HydrationOf_C152-C109.img.25.100
-2025-09-30 15:01:24,137 - app.windows.dialogs.hydration_results_viewer - INFO - Expected 1200000 voxels, got 1200000 values
-2025-09-30 15:01:24,171 - app.windows.dialogs.hydration_results_viewer - INFO - Successfully loaded microstructure: 120x100x100
-2025-09-30 15:01:24,175 - app.windows.dialogs.hydration_results_viewer - INFO - Unique phases in data: [ 0  1  2  3  4  5  6  7  9 10 13 19 20 21 22 23 24 25 26 31 32 33 34 39
- 40 41 42 43 44 45 46 49]
-2025-09-30 15:01:24,186 - app.windows.dialogs.hydration_results_viewer - INFO - Preloading complete! Cached 6 microstructures
-2025-09-30 15:01:24,338 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:01:26,088 - VCCTL.PyVistaViewer3D - INFO - Starting connectivity analysis
-2025-09-30 15:01:26,088 - VCCTL.PyVistaViewer3D - INFO - Using Python connectivity analysis with periodic boundary conditions...
-2025-09-30 15:01:30,018 - VCCTL.PyVistaViewer3D - INFO - Starting connectivity analysis with periodic boundary conditions...
-2025-09-30 15:01:30,393 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 29745 → 28870 components
-2025-09-30 15:01:40,542 - VCCTL.PyVistaViewer3D - INFO - Phase 1: 28870 components, ✓ PERCOLATED
-2025-09-30 15:01:40,779 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 22154 → 22122 components
-2025-09-30 15:01:47,602 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 973.9836296432316, 'current_memory_mb': 1379.546875}
-2025-09-30 15:01:48,618 - VCCTL.PyVistaViewer3D - INFO - Phase 2: 22122 components, ✓ PERCOLATED
-2025-09-30 15:01:48,881 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 27688 → 27627 components
-2025-09-30 15:01:49,114 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 61: 5 total operations, 0 running
-2025-09-30 15:01:49,115 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:01:58,965 - VCCTL.PyVistaViewer3D - INFO - Phase 3: 27627 components, ✓ PERCOLATED
-2025-09-30 15:01:59,196 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 11229 → 11220 components
-2025-09-30 15:02:03,317 - VCCTL.PyVistaViewer3D - INFO - Phase 4: 11220 components, ✓ PERCOLATED
-2025-09-30 15:02:03,536 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 4027 → 4027 components
-2025-09-30 15:02:04,959 - VCCTL.PyVistaViewer3D - INFO - Phase 5: 4027 components, ✗ Not Percolated
-2025-09-30 15:02:05,176 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 440 → 440 components
-2025-09-30 15:02:05,329 - VCCTL.PyVistaViewer3D - INFO - Phase 6: 440 components, ✗ Not Percolated
-2025-09-30 15:02:05,551 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 3493 → 3490 components
-2025-09-30 15:02:06,790 - VCCTL.PyVistaViewer3D - INFO - Phase 7: 3490 components, ✗ Not Percolated
-2025-09-30 15:02:07,014 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 4004 → 4000 components
-2025-09-30 15:02:08,472 - VCCTL.PyVistaViewer3D - INFO - Phase 8: 4000 components, ✗ Not Percolated
-2025-09-30 15:02:08,706 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 372 → 372 components
-2025-09-30 15:02:08,839 - VCCTL.PyVistaViewer3D - INFO - Phase 9: 372 components, ✗ Not Percolated
-2025-09-30 15:02:09,066 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 5039 → 5031 components
-2025-09-30 15:02:10,866 - VCCTL.PyVistaViewer3D - INFO - Phase 10: 5031 components, ✗ Not Percolated
-2025-09-30 15:02:10,872 - VCCTL.PyVistaViewer3D - INFO - Phase 13: 1 components, ✗ Not Percolated
-2025-09-30 15:02:11,109 - VCCTL.PyVistaViewer3D - INFO - Periodic connectivity: 11637 → 11593 components
-2025-09-30 15:02:15,143 - VCCTL.PyVistaViewer3D - INFO - Phase 33: 11593 components, ✓ PERCOLATED
-2025-09-30 15:02:15,170 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:15,171 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:15,275 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,276 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,277 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:15,281 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:16,289 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:17,290 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:17,648 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 681.5419274497157, 'current_memory_mb': 1427.765625}
-2025-09-30 15:02:18,294 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:19,298 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 91: 5 total operations, 0 running
-2025-09-30 15:02:19,302 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:20,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:20,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:20,313 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:21,317 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:22,322 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:23,327 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:24,330 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:25,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:25,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:25,333 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:26,341 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:27,348 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:28,357 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:29,364 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:30,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:30,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:30,370 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:31,373 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:32,375 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:33,381 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:34,387 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:35,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:35,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:35,391 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:36,396 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:37,398 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:38,404 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:39,408 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:40,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:40,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:40,412 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:41,419 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:42,420 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:43,428 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:44,430 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:45,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:45,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:45,431 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:46,438 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:47,441 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:47,716 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 511.5450830503639, 'current_memory_mb': 1428.625}
-2025-09-30 15:02:48,447 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:49,451 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 121: 5 total operations, 0 running
-2025-09-30 15:02:49,452 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:02:49,452 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:50,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:50,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:50,459 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:51,461 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:52,464 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:53,471 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:54,478 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:55,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:55,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:02:55,481 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:56,483 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:57,490 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:58,492 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:02:59,496 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:00,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:00,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:00,500 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:01,502 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:02,508 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:03,515 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:04,523 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:05,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:05,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:05,524 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:06,527 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:07,529 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:08,532 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:09,534 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:10,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:10,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:10,536 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:11,543 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:12,549 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:13,555 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:14,561 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:15,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:15,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:15,564 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:16,568 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:17,574 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:17,781 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 410.03302048603564, 'current_memory_mb': 1430.828125}
-2025-09-30 15:03:18,581 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:19,585 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 151: 5 total operations, 0 running
-2025-09-30 15:03:19,586 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:20,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:20,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:20,590 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:21,595 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:22,599 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:23,604 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:24,610 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:25,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:25,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:25,612 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:26,618 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:27,620 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:28,625 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:29,630 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:30,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:30,320 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:30,633 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:31,635 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:32,639 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:33,645 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:34,651 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:35,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:35,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:35,657 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:36,662 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:37,668 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:38,670 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:39,673 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:40,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:40,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:40,677 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:41,682 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:42,687 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:43,699 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:44,837 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:45,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:45,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:45,825 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:46,827 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:47,846 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:47,958 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 342.512875307848, 'current_memory_mb': 1433.40625}
-2025-09-30 15:03:48,847 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:49,845 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 181: 5 total operations, 0 running
-2025-09-30 15:03:49,847 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:03:49,847 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:50,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:50,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:50,850 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:51,856 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:52,857 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:53,858 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:54,862 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:55,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:55,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:03:55,865 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:56,868 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:57,870 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:58,873 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:03:59,875 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:00,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:00,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:00,877 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:01,883 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:02,886 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:03,887 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:04,889 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:05,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:05,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:05,892 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:06,896 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:07,898 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:08,903 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:09,906 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:10,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:10,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:10,909 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:11,911 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:12,915 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:13,917 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:14,919 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:15,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:15,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:15,922 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:16,924 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:17,928 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:18,114 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 294.23665686916877, 'current_memory_mb': 1436.3125}
-2025-09-30 15:04:18,932 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:19,933 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 211: 5 total operations, 0 running
-2025-09-30 15:04:19,935 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:20,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:20,322 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:20,939 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:21,943 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:22,944 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:23,947 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:24,951 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:25,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:25,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:25,956 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:26,960 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:27,963 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:28,966 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:29,967 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:30,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:30,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:30,971 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:31,973 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:32,980 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:33,982 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:34,986 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:35,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:35,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:35,989 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:36,992 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:37,997 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:38,999 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:40,006 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:40,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:40,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:41,008 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:42,011 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:43,014 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:44,032 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:45,035 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:45,345 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:45,356 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:46,038 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:47,042 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:48,044 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:48,247 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 258.08498530025236, 'current_memory_mb': 1439.21875}
-2025-09-30 15:04:49,049 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:50,050 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 241: 5 total operations, 0 running
-2025-09-30 15:04:50,052 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:04:50,053 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:50,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:50,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:51,054 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:52,057 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:53,059 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:54,062 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:55,065 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:55,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:55,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:04:56,067 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:57,068 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:58,071 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:04:59,075 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:00,079 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:00,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:00,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:01,082 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:02,085 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:03,088 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:04,090 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:05,094 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:05,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:05,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:06,096 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:07,100 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:08,101 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:09,105 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:10,108 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:10,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:10,316 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:11,112 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:12,114 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:13,117 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:14,119 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:15,123 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:15,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:15,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:16,126 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:17,129 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:18,132 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:18,410 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 229.36765897224518, 'current_memory_mb': 1439.25}
-2025-09-30 15:05:19,138 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:20,139 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 271: 5 total operations, 0 running
-2025-09-30 15:05:20,142 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:20,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:20,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:21,148 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:22,149 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:23,152 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:24,156 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:25,157 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:25,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:25,318 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:26,160 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:27,162 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:28,164 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:29,168 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:30,172 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:30,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:30,321 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:31,175 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:32,178 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:33,181 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:34,184 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:35,187 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:35,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:35,318 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:36,190 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:37,193 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:38,196 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:39,199 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:40,206 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:40,316 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:40,321 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:41,206 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:42,209 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:43,210 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:44,213 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:45,219 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:45,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:45,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:46,224 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:47,233 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:48,239 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:48,450 - VCCTL.PerformanceMonitor - WARNING - Performance alert: memory_growth - {'growth_rate_mb_per_min': 194.35923342074298, 'current_memory_mb': 1441.703125}
-2025-09-30 15:05:49,248 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:50,249 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 301: 5 total operations, 0 running
-2025-09-30 15:05:50,251 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:05:50,252 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:50,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:50,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:51,259 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:52,266 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:53,271 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:54,273 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:54,895 - VCCTL.PyVistaViewer3D - INFO - Connectivity analysis completed successfully
-2025-09-30 15:05:55,278 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:55,308 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:55,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:05:56,284 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:57,286 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:58,293 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:05:59,299 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:00,305 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:00,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:00,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:01,310 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:02,318 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:03,323 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:04,330 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:05,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:05,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:05,337 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:06,341 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:07,347 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:08,353 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:09,355 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:10,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:10,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:10,359 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:11,366 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:12,372 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:13,378 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:14,386 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:15,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:15,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:15,387 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:16,393 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:17,399 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:18,402 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:19,411 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:20,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:20,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:20,412 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 331: 5 total operations, 0 running
-2025-09-30 15:06:20,415 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:21,417 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:22,424 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:23,431 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:24,437 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:25,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:25,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:25,445 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:26,447 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:27,459 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:28,465 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:29,472 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:30,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:30,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:30,475 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:31,484 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:32,490 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:33,492 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:34,499 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:35,309 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:35,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:35,502 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:36,504 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:37,506 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:38,512 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:39,518 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:40,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:40,316 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:40,526 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:41,529 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:42,535 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:43,542 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:44,546 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:45,310 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:45,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:45,551 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:46,554 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:47,558 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:48,618 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:49,623 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:50,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:50,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:50,623 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 361: 5 total operations, 0 running
-2025-09-30 15:06:50,625 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:06:50,627 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:51,628 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:52,632 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:53,633 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:54,637 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:55,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:55,323 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:06:55,639 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:56,642 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:57,643 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:58,646 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:06:59,649 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:00,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:00,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:00,653 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:01,656 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:02,661 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:03,664 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:04,666 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:05,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:05,318 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:05,667 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:06,670 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:07,676 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:08,678 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:09,682 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:10,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:10,318 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:10,684 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:11,687 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:12,690 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:13,695 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:14,697 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:15,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:15,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:15,701 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:16,706 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:17,708 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:18,763 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:19,770 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:20,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:20,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:20,770 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 391: 5 total operations, 0 running
-2025-09-30 15:07:20,773 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:21,776 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:22,779 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:23,783 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:24,786 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:25,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:25,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:25,790 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:26,793 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:27,795 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:28,798 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:29,803 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:30,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:30,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:30,805 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:31,808 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:32,812 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:33,816 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:34,818 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:35,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:35,320 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:35,830 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:36,834 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:37,837 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:38,840 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:39,842 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:40,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:40,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:40,846 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:41,849 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:42,852 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:43,856 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:44,859 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:45,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:45,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:45,860 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:46,862 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:47,866 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:48,868 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:49,873 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:50,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:50,316 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:50,874 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 421: 5 total operations, 0 running
-2025-09-30 15:07:50,875 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:07:50,876 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:51,879 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:52,882 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:53,884 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:54,888 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:55,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:55,318 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:07:55,891 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:56,894 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:57,896 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:58,899 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:07:59,902 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:00,314 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:00,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:00,908 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:01,909 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:02,911 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:03,915 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:04,916 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:05,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:05,321 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:05,920 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:06,926 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:07,927 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:08,929 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:09,931 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:10,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:10,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:10,933 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:11,935 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:12,938 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:13,940 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:14,943 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:15,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:15,319 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:15,946 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:16,947 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:17,950 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:19,003 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:20,010 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:20,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:20,316 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:21,011 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 451: 5 total operations, 0 running
-2025-09-30 15:08:21,014 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:22,015 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:23,018 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:24,021 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:25,024 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:25,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:25,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:26,026 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:27,028 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:28,031 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:29,033 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:30,035 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:30,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:30,317 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:31,039 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:32,041 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:33,045 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:34,047 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:35,050 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:35,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:35,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:36,053 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:37,055 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:38,057 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:39,061 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:40,064 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:40,312 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:40,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:41,067 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:42,069 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:43,071 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:44,073 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:45,075 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:45,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:45,313 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:46,078 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:47,082 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:48,084 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:49,141 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:50,162 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:50,311 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C152-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:50,315 - VCCTL.OperationsMonitoringPanel - WARNING - Simple progress update failed for C151-C109: 'OperationsMonitoringPanel' object has no attribute 'metrics_completed_value'
-2025-09-30 15:08:51,163 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 481: 5 total operations, 0 running
-2025-09-30 15:08:51,164 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 5→5 total
-2025-09-30 15:08:51,165 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:52,168 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
-2025-09-30 15:08:53,170 - VCCTL.OperationsMonitoringPanel - ERROR - Error updating UI: 'OperationsMonitoringPanel' object has no attribute 'cpu_usage_label'
+2025-10-03 13:20:05,491 - VCCTL - INFO - VCCTL Application 10.0.0 initialized
+2025-10-03 13:20:05,551 - VCCTL - INFO - Application startup
+2025-10-03 13:20:05,551 - VCCTL - INFO - Application activated
+2025-10-03 13:20:05,552 - VCCTL.PerformanceMonitor - INFO - Performance monitor initialized
+2025-10-03 13:20:05,557 - VCCTL.PerformanceMonitor - INFO - Performance monitoring started
+2025-10-03 13:20:05,574 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-10-03 13:20:05,574 - VCCTL.ThemeManager - INFO - Theme manager initialized
+2025-10-03 13:20:05,574 - VCCTL.KeyboardManager - INFO - Keyboard manager initialized
+2025-10-03 13:20:05,574 - VCCTL.AccessibilityManager - INFO - Screen reader detected
+2025-10-03 13:20:05,575 - VCCTL.AccessibilityManager - INFO - Accessibility manager initialized
+2025-10-03 13:20:05,575 - VCCTL.ResponsiveLayout - WARNING - Responsive layout monitoring disabled to prevent infinite loops with invalid GTK allocations
+2025-10-03 13:20:05,575 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-10-03 13:20:05,575 - VCCTL.ResponsiveLayout - INFO - Responsive layout manager initialized
+2025-10-03 13:20:05,575 - VCCTL.ThemeManager - ERROR - Failed to apply theme: gtk-css-provider-error-quark: <data>:308:39Invalid name of pseudo-class (1)
+2025-10-03 13:20:05,575 - VCCTL.UIPolish - INFO - UI Polish manager initialized
+2025-10-03 13:20:05,696 - VCCTL.CarbonIconManager - ERROR - Error loading metadata: 'str' object has no attribute 'get'
+2025-10-03 13:20:05,708 - VCCTL.CarbonIconManager - INFO - Built metadata for 2366 icons from file structure
+2025-10-03 13:20:05,714 - VCCTL.CarbonIconManager - INFO - Carbon Icon Manager initialized with 2366 icons
+2025-10-03 13:20:05,866 - VCCTL.Database - INFO - Database engine created successfully
+2025-10-03 13:20:05,870 - VCCTL.Database - INFO - All database tables created successfully
+2025-10-03 13:20:05,870 - VCCTL.Database - INFO - Initializing default database data...
+2025-10-03 13:20:05,870 - VCCTL.Database - INFO - Session maker created successfully
+2025-10-03 13:20:05,888 - VCCTL.Database - INFO - portland_cement_standard parameters already exist
+2025-10-03 13:20:05,888 - VCCTL.Database - INFO - Default database data initialized successfully
+2025-10-03 13:20:05,888 - VCCTL.Database - INFO - Database initialized successfully
+2025-10-03 13:20:05,903 - VCCTL.MaterialTable - INFO - Loaded 48 materials
+2025-10-03 13:20:05,903 - VCCTL.MaterialTable - INFO - Material table initialized
+2025-10-03 13:20:05,907 - VCCTL.MaterialsPanel - INFO - Loaded material counts: 36 cement, 7 aggregate
+2025-10-03 13:20:05,907 - VCCTL.MaterialsPanel - INFO - Materials panel initialized
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement140
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: sacci425
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement141
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: box
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: ellipsoid
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma160
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement152
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement116
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-fib
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: sika-cement07
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: ma165
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found particle shape set: cement133
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106A-1-fine
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA111-7-coarse
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA113AB-2-fine
+2025-10-03 13:20:05,908 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118AB-3-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA107-6-fine
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA106B-4-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: spheres
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Slab
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118C-5-fine
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114AE-2-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: FDOT-57
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: AZ-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA99BC-5-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120F
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120A
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: LS-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: IN-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA114F-3-fine
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117A-4-fine
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Cubic
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: GR-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: SiamSand
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA118DE-9-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108A-7-fine
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA117B-8-coarse
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: Ottawa-sand
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120B
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120E
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: sika-flatt
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120D
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA120C
+2025-10-03 13:20:05,909 - VCCTL.MicrostructureService - INFO - Found aggregate shape: MA108BD-6-coarse
+2025-10-03 13:20:05,918 - VCCTL.MixDesignPanel - INFO - Loaded material lists for mix design
+2025-10-03 13:20:05,918 - VCCTL.MixDesignPanel - INFO - Mix design panel initialized
+2025-10-03 13:20:05,918 - VCCTL.HydrationService - INFO - Hydration service initialized
+2025-10-03 13:20:05,918 - VCCTL.PlotManager - INFO - PlotManager initialized
+2025-10-03 13:20:05,919 - VCCTL.HydrationPanel - INFO - Found 3 microstructures
+2025-10-03 13:20:05,947 - VCCTL.HydrationPanel - INFO - Loaded 378 parameters from database
+2025-10-03 13:20:05,948 - VCCTL.HydrationPanel - INFO - Hydration panel initialized
+2025-10-03 13:20:05,952 - app.services.elastic_moduli_service - INFO - DEBUG: Looking for operations with type='HYDRATION' and status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO - DEBUG: Found 8 total operations:
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 1: C151-C109 - type='microstructure_generation', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 2: HydrationOf-C151-C109 - type='HYDRATION', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 4: C152-C109 - type='microstructure_generation', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 5: HydrationOf-C152-C109 - type='HYDRATION', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 6: Elastic-HydrationOf-C152-C109-504.84h - type='ELASTIC_MODULI', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 7: HydrationOf-C152-C109a - type='HYDRATION', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 8: C152-C109a - type='microstructure_generation', status='COMPLETED'
+2025-10-03 13:20:05,953 - app.services.elastic_moduli_service - INFO -   ID 9: Elastic-HydrationOf-C152-C109-336.14h - type='ELASTIC_MODULI', status='COMPLETED'
+2025-10-03 13:20:05,954 - app.services.elastic_moduli_service - INFO - DEBUG: Found 3 matching hydration operations
+2025-10-03 13:20:05,954 - VCCTL.ElasticModuliPanel - INFO - Elastic Moduli panel initialized
+2025-10-03 13:20:05,960 - VCCTL.ConfigManager - INFO - Configuration loaded from /Users/jwbullard/Software/vcctl-gtk/config
+2025-10-03 13:20:05,960 - VCCTL.FileHistoryManager - INFO - Loaded 0 file histories
+2025-10-03 13:20:05,960 - VCCTL.FileHistoryManager - INFO - File history manager initialized: data/history
+2025-10-03 13:20:05,960 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-10-03 13:20:05,961 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-upload (tried all sizes)
+2025-10-03 13:20:05,961 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download-1 (tried all sizes)
+2025-10-03 13:20:05,962 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-file-download (tried all sizes)
+2025-10-03 13:20:05,962 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-badge-check-2 (tried all sizes)
+2025-10-03 13:20:05,962 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-filter (tried all sizes)
+2025-10-03 13:20:05,963 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-history (tried all sizes)
+2025-10-03 13:20:05,963 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-trash-xmark (tried all sizes)
+2025-10-03 13:20:05,963 - VCCTL.FileManagementPanel - INFO - Defaulting to Operations folder: /Users/jwbullard/Software/vcctl-gtk/src/Operations
+2025-10-03 13:20:05,966 - VCCTL.FileBrowser - WARNING - Failed to load icon for /Users/jwbullard/TestImageView.png: gtk-icon-theme-error-quark: Icon 'image-x-generic' not present in theme Adwaita (0)
+2025-10-03 13:20:05,967 - VCCTL.FileBrowser - INFO - File browser widget initialized
+2025-10-03 13:20:05,969 - VCCTL.FileManagementPanel - INFO - File management panel initialized
+2025-10-03 13:20:05,974 - VCCTL.OperationsMonitoringPanel - INFO - Refreshing results analysis dashboard...
+2025-10-03 13:20:05,979 - VCCTL.OperationsMonitoringPanel - INFO - Results analysis dashboard refresh completed
+2025-10-03 13:20:05,979 - VCCTL.OperationsMonitoringPanel - INFO - Loading all operations from database...
+2025-10-03 13:20:05,979 - VCCTL.OperationsMonitoringPanel - INFO - Found 8 operations in database
+2025-10-03 13:20:05,980 - VCCTL.OperationsMonitoringPanel - INFO - Successfully loaded 8 operations from database (0 failed)
+2025-10-03 13:20:05,980 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop started
+2025-10-03 13:20:05,980 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring started
+2025-10-03 13:20:05,980 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop iteration 1: 8 total operations, 0 running
+2025-10-03 13:20:05,980 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel initialized
+2025-10-03 13:20:05,981 - VCCTL.OperationsMonitoringPanel - INFO - Operations update: 0→0 running, 8→8 total
+2025-10-03 13:20:05,981 - VCCTL.ResultsPanel - INFO - Results panel initialized
+2025-10-03 13:20:05,981 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-10-03 13:20:05,981 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-336.14h
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-673.32h
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-504.84h
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-Final
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-673.32h
+2025-10-03 13:20:05,982 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109a
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109a' - found 16 files
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109a' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109a' classified as Microstructure (IMG only)
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109a' of type 'Microstructure Generation'
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109' - found 16 files
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' classified as Microstructure (IMG only)
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109' of type 'Microstructure Generation'
+2025-10-03 13:20:05,983 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: grading_files
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109a
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109a' - found 31 files
+2025-10-03 13:20:05,984 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109a' classified as Hydration (folder name)
+2025-10-03 13:20:05,985 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109a' of type 'Hydration Simulation'
+2025-10-03 13:20:05,985 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109
+2025-10-03 13:20:05,985 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109' - found 57 files
+2025-10-03 13:20:05,985 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109' classified as Hydration (folder name)
+2025-10-03 13:20:05,986 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109' of type 'Hydration Simulation'
+2025-10-03 13:20:05,986 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-336.14h
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-336.14h' - found 12 files
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-336.14h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-336.14h' of type 'Elastic Moduli'
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-673.32h
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-673.32h' - found 1 files
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-673.32h' classified as Hydration (folder name)
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-673.32h' of type 'Hydration Simulation'
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-504.84h
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-504.84h' - found 12 files
+2025-10-03 13:20:05,987 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-504.84h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:05,988 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-504.84h' of type 'Elastic Moduli'
+2025-10-03 13:20:05,988 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C151-C109
+2025-10-03 13:20:05,988 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C151-C109' - found 45 files
+2025-10-03 13:20:05,988 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C151-C109' classified as Hydration (folder name)
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C151-C109' of type 'Hydration Simulation'
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-Final
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-Final' - found 1 files
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-Final' classified as Hydration (folder name)
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-Final' of type 'Hydration Simulation'
+2025-10-03 13:20:05,989 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-673.32h
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-673.32h' - found 13 files
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-673.32h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-673.32h' of type 'Elastic Moduli'
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C151-C109
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-C109' - found 15 files
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' classified as Microstructure (IMG only)
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-C109' of type 'Microstructure Generation'
+2025-10-03 13:20:05,990 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 12 results from Operations folder
+2025-10-03 13:20:05,994 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-10-03 13:20:05,995 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-10-03 13:20:05,996 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-database (tried all sizes)
+2025-10-03 13:20:05,996 - VCCTL.CarbonIconManager - WARNING - Icon not found: 48-statistics (tried all sizes)
+2025-10-03 13:20:06,145 - VCCTL.MainWindow - INFO - Main window initialized
+2025-10-03 13:20:06,170 - VCCTL.ResultsPanel - INFO - Results panel: Performing initial load of operations
+2025-10-03 13:20:06,170 - VCCTL.ResultsPanel - INFO - Results panel: Starting to load results from Operations folder
+2025-10-03 13:20:06,170 - VCCTL.ResultsPanel - INFO - Results panel: Scanning Operations directory: /Users/jwbullard/Software/vcctl-gtk/Operations
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-336.14h
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-673.32h
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C152-C109-504.84h
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-Final
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Found nested elastic operation: Elastic-HydrationOf-C151-C109-673.32h
+2025-10-03 13:20:06,171 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109a
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109a' - found 16 files
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109a' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109a' classified as Microstructure (IMG only)
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109a' of type 'Microstructure Generation'
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C152-C109
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C152-C109' - found 16 files
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: 'C152-C109' classified as Microstructure (IMG only)
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C152-C109' of type 'Microstructure Generation'
+2025-10-03 13:20:06,172 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: grading_files
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'grading_files' - found 1 files
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' - time_series_img: False, csv: False, img: False
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: 'grading_files' classified as Unknown
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'grading_files' of type 'Unknown Analysis'
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109a
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109a' - found 31 files
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109a' classified as Hydration (folder name)
+2025-10-03 13:20:06,173 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109a' of type 'Hydration Simulation'
+2025-10-03 13:20:06,174 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C152-C109
+2025-10-03 13:20:06,174 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C152-C109' - found 57 files
+2025-10-03 13:20:06,174 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C152-C109' classified as Hydration (folder name)
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C152-C109' of type 'Hydration Simulation'
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-336.14h
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-336.14h' - found 12 files
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-336.14h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-336.14h' of type 'Elastic Moduli'
+2025-10-03 13:20:06,175 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-673.32h
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-673.32h' - found 1 files
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-673.32h' classified as Hydration (folder name)
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-673.32h' of type 'Hydration Simulation'
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C152-C109-504.84h
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C152-C109-504.84h' - found 12 files
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C152-C109-504.84h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C152-C109-504.84h' of type 'Elastic Moduli'
+2025-10-03 13:20:06,176 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: HydrationOf-C151-C109
+2025-10-03 13:20:06,177 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'HydrationOf-C151-C109' - found 45 files
+2025-10-03 13:20:06,177 - VCCTL.ResultsPanel - INFO - Results panel: 'HydrationOf-C151-C109' classified as Hydration (folder name)
+2025-10-03 13:20:06,177 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'HydrationOf-C151-C109' of type 'Hydration Simulation'
+2025-10-03 13:20:06,177 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-Final
+2025-10-03 13:20:06,177 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-Final' - found 1 files
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-Final' classified as Hydration (folder name)
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-Final' of type 'Hydration Simulation'
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: Elastic-HydrationOf-C151-C109-673.32h
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'Elastic-HydrationOf-C151-C109-673.32h' - found 13 files
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: 'Elastic-HydrationOf-C151-C109-673.32h' classified as Elastic Moduli (files detected)
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'Elastic-HydrationOf-C151-C109-673.32h' of type 'Elastic Moduli'
+2025-10-03 13:20:06,178 - VCCTL.ResultsPanel - INFO - Results panel: Processing result folder: C151-C109
+2025-10-03 13:20:06,179 - VCCTL.ResultsPanel - INFO - Results panel: Analyzing 'C151-C109' - found 15 files
+2025-10-03 13:20:06,179 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' - time_series_img: False, csv: False, img: True
+2025-10-03 13:20:06,179 - VCCTL.ResultsPanel - INFO - Results panel: 'C151-C109' classified as Microstructure (IMG only)
+2025-10-03 13:20:06,179 - VCCTL.ResultsPanel - INFO - Results panel: Added result 'C151-C109' of type 'Microstructure Generation'
+2025-10-03 13:20:06,179 - VCCTL.ResultsPanel - INFO - Results panel: Loaded 12 results from Operations folder
+2025-10-03 13:20:06,418 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-10-03 13:20:06,418 - VCCTL.MixDesignPanel - INFO - DEBUG: _create_mix_design_from_ui - found 0 UI component rows
+2025-10-03 13:20:17,279 - VCCTL - INFO - Quitting application
+2025-10-03 13:20:17,279 - VCCTL - INFO - Application shutdown
+2025-10-03 13:20:17,279 - VCCTL.MainWindow - INFO - Cleaning up main window resources
+2025-10-03 13:20:17,279 - VCCTL.OperationsMonitoringPanel - INFO - Starting operations monitoring panel cleanup...
+2025-10-03 13:20:17,279 - VCCTL.OperationsMonitoringPanel - INFO - Cancelled progress update timeout
+2025-10-03 13:20:17,781 - VCCTL.OperationsMonitoringPanel - WARNING - Monitoring thread did not terminate in time, continuing shutdown
+2025-10-03 13:20:17,781 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring stopped
+2025-10-03 13:20:17,781 - VCCTL.OperationsMonitoringPanel - INFO - Operations monitoring panel cleanup completed - saved 8 operations
+2025-10-03 13:20:18,047 - VCCTL.OperationsMonitoringPanel - INFO - Monitoring loop ended
+2025-10-03 13:20:18,283 - VCCTL.PerformanceMonitor - WARNING - Performance monitoring thread did not terminate in time, continuing shutdown
+2025-10-03 13:20:18,283 - VCCTL.PerformanceMonitor - INFO - Performance monitoring stopped
+2025-10-03 13:20:18,287 - VCCTL.PerformanceMonitor - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1759515618.json
+2025-10-03 13:20:18,287 - VCCTL.MainWindow - INFO - Performance data exported to /var/folders/2f/qqrt7y2n41769yhh_r31qf840000gq/T/vcctl_performance_1759515618.json
+2025-10-03 13:20:18,300 - VCCTL.ConfigManager - INFO - Configuration saved successfully
+2025-10-03 13:20:18,308 - VCCTL.ConfigManager - INFO - Configuration saved successfully

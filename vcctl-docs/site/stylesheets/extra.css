@@ -1,0 +1,109 @@
+/* Texas A&M University Color Scheme for VCCTL Documentation */
+
+/* Color Variables */
+:root {
+  --vcctl-maroon: rgb(80, 0, 0);
+  --vcctl-white: rgb(255, 255, 255);
+  --vcctl-gray: rgb(209, 209, 209);
+  --vcctl-maroon-light: rgb(120, 20, 20);
+  --vcctl-maroon-dark: rgb(60, 0, 0);
+}
+
+/* Primary Color - Maroon */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--vcctl-maroon);
+  --md-primary-fg-color--light: var(--vcctl-maroon-light);
+  --md-primary-fg-color--dark: var(--vcctl-maroon-dark);
+  --md-primary-bg-color: var(--vcctl-white);
+  --md-primary-bg-color--light: var(--vcctl-gray);
+}
+
+/* Accent Color - Maroon */
+[data-md-color-scheme="default"] {
+  --md-accent-fg-color: var(--vcctl-maroon);
+  --md-accent-fg-color--transparent: rgba(80, 0, 0, 0.1);
+  --md-accent-bg-color: var(--vcctl-white);
+  --md-accent-bg-color--light: var(--vcctl-gray);
+}
+
+/* Dark Mode - Adjusted Maroon */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: var(--vcctl-maroon-light);
+  --md-primary-fg-color--light: rgb(150, 30, 30);
+  --md-primary-fg-color--dark: var(--vcctl-maroon);
+}
+
+/* Header Styling */
+.md-header {
+  background-color: var(--vcctl-maroon);
+}
+
+/* Navigation Tabs */
+.md-tabs {
+  background-color: var(--vcctl-maroon);
+}
+
+/* Links */
+a {
+  color: var(--vcctl-maroon);
+}
+
+a:hover {
+  color: var(--vcctl-maroon-light);
+}
+
+/* Code Blocks */
+.md-typeset code {
+  background-color: rgba(80, 0, 0, 0.05);
+}
+
+/* Admonitions */
+.md-typeset .admonition.note {
+  border-color: var(--vcctl-maroon);
+}
+
+.md-typeset .admonition.note > .admonition-title {
+  background-color: rgba(80, 0, 0, 0.1);
+}
+
+/* Tables */
+.md-typeset table:not([class]) th {
+  background-color: var(--vcctl-maroon);
+  color: var(--vcctl-white);
+}
+
+/* Buttons */
+.md-button {
+  color: var(--vcctl-maroon);
+  border-color: var(--vcctl-maroon);
+}
+
+.md-button--primary {
+  background-color: var(--vcctl-maroon);
+  color: var(--vcctl-white);
+  border-color: var(--vcctl-maroon);
+}
+
+.md-button--primary:hover {
+  background-color: var(--vcctl-maroon-light);
+  border-color: var(--vcctl-maroon-light);
+}
+
+/* Search */
+.md-search__input {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.md-search__input:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Footer */
+.md-footer {
+  background-color: var(--vcctl-maroon-dark);
+}
+
+/* Version Badge */
+.md-version__current {
+  color: var(--vcctl-maroon);
+}

@@ -1,0 +1,2217 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/workflows/troubleshooting/">
+      
+      
+        <link rel="prev" href="../advanced-analysis/">
+      
+      
+        <link rel="next" href="../../reference/material-properties/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Troubleshooting - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#troubleshooting-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Troubleshooting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../user-guide/materials-management/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/materials-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/mix-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/elastic-calculations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/results-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/operations-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#materials-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Materials Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Materials Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-create-or-edit-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Create or Edit Materials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#material-import-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      Material Import Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Warnings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mix-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mix Design
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mix Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mix-validation-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mix Validation Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#microstructure-generation-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      Microstructure Generation Fails
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydration-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hydration Simulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydration Simulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simulation-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simulation Won't Start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simulation-runs-very-slowly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simulation Runs Very Slowly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unrealistic-hydration-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unrealistic Hydration Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#elastic-calculations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elastic Calculations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Elastic Calculations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#calculation-fails-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculation Fails to Start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculation-doesnt-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculation Doesn't Complete
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unrealistic-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unrealistic Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Results Visualization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Results Visualization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3d-viewer-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D Viewer Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plot-display-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plot Display Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export Problems
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operations-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operations Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operations Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operation-stuck-at-same-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Stuck at Same Progress
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operation-failed-unexpectedly" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operation Failed Unexpectedly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cannot-pause-or-resume" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cannot Pause or Resume
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleted-operation-still-appears" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deleted Operation Still Appears
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general-system-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      General System Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="General System Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#application-wont-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Won't Start
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-responsiveness-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      UI Responsiveness Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-io-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      File I/O Errors
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization Tips
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reducing-simulation-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reducing Simulation Time
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#managing-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Managing Memory Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-space-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disk Space Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-additional-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Additional Help
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Error Messages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typical-value-ranges" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typical Value Ranges
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="troubleshooting-guide">Troubleshooting Guide<a class="headerlink" href="#troubleshooting-guide" title="Permanent link">¶</a></h1>
+<p>This comprehensive troubleshooting guide consolidates common issues and solutions from all VCCTL operations. Issues are organized by workflow area for easy reference.</p>
+<hr>
+<h2 id="materials-management">Materials Management<a class="headerlink" href="#materials-management" title="Permanent link">¶</a></h2>
+<h3 id="cannot-create-or-edit-materials">Cannot Create or Edit Materials<a class="headerlink" href="#cannot-create-or-edit-materials" title="Permanent link">¶</a></h3>
+<p><strong>Error: "Material name already exists"</strong>:</p>
+<ul>
+<li>Material names must be unique within each type</li>
+<li>Try adding a version number or date to the name (e.g., "TypeI-Cement-v2")</li>
+<li>Delete the existing material if you want to reuse the name</li>
+</ul>
+<p><strong>PSD (Particle Size Distribution) errors</strong>:</p>
+<ul>
+<li>Ensure cumulative passing values are between 0-100%</li>
+<li>Values must increase monotonically (each value ≥ previous value)</li>
+<li>Include at least 3 data points for valid PSD</li>
+<li>Check that sieve sizes are in micrometers (μm)</li>
+</ul>
+<h3 id="material-import-fails">Material Import Fails<a class="headerlink" href="#material-import-fails" title="Permanent link">¶</a></h3>
+<p><strong>Invalid file format</strong>:</p>
+<ul>
+<li>Supported formats: JSON, CSV</li>
+<li>Check file encoding (should be UTF-8)</li>
+<li>Verify JSON syntax is valid (no trailing commas, proper quotes)</li>
+<li>CSV files should have headers in first row</li>
+</ul>
+<p><strong>Missing required fields</strong>:</p>
+<ul>
+<li>Cement materials require: name, density, chemical composition (oxide percentages)</li>
+<li>Aggregates require: name, density, PSD data</li>
+<li>SCMs require: name, density, type, chemical composition</li>
+</ul>
+<h3 id="validation-warnings">Validation Warnings<a class="headerlink" href="#validation-warnings" title="Permanent link">¶</a></h3>
+<p><strong>Cement composition doesn't sum to 100%</strong>:</p>
+<ul>
+<li>Check that all oxide percentages (SiO₂, Al₂O₃, Fe₂O₃, CaO, MgO, SO₃, etc.) sum to ~100% (±2%)</li>
+<li>Use normalized values if working from non-normalized data</li>
+<li>Missing oxides should be set to 0%, not left blank</li>
+</ul>
+<p><strong>Unrealistic density values</strong>:</p>
+<ul>
+<li>Typical Portland cement: 3.10-3.20 g/cm³</li>
+<li>Aggregates: 2.60-2.80 g/cm³ (silica/limestone), up to 3.0 g/cm³ (dense aggregates)</li>
+<li>Fly ash: 2.2-2.4 g/cm³</li>
+<li>Slag: 2.85-2.95 g/cm³</li>
+<li>Silica fume: 2.2-2.3 g/cm³</li>
+</ul>
+<hr>
+<h2 id="mix-design">Mix Design<a class="headerlink" href="#mix-design" title="Permanent link">¶</a></h2>
+<h3 id="mix-validation-fails">Mix Validation Fails<a class="headerlink" href="#mix-validation-fails" title="Permanent link">¶</a></h3>
+<p><strong>Water-binder ratio out of range</strong>:</p>
+<ul>
+<li>Practical range: 0.25-0.70</li>
+<li>Very low w/b (&lt;0.30): May have workability issues</li>
+<li>Very high w/b (&gt;0.60): Poor strength and durability</li>
+<li>Adjust water content or binder content to achieve target</li>
+</ul>
+<p><strong>Component volume fractions don't sum to 1.0</strong>:</p>
+<ul>
+<li>Total volume fractions should equal 100% (allowing for air content)</li>
+<li>Check that all materials have correct densities</li>
+<li>Verify mass inputs are in consistent units</li>
+<li>Air content typically 1-8% for normal concrete</li>
+</ul>
+<p><strong>Aggregate grading issues</strong>:</p>
+<ul>
+<li>Fine/coarse aggregate ratio typically 35:65 to 45:55</li>
+<li>Ensure gradation curves are smooth (no gaps or sudden jumps)</li>
+<li>Total aggregate content typically 60-75% by volume</li>
+</ul>
+<h3 id="microstructure-generation-fails">Microstructure Generation Fails<a class="headerlink" href="#microstructure-generation-fails" title="Permanent link">¶</a></h3>
+<p><strong>System size too large</strong>:</p>
+<ul>
+<li>Maximum recommended: 200×200×200 voxels</li>
+<li>Larger systems require significant RAM (&gt;16 GB)</li>
+<li>Start with 100×100×100 for testing</li>
+<li>Use 1.0 μm/voxel resolution currently</li>
+</ul>
+<p><strong>Particle placement fails</strong>:</p>
+<ul>
+<li>Volume fractions may be too high for successful packing</li>
+<li>Reduce total solid content slightly (increase w/c ratio)</li>
+<li>Check that aggregate sizes are appropriate for system size</li>
+<li>Very large particles may not fit in small systems</li>
+</ul>
+<p><strong>Operation shows "Failed" status</strong>:</p>
+<ul>
+<li>Check Operations panel for detailed error message</li>
+<li>Review console_output.txt in operation folder for full log</li>
+<li>Common causes: Memory exhaustion, invalid PSD data, file permission issues</li>
+</ul>
+<hr>
+<h2 id="hydration-simulation">Hydration Simulation<a class="headerlink" href="#hydration-simulation" title="Permanent link">¶</a></h2>
+<h3 id="simulation-wont-start">Simulation Won't Start<a class="headerlink" href="#simulation-wont-start" title="Permanent link">¶</a></h3>
+<p><strong>No microstructure selected</strong>:</p>
+<ul>
+<li>Must select an initial microstructure from dropdown</li>
+<li>Microstructure must be from a completed Mix Design operation</li>
+<li>If dropdown is empty, create a mix design first</li>
+</ul>
+<p><strong>Invalid simulation parameters</strong>:</p>
+<ul>
+<li>Target simulation time must be &gt; 0</li>
+<li>Temperature must be reasonable (5-60°C)</li>
+<li>Time step size should be appropriate for kinetics</li>
+<li>Check that all required fields have values</li>
+</ul>
+<h3 id="simulation-runs-very-slowly">Simulation Runs Very Slowly<a class="headerlink" href="#simulation-runs-very-slowly" title="Permanent link">¶</a></h3>
+<p><strong>Large system size</strong>:</p>
+<ul>
+<li>Hydration time scales with system volume</li>
+<li>100×100×100 system: ~30-60 minutes for 28 days</li>
+<li>200×200×200 system: Several hours for 28 days</li>
+<li>Consider smaller system for parameter studies</li>
+</ul>
+<p><strong>High target time</strong>:</p>
+<ul>
+<li>Hydration to 90+ days can take many hours</li>
+<li>Most property development occurs in first 28 days</li>
+<li>Use shorter times for initial testing</li>
+<li>Run long simulations overnight</li>
+</ul>
+<h3 id="unrealistic-hydration-results">Unrealistic Hydration Results<a class="headerlink" href="#unrealistic-hydration-results" title="Permanent link">¶</a></h3>
+<p><strong>Degree of hydration too high/low</strong>:</p>
+<ul>
+<li>Check w/c ratio is realistic (0.3-0.6 typical)</li>
+<li>Verify cement composition is correct</li>
+<li>Temperature affects hydration rate significantly</li>
+<li>Time conversion factor may need adjustment (default: 0.00035)</li>
+</ul>
+<p><strong>Heat evolution doesn't match experiments</strong>:</p>
+<ul>
+<li>Adjust time calibration parameters</li>
+<li>Check cement composition matches experimental cement</li>
+<li>Verify activation energies are appropriate</li>
+<li>Temperature profile should match experimental conditions</li>
+</ul>
+<hr>
+<h2 id="elastic-calculations">Elastic Calculations<a class="headerlink" href="#elastic-calculations" title="Permanent link">¶</a></h2>
+<h3 id="calculation-fails-to-start">Calculation Fails to Start<a class="headerlink" href="#calculation-fails-to-start" title="Permanent link">¶</a></h3>
+<p><strong>No microstructures available</strong>:</p>
+<ul>
+<li>Ensure you've completed a hydration simulation first</li>
+<li>Check that hydration operation generated snapshots</li>
+<li>Verify Operations folder contains hydration results</li>
+</ul>
+<p><strong>Missing aggregate properties</strong>:</p>
+<ul>
+<li>If calculation requires aggregates, all properties must be specified</li>
+<li>Use default values if unsure (bulk: 37 GPa, shear: 29 GPa)</li>
+</ul>
+<h3 id="calculation-doesnt-complete">Calculation Doesn't Complete<a class="headerlink" href="#calculation-doesnt-complete" title="Permanent link">¶</a></h3>
+<p><strong>Slow convergence</strong>:</p>
+<ul>
+<li>Check progress panel for gradient values</li>
+<li>If gradient not decreasing, microstructure may have issues</li>
+<li>Try with different microstructure snapshot</li>
+</ul>
+<p><strong>Memory issues</strong>:</p>
+<ul>
+<li>Large microstructures (&gt;200×200×200) may require significant RAM</li>
+<li>Consider using smaller system sizes in mix design</li>
+</ul>
+<h3 id="unrealistic-results">Unrealistic Results<a class="headerlink" href="#unrealistic-results" title="Permanent link">¶</a></h3>
+<p><strong>Elastic modulus too high or too low</strong>:</p>
+<ul>
+<li>Verify aggregate elastic properties are reasonable</li>
+<li>Check that microstructure hydration reached expected degree</li>
+<li>Ensure proper units (GPa for moduli)</li>
+<li>Typical mature paste: 18-25 GPa; with aggregates: 25-40 GPa</li>
+</ul>
+<p><strong>ITZ analysis shows no variation</strong>:</p>
+<ul>
+<li>Requires aggregates in mix design</li>
+<li>ITZ effects may be subtle at early ages</li>
+<li>Ensure sufficient spatial resolution in microstructure</li>
+</ul>
+<hr>
+<h2 id="results-visualization">Results Visualization<a class="headerlink" href="#results-visualization" title="Permanent link">¶</a></h2>
+<h3 id="3d-viewer-issues">3D Viewer Issues<a class="headerlink" href="#3d-viewer-issues" title="Permanent link">¶</a></h3>
+<p><strong>Viewer opens but shows black/blank screen</strong>:</p>
+<ul>
+<li>Check that operation completed successfully</li>
+<li>Verify microstructure files exist in Operations folder</li>
+<li>Try restarting VCCTL to refresh PyVista backend</li>
+</ul>
+<p><strong>Slow rendering performance</strong>:</p>
+<ul>
+<li>Switch to isosurface mode (faster than volume rendering)</li>
+<li>Hide unnecessary phases to reduce complexity</li>
+<li>Disable cross-section planes when not needed</li>
+<li>Close other open viewers</li>
+<li>Consider smaller system sizes in future simulations</li>
+</ul>
+<p><strong>Phase colors all look similar</strong>:</p>
+<ul>
+<li>Click color swatches in phase controls</li>
+<li>Choose more contrasting colors manually</li>
+<li>Use colorblind-friendly palettes for accessibility</li>
+</ul>
+<h3 id="plot-display-issues">Plot Display Issues<a class="headerlink" href="#plot-display-issues" title="Permanent link">¶</a></h3>
+<p><strong>"No data available for plotting"</strong>:</p>
+<ul>
+<li>Ensure hydration simulation saved time-series output</li>
+<li>Check that simulation ran to completion</li>
+<li>Verify progress.json or output files exist in operation folder</li>
+</ul>
+<p><strong>Plot appears but shows unexpected values</strong>:</p>
+<ul>
+<li>Verify time units match expectations (hours vs days)</li>
+<li>Check that degree of hydration is between 0 and 1</li>
+<li>Compare heat values to typical Portland cement (300-400 J/g total)</li>
+</ul>
+<h3 id="export-problems">Export Problems<a class="headerlink" href="#export-problems" title="Permanent link">¶</a></h3>
+<p><strong>Export button does not work</strong>:</p>
+<ul>
+<li>Check disk space availability</li>
+<li>Verify write permissions for output directory</li>
+<li>Try exporting to different location (Desktop, Documents)</li>
+<li>Check for special characters in filename</li>
+</ul>
+<p><strong>Exported data appears corrupted</strong>:</p>
+<ul>
+<li>Ensure operation completed fully before exporting</li>
+<li>Try different export format (CSV vs JSON)</li>
+<li>Check that files aren't locked by other applications</li>
+</ul>
+<hr>
+<h2 id="operations-monitoring">Operations Monitoring<a class="headerlink" href="#operations-monitoring" title="Permanent link">¶</a></h2>
+<h3 id="operation-stuck-at-same-progress">Operation Stuck at Same Progress<a class="headerlink" href="#operation-stuck-at-same-progress" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Progress percentage not changing for extended period, current step text not updating</p>
+<p><strong>Possible Causes</strong>:</p>
+<ol>
+<li><strong>Long computation phase</strong>: Some operations have phases that take disproportionately long (e.g., elastic convergence)</li>
+<li><strong>System resource contention</strong>: Other programs consuming CPU/memory</li>
+<li><strong>Disk I/O bottleneck</strong>: Slow disk writing snapshots</li>
+</ol>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Wait longer (some phases genuinely take time)</li>
+<li>Close other applications to free resources</li>
+<li>Check system monitor for CPU/memory usage</li>
+<li>If truly stuck (&gt;1 hour with no progress), cancel and restart</li>
+</ul>
+<h3 id="operation-failed-unexpectedly">Operation Failed Unexpectedly<a class="headerlink" href="#operation-failed-unexpectedly" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Status changes to Failed (red X), progress stops</p>
+<p><strong>Common Causes</strong>:</p>
+<ol>
+<li><strong>Invalid parameters</strong>: Check console logs for error messages</li>
+<li><strong>Insufficient memory</strong>: Operation ran out of RAM</li>
+<li><strong>Disk full</strong>: No space to write output files</li>
+<li><strong>File permissions</strong>: Cannot write to Operations folder</li>
+</ol>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Review operation parameters before restarting</li>
+<li>Reduce system size if memory issue</li>
+<li>Free up disk space (need several GB for large operations)</li>
+<li>Check Operations folder permissions (should be read/write)</li>
+</ul>
+<h3 id="cannot-pause-or-resume">Cannot Pause or Resume<a class="headerlink" href="#cannot-pause-or-resume" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Pause button does nothing, Resume button grayed out</p>
+<p><strong>Possible Causes</strong>:</p>
+<ol>
+<li><strong>Operation in transition</strong>: Status changing between states</li>
+<li><strong>Backend process not responding</strong>: Rare but possible</li>
+</ol>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Wait a few seconds and try again</li>
+<li>If persistent, cancel operation and restart</li>
+<li>Restart VCCTL application if problem continues</li>
+</ul>
+<h3 id="deleted-operation-still-appears">Deleted Operation Still Appears<a class="headerlink" href="#deleted-operation-still-appears" title="Permanent link">¶</a></h3>
+<p><strong>Symptoms</strong>: Deleted operation reappears after refresh, database shows operation still exists</p>
+<p><strong>Possible Causes</strong>:</p>
+<ol>
+<li><strong>Database sync delay</strong>: Sometimes takes a moment to update</li>
+<li><strong>File lock</strong>: Output files still open by viewer</li>
+</ol>
+<p><strong>Solutions</strong>:</p>
+<ul>
+<li>Refresh the operations list manually</li>
+<li>Close any open result viewers for that operation</li>
+<li>Restart VCCTL if issue persists</li>
+</ul>
+<hr>
+<h2 id="general-system-issues">General System Issues<a class="headerlink" href="#general-system-issues" title="Permanent link">¶</a></h2>
+<h3 id="application-wont-start">Application Won't Start<a class="headerlink" href="#application-wont-start" title="Permanent link">¶</a></h3>
+<p><strong>"Module not found" errors</strong>:</p>
+<ul>
+<li>Verify virtual environment is activated</li>
+<li>Reinstall dependencies: <code>pip install -r requirements.txt</code></li>
+<li>Check Python version (requires Python 3.8+)</li>
+</ul>
+<p><strong>GTK initialization errors</strong>:</p>
+<ul>
+<li>Ensure GTK 3.0 is installed on your system</li>
+<li>macOS: <code>brew install gtk+3</code></li>
+<li>Linux: <code>sudo apt-get install python3-gi gir1.2-gtk-3.0</code></li>
+<li>Windows: Use MSYS2/GTK installer</li>
+</ul>
+<h3 id="ui-responsiveness-issues">UI Responsiveness Issues<a class="headerlink" href="#ui-responsiveness-issues" title="Permanent link">¶</a></h3>
+<p><strong>Application becomes slow or unresponsive</strong>:</p>
+<ul>
+<li>Close unused panels or dialogs</li>
+<li>Limit number of concurrent operations</li>
+<li>Restart application periodically for long sessions</li>
+<li>Check system resources (Activity Monitor/Task Manager)</li>
+</ul>
+<h3 id="database-errors">Database Errors<a class="headerlink" href="#database-errors" title="Permanent link">¶</a></h3>
+<p><strong>"Database is locked" messages</strong>:</p>
+<ul>
+<li>Another VCCTL instance may be running</li>
+<li>Close all VCCTL windows and restart</li>
+<li>Check for orphaned Python processes</li>
+<li>Worst case: backup and delete <code>vcctl.db-wal</code> file</li>
+</ul>
+<p><strong>Corrupted database</strong>:</p>
+<ul>
+<li>Backup current database: <code>cp vcctl.db vcctl.db.backup</code></li>
+<li>Try database repair (contact support for tools)</li>
+<li>If necessary, start fresh (will lose saved operations)</li>
+</ul>
+<h3 id="file-io-errors">File I/O Errors<a class="headerlink" href="#file-io-errors" title="Permanent link">¶</a></h3>
+<p><strong>Cannot read/write files</strong>:</p>
+<ul>
+<li>Check disk space (need several GB free)</li>
+<li>Verify folder permissions</li>
+<li>Ensure antivirus isn't blocking VCCTL</li>
+<li>Check file paths for special characters or spaces</li>
+</ul>
+<p><strong>Missing operation files</strong>:</p>
+<ul>
+<li>Verify Operations folder exists and is writable</li>
+<li>Check that operations completed successfully</li>
+<li>May need to regenerate from saved parameters</li>
+<li>Use File Manager panel to investigate</li>
+</ul>
+<hr>
+<h2 id="performance-optimization-tips">Performance Optimization Tips<a class="headerlink" href="#performance-optimization-tips" title="Permanent link">¶</a></h2>
+<h3 id="reducing-simulation-time">Reducing Simulation Time<a class="headerlink" href="#reducing-simulation-time" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Use smaller system sizes</strong>: 100×100×100 instead of 200×200×200</li>
+<li><strong>Limit target simulation time</strong>: Focus on critical time points (1d, 7d, 28d)</li>
+<li><strong>Reduce snapshot frequency</strong>: Fewer snapshots = faster hydration</li>
+<li><strong>Run overnight</strong>: Schedule long operations during off-hours</li>
+<li><strong>Close other applications</strong>: Free up CPU and memory</li>
+</ol>
+<h3 id="managing-memory-usage">Managing Memory Usage<a class="headerlink" href="#managing-memory-usage" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Monitor system resources</strong>: Check RAM usage during operations</li>
+<li><strong>Limit concurrent operations</strong>: Run 1-2 at a time max</li>
+<li><strong>Close result viewers</strong>: Free memory after viewing</li>
+<li><strong>Restart periodically</strong>: Clear accumulated memory</li>
+<li><strong>Upgrade RAM</strong>: 16+ GB recommended for large systems</li>
+</ol>
+<h3 id="disk-space-management">Disk Space Management<a class="headerlink" href="#disk-space-management" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Clean old operations</strong>: Delete test runs regularly</li>
+<li><strong>Export important data</strong>: Then delete operations</li>
+<li><strong>Archive to external drive</strong>: Move completed work off main disk</li>
+<li><strong>Monitor Operations folder</strong>: Can grow to tens of GB</li>
+</ol>
+<hr>
+<h2 id="getting-additional-help">Getting Additional Help<a class="headerlink" href="#getting-additional-help" title="Permanent link">¶</a></h2>
+<p>If problems persist after trying these solutions:</p>
+<ol>
+<li><strong>Check error logs</strong>:</li>
+<li>Application log: <code>logs/vcctl.log</code></li>
+<li>
+<p>Operation logs: <code>Operations/[operation-name]/console_output.txt</code></p>
+</li>
+<li>
+<p><strong>Document the issue</strong>:</p>
+</li>
+<li>Steps to reproduce</li>
+<li>Error messages</li>
+<li>System specifications</li>
+<li>
+<p>VCCTL version</p>
+</li>
+<li>
+<p><strong>Gather diagnostic information</strong>:</p>
+</li>
+<li>Screenshot of error</li>
+<li>Relevant operation parameters</li>
+<li>
+<p>System information (OS, RAM, Python version)</p>
+</li>
+<li>
+<p><strong>Contact support</strong>:</p>
+</li>
+<li>GitHub Issues: <a href="https://github.com/jwbullard/VCCTL/issues">github.com/jwbullard/VCCTL/issues</a></li>
+<li>Email: jeff.bullard@tamu.edu</li>
+<li>Include all diagnostic information from above</li>
+</ol>
+<hr>
+<h2 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">¶</a></h2>
+<h3 id="common-error-messages">Common Error Messages<a class="headerlink" href="#common-error-messages" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Error Message</th>
+<th>Likely Cause</th>
+<th>Quick Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"Material name already exists"</td>
+<td>Duplicate name</td>
+<td>Use unique name with version/date</td>
+</tr>
+<tr>
+<td>"Composition does not sum to 100%"</td>
+<td>Invalid oxide %s</td>
+<td>Check all oxides sum to ~100%</td>
+</tr>
+<tr>
+<td>"No microstructure selected"</td>
+<td>Missing input</td>
+<td>Create/select mix design first</td>
+</tr>
+<tr>
+<td>"Operation failed to start"</td>
+<td>Invalid parameters</td>
+<td>Review all parameter values</td>
+</tr>
+<tr>
+<td>"Out of memory"</td>
+<td>System RAM exhausted</td>
+<td>Use smaller system size</td>
+</tr>
+<tr>
+<td>"Disk full"</td>
+<td>No space for output</td>
+<td>Free up disk space</td>
+</tr>
+<tr>
+<td>"Database is locked"</td>
+<td>Concurrent access</td>
+<td>Close other VCCTL instances</td>
+</tr>
+<tr>
+<td>"Cannot write to folder"</td>
+<td>Permission issue</td>
+<td>Check folder permissions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="typical-value-ranges">Typical Value Ranges<a class="headerlink" href="#typical-value-ranges" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Typical Range</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Water-cement ratio</td>
+<td>0.30 - 0.65</td>
+<td>Lower = stronger, less workable</td>
+</tr>
+<tr>
+<td>System size</td>
+<td>50³ - 200³ voxels</td>
+<td>Larger = more accurate, slower</td>
+</tr>
+<tr>
+<td>Resolution</td>
+<td>1.0 μm/voxel</td>
+<td>Current standard</td>
+</tr>
+<tr>
+<td>Cement density</td>
+<td>3.10 - 3.20 g/cm³</td>
+<td>Portland cement typical</td>
+</tr>
+<tr>
+<td>Aggregate density</td>
+<td>2.60 - 2.80 g/cm³</td>
+<td>Silica/limestone typical</td>
+</tr>
+<tr>
+<td>Target hydration time</td>
+<td>1 - 90 days</td>
+<td>28 days common reference</td>
+</tr>
+<tr>
+<td>Elastic modulus (paste)</td>
+<td>18 - 25 GPa</td>
+<td>At 28 days, w/c=0.40</td>
+</tr>
+<tr>
+<td>Elastic modulus (concrete)</td>
+<td>25 - 40 GPa</td>
+<td>With aggregates</td>
+</tr>
+<tr>
+<td>Degree of hydration (28d)</td>
+<td>0.70 - 0.85</td>
+<td>Depends on w/c ratio</td>
+</tr>
+</tbody>
+</table></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../advanced-analysis/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Advanced Analysis">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Advanced Analysis
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../reference/material-properties/" class="md-footer__link md-footer__link--next" aria-label="Next: Material Properties">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Material Properties
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

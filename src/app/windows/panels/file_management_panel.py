@@ -26,6 +26,7 @@ from app.windows.dialogs import (
 from app.utils.batch_file_operations import BatchFileOperationManager, BatchOperationType
 from app.utils.file_history import FileHistoryManager, ChangeType
 from app.utils.icon_utils import set_tool_button_custom_icon
+from app.help.panel_help_button import create_panel_help_button
 
 
 class FileManagementPanel(Gtk.Box):
@@ -84,15 +85,41 @@ class FileManagementPanel(Gtk.Box):
     
     def _setup_ui(self) -> None:
         """Setup the panel UI."""
+        # Create header
+        self._create_header()
+
         # Create toolbar
         self._create_toolbar()
-        
+
         # Create main content area with paned layout
         self._create_content_area()
-        
+
         # Create status bar
         self._create_status_bar()
-    
+
+    def _create_header(self) -> None:
+        """Create the panel header."""
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        header_box.set_margin_top(10)
+        header_box.set_margin_bottom(5)
+        header_box.set_margin_left(10)
+        header_box.set_margin_right(10)
+
+        # Title
+        title_label = Gtk.Label()
+        title_label.set_markup('<span size="large" weight="bold">File Management</span>')
+        title_label.set_halign(Gtk.Align.START)
+        header_box.pack_start(title_label, False, False, 0)
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('FileManagementPanel', self.main_window)
+        header_box.pack_start(help_button, False, False, 5)
+
+        # Spacer
+        header_box.pack_start(Gtk.Box(), True, True, 0)
+
+        self.pack_start(header_box, False, False, 0)
+
     def _create_toolbar(self) -> None:
         """Create the file operations toolbar."""
         toolbar = Gtk.Toolbar()

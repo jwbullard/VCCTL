@@ -21,6 +21,7 @@ from datetime import timedelta, datetime
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, Gdk, GLib
 from app.utils.icon_utils import create_icon_image
+from app.help.panel_help_button import create_panel_help_button
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -91,11 +92,15 @@ class MixDesignPanel(Gtk.Box):
         
         # Title and description
         title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        
+
         title_label = Gtk.Label()
         title_label.set_markup('<span size="large" weight="bold">Mix Design</span>')
         title_label.set_halign(Gtk.Align.START)
         title_box.pack_start(title_label, False, False, 0)
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('MixDesignPanel', self.main_window)
+        title_box.pack_start(help_button, False, False, 5)
         
         # Auto-calculate toggle
         self.auto_calc_switch = Gtk.Switch()

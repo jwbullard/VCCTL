@@ -17,6 +17,7 @@ from decimal import Decimal
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GObject, Pango, Gdk
 from app.utils.icon_utils import create_icon_image
+from app.help.panel_help_button import create_panel_help_button
 
 if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
@@ -78,11 +79,15 @@ class AggregatePanel(Gtk.Box):
         
         # Title and controls
         title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        
+
         title_label = Gtk.Label()
         title_label.set_markup('<span size="large" weight="bold">Aggregate & Grading Management</span>')
         title_label.set_halign(Gtk.Align.START)
         title_box.pack_start(title_label, False, False, 0)
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('AggregatePanel', self.main_window)
+        title_box.pack_start(help_button, False, False, 5)
         
         # Mode selection
         mode_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)

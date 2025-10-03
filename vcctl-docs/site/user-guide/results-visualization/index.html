@@ -1,0 +1,2552 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/user-guide/results-visualization/">
+      
+      
+        <link rel="prev" href="../elastic-calculations/">
+      
+      
+        <link rel="next" href="../operations-monitoring/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Results Visualization - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#results-visualization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Results Visualization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../materials-management/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../workflows/basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../materials-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mix-design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elastic-calculations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-results-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Results Panel
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-operation-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Operation Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Operation Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#microstructure-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Microstructure Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydration-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hydration Operations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#elastic-moduli-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Elastic Moduli Operations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3d-microstructure-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D Microstructure Visualization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3D Microstructure Visualization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-the-3d-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening the 3D Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#navigation-and-camera-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Navigation and Camera Controls
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendering-modes-for-microstructure-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rendering Modes for Microstructure Visualization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-data-and-visibility-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase Data and Visibility Control
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase Data and Visibility Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#viewing-phase-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Phase Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-visibility-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase Visibility Controls
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-section-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Section Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Section Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enabling-cross-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enabling Cross Sections
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-section-analysis-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Section Analysis Applications
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydration-time-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hydration Time Evolution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydration Time Evolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-time-slider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using the Time Slider
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observing-hydration-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      Observing Hydration Progress
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connectivity-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connectivity Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connectivity Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performing-connectivity-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performing Connectivity Analysis
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-connectivity-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Connectivity Results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting Results
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydration-data-plotting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hydration Data Plotting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydration Data Plotting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-plot-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening Plot Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#available-plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Plots
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Plots
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plot-interaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plot Interaction
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#strain-energy-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strain Energy Visualization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Strain Energy Visualization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accessing-strain-energy-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing Strain Energy Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strain-energy-heat-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strain Energy Heat Map
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#threshold-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      Threshold Control
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendering-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rendering Modes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#strain-energy-cross-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      Strain Energy Cross Sections
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#effective-moduli-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Effective Moduli Results
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Effective Moduli Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-moduli-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening Moduli Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exporting-moduli-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting Moduli Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#itz-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      ITZ Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ITZ Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opening-itz-viewer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Opening ITZ Viewer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#itz-plot-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      ITZ Plot Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-itz-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Interpreting ITZ Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exporting-itz-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exporting ITZ Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#visualization-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Visualization Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-export-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Export Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-visualization-for-publications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quality Visualization for Publications
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3d-viewer-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      3D Viewer Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plot-display-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plot Display Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#export-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export Problems
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="results-visualization">Results Visualization<a class="headerlink" href="#results-visualization" title="Permanent link">¶</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>The <strong>Results</strong> panel in VCCTL provides a centralized location for viewing and analyzing outputs from all completed operations. Whether you've generated microstructures, run hydration simulations, or calculated elastic moduli, this panel gives you access to visualization tools, data plots, and export capabilities.</p>
+<p><strong>Key capabilities:</strong></p>
+<ul>
+<li>View 3D microstructure visualizations with phase coloring</li>
+<li>Plot hydration degree of hydration and heat evolution</li>
+<li>Analyze strain energy distributions in 3D</li>
+<li>Examine interfacial transition zone (ITZ) properties</li>
+<li>Perform connectivity and percolation analysis</li>
+<li>Export data for external analysis</li>
+</ul>
+<hr>
+<h2 id="accessing-the-results-panel">Accessing the Results Panel<a class="headerlink" href="#accessing-the-results-panel" title="Permanent link">¶</a></h2>
+<ol>
+<li>Click the <strong>Results</strong> tab in the left sidebar</li>
+<li>The panel displays a list of all completed operations</li>
+<li>Select an operation to view available visualization options</li>
+<li>Click action buttons on the right to open specific viewers</li>
+</ol>
+<p><img alt="Results Panel Overview" src="../../assets/images/screenshots/results/results-panel-overview.png"></p>
+<hr>
+<h2 id="understanding-operation-types">Understanding Operation Types<a class="headerlink" href="#understanding-operation-types" title="Permanent link">¶</a></h2>
+<p>The Results panel displays different visualization buttons depending on operation type:</p>
+<h3 id="microstructure-operations">Microstructure Operations<a class="headerlink" href="#microstructure-operations" title="Permanent link">¶</a></h3>
+<p>Operations created from the Mix Design panel after pressing "Create Mix".</p>
+<p><strong>Available visualizations:</strong></p>
+<ul>
+<li><strong>View 3D</strong>: Interactive 3D microstructure viewer with phase data</li>
+<li><strong>Phase Data</strong>: Detailed phase volume fractions and statistics</li>
+</ul>
+<p><img alt="Microstructure Results Buttons" src="../../assets/images/screenshots/results/results-panel-microstructure-buttons.png"></p>
+<h3 id="hydration-operations">Hydration Operations<a class="headerlink" href="#hydration-operations" title="Permanent link">¶</a></h3>
+<p>Operations created from the Hydration panel simulating cement hydration over time.</p>
+<p><strong>Available visualizations:</strong></p>
+<ul>
+<li><strong>View 3D</strong>: 3D viewer with time slider for hydration snapshots</li>
+<li><strong>Plot Data</strong>: Charts showing degree of hydration and heat evolution</li>
+</ul>
+<p><img alt="Hydration Results Buttons" src="../../assets/images/screenshots/results/results-panel-hydration-buttons.png"></p>
+<h3 id="elastic-moduli-operations">Elastic Moduli Operations<a class="headerlink" href="#elastic-moduli-operations" title="Permanent link">¶</a></h3>
+<p>Operations created from the Elastic Moduli panel calculating mechanical properties.</p>
+<p><strong>Available visualizations:</strong></p>
+<ul>
+<li><strong>View Effective Moduli</strong>: Table of calculated elastic properties</li>
+<li><strong>View Strain Energy 3D</strong>: 3D heat map of strain energy distribution</li>
+<li><strong>View ITZ Analysis</strong>: Plots of property variation near aggregates (if present)</li>
+</ul>
+<p><img alt="Elastic Results Buttons" src="../../assets/images/screenshots/results/results-panel-elastic-buttons.png"></p>
+<hr>
+<h2 id="3d-microstructure-visualization">3D Microstructure Visualization<a class="headerlink" href="#3d-microstructure-visualization" title="Permanent link">¶</a></h2>
+<p>The 3D viewer provides interactive exploration of microstructure geometry and phase distribution.</p>
+<h3 id="opening-the-3d-viewer">Opening the 3D Viewer<a class="headerlink" href="#opening-the-3d-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>Select a microstructure or hydration operation in the Results panel</li>
+<li>Click <strong>"View 3D"</strong></li>
+<li>The PyVista-based viewer opens with the microstructure rendered</li>
+</ol>
+<p><img alt="3D Microstructure Viewer" src="../../assets/images/screenshots/results/3d-viewer-microstructure.png"></p>
+<h3 id="navigation-and-camera-controls">Navigation and Camera Controls<a class="headerlink" href="#navigation-and-camera-controls" title="Permanent link">¶</a></h3>
+<p><strong>Rotation Controls:</strong></p>
+<ul>
+<li><strong>Left/Right/Up/Down Arrow Boxes</strong>: Rotate view around center</li>
+<li><strong>Zoom+/Zoom-</strong>: Zoom in/out</li>
+</ul>
+<p><strong>Camera Views:</strong></p>
+<p>Use the camera preset buttons to switch between standard orientations:</p>
+<ul>
+<li><strong>Isometric</strong>: 3D perspective view showing depth</li>
+<li><strong>XY Plane</strong>: Top-down view (looking down Z-axis)</li>
+<li><strong>XZ Plane</strong>: Front view (looking along Y-axis)</li>
+<li><strong>YZ Plane</strong>: Side view (looking along X-axis)</li>
+</ul>
+<p><img alt="Camera View Controls" src="../../assets/images/screenshots/results/3d-viewer-isometric.png"></p>
+<div class="admonition tip">
+<p class="admonition-title">Navigation Tips</p>
+<ul>
+<li>Start with <strong>Isometric</strong> view to get overall 3D perspective</li>
+<li>Switch to <strong>orthographic views (XY, XZ, YZ)</strong> for precise alignment inspection</li>
+<li>Use <strong>Zoom+</strong> to focus on regions of interest</li>
+</ul>
+</div>
+<h3 id="rendering-modes-for-microstructure-visualization">Rendering Modes for Microstructure Visualization<a class="headerlink" href="#rendering-modes-for-microstructure-visualization" title="Permanent link">¶</a></h3>
+<p>The viewer offers four rendering modes optimized for different purposes:</p>
+<p><strong>Volume Mode</strong> (default):</p>
+<ul>
+<li>Renders solid volumes of each phase</li>
+<li>Best for visualizing overall structure</li>
+<li>Good rendering performance</li>
+</ul>
+<p><strong>Isosurface Mode</strong>:</p>
+<ul>
+<li>Renders solid surfaces of each phase</li>
+<li>Best for visualizing overall structure</li>
+<li>Faster rendering performance</li>
+<li>Clear phase boundaries</li>
+</ul>
+<p><strong>Pixel Art Mode</strong>:</p>
+<ul>
+<li>Shows individual voxels as small cubes</li>
+<li>Useful for detailed inspection at high zoom</li>
+<li>Reveals discrete nature of simulation grid</li>
+<li>Slower rendering for large systems</li>
+</ul>
+<p><strong>Wireframe Mode</strong>:</p>
+<ul>
+<li>Indicates surfaces as a transparent mesh of wires</li>
+<li>Useful for overall inspection of sparse microstructures</li>
+<li>Not available for visualizing strain energy heat maps</li>
+</ul>
+<hr>
+<h2 id="phase-data-and-visibility-control">Phase Data and Visibility Control<a class="headerlink" href="#phase-data-and-visibility-control" title="Permanent link">¶</a></h2>
+<p>Understand microstructure composition and control which phases are visible.</p>
+<h3 id="viewing-phase-data">Viewing Phase Data<a class="headerlink" href="#viewing-phase-data" title="Permanent link">¶</a></h3>
+<p>Click the <strong>"Phase Data"</strong> button in the toolbar to view detailed phase statistics:</p>
+<p><img alt="Phase Data Table" src="../../assets/images/screenshots/results/3d-viewer-phase-data.png"></p>
+<p><strong>Information displayed:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase Name</strong></td>
+<td>Material phase (<em>e.g.</em>, C₃S, C₂S, CSH, Porosity)</td>
+</tr>
+<tr>
+<td><strong>Phase ID</strong></td>
+<td>Numerical identifier in microstructure file</td>
+</tr>
+<tr>
+<td><strong>Voxel Count</strong></td>
+<td>Number of voxels occupied by this phase</td>
+</tr>
+<tr>
+<td><strong>Volume Fraction</strong></td>
+<td>Percentage of total volume (%)</td>
+</tr>
+<tr>
+<td><strong>Color</strong></td>
+<td>RGB color used for visualization</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Phase Evolution</p>
+<p>For hydration operations, phase volumes change over time. Use the time slider (see below) to see how phases evolve during hydration.</p>
+</div>
+<h3 id="phase-visibility-controls">Phase Visibility Controls<a class="headerlink" href="#phase-visibility-controls" title="Permanent link">¶</a></h3>
+<p>Control which phases are displayed to focus on specific features:</p>
+<p><img alt="Phase Visibility Controls" src="../../assets/images/screenshots/results/3d-viewer-phase-controls.png"></p>
+<p><strong>Checkbox Controls:</strong></p>
+<ul>
+<li><strong>Check</strong>: Phase is visible in 3D view</li>
+<li><strong>Uncheck</strong>: Phase is hidden from view</li>
+<li><strong>Color Swatch</strong>: Click to change phase color</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Phase Visibility</p>
+</div>
+<p>The spinbox next to each phase can be used adjust the transparency of that phase</p>
+<p><strong>Common Analysis Workflows:</strong></p>
+<ul>
+<li><strong>Hide porosity</strong>: See only solid phases to understand particle packing</li>
+<li><strong>Show only one phase</strong>: Isolate specific cement compound or hydration product</li>
+<li><strong>Hide aggregates</strong>: Focus on paste microstructure</li>
+<li><strong>Show only capillary porosity</strong>: Visualize pore network connectivity</li>
+</ul>
+<p><img alt="Example: Porosity Hidden" src="../../assets/images/screenshots/results/3d-viewer-phase-invisible.png"></p>
+<hr>
+<h2 id="cross-section-analysis">Cross-Section Analysis<a class="headerlink" href="#cross-section-analysis" title="Permanent link">¶</a></h2>
+<p>View internal structure by cutting through the microstructure along specific planes.</p>
+<h3 id="enabling-cross-sections">Enabling Cross Sections<a class="headerlink" href="#enabling-cross-sections" title="Permanent link">¶</a></h3>
+<p>Three independent clipping planes are available:</p>
+<ul>
+<li><strong>X Plane</strong>: Cuts perpendicular to X-axis</li>
+<li><strong>Y Plane</strong>: Cuts perpendicular to Y-axis</li>
+<li><strong>Z Plane</strong>: Cuts perpendicular to Z-axis</li>
+</ul>
+<p><img alt="Cross-Section Controls" src="../../assets/images/screenshots/results/3d-viewer-cross-section.png"></p>
+<p><strong>To create a cross section:</strong></p>
+<ol>
+<li>Check the checkbox for desired plane (e.g., "Z Plane")</li>
+<li>Adjust the slider to move the cutting plane position</li>
+<li>The view updates in real-time showing the cross section</li>
+</ol>
+<p><strong>Position Spinbox:</strong></p>
+<ul>
+<li><strong>Left (0%)</strong>: Plane at minimum coordinate (start of axis)</li>
+<li><strong>Middle (50%)</strong>: Plane at center of microstructure</li>
+<li><strong>Right (100%)</strong>: Plane at maximum coordinate (end of axis)</li>
+</ul>
+<h3 id="cross-section-analysis-applications">Cross-Section Analysis Applications<a class="headerlink" href="#cross-section-analysis-applications" title="Permanent link">¶</a></h3>
+<p><strong>Single Plane:</strong></p>
+<ul>
+<li>View 2D slice showing phase distribution</li>
+<li>Examine particle size distribution</li>
+<li>Inspect hydration product morphology at specific location</li>
+</ul>
+<p><strong>Two Perpendicular Planes:</strong></p>
+<ul>
+<li>Create corner view showing two internal faces</li>
+<li>Better spatial understanding of 3D structure</li>
+<li>Useful for presentations and publications</li>
+</ul>
+<p><strong>Three Planes:</strong></p>
+<ul>
+<li>Isolate specific internal region</li>
+<li>Focus on localized phenomena (e.g., around one aggregate particle)</li>
+<li>Study microstructure at specific coordinates</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Best Practice</p>
+<p>Start with Z-plane at 50% to see a central horizontal slice. This often provides the most representative view of the overall microstructure.</p>
+</div>
+<hr>
+<h2 id="hydration-time-evolution">Hydration Time Evolution<a class="headerlink" href="#hydration-time-evolution" title="Permanent link">¶</a></h2>
+<p>For hydration operations, explore how the microstructure changes over simulation time.</p>
+<h3 id="using-the-time-slider">Using the Time Slider<a class="headerlink" href="#using-the-time-slider" title="Permanent link">¶</a></h3>
+<p><img alt="Time Slider Control" src="../../assets/images/screenshots/results/hydration-time-slider.png"></p>
+<p><strong>Accessing time snapshots:</strong></p>
+<ol>
+<li>Open 3D viewer for a hydration operation</li>
+<li>Locate the <strong>time slider</strong> at the bottom of the viewer</li>
+<li>Drag the slider or click time markers to load different snapshots</li>
+</ol>
+<p><strong>Time Information:</strong></p>
+<ul>
+<li><strong>Time Labels</strong>: Show simulation time (e.g., "0.0 h", "24.0 h", "168.0 h")</li>
+<li><strong>Current Time</strong>: Displayed prominently above slider</li>
+<li><strong>Snapshot Count</strong>: Shows available time points (e.g., "Snapshot 5 of 12")</li>
+</ul>
+<h3 id="observing-hydration-progress">Observing Hydration Progress<a class="headerlink" href="#observing-hydration-progress" title="Permanent link">¶</a></h3>
+<p>As you move through time, observe:</p>
+<p><strong>Early Times (0 hours to 24 hours):</strong></p>
+<ul>
+<li>Anhydrous cement particles visible (C₃S, C₂S, C₃A, C₄AF phases)</li>
+<li>Initial formation of hydration products (CSH, CH)</li>
+<li>Rapid porosity reduction</li>
+</ul>
+<p><strong>Middle Period (1 day to 7 days):</strong></p>
+<ul>
+<li>Continued cement dissolution</li>
+<li>Growing CSH and CH phases filling pore space</li>
+<li>Microstructure densification</li>
+</ul>
+<p><strong>Later Times (7+ days):</strong></p>
+<ul>
+<li>Most cement hydrated</li>
+<li>Dominant CSH phase</li>
+<li>Residual unreacted cement particles (if any)</li>
+<li>Final porosity distribution</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Animation Workflow</p>
+<p>Manually step through time snapshots to create animation frames for presentations. Use consistent camera angle and phase visibility settings across all frames.</p>
+</div>
+<hr>
+<h2 id="connectivity-analysis">Connectivity Analysis<a class="headerlink" href="#connectivity-analysis" title="Permanent link">¶</a></h2>
+<p>Analyze percolation and connectivity of specific phases through the microstructure.</p>
+<h3 id="performing-connectivity-analysis">Performing Connectivity Analysis<a class="headerlink" href="#performing-connectivity-analysis" title="Permanent link">¶</a></h3>
+<ol>
+<li>Open 3D viewer for any operation</li>
+<li>Click the <strong>"Connectivity"</strong> button in the toolbar</li>
+<li>The analysis runs (may take 30 seconds to 2 minutes)</li>
+<li>Results appear in a dialog showing connectivity statistics</li>
+</ol>
+<p><img alt="Connectivity Analysis Results" src="../../assets/images/screenshots/results/3d-viewer-connectivity.png"></p>
+<h3 id="understanding-connectivity-results">Understanding Connectivity Results<a class="headerlink" href="#understanding-connectivity-results" title="Permanent link">¶</a></h3>
+<p>The analysis identifies <strong>connected components</strong> - regions of the same phase that form continuous paths through the microstructure.</p>
+<p><strong>Key Metrics:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Total Components</strong></td>
+<td>Number of separate connected regions</td>
+</tr>
+<tr>
+<td><strong>Largest Component</strong></td>
+<td>Volume of biggest connected region</td>
+</tr>
+<tr>
+<td><strong>Percolation</strong></td>
+<td>Whether phase forms connected path across system</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Percolation Status:</strong></p>
+<ul>
+<li><strong>X-direction</strong>: Phase connects from left to right face</li>
+<li><strong>Y-direction</strong>: Phase connects from front to back face</li>
+<li><strong>Z-direction</strong>: Phase connects from bottom to top face</li>
+</ul>
+<h3 id="interpreting-results">Interpreting Results<a class="headerlink" href="#interpreting-results" title="Permanent link">¶</a></h3>
+<p><strong>Porosity Connectivity:</strong></p>
+<ul>
+<li><strong>Percolating</strong>: Fluid can flow through the microstructure</li>
+<li><strong>Non-percolating</strong>: Isolated pores, impermeable material</li>
+<li>Critical for transport property predictions</li>
+</ul>
+<p><strong>CSH Connectivity:</strong></p>
+<ul>
+<li><strong>Well-connected</strong>: Good load-bearing network</li>
+<li><strong>Isolated regions</strong>: Potential weak points</li>
+<li>Related to mechanical property development</li>
+</ul>
+<p><strong>Unhydrated Cement:</strong></p>
+<ul>
+<li><strong>Many small components</strong>: Well-dispersed particles</li>
+<li><strong>Few large components</strong>: Particle clustering</li>
+<li>Affects hydration kinetics and final properties</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Periodic Boundaries</p>
+<p>VCCTL implements periodic boundary conditions, meaning phases that reach one boundary are considered connected to the opposite boundary. This represents an infinite periodic array of the simulated volume.</p>
+</div>
+<hr>
+<h2 id="hydration-data-plotting">Hydration Data Plotting<a class="headerlink" href="#hydration-data-plotting" title="Permanent link">¶</a></h2>
+<p>View quantitative time-series data from hydration simulations.</p>
+<h3 id="opening-plot-viewer">Opening Plot Viewer<a class="headerlink" href="#opening-plot-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>Select a hydration operation in Results panel</li>
+<li>Click <strong>"Plot Data"</strong> button</li>
+<li>A matplotlib-based plot window opens</li>
+</ol>
+<h3 id="available-plots">Available Plots<a class="headerlink" href="#available-plots" title="Permanent link">¶</a></h3>
+<p>You may select any variable as the abcissa for the plot. Typically time or
+degree of hydration are used for the abcissa.</p>
+<p>You may also select one or any number of other properties to display as the ordinate.
+Each property selected will be plotted as a separate curve with a different
+color.</p>
+<div class="admonition note">
+<p class="admonition-title">Commensurate Units</p>
+<p>The graphing utility allows you to plot data that have mutually</p>
+</div>
+<p>incommensurate units. For example, you can simultaneously plot temperature and degree of
+hydration versus time on the same plot. This is not advised because it makes
+interpretation of the plots difficult.</p>
+<h3 id="common-plots">Common Plots<a class="headerlink" href="#common-plots" title="Permanent link">¶</a></h3>
+<p><strong>Degree of Hydration vs Time:</strong></p>
+<ul>
+<li>Shows fraction of cement that has reacted (0.0 to 1.0)</li>
+<li>X-axis: Time (hours or days)</li>
+<li>Y-axis: Degree of hydration (dimensionless)</li>
+<li>Typically shows rapid early growth then asymptotic approach to final value</li>
+</ul>
+<p><strong>Cumulative Heat Evolution:</strong></p>
+<ul>
+<li>Shows total heat released by hydration reactions</li>
+<li>X-axis: Time (hours or days)</li>
+<li>Y-axis: Heat (J/g of cement)</li>
+<li>Used for comparison with calorimetry experiments</li>
+</ul>
+<p><strong>Heat Rate:</strong></p>
+<ul>
+<li>Shows instantaneous rate of heat release</li>
+<li>X-axis: Time (hours or days)</li>
+<li>Y-axis: Heat rate (W/g of cement)</li>
+<li>Shows characteristic peaks corresponding to different reaction stages</li>
+</ul>
+<h3 id="plot-interaction">Plot Interaction<a class="headerlink" href="#plot-interaction" title="Permanent link">¶</a></h3>
+<p><strong>Zoom and Pan:</strong></p>
+<ul>
+<li><strong>Zoom</strong>: Draw rectangle with left mouse button</li>
+<li><strong>Pan</strong>: Right-click and drag</li>
+<li><strong>Reset</strong>: Click home icon in toolbar</li>
+</ul>
+<p><strong>Export:</strong></p>
+<ul>
+<li>Click save icon to export as PNG, PDF, or SVG</li>
+<li>Use for publications and presentations</li>
+</ul>
+<div class="admonition success">
+<p class="admonition-title">Validation Workflow</p>
+<p>Export degree of hydration and heat data to CSV, then plot alongside experimental calorimetry measurements to validate time calibration parameters.</p>
+</div>
+<hr>
+<h2 id="strain-energy-visualization">Strain Energy Visualization<a class="headerlink" href="#strain-energy-visualization" title="Permanent link">¶</a></h2>
+<p>For elastic operations, visualize 3D distribution of strain energy density.</p>
+<h3 id="accessing-strain-energy-viewer">Accessing Strain Energy Viewer<a class="headerlink" href="#accessing-strain-energy-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>Select an elastic operation in Results panel</li>
+<li>Click <strong>"View Strain Energy 3D"</strong> button</li>
+<li>PyVista viewer opens with strain energy heat map</li>
+</ol>
+<p><img alt="Strain Energy 3D Viewer" src="../../assets/images/screenshots/results/strain-energy-3d-isosurface.png"></p>
+<h3 id="strain-energy-heat-map">Strain Energy Heat Map<a class="headerlink" href="#strain-energy-heat-map" title="Permanent link">¶</a></h3>
+<p><strong>Color Scale:</strong></p>
+<ul>
+<li><strong>Blue/Green</strong>: Low strain energy (uniform stress)</li>
+<li><strong>Yellow/Orange</strong>: Moderate strain energy</li>
+<li><strong>Red</strong>: High strain energy (stress concentrations)</li>
+</ul>
+<p><strong>Normalized Scale:</strong></p>
+<ul>
+<li>Values range from 0.0 to 1.0</li>
+<li>Normalization allows comparison between different operations</li>
+<li>Absolute values depend on applied boundary conditions</li>
+</ul>
+<h3 id="threshold-control">Threshold Control<a class="headerlink" href="#threshold-control" title="Permanent link">¶</a></h3>
+<p>Adjust threshold range to focus on specific energy levels:</p>
+<p><img alt="Threshold Presets" src="../../assets/images/screenshots/results/strain-energy-threshold-presets.png"></p>
+<p><strong>Preset Buttons:</strong></p>
+<ul>
+<li><strong>Bulk Material (0-0.02)</strong>: View majority of material with low strain energy</li>
+<li><strong>High Energy Hotspots (0.1-1.0)</strong>: Focus on critical stress concentration regions</li>
+<li><strong>Full Range (0-1.0)</strong>: See complete energy distribution</li>
+</ul>
+<p><strong>Custom Range:</strong></p>
+<ul>
+<li>Drag <strong>Min</strong> and <strong>Max</strong> sliders to set custom range</li>
+<li>Real-time update as you adjust thresholds</li>
+<li>Useful for exploring specific energy bands</li>
+</ul>
+<h3 id="rendering-modes">Rendering Modes<a class="headerlink" href="#rendering-modes" title="Permanent link">¶</a></h3>
+<p><strong>Isosurface Rendering:</strong></p>
+<p><img alt="Isosurface Mode" src="../../assets/images/screenshots/results/strain-energy-3d-isosurface.png"></p>
+<ul>
+<li>Shows surfaces of constant strain energy</li>
+<li>Smooth, continuous appearance</li>
+<li>Best for understanding overall distribution</li>
+<li>Faster rendering</li>
+</ul>
+<p><strong>Volume Rendering:</strong></p>
+<p><img alt="Volume Mode" src="../../assets/images/screenshots/results/strain-energy-3d-volume.png"></p>
+<ul>
+<li>Semi-transparent volume display</li>
+<li>Shows internal energy gradients</li>
+<li>Reveals 3D structure of stress fields</li>
+<li>Slower rendering but more detailed</li>
+</ul>
+<p><strong>Pixel Rendering:</strong></p>
+<p><img alt="Pixel Mode" src="../../assets/images/screenshots/results/strain-energy-3d-pixel.png"></p>
+<ul>
+<li>Shows individual voxels</li>
+<li>Highest detail level</li>
+<li>Useful for zooming into specific regions</li>
+<li>Slowest rendering for large volumes</li>
+</ul>
+<h3 id="strain-energy-cross-sections">Strain Energy Cross Sections<a class="headerlink" href="#strain-energy-cross-sections" title="Permanent link">¶</a></h3>
+<p>Combine strain energy visualization with cross-section planes:</p>
+<p><img alt="Strain Energy with Cross-Section" src="../../assets/images/screenshots/results/strain-energy-cross-section.png"></p>
+<ol>
+<li>Enable one or more cross-section planes (X, Y, or Z)</li>
+<li>Adjust plane position with slider</li>
+<li>View strain energy distribution on internal slices</li>
+<li>Identify locations of high energy within microstructure</li>
+</ol>
+<p><strong>Analysis Applications:</strong></p>
+<ul>
+<li>Locate ITZ stress concentrations near aggregates</li>
+<li>Find pores acting as stress concentrators</li>
+<li>Identify potential crack initiation sites</li>
+<li>Understand load transfer paths through microstructure</li>
+</ul>
+<hr>
+<h2 id="effective-moduli-results">Effective Moduli Results<a class="headerlink" href="#effective-moduli-results" title="Permanent link">¶</a></h2>
+<p>View calculated composite elastic properties for elastic operations.</p>
+<h3 id="opening-moduli-viewer">Opening Moduli Viewer<a class="headerlink" href="#opening-moduli-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>Select an elastic operation in Results panel</li>
+<li>Click <strong>"View Effective Moduli"</strong> button</li>
+<li>Table dialog displays calculated properties</li>
+</ol>
+<p><strong>Results Displayed:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Typical Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bulk Modulus</td>
+<td>15 GPa  to 22 GPa</td>
+<td>Resistance to compression</td>
+</tr>
+<tr>
+<td>Shear Modulus</td>
+<td>10 GPa to 15 GPa</td>
+<td>Resistance to shear deformation</td>
+</tr>
+<tr>
+<td>Elastic Modulus</td>
+<td>25 GPa to 40 GPa</td>
+<td>Young's modulus (with aggregates)</td>
+</tr>
+<tr>
+<td>Poisson's Ratio</td>
+<td>0.20 to 0.30</td>
+<td>Lateral strain ratio</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exporting-moduli-data">Exporting Moduli Data<a class="headerlink" href="#exporting-moduli-data" title="Permanent link">¶</a></h3>
+<p>Click <strong>"Export"</strong> button to save results as CSV file with columns:</p>
+<ul>
+<li>Property name</li>
+<li>Calculated value</li>
+<li>Units (GPa or dimensionless)</li>
+<li>Timestamp of calculation</li>
+</ul>
+<p>Use exported data for:</p>
+<ul>
+<li>Time series plots of property evolution</li>
+<li>Comparison with experimental measurements</li>
+<li>Input to structural analysis software</li>
+<li>Publication and reporting</li>
+</ul>
+<hr>
+<h2 id="itz-analysis">ITZ Analysis<a class="headerlink" href="#itz-analysis" title="Permanent link">¶</a></h2>
+<p>Examine how elastic properties vary with distance from aggregate surfaces.</p>
+<h3 id="opening-itz-viewer">Opening ITZ Viewer<a class="headerlink" href="#opening-itz-viewer" title="Permanent link">¶</a></h3>
+<ol>
+<li>Select an elastic operation with aggregates in Results panel</li>
+<li>Click <strong>"View ITZ Analysis"</strong> button</li>
+<li>Dialog opens with data table and property plots</li>
+</ol>
+<p><strong>Available Property Plots:</strong></p>
+<ul>
+<li>Bulk Modulus vs Distance</li>
+<li>Shear Modulus vs Distance</li>
+<li>Elastic Modulus vs Distance</li>
+<li>Poisson's Ratio vs Distance</li>
+</ul>
+<h3 id="itz-plot-features">ITZ Plot Features<a class="headerlink" href="#itz-plot-features" title="Permanent link">¶</a></h3>
+<p><strong>Data Visualization:</strong></p>
+<ul>
+<li><strong>Blue scatter points</strong>: Individual voxel properties vs distance from nearest aggregate</li>
+<li><strong>Green vertical line</strong>: ITZ width (median cement particle diameter)</li>
+<li><strong>Orange horizontal line</strong>: Average property within ITZ</li>
+<li><strong>Purple horizontal line</strong>: Average property outside ITZ</li>
+<li><strong>Text annotations</strong>: Numerical values with colored backgrounds</li>
+</ul>
+<h3 id="interpreting-itz-data">Interpreting ITZ Data<a class="headerlink" href="#interpreting-itz-data" title="Permanent link">¶</a></h3>
+<p><strong>Typical Observations:</strong></p>
+<ul>
+<li><strong>Property drop near aggregates</strong>: Lower values at distance ≈ 0 μm</li>
+<li><strong>Property recovery</strong>: Values increase with distance</li>
+<li><strong>Bulk plateau</strong>: Properties stabilize beyond ITZ width (~20-50 μm)</li>
+<li><strong>Quantitative difference</strong>: ITZ properties typically 20-40% lower than bulk</li>
+</ul>
+<p><strong>Scientific Applications:</strong></p>
+<ul>
+<li>Validate simulation against experimental ITZ measurements</li>
+<li>Understand microcracking susceptibility near aggregates</li>
+<li>Optimize aggregate properties to minimize ITZ weakening</li>
+<li>Study effect of SCMs (fly ash, slag) on ITZ properties</li>
+</ul>
+<h3 id="exporting-itz-data">Exporting ITZ Data<a class="headerlink" href="#exporting-itz-data" title="Permanent link">¶</a></h3>
+<p>Click <strong>"Export Data"</strong> to save CSV file with columns:</p>
+<ul>
+<li>Distance from aggregate (μm)</li>
+<li>Bulk modulus (GPa)</li>
+<li>Shear modulus (GPa)</li>
+<li>Elastic modulus (GPa)</li>
+<li>Poisson's ratio</li>
+</ul>
+<p>Use for custom plotting, statistical analysis, or publication figures.</p>
+<hr>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="visualization-strategy">Visualization Strategy<a class="headerlink" href="#visualization-strategy" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Start with overview</strong>: Use default isometric view to get spatial orientation</li>
+<li><strong>Use phase controls</strong>: Hide/show phases to isolate features of interest</li>
+<li><strong>Apply cross sections</strong>: View internal structure systematically</li>
+<li><strong>Adjust camera</strong>: Switch between perspective and orthographic views as needed</li>
+<li><strong>Export images</strong>: Save views for documentation and presentations</li>
+</ol>
+<h3 id="data-export-workflow">Data Export Workflow<a class="headerlink" href="#data-export-workflow" title="Permanent link">¶</a></h3>
+<ol>
+<li><strong>Visualize first</strong>: Understand results through interactive exploration</li>
+<li><strong>Identify interesting features</strong>: Note specific times, regions, or phases</li>
+<li><strong>Export quantitative data</strong>: Save numerical results as CSV</li>
+<li><strong>Create publication plots</strong>: Use exported data in plotting software (Python, MATLAB, Origin)</li>
+<li><strong>Archive visualizations</strong>: Save key 3D views as high-resolution images</li>
+</ol>
+<h3 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">¶</a></h3>
+<p><strong>For large microstructures (&gt;200³ voxels):</strong></p>
+<ul>
+<li>Use isosurface mode instead of volume rendering</li>
+<li>Hide phases not currently needed</li>
+<li>Avoid activating all three cross-section planes simultaneously</li>
+<li>Close viewer when not actively analyzing</li>
+</ul>
+<p><strong>For time-series hydration:</strong></p>
+<ul>
+<li>Load one time snapshot at a time rather than cycling rapidly</li>
+<li>Set consistent phase visibility before stepping through time</li>
+<li>Export time-series data for quantitative analysis rather than visual inspection</li>
+</ul>
+<h3 id="quality-visualization-for-publications">Quality Visualization for Publications<a class="headerlink" href="#quality-visualization-for-publications" title="Permanent link">¶</a></h3>
+<p><strong>3D Microstructure Images:</strong></p>
+<ul>
+<li>Use isometric view for 3D perspective</li>
+<li>Enable cross-section planes to show internal structure</li>
+<li>Hide porosity for clearer phase boundaries</li>
+<li>Set white or light gray background for print clarity</li>
+<li>Export at high resolution (&gt;1200 DPI)</li>
+</ul>
+<p><strong>Plot Export:</strong></p>
+<ul>
+<li>Use vector formats (PDF, SVG) when possible for scalability</li>
+<li>Ensure axis labels and legends are readable</li>
+<li>Use high-contrast colors for accessibility</li>
+<li>Include error bars or uncertainty bands if applicable</li>
+</ul>
+<hr>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="3d-viewer-issues">3D Viewer Issues<a class="headerlink" href="#3d-viewer-issues" title="Permanent link">¶</a></h3>
+<p><strong>Viewer opens but shows black/blank screen:</strong></p>
+<ul>
+<li>Check that operation completed successfully</li>
+<li>Verify microstructure files exist in Operations folder</li>
+<li>Try restarting VCCTL to refresh PyVista backend</li>
+</ul>
+<p><strong>Slow rendering performance:</strong></p>
+<ul>
+<li>Switch to isosurface mode</li>
+<li>Hide unnecessary phases</li>
+<li>Disable cross-section planes</li>
+<li>Close other open viewers</li>
+<li>Consider smaller system sizes in future simulations</li>
+</ul>
+<p><strong>Phase colors all look similar:</strong></p>
+<ul>
+<li>Click color swatches in phase controls</li>
+<li>Choose more contrasting colors manually</li>
+<li>Use colorblind-friendly palettes for accessibility</li>
+</ul>
+<h3 id="plot-display-issues">Plot Display Issues<a class="headerlink" href="#plot-display-issues" title="Permanent link">¶</a></h3>
+<p><strong>"No data available for plotting":</strong></p>
+<ul>
+<li>Ensure hydration simulation saved time-series output</li>
+<li>Check that simulation ran to completion</li>
+<li>Verify progress.json or output files exist</li>
+</ul>
+<p><strong>Plot appears but shows unexpected values:</strong></p>
+<ul>
+<li>Verify time units match expectations (hours vs days)</li>
+<li>Check that degree of hydration is between 0 and 1</li>
+<li>Compare heat values to typical Portland cement (300 J/g  to 400 J/g total)</li>
+</ul>
+<h3 id="export-problems">Export Problems<a class="headerlink" href="#export-problems" title="Permanent link">¶</a></h3>
+<p><strong>Export button does not work:</strong></p>
+<ul>
+<li>Check disk space availability</li>
+<li>Verify write permissions for output directory</li>
+<li>Try exporting to different location</li>
+<li>Check for special characters in filename</li>
+</ul>
+<hr>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">¶</a></h2>
+<p>The Results Visualization system in VCCTL provides:</p>
+<ul>
+<li>✅ Interactive 3D exploration of microstructure geometry</li>
+<li>✅ Phase-by-phase visibility control and analysis</li>
+<li>✅ Cross-sectional views of internal structure</li>
+<li>✅ Time evolution visualization for hydration</li>
+<li>✅ Connectivity and percolation analysis</li>
+<li>✅ Quantitative plotting of hydration kinetics</li>
+<li>✅ Strain energy distribution visualization</li>
+<li>✅ ITZ property analysis and export</li>
+</ul>
+<p>These tools enable you to:</p>
+<ul>
+<li><strong>Understand</strong> microstructure development during hydration</li>
+<li><strong>Validate</strong> simulations against experimental data</li>
+<li><strong>Identify</strong> critical features affecting properties</li>
+<li><strong>Publish</strong> high-quality visualization and data</li>
+<li><strong>Communicate</strong> results to collaborators and stakeholders</li>
+</ul>
+<div class="admonition success">
+<p class="admonition-title">Next Steps</p>
+<ul>
+<li><a href="../operations-monitoring/">Operations Monitoring</a> - Manage running calculations</li>
+<li><a href="../elastic-calculations/">Elastic Calculations</a> - Compute mechanical properties</li>
+</ul>
+</div></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../elastic-calculations/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Elastic Calculations">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Elastic Calculations
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../operations-monitoring/" class="md-footer__link md-footer__link--next" aria-label="Next: Operations Monitoring">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Operations Monitoring
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

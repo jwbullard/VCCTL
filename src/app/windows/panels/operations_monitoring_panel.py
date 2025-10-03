@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.utils.icon_utils import set_tool_button_custom_icon, create_button_with_icon
+from app.help.panel_help_button import create_panel_help_button
 
 
 class OperationStatus(Enum):
@@ -483,18 +484,44 @@ class OperationsMonitoringPanel(Gtk.Box):
         
         # Initialize operation details tracking
         self._currently_displayed_operation = None
-        
+
         # SIMPLE SOLUTION: Direct progress file reader every 5 seconds
         from gi.repository import GLib
-        GLib.timeout_add_seconds(5, self._simple_progress_update)
-        
+        self._progress_timeout_id = GLib.timeout_add_seconds(5, self._simple_progress_update)
+
         self.logger.info("Operations monitoring panel initialized")
-    
+
+    def _create_header(self) -> None:
+        """Create the panel header."""
+        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        header_box.set_margin_top(10)
+        header_box.set_margin_bottom(5)
+        header_box.set_margin_left(10)
+        header_box.set_margin_right(10)
+
+        # Title
+        title_label = Gtk.Label()
+        title_label.set_markup('<span size="large" weight="bold">Operations Monitoring</span>')
+        title_label.set_halign(Gtk.Align.START)
+        header_box.pack_start(title_label, False, False, 0)
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('OperationsMonitoringPanel', self.main_window)
+        header_box.pack_start(help_button, False, False, 5)
+
+        # Spacer
+        header_box.pack_start(Gtk.Box(), True, True, 0)
+
+        self.pack_start(header_box, False, False, 0)
+
     def _setup_ui(self) -> None:
         """Setup the panel UI."""
+        # Create header
+        self._create_header()
+
         # Create toolbar
         self._create_toolbar()
-        
+
         # Create main content area
         self._create_content_area()
         
@@ -1460,10 +1487,21 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _stop_monitoring(self) -> None:
         """Stop the monitoring thread."""
+        from gi.repository import GLib
+
+        # Cancel GLib progress update timeout
+        if hasattr(self, '_progress_timeout_id') and self._progress_timeout_id:
+            GLib.source_remove(self._progress_timeout_id)
+            self._progress_timeout_id = None
+            self.logger.info("Cancelled progress update timeout")
+
         if self.monitoring_active:
             self.monitoring_active = False
             if self.monitor_thread:
-                self.monitor_thread.join(timeout=2.0)
+                # Reduce timeout to 0.5 seconds for faster shutdown
+                self.monitor_thread.join(timeout=0.5)
+                if self.monitor_thread.is_alive():
+                    self.logger.warning("Monitoring thread did not terminate in time, continuing shutdown")
             self.logger.info("Monitoring stopped")
     
     def _monitoring_loop(self) -> None:
@@ -2391,8 +2429,12 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _update_system_resources_display(self) -> None:
         """Update system resources display."""
+        # Skip if System Resources tab is hidden/not initialized
+        if not hasattr(self, 'cpu_usage_label'):
+            return
+
         resources = self.system_resources
-        
+
         # CPU
         self.cpu_usage_label.set_text(f"CPU: {resources.cpu_usage:.1f}%")
         self.cpu_usage_bar.set_fraction(resources.cpu_usage / 100.0)
@@ -2459,8 +2501,11 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Base efficiency on completion rate and average resource usage
             avg_cpu = sum(op.cpu_usage for op in self.operations.values() if op.cpu_usage > 0) / max(1, len([op for op in self.operations.values() if op.cpu_usage > 0]))
             efficiency = min(100.0, success_rate * (avg_cpu / 100.0) if avg_cpu > 0 else success_rate)
-        
-        # Update metric labels
+
+        # Update metric labels (skip if Performance tab is hidden/not initialized)
+        if not hasattr(self, 'metrics_completed_value'):
+            return
+
         self.metrics_completed_value.set_text(str(completed_ops))
         self.metrics_failed_value.set_text(str(failed_ops))
         self.metrics_avg_duration_value.set_text(avg_duration_str)

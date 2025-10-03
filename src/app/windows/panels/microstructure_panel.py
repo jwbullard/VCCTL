@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.utils.icon_utils import create_button_with_icon
+from app.help.panel_help_button import create_panel_help_button
 from app.services.microstructure_service import MicrostructureParams, PhaseType
 from app.visualization import create_visualization_manager, Microstructure3DViewer, PyVistaViewer3D
 
@@ -80,13 +81,16 @@ class MicrostructurePanel(Gtk.Box):
         
         # Title and controls
         title_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        
+
         title_label = Gtk.Label()
         title_label.set_markup('<span size="large" weight="bold">Microstructure Preview</span>')
         title_label.set_halign(Gtk.Align.START)
         title_box.pack_start(title_label, False, False, 0)
-        
-        
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('MicrostructurePanel', self.main_window)
+        title_box.pack_start(help_button, False, False, 5)
+
         header_box.pack_start(title_box, False, False, 0)
         
         # Description

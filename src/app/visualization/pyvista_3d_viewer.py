@@ -627,26 +627,54 @@ class PyVistaViewer3D(Gtk.Box):
         self.set_phase_opacity(phase_id, opacity)
         self.logger.info(f"Set phase {phase_id} opacity to {opacity:.2f} ({opacity_percentage:.0f}%)")
     
-    def load_voxel_data(self, voxel_data: np.ndarray, phase_mapping: Dict[int, str] = None, 
-                       voxel_size: Tuple[float, float, float] = (1.0, 1.0, 1.0), 
+    def load_voxel_data(self, voxel_data: np.ndarray, phase_mapping: Dict[int, str] = None,
+                       voxel_size: Tuple[float, float, float] = (1.0, 1.0, 1.0),
                        source_file_path: str = None) -> bool:
         """
         Load 3D voxel data for visualization.
-        
+
         Args:
             voxel_data: 3D numpy array with phase IDs
             phase_mapping: Dictionary mapping phase IDs to names
             voxel_size: Size of each voxel in micrometers (x, y, z)
-            
+
         Returns:
             True if data loaded successfully, False otherwise
         """
         try:
+            # Defensive: Validate input data
+            if voxel_data is None:
+                self.logger.error("Cannot load voxel data: voxel_data is None")
+                return False
+
+            if not isinstance(voxel_data, np.ndarray):
+                self.logger.error(f"Cannot load voxel data: expected numpy array, got {type(voxel_data)}")
+                return False
+
+            if voxel_data.ndim != 3:
+                self.logger.error(f"Cannot load voxel data: expected 3D array, got {voxel_data.ndim}D array")
+                return False
+
+            if voxel_data.size == 0:
+                self.logger.error("Cannot load voxel data: array is empty")
+                return False
+
+            # Defensive: Validate voxel size
+            if not voxel_size or len(voxel_size) != 3:
+                self.logger.warning(f"Invalid voxel_size {voxel_size}, using default (1.0, 1.0, 1.0)")
+                voxel_size = (1.0, 1.0, 1.0)
+
+            if any(v <= 0 for v in voxel_size):
+                self.logger.warning(f"Invalid voxel_size values {voxel_size}, using default (1.0, 1.0, 1.0)")
+                voxel_size = (1.0, 1.0, 1.0)
+
+            self.logger.info(f"Loading voxel data: shape={voxel_data.shape}, dtype={voxel_data.dtype}, size={voxel_data.nbytes/1024/1024:.2f} MB")
+
             # Cleanup any existing data first to prevent memory leaks
             if hasattr(self, 'voxel_data') and self.voxel_data is not None:
                 self.logger.info("Cleaning up previous voxel data...")
                 self._cleanup_previous_data()
-            
+
             self.voxel_data = voxel_data.copy()
             self.phase_mapping = phase_mapping or {}
             self.voxel_size = voxel_size
@@ -680,11 +708,21 @@ class PyVistaViewer3D(Gtk.Box):
             
             self.emit('data-loaded')
             self.logger.info(f"Loaded voxel data: {voxel_data.shape}, {len(unique_phases)} phases")
-            
+
             return True
-            
+
+        except MemoryError as e:
+            self.logger.error(f"Out of memory loading voxel data: {e}", exc_info=True)
+            # Try to clean up to free memory
+            self._cleanup_previous_data()
+            return False
         except Exception as e:
-            self.logger.error(f"Failed to load voxel data: {e}")
+            self.logger.error(f"Failed to load voxel data: {e}", exc_info=True)
+            # Try to clean up on failure
+            try:
+                self._cleanup_previous_data()
+            except:
+                pass
             return False
     
     def _create_phase_meshes(self):
@@ -1722,12 +1760,60 @@ class PyVistaViewer3D(Gtk.Box):
     
     def _on_connectivity_analyze_clicked(self, button):
         """Handle connectivity analysis button click."""
-        try:
-            self.logger.info("Starting connectivity analysis")
-            self._perform_connectivity_analysis()
-        except Exception as e:
-            self.logger.error(f"Failed to perform connectivity analysis: {e}")
-    
+        import threading
+        from gi.repository import GLib
+
+        # Create and show progress dialog
+        progress_dialog = Gtk.MessageDialog(
+            transient_for=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.NONE,
+            message_format="Connectivity Analysis in Progress"
+        )
+        progress_dialog.format_secondary_text(
+            "Analyzing phase connectivity and percolation...\n\n"
+            "This may take 30-60 seconds for large microstructures.\n"
+            "Please wait..."
+        )
+        progress_dialog.show()
+
+        # Process GTK events to ensure dialog is displayed
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+        def run_analysis():
+            """Run connectivity analysis in background thread."""
+            try:
+                self.logger.info("Starting connectivity analysis")
+                self._perform_connectivity_analysis()
+                # Close dialog on success
+                GLib.idle_add(progress_dialog.destroy)
+            except Exception as e:
+                self.logger.error(f"Failed to perform connectivity analysis: {e}")
+                # Close dialog and show error
+                GLib.idle_add(progress_dialog.destroy)
+                GLib.idle_add(self._show_connectivity_error, str(e))
+
+        # Run analysis in background thread to prevent UI freeze
+        analysis_thread = threading.Thread(target=run_analysis, daemon=True)
+        analysis_thread.start()
+
+    def _show_connectivity_error(self, error_message):
+        """Show connectivity analysis error dialog."""
+        error_dialog = Gtk.MessageDialog(
+            transient_for=self.get_toplevel(),
+            flags=Gtk.DialogFlags.MODAL,
+            type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            message_format="Connectivity Analysis Failed"
+        )
+        error_dialog.format_secondary_text(
+            f"An error occurred during connectivity analysis:\n\n{error_message}"
+        )
+        error_dialog.run()
+        error_dialog.destroy()
+
     def _activate_distance_measurement(self):
         """Activate interactive distance measurement using point picking."""
         if not hasattr(self, 'plotter') or self.plotter is None:
@@ -2248,6 +2334,8 @@ Distance: {distance_um:.2f} μm"""
     
     def _perform_connectivity_analysis(self):
         """Perform connectivity analysis using efficient Python implementation."""
+        from gi.repository import GLib
+
         if self.voxel_data is None:
             self.logger.warning("No voxel data available for connectivity analysis")
             return
@@ -2256,7 +2344,8 @@ Distance: {distance_um:.2f} μm"""
             # Use Python implementation with scipy (more memory-efficient than C version)
             self.logger.info("Using Python connectivity analysis with periodic boundary conditions...")
             connectivity_results = self._python_connectivity_fallback()
-            self._show_connectivity_analysis_results(connectivity_results)
+            # Use GLib.idle_add for thread-safe UI updates
+            GLib.idle_add(self._show_connectivity_analysis_results, connectivity_results)
             self.logger.info("Connectivity analysis completed successfully")
 
         except ImportError as e:
@@ -2265,12 +2354,15 @@ Distance: {distance_um:.2f} μm"""
             try:
                 self.logger.info("Falling back to C perc3d program...")
                 raw_output = self._run_perc3d_analysis_raw()
-                self._show_raw_analysis_results(raw_output, "Connectivity Analysis Results")
+                # Use GLib.idle_add for thread-safe UI updates
+                GLib.idle_add(self._show_raw_analysis_results, raw_output, "Connectivity Analysis Results")
                 self.logger.info("Connectivity analysis completed using C perc3d program")
             except Exception as fallback_e:
                 self.logger.error(f"C perc3d fallback also failed: {fallback_e}")
+                raise  # Re-raise to be caught by outer exception handler
         except Exception as e:
             self.logger.error(f"Connectivity analysis failed: {e}")
+            raise  # Re-raise to be caught by button click handler
 
     def _python_connectivity_fallback(self):
         """Python fallback for connectivity analysis."""
@@ -2387,27 +2479,34 @@ Distance: {distance_um:.2f} μm"""
         self._merge_periodic_boundaries(labeled_array, component_map,
                                       labeled_array[0, :, :], labeled_array[nz-1, :, :])
         
-        # Apply the component mapping to merge connected components
+        # Apply the component mapping to merge connected components (vectorized)
         final_labeled = np.zeros_like(labeled_array)
         unique_components = set()
-        
-        for z in range(nz):
-            for y in range(ny):
-                for x in range(nx):
-                    if labeled_array[z, y, x] > 0:
-                        # Follow the component mapping chain to get final component ID
-                        final_comp = self._find_root_component(component_map, labeled_array[z, y, x])
-                        final_labeled[z, y, x] = final_comp
-                        unique_components.add(final_comp)
-        
-        # Renumber components to be sequential
-        component_renumber = {comp: i+1 for i, comp in enumerate(sorted(unique_components))}
-        for z in range(nz):
-            for y in range(ny):
-                for x in range(nx):
-                    if final_labeled[z, y, x] > 0:
-                        final_labeled[z, y, x] = component_renumber[final_labeled[z, y, x]]
-        
+
+        # Vectorized approach: create mapping lookup array
+        max_component = np.max(labeled_array)
+        component_lookup = np.zeros(max_component + 1, dtype=labeled_array.dtype)
+
+        # Build lookup table for component mapping
+        for comp_id in range(1, max_component + 1):
+            final_comp = self._find_root_component(component_map, comp_id)
+            component_lookup[comp_id] = final_comp
+            if final_comp > 0:
+                unique_components.add(final_comp)
+
+        # Apply mapping using vectorized indexing (much faster than nested loops)
+        mask = labeled_array > 0
+        final_labeled[mask] = component_lookup[labeled_array[mask]]
+
+        # Renumber components to be sequential (vectorized)
+        component_renumber_array = np.zeros(max_component + 1, dtype=labeled_array.dtype)
+        for i, comp in enumerate(sorted(unique_components), start=1):
+            component_renumber_array[comp] = i
+
+        # Apply renumbering using vectorized indexing
+        mask = final_labeled > 0
+        final_labeled[mask] = component_renumber_array[final_labeled[mask]]
+
         final_num_components = len(unique_components)
         self.logger.info(f"Periodic connectivity: {num_components} → {final_num_components} components")
         
@@ -2450,45 +2549,58 @@ Distance: {distance_um:.2f} μm"""
         return component_map[component]
     
     def _analyze_directional_percolation(self, labeled_array, num_components, shape):
-        """Analyze directional percolation for each component with periodic boundaries."""
+        """Analyze directional percolation for each component with periodic boundaries (optimized)."""
         nz, ny, nx = shape
-        
+
         percolates_x = False
-        percolates_y = False  
+        percolates_y = False
         percolates_z = False
         percolating_components = []
-        
-        # Check each connected component for directional percolation
-        for component_id in range(1, num_components + 1):
-            component_mask = (labeled_array == component_id)
-            
-            # Check X-direction percolation (spans from x=0 to x=nx-1)
-            x_percolates = self._check_x_percolation(component_mask, nx)
-            
-            # Check Y-direction percolation (spans from y=0 to y=ny-1)  
-            y_percolates = self._check_y_percolation(component_mask, ny)
-            
-            # Check Z-direction percolation (spans from z=0 to z=nz-1)
-            z_percolates = self._check_z_percolation(component_mask, nz)
-            
-            # Track which components percolate in each direction
-            if x_percolates or y_percolates or z_percolates:
-                percolating_components.append({
-                    'component_id': component_id,
-                    'x_percolates': x_percolates,
-                    'y_percolates': y_percolates,
-                    'z_percolates': z_percolates,
-                    'fully_percolates': x_percolates and y_percolates and z_percolates
-                })
-            
-            # Update global percolation status
-            percolates_x = percolates_x or x_percolates
-            percolates_y = percolates_y or y_percolates
-            percolates_z = percolates_z or z_percolates
-        
+
+        # Extract boundary slices once (much faster than creating full component masks)
+        left_boundary = labeled_array[:, :, 0]
+        right_boundary = labeled_array[:, :, nx-1]
+        front_boundary = labeled_array[:, 0, :]
+        back_boundary = labeled_array[:, ny-1, :]
+        bottom_boundary = labeled_array[0, :, :]
+        top_boundary = labeled_array[nz-1, :, :]
+
+        # Find unique components on each boundary (vectorized)
+        left_components = set(np.unique(left_boundary[left_boundary > 0]))
+        right_components = set(np.unique(right_boundary[right_boundary > 0]))
+        front_components = set(np.unique(front_boundary[front_boundary > 0]))
+        back_components = set(np.unique(back_boundary[back_boundary > 0]))
+        bottom_components = set(np.unique(bottom_boundary[bottom_boundary > 0]))
+        top_components = set(np.unique(top_boundary[top_boundary > 0]))
+
+        # Check percolation by set intersection (extremely fast)
+        x_percolating = left_components & right_components
+        y_percolating = front_components & back_components
+        z_percolating = bottom_components & top_components
+
+        # Update global percolation status
+        percolates_x = len(x_percolating) > 0
+        percolates_y = len(y_percolating) > 0
+        percolates_z = len(z_percolating) > 0
+
+        # Build percolating components list (only for components that actually percolate)
+        all_percolating = x_percolating | y_percolating | z_percolating
+        for component_id in all_percolating:
+            x_perc = component_id in x_percolating
+            y_perc = component_id in y_percolating
+            z_perc = component_id in z_percolating
+
+            percolating_components.append({
+                'component_id': int(component_id),
+                'x_percolates': x_perc,
+                'y_percolates': y_perc,
+                'z_percolates': z_perc,
+                'fully_percolates': x_perc and y_perc and z_perc
+            })
+
         # Phase is fully percolated if it percolates in ALL three directions
         fully_percolated = percolates_x and percolates_y and percolates_z
-        
+
         return {
             'percolates_x': percolates_x,
             'percolates_y': percolates_y,
@@ -2496,27 +2608,6 @@ Distance: {distance_um:.2f} μm"""
             'fully_percolated': fully_percolated,
             'percolating_components': percolating_components
         }
-    
-    def _check_x_percolation(self, component_mask, nx):
-        """Check if component percolates in X direction (left to right boundary)."""
-        # Check if component has voxels on both X boundaries (x=0 and x=nx-1)
-        left_boundary = component_mask[:, :, 0]
-        right_boundary = component_mask[:, :, nx-1]
-        return np.any(left_boundary) and np.any(right_boundary)
-    
-    def _check_y_percolation(self, component_mask, ny):
-        """Check if component percolates in Y direction (front to back boundary)."""
-        # Check if component has voxels on both Y boundaries (y=0 and y=ny-1)
-        front_boundary = component_mask[:, 0, :]
-        back_boundary = component_mask[:, ny-1, :]
-        return np.any(front_boundary) and np.any(back_boundary)
-    
-    def _check_z_percolation(self, component_mask, nz):
-        """Check if component percolates in Z direction (bottom to top boundary)."""
-        # Check if component has voxels on both Z boundaries (z=0 and z=nz-1)
-        bottom_boundary = component_mask[0, :, :]
-        top_boundary = component_mask[nz-1, :, :]
-        return np.any(bottom_boundary) and np.any(top_boundary)
     
     def _calculate_phase_statistics(self):
         """Calculate comprehensive statistics for all phases including volume and surface area."""

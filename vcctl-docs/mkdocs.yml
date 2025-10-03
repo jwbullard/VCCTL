@@ -1,0 +1,176 @@
+# VCCTL Documentation Configuration
+
+# Site Information
+site_name: VCCTL - Virtual Cement and Concrete Testing Laboratory
+site_description: VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials
+site_author: Jeffrey W. Bullard/Texas A&M University
+site_url: https://jwbullard.github.io/VCCTL
+repo_url: https://github.com/jwbullard/VCCTL
+repo_name: jwbullard/VCCTL
+copyright: Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+
+# Theme Configuration
+theme:
+  name: material
+  language: en
+
+  # Color Scheme - Texas A&M Maroon & White
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  # Features
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - toc.follow
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+  # Icons
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+  # Logo and Favicon (to be added)
+  # logo: assets/images/vcctl-logo.png
+  # favicon: assets/images/favicon.ico
+
+# Custom CSS for Texas A&M Colors
+extra_css:
+  - stylesheets/extra.css
+
+# JavaScript for MathJax (LaTeX rendering)
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+# Navigation Structure
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Getting Started: getting-started.md
+
+  - User Guide:
+    - Materials Management: user-guide/materials-management.md
+    - Mix Design: user-guide/mix-design.md
+    - Microstructure Generation: user-guide/microstructure-generation.md
+    - Hydration Simulation: user-guide/hydration-simulation.md
+    - Elastic Calculations: user-guide/elastic-calculations.md
+    - Results Visualization: user-guide/results-visualization.md
+    - Operations Monitoring: user-guide/operations-monitoring.md
+
+  - Workflows:
+    - Basic Concrete Simulation: workflows/basic-concrete-simulation.md
+    - Parameter Studies: workflows/parameter-studies.md
+    - Advanced Analysis: workflows/advanced-analysis.md
+    - Troubleshooting: workflows/troubleshooting.md
+
+  - Reference:
+    - Material Properties: reference/material-properties.md
+    - Parameter Reference: reference/parameter-reference.md
+    - File Formats: reference/file-formats.md
+    - API Documentation: reference/api-documentation.md
+
+  - Developer Guide:
+    - Architecture: developer/architecture.md
+    - Contributing: developer/contributing.md
+    - Building from Source: developer/building-from-source.md
+    - Plugin Development: developer/plugin-development.md
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - mermaid2
+  - mkdocs-video
+
+# Markdown Extensions
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Extra Configuration
+extra:
+  version:
+    provider: mike
+    default: stable
+
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jwbullard/VCCTL
+      name: VCCTL on GitHub
+
+  # Version information
+  vcctl_version: "10.0.0"
+
+  # Analytics (to be added if needed)
+  # analytics:
+  #   provider: google
+  #   property: G-XXXXXXXXXX
+
+# Watch additional files
+watch:
+  - docs

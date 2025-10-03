@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from app.windows.main_window import VCCTLMainWindow
 
 from app.services.service_container import get_service_container
+from app.help.panel_help_button import create_panel_help_button
 
 
 class ResultsPanel(Gtk.Box):
@@ -69,13 +70,17 @@ class ResultsPanel(Gtk.Box):
         header_box.set_margin_left(10)
         header_box.set_margin_right(10)
         header_box.set_margin_top(10)
-        
+
         # Title
         title_label = Gtk.Label()
         title_label.set_markup('<span size="large"><b>Results Analysis</b></span>')
         title_label.set_halign(Gtk.Align.START)
         header_box.pack_start(title_label, False, False, 0)
-        
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('ResultsPanel', self.parent)
+        header_box.pack_start(help_button, False, False, 5)
+
         # Spacer
         header_box.pack_start(Gtk.Box(), True, True, 0)
         
@@ -912,32 +917,47 @@ class ResultsPanel(Gtk.Box):
     def _on_view_3d_results_clicked(self, button) -> None:
         """Handle View 3D Results button click."""
         if not self.selected_operation:
+            self.logger.warning("No operation selected for 3D results viewing")
             return
-        
+
+        # Defensive: Check button is still valid
+        if not button or not isinstance(button, Gtk.Button):
+            self.logger.warning("Invalid button reference in _on_view_3d_results_clicked")
+            return
+
+        # Defensive: Check we have a valid parent window
+        parent_window = self.get_toplevel()
+        if not parent_window or not isinstance(parent_window, Gtk.Window):
+            self.logger.error("Cannot open 3D viewer: invalid parent window")
+            return
+
         try:
+            # Get operation name safely (works for both dict and object)
+            op_name = getattr(self.selected_operation, 'name', 'Unknown') if hasattr(self.selected_operation, 'name') else self.selected_operation.get('name', 'Unknown')
+            self.logger.info(f"Opening 3D results viewer for operation: {op_name}")
+
             # Import here to avoid circular imports
             from app.windows.dialogs.hydration_results_viewer import HydrationResultsViewer
-            
+
             # Create and show the 3D results viewer dialog
             viewer = HydrationResultsViewer(
-                parent=self.get_toplevel(),
+                parent=parent_window,
                 operation=self.selected_operation
             )
+
+            # Defensive: Verify viewer was created successfully
+            if not viewer:
+                raise RuntimeError("Failed to create HydrationResultsViewer instance")
+
             viewer.show_all()
-            
+            self.logger.info("3D results viewer opened successfully")
+
+        except ImportError as e:
+            self.logger.error(f"Failed to import HydrationResultsViewer: {e}", exc_info=True)
+            self._show_error_dialog("Import Error", f"Failed to load 3D visualization module: {e}")
         except Exception as e:
-            self.logger.error(f"Error opening 3D results viewer: {e}")
-            # Show error dialog
-            dialog = Gtk.MessageDialog(
-                transient_for=self.get_toplevel(),
-                flags=0,
-                message_type=Gtk.MessageType.ERROR,
-                buttons=Gtk.ButtonsType.OK,
-                text="Error Opening 3D Results"
-            )
-            dialog.format_secondary_text(f"Failed to open 3D results viewer: {e}")
-            dialog.run()
-            dialog.destroy()
+            self.logger.error(f"Error opening 3D results viewer: {e}", exc_info=True)
+            self._show_error_dialog("Error Opening 3D Results", f"Failed to open 3D results viewer: {e}")
     
     def _on_plot_data_clicked(self, button) -> None:
         """Handle Plot Data button click."""
@@ -1171,3 +1191,33 @@ class ResultsPanel(Gtk.Box):
         """Called when the Results tab is shown."""
         # Refresh the operations list when the tab becomes visible
         self._load_completed_operations()
+
+    def _show_error_dialog(self, title: str, message: str) -> None:
+        """Show a thread-safe error dialog to the user.
+
+        Args:
+            title: Dialog title
+            message: Error message to display
+        """
+        try:
+            # Get parent window safely
+            parent = self.get_toplevel()
+            if not parent or not isinstance(parent, Gtk.Window):
+                self.logger.error(f"Cannot show error dialog '{title}': no valid parent window")
+                return
+
+            # Create and show error dialog
+            dialog = Gtk.MessageDialog(
+                transient_for=parent,
+                flags=Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.OK,
+                text=title
+            )
+            dialog.format_secondary_text(message)
+            dialog.run()
+            dialog.destroy()
+
+        except Exception as e:
+            # Last resort: log the error if we can't even show a dialog
+            self.logger.error(f"Failed to show error dialog '{title}': {e}", exc_info=True)

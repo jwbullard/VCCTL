@@ -134,7 +134,10 @@ class PerformanceMonitor:
         if self.monitoring_active:
             self.monitoring_active = False
             if self.monitoring_thread:
-                self.monitoring_thread.join(timeout=2.0)
+                # Reduce timeout to 0.5 seconds for faster shutdown
+                self.monitoring_thread.join(timeout=0.5)
+                if self.monitoring_thread.is_alive():
+                    self.logger.warning("Performance monitoring thread did not terminate in time, continuing shutdown")
             self.logger.info("Performance monitoring stopped")
     
     def _monitoring_loop(self) -> None:

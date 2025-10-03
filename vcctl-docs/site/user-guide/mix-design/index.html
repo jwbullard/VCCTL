@@ -1,0 +1,2100 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="VCCTL is an integrated software package for simulating the 3D microstructure generation, hydration, and mechanical properties of cementitious materials">
+      
+      
+        <meta name="author" content="Jeffrey W. Bullard/Texas A&M University">
+      
+      
+        <link rel="canonical" href="https://jwbullard.github.io/VCCTL/user-guide/mix-design/">
+      
+      
+        <link rel="prev" href="../materials-management/">
+      
+      
+        <link rel="next" href="../microstructure-generation/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+    
+    
+      
+        <title>Mix Design - VCCTL - Virtual Cement and Concrete Testing Laboratory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mix-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-header__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            VCCTL - Virtual Cement and Concrete Testing Laboratory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Mix Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../materials-management/" class="md-tabs__link">
+          
+  
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../workflows/basic-concrete-simulation/" class="md-tabs__link">
+          
+  
+  
+  Workflows
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/material-properties/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer/architecture/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="VCCTL - Virtual Cement and Concrete Testing Laboratory" class="md-nav__button md-logo" aria-label="VCCTL - Virtual Cement and Concrete Testing Laboratory" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    VCCTL - Virtual Cement and Concrete Testing Laboratory
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/jwbullard/VCCTL" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jwbullard/VCCTL
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../materials-management/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Materials Management
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Mix Design
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mix-design-panel-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mix Design Panel Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mix Design Panel Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-mix-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a New Mix Design
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-materials-to-your-mix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Materials to Your Mix
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding Materials to Your Mix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adding-powder-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Powder Components
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-water" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Water
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-aggregates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Adding Aggregates
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-dimensions-and-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Dimensions and Resolution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Dimensions and Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Size
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resolution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#size-and-resolution-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Size and Resolution Guidance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#grading-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grading Curves
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Grading Curves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fine-aggregate-grading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fine Aggregate Grading
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#coarse-aggregate-grading" class="md-nav__link">
+    <span class="md-ellipsis">
+      Coarse Aggregate Grading
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grading-curve-dialog" class="md-nav__link">
+    <span class="md-ellipsis">
+      Grading Curve Dialog
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-fine-aggregate-gradings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Fine Aggregate Gradings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standard-coarse-aggregate-gradings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Coarse Aggregate Gradings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#particle-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Particle Shapes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Particle Shapes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-shape-sets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Available Shape Sets
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#powder-dispersion-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Powder Dispersion Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Powder Dispersion Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flocculation-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flocculation Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#effect-on-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Effect on Properties
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mixture-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixture Validation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mixture Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validation-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Checks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixture-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mixture Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-mixture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating the Mixture
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loaded-mixture-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loaded Mixture Design
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-saved-mix-designs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading Saved Mix Designs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mix-design-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mix Design Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#material-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Material Selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Dimensions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-mixture-design-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Mixture Design Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Mixture Design Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-normal-strength-concrete" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 1: Normal Strength Concrete
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-high-performance-concrete-with-fly-ash" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 2: High-Performance Concrete with Fly Ash
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-ultra-high-performance-concrete-with-silica-fume" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example 3: Ultra-High Performance Concrete with Silica Fume
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validation Warnings
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../microstructure-generation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Microstructure Generation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hydration-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Hydration Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../elastic-calculations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Elastic Calculations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../results-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Results Visualization
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations-monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Operations Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Workflows
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Workflows
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/basic-concrete-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Basic Concrete Simulation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/parameter-studies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Studies
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/advanced-analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Analysis
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../workflows/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Troubleshooting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Reference
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/material-properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Material Properties
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/parameter-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/file-formats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    File Formats
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Documentation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/building-from-source/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building from Source
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/plugin-development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plugin Development
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<div><h1 id="mix-design">Mix Design<a class="headerlink" href="#mix-design" title="Permanent link">¶</a></h1>
+<p>The Mix Design panel allows you to create and manage concrete mixture proportions that combine materials into virtual test specimens. Mix designs are automatically saved as you work and can be loaded later for creating microstructure operations.</p>
+<p><img alt="Mix Design Panel Overview" src="../../assets/images/screenshots/mix-design/mix-design-panel-overview.png"></p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
+<p>Mix designs in VCCTL define:</p>
+<ul>
+<li><strong>Material Components</strong> - Cement, water, aggregates, and supplementary materials</li>
+<li><strong>Proportions</strong> - Mass or volume fractions for each component</li>
+<li><strong>System Dimensions</strong> - Size and resolution of the virtual specimen</li>
+<li><strong>Particle Characteristics</strong> - Shape distributions and flocculation settings</li>
+<li><strong>Aggregate Grading</strong> - Size distributions for fine and coarse aggregates</li>
+</ul>
+<p>Mix designs are automatically saved to the database and can be loaded, modified, and used for multiple microstructure generation operations.</p>
+<h2 id="mix-design-panel-interface">Mix Design Panel Interface<a class="headerlink" href="#mix-design-panel-interface" title="Permanent link">¶</a></h2>
+<h3 id="creating-a-new-mix-design">Creating a New Mix Design<a class="headerlink" href="#creating-a-new-mix-design" title="Permanent link">¶</a></h3>
+<ol>
+<li>Enter a unique <strong>Mix Design Name</strong> at the top</li>
+<li>The mix auto-saves as you add components and adjust parameters</li>
+<li>All changes are immediately persisted to the database</li>
+</ol>
+<h2 id="adding-materials-to-your-mix">Adding Materials to Your Mix<a class="headerlink" href="#adding-materials-to-your-mix" title="Permanent link">¶</a></h2>
+<h3 id="adding-powder-components">Adding Powder Components<a class="headerlink" href="#adding-powder-components" title="Permanent link">¶</a></h3>
+<p><img alt="Mix Design Cement Selection" src="../../assets/images/screenshots/mix-design/mix-design-cement-selection.png"></p>
+<ol>
+<li>Click <strong>+ Add Component</strong> button</li>
+<li>Select <strong>Cement</strong> from the material type dropdown</li>
+<li>Choose a specific cement from your materials library</li>
+<li>Enter the <strong>mass</strong> in kg (for guidance, typical mass densities are 300 kg/m³ to 500 kg/m³)</li>
+<li>Repeat steps 1--4 to add other components as needed</li>
+</ol>
+<p><strong>Typical replacement levels:</strong>
+- <strong>Fly Ash</strong>: 15-35% cement replacement by mass
+- <strong>Slag</strong>: 30-70% cement replacement
+- <strong>Silica Fume</strong>: 5-10% cement addition
+- <strong>Limestone</strong>: 5-15% cement replacement</p>
+<p><strong>Common cement contents:</strong>
+- <strong>Low strength (20 MPa to 25 MPa)</strong>: 300 kg/m³ to 350 kg/m³
+- <strong>Normal strength (30 MPa to 40 MPa)</strong>: 350 kg/m³ to 450 kg/m³
+- <strong>High strength (50+ MPa)</strong>: 450 kg/m³ to 550 kg/m³</p>
+<h3 id="adding-water">Adding Water<a class="headerlink" href="#adding-water" title="Permanent link">¶</a></h3>
+<p>Water can be added by specifying either the mass or the water-binder (w/b) mass ratio.
+Whichever is specified, the other will update automatically based on the total
+mass of powder components.</p>
+<p>Typical water-binder ratios (w/b):**
+- <strong>Low (0.30-0.40)</strong>: High strength, low permeability
+- <strong>Medium (0.40-0.50)</strong>: Normal strength, good workability
+- <strong>High (0.50-0.65)</strong>: Lower strength, high workability</p>
+<h3 id="adding-aggregates">Adding Aggregates<a class="headerlink" href="#adding-aggregates" title="Permanent link">¶</a></h3>
+<p><img alt="Mix Design Aggregate Selection" src="../../assets/images/screenshots/mix-design/mix-design-aggregate-selection.png"></p>
+<p>Aggregates require additional configuration that can be found in the
+<strong>Mortar/Concrete Options</strong> section.</p>
+<ol>
+<li>Enter mass of fine aggregate in kg</li>
+<li>Select the fine aggregate material source from among those in the dropdown
+   menu</li>
+<li>Configure <strong>grading curve</strong> (see <a href="#grading-curves">Grading Curves</a> section)</li>
+<li>Select <strong>particle shape distribution</strong> (see <a href="#particle-shapes">Particle Shapes</a> section)</li>
+</ol>
+<p><strong>Typical aggregate contents:</strong>
+- <strong>Fine aggregate</strong>: 600 kg/m³ to 900 kg/m³
+- <strong>Coarse aggregate</strong>: 900 kg/m³ to 1200 kg/m³
+- <strong>Total aggregate</strong>: 1500kg/m³ to 1900 kg/m³ (typically 65% to 75% by volume)</p>
+<h2 id="system-dimensions-and-resolution">System Dimensions and Resolution<a class="headerlink" href="#system-dimensions-and-resolution" title="Permanent link">¶</a></h2>
+<p><img alt="Mix Design System Size" src="../../assets/images/screenshots/mix-design/mix-design-system-size.png"></p>
+<p>Configure the virtual specimen size in the <strong>System Settings</strong> section:</p>
+<h3 id="system-size">System Size<a class="headerlink" href="#system-size" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>System Size X</strong>: Width in voxels (typical: 100-200)</li>
+<li><strong>System Size Y</strong>: Depth in voxels (typical: 100-200)</li>
+<li><strong>System Size Z</strong>: Height in voxels (typical: 100-200)</li>
+</ul>
+<h3 id="resolution">Resolution<a class="headerlink" href="#resolution" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Resolution</strong>: Micrometers per voxel (currently use only 1.0; other values
+have unpredictable consequences!)</li>
+</ul>
+<p><strong>Physical size calculation:</strong>
+</p><div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Physical size (μm) = System size (voxels) × Resolution (μm/voxel)
+</span></code></pre></div>
+<p><strong>Example:</strong>
+- System: 100 × 100 × 100 voxels
+- Resolution: 1.0 μm/voxel
+- Physical size: 100 × 100 × 100 μm³</p>
+<h3 id="size-and-resolution-guidance">Size and Resolution Guidance<a class="headerlink" href="#size-and-resolution-guidance" title="Permanent link">¶</a></h3>
+<p><strong>Small Systems (Fast, less representative):</strong>
+- Size: 50 voxels to 100 voxels in each dimension
+- Resolution: 1 μm/voxel
+- Physical size: 50 μm to 100 μm in each dimension
+- Generation time: 5 minutes to 15 minutes
+- Best for: Initial testing, parameter exploration</p>
+<p><strong>Medium Systems (Balanced):</strong>
+- Size: 100 voxels to 150 voxels in each dimension
+- Resolution: 1.0 μm/voxel
+- Physical size: 100 μm to 200 μm in each dimension
+- Generation time: 15 minutes to 45 minutes
+- Best for: Normal simulations, most studies</p>
+<p><strong>Large Systems (Slow, most representative):</strong>
+- Size: 150 voxels to 300 voxels in each dimension
+- Resolution: 1.0 μm/voxel
+- Physical size: 150 μm to 300 μm in each dimension
+- Generation time: 45 minutes to 90 minutes
+- Best for: Final validation, publication-quality results</p>
+<p><strong>Memory Requirements:</strong>
+- 100³ system: ~4 MB per phase
+- 150³ system: ~14 MB per phase
+- 200³ system: ~32 MB per phase
+- 250³ system: ~62 MB per phase</p>
+<h2 id="grading-curves">Grading Curves<a class="headerlink" href="#grading-curves" title="Permanent link">¶</a></h2>
+<p>Aggregates require grading curve definition specifying the size distribution.</p>
+<h3 id="fine-aggregate-grading">Fine Aggregate Grading<a class="headerlink" href="#fine-aggregate-grading" title="Permanent link">¶</a></h3>
+<p><img alt="Grading Curve Fine Aggregate" src="../../assets/images/screenshots/mix-design/grading-curve-fine-aggregate.png"></p>
+<p>Fine aggregates use <strong>32 sieves</strong> from No. 4 (4.75 mm) through No. 635 (20 μm).</p>
+<h3 id="coarse-aggregate-grading">Coarse Aggregate Grading<a class="headerlink" href="#coarse-aggregate-grading" title="Permanent link">¶</a></h3>
+<p><img alt="Grading Curve Coarse Aggregate" src="../../assets/images/screenshots/mix-design/grading-curve-coarse-aggregate.png"></p>
+<p>Coarse aggregates use <strong>23 sieves</strong> from 4" (100 mm) through No. 4 (4.75 mm).</p>
+<h3 id="grading-curve-dialog">Grading Curve Dialog<a class="headerlink" href="#grading-curve-dialog" title="Permanent link">¶</a></h3>
+<p><img alt="Grading Curve Dialog" src="../../assets/images/screenshots/mix-design/grading-curve-dialog.png"></p>
+<p>The grading dialog provides:</p>
+<ol>
+<li><strong>Sieve Table</strong> - Enter mass percent retained on each sieve</li>
+<li><strong>Grading Curve Plot</strong> - Visual representation of size distribution</li>
+<li><strong>Templates</strong> - Load standard ASTM grading curves</li>
+<li><strong>Save/Load</strong> - Save custom gradings as templates</li>
+</ol>
+<p><strong>Grading Entry Methods:</strong></p>
+<p><strong>Method 1: Manual Entry</strong>
+- Enter percent retained for each sieve size
+- Values auto-validate (sum should be ~100%)</p>
+<p><strong>Method 2: Load Template</strong>
+- Click <strong>Load Template</strong> dropdown
+- Select from standard gradings (ASTM C33, <em>etc</em>.)
+- Modify if needed</p>
+<p><strong>Method 3: Import Data</strong>
+- Click <strong>Import</strong> button
+- Load CSV file with sieve data
+- Format: Sieve size (mm), Percent retained</p>
+<h3 id="standard-fine-aggregate-gradings">Standard Fine Aggregate Gradings<a class="headerlink" href="#standard-fine-aggregate-gradings" title="Permanent link">¶</a></h3>
+<p><strong>ASTM C33 Fine Aggregate:</strong>
+- 4.75 mm (No. 4): 0% to 10% retained
+- 2.36 mm (No. 8): 0% to 20% retained
+- 1.18 mm (No. 16): 0% to 35% retained
+- 600 μm (No. 30): 0% to 30% retained
+- 300 μm (No. 50): 0% to 15% retained
+- 150 μm (No. 100): 0% to 15% retained</p>
+<h3 id="standard-coarse-aggregate-gradings">Standard Coarse Aggregate Gradings<a class="headerlink" href="#standard-coarse-aggregate-gradings" title="Permanent link">¶</a></h3>
+<p><strong>ASTM C33 No. 67 (¾" to No. 4):</strong>
+- Most common for normal concrete
+- Maximum size: 25 mm (1 inch)
+- Nominal maximum: 19 mm (¾ inch)</p>
+<p><strong>ASTM C33 No. 57 (1" to No. 4):</strong>
+- Larger stone for structural concrete
+- Maximum size: 37.5 mm (1.5 inch)
+- Nominal maximum: 25 mm (1 inch)</p>
+<h2 id="particle-shapes">Particle Shapes<a class="headerlink" href="#particle-shapes" title="Permanent link">¶</a></h2>
+<p><img alt="Particle Shape Selection" src="../../assets/images/screenshots/mix-design/particle-shape-selection.png"></p>
+<p>VCCTL uses particle shape databases to represent realistic aggregate morphology using in-place reconstruction of the shapes by spherical harmonic models . For each aggregate component, select a shape distribution that matches your aggregate characteristics.</p>
+<h3 id="available-shape-sets">Available Shape Sets<a class="headerlink" href="#available-shape-sets" title="Permanent link">¶</a></h3>
+<p><strong>Shape sets available for aggregate:</strong>
+- <strong>Spherical</strong> - Approximating highly weathered river gravel or sand
+- <strong>MA106A-1-fine</strong> - Experimentally measured shapes for ASTM C33 standard sand
+- <strong>MA107-6-fine</strong> - Experimentally measured shapes for European standard sand
+EN 196-1
+- <strong>MA114F-3-fine</strong> - Experimentally measured shapes for AASHTO Proficiency sand
+  #9
+- <strong>MA106B-4-coarse</strong> - Experimentally measured shapes for an ASTM #57 stone
+- <strong>MA111-7-coarse</strong> - Experimentally measured shapes for AASHTO coarse
+limestone proficiency sample #137-#138
+- <strong>MA99BC-5-coarse</strong> - Experimentally measured shapes for a coarse steel slag
+aggregate</p>
+<p><strong>Best practice:</strong>
+- Use measured shape data when available
+- Match visual appearance of your aggregate
+- Spherical shapes are easiest to pack (faster generation)
+- Angular shapes are more realistic for crushed stone</p>
+<h2 id="powder-dispersion-options">Powder Dispersion Options<a class="headerlink" href="#powder-dispersion-options" title="Permanent link">¶</a></h2>
+<p><img alt="Flocculation Settings" src="../../assets/images/screenshots/mix-design/flocculation-settings.png"></p>
+<p>Dispersion settings control the agglomeration behavior of powder particles in fresh concrete binder.</p>
+<h3 id="flocculation-parameters">Flocculation Parameters<a class="headerlink" href="#flocculation-parameters" title="Permanent link">¶</a></h3>
+<p>The user can choose to enable flocculation/agglomeration by checking the "Enable
+Flocculation" box and then entering the degree of flocculation. The degree of
+flocculation is equation to one minus the ratio of the number of agglomerates to
+the number of primary particles.</p>
+<p>Alternatively, the user can choose to enforce the strict separation of all
+particles by leaving the "Enable flocculation" box unchecked and then entering a
+dispersion distance of one or two voxels.</p>
+<p>The default is to simulate neither flocculation nor dispersion but to simply
+locate particles by a random parking algorthm that avoids overlap.</p>
+<h3 id="effect-on-properties">Effect on Properties<a class="headerlink" href="#effect-on-properties" title="Permanent link">¶</a></h3>
+<p><strong>Well-dispersed cement (small flocs):</strong>
+- ✓ Faster hydration kinetics
+- ✓ More uniform property development
+- ✓ Lower permeability
+- ✗ May be unrealistic for low w/c ratios</p>
+<p><strong>Strongly flocculated cement (large flocs):</strong>
+- ✓ More realistic for typical concrete
+- ✓ Captures effects of mixing and consolidation
+- ✗ Slower hydration kinetics
+- ✗ Higher permeability</p>
+<p><strong>Recommendation:</strong> Use the default behavior of random parking unless simulating
+the effect of a strong superplasticizer.</p>
+<h2 id="mixture-validation">Mixture Validation<a class="headerlink" href="#mixture-validation" title="Permanent link">¶</a></h2>
+<p><img alt="Mix Design Properties Validation" src="../../assets/images/screenshots/mix-design/mix-design-properties-validation.png"></p>
+<p>Clicking on the <strong>Validate</strong> button will automatically validate  mix designs and warn  about potential issues:</p>
+<h3 id="validation-checks">Validation Checks<a class="headerlink" href="#validation-checks" title="Permanent link">¶</a></h3>
+<p><strong>Volume Balance:</strong>
+- Total component volumes should not exceed 100% of system volume
+- Accounts for material specific gravities
+- Shows warning if overfilled (&gt;105%) or underfilled (&lt;85%)</p>
+<p><strong>Water-Cement Ratio:</strong>
+- Calculates w/b based on powder and water masses
+- Warns if w/b &lt; 0.25 (very low, difficult hydration) or w/b &gt; 0.70 (high, poor durability)</p>
+<p><strong>Aggregate Distribution:</strong>
+- Checks fine/coarse aggregate ratio
+- Warns if imbalanced (should be roughly 40/60 to 60/40)</p>
+<p><strong>Material Compatibility:</strong>
+- Ensures materials are chemically compatible
+- Warns about unusual combinations</p>
+<h3 id="mixture-summary">Mixture Summary<a class="headerlink" href="#mixture-summary" title="Permanent link">¶</a></h3>
+<p>The Mixture Summary panel shows:</p>
+<ul>
+<li><strong>Total Mass</strong>: Sum of all component masses (kg)</li>
+<li><strong>Total Volume</strong>: Calculated volume accounting for specific gravities (% of specimen)</li>
+<li><strong>Air Content</strong>: Using user-prescribed value in the <strong>Mortar/Concrete
+Options</strong> section</li>
+<li><strong>w/b Ratio</strong>: Water-to-cement mass ratio</li>
+<li><strong>Aggregate Ratio</strong>: Fine-to-total aggregate volume ratio</li>
+</ul>
+<h3 id="creating-the-mixture">Creating the Mixture<a class="headerlink" href="#creating-the-mixture" title="Permanent link">¶</a></h3>
+<p>Once all the mixture parameters are set and validated, a 3D reconstruction of
+the mixture can be made by clicking the <strong>Create Mix</strong> button. Clicking this
+button will also save the mixture design by name so that it can be loaded back
+in the future without having to re-enter all the parameters.</p>
+<h2 id="loaded-mixture-design">Loaded Mixture Design<a class="headerlink" href="#loaded-mixture-design" title="Permanent link">¶</a></h2>
+<p><img alt="Mix Design Loaded" src="../../assets/images/screenshots/mix-design/mix-design-loaded.png"></p>
+<p>Once you've configured all components and parameters, your complete mix design shows:</p>
+<ol>
+<li>All material components with masses</li>
+<li>System dimensions and resolution</li>
+<li>Aggregate grading curves (configured)</li>
+<li>Particle shape selections</li>
+<li>Flocculation settings</li>
+<li>Mix summary with calculated properties</li>
+</ol>
+<h2 id="loading-saved-mix-designs">Loading Saved Mix Designs<a class="headerlink" href="#loading-saved-mix-designs" title="Permanent link">¶</a></h2>
+<p><img alt="Load Mix Design Dialog" src="../../assets/images/screenshots/mix-design/load-mix-design-dialog.png"></p>
+<p>To load a previously saved mix:</p>
+<ol>
+<li>Click <strong>Load Mix</strong> button</li>
+<li>Select from list of saved mix designs</li>
+<li>All parameters load automatically</li>
+<li>Modify as needed (creates a new mix design if you change the name)</li>
+</ol>
+<p><img alt="Saved Mix Designs List" src="../../assets/images/screenshots/mix-design/saved-mix-designs-list.png"></p>
+<p>The list shows:
+- Mix design name
+- Date created
+- Date last modified
+- Component summary</p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">¶</a></h2>
+<h3 id="mix-design-strategy">Mix Design Strategy<a class="headerlink" href="#mix-design-strategy" title="Permanent link">¶</a></h3>
+<p><strong>1. Start Simple</strong>
+- Begin with cement + water + one aggregate
+- Validate behavior before adding complexity
+- Gradually add supplementary materials</p>
+<p><strong>2. Use Realistic Proportions</strong>
+- Follow industry-standard mix designs (ACI 211, etc.)
+- Typical total mass: 2200-2400 kg/m³
+- Typical air content: 1-8%</p>
+<p><strong>3. Match Your Application</strong>
+- <strong>Structural concrete</strong>: w/c = 0.40-0.50, normal strength
+- <strong>High-performance</strong>: w/c = 0.30-0.40, SCMs, good aggregate
+- <strong>Mass concrete</strong>: w/c = 0.45-0.55, low heat cement, fly ash</p>
+<p><strong>4. Consider Computational Cost</strong>
+- Start with small systems (100 voxels) for testing
+- Use larger systems (150-200 voxels) for final results
+- Balance resolution with system size</p>
+<h3 id="material-selection">Material Selection<a class="headerlink" href="#material-selection" title="Permanent link">¶</a></h3>
+<p><strong>Cement:</strong>
+- Use measured cement data when possible
+- Portland cement Type I/II for most applications
+- Adjust phase composition for special cements</p>
+<p><strong>Water:</strong>
+- Simple: just specify mass
+- w/c ratio is key parameter for strength and durability</p>
+<p><strong>Aggregates:</strong>
+- Use realistic grading curves (ASTM C33)
+- Match particle shapes to your actual aggregate
+- Include both fine and coarse for realistic packing</p>
+<p><strong>SCMs:</strong>
+- Add fly ash for sulfate resistance, reduced heat
+- Add slag for long-term strength, reduced permeability
+- Add silica fume for ultra-high strength, dense microstructure</p>
+<h3 id="system-dimensions">System Dimensions<a class="headerlink" href="#system-dimensions" title="Permanent link">¶</a></h3>
+<p><strong>Small Studies (parameter exploration):</strong>
+- 100³ voxels at 1 μm/voxel = 100 μm cube
+- Fast generation (~10 minutes)
+- Good for testing different mixes</p>
+<p><strong>Production Studies (most work):</strong>
+- 150³ voxels at 1 μm/voxel = 150 μm cube
+- Reasonable generation time (~30 minutes)
+- Good balance of speed and accuracy</p>
+<p><strong>Publication Studies (final validation):</strong>
+- 200³ voxels at 0.5 μm/voxel = 100 μm cube (high resolution)
+- Slow generation (~2 hours)
+- Best accuracy and detail</p>
+<h2 id="common-mixture-design-examples">Common Mixture Design Examples<a class="headerlink" href="#common-mixture-design-examples" title="Permanent link">¶</a></h2>
+<h3 id="example-1-normal-strength-concrete">Example 1: Normal Strength Concrete<a class="headerlink" href="#example-1-normal-strength-concrete" title="Permanent link">¶</a></h3>
+<p><strong>Target</strong>: 35 MPa (5000 psi) structural concrete</p>
+<p><strong>Proportions:</strong>
+- Portland Cement Type I: 375 kg/m³
+- Water: 168 kg/m³ (w/c = 0.45)
+- Fine Aggregate: 750 kg/m³
+- Coarse Aggregate: 1065 kg/m³
+- Total: 2358 kg/m³</p>
+<p><strong>System</strong>:
+- Size: 150 × 150 × 150 voxels
+- Resolution: 1.0 μm/voxel</p>
+<h3 id="example-2-high-performance-concrete-with-fly-ash">Example 2: High-Performance Concrete with Fly Ash<a class="headerlink" href="#example-2-high-performance-concrete-with-fly-ash" title="Permanent link">¶</a></h3>
+<p><strong>Target</strong>: 60 MPa (8700 psi) with durability</p>
+<p><strong>Proportions:</strong>
+- Portland Cement Type I: 350 kg/m³
+- Fly Ash Class F: 100 kg/m³
+- Water: 153 kg/m³ (w/(c+0.6f) = 0.34)
+- Fine Aggregate: 700 kg/m³
+- Coarse Aggregate: 1050 kg/m³
+- Total: 2353 kg/m³</p>
+<p><strong>System:</strong>
+- Size: 150 × 150 × 150 voxels
+- Resolution: 1.0 μm/voxel</p>
+<h3 id="example-3-ultra-high-performance-concrete-with-silica-fume">Example 3: Ultra-High Performance Concrete with Silica Fume<a class="headerlink" href="#example-3-ultra-high-performance-concrete-with-silica-fume" title="Permanent link">¶</a></h3>
+<p><strong>Target</strong>: 120 MPa (17400 psi) UHPC</p>
+<p><strong>Proportions:</strong>
+- Portland Cement Type III: 800 kg/m³
+- Silica Fume: 80 kg/m³
+- Water: 176 kg/m³ (w/cm = 0.20)
+- Fine Aggregate (fine sand): 1020 kg/m³
+- Total: 2076 kg/m³</p>
+<p><strong>System:</strong>
+- Size: 100 × 100 × 100 voxels
+- Resolution: 1.0 μm/voxel</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">¶</a></h3>
+<p><strong>Problem:</strong> "Volume exceeds 100%" warning
+<strong>Solution:</strong> Reduce component masses or increase system size. Check that specific gravities are correct.</p>
+<p><strong>Problem:</strong> Aggregate grading won't save
+<strong>Solution:</strong> Ensure all required sieves have values. Total percent retained should be ~100%.</p>
+<p><strong>Problem:</strong> Mix design name already exists
+<strong>Solution:</strong> Choose a unique name or load the existing mix to modify it.</p>
+<p><strong>Problem:</strong> Unrealistic w/c ratio warning
+<strong>Solution:</strong> Check water and cement masses. Typical range is 0.30-0.60 for normal concrete.</p>
+<h3 id="validation-warnings">Validation Warnings<a class="headerlink" href="#validation-warnings" title="Permanent link">¶</a></h3>
+<p><strong>"Air content is high (&gt;10%)"</strong>
+- Check if component masses are too low
+- Verify specific gravities are correct
+- Some air is normal (1-8%), but &gt;10% may indicate error</p>
+<p><strong>"Fine/coarse aggregate ratio unusual"</strong>
+- Typical ratio is 40/60 to 60/40 (fine/total aggregate)
+- Very high fine content may cause packing issues
+- Very high coarse content may have insufficient fines</p>
+<p><strong>"Very low/high w/c ratio"</strong>
+- w/c &lt; 0.30: Difficult to hydrate, may not reach full degree of hydration
+- w/c &gt; 0.65: Poor durability, high permeability, lower strength</p>
+<hr>
+<p><strong>Next Steps:</strong>
+- <strong><a href="../microstructure-generation/">Microstructure Generation</a></strong> - Generate 3D particle arrangements from your mix design
+- <strong><a href="../materials-management/">Materials Management</a></strong> - Learn about material properties and definitions
+- <strong><a href="../../workflows/parameter-studies/">Workflows</a></strong> - Systematic mix design parameter studies</p></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../materials-management/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Materials Management">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Materials Management
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../microstructure-generation/" class="md-footer__link md-footer__link--next" aria-label="Next: Microstructure Generation">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Microstructure Generation
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2025 Jeffrey W. Bullard, Texas A&M University
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/jwbullard/VCCTL" target="_blank" rel="noopener" title="VCCTL on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

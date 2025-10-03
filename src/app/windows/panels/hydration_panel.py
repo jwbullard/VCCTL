@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 from app.services.service_container import get_service_container
 from app.utils.icon_utils import create_button_with_icon
+from app.help.panel_help_button import create_panel_help_button
 from app.services.hydration_service import (
     HydrationParameters, TemperatureProfile, TemperaturePoint, 
     AgingMode, SimulationStatus, SimulationProgress
@@ -306,6 +307,10 @@ class HydrationPanel(Gtk.Box):
         title_label.set_markup('<span size="large" weight="bold">Hydration Simulation</span>')
         title_label.set_halign(Gtk.Align.START)
         title_box.pack_start(title_label, False, False, 0)
+
+        # Add context-specific help button
+        help_button = create_panel_help_button('HydrationPanel', self.main_window)
+        title_box.pack_start(help_button, False, False, 5)
         
         # Simulation status indicator
         self.status_label = Gtk.Label("Ready")
@@ -520,7 +525,7 @@ class HydrationPanel(Gtk.Box):
         
         self.time_conversion_spin = Gtk.SpinButton.new_with_range(0.0001, 1.0, 0.0001)
         self.time_conversion_spin.set_digits(5)
-        self.time_conversion_spin.set_value(0.00045)  # Default for Knudsen parabolic
+        self.time_conversion_spin.set_value(0.00035)  # Default for Knudsen parabolic
         self.time_conversion_spin.set_tooltip_text("Time conversion factor for Knudsen parabolic law (units: h⁻²)")
         time_factor_box.pack_start(self.time_conversion_spin, False, False, 0)
         
@@ -860,8 +865,8 @@ class HydrationPanel(Gtk.Box):
         
         self.e_act_pozz_spin = Gtk.SpinButton.new_with_range(10.0, 150.0, 0.1)
         self.e_act_pozz_spin.set_digits(1)
-        self.e_act_pozz_spin.set_value(83.1)
-        self.e_act_pozz_spin.set_tooltip_text("Activation energy for pozzolan reaction (default 83.1 kJ/mol)")
+        self.e_act_pozz_spin.set_value(55.0)
+        self.e_act_pozz_spin.set_tooltip_text("Activation energy for pozzolan reaction (default 55.0 kJ/mol)")
         energy_grid.attach(self.e_act_pozz_spin, 1, 1, 1, 1)
         
         # Slag activation energy
@@ -932,24 +937,24 @@ class HydrationPanel(Gtk.Box):
         phase_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         phase_box.set_margin_left(15)
         
-        self.csh2_flag_check = Gtk.CheckButton(label="Enable CSH Type 2")
+        self.csh2_flag_check = Gtk.CheckButton(label="Enable formation of low Ca/Si CSH")
         self.csh2_flag_check.set_active(True)
-        self.csh2_flag_check.set_tooltip_text("Enable CSH Type 2 formation (default enabled)")
+        self.csh2_flag_check.set_tooltip_text("Enable formation of low Ca/Si CSH (default enabled)")
         phase_box.pack_start(self.csh2_flag_check, False, False, 0)
-        
-        self.ch_flag_check = Gtk.CheckButton(label="Enable CH Formation")
+
+        self.ch_flag_check = Gtk.CheckButton(label="Allow CH to precipitate on aggregate surfaces")
         self.ch_flag_check.set_active(True)
-        self.ch_flag_check.set_tooltip_text("Enable calcium hydroxide formation (default enabled)")
+        self.ch_flag_check.set_tooltip_text("Allow calcium hydroxide to precipitate on aggregate surfaces (default enabled)")
         phase_box.pack_start(self.ch_flag_check, False, False, 0)
-        
+
         self.ph_active_check = Gtk.CheckButton(label="Enable pH Calculations")
         self.ph_active_check.set_active(True)
         self.ph_active_check.set_tooltip_text("Enable pH calculations (default enabled)")
         phase_box.pack_start(self.ph_active_check, False, False, 0)
-        
-        self.ettringite_check = Gtk.CheckButton(label="Enable Ettringite Formation")
+
+        self.ettringite_check = Gtk.CheckButton(label="Allow formation of iron-rich ettringite")
         self.ettringite_check.set_active(True)
-        self.ettringite_check.set_tooltip_text("Enable ettringite formation during hydration")
+        self.ettringite_check.set_tooltip_text("Allow formation of iron-rich ettringite during hydration (default enabled)")
         phase_box.pack_start(self.ettringite_check, False, False, 0)
         
         content_box.pack_start(phase_box, False, False, 0)
