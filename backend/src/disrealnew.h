@@ -28,6 +28,7 @@
 #endif
 
 #include "include/vcctl.h"
+#include "include/win32_compat.h"
 #include <ctype.h>
 #include <getopt.h>
 #include <math.h>

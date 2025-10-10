@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.26)
 
 project (VcctlLibrary_project)
 
@@ -21,8 +21,8 @@ message ("VCCTL lib directory, CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS})
 
 add_library (vcctl STATIC ${SOURCES})
 
-# target_link_libraries(vcctl ${EXTRA_LIBS})
-target_link_libraries(vcctl)
+# Link to PNG library to get include directories
+target_link_libraries(vcctl PNG::PNG ZLIB::ZLIB)
 
 install (TARGETS vcctl DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 

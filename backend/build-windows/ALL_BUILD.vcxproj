@@ -1,0 +1,288 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{67584EBE-20CA-340A-99E9-AECFBDB51994}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/jwbullard/Desktop/foo/VCCTL/backend/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jwbullard/Desktop/foo/VCCTL/backend -BC:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows --check-stamp-file C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\SelectLibraryConfigurations.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCXXCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeRCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeSystem.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-debug.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-release.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/jwbullard/Desktop/foo/VCCTL/backend/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jwbullard/Desktop/foo/VCCTL/backend -BC:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows --check-stamp-file C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\SelectLibraryConfigurations.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCXXCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeRCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeSystem.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-debug.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-release.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/jwbullard/Desktop/foo/VCCTL/backend/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jwbullard/Desktop/foo/VCCTL/backend -BC:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows --check-stamp-file C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\SelectLibraryConfigurations.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCXXCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeRCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeSystem.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-debug.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-release.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/jwbullard/Desktop/foo/VCCTL/backend/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jwbullard/Desktop/foo/VCCTL/backend -BC:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows --check-stamp-file C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPNG.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\FindZLIB.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.26\Modules\SelectLibraryConfigurations.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeCXXCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeRCCompiler.cmake;C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\3.26.2\CMakeSystem.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\png\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-debug.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config-release.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\unofficial-getopt-win32\unofficial-getopt-win32-config.cmake;C:\Users\jwbullard\vcpkg\installed\x64-windows\share\zlib\vcpkg-cmake-wrapper.cmake;C:\Users\jwbullard\vcpkg\scripts\buildsystems\vcpkg.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\ZERO_CHECK.vcxproj">
+      <Project>{0CBE693A-E02D-3EF0-A2F2-BD25CE969264}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\aggvrml.vcxproj">
+      <Project>{21737632-6522-39EA-8539-482BD95F3784}</Project>
+      <Name>aggvrml</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\apstats.vcxproj">
+      <Project>{73774C90-55D6-32D6-8A60-C2BDD3549A01}</Project>
+      <Name>apstats</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\chlorattack3d.vcxproj">
+      <Project>{7115C65C-3FAE-3C12-8AA5-2632AD17511E}</Project>
+      <Name>chlorattack3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\disrealnew.vcxproj">
+      <Project>{9350A772-1340-33DA-BB9A-FF689B6AA683}</Project>
+      <Name>disrealnew</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\distfapart.vcxproj">
+      <Project>{E84943A6-29AF-3245-B2E2-3FB67D4A608E}</Project>
+      <Name>distfapart</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\distfarand.vcxproj">
+      <Project>{8EF9A167-3DF0-39BA-8FF6-5FB3B4FC9563}</Project>
+      <Name>distfarand</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\dryout.vcxproj">
+      <Project>{233BAF93-CAFC-32E7-A86D-CD72781D3BD2}</Project>
+      <Name>dryout</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\elastic.vcxproj">
+      <Project>{83AA108F-D37E-3DC1-BC2A-B32A0441E45A}</Project>
+      <Name>elastic</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\genaggpack.vcxproj">
+      <Project>{9E635746-C5D8-3E7B-97C4-5D8F330FEEE4}</Project>
+      <Name>genaggpack</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\genmic.vcxproj">
+      <Project>{8366D4FC-F233-361F-A566-297684B47AAD}</Project>
+      <Name>genmic</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\hydmovie.vcxproj">
+      <Project>{59D05C73-1D43-377B-858E-BEDC4EB405D9}</Project>
+      <Name>hydmovie</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\image100.vcxproj">
+      <Project>{99740FE9-CBBE-3818-A201-D54A550F06C3}</Project>
+      <Name>image100</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\leach3d.vcxproj">
+      <Project>{3EADFF87-9ABA-3441-9225-FEF8E2B74E25}</Project>
+      <Name>leach3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\measagg.vcxproj">
+      <Project>{AB109405-E50B-3B67-8489-6FB8F388EDD0}</Project>
+      <Name>measagg</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\oneimage.vcxproj">
+      <Project>{985E40CB-B3A7-325F-AC4B-2EAF20BC578A}</Project>
+      <Name>oneimage</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\onepimage.vcxproj">
+      <Project>{62CC27D9-0FBE-3438-9B1E-514608671B59}</Project>
+      <Name>onepimage</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\perc3d.vcxproj">
+      <Project>{D59165F1-CFB1-3073-AEAB-E5EBFEEA43BB}</Project>
+      <Name>perc3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\perc3d-leach.vcxproj">
+      <Project>{E4DB3113-9B54-3098-AC32-60B04875DA12}</Project>
+      <Name>perc3d-leach</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\poredist3d.vcxproj">
+      <Project>{B6784852-2C45-3E3D-B50E-70E880B69FBC}</Project>
+      <Name>poredist3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\rand3d.vcxproj">
+      <Project>{57494EDA-5B9F-32CF-84A4-9614E204F8E3}</Project>
+      <Name>rand3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\stat3d.vcxproj">
+      <Project>{960CFDEA-E548-39E8-8EA1-DDE27488C04B}</Project>
+      <Name>stat3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\sulfattack3d.vcxproj">
+      <Project>{F89B8D1B-DC51-3FD9-929A-EBD2DEBDAF04}</Project>
+      <Name>sulfattack3d</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\thames2vcctl.vcxproj">
+      <Project>{DE0B6553-863B-3956-927C-62F79D454D52}</Project>
+      <Name>thames2vcctl</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\thames2vcctlcorr.vcxproj">
+      <Project>{E9166746-0691-310F-B05E-A8418FA4F304}</Project>
+      <Name>thames2vcctlcorr</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\totsurf.vcxproj">
+      <Project>{279C5FCC-4799-325E-ABF3-795806DCFC3D}</Project>
+      <Name>totsurf</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\transport.vcxproj">
+      <Project>{90E24494-5C91-36D6-842B-B46327BC90F6}</Project>
+      <Name>transport</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\build-windows\src\vcctllib\vcctl.vcxproj">
+      <Project>{02521753-3677-3F80-847F-278F1EBB63E1}</Project>
+      <Name>vcctl</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

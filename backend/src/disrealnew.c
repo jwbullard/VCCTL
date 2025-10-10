@@ -10256,10 +10256,18 @@ char *rfc8601_timespec(struct timespec *tv) {
   rfc8601 = malloc(256);
 
   memset(&tm, 0, sizeof(struct tm));
-  sprintf(time_str, "%ld UTC", tv->tv_sec);
 
-  // convert our timespec into broken down time
+  /* Original macOS code using strptime (not available on Windows):
+  sprintf(time_str, "%ld UTC", tv->tv_sec);
   strptime(time_str, "%s %U", &tm);
+  */
+
+  // Platform-independent conversion of time_t to broken-down time
+#ifdef _WIN32
+  gmtime_s(&tm, &tv->tv_sec);  // Windows secure version
+#else
+  gmtime_r(&tv->tv_sec, &tm);  // Unix/macOS thread-safe version
+#endif
 
   // do the math to convert nanoseconds to integer milliseconds
   fractional_seconds = (double)tv->tv_nsec;

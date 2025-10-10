@@ -1,0 +1,36 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeCXXInformation.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeCommonLanguageInclude.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeDependentOption.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeGenericSystem.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeInitializeConfigs.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeLanguageInformation.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeRCInformation.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeSystemSpecificInformation.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/CMakeSystemSpecificInitialize.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Compiler/CMakeCommonCompilerMacros.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Compiler/MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Compiler/MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Compiler/MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindPNG.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/FindZLIB.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Platform/Windows-MSVC-C.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Platform/Windows-MSVC-CXX.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Platform/Windows-MSVC.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Platform/Windows.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/Platform/WindowsPaths.cmake
+C:/Program Files/CMake/share/cmake-3.26/Modules/SelectLibraryConfigurations.cmake
+C:/Users/jwbullard/Desktop/foo/VCCTL/backend/CMakeLists.txt
+C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/3.26.2/CMakeCCompiler.cmake
+C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/3.26.2/CMakeCXXCompiler.cmake
+C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/3.26.2/CMakeRCCompiler.cmake
+C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/3.26.2/CMakeSystem.cmake
+C:/Users/jwbullard/vcpkg/installed/x64-windows/share/png/vcpkg-cmake-wrapper.cmake
+C:/Users/jwbullard/vcpkg/installed/x64-windows/share/unofficial-getopt-win32/unofficial-getopt-win32-config-debug.cmake
+C:/Users/jwbullard/vcpkg/installed/x64-windows/share/unofficial-getopt-win32/unofficial-getopt-win32-config-release.cmake
+C:/Users/jwbullard/vcpkg/installed/x64-windows/share/unofficial-getopt-win32/unofficial-getopt-win32-config.cmake
+C:/Users/jwbullard/vcpkg/installed/x64-windows/share/zlib/vcpkg-cmake-wrapper.cmake
+C:/Users/jwbullard/vcpkg/scripts/buildsystems/vcpkg.cmake

@@ -6,7 +6,7 @@
  * GIF image files
  *
  ******************************************************/
-#include "include/png.h"
+#include <png.h>
 #include "include/vcctl.h"
 #include <stdio.h>
 #include <stdlib.h>

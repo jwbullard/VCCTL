@@ -4,7 +4,7 @@
  *
  *       8 November 2013
  ******************************************************************************/
-#include "../include/png.h"
+#include <png.h>
 #include "../include/vcctl.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,0 +1,10 @@
+^C:\USERS\JWBULLARD\DESKTOP\FOO\VCCTL\BACKEND\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/jwbullard/Desktop/foo/VCCTL/backend -BC:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows --check-stamp-file C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\breakflocs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\calcporedist3d.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\checkbc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\complex.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\convert_id.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\diam2vol.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\filehandler.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\fread_string.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\gtime.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\id2phasename.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\imageutil.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\mediansize.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\memutil.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\messages.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\probe_imgheader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\ran1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\read_imgheader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\read_string.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\skip_imgheader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\write_imgheader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\vcctllib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{69940D15-1CDA-360D-92C8-D7464D44348F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

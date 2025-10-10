@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\disrealnew.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\disrealnew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\properties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\burn3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\burnset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\parthyd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\hydrealnew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\src\include\pHpred.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\jwbullard\Desktop\foo\VCCTL\backend\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{2ADE74C5-5CEB-3202-8C07-95DDD51C04C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{69940D15-1CDA-360D-92C8-D7464D44348F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

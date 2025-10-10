@@ -20,6 +20,7 @@
  *
  *******************************************************/
 #include "include/vcctl.h"
+#include "include/win32_compat.h"
 #include <getopt.h>
 #include <math.h>
 #include <setjmp.h>
@@ -425,7 +426,8 @@ void striplayer(int nxp, int nyp, int nzp);
 void makefloc(void);
 void measure(void);
 void measagg(void);
-void connect(void);
+/* void connect(void); */  /* Original name - conflicts with Windows winsock on Windows */
+void check_connectivity(void);  /* Renamed to avoid Windows name collision */
 int distrib3d(void);
 int distfa(int fadchoice);
 int addonepixels(void);
@@ -671,7 +673,8 @@ int main(int argc, char *argv[]) {
       Binderpix = (Xsyssize - 1) * Ysyssize * Zsyssize;
       break;
     case CONNECTIVITY:
-      connect();
+      /* connect(); */  /* Original name - conflicts with Windows winsock on Windows */
+      check_connectivity();  /* Renamed to avoid Windows name collision */
       break;
     case DISTFROMAGG:
       if (Aggsize != 0) {
@@ -4438,7 +4441,7 @@ void measagg(void) {
 }
 
 /***
- *    connect
+ *    check_connectivity (formerly connect)
  *
  *    Routine to assess the connectivity (percolation)
  *    of a single phase.  Two matrices are used here:
@@ -4452,8 +4455,12 @@ void measagg(void) {
  *
  *    Calls:        No other routines
  *    Called by:    main program
+ *
+ *    Note: Renamed from connect() to check_connectivity() to avoid
+ *          name collision with Windows winsock library
  ***/
-void connect(void) {
+/* void connect(void) { */  /* Original name - conflicts with Windows winsock on Windows */
+void check_connectivity(void) {  /* Renamed to avoid Windows name collision */
   register int i, j, k;
   int inew, ntop, nthrough, ncur, nnew, ntot;
   int *nmatx, *nmaty, *nmatz, *nnewx, *nnewy, *nnewz;
@@ -8332,10 +8339,18 @@ char *rfc8601_timespec(struct timespec *tv) {
   rfc8601 = malloc(256);
 
   memset(&tm, 0, sizeof(struct tm));
-  sprintf(time_str, "%ld UTC", tv->tv_sec);
 
-  // convert our timespec into broken down time
+  /* Original macOS code using strptime (not available on Windows):
+  sprintf(time_str, "%ld UTC", tv->tv_sec);
   strptime(time_str, "%s %U", &tm);
+  */
+
+  // Platform-independent conversion of time_t to broken-down time
+#ifdef _WIN32
+  gmtime_s(&tm, &tv->tv_sec);  // Windows secure version
+#else
+  gmtime_r(&tv->tv_sec, &tm);  // Unix/macOS thread-safe version
+#endif
 
   // do the math to convert nanoseconds to integer milliseconds
   fractional_seconds = (double)tv->tv_nsec;

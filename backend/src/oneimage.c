@@ -5,7 +5,7 @@
  * Creates a PPM file for one slice of a
  * 3D microstructure
  ******************************************************/
-#include "include/png.h"
+#include <png.h>
 #include "include/vcctl.h"
 #include <stdio.h>
 #include <stdlib.h>

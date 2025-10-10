@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.26)
 
 project (VCCTL)
 
@@ -6,58 +6,44 @@ set (VCCTL_VERSION 10.0.0)
 set (VCCTL_VERSION_MAJOR 10)
 set (VCCTL_VERSION_MINOR 0.0)
 
-find_library (
-    LIBPNG_LIB
-    NAMES libpng libpng.a # what to look for
-    HINTS "${CMAKE_SOURCE_DIR}/lib" # where to look
-)
+# Use find_package for vcpkg-managed libraries
+find_package(PNG REQUIRED)
+find_package(ZLIB REQUIRED)
 
-# check if we found the GEMS3K library
-message(STATUS "LIBPNG_LIB: [${LIBPNG_LIB}]")
+# getopt library - Windows only (Unix has it built-in)
+if(WIN32)
+    find_package(unofficial-getopt-win32 REQUIRED)
+    set(EXTRA_LIBS ${EXTRA_LIBS} unofficial::getopt-win32::getopt)
+endif()
 
-if (LIBPNG_LIB)
-  message ("Found LIBPNG_LIB: [${LIBPNG_LIB}]")
-  set (EXTRA_LIBS ${EXTRA_LIBS} ${LIBPNG_LIB})
-  message ("EXTRA_LIBS: " ${EXTRA_LIBS})
-else ()
-    message (FATAL_ERROR "Did not find lib libpng")
-endif ()
+# Math library handling - not needed on Windows, required on Unix
+if(UNIX)
+    find_library(MATH_LIB NAMES m libm HINTS "/usr/lib")
+    if(MATH_LIB)
+        message("Found MATH_LIB: [${MATH_LIB}]")
+        set(EXTRA_LIBS ${EXTRA_LIBS} ${MATH_LIB})
+    else()
+        message(FATAL_ERROR "Did not find MATH lib")
+    endif()
+endif()
 
-find_library (
-    MATH_LIB
-    NAMES m libm # what to look for
-    HINTS "/usr/lib" # where to look
-)
-
-message(STATUS "MATH_LIB: [${MATH_LIB}]")
-
-if (MATH_LIB)
-    message ("Found MATH_LIB: [${MATH_LIB}]")
-    set (EXTRA_LIBS ${EXTRA_LIBS} ${MATH_LIB})
-else ()
-    message (FATAL_ERROR "Did not find MATH lib")
-endif ()
-
-find_library (
-    Z_LIB
-    NAMES z libz libz.a # what to look for
-    HINTS "${CMAKE_SOURCE_DIR}/lib" # where to look
-)
-
-message(STATUS "Z_LIB: [${Z_LIB}]")
-
-if (Z_LIB)
-    message ("Found Z_LIB: [${Z_LIB}]")
-    set (EXTRA_LIBS ${EXTRA_LIBS} ${Z_LIB})
-else ()
-    message (FATAL_ERROR "Did not find Z lib")
-endif ()
+# Set up library list
+set(EXTRA_LIBS ${EXTRA_LIBS} PNG::PNG ZLIB::ZLIB)
+message("EXTRA_LIBS: " ${EXTRA_LIBS})
 
 # Use include_directories instead of manual -I flags to handle special characters in paths
-include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("/usr/local/include")
+# Note: PNG/ZLIB headers come from vcpkg on Windows, so don't add custom include paths
+if(UNIX)
+    include_directories("${CMAKE_SOURCE_DIR}/include")
+    include_directories("/usr/local/include")
+endif()
 
-set (CMAKE_C_FLAGS "-O2")
+# Platform-specific compiler flags
+if(MSVC)
+    set(CMAKE_C_FLAGS "/O2")
+else()
+    set(CMAKE_C_FLAGS "-O2")
+endif()
 
 message ("Top level CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS})
 message ("Linked libraries are: " ${EXTRA_LIBS})

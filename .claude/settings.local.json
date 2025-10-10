@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where cl)",
+      "Bash(where gcc)",
+      "Read(//c/Users/jwbullard/**)",
+      "Bash(./bootstrap-vcpkg.bat)",
+      "Bash(./vcpkg install:*)",
+      "Bash(ls:*)",
+      "Bash(pip --version)",
+      "Bash(test:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(C:/msys64/mingw64/bin/python --version)",
+      "Bash(C:/msys64/usr/bin/bash -lc \"pacman -S --noconfirm mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python-gobject mingw-w64-x86_64-python-pip\")",
+      "Bash(C:/msys64/mingw64/bin/python -c \"import gi; gi.require_version(''Gtk'', ''3.0''); from gi.repository import Gtk; print(''GTK3 version:'', Gtk._version)\")",
+      "Bash(C:/msys64/mingw64/bin/python -m pip install --upgrade pip)",
+      "Bash(C:/msys64/mingw64/bin/python -m pip install:*)",
+      "Bash(C:/msys64/mingw64/bin/python -m PyInstaller --version)",
+      "Bash(C:/msys64/mingw64/bin/python -m PyInstaller vcctl.spec)",
+      "Bash(C:/msys64/mingw64/bin/python -m PyInstaller --clean vcctl.spec)",
+      "Bash(PATH=\"C:/msys64/mingw64/bin:$PATH\" C:/msys64/mingw64/bin/python -m PyInstaller --clean vcctl.spec)",
+      "Bash(export:*)",
+      "Bash(/c/msys64/mingw64/bin/python:*)",
+      "Bash(C:/msys64/mingw64.exe -c \"cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller --clean vcctl.spec\")",
+      "Bash(C:/msys64/mingw64.exe -c \"cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller vcctl.spec\")",
+      "Bash(./VCCTL.exe)",
+      "Bash(timeout:*)",
+      "Bash(C:/msys64/mingw64.exe -c \"cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller vcctl.spec 2>&1\")",
+      "Bash(cmd.exe /c \"C:\\msys64\\msys2_shell.cmd -mingw64 -defterm -no-start -here -c ''cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller vcctl.spec 2>&1 | tee build.log''\")",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-x86_64-python-pydantic)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
