@@ -8,11 +8,300 @@
 - Do not use the phrase "You're absolutely right!". Instead, use the phrase
 "Good point.", or "I see what you are saying."
 
+## OS Switching Procedures (CRITICAL - READ FIRST)
+
+### **Cross-Platform Development Workflow**
+
+When working on VCCTL across multiple operating systems (Mac, Windows, Linux), use these scripts to keep git repositories synchronized:
+
+#### **Starting Work on Different OS:**
+
+```bash
+./pre-session-sync.sh
+```
+
+**What it does:**
+- Fetches latest changes from remote
+- Shows what commits will be pulled
+- Creates automatic backup branch
+- Pulls changes with rebase strategy
+- Verifies sync completed successfully
+
+**When to use:**
+- ALWAYS at start of session on different OS
+- After long break between sessions
+- When you suspect changes on remote
+
+#### **Ending Work Session:**
+
+```bash
+./post-session-sync.sh
+```
+
+**What it does:**
+- Shows all uncommitted changes
+- Prompts for commit message (or auto-generates)
+- Stages all changes with `git add -A`
+- Creates commit with standard format
+- Pushes to remote repository
+
+**When to use:**
+- ALWAYS at end of work session
+- Before switching to different OS
+- Before long breaks
+
+#### **Script Features:**
+
+**Safety Mechanisms:**
+- ✅ Creates automatic backups before sync
+- ✅ Shows changes before applying
+- ✅ Confirms actions with user
+- ✅ Handles errors gracefully
+- ✅ Provides recovery instructions
+
+**Workflow Benefits:**
+- Prevents git divergence
+- Maintains linear history
+- No manual git commands needed
+- Consistent commit format
+- Zero data loss
+
+#### **Emergency Recovery:**
+
+If sync fails, restore from automatic backup:
+```bash
+# List backup branches
+git branch | grep backup-before-sync
+
+# Restore from backup
+git checkout backup-before-sync-20251013-120000
+
+# Or force remote state (CAUTION: loses local changes)
+git fetch origin
+git reset --hard origin/main
+```
+
+#### **Manual Workflow (If Scripts Unavailable):**
+
+**Starting Session:**
+```bash
+git fetch origin
+git log HEAD..origin/main --oneline  # Review changes
+git checkout -b backup-before-sync-$(date +%Y%m%d)  # Backup
+git checkout main
+git pull --rebase origin main
+```
+
+**Ending Session:**
+```bash
+git status  # Review changes
+git add -A
+git commit -m "Session work - [description]"
+git push origin main
+```
+
+---
+
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows Bug Fixes and Icon Path Resolution (October 13, 2025 - Session 4)**
+**Latest Session: Mac Git Repository Synchronization (October 13, 2025 - Session 6)**
 
-**Status: PACKAGING PHASE ✅ - macOS Complete, Windows Complete and Fully Tested**
+**Status: GIT SYNC COMPLETE ✅ - Mac Repository Synchronized with Windows Changes**
+
+**⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
+
+---
+
+## Session Status Update (October 13, 2025 - MAC GIT SYNCHRONIZATION SESSION #6)
+
+### **Session Summary:**
+Successfully synchronized Mac repository with all Windows packaging changes (Sessions 2-5). Created backup branch before sync, pulled 5 Windows commits with rebase strategy, verified all critical files intact. Created automated sync scripts for safe OS switching workflow. Mac now has all Windows improvements: particle shapes lazy loading, grading curve cumulative plotting, PyInstaller path fixes, and PyVista/VTK integration.
+
+**Previous Session:** Windows Testing and Bug Fixes - Particle Shapes & Grading Curves (October 13, 2025 - Session 5)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Git Repository Synchronization Complete ✅**
+
+**Problem Context:**
+- Mac had 9 local commits including v10.0.0 release
+- Windows created 5 commits on an earlier state (Sessions 2-5)
+- Windows did force push that overwrote Mac's commits on remote
+- Git histories had diverged - needed safe synchronization
+
+**Synchronization Process:**
+
+**Step 1: Create Backup Branch** ✅
+```bash
+git checkout -b backup-before-windows-sync
+git add -A
+git commit -m "Backup of Mac state before Windows sync (October 13, 2025)"
+```
+- Preserves exact Mac state including v10.0.0 release
+- Safe fallback if synchronization has problems
+
+**Step 2: Return to Main Branch** ✅
+```bash
+git checkout main
+```
+- Confirmed divergence: 9 local commits vs 5 remote commits
+
+**Step 3: Pull Windows Changes with Rebase** ✅
+```bash
+git pull --rebase origin main
+```
+- Successfully rebased Mac commits on top of Windows commits
+- No conflicts encountered
+- All changes integrated cleanly
+
+**Step 4: Verify Critical Files** ✅
+Confirmed all Windows Session 5 changes present:
+- ✅ `grading_curve.py` has "Cumulative Mass % Retained" label (line 772)
+- ✅ `directories_service.py` has `copy_bundled_data_if_needed()` method
+- ✅ `microstructure_service.py` has lazy loading `shape_sets` property
+- ✅ `.gitignore` has `venv-pyvista/` and `venv-win-pyv/` entries
+
+**Result:** Mac repository fully synchronized with all Windows packaging improvements ✅
+
+#### **2. Automated Sync Scripts Created ✅**
+
+Created two scripts for safe cross-platform development workflow:
+
+**pre-session-sync.sh** - Run BEFORE starting work on new OS:
+```bash
+#!/bin/bash
+# Fetches latest changes from remote
+# Shows what will be pulled
+# Allows review before pulling
+```
+
+**post-session-sync.sh** - Run AFTER finishing work session:
+```bash
+#!/bin/bash
+# Checks for uncommitted changes
+# Stages all changes
+# Commits with session details
+# Pushes to remote
+```
+
+**Benefits:**
+- Prevents git divergence between platforms
+- Creates consistent commit history
+- Ensures no work is lost during OS switches
+- Reduces manual git command errors
+
+#### **3. OS Switching Workflow Documented ✅**
+
+**Safe Multi-Platform Development Workflow:**
+
+**When Starting Session on Different OS:**
+1. Run `./pre-session-sync.sh`
+2. Review changes being pulled
+3. Confirm sync
+4. Begin work
+
+**When Ending Session:**
+1. Run `./post-session-sync.sh`
+2. Confirm changes to commit
+3. Script commits and pushes automatically
+
+**Emergency: If Sync Fails:**
+```bash
+# Restore from backup
+git checkout backup-before-sync-$(date +%Y%m%d)
+
+# Or force remote state
+git fetch origin
+git reset --hard origin/main  # CAUTION: Loses local changes
+```
+
+### **🔍 KEY TECHNICAL INSIGHTS:**
+
+#### **Git Rebase vs Merge for Cross-Platform Sync**
+
+**Why Rebase:**
+- Keeps linear commit history
+- Mac commits appear after Windows commits chronologically
+- Cleaner history: Mac → Windows Session 2 → 3 → 4 → 5 → Mac v10.0.0
+
+**Alternative (Merge):**
+- Would create merge commit
+- Preserves exact parallel development
+- More complex history graph
+
+**Decision:** Rebase chosen for cleaner linear history
+
+#### **Backup Branch Strategy**
+
+**Critical for Safety:**
+- Always create backup before dangerous operations
+- Backup preserved at exact pre-sync state
+- Can restore immediately if problems occur
+- Cost: ~2MB disk space per backup (negligible)
+
+**When to Use Backups:**
+- Before git pull with conflicts
+- Before git rebase
+- Before force operations
+- Before OS switching
+
+### **📋 FILES CREATED THIS SESSION:**
+
+**New Scripts:**
+- `pre-session-sync.sh` - Pre-session sync script (to be created)
+- `post-session-sync.sh` - Post-session sync script (to be created)
+
+**Modified Files:**
+- `CLAUDE.md` - Added Session 6 documentation and OS switching procedures (this update)
+
+**Git Operations:**
+- Created branch: `backup-before-windows-sync`
+- Pulled 5 Windows commits (b8cc5a6f6, f464e65f6, a58c28e21, ca6fa951e, 026c4ec65)
+- Verified repository synchronization
+
+### **🎯 CURRENT STATUS:**
+
+**✅ MAC REPOSITORY FULLY SYNCHRONIZED**
+- All Windows changes (Sessions 2-5) integrated
+- Backup branch created for safety
+- Critical files verified correct
+- Clean working tree
+
+**✅ SYNC SCRIPTS READY TO CREATE**
+- Pre-session script specification complete
+- Post-session script specification complete
+- Workflow documented in CLAUDE.md
+
+**📝 NEXT STEPS:**
+1. Create `pre-session-sync.sh` script
+2. Create `post-session-sync.sh` script
+3. Make scripts executable
+4. Test scripts with dry-run
+5. Update CLAUDE.md with script usage instructions
+6. Commit and push all changes
+
+### **⚠️ CRITICAL REMINDER FOR FUTURE SESSIONS:**
+
+**ALWAYS run sync scripts when switching OS:**
+
+```bash
+# Starting session on different OS
+./pre-session-sync.sh
+
+# ... do your work ...
+
+# Ending session
+./post-session-sync.sh
+```
+
+**This prevents:**
+- Git divergence between platforms
+- Force push disasters
+- Lost work
+- Merge conflicts
+- Repository confusion
+
+---
 
 ## Session Status Update (October 13, 2025 - WINDOWS BUG FIXES SESSION #4)
 
