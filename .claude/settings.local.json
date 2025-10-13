@@ -42,7 +42,10 @@
       "Bash(where pkg-config)",
       "Bash(C:/msys64/mingw64/bin/pkg-config.exe --version)",
       "Bash(C:/msys64/mingw64/bin/pkg-config.exe --list-all)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(/dev/null)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

@@ -23,9 +23,16 @@ class CarbonIconManager:
     def __init__(self):
         """Initialize the Carbon icon manager."""
         self.logger = logging.getLogger('VCCTL.CarbonIconManager')
-        
-        # Determine paths
-        self.project_root = Path(__file__).parent.parent.parent.parent
+
+        # Determine paths - handle both development and PyInstaller bundle
+        import sys
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            # Running in PyInstaller bundle
+            self.project_root = Path(sys._MEIPASS)
+        else:
+            # Running in development
+            self.project_root = Path(__file__).parent.parent.parent.parent
+
         self.carbon_icons_dir = self.project_root / "icons" / "carbon"
         self.metadata_file = self.carbon_icons_dir / "metadata.json"
         

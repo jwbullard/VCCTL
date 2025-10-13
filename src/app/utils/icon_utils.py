@@ -8,6 +8,7 @@ Provides functions for loading Carbon icons with fallback to custom/system icons
 
 import gi
 import logging
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -15,8 +16,13 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, GdkPixbuf
 
-# Base path to icons
-ICONS_PATH = Path(__file__).parent.parent.parent.parent / "icons"
+# Base path to icons - handle both development and PyInstaller bundle
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    # Running in PyInstaller bundle
+    ICONS_PATH = Path(sys._MEIPASS) / "icons"
+else:
+    # Running in development
+    ICONS_PATH = Path(__file__).parent.parent.parent.parent / "icons"
 
 # Logger
 logger = logging.getLogger('VCCTL.IconUtils')

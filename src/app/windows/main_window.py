@@ -469,17 +469,16 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
     
     def _on_preferences_clicked(self, widget: Gtk.Widget) -> None:
         """Show the preferences dialog."""
-        # TODO: Implement preferences dialog
-        dialog = Gtk.MessageDialog(
-            transient_for=self,
-            flags=0,
-            message_type=Gtk.MessageType.INFO,
-            buttons=Gtk.ButtonsType.OK,
-            text="Preferences"
-        )
-        dialog.format_secondary_text("Preferences dialog will be implemented in a future version.")
-        dialog.run()
-        dialog.destroy()
+        try:
+            from app.windows.dialogs.preferences_dialog import PreferencesDialog
+            service_container = get_service_container()
+            config_manager = service_container.config_manager
+
+            dialog = PreferencesDialog(self, config_manager)
+            dialog.run_dialog()
+        except Exception as e:
+            self.logger.error(f"Failed to show preferences dialog: {e}")
+            self.update_status(f"Error opening preferences: {str(e)}", "error", 5)
     
     def _on_new_project_clicked(self, widget: Gtk.Widget) -> None:
         """Handle new project menu item."""
@@ -933,7 +932,12 @@ Services:"""
         # VCCTL logo icon
         try:
             from pathlib import Path
-            icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
+            import sys
+            # Handle both development and PyInstaller bundle
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                icon_path = Path(sys._MEIPASS) / "icons" / "vcctl-icon-maroon.png"
+            else:
+                icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
             icon_path = icon_path.resolve()  # Make absolute path to avoid working directory issues
             if icon_path.exists():
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon_path), 80, 80, True)
@@ -1345,7 +1349,12 @@ This GTK3 desktop application provides an intuitive interface for:</span>
         
         # Set VCCTL logo icon
         try:
-            icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
+            import sys
+            # Handle both development and PyInstaller bundle
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                icon_path = Path(sys._MEIPASS) / "icons" / "vcctl-icon-maroon.png"
+            else:
+                icon_path = Path(__file__).parent.parent.parent.parent / "icons" / "vcctl-icon-maroon.png"
             icon_path = icon_path.resolve()  # Make absolute path to avoid working directory issues
             if icon_path.exists():
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon_path), 128, 128, True)
