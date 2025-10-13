@@ -17,8 +17,13 @@ from typing import Dict, List, Optional, Any, Tuple
 import logging
 import re
 
-# Import the existing PyVista 3D viewer
-from app.visualization.pyvista_3d_viewer import PyVistaViewer3D
+# Import the existing PyVista 3D viewer - optional if pyvista not available
+try:
+    from app.visualization.pyvista_3d_viewer import PyVistaViewer3D
+    PYVISTA_AVAILABLE = True
+except ImportError:
+    PyVistaViewer3D = None
+    PYVISTA_AVAILABLE = False
 
 
 class HydrationResultsViewer(Gtk.Dialog):
@@ -110,13 +115,24 @@ class HydrationResultsViewer(Gtk.Dialog):
         viewer_frame = Gtk.Frame(label="3D Microstructure Evolution")
         viewer_frame.set_size_request(-1, 500)
         main_vbox.pack_start(viewer_frame, True, True, 0)
-        
-        # Add PyVista viewer
-        self.pyvista_viewer = PyVistaViewer3D()
-        viewer_frame.add(self.pyvista_viewer)
-        
-        # Make sure the viewer is shown
-        self.pyvista_viewer.show_all()
+
+        # Add PyVista viewer if available
+        if PYVISTA_AVAILABLE and PyVistaViewer3D is not None:
+            self.pyvista_viewer = PyVistaViewer3D()
+            viewer_frame.add(self.pyvista_viewer)
+
+            # Make sure the viewer is shown
+            self.pyvista_viewer.show_all()
+        else:
+            # Show message that 3D visualization is not available
+            unavailable_label = Gtk.Label()
+            unavailable_label.set_markup(
+                "<b>3D Visualization Not Available</b>\n\n"
+                "PyVista is required for 3D microstructure visualization.\n"
+                "Install PyVista to enable this feature."
+            )
+            unavailable_label.set_justify(Gtk.Justification.CENTER)
+            viewer_frame.add(unavailable_label)
         
         # Create time controls frame
         controls_frame = Gtk.Frame(label="Time Controls")

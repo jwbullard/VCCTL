@@ -29,7 +29,20 @@
       "Bash(C:/msys64/mingw64.exe -c \"cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller vcctl.spec 2>&1\")",
       "Bash(cmd.exe /c \"C:\\msys64\\msys2_shell.cmd -mingw64 -defterm -no-start -here -c ''cd /c/Users/jwbullard/Desktop/foo/VCCTL && python -m PyInstaller vcctl.spec 2>&1 | tee build.log''\")",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-x86_64-python-pydantic)"
+      "Bash(C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-x86_64-python-pydantic)",
+      "Bash(C:/msys64/usr/bin/pacman -Ss python-pyvista)",
+      "Bash(C:/msys64/usr/bin/pacman -Ss vtk)",
+      "Bash(C:/msys64/usr/bin/pacman -S --noconfirm mingw-w64-x86_64-vtk)",
+      "Bash(C:/msys64/usr/bin/pacman -Ss mingw-w64-x86_64-python)",
+      "Bash(where python)",
+      "Bash(C:/Python313/python.exe:*)",
+      "Bash(__NEW_LINE__ ista)",
+      "Bash(./venv-pyvista/Scripts/python.exe -m pip install:*)",
+      "Bash(./venv-pyvista/bin/python -m pip install:*)",
+      "Bash(where pkg-config)",
+      "Bash(C:/msys64/mingw64/bin/pkg-config.exe --version)",
+      "Bash(C:/msys64/mingw64/bin/pkg-config.exe --list-all)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
