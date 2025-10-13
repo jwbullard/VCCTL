@@ -120,24 +120,26 @@ class MicrostructureService:
     and 3D structure generation support for the VCCTL system.
     """
     
-    def __init__(self, db_service: DatabaseService):
+    def __init__(self, db_service: DatabaseService, config_manager=None):
         self.db_service = db_service
+        self.config_manager = config_manager
         self.logger = logging.getLogger('VCCTL.MicrostructureService')
-        
+
         # Default phase properties
         self.default_phase_properties = self._initialize_default_phases()
-        
-        # Supported shape sets - load from particle_shape_set directory
-        self.shape_sets = self._load_particle_shape_sets()
-        
-        # Supported aggregate shapes - load from aggregate directory
-        self.aggregate_shapes = self._load_aggregate_shapes()
-        
-        # Base path for particle shape set data
-        self.particle_shape_base_path = os.path.join(os.getcwd(), "particle_shape_set")
-        
-        # Base path for aggregate shape data
-        self.aggregate_shape_base_path = os.path.join(os.getcwd(), "aggregate")
+
+        # Base paths for particle shape set and aggregate data
+        if config_manager:
+            self.particle_shape_base_path = str(config_manager.directories.particle_shape_set_path)
+            self.aggregate_shape_base_path = str(config_manager.directories.aggregate_path)
+        else:
+            # Fallback for tests
+            self.particle_shape_base_path = os.path.join(os.getcwd(), "particle_shape_set")
+            self.aggregate_shape_base_path = os.path.join(os.getcwd(), "aggregate")
+
+        # Lazy loading - don't load shape sets until first access
+        self._shape_sets = None
+        self._aggregate_shapes = None
     
     def _load_particle_shape_sets(self) -> Dict[str, str]:
         """Load available particle shape sets from particle_shape_set directory."""
@@ -145,20 +147,21 @@ class MicrostructureService:
         
         # Always include spherical - it's mathematical, doesn't need files
         shape_sets["sphere"] = "Spherical particles"
-        
+
         # Dynamically discover all directories in particle_shape_set
-        particle_shape_path = os.path.join(os.getcwd(), "particle_shape_set")
-        if os.path.exists(particle_shape_path):
+        if os.path.exists(self.particle_shape_base_path):
             try:
-                for item in os.listdir(particle_shape_path):
-                    item_path = os.path.join(particle_shape_path, item)
+                for item in os.listdir(self.particle_shape_base_path):
+                    item_path = os.path.join(self.particle_shape_base_path, item)
                     if os.path.isdir(item_path):
                         # Use the folder name as both ID and description
                         shape_sets[item] = f"{item.title()} particles"
                         self.logger.info(f"Found particle shape set: {item}")
             except Exception as e:
                 self.logger.error(f"Failed to scan particle_shape_set directory: {e}")
-        
+        else:
+            self.logger.warning(f"Particle shape set directory not found: {self.particle_shape_base_path}")
+
         return shape_sets
     
     def get_particle_shape_set_path(self, shape_set_name: str) -> Optional[str]:
@@ -199,23 +202,24 @@ class MicrostructureService:
     def _load_aggregate_shapes(self) -> Dict[str, str]:
         """Load available aggregate shapes from aggregate directory."""
         aggregate_shapes = {}
-        
+
         # Always include spherical - it's mathematical, doesn't need files
         aggregate_shapes["sphere"] = "Spherical particles"
-        
+
         # Dynamically discover all directories in aggregate
-        aggregate_path = os.path.join(os.getcwd(), "aggregate")
-        if os.path.exists(aggregate_path):
+        if os.path.exists(self.aggregate_shape_base_path):
             try:
-                for item in os.listdir(aggregate_path):
-                    item_path = os.path.join(aggregate_path, item)
+                for item in os.listdir(self.aggregate_shape_base_path):
+                    item_path = os.path.join(self.aggregate_shape_base_path, item)
                     if os.path.isdir(item_path):
                         # Use the folder name as both ID and description
                         aggregate_shapes[item] = f"{item.title()} aggregate"
                         self.logger.info(f"Found aggregate shape: {item}")
             except Exception as e:
                 self.logger.error(f"Failed to scan aggregate directory: {e}")
-        
+        else:
+            self.logger.warning(f"Aggregate directory not found: {self.aggregate_shape_base_path}")
+
         return aggregate_shapes
     
     def get_aggregate_shape_path(self, shape_name: str) -> Optional[str]:
@@ -589,6 +593,30 @@ class MicrostructureService:
             validation_result['is_feasible'] = False
             return validation_result
     
+    @property
+    def shape_sets(self) -> Dict[str, str]:
+        """Get shape sets with lazy loading."""
+        if self._shape_sets is None:
+            # Ensure bundled data is copied before loading
+            if self.config_manager:
+                from app.services.service_container import service_container
+                service_container.directories_service.copy_bundled_data_if_needed()
+
+            self._shape_sets = self._load_particle_shape_sets()
+        return self._shape_sets
+
+    @property
+    def aggregate_shapes(self) -> Dict[str, str]:
+        """Get aggregate shapes with lazy loading."""
+        if self._aggregate_shapes is None:
+            # Ensure bundled data is copied before loading
+            if self.config_manager:
+                from app.services.service_container import service_container
+                service_container.directories_service.copy_bundled_data_if_needed()
+
+            self._aggregate_shapes = self._load_aggregate_shapes()
+        return self._aggregate_shapes
+
     def get_supported_shape_sets(self) -> Dict[str, str]:
         """Get list of supported particle shape sets."""
         return self.shape_sets.copy()

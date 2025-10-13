@@ -196,7 +196,7 @@ class ServiceContainer:
     def microstructure_service(self) -> MicrostructureService:
         """Get microstructure service instance."""
         if self._microstructure_service is None:
-            self._microstructure_service = MicrostructureService(self.db_service)
+            self._microstructure_service = MicrostructureService(self.db_service, self.config_manager)
             self.logger.debug("Microstructure service created")
         return self._microstructure_service
     

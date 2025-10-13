@@ -371,23 +371,38 @@ class GradingCurveWidget(Gtk.Box):
     
     def _setup_default_data(self) -> None:
         """Setup default grading data."""
-        # Default well-graded curve
-        default_data = [
-            (75.0, 100.0),
-            (50.0, 95.0),
-            (25.0, 85.0),
-            (19.0, 75.0),
-            (12.5, 65.0),
-            (9.5, 55.0),
-            (4.75, 40.0),
-            (2.36, 30.0),
-            (1.18, 22.0),
-            (0.60, 16.0),
-            (0.30, 10.0),
-            (0.15, 6.0),
-            (0.075, 3.0)
-        ]
-        
+        # Default coarse aggregate grading - differential percent retained (sums to 100%)
+        # Based on typical well-graded coarse aggregate distribution
+        if self.aggregate_type == 'coarse':
+            default_data = [
+                (75.0, 5.0),    # 3" sieve: 5% retained
+                (50.0, 10.0),   # 2" sieve: 10% retained
+                (37.5, 10.0),   # 1-1/2" sieve: 10% retained
+                (25.0, 15.0),   # 1" sieve: 15% retained
+                (19.0, 15.0),   # 3/4" sieve: 15% retained
+                (12.5, 15.0),   # 1/2" sieve: 15% retained
+                (9.5, 12.0),    # 3/8" sieve: 12% retained
+                (4.75, 10.0),   # No. 4 sieve: 10% retained
+                (2.36, 5.0),    # No. 8 sieve: 5% retained
+                (1.18, 2.0),    # No. 16 sieve: 2% retained
+                (0.60, 1.0),    # No. 30 sieve: 1% retained
+                # Total: 100%
+            ]
+        else:
+            # Default fine aggregate grading - differential percent retained (sums to 100%)
+            # Based on typical well-graded fine aggregate distribution
+            default_data = [
+                (4.75, 3.0),    # No. 4 sieve: 3% retained
+                (2.36, 8.0),    # No. 8 sieve: 8% retained
+                (1.18, 12.0),   # No. 16 sieve: 12% retained
+                (0.60, 18.0),   # No. 30 sieve: 18% retained
+                (0.30, 22.0),   # No. 50 sieve: 22% retained
+                (0.15, 20.0),   # No. 100 sieve: 20% retained
+                (0.075, 14.0),  # No. 200 sieve: 14% retained
+                (0.038, 3.0),   # No. 400 sieve: 3% retained
+                # Total: 100%
+            ]
+
         self.set_grading_data(default_data)
     
     def set_grading_data(self, data: List[Tuple[float, float]]) -> None:
@@ -753,8 +768,8 @@ class GradingCurveWidget(Gtk.Box):
         # Add axis titles
         cr.set_font_size(11)
         # X-axis title
-        cr.move_to(plot_x + plot_width/2 - 40, plot_y + plot_height + 35)
-        cr.show_text("Mass % Retained")
+        cr.move_to(plot_x + plot_width/2 - 60, plot_y + plot_height + 35)
+        cr.show_text("Cumulative Mass % Retained")
         # Y-axis title (rotated)
         cr.save()
         cr.move_to(plot_x - 35, plot_y + plot_height/2)
@@ -766,27 +781,40 @@ class GradingCurveWidget(Gtk.Box):
         """Draw the grading curve."""
         if len(self.grading_data) < 2:
             return
-        
+
+        # Convert differential percent retained to cumulative percent retained for plotting
+        # Sort by size (largest first)
+        sorted_data = sorted(self.grading_data, key=lambda x: x[0], reverse=True)
+
+        # Convert to cumulative percent retained and clamp to 0-100%
+        cumulative_data = []
+        cumulative_percent = 0.0
+        for size, differential_percent in sorted_data:
+            cumulative_percent += differential_percent
+            # Clamp to 0-100% range to keep curve within plot bounds
+            clamped_percent = max(0.0, min(100.0, cumulative_percent))
+            cumulative_data.append((size, clamped_percent))
+
         cr.set_source_rgb(0.2, 0.4, 0.8)
         cr.set_line_width(2.0)
-        
+
         # Convert first point
-        first_size, first_percent = self.grading_data[0]
+        first_size, first_percent = cumulative_data[0]
         x = plot_x + (first_percent / 100.0) * plot_width
         y = self._size_to_y(first_size, plot_y, plot_height)
         cr.move_to(x, y)
-        
+
         # Draw line to each subsequent point
-        for size, percent in self.grading_data[1:]:
+        for size, percent in cumulative_data[1:]:
             x = plot_x + (percent / 100.0) * plot_width
             y = self._size_to_y(size, plot_y, plot_height)
             cr.line_to(x, y)
-        
+
         cr.stroke()
-        
+
         # Draw data points
         cr.set_source_rgb(0.8, 0.2, 0.2)
-        for size, percent in self.grading_data:
+        for size, percent in cumulative_data:
             x = plot_x + (percent / 100.0) * plot_width
             y = self._size_to_y(size, plot_y, plot_height)
             cr.arc(x, y, 3.0, 0, 2 * math.pi)
@@ -798,14 +826,21 @@ class GradingCurveWidget(Gtk.Box):
             # Log scale (0.075 to 75.0 mm)
             if size <= 0:
                 size = 0.075
+            # Clamp size to valid range
+            size = max(0.075, min(75.0, size))
             log_size = math.log10(size)
             log_min = math.log10(0.075)
             log_max = math.log10(75.0)
             ratio = (log_size - log_min) / (log_max - log_min)
         else:
             # Linear scale
+            # Clamp size to valid range
+            size = max(0.0, min(75.0, size))
             ratio = size / 75.0
-        
+
+        # Clamp ratio to 0-1 range to keep within plot bounds
+        ratio = max(0.0, min(1.0, ratio))
+
         # Invert Y axis (larger sizes at top)
         return plot_y + plot_height * (1.0 - ratio)
     

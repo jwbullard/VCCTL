@@ -6,6 +6,8 @@ Manages directory operations and path handling for simulations and operations.
 """
 
 import logging
+import sys
+import shutil
 from pathlib import Path
 from typing import Optional, Dict, Any
 from ..config.config_manager import ConfigManager
@@ -26,9 +28,84 @@ class DirectoriesService:
             directories_config = self.config_manager.directories
             directories_config.create_directories()
             self.logger.info("Base directories ensured")
+
+            # Copy bundled data on first run
+            self.copy_bundled_data_if_needed()
         except Exception as e:
             self.logger.error(f"Failed to create base directories: {e}")
             raise
+
+    def copy_bundled_data_if_needed(self) -> None:
+        """
+        Public method to copy bundled data to user directory.
+        Can be called after config changes to ensure data is populated.
+        """
+        self._copy_bundled_data_if_needed()
+
+    def _copy_bundled_data_if_needed(self) -> None:
+        """Copy bundled particle_shape_set and aggregate data to user directory on first run."""
+        try:
+            # Check if running from PyInstaller bundle
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                bundled_base = Path(sys._MEIPASS) / "data"
+            else:
+                # Running in development - data is in project root
+                return  # Don't copy in development mode
+
+            directories_config = self.config_manager.directories
+
+            # Copy particle_shape_set if not exists or empty
+            particle_shape_dest = directories_config.particle_shape_set_path
+            particle_shape_src = bundled_base / "particle_shape_set"
+
+            if particle_shape_src.exists():
+                # Check if destination is empty
+                needs_copy = False
+                if not particle_shape_dest.exists():
+                    needs_copy = True
+                else:
+                    try:
+                        # Check if directory is empty
+                        needs_copy = not any(particle_shape_dest.iterdir())
+                    except Exception:
+                        needs_copy = True
+
+                if needs_copy:
+                    self.logger.info(f"Copying particle shape sets from {particle_shape_src} to {particle_shape_dest}")
+                    particle_shape_dest.mkdir(parents=True, exist_ok=True)
+                    shutil.copytree(particle_shape_src, particle_shape_dest, dirs_exist_ok=True)
+                    self.logger.info("Particle shape sets copied successfully")
+                else:
+                    self.logger.debug("Particle shape sets already exist, skipping copy")
+
+            # Copy aggregate if not exists or empty
+            aggregate_dest = directories_config.aggregate_path
+            aggregate_src = bundled_base / "aggregate"
+
+            if aggregate_src.exists():
+                # Check if destination is empty
+                needs_copy = False
+                if not aggregate_dest.exists():
+                    needs_copy = True
+                else:
+                    try:
+                        # Check if directory is empty
+                        needs_copy = not any(aggregate_dest.iterdir())
+                    except Exception:
+                        needs_copy = True
+
+                if needs_copy:
+                    self.logger.info(f"Copying aggregate shapes from {aggregate_src} to {aggregate_dest}")
+                    aggregate_dest.mkdir(parents=True, exist_ok=True)
+                    shutil.copytree(aggregate_src, aggregate_dest, dirs_exist_ok=True)
+                    self.logger.info("Aggregate shapes copied successfully")
+                else:
+                    self.logger.debug("Aggregate shapes already exist, skipping copy")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to copy bundled data (non-critical): {e}")
+            import traceback
+            self.logger.warning(traceback.format_exc())
     
     def get_operation_dir(self, operation_name: str) -> Path:
         """
