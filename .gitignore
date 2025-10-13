@@ -188,3 +188,7 @@ logs/
 # VCCTL Operations folder - contains user-generated mix designs and simulation outputs
 backend/bin/*
 Operations/
+
+# Additional venv directories
+venv-pyvista/
+venv-win-pyv/
