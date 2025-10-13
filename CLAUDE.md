@@ -104,11 +104,363 @@ git push origin main
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Mac Git Repository Synchronization (October 13, 2025 - Session 6)**
+**Latest Session: Windows Continuation - Session 5 Documentation Added (October 13, 2025)**
 
-**Status: GIT SYNC COMPLETE ✅ - Mac Repository Synchronized with Windows Changes**
+**Status: REPOSITORY SYNCHRONIZED ✅ - Session 5 Documentation Re-added After Sync**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
+
+---
+
+## Session Status Update (October 13, 2025 - WINDOWS TESTING AND BUG FIXES SESSION #5)
+
+### **Session Summary:**
+Conducted comprehensive Windows application testing and fixed two critical bugs: particle shape sets not showing in dropdowns, and aggregate grading curve plotting incorrectly. Discovered and resolved git repository divergence issue where macOS had uncommitted local changes that Windows never received. Implemented lazy loading for particle shapes to fix timing issue with PyInstaller data bundling. Transferred updated grading_curve.py from Mac with cumulative plotting logic. All changes committed and pushed to GitHub. Repository now synchronized.
+
+**Previous Session:** Windows Bug Fixes and Icon Path Resolution (October 13, 2025 - Session 4)
+
+### **🎉 SESSION 5 ACCOMPLISHMENTS:**
+
+#### **1. Windows Application Testing - Bug Report ✅**
+
+**User Testing Results:**
+- ✅ Materials showing correctly (Session 4 fix working)
+- ❌ No particle shape sets showing in Mix Design panel dropdowns (cement or aggregate)
+- ❌ Aggregate grading curve plotting differently than macOS version
+- ⏳ Microstructure operations not appearing on Operations page (not yet addressed)
+
+**Testing Context:**
+- Fresh Windows package build from Session 4
+- All Python dependencies and C executables verified working
+- First comprehensive feature testing of Windows application
+
+#### **2. Particle Shape Sets Bug - Root Cause and Fix ✅**
+
+**Initial Investigation:**
+- Verified `particle_shape_set/` (12 MB) and `aggregate/` (10 MB) directories exist in project root
+- Checked if directories were bundled in PyInstaller package
+- **Root Cause:** Data directories NOT included in Windows package
+
+**User's Prime Directive:**
+> "We want fully functioning applications out of the box. The end user should have to do nothing extra besides double-clicking on the application icon to have a full-featured version running."
+
+**Solution Implemented - Data Bundling and Auto-Copy:**
+
+1. **Updated vcctl.spec (Lines 142-149):**
+   - Added particle_shape_set and aggregate to datas list
+   - Data bundled at `dist/VCCTL/_internal/data/particle_shape_set/` and `aggregate/`
+
+2. **Updated directories_service.py:**
+   - Added `shutil` and `sys` imports
+   - Created `_copy_bundled_data_if_needed()` method
+   - Detects PyInstaller bundle with `sys.frozen` and `sys._MEIPASS`
+   - Copies bundled data to user-specified data directory on first run
+   - Made method public as `copy_bundled_data_if_needed()`
+
+3. **Updated microstructure_service.py:**
+   - Modified `__init__` to accept `config_manager` parameter
+   - Use `config_manager.directories` paths instead of `os.getcwd()`
+   - **Critical:** Changed to lazy loading pattern to fix timing issue
+
+4. **Updated service_container.py:**
+   - Modified `microstructure_service` property to pass `self.config_manager`
+
+**First Attempt Failed - Timing Issue:**
+- Initial implementation loaded shape_sets in `__init__()`
+- Problem: `microstructure_service.__init__()` ran before `directories_service` copied data
+- User feedback: "I don't understand why we are having to do so much of this re-engineering of the application on Windows."
+
+**Final Fix - Lazy Loading Pattern:**
+- Changed `shape_sets` and `aggregate_shapes` to `@property` decorators
+- Properties load data on first access, not in `__init__()`
+- Properties explicitly call `copy_bundled_data_if_needed()` before loading
+- This ensures data is copied before first attempt to load
+
+**Code Pattern:**
+```python
+# In microstructure_service.py
+def __init__(self, db_service: DatabaseService, config_manager=None):
+    self.config_manager = config_manager
+    # ... other init code
+
+    # Lazy loading - don't load shape sets until first access
+    self._shape_sets = None
+    self._aggregate_shapes = None
+
+@property
+def shape_sets(self) -> Dict[str, str]:
+    """Get shape sets with lazy loading."""
+    if self._shape_sets is None:
+        # Ensure bundled data is copied before loading
+        if self.config_manager:
+            from app.services.service_container import service_container
+            service_container.directories_service.copy_bundled_data_if_needed()
+
+        self._shape_sets = self._load_particle_shape_sets()
+    return self._shape_sets
+```
+
+**Result:** User reported "Progress! The particle shapes are showing up in the drop down menus."
+
+#### **3. Grading Curve Plotting Bug - Git Divergence Discovery ✅**
+
+**Issue:**
+- Windows: Multiple disconnected line segments, axis label "Mass % Retained"
+- macOS: Smooth cumulative curve, axis label "Cumulative Mass % Retained"
+- User provided screenshots showing clear differences
+
+**Initial Assumption:** Code should be identical since both from same repository
+
+**Investigation:**
+```bash
+# Check git history on Windows
+git log -- src/app/widgets/grading_curve.py
+# Last commit: November 2024 with old version
+
+# Extract old version from git
+git show 741f273a2:src/app/widgets/grading_curve.py | grep "Mass % Retained"
+# Result: Shows "Mass % Retained" (not "Cumulative")
+```
+
+**Discovery:** macOS version had LOCAL UNCOMMITTED CHANGES never pushed to git
+
+**Root Cause:**
+- Mac version had significant modifications to `grading_curve.py`
+- Changes never staged or committed to git repository
+- `git status` on Mac somehow not detecting the changes
+- Windows cloned repository and got old version from November
+- User frustration: "More importantly, what is going on with git? Why does the Mac repository say that there are no unstaged changes?"
+
+**User Concern:**
+> "This weird divergence makes me nervous and I want it fixed as soon as possible."
+
+**Solution:**
+1. User manually copied Mac version of `grading_curve.py` to Windows
+2. Rebuilt Windows package with corrected file
+3. Verified fix: grading curve now plots correctly on Windows
+4. Committed all Windows changes to git (see below)
+
+**Key Changes in Mac Version (grading_curve.py):**
+- **Line 757:** Changed axis label to "Cumulative Mass % Retained"
+- **Lines 770-806:** Complete rewrite of `_draw_curve()` method to convert differential percent to cumulative
+- **Lines 372-406:** Changed default data to differential percentages that sum to 100%
+- **Lines 814-830:** Added clamping to prevent values outside 0-100% range
+
+**Technical Details:**
+```python
+# Old version (in git): Plotted raw differential percentages
+for size, percent in sorted_data:
+    x = plot_x + (percent / 100.0) * plot_width
+    y = self._size_to_y(size, plot_y, plot_height)
+    cr.line_to(x, y)
+
+# New version (Mac): Accumulates to cumulative percentages
+cumulative_data = []
+cumulative_percent = 0.0
+for size, differential_percent in sorted_data:
+    cumulative_percent += differential_percent
+    clamped_percent = max(0.0, min(100.0, cumulative_percent))
+    cumulative_data.append((size, clamped_percent))
+
+# Then plot cumulative_data with smooth curve
+```
+
+#### **4. Git Repository Synchronization ✅**
+
+**Actions Taken:**
+
+1. **Updated .gitignore:**
+   - Added `venv-pyvista/` and `venv-win-pyv/` to exclusion list
+
+2. **Staged All Changes:**
+   ```bash
+   git add -A
+   ```
+
+3. **Committed Changes:**
+   ```
+   Windows bug fix session: Particle shape data bundling and grading curve fixes
+
+   - Fixed particle shape sets not showing in Windows package
+   - Added particle_shape_set and aggregate to vcctl.spec datas
+   - Implemented lazy loading in microstructure_service
+   - Updated directories_service with data copy logic
+   - Fixed grading curve plotting with cumulative percentages
+   - Updated .gitignore for venv directories
+   ```
+   Commit hash: `b8cc5a6f6`
+
+4. **Pushed to Remote:**
+   ```bash
+   git push origin main
+   ```
+
+**Result:** All Windows changes committed to GitHub repository
+
+#### **5. Git Synchronization Strategy for Mac ✅**
+
+**Problem:**
+- Mac has local uncommitted changes (grading_curve.py and possibly others)
+- Windows has new changes pushed to remote (particle shapes, bundling)
+- Mac must pull Windows changes without losing local work
+
+**User Question:**
+> "When I go to the Mac, if I run 'git pull origin main' that means it will pull from the remote. But I likely have at least some code on the Mac that should not be changed (for instance, grading_curve.py before we discovered the divergence). How do I ensure that nothing important is lost by the git pull?"
+
+**Recommended Strategy - Option 1: Create Backup Branch First**
+
+```bash
+# On Mac:
+# 1. Create backup branch of current state
+git checkout -b backup-before-windows-sync
+
+# 2. Commit all local changes to backup branch
+git add -A
+git commit -m "Backup of Mac state before Windows sync (October 13, 2025)"
+
+# 3. Return to main branch
+git checkout main
+
+# 4. Pull Windows changes
+git pull origin main
+
+# 5. If any conflicts occur, resolve them manually
+# 6. Verify grading_curve.py is the Mac version (Windows now has it)
+# 7. Verify particle shapes changes are present
+
+# If something goes wrong:
+git checkout backup-before-windows-sync  # Return to backup
+```
+
+**Why This Is Safe:**
+- Backup branch preserves EXACT Mac state before pull
+- Can always return to backup if pull causes problems
+- Mac's grading_curve.py is now in git (transferred via Windows)
+- Particle shapes changes are compatible with Mac code
+
+**Next Session Plan:**
+- User will end Windows session
+- Immediately start new Mac session
+- Guide Mac through Option 1 synchronization process
+
+### **📋 SESSION 5 FILES CREATED/MODIFIED:**
+
+**Modified Files:**
+- `vcctl.spec` - Added particle_shape_set and aggregate to datas list (lines 142-149)
+- `src/app/services/directories_service.py` - Added shutil/sys imports, _copy_bundled_data_if_needed() method (lines 8-13, 25-101)
+- `src/app/services/microstructure_service.py` - Added lazy loading for shape_sets and aggregate_shapes (lines 123-142, 596-618)
+- `src/app/services/service_container.py` - Updated microstructure_service to pass config_manager (lines 196-201)
+- `src/app/widgets/grading_curve.py` - Updated with Mac version (cumulative plotting logic from user)
+- `.gitignore` - Added venv-pyvista/ and venv-win-pyv/ (lines 192-194)
+- `CLAUDE.md` - This session documentation
+
+**Commits Created:**
+- `b8cc5a6f6` - Windows session 5 fixes (particle shapes and grading curve)
+- `026c4ec65` - Gitignore updates for venv directories
+
+**Pushed to GitHub:** ✅ All changes synchronized to remote repository
+
+### **🔧 TECHNICAL PATTERNS:**
+
+#### **Lazy Loading Pattern for PyInstaller Data:**
+```python
+# Problem: Service loads data in __init__ before directories_service copies it
+# Solution: Use @property decorator to defer loading until first access
+
+class MicrostructureService:
+    def __init__(self):
+        self._shape_sets = None  # Don't load yet
+
+    @property
+    def shape_sets(self) -> Dict[str, str]:
+        if self._shape_sets is None:
+            # Copy data first if in PyInstaller bundle
+            service_container.directories_service.copy_bundled_data_if_needed()
+            # Now load the data
+            self._shape_sets = self._load_particle_shape_sets()
+        return self._shape_sets
+```
+
+**Benefits:**
+- Decouples service initialization from data loading
+- Ensures data is available before attempting to load
+- Maintains same external API (access via `service.shape_sets`)
+
+#### **PyInstaller Data Bundling with Auto-Copy:**
+```python
+# In directories_service.py
+def _copy_bundled_data_if_needed(self):
+    # Detect PyInstaller bundle
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        bundled_base = Path(sys._MEIPASS) / "data"
+
+        # Check if user directory is empty
+        if not any(particle_shape_dest.iterdir()):
+            # Copy from bundle to user directory
+            shutil.copytree(bundled_base / "particle_shape_set",
+                           particle_shape_dest,
+                           dirs_exist_ok=True)
+```
+
+**Benefits:**
+- Bundles data with application (fully functional out of the box)
+- Copies to user-specified directory on first run
+- Respects user's Preferences settings
+- Only copies if destination is empty
+
+### **🎯 CURRENT STATUS:**
+
+**✅ WINDOWS APPLICATION BUGS FIXED**
+- ✅ Particle shape sets showing correctly in all dropdowns
+- ✅ Grading curve plotting with smooth cumulative curve
+- ⏳ Microstructure operations visibility (not yet addressed)
+
+**✅ GIT REPOSITORY SYNCHRONIZED**
+- All Windows changes committed and pushed
+- Mac version of grading_curve.py now in repository
+- .gitignore updated for venv directories
+- Safe Mac pull strategy documented
+
+**⚠️ CRITICAL NEXT STEP: MAC SYNCHRONIZATION**
+- Mac must pull Windows changes before next development work
+- Use Option 1: Create backup branch before pulling
+- Verify grading_curve.py and particle shapes changes
+
+### **📊 PLATFORM STATUS AFTER SESSION 5:**
+
+| Platform | C Executables | PyInstaller | Icons | Database | 3D Viz | Particle Shapes | Grading Plots | Status |
+|----------|--------------|-------------|-------|----------|--------|----------------|---------------|--------|
+| macOS (ARM64) | ✅ (7) | ✅ 771 MB | ✅ | ✅ | ✅ | ⏳ Pull needed | ✅ | **Needs Git Sync** |
+| Windows (x64) | ✅ (26) | ✅ 746 MB | ✅ | ✅ | ✅ | ✅ | ✅ | **Fully Tested** |
+| Linux (x64) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Not started |
+
+### **📝 PENDING ISSUES:**
+
+1. **Microstructure Operations Not Appearing on Operations Page (Bug #4):** Not yet investigated
+2. **Mac Git Synchronization:** Must pull Windows changes using backup branch strategy
+3. **Comprehensive Windows Testing:** User testing grading curve fix when session ended
+
+### **🎯 NEXT SESSION:**
+
+**Mac Session - Git Synchronization:**
+1. Create backup branch: `git checkout -b backup-before-windows-sync`
+2. Commit all local changes to backup: `git add -A && git commit -m "Backup"`
+3. Switch to main: `git checkout main`
+4. Pull Windows changes: `git pull origin main`
+5. Verify changes: grading_curve.py, particle shapes, directories_service
+6. Test Mac application with new changes
+
+**Git Workflow for Future Development:**
+```bash
+# ALWAYS before switching platforms:
+git status                    # Check for uncommitted changes
+git add -A                    # Stage all changes
+git commit -m "Description"   # Commit locally
+git push origin main          # Push to remote
+
+# ALWAYS when starting work on new platform:
+git pull origin main          # Pull latest changes before starting work
+```
 
 ---
 
