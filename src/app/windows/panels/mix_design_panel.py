@@ -706,7 +706,8 @@ class MixDesignPanel(Gtk.Box):
                 self.mix_name_status_label.set_markup(f'<span color="orange">⚠ Will be saved as: {mix_name_safe}</span>')
         
         # Check if directory already exists
-        operations_dir = os.path.join(os.getcwd(), "Operations")
+        # Use configured operations path from config manager
+        operations_dir = str(self.service_container.config_manager.directories.operations_path)
         mix_folder_path = os.path.join(operations_dir, mix_name_safe)
         
         if os.path.exists(mix_folder_path):
@@ -2653,9 +2654,10 @@ class MixDesignPanel(Gtk.Box):
             mix_name_safe = "".join(c for c in mix_design.name if c.isalnum() or c in ['_', '-'])
             
             # Create Operations directory structure
-            operations_dir = os.path.join(os.getcwd(), "Operations")
+            # Use configured operations path from config manager
+            operations_dir = str(self.service_container.config_manager.directories.operations_path)
             mix_folder_path = os.path.join(operations_dir, mix_name_safe)
-            
+
             # Create Operations directory if it doesn't exist
             os.makedirs(operations_dir, exist_ok=True)
             self.logger.info(f"Ensured Operations directory exists: {operations_dir}")
@@ -2754,10 +2756,12 @@ class MixDesignPanel(Gtk.Box):
             lines.append("0")  # SPHERES - no additional inputs needed
         else:
             lines.append("1")  # REALSHAPE
-            # Parent directory path (relative path since genmic runs from mix folder)
-            # From Operations/MixName/ we need to go up two levels to reach particle_shape_set/
-            parent_path = "../../particle_shape_set/"
-            lines.append(parent_path)
+            # Use absolute path to particle_shape_set directory from config
+            particle_shape_set_path = str(self.service_container.config_manager.directories.particle_shape_set_path)
+            # Ensure path ends with separator for genmic
+            if not particle_shape_set_path.endswith(os.sep):
+                particle_shape_set_path += os.sep
+            lines.append(particle_shape_set_path)
             # Shape set name (no final separator)
             lines.append(shape_set)
         
@@ -2981,7 +2985,8 @@ class MixDesignPanel(Gtk.Box):
             default_filename = f"{mix_name_safe}_input.txt"
             
             # Automatically save to mix folder in Operations directory
-            operations_dir = os.path.join(os.getcwd(), "Operations")
+            # Use configured operations path from config manager
+            operations_dir = str(self.service_container.config_manager.directories.operations_path)
             mix_folder_path = os.path.join(operations_dir, mix_name_safe)
             if not os.path.exists(mix_folder_path):
                 # Mix folder should already exist from correlation file generation,
@@ -3191,10 +3196,21 @@ class MixDesignPanel(Gtk.Box):
         try:
             self.logger.info(f"_execute_genmic called with input_file={input_file}, output_dir={output_dir}")
             
-            # Path to genmic executable (go up to project root, then to backend/bin/genmic)
-            # From src/app/windows/panels/mix_design_panel.py, go up 5 levels to vcctl-gtk
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
-            genmic_path = os.path.join(project_root, 'backend', 'bin', 'genmic')
+            # Path to genmic executable
+            import sys
+
+            # Detect if running in PyInstaller bundle
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                # Running in PyInstaller bundle
+                project_root = sys._MEIPASS
+            else:
+                # Running in development
+                # From src/app/windows/panels/mix_design_panel.py, go up 5 levels to project root
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+
+            # Platform-specific executable name
+            genmic_exe = 'genmic.exe' if sys.platform == 'win32' else 'genmic'
+            genmic_path = os.path.join(project_root, 'backend', 'bin', genmic_exe)
             
             self.logger.info(f"Project root: {project_root}")
             self.logger.info(f"Genmic path: {genmic_path}")

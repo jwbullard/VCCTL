@@ -515,11 +515,11 @@ class ResultsPanel(Gtk.Box):
         try:
             if not operation or not operation.name:
                 return None
-            
-            # Construct the path to Operations/{operation_name}
-            project_root = Path(__file__).parent.parent.parent.parent
-            output_dir = project_root / "Operations" / operation.name
-            
+
+            # Get operations directory from configuration
+            operations_dir = self.service_container.directories_service.get_operations_path()
+            output_dir = operations_dir / operation.name
+
             return str(output_dir)
             
         except Exception as e:
@@ -631,13 +631,12 @@ class ResultsPanel(Gtk.Box):
         if hasattr(result_obj, 'metadata') and result_obj.metadata and 'output_directory' in result_obj.metadata:
             return result_obj.metadata['output_directory']
         
-        # Try to construct from name
-        project_root = Path(__file__).parent.parent.parent.parent.parent
-        operations_dir = project_root / "Operations"
+        # Try to construct from name using configured operations directory
+        operations_dir = self.service_container.directories_service.get_operations_path()
         potential_folder = operations_dir / result_obj.name
         if potential_folder.exists():
             return str(potential_folder)
-        
+
         return None
     
     def _load_completed_operations(self) -> None:
@@ -647,11 +646,9 @@ class ResultsPanel(Gtk.Box):
         try:
             self.logger.info("Results panel: Starting to load results from Operations folder")
             
-            # Load results directly from Operations folder
-            # Go up from src/app/windows/panels/results_panel.py to project root
-            project_root = Path(__file__).parent.parent.parent.parent.parent
-            operations_dir = project_root / "Operations"
-            
+            # Load results directly from Operations folder using configured directory
+            operations_dir = self.service_container.directories_service.get_operations_path()
+
             if not operations_dir.exists():
                 self.logger.warning(f"Results panel: Operations directory not found: {operations_dir}")
                 return

@@ -2332,10 +2332,19 @@ class OperationsMonitoringPanel(Gtk.Box):
                 return direct_path
 
             # For process operations, try working directory if available
-            if hasattr(operation, 'process') and hasattr(operation, 'working_dir'):
-                if os.path.exists(operation.working_dir):
-                    self.logger.debug(f"Using process working directory: {operation.working_dir}")
-                    return operation.working_dir
+            # Check both 'working_directory' (correct) and 'working_dir' (legacy) for compatibility
+            if hasattr(operation, 'process'):
+                if hasattr(operation, 'working_directory'):
+                    wd = operation.working_directory
+                    if os.path.exists(wd):
+                        self.logger.debug(f"Using process working_directory: {wd}")
+                        return wd
+
+                if hasattr(operation, 'working_dir'):
+                    wd = operation.working_dir
+                    if os.path.exists(wd):
+                        self.logger.debug(f"Using process working_dir: {wd}")
+                        return wd
 
             # Try metadata directory if available
             if hasattr(operation, 'metadata') and operation.metadata.get('output_directory'):

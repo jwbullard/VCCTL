@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-mingw/cmake_install.cmake",
+		"C:/Users/jwbullard/Desktop/foo/VCCTL/backend/build-mingw/src/vcctllib/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\image100.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\image100.dir/objects.a @CMakeFiles\image100.dir\objects1.rsp
+C:\msys64\mingw64\bin\gcc.exe -O2 -Wl,--whole-archive CMakeFiles\image100.dir/objects.a -Wl,--no-whole-archive -o image100.exe -Wl,--out-implib,libimage100.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\image100.dir\linkLibs.rsp

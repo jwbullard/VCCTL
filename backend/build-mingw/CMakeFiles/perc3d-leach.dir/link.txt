@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\perc3d-leach.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\perc3d-leach.dir/objects.a @CMakeFiles\perc3d-leach.dir\objects1.rsp
+C:\msys64\mingw64\bin\gcc.exe -O2 -Wl,--whole-archive CMakeFiles\perc3d-leach.dir/objects.a -Wl,--no-whole-archive -o perc3d-leach.exe -Wl,--out-implib,libperc3d-leach.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\perc3d-leach.dir\linkLibs.rsp

@@ -104,11 +104,289 @@ git push origin main
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows Continuation - Session 5 Documentation Added (October 13, 2025)**
+**Latest Session: Windows Path Resolution Investigation (October 15, 2025 - Session 7)**
 
-**Status: REPOSITORY SYNCHRONIZED ✅ - Session 5 Documentation Re-added After Sync**
+**Status: Path resolution bugs identified and partially fixed - Rebuild pending**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
+
+---
+
+## Session Status Update (October 15, 2025 - WINDOWS PATH RESOLUTION INVESTIGATION SESSION #7)
+
+### **Session Summary:**
+Investigated why Windows VCCTL panels couldn't find operations/microstructures despite successful operation completion. Discovered systemic issue with hardcoded `"./Operations"` paths throughout codebase. Conducted deep analysis of why macOS "worked" but Windows didn't - macOS succeeded by accident due to current working directory alignment. Fixed critical paths in Hydration Panel, Results Panel, and Elastic Moduli Panel. Identified all remaining hardcoded paths for future fix. **Key Insight:** The same bugs existed on both platforms; macOS only worked because of lucky working directory coincidence.
+
+**Previous Session:** Mac Git Synchronization Complete (October 13, 2025 - Session 6)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Root Cause Analysis - Why macOS Works But Windows Doesn't ✅**
+
+**The Critical Question:**
+User asked: "And is your analysis consistent with the *known fact* that the application already works on macOS?"
+
+**Initial Confusion:**
+- User reported Windows couldn't find microstructures/operations
+- User emphasized macOS works perfectly with custom directories
+- Same code on both platforms - shouldn't both fail?
+
+**Deep Investigation:**
+Checked git history to understand when paths were using configured vs hardcoded:
+```bash
+git show 0e4d2feb0:src/app/windows/panels/hydration_panel.py | sed -n '2085,2095p'
+# Result: Line 2090 was hardcoded as "./Operations"
+```
+
+**THE REVELATION:**
+
+**On macOS:**
+- When running from project directory (development or packaged), current working directory = project root
+- So `"./Operations"` accidentally resolves to correct location
+- PyInstaller `.app` bundles set working directory to bundle's parent directory
+- This "lucky coincidence" made hardcoded paths work on macOS
+
+**On Windows:**
+- PyInstaller `.exe` sets working directory to wherever user double-clicked the executable
+- Could be Desktop, Downloads, Program Files, anywhere
+- So `"./Operations"` resolves to completely wrong location
+- Operations are created at `C:\Users\...\Arthur\operations\` but code looks in `C:\Users\...\Desktop\VCCTL\Operations\`
+
+**Key Insight:**
+- **The bugs existed on BOTH platforms**
+- macOS only worked by "accident" due to working directory alignment
+- Windows exposed the real problem because working directory doesn't align
+- Fixing for Windows also makes macOS more robust
+
+#### **2. Comprehensive Hardcoded Path Audit ✅**
+
+**Searched entire codebase for hardcoded paths:**
+```bash
+grep -r '\.\/Operations' src/ --include="*.py"
+```
+
+**Found Hardcoded Paths (11 locations):**
+1. ✅ **FIXED**: `hydration_panel.py` line 1256-1257 (img_file, pimg_file)
+2. ✅ **FIXED**: `hydration_panel.py` line 1662 (get_selected_microstructure path)
+3. ✅ **FIXED**: `elastic_moduli_panel.py` line 821 (output directory)
+4. ⏳ **PENDING**: `mix_design_panel.py` line 3357 (microstructure_file path)
+5. ⏳ **PENDING**: `elastic_lineage_service.py` line 308 (temp_grading_path)
+6. ⏳ **PENDING**: `microstructure_hydration_bridge.py` line 261 (operation_dir)
+7. ⏳ **PENDING**: `microstructure_hydration_bridge.py` line 268 (param_file_path)
+8. ⏳ **PENDING**: `microstructure_hydration_bridge.py` line 336 (operation_dir)
+9. ⏳ **PENDING**: `microstructure_hydration_bridge.py` line 644 (source_dir)
+
+#### **3. Critical Path Fixes Implemented ✅**
+
+**Added `get_operations_path()` Method:**
+Created new method in `directories_service.py` (lines 198-201):
+```python
+def get_operations_path(self) -> Path:
+    """Get the operations directory path."""
+    directories_config = self.config_manager.directories
+    return directories_config.operations_path
+```
+
+**Fixed Hydration Panel (2 locations):**
+
+**Location 1 - Lines 1253-1261 (_on_microstructure_changed):**
+```python
+# OLD:
+self.selected_microstructure = {
+    'operation_name': microstructure_id,
+    'img_file': f"./Operations/{microstructure_id}/{microstructure_id}.img",
+    'pimg_file': f"./Operations/{microstructure_id}/{microstructure_id}.pimg"
+}
+
+# NEW:
+operations_dir = self.service_container.directories_service.get_operations_path()
+self.selected_microstructure = {
+    'operation_name': microstructure_id,
+    'img_file': str(operations_dir / microstructure_id / f"{microstructure_id}.img"),
+    'pimg_file': str(operations_dir / microstructure_id / f"{microstructure_id}.pimg")
+}
+```
+
+**Location 2 - Lines 1660-1665 (_get_selected_microstructure):**
+```python
+# OLD:
+return {
+    'name': microstructure_name,
+    'path': f"./Operations/{microstructure_name}"
+}
+
+# NEW:
+operations_dir = self.service_container.directories_service.get_operations_path()
+return {
+    'name': microstructure_name,
+    'path': str(operations_dir / microstructure_name)
+}
+```
+
+**Fixed Elastic Moduli Panel - Line 821:**
+```python
+# OLD:
+relative_output_dir = f"./Operations/{hydration_op.name}/{operation_name}"
+
+# NEW:
+operations_dir = self.service_container.directories_service.get_operations_path()
+relative_output_dir = str(operations_dir / hydration_op.name / operation_name)
+```
+
+**Note:** Results Panel was already fixed in previous session.
+
+#### **4. Technical Understanding: Current Working Directory in PyInstaller ✅**
+
+**Why `./` Paths Are Dangerous:**
+
+**macOS .app Bundle:**
+- Structure: `VCCTL.app/Contents/MacOS/VCCTL` (executable)
+- macOS automatically sets CWD to `.app/Contents/Resources/` when launched
+- PyInstaller puts bundled data in `Contents/Resources/`
+- So `./Operations` → `Contents/Resources/Operations` (happens to work if in project root)
+
+**Windows .exe:**
+- Structure: `VCCTL.exe` with `_internal/` subfolder
+- Windows sets CWD to wherever user double-clicked (Desktop, Downloads, etc.)
+- PyInstaller puts bundled data in `_internal/`
+- So `./Operations` → `<random launch location>/Operations` (completely wrong!)
+
+**The Safe Solution:**
+Always use configured paths via `directories_service.get_operations_path()`:
+- Respects user's Preferences settings
+- Works with both default and custom directories
+- Platform-independent
+- Robust across all launch methods
+
+### **📋 SESSION 7 FILES MODIFIED:**
+
+**Modified Files:**
+1. `src/app/services/directories_service.py` - Added `get_operations_path()` method (lines 198-201)
+2. `src/app/windows/panels/hydration_panel.py` - Fixed 2 hardcoded paths (lines 1253-1261, 1660-1665)
+3. `src/app/windows/panels/elastic_moduli_panel.py` - Fixed 1 hardcoded path (line 821-822)
+4. `CLAUDE.md` - This session documentation
+
+**No files created this session.**
+
+### **🔧 KEY TECHNICAL PATTERNS DOCUMENTED:**
+
+#### **Why Hardcoded Relative Paths Fail in PyInstaller:**
+
+**Problem:**
+```python
+# This works in development but fails in packaged app
+operations_dir = "./Operations"
+```
+
+**Reason:**
+- In development: CWD = project root, so `./Operations` works
+- In packaged app: CWD = launch location (unpredictable), so `./Operations` fails
+
+**Solution:**
+```python
+# Always use configured paths from directories_service
+operations_dir = self.service_container.directories_service.get_operations_path()
+```
+
+**Benefits:**
+- ✅ Works in development and packaged apps
+- ✅ Respects user configuration (default or custom directory)
+- ✅ Platform-independent (macOS, Windows, Linux)
+- ✅ No assumptions about working directory
+
+#### **macOS "Lucky Coincidence" Explained:**
+
+**Why macOS Appeared to Work:**
+1. macOS development workflow runs from project root directory
+2. macOS .app bundle sets CWD to location that happens to align with operations directory
+3. User likely testing with operations in project root or default directory
+4. Hardcoded `./Operations` accidentally resolved correctly
+
+**Why This Was Fragile:**
+- Would fail if user launched from different directory
+- Would fail if packaged .app moved to different location
+- Only worked due to specific testing circumstances
+- Not actually robust code
+
+**Why Windows Exposed the Bug:**
+- Windows doesn't have the same CWD behavior
+- User double-clicking .exe from arbitrary location
+- No "lucky coincidence" to hide the bug
+- Forced us to fix the real problem
+
+### **🎯 REMAINING WORK:**
+
+**Pending Path Fixes (5 locations, 4 files):**
+1. `mix_design_panel.py` line 3357 - microstructure_file path
+2. `elastic_lineage_service.py` line 308 - temp_grading_path
+3. `microstructure_hydration_bridge.py` line 261 - operation_dir
+4. `microstructure_hydration_bridge.py` line 268 - param_file_path
+5. `microstructure_hydration_bridge.py` line 336 - operation_dir
+6. `microstructure_hydration_bridge.py` line 644 - source_dir
+
+**PyVista API Issue:**
+- 3D viewer error: `Renderer.enable_anti_aliasing() takes 1 positional argument but 2 were given`
+- PyVista API changed between versions
+- Need to update anti-aliasing call
+
+**Testing Plan:**
+1. Fix remaining hardcoded paths
+2. Fix PyVista API issue
+3. Rebuild Windows package
+4. Test full workflow: microstructure → hydration → operations display → 3D viewing
+
+### **📊 PLATFORM STATUS AFTER SESSION 7:**
+
+| Platform | Path Resolution | Ops Detection | 3D Viewer | Status |
+|----------|----------------|---------------|-----------|--------|
+| macOS (ARM64) | ⚠️ Fragile (lucky coincidence) | ✅ Works | ✅ Works | **Needs fixes for robustness** |
+| Windows (x64) | ⏳ Partially fixed (3/11) | ⏳ Testing pending | ❌ PyVista API issue | **In progress** |
+| Linux (x64) | ⏳ Not tested | ⏳ Not tested | ⏳ Not tested | Not started |
+
+### **💡 KEY LESSONS FOR FUTURE PROJECTS:**
+
+#### **Lesson 1: Cross-Platform Testing Exposes Hidden Bugs**
+- Code that "works" on one platform may have hidden bugs
+- Different platforms have different working directory behaviors
+- Always test on target platforms, not just development platform
+
+#### **Lesson 2: Avoid Hardcoded Relative Paths**
+- Never use `"./path"` or `"path/to/file"` in production code
+- Always use configuration service to get configured paths
+- Makes code robust to packaging, launch location, and user configuration
+
+#### **Lesson 3: Current Working Directory Is Unreliable**
+- Don't assume CWD is project root
+- Don't assume CWD is stable across platforms
+- Always use absolute paths or paths relative to known anchors (like `sys._MEIPASS`)
+
+#### **Lesson 4: "It Works on My Machine" Is a Warning Sign**
+- If code only works in development, it's probably fragile
+- Test in packaged form early and often
+- Test with different launch methods and locations
+
+#### **Lesson 5: PyInstaller Requires Special Path Handling**
+- Use `sys.frozen` and `sys._MEIPASS` to detect packaged environment
+- Bundle data properly in `.spec` file
+- Test path resolution in packaged app, not just development
+
+### **🎯 NEXT SESSION PLAN:**
+
+1. Fix remaining 6 hardcoded paths in 4 files
+2. Fix PyVista anti-aliasing API call
+3. Rebuild Windows package with all fixes
+4. Comprehensive testing:
+   - Create microstructure
+   - Run hydration
+   - Verify Operations panel shows results
+   - Verify Hydration panel finds microstructures
+   - Test 3D visualization
+5. If tests pass, commit and push all changes
+6. Update macOS package with fixes for robustness
+
+### **⏰ SESSION END:**
+
+User ending session for the day. Will test fixes tomorrow after rebuild.
 
 ---
 

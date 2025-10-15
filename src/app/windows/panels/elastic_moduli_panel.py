@@ -817,8 +817,9 @@ class ElasticModuliPanel(Gtk.Box):
         self.image_filename_entry.set_text(image_filename)
 
         # Set hierarchical output directory (relative path)
-        # Format: ./Operations/{HydrationName}/{ElasticOperationName}
-        relative_output_dir = f"./Operations/{hydration_op.name}/{operation_name}"
+        # Format: {OperationsDir}/{HydrationName}/{ElasticOperationName}
+        operations_dir = self.service_container.directories_service.get_operations_path()
+        relative_output_dir = str(operations_dir / hydration_op.name / operation_name)
         self.output_dir_entry.set_text(relative_output_dir)
 
         # Set PIMG file path (relative to project root)
@@ -1387,8 +1388,19 @@ class ElasticModuliPanel(Gtk.Box):
                 return None
 
             # Get elastic executable path
-            project_root = Path(__file__).parent.parent.parent.parent.parent
-            elastic_path = project_root / "backend" / "bin" / "elastic"
+            import sys
+
+            # Detect if running in PyInstaller bundle
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                # Running in PyInstaller bundle
+                project_root = Path(sys._MEIPASS)
+            else:
+                # Running in development
+                project_root = Path(__file__).parent.parent.parent.parent.parent
+
+            # Platform-specific executable name
+            elastic_exe = 'elastic.exe' if sys.platform == 'win32' else 'elastic'
+            elastic_path = project_root / "backend" / "bin" / elastic_exe
             if not elastic_path.exists():
                 self.logger.error(f"Elastic executable not found at: {elastic_path}")
                 return None

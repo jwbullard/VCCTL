@@ -189,11 +189,16 @@ class DirectoriesService:
         """Get the aggregate directory path."""
         directories_config = self.config_manager.directories
         return directories_config.aggregate_path
-    
+
     def get_particle_shape_set_dir(self) -> Path:
         """Get the particle shape set directory path."""
         directories_config = self.config_manager.directories
         return directories_config.particle_shape_set_path
+
+    def get_operations_path(self) -> Path:
+        """Get the operations directory path."""
+        directories_config = self.config_manager.directories
+        return directories_config.operations_path
     
     def create_temp_file(self, prefix: str = "vcctl_", suffix: str = ".tmp") -> Path:
         """

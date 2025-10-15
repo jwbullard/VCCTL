@@ -10,20 +10,20 @@ set (VCCTL_VERSION_MINOR 0.0)
 find_package(PNG REQUIRED)
 find_package(ZLIB REQUIRED)
 
-# getopt library - Windows only (Unix has it built-in)
-if(WIN32)
+# getopt library - MSVC only (Unix and MinGW have it built-in)
+if(MSVC)
     find_package(unofficial-getopt-win32 REQUIRED)
     set(EXTRA_LIBS ${EXTRA_LIBS} unofficial::getopt-win32::getopt)
 endif()
 
-# Math library handling - not needed on Windows, required on Unix
-if(UNIX)
-    find_library(MATH_LIB NAMES m libm HINTS "/usr/lib")
+# Math library handling - not needed on MSVC, required on Unix and MinGW
+if(NOT MSVC)
+    find_library(MATH_LIB NAMES m libm HINTS "/usr/lib" "/c/msys64/mingw64/lib")
     if(MATH_LIB)
         message("Found MATH_LIB: [${MATH_LIB}]")
         set(EXTRA_LIBS ${EXTRA_LIBS} ${MATH_LIB})
     else()
-        message(FATAL_ERROR "Did not find MATH lib")
+        message(WARNING "Did not find MATH lib - continuing without it")
     endif()
 endif()
 
@@ -32,10 +32,13 @@ set(EXTRA_LIBS ${EXTRA_LIBS} PNG::PNG ZLIB::ZLIB)
 message("EXTRA_LIBS: " ${EXTRA_LIBS})
 
 # Use include_directories instead of manual -I flags to handle special characters in paths
-# Note: PNG/ZLIB headers come from vcpkg on Windows, so don't add custom include paths
-if(UNIX)
+# Note: PNG/ZLIB headers come from vcpkg on MSVC, MinGW and Unix need custom include paths
+if(NOT MSVC)
     include_directories("${CMAKE_SOURCE_DIR}/include")
-    include_directories("/usr/local/include")
+    include_directories("${CMAKE_SOURCE_DIR}/src/include")
+    if(UNIX)
+        include_directories("/usr/local/include")
+    endif()
 endif()
 
 # Platform-specific compiler flags

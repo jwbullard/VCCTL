@@ -1250,11 +1250,14 @@ class HydrationPanel(Gtk.Box):
         microstructure_id = combo.get_active_id()
         
         if microstructure_id:
+            # Get operations directory from configuration
+            operations_dir = self.service_container.directories_service.get_operations_path()
+
             # Store selected microstructure info
             self.selected_microstructure = {
                 'operation_name': microstructure_id,
-                'img_file': f"./Operations/{microstructure_id}/{microstructure_id}.img",
-                'pimg_file': f"./Operations/{microstructure_id}/{microstructure_id}.pimg"
+                'img_file': str(operations_dir / microstructure_id / f"{microstructure_id}.img"),
+                'pimg_file': str(operations_dir / microstructure_id / f"{microstructure_id}.pimg")
             }
             
             # Update info display
@@ -1654,9 +1657,11 @@ class HydrationPanel(Gtk.Box):
         """Get the currently selected microstructure."""
         if hasattr(self, 'microstructure_combo') and self.microstructure_combo.get_active_text():
             microstructure_name = self.microstructure_combo.get_active_text()
+            # Get operations directory from configuration
+            operations_dir = self.service_container.directories_service.get_operations_path()
             return {
                 'name': microstructure_name,
-                'path': f"./Operations/{microstructure_name}"
+                'path': str(operations_dir / microstructure_name)
             }
         return None
     
@@ -2082,14 +2087,14 @@ class HydrationPanel(Gtk.Box):
         try:
             # Clear current list
             self.microstructure_combo.remove_all()
-            
+
             # Add empty option
             self.microstructure_combo.append("", "-- Select Microstructure --")
-            
-            # Scan Operations folder for microstructures
-            operations_dir = "./Operations"
+
+            # Get operations directory from configuration
+            operations_dir = str(self.service_container.directories_service.get_operations_path())
             if not os.path.exists(operations_dir):
-                self.logger.warning("Operations folder not found")
+                self.logger.warning(f"Operations folder not found: {operations_dir}")
                 self.microstructure_combo.set_active(0)
                 return
             

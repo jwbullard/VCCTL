@@ -3175,7 +3175,8 @@ Distance: {distance_um:.2f} μm"""
         import subprocess
         import tempfile
         import os
-        
+        import sys
+
         # Create temporary input file and permanent output file in source directory
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_input.close()
@@ -3210,8 +3211,11 @@ Distance: {distance_um:.2f} μm"""
             
             # Get path to stat3d executable - use absolute path from project root
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-            stat3d_path = os.path.join(project_root, 'backend', 'bin', 'stat3d')
-            
+
+            # Platform-specific executable name
+            stat3d_exe = 'stat3d.exe' if sys.platform == 'win32' else 'stat3d'
+            stat3d_path = os.path.join(project_root, 'backend', 'bin', stat3d_exe)
+
             # Run stat3d program with input and output files
             cmd = [stat3d_path, temp_input.name, output_file]
             self.logger.info(f"Executing: {' '.join(cmd)}")
@@ -3252,7 +3256,8 @@ Distance: {distance_um:.2f} μm"""
         import subprocess
         import tempfile
         import os
-        
+        import sys
+
         # Create temporary input file and permanent output file in source directory
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_input.close()
@@ -3287,8 +3292,11 @@ Distance: {distance_um:.2f} μm"""
             
             # Get path to perc3d executable
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-            perc3d_path = os.path.join(project_root, 'backend', 'bin', 'perc3d')
-            
+
+            # Platform-specific executable name
+            perc3d_exe = 'perc3d.exe' if sys.platform == 'win32' else 'perc3d'
+            perc3d_path = os.path.join(project_root, 'backend', 'bin', perc3d_exe)
+
             # Run perc3d program with command line arguments
             cmd = [perc3d_path, temp_input.name, output_file]
             self.logger.info(f"Executing: {' '.join(cmd)}")
@@ -3329,8 +3337,10 @@ Distance: {distance_um:.2f} μm"""
         import subprocess
         import tempfile
         import os
+        import sys
         import re
-        
+
+
         # Create temporary input and output files
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
@@ -3357,8 +3367,11 @@ Distance: {distance_um:.2f} μm"""
             
             # Get path to stat3d executable - use absolute path from project root
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-            stat3d_path = os.path.join(project_root, 'backend', 'bin', 'stat3d')
-            
+
+            # Platform-specific executable name
+            stat3d_exe = 'stat3d.exe' if sys.platform == 'win32' else 'stat3d'
+            stat3d_path = os.path.join(project_root, 'backend', 'bin', stat3d_exe)
+
             # Run stat3d program with command line arguments
             cmd = [stat3d_path, temp_input.name]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
@@ -3415,7 +3428,8 @@ Distance: {distance_um:.2f} μm"""
         import subprocess
         import tempfile
         import os
-        
+        import sys
+
         # Create temporary input and output files
         temp_input = tempfile.NamedTemporaryFile(mode='w', suffix='.img', delete=False)
         temp_output = tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False)
@@ -3442,8 +3456,11 @@ Distance: {distance_um:.2f} μm"""
             
             # Get path to perc3d executable
             project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-            perc3d_path = os.path.join(project_root, 'backend', 'bin', 'perc3d')
-            
+
+            # Platform-specific executable name
+            perc3d_exe = 'perc3d.exe' if sys.platform == 'win32' else 'perc3d'
+            perc3d_path = os.path.join(project_root, 'backend', 'bin', perc3d_exe)
+
             # Run perc3d program with command line arguments
             cmd = [perc3d_path, temp_input.name]
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)

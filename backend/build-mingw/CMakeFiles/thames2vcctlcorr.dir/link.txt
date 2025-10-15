@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\thames2vcctlcorr.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\thames2vcctlcorr.dir/objects.a @CMakeFiles\thames2vcctlcorr.dir\objects1.rsp
+C:\msys64\mingw64\bin\gcc.exe -O2 -Wl,--whole-archive CMakeFiles\thames2vcctlcorr.dir/objects.a -Wl,--no-whole-archive -o thames2vcctlcorr.exe -Wl,--out-implib,libthames2vcctlcorr.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\thames2vcctlcorr.dir\linkLibs.rsp

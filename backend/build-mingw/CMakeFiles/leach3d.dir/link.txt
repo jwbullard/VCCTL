@@ -1,0 +1,3 @@
+C:\msys64\mingw64\bin\cmake.exe -E rm -f CMakeFiles\leach3d.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\leach3d.dir/objects.a @CMakeFiles\leach3d.dir\objects1.rsp
+C:\msys64\mingw64\bin\gcc.exe -O2 -Wl,--whole-archive CMakeFiles\leach3d.dir/objects.a -Wl,--no-whole-archive -o leach3d.exe -Wl,--out-implib,libleach3d.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\leach3d.dir\linkLibs.rsp

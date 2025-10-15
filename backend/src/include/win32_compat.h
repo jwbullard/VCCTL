@@ -1,7 +1,8 @@
 #ifndef WIN32_COMPAT_H
 #define WIN32_COMPAT_H
 
-#ifdef _WIN32
+/* Only needed for MSVC - MinGW has these functions built-in */
+#if defined(_WIN32) && defined(_MSC_VER)
 
 #include <windows.h>
 #include <time.h>
@@ -28,6 +29,6 @@ static inline int clock_gettime(int clk_id, struct timespec *spec) {
     return 0;
 }
 
-#endif /* _WIN32 */
+#endif /* _WIN32 && _MSC_VER */
 
 #endif /* WIN32_COMPAT_H */
