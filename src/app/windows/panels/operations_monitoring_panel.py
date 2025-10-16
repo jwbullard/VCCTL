@@ -2854,8 +2854,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     
                     # Always try to find the standard Operations folder regardless of metadata
                     # This ensures orphaned folders get cleaned up even if metadata is missing/incorrect
-                    project_root = Path(__file__).parent.parent.parent.parent.parent
-                    operations_dir = project_root / "Operations"
+                    operations_dir = self.service_container.directories_service.get_operations_path()
                     standard_folder = operations_dir / operation.name
                     
                     # Use the metadata output_dir if available and valid, otherwise use standard location
@@ -2869,7 +2868,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     else:
                         # Try to make relative paths absolute
                         if output_dir and not Path(output_dir).is_absolute():
-                            absolute_path = project_root / output_dir
+                            absolute_path = operations_dir / output_dir
                             if absolute_path.exists():
                                 output_dir = str(absolute_path)
                                 self.logger.info(f"Made relative path absolute for {operation.name}: {output_dir}")

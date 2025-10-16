@@ -19,9 +19,10 @@ from app.database.base import Base
 class OperationStatus(str, enum.Enum):
     """Operation lifecycle status."""
     QUEUED = "QUEUED"
-    RUNNING = "RUNNING" 
+    RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
+    ERROR = "ERROR"  # Alias for FAILED (for backward compatibility)
     CANCELLED = "CANCELLED"
 
 
@@ -129,7 +130,14 @@ class Operation(Base):
         self.completed_at = datetime.utcnow()
         if error_message:
             self.error_message = error_message
-    
+
+    def mark_error(self, error_message: str = None):
+        """Mark operation as failed (alias for backward compatibility)."""
+        self.status = OperationStatus.ERROR.value
+        self.completed_at = datetime.utcnow()
+        if error_message:
+            self.error_message = error_message
+
     def mark_cancelled(self):
         """Mark operation as cancelled."""
         self.status = OperationStatus.CANCELLED.value

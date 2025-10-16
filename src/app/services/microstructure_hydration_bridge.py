@@ -347,15 +347,15 @@ class MicrostructureHydrationBridge:
         
         # Process time calibration settings
         if time_calibration_settings:
-            calibration_mode = time_calibration_settings.get('calibration_mode', 'knudsen_parabolic')
-            calibration_value = time_calibration_settings.get('calibration_value')
+            calibration_mode = time_calibration_settings.get('mode', 'knudsen')  # Changed from 'calibration_mode' to 'mode'
+            calibration_value = time_calibration_settings.get('data_file')  # Changed from 'calibration_value' to 'data_file'
             time_conversion_factor = time_calibration_settings.get('time_conversion_factor', 0.00045)
             
             # Map calibration mode to TimeCalibrationMethod parameter
-            if calibration_mode == 'knudsen_parabolic':
+            if calibration_mode == 'knudsen' or calibration_mode == 'knudsen_parabolic':
                 time_calibration_method = 0
-                beta_value = time_conversion_factor if calibration_value is not None else time_conversion_factor
-                cal_filename = ""
+                beta_value = time_conversion_factor
+                cal_filename = "none"  # Use "none" instead of empty string to avoid NULL pointer on Windows
             elif calibration_mode == 'calorimetry':
                 time_calibration_method = 1
                 beta_value = time_conversion_factor  # Keep default for reference

@@ -85,18 +85,23 @@ class HydrationProgress:
 
 class HydrationExecutorService:
     """Service for executing and monitoring hydration simulations."""
-    
-    def __init__(self, database_service: DatabaseService, 
+
+    def __init__(self, database_service: DatabaseService,
                  hydration_params_service: HydrationParametersService):
         """Initialize the hydration executor service."""
         self.database_service = database_service
         self.hydration_params_service = hydration_params_service
         self.logger = logging.getLogger('VCCTL.HydrationExecutor')
-        
+
         # Process management
         self.active_simulations: Dict[str, Dict[str, Any]] = {}  # operation_name -> simulation info
         self.progress_callbacks: Dict[str, List[Callable]] = {}  # operation_name -> callback list
-        
+
+        # Get service container for configured directories
+        from app.services.service_container import get_service_container
+        service_container = get_service_container()
+        self.operations_dir = service_container.directories_service.get_operations_path()
+
         # Paths
         # Detect if running in PyInstaller bundle
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -109,7 +114,7 @@ class HydrationExecutorService:
         # Platform-specific executable name
         disrealnew_exe = 'disrealnew.exe' if sys.platform == 'win32' else 'disrealnew'
         self.disrealnew_binary = self.project_root / "backend" / "bin" / disrealnew_exe
-        
+
         # Configuration
         self.progress_update_interval = 15.0  # seconds
         self.json_progress_support = True  # Will be True when your I/O improvements are ready
@@ -256,8 +261,8 @@ class HydrationExecutorService:
                 raise FileNotFoundError(f"disrealnew binary not found: {self.disrealnew_binary}")
             
             # Create additional required directories/files if needed
-            operation_dir = self.project_root / "Operations" / operation_name
-            
+            operation_dir = self.operations_dir / operation_name
+
             # Prepare log files
             stdout_log = operation_dir / f"{operation_name}_hydration_stdout.log"
             stderr_log = operation_dir / f"{operation_name}_hydration_stderr.log"
@@ -283,7 +288,7 @@ class HydrationExecutorService:
             Simulation info dictionary or None if failed
         """
         try:
-            operation_dir = self.project_root / "Operations" / operation_name
+            operation_dir = self.operations_dir / operation_name
             if parameter_file_path:
                 # Use absolute path for the parameter file
                 param_file = Path(parameter_file_path).resolve()
@@ -651,8 +656,8 @@ class HydrationExecutorService:
             True if simulation completed successfully, False otherwise
         """
         try:
-            operation_dir = self.project_root / "Operations" / operation_name
-            
+            operation_dir = self.operations_dir / operation_name
+
             # Check for key output files that indicate successful completion
             # Try to detect the actual microstructure name from the files in the directory
             microstructure_name = None

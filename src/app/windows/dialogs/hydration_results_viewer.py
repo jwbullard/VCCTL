@@ -201,9 +201,10 @@ class HydrationResultsViewer(Gtk.Dialog):
                     output_dir = self.operation.metadata.get('output_dir')
             
             if not output_dir:
-                # Try to construct from operation name
-                project_root = Path(__file__).parent.parent.parent.parent
-                operations_dir = project_root / "Operations"
+                # Try to construct from operation name using configured operations directory
+                from app.services.service_container import get_service_container
+                service_container = get_service_container()
+                operations_dir = service_container.directories_service.get_operations_path()
                 potential_folder = operations_dir / self.operation.name
                 if potential_folder.exists():
                     output_dir = str(potential_folder)
@@ -270,50 +271,95 @@ class HydrationResultsViewer(Gtk.Dialog):
         """Load the initial microstructure in the 3D viewer."""
         if not self.microstructure_files:
             self.logger.warning("No microstructure files available")
+            self._show_diagnostic_message("No Microstructure Files", "No microstructure files were found for this operation.")
             return
-        
+
         try:
             # Load the first microstructure (time=0)
             self.current_time_index = 0
             time_hours, file_path = self.microstructure_files[0]
-            
+
+            print(f"\n=== 3D VIEWER DIAGNOSTIC ===")
+            print(f"Loading file: {file_path}")
+
             # Read microstructure file and load into PyVista viewer
             if self.pyvista_viewer:
                 voxel_data = self._read_microstructure_file(file_path)
+                print(f"Voxel data loaded: {voxel_data is not None}")
                 if voxel_data is not None:
+                    print(f"Voxel shape: {voxel_data.shape}, unique phases: {np.unique(voxel_data)}")
+
                     # VCCTL phase mapping with official colors - fresh read
                     phase_mapping, phase_colors = self._get_vcctl_phase_mapping()
+                    print(f"Phase mapping loaded: {len(phase_mapping)} phases, {len(phase_colors)} colors")
                     self.logger.info(f"Loading {len(phase_colors)} colors from colors.csv for initial load")
-                    
+
                     # Debug: log what phases and colors we actually loaded
                     for phase_id, phase_name in phase_mapping.items():
                         if phase_id in phase_colors:
                             color = phase_colors[phase_id]
                             self.logger.info(f"Phase {phase_id}: {phase_name} = RGB({color[0]*255:.0f}, {color[1]*255:.0f}, {color[2]*255:.0f})")
-                    
+
                     # Clear any existing phase colors in PyVista viewer
                     if hasattr(self.pyvista_viewer, 'phase_colors'):
                         self.pyvista_viewer.phase_colors.clear()
-                    
+
                     # Pre-set colors in PyVista viewer before loading data
                     for phase_id, rgb_color in phase_colors.items():
                         r = int(rgb_color[0] * 255)
-                        g = int(rgb_color[1] * 255) 
+                        g = int(rgb_color[1] * 255)
                         b = int(rgb_color[2] * 255)
                         hex_color = f"#{r:02x}{g:02x}{b:02x}"
                         if hasattr(self.pyvista_viewer, 'set_phase_color'):
                             self.pyvista_viewer.set_phase_color(phase_id, hex_color)
                             self.logger.debug(f"Set PyVista color for phase {phase_id}: {hex_color}")
-                    
+
+                    print(f"Calling load_voxel_data...")
                     self.logger.info(f"Loading voxel data into PyVista viewer...")
                     success = self.pyvista_viewer.load_voxel_data(voxel_data, phase_mapping)
+                    print(f"load_voxel_data returned: {success}")
                     self.logger.info(f"PyVista load_voxel_data returned: {success}")
+
+                    if not success:
+                        self._show_diagnostic_message("3D Load Failed",
+                            f"PyVista failed to load the microstructure data.\n\n"
+                            f"File: {file_path}\n"
+                            f"Shape: {voxel_data.shape}\n"
+                            f"Phases: {np.unique(voxel_data)}\n\n"
+                            f"Check console output for details.")
+
+                    print(f"=== END DIAGNOSTIC ===\n")
                     self._update_time_display()
                 else:
                     self.logger.error("Failed to read microstructure file data")
-                
+                    self._show_diagnostic_message("File Read Failed",
+                        f"Failed to read microstructure file:\n{file_path}\n\nCheck that the file exists and is a valid .img file.")
+            else:
+                print("ERROR: pyvista_viewer is None!")
+                self._show_diagnostic_message("No 3D Viewer", "PyVista viewer widget was not initialized.")
+
         except Exception as e:
             self.logger.error(f"Error loading initial microstructure: {e}")
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"ERROR loading microstructure:\n{error_details}")
+            self._show_diagnostic_message("Load Error", f"Error loading microstructure:\n\n{str(e)}\n\nSee console for full traceback.")
+
+    def _show_diagnostic_message(self, title: str, message: str):
+        """Show a diagnostic message dialog to the user."""
+        try:
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                flags=0,
+                message_type=Gtk.MessageType.INFO,
+                buttons=Gtk.ButtonsType.OK,
+                text=title
+            )
+            dialog.format_secondary_text(message)
+            dialog.run()
+            dialog.destroy()
+        except Exception as e:
+            print(f"Failed to show diagnostic dialog: {e}")
     
     def _start_preloading(self) -> None:
         """Start background preloading of all microstructure data."""
