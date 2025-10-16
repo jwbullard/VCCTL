@@ -183,7 +183,13 @@ class PyVistaViewer3D(Gtk.Box):
             # Configure plotter
             self.plotter.background_color = 'white'
             self.plotter.enable_depth_peeling(number_of_peels=10)  # Better transparency
-            self.plotter.enable_anti_aliasing('ssaa')  # Smooth edges
+
+            # Enable anti-aliasing (API changed between PyVista versions)
+            try:
+                self.plotter.enable_anti_aliasing()  # New API (PyVista >= 0.43.0)
+            except TypeError:
+                # Fallback for older PyVista versions that require an argument
+                self.plotter.enable_anti_aliasing('ssaa')  # Old API (PyVista < 0.43.0)
             
             # Ensure proper lighting setup
             self.plotter.remove_all_lights()  # Clear any default lights
@@ -2891,7 +2897,13 @@ Distance: {distance_um:.2f} μm"""
             # Configure plotter
             self.plotter.background_color = 'white'
             self.plotter.enable_depth_peeling(number_of_peels=10)  # Better transparency
-            self.plotter.enable_anti_aliasing('ssaa')  # Smooth edges
+
+            # Enable anti-aliasing (API changed between PyVista versions)
+            try:
+                self.plotter.enable_anti_aliasing()  # New API (PyVista >= 0.43.0)
+            except TypeError:
+                # Fallback for older PyVista versions that require an argument
+                self.plotter.enable_anti_aliasing('ssaa')  # Old API (PyVista < 0.43.0)
             
             # Set up professional lighting
             self.plotter.remove_all_lights()  # Clear any default lights

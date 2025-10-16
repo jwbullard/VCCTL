@@ -57,9 +57,14 @@ class MicrostructureHydrationBridge:
         self.db_service = db_service
         self.psd_service = PSDService()
         self.bias_service = OneVoxelBiasService()
-        
-        # Metadata storage directory
-        self.metadata_dir = os.path.join(os.getcwd(), "microstructure_metadata")
+
+        # Get operations directory from configuration
+        from app.services.service_container import get_service_container
+        service_container = get_service_container()
+        self.operations_dir = service_container.directories_service.get_operations_path()
+
+        # Metadata storage directory (in operations directory)
+        self.metadata_dir = os.path.join(str(self.operations_dir), "microstructure_metadata")
         os.makedirs(self.metadata_dir, exist_ok=True)
     
     def store_microstructure_metadata(self, operation_name: str, 
@@ -258,14 +263,14 @@ class MicrostructureHydrationBridge:
             )
             
             # Create operation directory
-            operation_dir = f"./Operations/{operation_name}"
+            operation_dir = str(self.operations_dir / operation_name)
             os.makedirs(operation_dir, exist_ok=True)
             
             # Copy microstructure files to operation directory
             self._copy_microstructure_files(microstructure_name, operation_dir)
-            
+
             # Generate extended parameter file
-            param_file_path = f"./Operations/{operation_name}/{operation_name}_extended_parameters.csv"
+            param_file_path = str(self.operations_dir / operation_name / f"{operation_name}_extended_parameters.csv")
             
             with open(param_file_path, 'w') as f:
                 # Write base hydration parameters (378 parameters)
@@ -333,7 +338,7 @@ class MicrostructureHydrationBridge:
             temperature_profile_data = curing_conditions.get('temperature_profile_data')
             if temperature_profile_data and operation_name:
                 # Create operation directory to store the temperature profile file
-                operation_dir = f"./Operations/{operation_name}"
+                operation_dir = str(self.operations_dir / operation_name)
                 os.makedirs(operation_dir, exist_ok=True)
                 self._generate_temperature_profile_csv(temperature_profile_data, operation_dir)
         
@@ -641,8 +646,8 @@ class MicrostructureHydrationBridge:
             operation_dir: Path to the hydration simulation operation directory
         """
         try:
-            source_dir = f"./Operations/{microstructure_name}"
-            
+            source_dir = str(self.operations_dir / microstructure_name)
+
             if not os.path.exists(source_dir):
                 raise FileNotFoundError(f"Source microstructure directory not found: {source_dir}")
             

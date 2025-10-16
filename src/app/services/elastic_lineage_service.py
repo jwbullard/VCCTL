@@ -63,10 +63,9 @@ class ElasticLineageService:
         self.service_container = service_container
         self.database_service = service_container.database_service
         self.logger = logging.getLogger(__name__)
-        
-        # Get operations directory from config or default
-        project_root = Path(__file__).parent.parent.parent.parent
-        self.operations_dir = project_root / "Operations"
+
+        # Get operations directory from configuration
+        self.operations_dir = service_container.directories_service.get_operations_path()
     
     def resolve_lineage_chain(self, hydration_operation_id: int, output_directory: str = None) -> Dict[str, Any]:
         """
@@ -304,8 +303,8 @@ class ElasticLineageService:
             else:
                 # Fallback to operations base directory
                 actual_file_path = self.operations_dir / grading_filename
-                # Return path indicating it's in operations directory
-                temp_grading_path = f"./Operations/{grading_filename}"
+                # Return relative path from operations directory
+                temp_grading_path = f"./{grading_filename}"
             
             # Convert sieve data to .gdg format in CSV with header (as required by elastic.c)
             lines = []

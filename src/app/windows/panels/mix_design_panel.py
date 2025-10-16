@@ -3352,9 +3352,10 @@ class MixDesignPanel(Gtk.Box):
                             self.logger.info(f"DEBUG: Prepared {len(materials_data)} materials for metadata storage")
                             
                             # Store metadata with operation parameters
+                            operations_dir = self.service_container.directories_service.get_operations_path()
                             success = bridge.store_microstructure_metadata(
                                 operation_name=operation_name,
-                                microstructure_file=f"./Operations/{operation_name}/{operation_name}.pimg",  # Expected PIMG location
+                                microstructure_file=str(operations_dir / operation_name / f"{operation_name}.pimg"),
                                 system_size=system_size,
                                 resolution=resolution,
                                 materials_data=materials_data
