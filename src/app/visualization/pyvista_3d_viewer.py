@@ -48,6 +48,32 @@ try:
 except Exception:
     pass
 
+# PyVista 0.36.0 bug workaround: Add _textures attribute to PolyData class
+# This fixes AttributeError in contour() → copy_meta_from() → clear_textures()
+# See: https://github.com/pyvista/pyvista/issues/XXXX
+if not hasattr(pv.PolyData, '_textures_patched'):
+    original_init = pv.PolyData.__init__
+    def patched_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        if not hasattr(self, '_textures'):
+            self._textures = {}
+    pv.PolyData.__init__ = patched_init
+    pv.PolyData._textures_patched = True
+
+# PyVista 0.36.0 bug workaround: Add missing _association_* attributes to UniformGrid
+# This fixes AttributeError when calling contour() on UniformGrid objects
+if not hasattr(pv.UniformGrid, '_association_attributes_patched'):
+    original_uniformgrid_init = pv.UniformGrid.__init__
+    def patched_uniformgrid_init(self, *args, **kwargs):
+        original_uniformgrid_init(self, *args, **kwargs)
+        # PyVista 0.36.0 is missing multiple _association_* attributes
+        if not hasattr(self, '_association_complex_names'):
+            self._association_complex_names = {}
+        if not hasattr(self, '_association_bitarray_names'):
+            self._association_bitarray_names = {}
+    pv.UniformGrid.__init__ = patched_uniformgrid_init
+    pv.UniformGrid._association_attributes_patched = True
+
 # Configure theme for better memory management
 try:
     pv.global_theme.load_theme('default')
@@ -760,9 +786,8 @@ class PyVistaViewer3D(Gtk.Box):
                 phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
 
                 # Create structured grid
-                # PyVista UniformGrid (formerly ImageData) expects dimensions as (nx, ny, nz) and data in C-order
-                grid = pv.UniformGrid(dimensions=phase_mask.shape)
-                grid.spacing = self.voxel_size  # Set physical spacing
+                # PyVista UniformGrid (formerly ImageData) expects dims as (nx, ny, nz) and data in C-order
+                grid = pv.UniformGrid(dims=phase_mask.shape, spacing=self.voxel_size)  # Set dimensions and physical spacing
                 grid.point_data['phase'] = phase_mask.flatten(order='C')
                 
                 # Store mesh object
@@ -1001,6 +1026,9 @@ class PyVistaViewer3D(Gtk.Box):
         """Add wireframe rendering for a phase."""
         try:
             contour = mesh.contour([0.5], scalars='phase')
+            # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
+            if not hasattr(contour, '_textures'):
+                contour._textures = {}
             if contour.n_points > 0:
                 # Apply cross-sections if enabled
                 contour = self._apply_cross_sections(contour, phase_id)
@@ -1021,12 +1049,15 @@ class PyVistaViewer3D(Gtk.Box):
         """Add volume rendering with enhanced depth and contrast."""
         try:
             contour = mesh.contour([0.5], scalars='phase')
+            # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
+            if not hasattr(contour, '_textures'):
+                contour._textures = {}
             if contour.n_points > 0:
                 # Apply cross-sections if enabled
                 contour = self._apply_cross_sections(contour, phase_id)
                 
                 if contour.n_points > 0:  # Check if mesh still has points after cutting
-                    # Enhanced volume rendering for better depth perception
+                    # Enhanced volume rendering - using only PyVista 0.36.0 compatible parameters
                     self.plotter.add_mesh(
                         contour,
                         color=color,
@@ -1035,12 +1066,11 @@ class PyVistaViewer3D(Gtk.Box):
                         label=name,
                         smooth_shading=True,
                         show_edges=False,
-                        specular=0.8,  # Higher specular for more shine
-                        specular_power=30,  # Sharper highlights
-                        ambient=0.1,  # Very low ambient for more dramatic shadows
-                        diffuse=0.9,   # Higher diffuse for stronger contrast
-                        metallic=0.3,  # Add metallic quality
-                        roughness=0.2  # Lower roughness for more reflective surface
+                        specular=0.5,  # Moderate specular for some shine
+                        specular_power=20,  # Moderate highlights
+                        ambient=0.2,  # Low ambient for contrast
+                        diffuse=0.8   # High diffuse for good visibility
+                        # Note: metallic and roughness removed - not supported in PyVista 0.36.0
                     )
         except Exception as e:
             self.logger.warning(f"Volume rendering failed for phase {phase_id}: {e}")
@@ -1049,6 +1079,9 @@ class PyVistaViewer3D(Gtk.Box):
         """Add isosurface rendering with professional quality settings."""
         try:
             contour = mesh.contour([0.5], scalars='phase')
+            # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
+            if not hasattr(contour, '_textures'):
+                contour._textures = {}
             if contour.n_points > 0:
                 # Apply cross-sections if enabled
                 contour = self._apply_cross_sections(contour, phase_id)
