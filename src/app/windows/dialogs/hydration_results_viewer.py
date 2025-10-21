@@ -17,13 +17,17 @@ from typing import Dict, List, Optional, Any, Tuple
 import logging
 import re
 
-# Import the existing PyVista 3D viewer - optional if pyvista not available
+# Import the existing VTK-based 3D viewer
 try:
     from app.visualization.pyvista_3d_viewer import PyVistaViewer3D
     PYVISTA_AVAILABLE = True
-except ImportError:
+    print("SUCCESS: PyVistaViewer3D imported successfully")
+except ImportError as e:
     PyVistaViewer3D = None
     PYVISTA_AVAILABLE = False
+    print(f"ERROR: Failed to import PyVistaViewer3D: {e}")
+    import traceback
+    traceback.print_exc()
 
 
 class HydrationResultsViewer(Gtk.Dialog):
@@ -336,7 +340,7 @@ class HydrationResultsViewer(Gtk.Dialog):
                         f"Failed to read microstructure file:\n{file_path}\n\nCheck that the file exists and is a valid .img file.")
             else:
                 print("ERROR: pyvista_viewer is None!")
-                self._show_diagnostic_message("No 3D Viewer", "PyVista viewer widget was not initialized.")
+                self._show_diagnostic_message("No 3D Viewer", "VTK 3D viewer widget was not initialized.")
 
         except Exception as e:
             self.logger.error(f"Error loading initial microstructure: {e}")
@@ -781,17 +785,17 @@ class HydrationResultsViewer(Gtk.Dialog):
             # Don't let default response handling proceed to avoid destruction
     
     def _cleanup_pyvista(self):
-        """Clean up PyVista viewer to prevent segfaults."""
+        """Clean up VTK 3D viewer to prevent segfaults."""
         # Prevent double cleanup
         if self.cleanup_performed:
-            self.logger.info("PyVista cleanup already performed, skipping")
+            self.logger.info("VTK 3D viewer cleanup already performed, skipping")
             return
-            
+
         try:
             self.cleanup_performed = True
-            self.logger.info("Starting PyVista cleanup...")
-            
-            # First disable all UI interactions to prevent further calls to PyVista
+            self.logger.info("Starting VTK 3D viewer cleanup...")
+
+            # First disable all UI interactions to prevent further calls to VTK viewer
             if hasattr(self, 'time_slider') and self.time_slider:
                 self.time_slider.set_sensitive(False)
             
@@ -801,30 +805,30 @@ class HydrationResultsViewer(Gtk.Dialog):
             if hasattr(self, 'cached_phase_meshes'):
                 self.cached_phase_meshes.clear()
             
-            # Now try to cleanup PyVista safely with minimum operations
+            # Now try to cleanup VTK viewer safely with minimum operations
             if hasattr(self, 'pyvista_viewer') and self.pyvista_viewer:
                 try:
                     # Try to clear any active plots/meshes first
-                    if hasattr(self.pyvista_viewer, 'plotter') and self.pyvista_viewer.plotter:
-                        self.pyvista_viewer.plotter.clear()
-                    
-                    # Try to call cleanup if it exists  
+                    if hasattr(self.pyvista_viewer, 'renderer') and self.pyvista_viewer.renderer:
+                        self.pyvista_viewer.renderer.RemoveAllViewProps()
+
+                    # Try to call cleanup if it exists
                     if hasattr(self.pyvista_viewer, 'cleanup'):
                         self.pyvista_viewer.cleanup()
-                        
+
                 except Exception as cleanup_error:
-                    # Don't let PyVista cleanup errors stop us
-                    self.logger.warning(f"PyVista cleanup method failed (continuing anyway): {cleanup_error}")
-                
+                    # Don't let VTK cleanup errors stop us
+                    self.logger.warning(f"VTK cleanup method failed (continuing anyway): {cleanup_error}")
+
                 # Clear reference regardless of cleanup success/failure
                 self.pyvista_viewer = None
-                self.logger.info("PyVista viewer reference cleared")
-            
-            self.logger.info("PyVista cleanup completed")
+                self.logger.info("VTK 3D viewer reference cleared")
+
+            self.logger.info("VTK 3D viewer cleanup completed")
                 
         except Exception as e:
             # If cleanup fails, just log it and continue - don't let it crash the app
-            self.logger.warning(f"Error during PyVista cleanup (ignoring): {e}")
+            self.logger.warning(f"Error during VTK 3D viewer cleanup (ignoring): {e}")
             # Still mark as performed to prevent retry
             self.cleanup_performed = True
     

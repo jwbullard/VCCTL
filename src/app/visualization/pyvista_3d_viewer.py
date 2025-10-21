@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-PyVista-based 3D Microstructure Viewer for VCCTL
+VTK-based 3D Microstructure Viewer for VCCTL
 
-High-quality 3D visualization using PyVista/VTK for Ovito-style rendering
+High-quality 3D visualization using VTK directly for cross-platform compatibility
 with professional lighting, materials, and interaction capabilities.
+
+Note: This was previously PyVista-based but was rewritten to use VTK directly
+due to PyVista 0.36.0 initialization bugs on Windows MSYS2 environment.
+See Session 10 documentation in CLAUDE.md for details.
 """
 
 import gi
@@ -11,80 +15,34 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, GObject, Gdk, GdkPixbuf, Pango
 
-import pyvista as pv
+# Import only the specific VTK modules we need (avoid loading Qt modules)
 import numpy as np
+try:
+    # Import specific VTK modules instead of the whole vtk package
+    from vtkmodules.vtkRenderingCore import (
+        vtkRenderer, vtkRenderWindow, vtkCamera, vtkActor, vtkPolyDataMapper, vtkLight
+    )
+    from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+    from vtkmodules.vtkCommonCore import vtkObject, VTK_UNSIGNED_CHAR
+    from vtkmodules.vtkCommonDataModel import vtkImageData, vtkDataObject
+    from vtkmodules.vtkFiltersCore import vtkContourFilter
+    from vtkmodules.vtkRenderingCore import vtkWindowToImageFilter
+    from vtkmodules.util import numpy_support
+    import vtkmodules.vtkInteractionStyle  # Needed for interactor
+    import vtkmodules.vtkRenderingOpenGL2  # Needed for OpenGL rendering
+    VTK_AVAILABLE = True
+except ImportError as e:
+    print(f"WARNING: VTK modules import failed: {e}")
+    VTK_AVAILABLE = False
 from typing import Dict, List, Optional, Any, Tuple, Union
 import logging
 from pathlib import Path
 import io
 import PIL.Image
 
-# Configure PyVista for better memory management
-pv.set_plot_theme("default")  # Default theme with better lighting
-pv.global_theme.window_size = [800, 600] 
-pv.global_theme.font.size = 10
-pv.global_theme.background = 'white'  # Keep white background
-
-# Enable better memory management
-try:
-    pv.global_theme.auto_close = True  # Auto-close plotters
-except AttributeError:
-    pass  # Not available in this PyVista version
-
-# Try to start virtual display for headless rendering (Linux/CI only)
-try:
-    pv.start_xvfb()
-except Exception:
-    # On macOS/Windows, headless rendering works without xvfb
-    pass
-
-# Set VTK to be more aggressive about memory management
-try:
-    import vtk
-    vtk.vtkObject.SetGlobalWarningDisplay(0)  # Reduce VTK warnings
-    # Try to disable VTK's automatic object tracking (not available in all versions)
-    if hasattr(vtk.vtkReferenceCount, 'SetGlobalDebugFlag'):
-        vtk.vtkReferenceCount.SetGlobalDebugFlag(0)
-except Exception:
-    pass
-
-# PyVista 0.36.0 bug workaround: Add _textures attribute to PolyData class
-# This fixes AttributeError in contour() → copy_meta_from() → clear_textures()
-# See: https://github.com/pyvista/pyvista/issues/XXXX
-if not hasattr(pv.PolyData, '_textures_patched'):
-    original_init = pv.PolyData.__init__
-    def patched_init(self, *args, **kwargs):
-        original_init(self, *args, **kwargs)
-        if not hasattr(self, '_textures'):
-            self._textures = {}
-    pv.PolyData.__init__ = patched_init
-    pv.PolyData._textures_patched = True
-
-# PyVista 0.36.0 bug workaround: Add missing _association_* attributes to UniformGrid
-# This fixes AttributeError when calling contour() on UniformGrid objects
-if not hasattr(pv.UniformGrid, '_association_attributes_patched'):
-    original_uniformgrid_init = pv.UniformGrid.__init__
-    def patched_uniformgrid_init(self, *args, **kwargs):
-        original_uniformgrid_init(self, *args, **kwargs)
-        # PyVista 0.36.0 is missing multiple _association_* attributes
-        if not hasattr(self, '_association_complex_names'):
-            self._association_complex_names = {}
-        if not hasattr(self, '_association_bitarray_names'):
-            self._association_bitarray_names = {}
-    pv.UniformGrid.__init__ = patched_uniformgrid_init
-    pv.UniformGrid._association_attributes_patched = True
-
-# Configure theme for better memory management
-try:
-    pv.global_theme.load_theme('default')
-except Exception:
-    pass
-
-# Try to disable some automatic features that can cause memory leaks
-try:
-    pv._BUILDING_GALLERY = True  
-except Exception:
-    pass
+# Configure VTK for better memory management and reduced warnings
+if VTK_AVAILABLE:
+    vtkObject.SetGlobalWarningDisplay(0)  # Reduce VTK warnings
 
 
 class PyVistaViewer3D(Gtk.Box):
@@ -142,10 +100,35 @@ class PyVistaViewer3D(Gtk.Box):
             8: '#FFF056',   # Hemihydrate (light yellow)
             9: '#FFFF80',   # Anhydrite (pale yellow)
             10: '#28AD4B',  # Silica fume (green)
-            12: '#FF69B4',  # Slag (hot pink)
-            18: '#DDA0DD',  # Fly ash (plum)
-            30: '#F0E68C',  # Silica fume alternate (khaki)
-            100: '#D3D3D3'  # Aggregate (light gray)
+            11: '#EEAEEE',  # Inert Filler (plum)
+            12: '#FFA500',  # Slag (orange)
+            13: '#FFC041',  # Aggregate (gold)
+            14: '#FFA500',  # ASG (orange)
+            15: '#000080',  # CAS2 (navy)
+            16: '#1A641A',  # Silica(am) (dark green)
+            17: '#404040',  # FA-C3A (dark gray)
+            18: '#404040',  # Generic Flyash (dark gray)
+            19: '#07488E',  # Portlandite (dark blue)
+            20: '#F5DEB3',  # CSH (wheat)
+            21: '#969600',  # C3AH6 (olive)
+            22: '#7F00FF',  # AFt (violet)
+            23: '#7F00FF',  # AFt-Fe (violet)
+            24: '#F446CB',  # AFm (orchid)
+            25: '#408080',  # FH3 (teal)
+            26: '#AEEDDE',  # Pozzolanic CSH (pale turquoise)
+            27: '#80FA80',  # Slag CSH (pale green)
+            28: '#FFAA80',  # CaCl2 (peach)
+            29: '#FF00FF',  # Friedel Salt (magenta)
+            30: '#404000',  # Straetlingite (dark olive)
+            31: '#FFFF00',  # Secondary Gypsum (yellow)
+            32: '#FFFF00',  # Absorbed Gypsum (yellow)
+            33: '#00CC00',  # CACO3 (green)
+            34: '#FAC6DC',  # AFmc (pink)
+            35: '#1A671A',  # Brucite (dark green)
+            36: '#80FF00',  # Free lime (lime green)
+            37: '#B2B2B2',  # Orth. C3A (light gray)
+            55: '#000000',  # Void (black)
+            100: '#D3D3D3'  # Legacy aggregate (light gray)
         }
         self.phase_opacity = {}  # Per-phase opacity control
         self.show_phase = {}     # Per-phase visibility control
@@ -197,32 +180,68 @@ class PyVistaViewer3D(Gtk.Box):
         self.logger.info("PyVista 3D viewer initialized")
     
     def _create_pyvista_widget(self):
-        """Create PyVista widget using headless rendering."""
+        """Create VTK widget using headless rendering."""
         try:
-            # Create headless PyVista plotter
-            self.plotter = pv.Plotter(
-                off_screen=True,  # Headless rendering
-                window_size=[1200, 900],  # Even larger viewing window to fill available space
-                lighting='three_lights'  # Professional 3-point lighting
-            )
-            
-            # Configure plotter
-            self.plotter.background_color = 'white'
-            self.plotter.enable_depth_peeling(number_of_peels=10)  # Better transparency
+            # Create VTK render window for headless rendering
+            self.render_window = vtkRenderWindow()
+            self.render_window.SetOffScreenRendering(1)  # Headless rendering
+            self.render_window.SetSize(1200, 900)  # Larger viewing window
+            self.render_window.SetMultiSamples(0)  # Anti-aliasing
 
-            # Enable anti-aliasing (API changed between PyVista versions)
-            try:
-                self.plotter.enable_anti_aliasing()  # New API (PyVista >= 0.43.0)
-            except TypeError:
-                # Fallback for older PyVista versions that require an argument
-                self.plotter.enable_anti_aliasing('ssaa')  # Old API (PyVista < 0.43.0)
-            
-            # Ensure proper lighting setup
-            self.plotter.remove_all_lights()  # Clear any default lights
-            self.plotter.add_light(pv.Light(position=(1, 1, 1), focal_point=(0, 0, 0), color='white', intensity=0.8))
-            self.plotter.add_light(pv.Light(position=(-1, -1, 1), focal_point=(0, 0, 0), color='white', intensity=0.4))
-            self.plotter.add_light(pv.Light(position=(0, 0, -1), focal_point=(0, 0, 0), color='white', intensity=0.2))
-            
+            # Create VTK renderer
+            self.renderer = vtkRenderer()
+            self.renderer.SetBackground(1.0, 1.0, 1.0)  # White background
+            self.render_window.AddRenderer(self.renderer)
+
+            # Enable depth peeling for better transparency rendering
+            self.renderer.SetUseDepthPeeling(1)
+            self.renderer.SetMaximumNumberOfPeels(10)
+            self.renderer.SetOcclusionRatio(0.1)
+
+            # Setup professional 3-point lighting
+            self.renderer.RemoveAllLights()  # Clear default lights
+
+            # Key light (main light source)
+            key_light = vtkLight()
+            key_light.SetPosition(1, 1, 1)
+            key_light.SetFocalPoint(0, 0, 0)
+            key_light.SetColor(1.0, 1.0, 1.0)
+            key_light.SetIntensity(0.8)
+            self.renderer.AddLight(key_light)
+
+            # Fill light (softer, from opposite side)
+            fill_light = vtkLight()
+            fill_light.SetPosition(-1, -1, 1)
+            fill_light.SetFocalPoint(0, 0, 0)
+            fill_light.SetColor(1.0, 1.0, 1.0)
+            fill_light.SetIntensity(0.4)
+            self.renderer.AddLight(fill_light)
+
+            # Back light (rim lighting)
+            back_light = vtkLight()
+            back_light.SetPosition(0, 0, -1)
+            back_light.SetFocalPoint(0, 0, 0)
+            back_light.SetColor(1.0, 1.0, 1.0)
+            back_light.SetIntensity(0.2)
+            self.renderer.AddLight(back_light)
+
+            # Create camera
+            self.camera = vtkCamera()
+            self.renderer.SetActiveCamera(self.camera)
+
+            # Add coordinate axes
+            axes = vtkAxesActor()
+            axes.SetTotalLength(50, 50, 50)  # Length of axes in voxels
+            axes.SetShaftType(0)  # Cylinder shaft
+            axes.SetCylinderRadius(0.02)  # Thinner axes
+            self.renderer.AddActor(axes)
+
+            # Store reference to window-to-image filter for screenshot capture
+            self.window_to_image_filter = vtkWindowToImageFilter()
+            self.window_to_image_filter.SetInput(self.render_window)
+            self.window_to_image_filter.SetInputBufferTypeToRGB()
+            self.window_to_image_filter.ReadFrontBufferOff()  # Read from back buffer
+
             # Create GTK image widget to display rendered images
             self.image_widget = Gtk.Image()
             # Remove fixed size constraint to allow expansion
@@ -230,44 +249,44 @@ class PyVistaViewer3D(Gtk.Box):
             self.image_widget.set_vexpand(True)
             self.image_widget.set_halign(Gtk.Align.CENTER)
             self.image_widget.set_valign(Gtk.Align.CENTER)
-            
+
             # Enable mouse events for distance measurement
-            self.image_widget.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | 
+            self.image_widget.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
                                        Gdk.EventMask.BUTTON_RELEASE_MASK |
                                        Gdk.EventMask.POINTER_MOTION_MASK)
             self.image_widget.set_can_focus(True)
-            
+
             # Wrap image widget in EventBox to capture mouse events
             self.image_eventbox = Gtk.EventBox()
             self.image_eventbox.add(self.image_widget)
-            self.image_eventbox.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | 
+            self.image_eventbox.add_events(Gdk.EventMask.BUTTON_PRESS_MASK |
                                          Gdk.EventMask.BUTTON_RELEASE_MASK |
                                          Gdk.EventMask.POINTER_MOTION_MASK)
             self.image_eventbox.set_can_focus(True)
-            
+
             # Create scrolled window for the image
             scrolled = Gtk.ScrolledWindow()
             scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
             scrolled.set_hexpand(True)
             scrolled.set_vexpand(True)
             scrolled.add(self.image_eventbox)
-            
+
             # Create main widget container
             self.plotter_widget = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.plotter_widget.pack_start(scrolled, True, True, 0)
-            
+
             # Add status label
-            self.render_status = Gtk.Label("PyVista 3D Viewer Ready")
+            self.render_status = Gtk.Label("VTK 3D Viewer Ready")
             self.render_status.set_halign(Gtk.Align.CENTER)
             self.plotter_widget.pack_start(self.render_status, False, False, 5)
-            
-            self.logger.info("PyVista headless plotter created successfully")
-            
+
+            self.logger.info("VTK headless renderer created successfully")
+
         except Exception as e:
-            self.logger.error(f"Failed to create PyVista widget: {e}")
+            self.logger.error(f"Failed to create VTK widget: {e}")
             # Fallback to placeholder
             self.plotter_widget = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-            error_label = Gtk.Label(f"PyVista initialization failed:\n{e}")
+            error_label = Gtk.Label(f"VTK initialization failed:\n{e}")
             error_label.set_justify(Gtk.Justification.CENTER)
             self.plotter_widget.pack_start(error_label, True, True, 0)
     
@@ -761,74 +780,84 @@ class PyVistaViewer3D(Gtk.Box):
         """Create VTK mesh objects for each phase."""
         if self.voxel_data is None:
             return
-        
+
         # Clear existing mesh objects to prevent memory leaks
         if hasattr(self, 'mesh_objects'):
             for mesh in self.mesh_objects.values():
                 try:
-                    if hasattr(mesh, 'clear'):
-                        mesh.clear()
-                    # Force deletion of VTK objects
+                    # VTK objects don't have 'clear' method, just delete them
                     del mesh
                 except:
                     pass
-        
+
         self.mesh_objects = {}
-        
+
         # Force garbage collection to free VTK memory
         import gc
         gc.collect()
         unique_phases = np.unique(self.voxel_data)
-        
+
         for phase_id in unique_phases:
             try:
                 # Create binary mask for this phase
                 phase_mask = (self.voxel_data == phase_id).astype(np.uint8)
 
-                # Create structured grid
-                # PyVista UniformGrid (formerly ImageData) expects dims as (nx, ny, nz) and data in C-order
-                grid = pv.UniformGrid(dims=phase_mask.shape, spacing=self.voxel_size)  # Set dimensions and physical spacing
-                grid.point_data['phase'] = phase_mask.flatten(order='C')
-                
+                # Create VTK ImageData (structured grid)
+                grid = vtkImageData()
+
+                # Set dimensions (number of points in each direction)
+                grid.SetDimensions(phase_mask.shape[0], phase_mask.shape[1], phase_mask.shape[2])
+
+                # Set spacing (physical size of voxels)
+                grid.SetSpacing(self.voxel_size[0], self.voxel_size[1], self.voxel_size[2])
+
+                # Set origin
+                grid.SetOrigin(0.0, 0.0, 0.0)
+
+                # Convert numpy array to VTK array
+                vtk_data_array = numpy_support.numpy_to_vtk(
+                    num_array=phase_mask.flatten(order='C'),  # Flatten in C-order
+                    deep=True,  # Make a copy
+                    array_type=VTK_UNSIGNED_CHAR
+                )
+                vtk_data_array.SetName('phase')
+
+                # Add scalar data to grid
+                grid.GetPointData().SetScalars(vtk_data_array)
+
                 # Store mesh object
                 self.mesh_objects[phase_id] = grid
-                
+
                 self.logger.debug(f"Created mesh for phase {phase_id}: {np.sum(phase_mask)} voxels")
-                
+
             except Exception as e:
                 self.logger.error(f"Failed to create mesh for phase {phase_id}: {e}")
     
     def _update_visualization(self):
         """Update the 3D visualization based on current settings."""
-        if not hasattr(self, 'plotter') or self.voxel_data is None:
+        if not hasattr(self, 'renderer') or self.voxel_data is None:
             return
-        
+
         try:
-            # Safe approach: clear existing plots without destroying plotter
-            self.plotter.clear()
-            
-            # Restore professional lighting after clear (clear removes lights)
-            self.plotter.remove_all_lights()  # Clear any default lights
-            self.plotter.add_light(pv.Light(position=(1, 1, 1), focal_point=(0, 0, 0), color='white', intensity=0.8))
-            self.plotter.add_light(pv.Light(position=(-1, -1, 1), focal_point=(0, 0, 0), color='white', intensity=0.4))
-            self.plotter.add_light(pv.Light(position=(0, 0, -1), focal_point=(0, 0, 0), color='white', intensity=0.2))
-            
+            # Clear existing actors from renderer
+            self.renderer.RemoveAllViewProps()
+
             # Force garbage collection to prevent memory leaks
             import gc
             gc.collect()
-            
+
             # Add coordinate axes for spatial reference
             self._add_coordinate_axes()
-            
+
             # Add each phase based on rendering mode
             for phase_id, mesh in self.mesh_objects.items():
                 if not self.show_phase.get(phase_id, True):
                     continue
-                
+
                 color = self.phase_colors.get(phase_id, '#808080')
                 opacity = self.phase_opacity.get(phase_id, 0.8)
                 phase_name = self.phase_mapping.get(phase_id, f"Phase {phase_id}")
-                
+
                 if self.rendering_mode == 'volume':
                     self._add_volume_rendering(mesh, phase_id, color, opacity, phase_name)
                 elif self.rendering_mode == 'isosurface':
@@ -837,16 +866,15 @@ class PyVistaViewer3D(Gtk.Box):
                     self._add_point_rendering(mesh, phase_id, color, phase_name)
                 elif self.rendering_mode == 'wireframe':
                     self._add_wireframe_rendering(mesh, phase_id, color, phase_name)
-            
-            
-            # Reset camera if first visualization
-            self.plotter.reset_camera()
-            
+
+            # Reset camera to fit all actors
+            self.renderer.ResetCamera()
+
             # Render to image and update GTK widget
             self._render_to_gtk()
-            
+
             self.logger.debug(f"Updated visualization with {len(self.mesh_objects)} phases")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to update visualization: {e}")
     
@@ -855,7 +883,7 @@ class PyVistaViewer3D(Gtk.Box):
         try:
             self.logger.info("=== Simple render update - taking new screenshot ===")
             
-            if not hasattr(self, 'plotter') or self.plotter is None:
+            if not hasattr(self, 'plotter') or self.renderer is None:
                 self.logger.warning("No plotter available")
                 return
             
@@ -875,14 +903,14 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.debug("Forcing render update (camera/view change only)")
             
             # Check if plotter has content to render
-            if not hasattr(self, 'plotter') or self.plotter is None:
+            if not hasattr(self, 'plotter') or self.renderer is None:
                 self.logger.warning("No plotter available for render update")
                 return
                 
             # Force plotter to render the current scene with new camera position
             try:
                 # Make sure the plotter renders the current state
-                self.plotter.render()  # Force internal render
+                self.renderer.render()  # Force internal render
             except Exception as e:
                 self.logger.debug(f"Plotter render failed: {e}")
             
@@ -902,45 +930,68 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.error(traceback.format_exc())
     
     def _render_to_gtk(self):
-        """Render PyVista scene to GTK image widget."""
+        """Render VTK scene to GTK image widget."""
         try:
             self.logger.info(">>> Starting render to GTK")
-            
-            # Check if we have a valid plotter
-            if not hasattr(self, 'plotter') or self.plotter is None:
-                self.logger.warning("No plotter available for GTK render")
+
+            # Check if we have a valid render window
+            if not hasattr(self, 'render_window') or self.render_window is None:
+                self.logger.warning("No render window available for GTK render")
                 return
-            
-            # Simple screenshot with minimal parameters
+
+            # Render the scene
             try:
-                self.logger.info(">>> Taking screenshot...")
-                image_array = self.plotter.screenshot(return_img=True, transparent_background=False)
-                self.logger.info(f">>> Screenshot result: {image_array.shape if image_array is not None else 'None'}")
+                self.logger.info(">>> Rendering VTK scene...")
+                self.render_window.Render()
+
+                # Capture screenshot using window-to-image filter
+                self.window_to_image_filter.Modified()  # Force update
+                self.window_to_image_filter.Update()
+
+                # Get the output image
+                vtk_image = self.window_to_image_filter.GetOutput()
+
+                # Get image dimensions
+                dims = vtk_image.GetDimensions()
+                width, height = dims[0], dims[1]
+
+                # Convert VTK image to numpy array
+                vtk_array = vtk_image.GetPointData().GetScalars()
+                components = vtk_array.GetNumberOfComponents()
+                image_array = numpy_support.vtk_to_numpy(vtk_array)
+
+                # Reshape to image dimensions (height, width, components)
+                # VTK stores data bottom-to-top, so flip it
+                image_array = image_array.reshape(height, width, components)
+                image_array = np.flipud(image_array)  # Flip vertically
+
+                self.logger.info(f">>> Screenshot captured: shape={image_array.shape}")
+
             except Exception as e:
-                self.logger.error(f"Screenshot failed: {e}")
+                self.logger.error(f"VTK render failed: {e}")
                 return
-            
+
             if image_array is None or image_array.size == 0:
-                self.logger.warning("Empty image array from screenshot")
+                self.logger.warning("Empty image array from VTK render")
                 return
-            
+
             # Convert to GTK display
             try:
                 self.logger.info(">>> Converting to GTK display...")
                 # Convert numpy array to PIL Image
                 pil_image = PIL.Image.fromarray(image_array)
-                
+
                 # Convert PIL image to GdkPixbuf
                 buffer = io.BytesIO()
                 pil_image.save(buffer, format='PNG')
                 buffer.seek(0)
-                
+
                 # Load into GdkPixbuf
                 loader = GdkPixbuf.PixbufLoader.new()
                 loader.write(buffer.getvalue())
                 loader.close()
                 pixbuf = loader.get_pixbuf()
-                
+
                 # Update GTK image widget
                 if hasattr(self, 'image_widget') and pixbuf:
                     self.logger.info(">>> Updating GTK image widget...")
@@ -952,13 +1003,13 @@ class PyVistaViewer3D(Gtk.Box):
                     self.logger.info(">>> GTK image widget updated and display refreshed")
                 else:
                     self.logger.warning(f">>> No image widget ({hasattr(self, 'image_widget')}) or pixbuf ({pixbuf is not None if 'pixbuf' in locals() else 'undefined'}) for update")
-                
+
                 # CRITICAL: Clean up memory to prevent leaks
                 buffer.close()
                 buffer = None
                 pil_image = None
                 pixbuf = None
-                    
+
             except Exception as e:
                 self.logger.error(f"GTK update failed: {e}")
                 import traceback
@@ -970,12 +1021,12 @@ class PyVistaViewer3D(Gtk.Box):
                     image_array = None
                 import gc
                 gc.collect()
-                
+
             if hasattr(self, 'render_status'):
                 self.render_status.set_text(f"Rendered: {self.rendering_mode} mode")
-            
+
             self.logger.info(">>> Render to GTK completed successfully")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to render to GTK: {e}")
             import traceback
@@ -1002,7 +1053,13 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Volume rendering failed for phase {phase_id}: {e}")
     
     def _add_point_rendering(self, mesh, phase_id, color, name):
-        """Add point cloud rendering for a phase."""
+        """Add point cloud rendering - TODO: implement with VTK."""
+        # TODO: Implement point rendering with VTK
+        # For now, fallback to volume rendering
+        self._add_volume_rendering(mesh, phase_id, color, 0.8, name)
+
+    def _add_point_rendering_old(self, mesh, phase_id, color, name):
+        """OLD PyVista version - Add point cloud rendering for a phase."""
         try:
             # Extract points where phase exists
             threshold = mesh.threshold(0.5, scalars='phase')
@@ -1023,7 +1080,13 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Point rendering failed for phase {phase_id}: {e}")
     
     def _add_wireframe_rendering(self, mesh, phase_id, color, name):
-        """Add wireframe rendering for a phase."""
+        """Add wireframe rendering - TODO: implement with VTK."""
+        # TODO: Implement wireframe rendering with VTK
+        # For now, fallback to volume rendering
+        self._add_volume_rendering(mesh, phase_id, color, 0.8, name)
+
+    def _add_wireframe_rendering_old(self, mesh, phase_id, color, name):
+        """OLD PyVista version - Add wireframe rendering for a phase."""
         try:
             contour = mesh.contour([0.5], scalars='phase')
             # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
@@ -1046,37 +1109,67 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Wireframe rendering failed for phase {phase_id}: {e}")
     
     def _add_volume_rendering(self, mesh, phase_id, color, opacity, name):
-        """Add volume rendering with enhanced depth and contrast."""
+        """Add volume rendering with enhanced depth and contrast using VTK."""
         try:
-            contour = mesh.contour([0.5], scalars='phase')
-            # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
-            if not hasattr(contour, '_textures'):
-                contour._textures = {}
-            if contour.n_points > 0:
-                # Apply cross-sections if enabled
-                contour = self._apply_cross_sections(contour, phase_id)
-                
-                if contour.n_points > 0:  # Check if mesh still has points after cutting
-                    # Enhanced volume rendering - using only PyVista 0.36.0 compatible parameters
-                    self.plotter.add_mesh(
-                        contour,
-                        color=color,
-                        opacity=opacity,
-                        name=f"phase_{phase_id}",
-                        label=name,
-                        smooth_shading=True,
-                        show_edges=False,
-                        specular=0.5,  # Moderate specular for some shine
-                        specular_power=20,  # Moderate highlights
-                        ambient=0.2,  # Low ambient for contrast
-                        diffuse=0.8   # High diffuse for good visibility
-                        # Note: metallic and roughness removed - not supported in PyVista 0.36.0
-                    )
+            print(f"DEBUG: _add_volume_rendering called for phase {phase_id}: {name}")
+            print(f"DEBUG: Input mesh type: {type(mesh)}, points: {mesh.GetNumberOfPoints() if hasattr(mesh, 'GetNumberOfPoints') else 'N/A'}")
+
+            # Create contour filter to extract isosurface at threshold 0.5
+            contour_filter = vtkContourFilter()
+            contour_filter.SetInputData(mesh)
+            contour_filter.SetValue(0, 0.5)  # Contour at value 0.5
+            contour_filter.SetInputArrayToProcess(0, 0, 0, vtkDataObject.FIELD_ASSOCIATION_POINTS, 'phase')
+            contour_filter.Update()
+
+            contour = contour_filter.GetOutput()
+            print(f"DEBUG: Contour has {contour.GetNumberOfPoints()} points")
+
+            # Check if contour has any points
+            if contour.GetNumberOfPoints() > 0:
+                # Create mapper
+                mapper = vtkPolyDataMapper()
+                mapper.SetInputData(contour)
+                mapper.ScalarVisibilityOff()  # Use actor color, not scalar data
+
+                # Create actor
+                actor = vtkActor()
+                actor.SetMapper(mapper)
+
+                # Convert hex color to RGB (0-1 range)
+                color_str = color.lstrip('#')
+                r = int(color_str[0:2], 16) / 255.0
+                g = int(color_str[2:4], 16) / 255.0
+                b = int(color_str[4:6], 16) / 255.0
+
+                # Set actor properties
+                property = actor.GetProperty()
+                property.SetColor(r, g, b)
+                property.SetOpacity(opacity)
+
+                # Enable smooth shading
+                property.SetInterpolationToPhong()
+
+                # Set lighting parameters for good visibility
+                property.SetSpecular(0.5)  # Moderate specular for some shine
+                property.SetSpecularPower(20)  # Moderate highlights
+                property.SetAmbient(0.2)  # Low ambient for contrast
+                property.SetDiffuse(0.8)  # High diffuse for good visibility
+
+                # Add actor to renderer
+                self.renderer.AddActor(actor)
+
+                self.logger.debug(f"Added volume rendering for phase {phase_id}: {contour.GetNumberOfPoints()} points")
+
         except Exception as e:
             self.logger.warning(f"Volume rendering failed for phase {phase_id}: {e}")
     
     def _add_isosurface_rendering(self, mesh, phase_id, color, opacity, name):
-        """Add isosurface rendering with professional quality settings."""
+        """Add isosurface rendering - same as volume rendering for now."""
+        # For minimal prototype, isosurface is same as volume rendering
+        self._add_volume_rendering(mesh, phase_id, color, opacity, name)
+
+    def _add_isosurface_rendering_old(self, mesh, phase_id, color, opacity, name):
+        """OLD PyVista version - Add isosurface rendering with professional quality settings."""
         try:
             contour = mesh.contour([0.5], scalars='phase')
             # PyVista 0.36.0 bug workaround: Initialize _textures attribute if missing
@@ -1287,10 +1380,29 @@ class PyVistaViewer3D(Gtk.Box):
     
     def _rotate_camera(self, direction: str, angle: float = 15.0):
         """Rotate camera in specified direction."""
-        if not hasattr(self, 'plotter') or self.plotter is None:
-            self.logger.warning("Plotter not initialized for rotation")
+        # Check for VTK-direct renderer first, then fallback to PyVista plotter
+        if hasattr(self, 'renderer') and self.renderer is not None:
+            # VTK-direct path
+            camera = self.camera
+            if direction == 'left':
+                camera.Azimuth(angle)
+            elif direction == 'right':
+                camera.Azimuth(-angle)
+            elif direction == 'up':
+                camera.Elevation(angle)
+            elif direction == 'down':
+                camera.Elevation(-angle)
+
+            self.renderer.ResetCameraClippingRange()
+            self._render_to_gtk()  # Update display
+            self.logger.info(f"Rotated camera {direction} by {angle}°")
             return
-        
+
+        # PyVista plotter fallback (legacy code)
+        if not hasattr(self, 'plotter') or self.plotter is None:
+            self.logger.warning("Neither renderer nor plotter initialized for rotation")
+            return
+
         try:
             # Try multiple camera access methods
             camera = None
@@ -1300,18 +1412,18 @@ class PyVistaViewer3D(Gtk.Box):
                 camera = self.plotter.renderer.GetActiveCamera()
             elif len(self.plotter.renderers) > 0:
                 camera = self.plotter.renderers[0].GetActiveCamera()
-            
+
             if camera is None:
                 self.logger.warning("Camera not available for rotation")
                 return
-            
+
             # Apply rotation based on camera type
             if hasattr(camera, 'azimuth') and hasattr(camera, 'elevation'):
                 # PyVista camera
                 if direction == 'left':
                     camera.azimuth += angle
                 elif direction == 'right':
-                    camera.azimuth -= angle  
+                    camera.azimuth -= angle
                 elif direction == 'up':
                     camera.elevation += angle
                 elif direction == 'down':
@@ -1326,7 +1438,7 @@ class PyVistaViewer3D(Gtk.Box):
                     camera.Elevation(angle)
                 elif direction == 'down':
                     camera.Elevation(-angle)
-            
+
             # Force camera update to take effect
             try:
                 self.logger.info(f">>> Forcing camera update after {direction} rotation")
@@ -1344,11 +1456,11 @@ class PyVistaViewer3D(Gtk.Box):
                     self.logger.info(">>> Plotter render() called")
             except Exception as e:
                 self.logger.warning(f"Camera update failed: {e}")
-            
+
             # Force immediate screenshot update
             self._simple_render_update()
             self.logger.info(f"Rotated camera {direction} by {angle}°")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to rotate camera {direction}: {e}")
             import traceback
@@ -1356,10 +1468,20 @@ class PyVistaViewer3D(Gtk.Box):
     
     def _zoom_camera(self, factor: float):
         """Zoom camera by specified factor."""
-        if not hasattr(self, 'plotter') or self.plotter is None:
-            self.logger.warning("Plotter not initialized for zoom")
+        # Check for VTK-direct renderer first, then fallback to PyVista plotter
+        if hasattr(self, 'renderer') and self.renderer is not None:
+            # VTK-direct path
+            self.camera.Zoom(factor)
+            self.renderer.ResetCameraClippingRange()
+            self._render_to_gtk()  # Update display
+            self.logger.info(f"Zoomed camera by factor {factor}")
             return
-        
+
+        # PyVista plotter fallback (legacy code)
+        if not hasattr(self, 'plotter') or self.plotter is None:
+            self.logger.warning("Neither renderer nor plotter initialized for zoom")
+            return
+
         try:
             # Try multiple camera access methods
             camera = None
@@ -1369,11 +1491,11 @@ class PyVistaViewer3D(Gtk.Box):
                 camera = self.plotter.renderer.GetActiveCamera()
             elif len(self.plotter.renderers) > 0:
                 camera = self.plotter.renderers[0].GetActiveCamera()
-            
+
             if camera is None:
                 self.logger.warning("Camera not available for zoom")
                 return
-            
+
             # Apply zoom
             if hasattr(camera, 'zoom'):
                 camera.zoom(factor)
@@ -1382,7 +1504,7 @@ class PyVistaViewer3D(Gtk.Box):
             else:
                 self.logger.warning("Camera zoom method not found")
                 return
-            
+
             # Force camera update to take effect for zoom
             try:
                 self.logger.info(f">>> Forcing camera update after zoom factor {factor}")
@@ -1400,7 +1522,7 @@ class PyVistaViewer3D(Gtk.Box):
                     self.logger.info(">>> Plotter render() called")
             except Exception as e:
                 self.logger.warning(f"Camera zoom update failed: {e}")
-            
+
             # Force immediate screenshot update
             self._simple_render_update()
             self.logger.info(f"Zoomed camera by factor {factor}")
@@ -1413,8 +1535,12 @@ class PyVistaViewer3D(Gtk.Box):
     def _add_coordinate_axes(self):
         """Add coordinate axes to the visualization for spatial reference."""
         try:
-            if not hasattr(self, 'plotter') or self.plotter is None:
-                return
+            # TODO: Add VTK axes widget for spatial reference
+            # For minimal prototype, skip coordinate axes
+            # Can be added later using vtkAxesActor or vtkCubeAxesActor
+            pass
+        except Exception as e:
+            self.logger.debug(f"Failed to add coordinate axes: {e}")
             
             # Get the bounds of the microstructure data to position axes appropriately
             if hasattr(self, 'voxel_data') and self.voxel_data is not None:
@@ -1644,10 +1770,29 @@ class PyVistaViewer3D(Gtk.Box):
     
     def _on_reset_view(self, button):
         """Handle reset view button."""
-        if not hasattr(self, 'plotter') or self.plotter is None:
-            self.logger.warning("Plotter not initialized for reset")
+        # Check for VTK-direct renderer first
+        if hasattr(self, 'renderer') and self.renderer is not None:
+            # VTK-direct path - reset to isometric view
+            if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+                shape = self.voxel_data.shape
+                max_dim = max(shape) * max(self.voxel_size)
+                distance = max_dim * 2
+            else:
+                distance = 200
+
+            self.camera.SetPosition(distance, distance, distance)
+            self.camera.SetViewUp(0, 0, 1)
+            self.camera.SetFocalPoint(0, 0, 0)
+            self.renderer.ResetCamera()
+            self._render_to_gtk()
+            self.logger.info("View reset to default isometric")
             return
-            
+
+        # PyVista plotter fallback (legacy code)
+        if not hasattr(self, 'plotter') or self.plotter is None:
+            self.logger.warning("Neither renderer nor plotter initialized for reset")
+            return
+
         try:
             # Comprehensive camera reset to default isometric view
             reset_success = False
@@ -2870,7 +3015,7 @@ Distance: {distance_um:.2f} μm"""
             # Try to trigger VTK garbage collection if available
             try:
                 import vtk
-                vtk.vtkObject.GlobalWarningDisplayOff()  # Reduce VTK warnings
+                vtkObject.GlobalWarningDisplayOff()  # Reduce VTK warnings
             except:
                 pass
             

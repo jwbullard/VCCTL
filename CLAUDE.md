@@ -104,13 +104,282 @@ git push origin main
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows 3D Viewer Investigation - PyVista 0.36.0 Too Buggy, Switching to VTK Direct (October 17, 2025 - Session 10)**
+**Latest Session: Windows VTK-Direct 3D Viewer - Axes and Camera Controls Working (October 20, 2025 - Session 11)**
 
-**Status: Discovered PyVista 0.36.0 has 4+ initialization bugs (_textures, _association_complex_names, _association_bitarray_names, _active_scalars_info). Decision made to rewrite 3D viewer using VTK directly for guaranteed cross-platform compatibility. All other Windows features working (hydration, elastic, materials, mix design). macOS fully functional.**
+**Status: VTK-direct 3D viewer successfully rendering phases on Windows. Coordinate axes and camera controls (rotate, zoom, reset) implemented and working. Performance is laggy compared to macOS. Phase color bug discovered - phases 13, 21, 23, 25, 31, 32, 33 displaying gray with generic names despite adding complete phase_colors dictionary. Bug persists after rebuild - needs investigation of where phase names/colors are actually used in rendering code.**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Begin VTK-direct 3D viewer implementation**
+**⚠️ NEXT SESSION: Investigate why phase_colors dictionary not being used for phases 13,21,23,25,31,32,33**
+
+---
+
+## Session Status Update (October 20, 2025 - WINDOWS VTK-DIRECT 3D VIEWER SESSION #11)
+
+### **Session Summary:**
+Successfully implemented VTK-direct 3D viewer with coordinate axes and camera controls. Phases now render correctly on Windows with proper isosurface extraction. Added vtkAxesActor for 3D coordinate display and implemented VTK camera methods for rotation, zoom, and view reset. Camera controls work but are laggy compared to macOS performance. Attempted to fix phase color bug for phases 13, 21, 23, 25, 31, 32, 33 by adding complete phase_colors dictionary from colors.csv, but bug persists - these phases still display as gray with generic names. Root cause unclear - phase_colors dictionary may not be the correct location for this data.
+
+**Previous Session:** Windows PyVista Investigation & VTK Decision (October 17, 2025 - Session 10)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. VTK-Direct 3D Viewer - Phases Rendering Successfully ✅**
+
+**User Confirmation:** "Yes, I can confirm that the microstructure now appears in the viewing window. In addition, the phase appearance controls work (I can make one or more phases invisible, for example)."
+
+**Implementation Complete:**
+- VTK-direct rendering pipeline working on Windows
+- Isosurface extraction with vtkContourFilter
+- Phase visibility controls functional
+- Headless rendering with vtkWindowToImageFilter → GTK display
+
+**Files Modified:**
+- `src/app/visualization/pyvista_3d_viewer.py` - VTK-direct implementation (Session 10)
+
+#### **2. Coordinate Axes Added to VTK Renderer ✅**
+
+**Issue:** User reported "the coordinate axes do not appear"
+
+**Fix Implemented:**
+```python
+# Added vtkAxesActor import
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+
+# In renderer initialization (lines 207-212):
+axes = vtkAxesActor()
+axes.SetTotalLength(50, 50, 50)  # Length in voxels
+axes.SetShaftType(0)  # Cylinder shaft
+axes.SetCylinderRadius(0.02)  # Thinner axes
+self.renderer.AddActor(axes)
+```
+
+**Result:** Coordinate axes now visible in 3D viewer showing X, Y, Z directions
+
+#### **3. Camera Control Buttons Implemented ✅**
+
+**Issue:** User reported "none of the manipulation buttons work, such as rotate left/right/up/down, zoom+, zoom-, and all the rest"
+
+**Rotation Controls Implemented (lines 1356-1442):**
+```python
+def _rotate_camera(self, direction: str, angle: float = 15.0):
+    # Check for VTK-direct renderer first
+    if hasattr(self, 'renderer') and self.renderer is not None:
+        camera = self.camera
+        if direction == 'left':
+            camera.Azimuth(angle)
+        elif direction == 'right':
+            camera.Azimuth(-angle)
+        elif direction == 'up':
+            camera.Elevation(angle)
+        elif direction == 'down':
+            camera.Elevation(-angle)
+
+        self.renderer.ResetCameraClippingRange()
+        self._render_to_gtk()  # Update display
+```
+
+**Zoom Controls Implemented (lines 1444-1508):**
+```python
+def _zoom_camera(self, factor: float):
+    if hasattr(self, 'renderer') and self.renderer is not None:
+        self.camera.Zoom(factor)
+        self.renderer.ResetCameraClippingRange()
+        self._render_to_gtk()
+```
+
+**Reset View Implemented (lines 1746-1764):**
+```python
+def _on_reset_view(self, button):
+    if hasattr(self, 'renderer') and self.renderer is not None:
+        # Calculate distance based on data size
+        if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+            shape = self.voxel_data.shape
+            max_dim = max(shape) * max(self.voxel_size)
+            distance = max_dim * 2
+        else:
+            distance = 200
+
+        # Set isometric view
+        self.camera.SetPosition(distance, distance, distance)
+        self.camera.SetViewUp(0, 0, 1)
+        self.camera.SetFocalPoint(0, 0, 0)
+        self.renderer.ResetCamera()
+        self._render_to_gtk()
+```
+
+**User Confirmation:** "The camera control buttons are working. Very laggy compared to what I was seeing on macOS, but that may just be machine performance, I suppose."
+
+**Pattern Used:** All camera methods check for VTK renderer first, then call `self._render_to_gtk()` to update the GTK display.
+
+#### **4. Phase Color Bug Investigation - NOT RESOLVED ❌**
+
+**Issue:** User reported "phases 13, 21, 23, 25, 31, 32, and 33 don't seem to have names or to know what color they should be. They are just labeled 'Phase 13', 'Phase 21', etc and they all are gray."
+
+**Attempted Fix:**
+- Read `colors/colors.csv` file containing complete phase definitions with RGB values
+- Expanded `self.phase_colors` dictionary from 16 entries to 42 entries (lines 91-132)
+- Added all missing phases:
+  - Phase 13: Aggregate (gold #FFC041)
+  - Phase 19: Portlandite (dark blue #07488E)
+  - Phase 20: CSH (wheat #F5DEB3)
+  - Phase 21: C3AH6 (olive #969600)
+  - Phase 22-23: AFt variants (violet #7F00FF)
+  - Phase 24: AFm (orchid #F446CB)
+  - Phase 25: FH3 (teal #408080)
+  - Phase 26-37: Additional hydration/mineral phases
+  - Phase 55: Void (black)
+  - Phase 100: Legacy aggregate (light gray)
+
+**Rebuild Attempt:**
+- Rebuilt Windows package with updated phase_colors dictionary
+- User tested: "Your fix did not help. The same phase ids are still all gray and their names are generic"
+
+**Root Cause Unknown:**
+- `self.phase_colors` dictionary may not be the correct location for this data
+- Phase names and colors may be read from different source (database? CSV file? separate config?)
+- Need to investigate where phase rendering code actually gets color/name information
+- Possible issue: VTK-direct path may not be using same color lookup as PyVista path
+
+**Next Session Action:**
+Search for where phase names/colors are actually used in rendering code, not just where they're defined.
+
+### **📋 SESSION 11 FILES MODIFIED:**
+
+**Modified Files:**
+1. `src/app/visualization/pyvista_3d_viewer.py` - Multiple changes:
+   - Line 25: Added `from vtkmodules.vtkRenderingAnnotation import vtkAxesActor`
+   - Lines 91-132: Expanded `self.phase_colors` dictionary to 42 entries
+   - Lines 207-212: Added coordinate axes to renderer
+   - Lines 1356-1442: Implemented VTK-direct camera rotation
+   - Lines 1444-1508: Implemented VTK-direct camera zoom
+   - Lines 1746-1764: Implemented VTK-direct view reset
+
+2. `CLAUDE.md` - This session documentation
+
+**Files Read (Investigation):**
+- `colors/colors.csv` - Read to get authoritative phase color definitions
+
+**No new files created this session.**
+
+### **🔧 TECHNICAL PATTERNS DOCUMENTED:**
+
+#### **VTK Camera Control Pattern:**
+All camera manipulation methods follow this pattern:
+```python
+def _camera_operation(self, ...):
+    # Check for VTK-direct renderer first
+    if hasattr(self, 'renderer') and self.renderer is not None:
+        # VTK-direct path
+        camera = self.camera
+        # ... perform VTK camera operations ...
+        self.renderer.ResetCameraClippingRange()
+        self._render_to_gtk()  # Critical: update GTK display
+        return
+
+    # PyVista fallback for macOS
+    # ... PyVista code ...
+```
+
+**Key Points:**
+- Always check for VTK renderer first (Windows), then fallback to PyVista (macOS)
+- Must call `self._render_to_gtk()` after VTK operations to update display
+- Must call `ResetCameraClippingRange()` to prevent clipping artifacts
+
+#### **VTK Coordinate Axes:**
+```python
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
+
+axes = vtkAxesActor()
+axes.SetTotalLength(50, 50, 50)  # Scale to match data
+axes.SetShaftType(0)  # Cylinder shaft (cleaner than arrow)
+axes.SetCylinderRadius(0.02)  # Thin axes
+self.renderer.AddActor(axes)  # Persistent actor
+```
+
+**Benefits:**
+- Always visible in scene
+- Automatic color coding (X=red, Y=green, Z=blue)
+- Scales with camera zoom
+
+### **🎯 CURRENT STATUS:**
+
+**✅ VTK-DIRECT 3D VIEWER WORKING ON WINDOWS**
+- Phases rendering correctly with isosurface extraction
+- Coordinate axes displaying
+- Phase visibility controls functional
+- Camera rotation working (Azimuth/Elevation)
+- Camera zoom working (Zoom method)
+- View reset working (isometric position)
+
+**⚠️ PERFORMANCE ISSUE - LAGGY CAMERA CONTROLS**
+- User reports: "Very laggy compared to what I was seeing on macOS"
+- Possible causes: Windows VTK performance, offscreen rendering overhead, GTK conversion
+- Not critical but needs optimization in future
+
+**❌ PHASE COLOR BUG UNRESOLVED**
+- Phases 13, 21, 23, 25, 31, 32, 33 still display gray with generic names
+- Added complete phase_colors dictionary but no effect
+- Bug root cause unknown - need to investigate rendering code
+
+**⏳ CROSS-SECTION CONTROLS NOT IMPLEMENTED**
+- User acknowledged: "The cross-section controls are not changing the view, but you probably knew that already"
+- Requires VTK clipping planes (vtkPlane, vtkClipPolyData)
+- Lower priority than phase color bug
+
+### **📊 PLATFORM STATUS AFTER SESSION 11:**
+
+| Platform | Path Resolution | Hydration | 3D Viewer Phases | 3D Axes | 3D Camera | 3D Phase Colors | Package Status | Status |
+|----------|----------------|-----------|------------------|---------|-----------|-----------------|----------------|--------|
+| macOS (ARM64) | ✅ Fixed | ✅ Works | ✅ Works | ✅ Works | ✅ Works | ✅ Works | ⏳ Rebuild pending | **Awaiting rebuild** |
+| Windows (x64) | ✅ Fixed | ✅ Fixed | ✅ Working | ✅ Working | ✅ Working (laggy) | ❌ Bug unresolved | ✅ Rebuilt | **Testing in progress** |
+| Linux (x64) | ⏳ Not started | ⏳ Not started | ⏳ Not started | ⏳ Not started | ⏳ Not started | ⏳ Not started | ⏳ Not started | Not started |
+
+### **💡 KEY LESSONS:**
+
+**Lesson 1: Phase Color Dictionary Location**
+- Adding colors to `self.phase_colors` dictionary was not sufficient
+- Phase rendering code may get colors from different source
+- Need to trace rendering pipeline to find actual color lookup
+
+**Lesson 2: VTK Performance on Windows**
+- VTK-direct rendering is noticeably slower than macOS PyVista
+- Offscreen rendering + GTK conversion may add overhead
+- Future optimization: reduce render calls, use VTK native windowing, or profile bottlenecks
+
+**Lesson 3: VTK Camera Methods Are Simple**
+- `camera.Azimuth(angle)` / `camera.Elevation(angle)` for rotation
+- `camera.Zoom(factor)` for zoom in/out
+- `camera.SetPosition()` / `camera.SetFocalPoint()` for view reset
+- Much simpler than PyVista's camera API
+
+### **🎯 NEXT SESSION PLAN:**
+
+**Priority 1: Fix Phase Color Bug**
+1. Search for where phase names are displayed in UI (labels, tables, legends)
+2. Search for where phase colors are applied to VTK actors
+3. Check if colors are read from database instead of hardcoded dictionary
+4. Investigate if VTK-direct path uses different color lookup than PyVista path
+5. Add logging to see what colors are being used during rendering
+
+**Priority 2: Optimize Rendering Performance (Future)**
+- Profile VTK rendering calls to find bottleneck
+- Investigate VTK native GTK integration instead of image conversion
+- Consider reducing render quality for interactive operations
+
+**Priority 3: Cross-Section Clipping Planes (Future)**
+- Implement vtkPlane for X/Y/Z clipping
+- Add vtkClipPolyData to apply planes to actors
+- Wire up to existing cross-section slider controls
+
+### **⏰ SESSION END:**
+
+User ending session. All changes documented in CLAUDE.md.
+
+**Files Modified This Session:**
+- `src/app/visualization/pyvista_3d_viewer.py` (6 locations)
+- `CLAUDE.md` (this documentation)
+
+**Git Status:** Changes not yet committed - will be committed during post-session sync.
 
 ---
 
