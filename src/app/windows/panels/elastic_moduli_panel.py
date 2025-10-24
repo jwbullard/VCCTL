@@ -816,29 +816,17 @@ class ElasticModuliPanel(Gtk.Box):
         image_filename = os.path.basename(selected_microstructure.file_path)
         self.image_filename_entry.set_text(image_filename)
 
-        # Set hierarchical output directory (relative path)
+        # Set hierarchical output directory (absolute path)
         # Format: {OperationsDir}/{HydrationName}/{ElasticOperationName}
         operations_dir = self.service_container.directories_service.get_operations_path()
-        relative_output_dir = str(operations_dir / hydration_op.name / operation_name)
-        self.output_dir_entry.set_text(relative_output_dir)
+        output_dir = str(operations_dir / hydration_op.name / operation_name)
+        self.output_dir_entry.set_text(output_dir)
 
-        # Set PIMG file path (relative to project root)
-        # Convert absolute PIMG path to relative path using consistent format
+        # Set PIMG file path (use absolute path for consistency)
         if selected_microstructure.pimg_path:
-            project_root = Path(__file__).parent.parent.parent.parent
-            try:
-                pimg_absolute = Path(selected_microstructure.pimg_path)
-                pimg_relative = os.path.relpath(pimg_absolute, project_root)
-                # Ensure consistent relative path format starting with ./
-                if pimg_relative.startswith("../"):
-                    # If path goes up directories, normalize to start from project root
-                    pimg_relative = pimg_relative.replace("../", "", 1)
-                if not pimg_relative.startswith("./"):
-                    pimg_relative = f"./{pimg_relative}"
-                self.pimg_file_entry.set_text(pimg_relative)
-            except Exception as e:
-                self.logger.warning(f"Could not convert PIMG path to relative: {e}")
-                self.pimg_file_entry.set_text(selected_microstructure.pimg_path)
+            # Use absolute path - consistent with output directory and works in PyInstaller
+            pimg_absolute = Path(selected_microstructure.pimg_path)
+            self.pimg_file_entry.set_text(str(pimg_absolute.resolve()))
 
         # Re-resolve lineage with output directory for accurate grading file paths
         if hasattr(self, "_current_hydration_id"):

@@ -24,8 +24,10 @@ try:
     )
     from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
     from vtkmodules.vtkCommonCore import vtkObject, VTK_UNSIGNED_CHAR
-    from vtkmodules.vtkCommonDataModel import vtkImageData, vtkDataObject
-    from vtkmodules.vtkFiltersCore import vtkContourFilter
+    from vtkmodules.vtkCommonDataModel import vtkImageData, vtkDataObject, vtkPlane
+    from vtkmodules.vtkFiltersCore import vtkContourFilter, vtkClipPolyData, vtkThreshold, vtkGlyph3D
+    from vtkmodules.vtkFiltersGeneral import vtkVertexGlyphFilter
+    from vtkmodules.vtkFiltersSources import vtkCubeSource
     from vtkmodules.vtkRenderingCore import vtkWindowToImageFilter
     from vtkmodules.util import numpy_support
     import vtkmodules.vtkInteractionStyle  # Needed for interactor
@@ -358,18 +360,24 @@ class PyVistaViewer3D(Gtk.Box):
         rotate_left = Gtk.Button("◀")
         rotate_left.set_tooltip_text("Rotate left")
         rotate_left.connect('clicked', self._on_rotate_left_clicked)
+        # Make left/right arrows larger to match up/down arrows
+        left_label = rotate_left.get_child()
+        left_label.set_markup('<span font="16">◀</span>')
         self.control_panel.pack_start(rotate_left, False, False, 0)
-        
+
         rotate_right = Gtk.Button("▶")
         rotate_right.set_tooltip_text("Rotate right")
         rotate_right.connect('clicked', self._on_rotate_right_clicked)
+        # Make left/right arrows larger to match up/down arrows
+        right_label = rotate_right.get_child()
+        right_label.set_markup('<span font="16">▶</span>')
         self.control_panel.pack_start(rotate_right, False, False, 0)
-        
+
         rotate_up = Gtk.Button("▲")
         rotate_up.set_tooltip_text("Rotate up")
         rotate_up.connect('clicked', self._on_rotate_up_clicked)
         self.control_panel.pack_start(rotate_up, False, False, 0)
-        
+
         rotate_down = Gtk.Button("▼")
         rotate_down.set_tooltip_text("Rotate down")
         rotate_down.connect('clicked', self._on_rotate_down_clicked)
@@ -930,18 +938,14 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.error(traceback.format_exc())
     
     def _render_to_gtk(self):
-        """Render VTK scene to GTK image widget."""
+        """Render VTK scene to GTK image widget (optimized for performance)."""
         try:
-            self.logger.info(">>> Starting render to GTK")
-
             # Check if we have a valid render window
             if not hasattr(self, 'render_window') or self.render_window is None:
-                self.logger.warning("No render window available for GTK render")
                 return
 
             # Render the scene
             try:
-                self.logger.info(">>> Rendering VTK scene...")
                 self.render_window.Render()
 
                 # Capture screenshot using window-to-image filter
@@ -965,55 +969,48 @@ class PyVistaViewer3D(Gtk.Box):
                 image_array = image_array.reshape(height, width, components)
                 image_array = np.flipud(image_array)  # Flip vertically
 
-                self.logger.info(f">>> Screenshot captured: shape={image_array.shape}")
-
             except Exception as e:
                 self.logger.error(f"VTK render failed: {e}")
                 return
 
             if image_array is None or image_array.size == 0:
-                self.logger.warning("Empty image array from VTK render")
                 return
 
-            # Convert to GTK display
+            # Convert to GTK display (optimized: direct numpy to GdkPixbuf)
             try:
-                self.logger.info(">>> Converting to GTK display...")
-                # Convert numpy array to PIL Image
-                pil_image = PIL.Image.fromarray(image_array)
+                # Create GdkPixbuf directly from numpy array (much faster than PIL→PNG→GdkPixbuf)
+                # GdkPixbuf expects RGB data in row-major order
+                if components == 3:
+                    # Already RGB
+                    rgb_data = image_array.tobytes()
+                elif components == 4:
+                    # RGBA - extract RGB only
+                    rgb_data = image_array[:, :, :3].tobytes()
+                else:
+                    self.logger.warning(f"Unexpected number of components: {components}")
+                    return
 
-                # Convert PIL image to GdkPixbuf
-                buffer = io.BytesIO()
-                pil_image.save(buffer, format='PNG')
-                buffer.seek(0)
-
-                # Load into GdkPixbuf
-                loader = GdkPixbuf.PixbufLoader.new()
-                loader.write(buffer.getvalue())
-                loader.close()
-                pixbuf = loader.get_pixbuf()
+                # Create pixbuf from raw RGB data
+                pixbuf = GdkPixbuf.Pixbuf.new_from_data(
+                    rgb_data,
+                    GdkPixbuf.Colorspace.RGB,
+                    False,  # has_alpha
+                    8,  # bits_per_sample
+                    width,
+                    height,
+                    width * 3  # rowstride (bytes per row)
+                )
 
                 # Update GTK image widget
                 if hasattr(self, 'image_widget') and pixbuf:
-                    self.logger.info(">>> Updating GTK image widget...")
                     self.image_widget.set_from_pixbuf(pixbuf)
-                    # Force immediate GTK update
                     self.image_widget.queue_draw()
-                    while Gtk.events_pending():
-                        Gtk.main_iteration_do(False)
-                    self.logger.info(">>> GTK image widget updated and display refreshed")
-                else:
-                    self.logger.warning(f">>> No image widget ({hasattr(self, 'image_widget')}) or pixbuf ({pixbuf is not None if 'pixbuf' in locals() else 'undefined'}) for update")
 
-                # CRITICAL: Clean up memory to prevent leaks
-                buffer.close()
-                buffer = None
-                pil_image = None
+                # Clean up
                 pixbuf = None
 
             except Exception as e:
                 self.logger.error(f"GTK update failed: {e}")
-                import traceback
-                self.logger.error(traceback.format_exc())
                 return
             finally:
                 # Force cleanup of screenshot array
@@ -1053,10 +1050,79 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Volume rendering failed for phase {phase_id}: {e}")
     
     def _add_point_rendering(self, mesh, phase_id, color, name):
-        """Add point cloud rendering - TODO: implement with VTK."""
-        # TODO: Implement point rendering with VTK
-        # For now, fallback to volume rendering
-        self._add_volume_rendering(mesh, phase_id, color, 0.8, name)
+        """Add voxel cube rendering (Minecraft style) using VTK."""
+        try:
+            # Use threshold filter to extract points where phase exists (value > 0.5)
+            threshold = vtkThreshold()
+            threshold.SetInputData(mesh)
+            threshold.SetInputArrayToProcess(0, 0, 0, vtkDataObject.FIELD_ASSOCIATION_POINTS, 'phase')
+            threshold.SetLowerThreshold(0.5)
+            threshold.SetUpperThreshold(1.5)  # Allow for values slightly above 1.0
+            threshold.Update()
+
+            threshold_output = threshold.GetOutput()
+
+            if threshold_output.GetNumberOfPoints() > 0:
+                # Convert to polydata with vertex glyphs
+                vertex_filter = vtkVertexGlyphFilter()
+                vertex_filter.SetInputData(threshold_output)
+                vertex_filter.Update()
+
+                vertices = vertex_filter.GetOutput()
+
+                # Apply cross-section clipping if enabled
+                if any(self.cross_section_enabled.values()) and self.volume_bounds is not None:
+                    vertices = self._apply_cross_sections_vtk(vertices)
+
+                if vertices.GetNumberOfPoints() > 0:
+                    # Create cube source for voxel representation
+                    cube_source = vtkCubeSource()
+
+                    # Scale cubes to match voxel size (slightly smaller to show gaps)
+                    voxel_scale = min(self.voxel_size) * 0.9  # 90% of voxel size for visual separation
+                    cube_source.SetXLength(voxel_scale)
+                    cube_source.SetYLength(voxel_scale)
+                    cube_source.SetZLength(voxel_scale)
+
+                    # Use Glyph3D to place cubes at each point
+                    glyph = vtkGlyph3D()
+                    glyph.SetInputData(vertices)
+                    glyph.SetSourceConnection(cube_source.GetOutputPort())
+                    glyph.SetScaleModeToDataScalingOff()  # Don't scale by data
+                    glyph.Update()
+
+                    # Create mapper
+                    mapper = vtkPolyDataMapper()
+                    mapper.SetInputConnection(glyph.GetOutputPort())
+                    mapper.ScalarVisibilityOff()
+
+                    # Create actor
+                    actor = vtkActor()
+                    actor.SetMapper(mapper)
+
+                    # Convert hex color to RGB (0-1 range)
+                    color_str = color.lstrip('#')
+                    r = int(color_str[0:2], 16) / 255.0
+                    g = int(color_str[2:4], 16) / 255.0
+                    b = int(color_str[4:6], 16) / 255.0
+
+                    # Set actor properties - solid cubes
+                    property = actor.GetProperty()
+                    property.SetColor(r, g, b)
+                    property.SetOpacity(1.0)
+
+                    # Optional: Add slight edge visibility for better voxel definition
+                    property.EdgeVisibilityOn()
+                    property.SetEdgeColor(r * 0.7, g * 0.7, b * 0.7)  # Darker edges
+                    property.SetLineWidth(0.5)
+
+                    # Add actor to renderer
+                    self.renderer.AddActor(actor)
+
+                    self.logger.debug(f"Added voxel cube rendering for phase {phase_id}: {vertices.GetNumberOfPoints()} cubes")
+
+        except Exception as e:
+            self.logger.warning(f"Point rendering failed for phase {phase_id}: {e}")
 
     def _add_point_rendering_old(self, mesh, phase_id, color, name):
         """OLD PyVista version - Add point cloud rendering for a phase."""
@@ -1080,10 +1146,53 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Point rendering failed for phase {phase_id}: {e}")
     
     def _add_wireframe_rendering(self, mesh, phase_id, color, name):
-        """Add wireframe rendering - TODO: implement with VTK."""
-        # TODO: Implement wireframe rendering with VTK
-        # For now, fallback to volume rendering
-        self._add_volume_rendering(mesh, phase_id, color, 0.8, name)
+        """Add wireframe rendering using VTK."""
+        try:
+            # Create contour filter to extract isosurface at threshold 0.5
+            contour_filter = vtkContourFilter()
+            contour_filter.SetInputData(mesh)
+            contour_filter.SetValue(0, 0.5)  # Contour at value 0.5
+            contour_filter.SetInputArrayToProcess(0, 0, 0, vtkDataObject.FIELD_ASSOCIATION_POINTS, 'phase')
+            contour_filter.Update()
+
+            contour = contour_filter.GetOutput()
+
+            # Apply cross-section clipping if enabled
+            contour = self._apply_cross_sections_vtk(contour)
+
+            # Check if contour has any points
+            if contour.GetNumberOfPoints() > 0:
+                # Create mapper
+                mapper = vtkPolyDataMapper()
+                mapper.SetInputData(contour)
+                mapper.ScalarVisibilityOff()  # Use actor color, not scalar data
+
+                # Create actor
+                actor = vtkActor()
+                actor.SetMapper(mapper)
+
+                # Convert hex color to RGB (0-1 range)
+                color_str = color.lstrip('#')
+                r = int(color_str[0:2], 16) / 255.0
+                g = int(color_str[2:4], 16) / 255.0
+                b = int(color_str[4:6], 16) / 255.0
+
+                # Set actor properties - wireframe mode shows only edges
+                property = actor.GetProperty()
+                property.SetColor(r, g, b)
+
+                # Wireframe-specific: show only wireframe, no surface
+                property.SetRepresentationToWireframe()
+                property.SetLineWidth(1.0)
+                property.SetOpacity(1.0)  # Full opacity for wireframe
+
+                # Add actor to renderer
+                self.renderer.AddActor(actor)
+
+                self.logger.debug(f"Added wireframe rendering for phase {phase_id}: {contour.GetNumberOfPoints()} points")
+
+        except Exception as e:
+            self.logger.warning(f"Wireframe rendering failed for phase {phase_id}: {e}")
 
     def _add_wireframe_rendering_old(self, mesh, phase_id, color, name):
         """OLD PyVista version - Add wireframe rendering for a phase."""
@@ -1111,9 +1220,6 @@ class PyVistaViewer3D(Gtk.Box):
     def _add_volume_rendering(self, mesh, phase_id, color, opacity, name):
         """Add volume rendering with enhanced depth and contrast using VTK."""
         try:
-            print(f"DEBUG: _add_volume_rendering called for phase {phase_id}: {name}")
-            print(f"DEBUG: Input mesh type: {type(mesh)}, points: {mesh.GetNumberOfPoints() if hasattr(mesh, 'GetNumberOfPoints') else 'N/A'}")
-
             # Create contour filter to extract isosurface at threshold 0.5
             contour_filter = vtkContourFilter()
             contour_filter.SetInputData(mesh)
@@ -1122,7 +1228,9 @@ class PyVistaViewer3D(Gtk.Box):
             contour_filter.Update()
 
             contour = contour_filter.GetOutput()
-            print(f"DEBUG: Contour has {contour.GetNumberOfPoints()} points")
+
+            # Apply cross-section clipping if enabled
+            contour = self._apply_cross_sections_vtk(contour)
 
             # Check if contour has any points
             if contour.GetNumberOfPoints() > 0:
@@ -1164,9 +1272,63 @@ class PyVistaViewer3D(Gtk.Box):
             self.logger.warning(f"Volume rendering failed for phase {phase_id}: {e}")
     
     def _add_isosurface_rendering(self, mesh, phase_id, color, opacity, name):
-        """Add isosurface rendering - same as volume rendering for now."""
-        # For minimal prototype, isosurface is same as volume rendering
-        self._add_volume_rendering(mesh, phase_id, color, opacity, name)
+        """Add isosurface rendering with edge display using VTK."""
+        try:
+            # Create contour filter to extract isosurface at threshold 0.5
+            contour_filter = vtkContourFilter()
+            contour_filter.SetInputData(mesh)
+            contour_filter.SetValue(0, 0.5)  # Contour at value 0.5
+            contour_filter.SetInputArrayToProcess(0, 0, 0, vtkDataObject.FIELD_ASSOCIATION_POINTS, 'phase')
+            contour_filter.Update()
+
+            contour = contour_filter.GetOutput()
+
+            # Apply cross-section clipping if enabled
+            contour = self._apply_cross_sections_vtk(contour)
+
+            # Check if contour has any points
+            if contour.GetNumberOfPoints() > 0:
+                # Create mapper
+                mapper = vtkPolyDataMapper()
+                mapper.SetInputData(contour)
+                mapper.ScalarVisibilityOff()  # Use actor color, not scalar data
+
+                # Create actor
+                actor = vtkActor()
+                actor.SetMapper(mapper)
+
+                # Convert hex color to RGB (0-1 range)
+                color_str = color.lstrip('#')
+                r = int(color_str[0:2], 16) / 255.0
+                g = int(color_str[2:4], 16) / 255.0
+                b = int(color_str[4:6], 16) / 255.0
+
+                # Set actor properties - isosurface mode shows edges
+                property = actor.GetProperty()
+                property.SetColor(r, g, b)
+                property.SetOpacity(opacity)
+
+                # Enable smooth shading
+                property.SetInterpolationToPhong()
+
+                # Isosurface-specific: show edges with black lines
+                property.EdgeVisibilityOn()
+                property.SetEdgeColor(0, 0, 0)  # Black edges
+                property.SetLineWidth(0.3)
+
+                # Set lighting parameters for good visibility
+                property.SetSpecular(0.4)
+                property.SetSpecularPower(20)
+                property.SetAmbient(0.3)
+                property.SetDiffuse(0.7)
+
+                # Add actor to renderer
+                self.renderer.AddActor(actor)
+
+                self.logger.debug(f"Added isosurface rendering for phase {phase_id}: {contour.GetNumberOfPoints()} points")
+
+        except Exception as e:
+            self.logger.warning(f"Isosurface rendering failed for phase {phase_id}: {e}")
 
     def _add_isosurface_rendering_old(self, mesh, phase_id, color, opacity, name):
         """OLD PyVista version - Add isosurface rendering with professional quality settings."""
@@ -1238,16 +1400,77 @@ class PyVistaViewer3D(Gtk.Box):
         except Exception as e:
             self.logger.error(f"Failed to reset cross-sections: {e}")
     
+    def _apply_cross_sections_vtk(self, polydata):
+        """Apply cross-section cuts to VTK PolyData using clipping planes."""
+        if not any(self.cross_section_enabled.values()) or self.volume_bounds is None:
+            return polydata
+
+        try:
+            clipped = polydata
+            bounds = self.volume_bounds
+
+            # Apply each enabled cutting plane
+            if self.cross_section_enabled['x']:
+                # YZ plane cut (normal along X axis)
+                x_pos = bounds[0] + (bounds[1] - bounds[0]) * self.cross_section_positions['x']
+                plane = vtkPlane()
+                plane.SetOrigin(x_pos, 0, 0)
+                plane.SetNormal(1, 0, 0)  # Normal points in +X direction
+
+                clipper = vtkClipPolyData()
+                clipper.SetInputData(clipped)
+                clipper.SetClipFunction(plane)
+                clipper.InsideOutOff()  # Keep the side in the direction of the normal
+                clipper.Update()
+                clipped = clipper.GetOutput()
+                self.logger.debug(f"X cut at position {x_pos:.1f}")
+
+            if self.cross_section_enabled['y']:
+                # XZ plane cut (normal along Y axis)
+                y_pos = bounds[2] + (bounds[3] - bounds[2]) * self.cross_section_positions['y']
+                plane = vtkPlane()
+                plane.SetOrigin(0, y_pos, 0)
+                plane.SetNormal(0, 1, 0)  # Normal points in +Y direction
+
+                clipper = vtkClipPolyData()
+                clipper.SetInputData(clipped)
+                clipper.SetClipFunction(plane)
+                clipper.InsideOutOff()
+                clipper.Update()
+                clipped = clipper.GetOutput()
+                self.logger.debug(f"Y cut at position {y_pos:.1f}")
+
+            if self.cross_section_enabled['z']:
+                # XY plane cut (normal along Z axis)
+                z_pos = bounds[4] + (bounds[5] - bounds[4]) * self.cross_section_positions['z']
+                plane = vtkPlane()
+                plane.SetOrigin(0, 0, z_pos)
+                plane.SetNormal(0, 0, 1)  # Normal points in +Z direction
+
+                clipper = vtkClipPolyData()
+                clipper.SetInputData(clipped)
+                clipper.SetClipFunction(plane)
+                clipper.InsideOutOff()
+                clipper.Update()
+                clipped = clipper.GetOutput()
+                self.logger.debug(f"Z cut at position {z_pos:.1f}")
+
+            return clipped
+
+        except Exception as e:
+            self.logger.warning(f"VTK cross-section failed: {e}")
+            return polydata
+
     def _apply_cross_sections(self, mesh, phase_id: int):
-        """Apply cross-section cuts to a mesh."""
+        """Apply cross-section cuts to a mesh (PyVista version - legacy)."""
         if not any(self.cross_section_enabled.values()) or self.volume_bounds is None:
             return mesh
-            
+
         try:
             # Clean the mesh first to avoid object array issues
             cut_mesh = mesh.clean()
             bounds = self.volume_bounds
-            
+
             # Apply each enabled cutting plane using box clipping instead of plane clipping
             if self.cross_section_enabled['x']:
                 # YZ plane cut (normal along X axis) - use box clipping
@@ -1256,16 +1479,16 @@ class PyVistaViewer3D(Gtk.Box):
                 box_bounds = [x_pos, bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]]
                 cut_mesh = cut_mesh.clip_box(box_bounds, invert=False)
                 self.logger.debug(f"X cut at position {x_pos:.1f}")
-                
+
             if self.cross_section_enabled['y']:
-                # XZ plane cut (normal along Y axis)  
+                # XZ plane cut (normal along Y axis)
                 y_pos = bounds[2] + (bounds[3] - bounds[2]) * self.cross_section_positions['y']
                 # Get current bounds of the mesh (may have changed from X cut)
                 current_bounds = cut_mesh.bounds
                 box_bounds = [current_bounds[0], current_bounds[1], y_pos, bounds[3], current_bounds[4], current_bounds[5]]
                 cut_mesh = cut_mesh.clip_box(box_bounds, invert=False)
                 self.logger.debug(f"Y cut at position {y_pos:.1f}")
-                
+
             if self.cross_section_enabled['z']:
                 # XY plane cut (normal along Z axis)
                 z_pos = bounds[4] + (bounds[5] - bounds[4]) * self.cross_section_positions['z']
@@ -1274,9 +1497,9 @@ class PyVistaViewer3D(Gtk.Box):
                 box_bounds = [current_bounds[0], current_bounds[1], current_bounds[2], current_bounds[3], z_pos, bounds[5]]
                 cut_mesh = cut_mesh.clip_box(box_bounds, invert=False)
                 self.logger.debug(f"Z cut at position {z_pos:.1f}")
-                
+
             return cut_mesh
-            
+
         except Exception as e:
             self.logger.warning(f"Cross-section failed for phase {phase_id}: {e}")
             return mesh

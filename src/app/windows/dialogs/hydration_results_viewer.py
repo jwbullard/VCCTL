@@ -508,13 +508,19 @@ class HydrationResultsViewer(Gtk.Dialog):
             # Return cached colors if available and requested
             if use_cache and self.cached_phase_mapping is not None and self.cached_phase_colors is not None:
                 return self.cached_phase_mapping, self.cached_phase_colors
-            
+
             # Import pandas here to avoid dependency issues
             import pandas as pd
-            
-            # Get path to colors.csv - it's in the project root
-            colors_file = Path(__file__).parent.parent.parent.parent.parent / "colors" / "colors.csv"
-            
+            import sys
+
+            # Get path to colors.csv - handle both development and packaged app
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                # PyInstaller packaged app
+                colors_file = Path(sys._MEIPASS) / "colors" / "colors.csv"
+            else:
+                # Development environment
+                colors_file = Path(__file__).parent.parent.parent.parent.parent / "colors" / "colors.csv"
+
             if not colors_file.exists():
                 self.logger.warning(f"Colors file not found: {colors_file}")
                 return self._get_default_phase_mapping()

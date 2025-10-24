@@ -599,9 +599,19 @@ class OperationsMonitoringPanel(Gtk.Box):
         self.clean_duplicates_button.set_is_important(True)  # Force label to show
         self.clean_duplicates_button.connect('clicked', self._on_clean_duplicates_clicked)
         toolbar.insert(self.clean_duplicates_button, -1)
-        
+
+        # Sync with Filesystem button
+        self.sync_filesystem_button = Gtk.ToolButton()
+        self.sync_filesystem_button.set_icon_name("folder-sync")
+        set_tool_button_custom_icon(self.sync_filesystem_button, "view-refresh", 24)
+        self.sync_filesystem_button.set_label("Sync with Filesystem")
+        self.sync_filesystem_button.set_tooltip_text("Remove database records for operations with no folders, and clean up orphaned folders")
+        self.sync_filesystem_button.set_is_important(True)  # Force label to show
+        self.sync_filesystem_button.connect('clicked', self._on_sync_filesystem_clicked)
+        toolbar.insert(self.sync_filesystem_button, -1)
+
         # Note: View 3D Results and Plot Data buttons moved to dedicated Results panel
-        
+
         # Separator
         toolbar.insert(Gtk.SeparatorToolItem(), -1)
         
@@ -659,9 +669,10 @@ class OperationsMonitoringPanel(Gtk.Box):
             
             # Note: 3D Results and Plot Data functionality moved to dedicated Results panel
             
-            # Refresh, Clean Duplicates, and Settings: Always enabled
+            # Refresh, Clean Duplicates, Sync Filesystem, and Settings: Always enabled
             self.refresh_button.set_sensitive(True)
             self.clean_duplicates_button.set_sensitive(True)
+            self.sync_filesystem_button.set_sensitive(True)
             self.settings_button.set_sensitive(True)
             
         except Exception as e:
@@ -2312,11 +2323,13 @@ class OperationsMonitoringPanel(Gtk.Box):
             operation_name = operation.name
             import os
 
+            # Get Operations directory using directories service (not hardcoded path)
+            operations_base = self.service_container.directories_service.get_operations_path()
+
             # First, try to find the operation directory regardless of source
             # Check if it's a nested elastic operation
             if operation_name.startswith('Elastic-'):
                 # Look for nested structure: Operations/HydrationName/ElasticName/
-                operations_base = "Operations"
                 for parent_dir in os.listdir(operations_base):
                     parent_path = os.path.join(operations_base, parent_dir)
                     if os.path.isdir(parent_path):
@@ -2326,7 +2339,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                             return elastic_path
 
             # Check direct operation directory
-            direct_path = os.path.join("Operations", operation_name)
+            direct_path = os.path.join(operations_base, operation_name)
             if os.path.exists(direct_path):
                 self.logger.debug(f"Found direct operation directory: {direct_path}")
                 return direct_path
@@ -2919,9 +2932,10 @@ class OperationsMonitoringPanel(Gtk.Box):
                     meaningful_name = self._get_meaningful_operation_name(operation)
                     self.logger.error(f"Error deleting operation '{meaningful_name}': {e}")
             
+            # DISABLED: Automatic cleanup is dangerous - use "Sync with Filesystem" instead
             # Clean up any orphaned folders after deletion
-            self._cleanup_orphaned_folders()
-            
+            # self._cleanup_orphaned_folders()
+
             # Refresh the UI
             self._update_operations_list()
             self._load_operations_files()  # Refresh file browser
@@ -2972,10 +2986,154 @@ class OperationsMonitoringPanel(Gtk.Box):
             self._update_status(f"Cleaned {removed_count} duplicate operations. {operations_after} operations remaining.")
         else:
             self._update_status("No duplicate operations found.")
-    
-    
-    
-    
+
+    def _on_sync_filesystem_clicked(self, button: Gtk.Button) -> None:
+        """Sync database with filesystem - remove orphaned database records and folders."""
+        try:
+            self._update_status("Analyzing database and filesystem...")
+
+            # Get Operations directory
+            operations_dir = self.service_container.directories_service.get_operations_path()
+            if not operations_dir.exists():
+                self._update_status(f"Operations directory not found: {operations_dir}")
+                return
+
+            # Get all database operations
+            operation_service = self.service_container.operation_service
+            db_operations = operation_service.get_all()
+            db_operation_names = {op.name for op in db_operations}
+
+            # DIAGNOSTIC: Log database operation names
+            self.logger.info(f"=== SYNC DIAGNOSTIC ===")
+            self.logger.info(f"Operations directory: {operations_dir}")
+            self.logger.info(f"Database operations ({len(db_operation_names)}): {sorted(db_operation_names)}")
+
+            # Get all folders in Operations directory
+            folder_names = set()
+            special_folders = {'grading_files', 'microstructure_metadata', '.git', '__pycache__', 'particle_shape_set', 'aggregate'}
+            for item in operations_dir.iterdir():
+                if item.is_dir() and item.name not in special_folders:
+                    folder_names.add(item.name)
+
+            # DIAGNOSTIC: Log filesystem folders
+            self.logger.info(f"Filesystem folders ({len(folder_names)}): {sorted(folder_names)}")
+
+            # Find mismatches
+            orphaned_db_records = db_operation_names - folder_names  # In database but no folder
+            orphaned_folders = folder_names - db_operation_names  # Folder exists but no database record
+
+            # DIAGNOSTIC: Log mismatches
+            self.logger.info(f"Orphaned DB records ({len(orphaned_db_records)}): {sorted(orphaned_db_records)}")
+            self.logger.info(f"Orphaned folders ({len(orphaned_folders)}): {sorted(orphaned_folders)}")
+            self.logger.info(f"=== END SYNC DIAGNOSTIC ===")
+            print(f"=== SYNC DIAGNOSTIC ===")
+            print(f"Database operations ({len(db_operation_names)}): {sorted(db_operation_names)}")
+            print(f"Filesystem folders ({len(folder_names)}): {sorted(folder_names)}")
+            print(f"Orphaned DB records ({len(orphaned_db_records)}): {sorted(orphaned_db_records)}")
+            print(f"Orphaned folders ({len(orphaned_folders)}): {sorted(orphaned_folders)}")
+            print(f"=== END SYNC DIAGNOSTIC ===")
+
+            # Show confirmation dialog with details
+            total_issues = len(orphaned_db_records) + len(orphaned_folders)
+            if total_issues == 0:
+                self._update_status("Database and filesystem are in sync!")
+                return
+
+            dialog_text = f"Found {total_issues} mismatches between database and filesystem:\n\n"
+
+            if orphaned_db_records:
+                dialog_text += f"**{len(orphaned_db_records)} Orphaned Database Records** (will be deleted):\n"
+                for name in sorted(list(orphaned_db_records)[:10]):  # Show first 10
+                    dialog_text += f"  • {name}\n"
+                if len(orphaned_db_records) > 10:
+                    dialog_text += f"  ... and {len(orphaned_db_records) - 10} more\n"
+                dialog_text += "\n"
+
+            if orphaned_folders:
+                dialog_text += f"**{len(orphaned_folders)} Orphaned Folders** (will be imported to database):\n"
+                for name in sorted(list(orphaned_folders)[:10]):  # Show first 10
+                    dialog_text += f"  • {name}\n"
+                if len(orphaned_folders) > 10:
+                    dialog_text += f"  ... and {len(orphaned_folders) - 10} more\n"
+
+            dialog = Gtk.MessageDialog(
+                transient_for=self.main_window,
+                message_type=Gtk.MessageType.QUESTION,
+                buttons=Gtk.ButtonsType.YES_NO,
+                text="Sync Database with Filesystem?"
+            )
+            dialog.format_secondary_text(dialog_text)
+
+            response = dialog.run()
+            dialog.destroy()
+
+            if response == Gtk.ResponseType.YES:
+                # Delete orphaned database records
+                deleted_count = 0
+                for op_name in orphaned_db_records:
+                    try:
+                        operation_service.delete(op_name)
+                        # Also remove from memory
+                        for op_id, op in list(self.operations.items()):
+                            if op.name == op_name:
+                                del self.operations[op_id]
+                                break
+                        deleted_count += 1
+                        self.logger.info(f"Deleted orphaned database record: {op_name}")
+                    except Exception as e:
+                        self.logger.error(f"Failed to delete database record {op_name}: {e}")
+
+                # Import orphaned folders as new operations
+                imported_count = 0
+                for folder_name in orphaned_folders:
+                    try:
+                        folder_path = operations_dir / folder_name
+
+                        # Infer operation type from folder name
+                        if folder_name.startswith("HydrationOf-") or folder_name.startswith("Hydration"):
+                            op_type = "Hydration Simulation"
+                        elif folder_name.startswith("Elastic-"):
+                            op_type = "Elastic Moduli Calculation"
+                        elif folder_name.endswith("-ElMod"):
+                            op_type = "Elastic Moduli Calculation"
+                        else:
+                            op_type = "Microstructure Generation"
+
+                        # Create basic database record
+                        from app.models.operation import Operation as OperationModel
+                        new_op = OperationModel(
+                            name=folder_name,
+                            operation_type=op_type,
+                            status="completed",  # Assume completed since folder exists
+                            output_directory=str(folder_path)
+                        )
+                        operation_service.save(new_op)
+                        imported_count += 1
+                        self.logger.info(f"Imported folder as operation: {folder_name}")
+                    except Exception as e:
+                        self.logger.error(f"Failed to import folder {folder_name}: {e}")
+
+                # Refresh from database to show new operations
+                self._smart_refresh_from_database()
+                self._update_ui()
+
+                # Report results
+                if imported_count > 0:
+                    self._update_status(
+                        f"Sync complete! Removed {deleted_count} orphaned database records. "
+                        f"Imported {imported_count} folders as operations."
+                    )
+                else:
+                    self._update_status(f"Sync complete! Removed {deleted_count} orphaned database records.")
+            else:
+                self._update_status("Sync cancelled.")
+
+        except Exception as e:
+            self.logger.error(f"Error during filesystem sync: {e}")
+            self._update_status(f"Error during sync: {e}")
+
+
+
     def _verify_operation_completion_by_files(self, operation: Operation) -> bool:
         """
         Verify if an operation actually completed by checking its output files.
@@ -4733,10 +4891,9 @@ class OperationsMonitoringPanel(Gtk.Box):
             operation_service = self.service_container.operation_service
             db_operations = operation_service.get_all()
             db_operation_names = {op.name for op in db_operations}
-            
-            # Get all folder names in Operations directory
-            project_root = Path(__file__).parent.parent.parent.parent.parent
-            operations_dir = project_root / "Operations"
+
+            # Get Operations directory using directories service (not hardcoded path)
+            operations_dir = self.service_container.directories_service.get_operations_path()
             
             if not operations_dir.exists():
                 return
@@ -4801,8 +4958,12 @@ class OperationsMonitoringPanel(Gtk.Box):
             with self.service_container.database_service.get_read_only_session() as session:
                 from app.models.operation import Operation as DBOperation
                 db_operations = session.query(DBOperation).all()
-            
+
             self.logger.info(f"Found {len(db_operations)} operations in database")
+            print(f"=== SMART REFRESH DIAGNOSTIC ===")
+            print(f"Database operations found: {len(db_operations)}")
+            print(f"Operation names: {[db_op.name for db_op in db_operations]}")
+            print(f"Running operations to preserve: {list(running_operation_names)}")
             
             # Instead of clearing all, only remove non-running operations to preserve process handles
             non_running_ids = [
@@ -4856,11 +5017,18 @@ class OperationsMonitoringPanel(Gtk.Box):
                     db_loaded_count += 1
                 except Exception as e:
                     self.logger.warning(f"Failed to convert database operation {db_op.name}: {e}")
+                    print(f"ERROR converting DB operation '{db_op.name}': {e}")
             
             # Running operations are already preserved in self.operations with process handles intact
             self.logger.info(f"Running operations already preserved with process handles: {len(running_operations)} operations")
-            
+
             self.logger.info(f"Smart refresh complete: {len(self.operations)} total operations ({db_loaded_count} from DB, {len(running_operations)} running preserved, {db_skipped_count} duplicates avoided)")
+            print(f"Smart refresh results:")
+            print(f"  - Loaded from DB: {db_loaded_count} operations")
+            print(f"  - Preserved running: {len(running_operations)} operations")
+            print(f"  - Total in memory: {len(self.operations)} operations")
+            print(f"  - Operation names in memory: {[op.name for op in self.operations.values()]}")
+            print(f"=== END SMART REFRESH DIAGNOSTIC ===")
             
         except Exception as e:
             self.logger.error(f"Failed to perform smart refresh from database: {e}", exc_info=True)

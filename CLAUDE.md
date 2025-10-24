@@ -104,13 +104,292 @@ git push origin main
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows VTK-Direct 3D Viewer - Axes and Camera Controls Working (October 20, 2025 - Session 11)**
+**Latest Session: Windows Database Persistence & Path Resolution Fixes (October 23, 2025 - Session 13)**
 
-**Status: VTK-direct 3D viewer successfully rendering phases on Windows. Coordinate axes and camera controls (rotate, zoom, reset) implemented and working. Performance is laggy compared to macOS. Phase color bug discovered - phases 13, 21, 23, 25, 31, 32, 33 displaying gray with generic names despite adding complete phase_colors dictionary. Bug persists after rebuild - needs investigation of where phase names/colors are actually used in rendering code.**
+**Status: Fixed critical database persistence issue - database now stored in user data directory (AppData\Local\VCCTL on Windows, ~/Library/Application Support/VCCTL on macOS, ~/.local/share/VCCTL on Linux). This ensures user data persists across app uninstalls/reinstalls. Fixed all hardcoded path issues in operations monitoring and elastic moduli panels. Removed source database from bundling. Package rebuilt and ready for testing.**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Investigate why phase_colors dictionary not being used for phases 13,21,23,25,31,32,33**
+**⚠️ NEXT SESSION: Test database persistence, verify elastic moduli operations work correctly, investigate phase color bug if time permits**
+
+---
+
+## Session Status Update (October 23, 2025 - WINDOWS DATABASE PERSISTENCE & PATH RESOLUTION FIXES SESSION #13)
+
+### **Session Summary:**
+Fixed critical database persistence issue where orphaned operations kept reappearing after deletion. Root cause: database was stored in application directory (`src/data/database/vcctl.db`) and bundled with PyInstaller, causing it to be overwritten on every rebuild. Solution: moved database to user data directory (`AppData\Local\VCCTL\database` on Windows, `~/Library/Application Support/VCCTL/database` on macOS, `~/.local/share/VCCTL/database` on Linux). Also fixed hardcoded "Operations" path in operations monitoring panel and inconsistent path handling in elastic moduli panel. Deleted source database file to prevent bundling. Cross-platform solution ensures users won't lose data on uninstall/reinstall.
+
+**Previous Session:** Windows VTK-Direct 3D Viewer - Axes and Camera Controls Working (October 20, 2025 - Session 11)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Database Persistence Fix - Cross-Platform User Data Directory ✅**
+
+**Issue:** Orphaned operations kept reappearing after deletion and restart. Real operations not appearing in Operations panel.
+
+**Root Cause Discovery:**
+- Database stored at `src/data/database/vcctl.db` (inside application directory)
+- PyInstaller bundles this database into package at `dist/_internal/data/database/vcctl.db`
+- Every rebuild copies old source database to dist, overwriting user changes
+- Development problem: orphaned operations return after every rebuild
+- **Production problem:** Database deleted on uninstall - users lose all data!
+
+**Console Output Evidence:**
+```
+Loading operations from database...
+Found 8 operations in database
+Found 3 operations directories on disk
+```
+8 operations in database but only 3 folders on disk = orphaned database records
+
+**Fix Implemented in `app_info.py` (lines 30-40):**
+```python
+# User data directory (persists across uninstalls/reinstalls)
+# Use AppData\Local on Windows, ~/.local/share on Linux, ~/Library/Application Support on macOS
+if os.name == 'nt':  # Windows
+    USER_DATA_DIR = Path(os.environ.get('LOCALAPPDATA', Path.home() / 'AppData' / 'Local')) / APP_NAME
+elif os.name == 'posix' and os.uname().sysname == 'Darwin':  # macOS
+    USER_DATA_DIR = Path.home() / 'Library' / 'Application Support' / APP_NAME
+else:  # Linux
+    USER_DATA_DIR = Path.home() / '.local' / 'share' / APP_NAME
+
+# Database is stored in user data directory (NOT in application directory)
+DATABASE_DIR = USER_DATA_DIR / "database"
+```
+
+**Database Locations by Platform:**
+- **Windows:** `C:\Users\<username>\AppData\Local\VCCTL\database\vcctl.db`
+- **macOS:** `~/Library/Application Support/VCCTL/database/vcctl.db`
+- **Linux:** `~/.local/share/VCCTL/database/vcctl.db`
+
+**Benefits:**
+- ✅ Data persists across app uninstalls/reinstalls
+- ✅ Each user has their own database
+- ✅ Easy to backup/restore
+- ✅ No admin permissions required
+- ✅ Follows OS conventions
+- ✅ Fixes development rebuild issue
+- ✅ Prevents production data loss
+
+**Source Database Deleted:**
+- Removed `src/data/database/vcctl.db` to prevent bundling
+- Fresh database created in user data directory on first launch
+
+#### **2. Fixed Hardcoded "Operations" Path in Operations Monitoring Panel ✅**
+
+**Issue:** Elastic moduli operations failing with error: `[WinError 3] The system cannot find the path specified: 'Operations'`
+
+**Root Cause:** `_get_operation_directory()` used hardcoded string `"Operations"` instead of calling directories service.
+
+**Fix in `operations_monitoring_panel.py` (lines 2320-2342):**
+```python
+# BEFORE:
+operations_base = "Operations"  # HARDCODED!
+
+# AFTER:
+operations_base = self.service_container.directories_service.get_operations_path()
+```
+
+**Result:** Operations directory now resolved correctly at runtime using proper service call.
+
+#### **3. Fixed Inconsistent Path Handling in Elastic Moduli Panel ✅**
+
+**Issue:** User observed: "Output directory shows absolute path (C:\Users\...) but Pimg file shows relative path (../../../). Shouldn't they both be absolute?"
+
+**Root Cause:**
+- Output directory: absolute path from directories service
+- Pimg file: relative path calculated using hardcoded `Path(__file__)` which breaks in PyInstaller
+- Inconsistent path types
+
+**Fix in `elastic_moduli_panel.py` (lines 819-829):**
+```python
+# BEFORE:
+project_root = Path(__file__).parent.parent.parent.parent  # HARDCODED __file__!
+pimg_relative = os.path.relpath(pimg_absolute, project_root)  # Relative path
+
+# AFTER:
+pimg_absolute = Path(selected_microstructure.pimg_path)
+self.pimg_file_entry.set_text(str(pimg_absolute.resolve()))  # Absolute path
+```
+
+**Changes:**
+- Both output directory and pimg file now use **absolute paths** (consistent)
+- Removed hardcoded `Path(__file__)` that breaks in PyInstaller bundles
+- Simpler, more reliable code
+
+**Result:** Consistent path handling, no more PyInstaller issues, Browse buttons should work correctly.
+
+### **📋 SESSION 13 FILES MODIFIED:**
+
+**Modified Files:**
+1. `src/app/resources/app_info.py` - Database location moved to user data directory (lines 30-40)
+2. `src/app/windows/panels/operations_monitoring_panel.py` - Fixed hardcoded "Operations" path (lines 2320-2342)
+3. `src/app/windows/panels/elastic_moduli_panel.py` - Fixed inconsistent paths, removed hardcoded `__file__` (lines 819-829)
+4. `CLAUDE.md` - This session documentation
+
+**Deleted Files:**
+- `src/data/database/vcctl.db` - Removed to prevent bundling (database now created in user data directory)
+
+**No new files created this session.**
+
+### **🔧 TECHNICAL PATTERNS DOCUMENTED:**
+
+#### **Cross-Platform User Data Directory Pattern:**
+```python
+if os.name == 'nt':  # Windows
+    USER_DATA_DIR = Path(os.environ.get('LOCALAPPDATA', ...)) / APP_NAME
+elif os.name == 'posix' and os.uname().sysname == 'Darwin':  # macOS
+    USER_DATA_DIR = Path.home() / 'Library' / 'Application Support' / APP_NAME
+else:  # Linux
+    USER_DATA_DIR = Path.home() / '.local' / 'share' / APP_NAME
+```
+
+**Key Points:**
+- Use OS-appropriate environment variables (LOCALAPPDATA on Windows)
+- Follow platform conventions (AppData\Local, Library/Application Support, .local/share)
+- Ensure directory creation at app startup
+- Separate user data from application resources
+
+#### **Avoiding PyInstaller Path Issues:**
+```python
+# ❌ WRONG - breaks in PyInstaller:
+project_root = Path(__file__).parent.parent.parent
+
+# ✅ RIGHT - use services or absolute paths:
+operations_dir = self.service_container.directories_service.get_operations_path()
+absolute_path = Path(some_path).resolve()
+```
+
+**Pattern:** Never use `Path(__file__)` for runtime path resolution in PyInstaller apps. Use services or absolute paths instead.
+
+### **🎯 CURRENT STATUS:**
+
+**✅ DATABASE PERSISTENCE FIXED**
+- Database moved to user data directory
+- Cross-platform solution (Windows/macOS/Linux)
+- Source database deleted (won't be bundled)
+- Ready for testing
+
+**✅ PATH RESOLUTION FIXED**
+- Hardcoded "Operations" path replaced with service call
+- Elastic moduli panel uses consistent absolute paths
+- No more `Path(__file__)` issues
+
+**⏳ PENDING TESTING**
+1. Database creates in `C:\Users\jwbullard\AppData\Local\VCCTL\database\vcctl.db`
+2. Operations persist across app restarts (no more orphaned operations!)
+3. Elastic moduli operations work without path errors
+4. Browse buttons work on Elastic Moduli panel
+
+**📦 PACKAGE STATUS**
+- Windows package rebuilt (2 builds this session)
+- Ready for testing at `dist/VCCTL/VCCTL.exe`
+- macOS rebuild needed to pick up database location changes
+
+### **📊 PLATFORM STATUS AFTER SESSION 13:**
+
+| Platform | Path Resolution | Database Persistence | Elastic Moduli | Package Status | Status |
+|----------|----------------|----------------------|----------------|----------------|--------|
+| macOS (ARM64) | ✅ Fixed | ✅ Fixed (needs rebuild) | ⏳ Needs testing | ⏳ Rebuild pending | **Awaiting rebuild** |
+| Windows (x64) | ✅ Fixed | ✅ Fixed | ⏳ Testing pending | ✅ Rebuilt | **Testing in progress** |
+| Linux (x64) | ✅ Fixed | ✅ Fixed | ⏳ Not started | ⏳ Not started | Not started |
+
+### **💡 KEY LESSONS:**
+
+**Lesson 1: Always Test Platform-Specific Features Early**
+- Database persistence seemed fine during development on macOS
+- Didn't discover bundling issue until Windows testing
+- Could have prevented 2+ hours of debugging if tested Windows builds earlier
+
+**Lesson 2: User Data vs Application Data**
+- User data (databases, preferences, projects) → User data directory
+- Application resources (icons, docs, binaries) → Application directory
+- Never mix the two!
+
+**Lesson 3: Avoid Path(__file__) in PyInstaller Apps**
+- `Path(__file__)` returns unpredictable paths in frozen executables
+- Use services for runtime path resolution
+- Use absolute paths when possible
+- Test PyInstaller builds early to catch path issues
+
+**Lesson 4: Cross-Platform Database Paths**
+- Each OS has different conventions for user data
+- Windows: `%LOCALAPPDATA%`
+- macOS: `~/Library/Application Support`
+- Linux: `~/.local/share`
+- Following conventions prevents user confusion
+
+### **📝 COMPLETE TODO LIST (All Sessions):**
+
+**High Priority:**
+1. ✅ Fix database persistence issue (Session 13)
+2. ✅ Fix hardcoded Operations path (Session 13)
+3. ✅ Fix Elastic Moduli panel path issues (Session 13)
+4. ⏳ **Test database creates in AppData correctly** (Session 13 - NEXT)
+5. ⏳ **Test Elastic Moduli operations after path fixes** (Session 13 - NEXT)
+6. ⏳ **Fix phase color display - phases 13,21,23,25,31,32,33 showing gray** (Session 11)
+7. ⏳ **Test operation folder deletion on Windows** (Session 9)
+
+**Medium Priority:**
+8. ⏳ **Fix blank console window appearing with app** (Session 8 - simple PyInstaller fix: `console=False`)
+9. ⏳ **Implement standalone installer with Operations directory selection** (Session 8)
+
+**Lower Priority:**
+10. ⏳ **Add cross-section clipping planes (VTK vtkPlane)** (Session 11)
+11. ⏳ **Optimize rendering performance (reduce lag)** (Session 11)
+
+### **🎯 NEXT SESSION PLAN:**
+
+**Priority 1: Test Database Persistence**
+1. Launch app and verify database creates at `C:\Users\jwbullard\AppData\Local\VCCTL\database\vcctl.db`
+2. Create new operations (microstructure, hydration, elastic moduli)
+3. Close and relaunch app
+4. Verify operations persist (no orphaned operations!)
+
+**Priority 2: Test Elastic Moduli Operations**
+1. Run elastic moduli calculations
+2. Verify no path errors in console
+3. Verify Browse buttons work for Output directory and Pimg file
+
+**Priority 3: Clean Up (If Testing Successful)**
+- Set `console=False` in vcctl.spec to hide console window
+- Rebuild final package for distribution
+
+### **🐛 ADDITIONAL ISSUES DISCOVERED (End of Session):**
+
+**Issue 1: Datetime Timezone Mixing Bug**
+- **Problem:** Operations show negative durations in console
+- **Root Cause:** Code mixes `datetime.utcnow()` (UTC) and `datetime.now()` (local time)
+  - Database model (`operation.py`): Uses `datetime.utcnow()` for timestamps ✓
+  - Operations panel (`operations_monitoring_panel.py`): Uses `datetime.now()` in 17+ places ✗
+- **Impact:** Causes ~5 hour offset (UTC vs EST), appears as negative duration
+- **Example:** Start time: 2025-10-24 02:31:57 (UTC), End time: 2025-10-23 21:36:03 (local) → negative!
+- **Fix:** Replace all `datetime.now()` with `datetime.utcnow()` in operations_monitoring_panel.py
+- **Status:** Deferred to Session 14 (affects 17+ lines, needs testing)
+
+**Issue 2: Icon Metadata Loading Error**
+- **Problem:** Console warnings: `Icon not found` and `'str' object has no attribute 'get'`
+- **Root Cause:** Missing icon metadata JSON file
+- **Status:** Icons ARE bundled correctly in `_internal/icons/`, just metadata issue
+- **Impact:** Warning-level only, doesn't break functionality
+- **Fix:** Investigate icon manager metadata loading
+- **Status:** Deferred to Session 14
+
+### **⏰ SESSION END:**
+
+User ending session. All changes documented in CLAUDE.md. Ready for post-session sync.
+
+**Files Modified This Session:**
+- `src/app/resources/app_info.py` (database location + seed database logic)
+- `src/app/windows/panels/operations_monitoring_panel.py` (hardcoded path fix)
+- `src/app/windows/panels/elastic_moduli_panel.py` (consistent paths)
+- `src/data/database/vcctl.db` (restored from git with correct materials/gradings)
+- `CLAUDE.md` (this documentation)
+
+**Files Restored from Git:**
+- `src/data/database/vcctl.db` (36 cements, 7 aggregates, 8 gradings, 1 filler)
+
+**Git Status:** Changes ready to commit via post-session sync.
 
 ---
 

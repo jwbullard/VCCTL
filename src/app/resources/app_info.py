@@ -25,12 +25,34 @@ BASE_DIR = Path(__file__).parent.parent.parent
 RESOURCES_DIR = BASE_DIR / "app" / "resources"
 ICONS_DIR = RESOURCES_DIR / "icons"
 DATA_DIR = BASE_DIR / "data"
-DATABASE_DIR = DATA_DIR / "database"
 MATERIALS_DIR = DATA_DIR / "materials"
 
+# User data directory (persists across uninstalls/reinstalls)
+# Use AppData\Local on Windows, ~/.local/share on Linux, ~/Library/Application Support on macOS
+if os.name == 'nt':  # Windows
+    USER_DATA_DIR = Path(os.environ.get('LOCALAPPDATA', Path.home() / 'AppData' / 'Local')) / APP_NAME
+elif os.name == 'posix' and os.uname().sysname == 'Darwin':  # macOS
+    USER_DATA_DIR = Path.home() / 'Library' / 'Application Support' / APP_NAME
+else:  # Linux
+    USER_DATA_DIR = Path.home() / '.local' / 'share' / APP_NAME
+
+# Database is stored in user data directory (NOT in application directory)
+DATABASE_DIR = USER_DATA_DIR / "database"
+
 # Ensure directories exist
-for directory in [RESOURCES_DIR, ICONS_DIR, DATA_DIR, DATABASE_DIR, MATERIALS_DIR]:
+for directory in [RESOURCES_DIR, ICONS_DIR, DATA_DIR, MATERIALS_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
+
+# Ensure user data directories exist (these persist across app updates)
+for directory in [USER_DATA_DIR, DATABASE_DIR]:
+    directory.mkdir(parents=True, exist_ok=True)
+
+# Copy seed database on first launch (if user database doesn't exist)
+USER_DB_PATH = DATABASE_DIR / "vcctl.db"
+SEED_DB_PATH = DATA_DIR / "database" / "vcctl.db"
+if not USER_DB_PATH.exists() and SEED_DB_PATH.exists():
+    import shutil
+    shutil.copy2(SEED_DB_PATH, USER_DB_PATH)
 
 # Icon paths (will be used when we have actual icon files)
 ICON_PATHS = {
