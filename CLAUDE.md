@@ -104,13 +104,286 @@ git push origin main
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows Database Persistence & Path Resolution Fixes (October 23, 2025 - Session 13)**
+**Latest Session: Windows Elastic Moduli Path Resolution Complete (October 28, 2025 - Session 14)**
 
-**Status: Fixed critical database persistence issue - database now stored in user data directory (AppData\Local\VCCTL on Windows, ~/Library/Application Support/VCCTL on macOS, ~/.local/share/VCCTL on Linux). This ensures user data persists across app uninstalls/reinstalls. Fixed all hardcoded path issues in operations monitoring and elastic moduli panels. Removed source database from bundling. Package rebuilt and ready for testing.**
+**Status: Fixed all remaining path issues in elastic moduli workflow. Elastic operations now create folders in correct nested location, Results panel viewers (Effective Moduli, ITZ Analysis) display data correctly. Fixed timezone bug causing negative durations, icon metadata parsing error, and multiple hardcoded paths in elastic_moduli_panel.py, elastic_moduli_service.py, and viewer dialogs. All elastic moduli features now working on Windows.**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Test database persistence, verify elastic moduli operations work correctly, investigate phase color bug if time permits**
+**⚠️ NEXT SESSION: Test on macOS to verify no regressions from path fixes, investigate phase color bug (phases 13,21,23,25,31,32,33 showing gray)**
+
+---
+
+## Session Status Update (October 28, 2025 - WINDOWS ELASTIC MODULI PATH RESOLUTION COMPLETE SESSION #14)
+
+### **Session Summary:**
+Fixed all remaining path issues preventing elastic moduli operations from working on Windows. Operations now create folders in correct nested location (`operations/<hydration>/<elastic>/`), and Results panel viewers display data correctly. Root cause was multiple hardcoded `Path("Operations")` and `Path(__file__)` references that broke in PyInstaller bundles. Fixed 5 separate files with path issues. Also fixed timezone mixing bug (UTC vs local time) and icon metadata parsing error.
+
+**Previous Session:** Windows Database Persistence & Path Resolution Fixes (October 23, 2025 - Session 13)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Elastic Moduli Operations - Complete Path Resolution ✅**
+
+**Issue:** Elastic moduli operations created but files not appearing in Results panel viewers. User reported: "It seemed to run smoothly on the Operations panel and is showing as completed, but the corresponding folder was not created and I don't know where it put the output."
+
+**Root Cause Discovery:**
+Multiple locations had hardcoded paths that worked on macOS but broke on Windows:
+1. `elastic_moduli_panel.py` (lines 1387, 1399): `Path(__file__)` and `"Operations"` string
+2. `elastic_moduli_service.py` (line 372): Flat structure instead of nesting
+3. `results_panel.py` (line 521): Didn't check `output_directory` attribute
+4. `effective_moduli_viewer.py` (line 147): Hardcoded `Path("Operations")`
+5. `itz_analysis_viewer.py` (line 202): Hardcoded `Path("Operations")`
+
+**Fixes Implemented:**
+
+**Fix #1 - elastic_moduli_panel.py (lines 1384-1399):**
+```python
+# BEFORE:
+if getattr(sys, 'frozen', False):
+    project_root = Path(sys._MEIPASS)
+else:
+    project_root = Path(__file__).parent.parent.parent.parent.parent
+operations_dir = project_root / "Operations"
+
+# AFTER:
+if getattr(sys, 'frozen', False):
+    bin_dir = Path(sys._MEIPASS) / "backend" / "bin"  # Bundled executables
+else:
+    project_root = Path(__file__).parent.parent.parent.parent.parent
+    bin_dir = project_root / "backend" / "bin"
+operations_dir = self.service_container.directories_service.get_operations_path()  # User data
+```
+
+**Fix #2 - elastic_moduli_service.py (lines 372-378):**
+```python
+# BEFORE:
+operations_dir = operations_base / f"Elastic_{hydration_operation.name}"  # Flat structure
+
+# AFTER:
+if operation.name:
+    # Nest elastic operation inside hydration folder
+    operations_dir = operations_base / hydration_operation.name / operation.name
+else:
+    operations_dir = operations_base / hydration_operation.name / "elastic_pending"
+```
+
+**Fix #3 - results_panel.py (lines 519-527):**
+```python
+# BEFORE:
+operations_dir = self.service_container.directories_service.get_operations_path()
+output_dir = operations_dir / operation.name  # Assumes flat structure
+
+# AFTER:
+# First check if operation has output_directory field (for elastic operations)
+if hasattr(operation, 'output_directory') and operation.output_directory:
+    return operation.output_directory
+# Fallback to flat structure for hydration/microstructure
+operations_dir = self.service_container.directories_service.get_operations_path()
+output_dir = operations_dir / operation.name
+```
+
+**Fix #4 & #5 - Viewer dialogs (effective_moduli_viewer.py, itz_analysis_viewer.py):**
+```python
+# BEFORE:
+operations_base = Path("Operations")  # Hardcoded relative path!
+
+# AFTER:
+# First check if operation has folder_path (from Results panel)
+if hasattr(self.operation, 'folder_path'):
+    return self.operation.folder_path
+# Check output_directory (from database)
+if hasattr(self.operation, 'output_directory') and self.operation.output_directory:
+    return self.operation.output_directory
+# Legacy fallback using service
+operations_base = service_container.directories_service.get_operations_path()
+```
+
+**Result:**
+- ✅ Elastic operations create folders at: `C:\Users\jwbullard\Desktop\Arthur\operations\<hydration>\<elastic>\`
+- ✅ Files written to correct location
+- ✅ Results panel finds operations
+- ✅ Effective Moduli viewer displays data
+- ✅ ITZ Analysis viewer displays charts
+
+**User confirmation:** "Yes, all the results are showing now. Thank you."
+
+#### **2. Timezone Bug Fix - UTC Consistency ✅**
+
+**Issue:** Operations showing negative durations in console (e.g., "-1 day, 19:04:06")
+
+**Root Cause:** Code mixed `datetime.utcnow()` (UTC) and `datetime.now()` (local time)
+- Database model (`operation.py`): Uses `datetime.utcnow()` ✓
+- Operations panel: Used `datetime.now()` in 22 places ✗
+
+**Fix:** Replaced all 22 instances of `datetime.now()` with `datetime.utcnow()` in operations_monitoring_panel.py
+
+**User confirmation:** "The new durations on the Operations page seem to be working properly now."
+
+#### **3. Icon Metadata Parsing Error Fix ✅**
+
+**Issue:** Console warnings: `Icon not found` and `'str' object has no attribute 'get'`
+
+**Root Cause:** Line 59 of carbon_icon_manager.py iterated over dictionary keys instead of icon list
+- Metadata JSON structure: `{"icons": [...]}`
+- Code did: `for icon_data in raw_metadata:` → iterates over keys ("icons")
+
+**Fix in carbon_icon_manager.py (line 59):**
+```python
+# BEFORE:
+for icon_data in raw_metadata:
+
+# AFTER:
+for icon_data in raw_metadata.get('icons', []):
+```
+
+### **📋 SESSION 14 FILES MODIFIED:**
+
+**Modified Files:**
+1. `src/app/windows/panels/operations_monitoring_panel.py` - Fixed 22 datetime.now() → datetime.utcnow()
+2. `src/app/utils/carbon_icon_manager.py` - Fixed metadata parsing (line 59)
+3. `src/app/windows/panels/elastic_moduli_panel.py` - Fixed executable path and operations path (lines 1384-1399)
+4. `src/app/services/elastic_moduli_service.py` - Fixed nesting structure (lines 372-378)
+5. `src/app/windows/panels/results_panel.py` - Added output_directory check (lines 519-527)
+6. `src/app/windows/dialogs/effective_moduli_viewer.py` - Fixed path resolution (lines 145-170)
+7. `src/app/windows/dialogs/itz_analysis_viewer.py` - Fixed path resolution (lines 200-225)
+8. `CLAUDE.md` - This session documentation
+
+**No new files created this session.**
+
+### **🔧 TECHNICAL PATTERNS DOCUMENTED:**
+
+#### **PyInstaller Path Resolution Pattern:**
+```python
+# WRONG - breaks in PyInstaller:
+project_root = Path(__file__).parent.parent.parent
+
+# RIGHT - use service abstraction:
+operations_dir = self.service_container.directories_service.get_operations_path()
+
+# For bundled resources (read-only):
+if getattr(sys, 'frozen', False):
+    resource_dir = Path(sys._MEIPASS) / "resource_folder"
+else:
+    resource_dir = Path(__file__).parent / "resource_folder"
+
+# For user data (writable):
+Always use directories_service.get_operations_path() / get_data_dir() / etc.
+```
+
+**Key Distinction:**
+- **Bundled resources** (executables, docs): Use `sys._MEIPASS`
+- **User data** (operations, databases): Use `directories_service`
+
+#### **Relative vs Absolute Paths:**
+```python
+# WRONG - depends on current working directory:
+operations_dir = Path("Operations")
+
+# RIGHT - use absolute paths from service:
+operations_dir = directories_service.get_operations_path()
+
+# WRONG - hardcoded path separator assumptions:
+path = "C:\\Users\\..."
+
+# RIGHT - use Path for cross-platform:
+path = Path(base) / "subfolder" / "file.txt"
+```
+
+### **💡 KEY LESSONS:**
+
+**Lesson 1: Bundled Resources vs User Data**
+- Bundled resources (executables, icons): Located in `sys._MEIPASS` (read-only, temp on Windows)
+- User data (operations, databases): Located via `directories_service` (writable, persistent)
+- Never mix the two!
+
+**Lesson 2: Absolute Paths Are Safer**
+- Relative paths like `Path("Operations")` depend on current working directory (CWD)
+- CWD can differ between macOS (.app) and Windows (.exe) launch behavior
+- Always use absolute paths from configuration/services
+
+**Lesson 3: Check Attributes Before Assuming**
+- Results panel creates synthetic objects with `folder_path` attribute
+- Database operations have `output_directory` attribute
+- Viewers must check both before falling back to path construction
+
+**Lesson 4: Platform-Independent ≠ Configuration-Independent**
+- Python IS platform-independent
+- But hardcoded paths, relative paths, and CWD assumptions are NOT
+- Use configuration and service abstractions
+
+### **🎯 CURRENT STATUS:**
+
+**✅ ELASTIC MODULI WORKFLOW COMPLETE ON WINDOWS**
+- Operations create folders correctly (nested structure)
+- Files written to correct location
+- Results panel displays operations
+- Effective Moduli viewer works
+- ITZ Analysis viewer works
+- Strain Energy 3D viewer works
+
+**✅ TIMEZONE BUG FIXED**
+- All timestamps use UTC consistently
+- No more negative durations
+
+**✅ ICON METADATA FIXED**
+- Metadata loads without errors
+
+**⏳ PENDING TESTING**
+1. **Test on macOS** - Verify no regressions from path fixes
+2. **Phase color bug** - Phases 13,21,23,25,31,32,33 showing gray (Session 11)
+3. **Database persistence** - Verify AppData location works correctly
+4. **Operation folder deletion** - Test on Windows (Session 9)
+
+### **📊 PLATFORM STATUS AFTER SESSION 14:**
+
+| Platform | Elastic Moduli Complete | Timezone Fix | Icon Metadata | Package Status | Status |
+|----------|-------------------------|--------------|---------------|----------------|--------|
+| macOS (ARM64) | ✅ Works | ✅ Fixed | ✅ Fixed | ⏳ Rebuild pending | **Awaiting rebuild** |
+| Windows (x64) | ✅ Working | ✅ Fixed | ✅ Fixed | ✅ Rebuilt | **Testing complete** |
+| Linux (x64) | ⏳ Not started | ⏳ Not started | ⏳ Not started | ⏳ Not started | Not started |
+
+### **📝 COMPLETE TODO LIST (All Sessions):**
+
+**Completed This Session:**
+1. ✅ Fix datetime timezone mixing
+2. ✅ Fix icon metadata loading error
+3. ✅ Fix hardcoded paths in elastic_moduli_panel.py
+4. ✅ Fix hardcoded paths in elastic_moduli_service.py
+5. ✅ Fix hardcoded paths in results_panel.py
+6. ✅ Fix hardcoded paths in effective_moduli_viewer.py
+7. ✅ Fix hardcoded paths in itz_analysis_viewer.py
+8. ✅ Test elastic moduli operations end-to-end
+
+**High Priority:**
+9. ⏳ **Test macOS build for regressions** (NEXT SESSION)
+10. ⏳ **Fix phase color display - phases 13,21,23,25,31,32,33 showing gray** (Session 11)
+11. ⏳ **Test database creates in AppData correctly**
+
+**Medium Priority:**
+12. ⏳ **Test operation folder deletion on Windows** (Session 9)
+13. ⏳ **Fix blank console window** - set `console=False` in vcctl.spec (Session 8)
+14. ⏳ **Implement standalone installer** with Operations directory selection (Session 8)
+
+**Lower Priority (Enhancements):**
+15. ⏳ **Add cross-section clipping planes** using VTK vtkPlane (Session 11)
+16. ⏳ **Optimize rendering performance** to reduce lag (Session 11)
+
+### **⏰ SESSION END:**
+
+User confirmed all elastic moduli results displaying correctly. Ready for post-session sync.
+
+**Files Modified This Session (8 files):**
+- `src/app/windows/panels/operations_monitoring_panel.py` (22 datetime fixes)
+- `src/app/utils/carbon_icon_manager.py` (metadata parsing)
+- `src/app/windows/panels/elastic_moduli_panel.py` (path resolution)
+- `src/app/services/elastic_moduli_service.py` (nesting structure)
+- `src/app/windows/panels/results_panel.py` (output_directory check)
+- `src/app/windows/dialogs/effective_moduli_viewer.py` (path resolution)
+- `src/app/windows/dialogs/itz_analysis_viewer.py` (path resolution)
+- `CLAUDE.md` (this documentation)
+
+**Git Status:** Changes ready to commit via post-session sync.
 
 ---
 

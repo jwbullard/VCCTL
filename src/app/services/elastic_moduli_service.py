@@ -159,17 +159,16 @@ class ElasticModuliService:
             
             # Create ElasticModuliOperation with pre-populated lineage data
             # Set default output directory nested inside hydration operation folder
-            from pathlib import Path
-            project_root = Path(__file__).parent.parent.parent.parent
+            operations_dir = self.service_container.directories_service.get_operations_path()
 
             # Get hydration operation name for proper nesting
             hydration_op = session.query(Operation).filter_by(id=hydration_operation_id).first()
             if hydration_op and hydration_op.name:
                 # Nest elastic operation inside hydration folder
-                default_output_dir = str(project_root / "Operations" / hydration_op.name / name)
+                default_output_dir = str(operations_dir / hydration_op.name / name)
             else:
                 # Fallback to flat structure
-                default_output_dir = str(project_root / "Operations" / name)
+                default_output_dir = str(operations_dir / name)
 
             # Check if an ElasticModuliOperation with this name already exists
             existing_elastic = session.query(ElasticModuliOperation).filter_by(name=name).first()
@@ -368,14 +367,20 @@ class ElasticModuliService:
                 operation.image_filename = f"{hydration_operation.name}.img"
             
             if not operation.output_directory:
-                # Default to Operations directory structure
-                project_root = Path(__file__).parent.parent.parent.parent
-                operations_dir = project_root / "Operations" / f"Elastic_{hydration_operation.name}"
+                # Default to Operations directory structure - nest inside hydration operation folder
+                operations_base = self.service_container.directories_service.get_operations_path()
+                if operation.name:
+                    # Nest elastic operation inside hydration folder
+                    operations_dir = operations_base / hydration_operation.name / operation.name
+                else:
+                    # If no name yet, use placeholder (actual directory will be created by panel)
+                    operations_dir = operations_base / hydration_operation.name / "elastic_pending"
                 operation.output_directory = str(operations_dir)
-            
+
             if not operation.pimg_file_path:
                 # Look for .pimg file in hydration operation directory
-                hydration_dir = Path(__file__).parent.parent.parent.parent / "Operations" / hydration_operation.name
+                operations_base = self.service_container.directories_service.get_operations_path()
+                hydration_dir = operations_base / hydration_operation.name
                 pimg_files = list(hydration_dir.glob("*.pimg"))
                 if pimg_files:
                     operation.pimg_file_path = str(pimg_files[0])

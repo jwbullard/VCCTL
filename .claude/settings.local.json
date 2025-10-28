@@ -33,7 +33,8 @@
       "Bash(find:*)",
       "Read(//c/gtk-build/build/**)",
       "Read(//c/gtk-build//**)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(/c/msys64/mingw64/bin/python.exe -m PyInstaller:*)"
     ],
     "deny": [],
     "ask": []

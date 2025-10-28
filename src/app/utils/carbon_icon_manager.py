@@ -56,7 +56,7 @@ class CarbonIconManager:
                     raw_metadata = json.load(f)
                 
                 # Process metadata into usable format
-                for icon_data in raw_metadata:
+                for icon_data in raw_metadata.get('icons', []):
                     name = icon_data.get('name', '').replace('--', '-')
                     self.metadata[name] = {
                         'name': name,

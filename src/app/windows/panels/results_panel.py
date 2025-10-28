@@ -516,12 +516,16 @@ class ResultsPanel(Gtk.Box):
             if not operation or not operation.name:
                 return None
 
-            # Get operations directory from configuration
+            # First check if operation has an output_directory field (for elastic operations)
+            if hasattr(operation, 'output_directory') and operation.output_directory:
+                return operation.output_directory
+
+            # Fallback to constructing path from name (for hydration/microstructure operations)
             operations_dir = self.service_container.directories_service.get_operations_path()
             output_dir = operations_dir / operation.name
 
             return str(output_dir)
-            
+
         except Exception as e:
             self.logger.error(f"Error getting output directory for operation {operation.name}: {e}")
             return None

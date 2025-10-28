@@ -1380,15 +1380,16 @@ class ElasticModuliPanel(Gtk.Box):
 
             # Detect if running in PyInstaller bundle
             if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-                # Running in PyInstaller bundle
-                project_root = Path(sys._MEIPASS)
+                # Running in PyInstaller bundle - executables are in _MEIPASS/backend/bin
+                bin_dir = Path(sys._MEIPASS) / "backend" / "bin"
             else:
-                # Running in development
+                # Running in development - executables are in project backend/bin
                 project_root = Path(__file__).parent.parent.parent.parent.parent
+                bin_dir = project_root / "backend" / "bin"
 
             # Platform-specific executable name
             elastic_exe = 'elastic.exe' if sys.platform == 'win32' else 'elastic'
-            elastic_path = project_root / "backend" / "bin" / elastic_exe
+            elastic_path = bin_dir / elastic_exe
             if not elastic_path.exists():
                 self.logger.error(f"Elastic executable not found at: {elastic_path}")
                 return None
@@ -1396,7 +1397,7 @@ class ElasticModuliPanel(Gtk.Box):
             # Create output directory nested inside hydration operation folder
             # Need to get the hydration operation name to create proper nesting
             hydration_name = self._get_hydration_operation_name(hydration_id)
-            operations_dir = project_root / "Operations"
+            operations_dir = self.service_container.directories_service.get_operations_path()
 
             if hydration_name:
                 # Nest elastic operation inside hydration folder

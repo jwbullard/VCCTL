@@ -275,7 +275,7 @@ class Operation:
                 if progress_data["stage"] == "complete":
                     self.status = OperationStatus.COMPLETED
                     self.progress = 1.0
-                    self.end_time = datetime.now()
+                    self.end_time = datetime.utcnow()
                     self.completed_steps = self.total_steps
                     return True
             
@@ -1614,7 +1614,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             self.system_resources.network_in = 0.0
             self.system_resources.network_out = 0.0
             
-            self.system_resources.timestamp = datetime.now()
+            self.system_resources.timestamp = datetime.utcnow()
             
         except ImportError:
             # psutil not available, use dummy values
@@ -1626,7 +1626,7 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _update_operations(self) -> None:
         """Update operation status information by checking real processes."""
-        current_time = datetime.now()
+        current_time = datetime.utcnow()
         
         # Periodically refresh operations from database 
         # More frequent updates if we have running operations, less frequent otherwise
@@ -2012,7 +2012,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 # Check for completion
                 if progress >= 1.0:
                     operation.status = OperationStatus.COMPLETED
-                    operation.end_time = datetime.now()
+                    operation.end_time = datetime.utcnow()
                     operation.completed_steps = operation.total_steps
                 
                 # Return True if progress changed
@@ -2149,7 +2149,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                         if progress >= 1.0:
                             from datetime import datetime
                             operation.status = OperationStatus.COMPLETED
-                            operation.end_time = datetime.now()
+                            operation.end_time = datetime.utcnow()
                             operation.current_step = "Microstructure generation complete"
 
                         # Only update database if progress or step actually changed
@@ -2620,7 +2620,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             if operation.operation_type == OperationType.HYDRATION_SIMULATION:
                 # For running hydration simulations, show a more informative message
                 if operation.start_time:
-                    elapsed = datetime.now() - operation.start_time
+                    elapsed = datetime.utcnow() - operation.start_time
                     elapsed_hours = elapsed.total_seconds() / 3600.0
                     
                     # Check if this is a real active simulation by looking at the hydration service
@@ -3271,7 +3271,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             name=name,
             operation_type=operation_type,
             status=OperationStatus.RUNNING,
-            start_time=datetime.now(),
+            start_time=datetime.utcnow(),
             total_steps=10,
             completed_steps=0,
             current_step="Initializing..."
@@ -3288,12 +3288,12 @@ class OperationsMonitoringPanel(Gtk.Box):
             # Try to terminate the actual process
             if operation.terminate_process():
                 operation.status = OperationStatus.CANCELLED
-                operation.end_time = datetime.now()
+                operation.end_time = datetime.utcnow()
                 self._add_log_entry(f"Successfully terminated process for operation: {operation.name}")
             else:
                 # Process might have already ended, just update status
                 operation.status = OperationStatus.CANCELLED
-                operation.end_time = datetime.now()
+                operation.end_time = datetime.utcnow()
                 self._add_log_entry(f"Operation marked as stopped: {operation.name} (process may have already ended)")
             
             self._update_operations_list()
@@ -3312,7 +3312,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 self.logger.info(f"PAUSE DEBUG: Calling pause_process() for {operation.name}")
                 if operation.pause_process():
                     operation.status = OperationStatus.PAUSED
-                    operation.paused_time = datetime.now()  # Record when paused
+                    operation.paused_time = datetime.utcnow()  # Record when paused
                     self._add_log_entry(f"Successfully paused process for operation: {operation.name}")
                     self.logger.info(f"PAUSE DEBUG: Successfully paused {operation.name}")
                 else:
@@ -3326,7 +3326,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     operation.status = OperationStatus.RUNNING
                     # Adjust start_time to account for paused duration
                     if operation.paused_time and operation.start_time:
-                        paused_duration = datetime.now() - operation.paused_time
+                        paused_duration = datetime.utcnow() - operation.paused_time
                         operation.start_time = operation.start_time + paused_duration
                     operation.paused_time = None  # Clear paused time
                     self._add_log_entry(f"Successfully resumed process for operation: {operation.name}")
@@ -3336,7 +3336,7 @@ class OperationsMonitoringPanel(Gtk.Box):
     
     def _add_log_entry(self, message: str) -> None:
         """Add an entry to the operation log."""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         log_entry = f"[{timestamp}] {message}\n"
         
         # Add to log buffer
@@ -3458,7 +3458,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 name=name,
                 operation_type=operation_type,
                 status=OperationStatus.RUNNING,
-                start_time=datetime.now(),
+                start_time=datetime.utcnow(),
                 progress=0.05,  # Start with 5% to show immediate feedback
                 current_step="Process started",
                 total_steps=4,  # Typical genmic phases: Init, Parse, Generate, Finalize
@@ -3542,7 +3542,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         operation = self.operations.get(operation_id)
         if operation and operation.status == OperationStatus.PENDING:
             operation.status = OperationStatus.RUNNING
-            operation.start_time = datetime.now()
+            operation.start_time = datetime.utcnow()
             operation.current_step = current_step
             
             self._add_log_entry(f"Started operation: {operation.name}")
@@ -3592,7 +3592,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         operation = self.operations.get(operation_id)
         if operation and operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED]:
             operation.status = OperationStatus.COMPLETED if success else OperationStatus.FAILED
-            operation.end_time = datetime.now()
+            operation.end_time = datetime.utcnow()
             operation.progress = 1.0
             operation.error_message = error_message
             
@@ -3619,7 +3619,7 @@ class OperationsMonitoringPanel(Gtk.Box):
         operation = self.operations.get(operation_id)
         if operation and operation.status in [OperationStatus.RUNNING, OperationStatus.PAUSED, OperationStatus.PENDING]:
             operation.status = OperationStatus.CANCELLED
-            operation.end_time = datetime.now()
+            operation.end_time = datetime.utcnow()
             
             self._add_log_entry(f"Cancelled operation: {operation.name}")
             self._update_operations_list()
@@ -4414,7 +4414,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                     })
                     
                     # Track recent operations (last 24 hours)
-                    if (datetime.now() - end_dt).days == 0:
+                    if (datetime.utcnow() - end_dt).days == 0:
                         recent_ops.append({'name': op_data.get('name', op_id), 'status': status})
                     
                     # Track failure times
@@ -4730,7 +4730,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             report_lines = []
             report_lines.append("VCCTL Operations Results Analysis Report")
             report_lines.append("=" * 50)
-            report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report_lines.append(f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
             report_lines.append("")
             
             # Operation outcomes
@@ -4785,7 +4785,7 @@ class OperationsMonitoringPanel(Gtk.Box):
             dialog.add_button("Save", Gtk.ResponseType.OK)
             
             # Set default filename
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
             dialog.set_current_name(f"vcctl_results_analysis_{timestamp}.txt")
             
             response = dialog.run()
@@ -4830,7 +4830,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                 
                 deleted_count = 0
                 freed_space = 0
-                cutoff_date = datetime.now() - timedelta(days=30)
+                cutoff_date = datetime.utcnow() - timedelta(days=30)
                 
                 for op_dir in operations_dir.iterdir():
                     if op_dir.is_dir():
@@ -5183,7 +5183,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                         if existing_op_found.status != db_status:
                             existing_op_found.status = db_status
                             if db_status == OperationStatus.COMPLETED and not existing_op_found.end_time:
-                                existing_op_found.end_time = getattr(db_op, 'completed_at', datetime.now())
+                                existing_op_found.end_time = getattr(db_op, 'completed_at', datetime.utcnow())
                             
                     except Exception as e:
                         self.logger.warning(f"Failed to update existing operation {db_op.name}: {e}")
@@ -5275,7 +5275,7 @@ class OperationsMonitoringPanel(Gtk.Box):
                         # Mark as completed if progress >= 1.0
                         if progress_val >= 1.0 and matching_op.status != OperationStatus.COMPLETED:
                             matching_op.status = OperationStatus.COMPLETED
-                            matching_op.end_time = datetime.now()
+                            matching_op.end_time = datetime.utcnow()
                         
                         # Update operation details if this operation is currently displayed (ALWAYS)
                         if self._currently_displayed_operation:

@@ -142,19 +142,26 @@ class EffectiveModuliViewer(Gtk.Dialog):
     def _get_operation_directory(self) -> Optional[str]:
         """Get the operation output directory."""
         try:
-            # Check for nested elastic operation (common case)
+            # First check if operation has folder_path (from Results panel)
+            if hasattr(self.operation, 'folder_path'):
+                return self.operation.folder_path
+
+            # Check if operation has output_directory (from database)
+            if hasattr(self.operation, 'output_directory') and self.operation.output_directory:
+                return self.operation.output_directory
+
+            # Legacy fallback: scan filesystem for nested elastic operation
             if hasattr(self.operation, 'name') and self.operation.name.startswith('Elastic-'):
-                operations_base = Path("Operations")
+                # Get operations directory from service container
+                from app.services.service_container import ServiceContainer
+                service_container = ServiceContainer()
+                operations_base = service_container.directories_service.get_operations_path()
+
                 for parent_dir in operations_base.iterdir():
                     if parent_dir.is_dir():
                         elastic_path = parent_dir / self.operation.name
                         if elastic_path.exists():
                             return str(elastic_path)
-
-            # Check direct path
-            direct_path = Path("Operations") / self.operation.name
-            if direct_path.exists():
-                return str(direct_path)
 
             return None
 
