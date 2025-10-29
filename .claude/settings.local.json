@@ -34,7 +34,8 @@
       "Read(//c/gtk-build/build/**)",
       "Read(//c/gtk-build//**)",
       "Bash(git log:*)",
-      "Bash(/c/msys64/mingw64/bin/python.exe -m PyInstaller:*)"
+      "Bash(/c/msys64/mingw64/bin/python.exe -m PyInstaller:*)",
+      "Bash(./pre-session-sync.sh:*)"
     ],
     "deny": [],
     "ask": []
