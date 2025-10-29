@@ -11,7 +11,7 @@ echo ""
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
-python3 -m PyInstaller vcctl.spec --clean --noconfirm
+python3 -m PyInstaller vcctl-macos.spec --clean --noconfirm
 
 # Fix GTK library conflict (PIL's libharfbuzz conflicts with system GTK)
 echo ""
