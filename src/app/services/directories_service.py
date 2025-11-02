@@ -15,7 +15,10 @@ from ..config.config_manager import ConfigManager
 
 class DirectoriesService:
     """Service for managing application directories and operation paths."""
-    
+
+    # Class variable to track if extraction dialog has been shown
+    _extraction_started = False
+
     def __init__(self, config_manager: ConfigManager):
         """Initialize directories service with configuration manager."""
         self.config_manager = config_manager
@@ -43,70 +46,282 @@ class DirectoriesService:
         self._copy_bundled_data_if_needed()
 
     def _copy_bundled_data_if_needed(self) -> None:
-        """Copy bundled particle_shape_set and aggregate data to user directory on first run."""
+        """Extract bundled compressed particle_shape_set and aggregate data to user directory on first run."""
+        import tarfile
+        import threading
         try:
             # Check if running from PyInstaller bundle
             if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
                 bundled_base = Path(sys._MEIPASS) / "data"
             else:
                 # Running in development - data is in project root
-                return  # Don't copy in development mode
+                return  # Don't extract in development mode
 
             directories_config = self.config_manager.directories
 
-            # Copy particle_shape_set if not exists or empty
+            # Extract particle_shape_set if not exists or empty
             particle_shape_dest = directories_config.particle_shape_set_path
-            particle_shape_src = bundled_base / "particle_shape_set"
+            particle_shape_archive = bundled_base / "particle_shape_set.tar.gz"
 
-            if particle_shape_src.exists():
-                # Check if destination is empty
-                needs_copy = False
-                if not particle_shape_dest.exists():
-                    needs_copy = True
-                else:
-                    try:
-                        # Check if directory is empty
-                        needs_copy = not any(particle_shape_dest.iterdir())
-                    except Exception:
-                        needs_copy = True
-
-                if needs_copy:
-                    self.logger.info(f"Copying particle shape sets from {particle_shape_src} to {particle_shape_dest}")
-                    particle_shape_dest.mkdir(parents=True, exist_ok=True)
-                    shutil.copytree(particle_shape_src, particle_shape_dest, dirs_exist_ok=True)
-                    self.logger.info("Particle shape sets copied successfully")
-                else:
-                    self.logger.debug("Particle shape sets already exist, skipping copy")
-
-            # Copy aggregate if not exists or empty
+            # Check aggregate too
             aggregate_dest = directories_config.aggregate_path
-            aggregate_src = bundled_base / "aggregate"
+            aggregate_archive = bundled_base / "aggregate.tar.gz"
 
-            if aggregate_src.exists():
-                # Check if destination is empty
-                needs_copy = False
-                if not aggregate_dest.exists():
-                    needs_copy = True
+            self.logger.info(f"Checking extraction needs:")
+            self.logger.info(f"  particle_shape_archive exists: {particle_shape_archive.exists()}")
+            self.logger.info(f"  particle_shape_dest: {particle_shape_dest}")
+            self.logger.info(f"  aggregate_archive exists: {aggregate_archive.exists()}")
+            self.logger.info(f"  aggregate_dest: {aggregate_dest}")
+
+            # Determine if we need to show the first-launch dialog
+            needs_particle_extract = False
+            needs_aggregate_extract = False
+
+            if particle_shape_archive.exists():
+                if not particle_shape_dest.exists():
+                    needs_particle_extract = True
                 else:
                     try:
-                        # Check if directory is empty
-                        needs_copy = not any(aggregate_dest.iterdir())
+                        needs_particle_extract = not any(particle_shape_dest.iterdir())
                     except Exception:
-                        needs_copy = True
+                        needs_particle_extract = True
 
-                if needs_copy:
-                    self.logger.info(f"Copying aggregate shapes from {aggregate_src} to {aggregate_dest}")
-                    aggregate_dest.mkdir(parents=True, exist_ok=True)
-                    shutil.copytree(aggregate_src, aggregate_dest, dirs_exist_ok=True)
-                    self.logger.info("Aggregate shapes copied successfully")
+            if aggregate_archive.exists():
+                if not aggregate_dest.exists():
+                    needs_aggregate_extract = True
                 else:
-                    self.logger.debug("Aggregate shapes already exist, skipping copy")
+                    try:
+                        needs_aggregate_extract = not any(aggregate_dest.iterdir())
+                    except Exception:
+                        needs_aggregate_extract = True
+
+            self.logger.info(f"Extraction decision: particle={needs_particle_extract}, aggregate={needs_aggregate_extract}")
+
+            # Show dialog if extraction is needed (only once)
+            dialog = None
+            if needs_particle_extract or needs_aggregate_extract:
+                # Check if extraction already started by another instance
+                # (only matters if data actually needs extraction)
+                if DirectoriesService._extraction_started:
+                    self.logger.info("Extraction already started by another instance, waiting for it to complete")
+                    # Don't show another dialog, but also don't extract again
+                    # Just return and let the other instance finish
+                    return
+
+                # Mark extraction as started
+                DirectoriesService._extraction_started = True
+                self.logger.info(f"Starting first-launch extraction (particle_extract={needs_particle_extract}, aggregate_extract={needs_aggregate_extract})")
+
+                dialog = self._show_first_launch_dialog()
+
+                # Run extraction in background thread
+                def extract_in_background():
+                    try:
+                        self.logger.info("Starting background extraction thread")
+                        # Extract particle shapes
+                        if particle_shape_archive.exists() and needs_particle_extract:
+                            self.logger.info(f"Extracting particle shape sets from {particle_shape_archive} to {particle_shape_dest.parent}")
+                            from gi.repository import GLib
+                            if dialog:
+                                GLib.idle_add(self._update_dialog_message, dialog, "Extracting particle shape sets...\n(This may take up to 60 seconds)")
+                            particle_shape_dest.parent.mkdir(parents=True, exist_ok=True)
+                            self.logger.info(f"Created directory: {particle_shape_dest.parent}")
+                            with tarfile.open(particle_shape_archive, 'r:gz') as tar:
+                                tar.extractall(path=particle_shape_dest.parent)
+                            self.logger.info("Particle shape sets extracted successfully")
+
+                        # Extract aggregate (code continues below...)
+                        self._extract_aggregate_in_background(aggregate_archive, aggregate_dest, needs_aggregate_extract, dialog, bundled_base)
+
+                        self.logger.info("Extraction complete, closing dialog")
+                        # Close dialog when done
+                        if dialog:
+                            GLib.idle_add(self._close_dialog, dialog)
+
+                    except Exception as e:
+                        self.logger.error(f"Failed to extract bundled data: {e}")
+                        import traceback
+                        self.logger.error(traceback.format_exc())
+                        if dialog:
+                            from gi.repository import GLib
+                            GLib.idle_add(self._close_dialog, dialog)
+
+                # Start background thread (NOT daemon so it completes even if main thread continues)
+                thread = threading.Thread(target=extract_in_background, daemon=False)
+                thread.start()
+
+                # Return immediately - extraction continues in background
+                return
+
+            # No extraction needed - continue with normal flow
+            if particle_shape_archive.exists():
+                if needs_particle_extract:
+                    self.logger.info(f"Extracting particle shape sets from {particle_shape_archive} to {particle_shape_dest.parent}")
+                    particle_shape_dest.parent.mkdir(parents=True, exist_ok=True)
+                    with tarfile.open(particle_shape_archive, 'r:gz') as tar:
+                        tar.extractall(path=particle_shape_dest.parent)
+                    self.logger.info("Particle shape sets extracted successfully")
+                else:
+                    self.logger.debug("Particle shape sets already exist, skipping extraction")
+            else:
+                # Fall back to uncompressed directory (for backwards compatibility or development)
+                particle_shape_src = bundled_base / "particle_shape_set"
+                if particle_shape_src.exists():
+                    needs_copy = False
+                    if not particle_shape_dest.exists():
+                        needs_copy = True
+                    else:
+                        try:
+                            needs_copy = not any(particle_shape_dest.iterdir())
+                        except Exception:
+                            needs_copy = True
+
+                    if needs_copy:
+                        self.logger.info(f"Copying particle shape sets from {particle_shape_src} to {particle_shape_dest}")
+                        particle_shape_dest.mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(particle_shape_src, particle_shape_dest, dirs_exist_ok=True)
+                        self.logger.info("Particle shape sets copied successfully")
+
+            # Extract aggregate if not exists or empty
+            # Try compressed archive first, fall back to uncompressed directory
+            if aggregate_archive.exists():
+                if needs_aggregate_extract:
+                    self.logger.info(f"Extracting aggregate shapes from {aggregate_archive} to {aggregate_dest.parent}")
+                    if dialog:
+                        self._update_dialog_message(dialog, "Extracting aggregate shapes...\n(This may take up to 30 seconds)")
+                    aggregate_dest.parent.mkdir(parents=True, exist_ok=True)
+                    with tarfile.open(aggregate_archive, 'r:gz') as tar:
+                        tar.extractall(path=aggregate_dest.parent)
+                    self.logger.info("Aggregate shapes extracted successfully")
+                else:
+                    self.logger.debug("Aggregate shapes already exist, skipping extraction")
+            else:
+                # Fall back to uncompressed directory (for backwards compatibility)
+                aggregate_src = bundled_base / "aggregate"
+                if aggregate_src.exists():
+                    needs_copy = False
+                    if not aggregate_dest.exists():
+                        needs_copy = True
+                    else:
+                        try:
+                            needs_copy = not any(aggregate_dest.iterdir())
+                        except Exception:
+                            needs_copy = True
+
+                    if needs_copy:
+                        self.logger.info(f"Copying aggregate shapes from {aggregate_src} to {aggregate_dest}")
+                        aggregate_dest.mkdir(parents=True, exist_ok=True)
+                        shutil.copytree(aggregate_src, aggregate_dest, dirs_exist_ok=True)
+                        self.logger.info("Aggregate shapes copied successfully")
+
+            # Close the dialog if it was shown
+            if dialog:
+                self._close_dialog(dialog)
 
         except Exception as e:
-            self.logger.warning(f"Failed to copy bundled data (non-critical): {e}")
+            self.logger.warning(f"Failed to extract bundled data (non-critical): {e}")
             import traceback
             self.logger.warning(traceback.format_exc())
-    
+            # Close dialog on error too
+            if 'dialog' in locals() and dialog:
+                self._close_dialog(dialog)
+
+    def _extract_aggregate_in_background(self, aggregate_archive, aggregate_dest, needs_aggregate_extract, dialog, bundled_base):
+        """Helper method to extract aggregate data in background thread."""
+        import tarfile
+        from gi.repository import GLib
+
+        if aggregate_archive.exists() and needs_aggregate_extract:
+            self.logger.info(f"Extracting aggregate shapes from {aggregate_archive} to {aggregate_dest.parent}")
+            if dialog:
+                GLib.idle_add(self._update_dialog_message, dialog, "Extracting aggregate shapes...\n(This may take up to 30 seconds)")
+            aggregate_dest.parent.mkdir(parents=True, exist_ok=True)
+            with tarfile.open(aggregate_archive, 'r:gz') as tar:
+                tar.extractall(path=aggregate_dest.parent)
+            self.logger.info("Aggregate shapes extracted successfully")
+        elif not aggregate_archive.exists():
+            # Fall back to uncompressed directory
+            aggregate_src = bundled_base / "aggregate"
+            if aggregate_src.exists() and needs_aggregate_extract:
+                self.logger.info(f"Copying aggregate shapes from {aggregate_src} to {aggregate_dest}")
+                aggregate_dest.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(aggregate_src, aggregate_dest, dirs_exist_ok=True)
+                self.logger.info("Aggregate shapes copied successfully")
+
+    def _show_first_launch_dialog(self):
+        """Show a dialog informing user about first-launch data extraction."""
+        try:
+            from gi.repository import Gtk, GLib
+
+            # Create a simple dialog
+            dialog = Gtk.Window(title="VCCTL - First Launch")
+            dialog.set_border_width(20)
+            dialog.set_default_size(400, 150)
+            dialog.set_position(Gtk.WindowPosition.CENTER)
+            dialog.set_resizable(False)
+            dialog.set_decorated(True)
+
+            # Create a vertical box for content
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            dialog.add(vbox)
+
+            # Title label
+            title_label = Gtk.Label()
+            title_label.set_markup("<b>Welcome to VCCTL</b>")
+            vbox.pack_start(title_label, False, False, 0)
+
+            # Message label (will be updated during extraction)
+            message_label = Gtk.Label()
+            message_label.set_text("Preparing application data for first launch...\nThis may take up to 60 seconds.")
+            message_label.set_line_wrap(True)
+            message_label.set_justify(Gtk.Justification.CENTER)
+            vbox.pack_start(message_label, False, False, 0)
+
+            # Add a spinner
+            spinner = Gtk.Spinner()
+            spinner.start()
+            vbox.pack_start(spinner, False, False, 0)
+
+            # Store message label for updates
+            dialog.message_label = message_label
+
+            # Show the dialog
+            dialog.show_all()
+
+            # Process pending GTK events to ensure dialog is visible
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+
+            return dialog
+
+        except Exception as e:
+            self.logger.warning(f"Failed to show first-launch dialog: {e}")
+            return None
+
+    def _update_dialog_message(self, dialog, message: str):
+        """Update the message in the first-launch dialog."""
+        try:
+            if dialog and hasattr(dialog, 'message_label'):
+                from gi.repository import Gtk
+                dialog.message_label.set_text(message)
+                # Process pending GTK events to update display
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
+        except Exception as e:
+            self.logger.warning(f"Failed to update dialog message: {e}")
+
+    def _close_dialog(self, dialog):
+        """Close the first-launch dialog."""
+        try:
+            if dialog:
+                from gi.repository import Gtk
+                dialog.destroy()
+                # Process pending GTK events
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
+        except Exception as e:
+            self.logger.warning(f"Failed to close dialog: {e}")
+
     def get_operation_dir(self, operation_name: str) -> Path:
         """
         Get the directory path for a specific operation, creating it if necessary.

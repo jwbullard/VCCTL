@@ -1,5 +1,35 @@
 # VCCTL Project - Claude Context
 
+## MANDATORY: Cross-Platform Safety Protocol
+
+**CRITICAL: Before making ANY change to these files, ALWAYS check both platforms:**
+- `.spec` files (vcctl-macos.spec, vcctl-windows.spec)
+- Path-related code (directories_service.py, config_manager.py, app_info.py)
+- Build scripts (build_macos.sh, any Windows build scripts)
+- Hooks directory
+
+**Required checks for EVERY change:**
+
+1. **Read BOTH platform spec files:**
+   ```bash
+   grep -n "relevant_pattern" vcctl-macos.spec
+   grep -n "relevant_pattern" vcctl-windows.spec
+   ```
+
+2. **State explicitly BEFORE making the change:**
+   - "This change affects: [macOS / Windows / both]"
+   - "Windows currently does: [X]"
+   - "macOS currently does: [Y]"
+   - "After this change: [Z]"
+   - "This will/won't break Windows because: [reason]"
+
+3. **For path changes specifically:**
+   - Check where files are bundled in BOTH specs
+   - Check where code looks for them in the Python files
+   - Verify the paths match on BOTH platforms after the change
+
+**Failure to follow this protocol causes platform regressions and wastes user time.**
+
 ## Git commands
 - Do not run a git command unless you are requested to do so
 - Use "git add -A" to stage changes before committing to the git repository
@@ -102,15 +132,311 @@ git push origin main
 
 ---
 
+## Critical Rule: Build Configuration Tracking
+
+**ALL build and configuration files MUST be tracked in git to prevent cross-platform sync issues.**
+
+### **Required Tracked Files:**
+- ALL files ending in `.spec`, `.sh`, `.yml`, `CMakeLists.txt`
+- PyInstaller spec files: `vcctl-macos.spec`, `vcctl-windows.spec`
+- All hook files in `hooks/` directory
+- Build scripts: `build_macos.sh`, `pre-session-sync.sh`, `post-session-sync.sh`
+- Icon files: `icons/vcctl.icns`, `icons/vcctl-icon-maroon.png`
+
+### **Verification Commands:**
+
+**Before any cross-platform sync, verify critical files are tracked:**
+```bash
+git ls-files | grep -E "\.(spec|sh|yml)$"
+```
+
+**Check if a specific file is tracked:**
+```bash
+git ls-files --error-unmatch filename
+```
+
+### **If a Build File Exists But Isn't Tracked:**
+
+**STOP IMMEDIATELY and fix .gitignore first:**
+1. Check `.gitignore` for overly broad wildcards (e.g., `*.spec`)
+2. Add exceptions for platform-specific files:
+   ```gitignore
+   *.spec
+   # But track our platform-specific spec files
+   !vcctl-macos.spec
+   !vcctl-windows.spec
+   ```
+3. Stage and commit the file: `git add filename && git commit -m "Track build config"`
+4. Verify it's tracked: `git ls-files filename`
+
+### **Why This Matters:**
+
+**Real Example from October 29, 2025:**
+- `.gitignore` had `*.spec` which blocked all spec files
+- Windows Session 2 added `gi_typelibs` collection to local `vcctl.spec`
+- Mac never received this change because file wasn't synced
+- Result: Mac build broke with GTK missing GLib.Idle error
+- Fix: Created platform-specific `vcctl-macos.spec` and `vcctl-windows.spec`, both tracked in git
+
+**The Lesson:** Untracked build files cause invisible cross-platform drift that manifests as mysterious build failures.
+
+---
+
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Windows Elastic Moduli Path Resolution Complete (October 28, 2025 - Session 14)**
+**Latest Session: Mac Temperature Profile & Concurrent Operations Complete (November 1, 2025 - Session 15)**
 
-**Status: Fixed all remaining path issues in elastic moduli workflow. Elastic operations now create folders in correct nested location, Results panel viewers (Effective Moduli, ITZ Analysis) display data correctly. Fixed timezone bug causing negative durations, icon metadata parsing error, and multiple hardcoded paths in elastic_moduli_panel.py, elastic_moduli_service.py, and viewer dialogs. All elastic moduli features now working on Windows.**
+**Status: TEMPERATURE PROFILE MODE FULLY WORKING ✅ - Fixed critical code ordering bug in disrealnew.c where temperature profile file was checked before Adiaflag was read. Fixed strtok() tokenization bug in temperature interpolation. Enhanced UI to re-enable buttons after operation completion and support concurrent hydration operations. All fixes tested and verified working on macOS. Ready for Windows testing.**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Test on macOS to verify no regressions from path fixes, investigate phase color bug (phases 13,21,23,25,31,32,33 showing gray)**
+**⚠️ NEXT SESSION: Test all fixes on Windows - temperature profile mode, concurrent operations, button re-enabling**
+
+---
+
+## Session Status Update (November 1, 2025 - MAC TEMPERATURE PROFILE & CONCURRENT OPERATIONS SESSION #15)
+
+### **Session Summary:**
+Fixed temperature profile hydration mode that was failing due to two critical bugs in disrealnew.c. Fixed UI issues preventing concurrent operations and button re-enabling after completion. All fixes tested and verified working on macOS. Temperature profile mode (Adiaflag = 2) and adiabatic mode (Adiaflag = 1) both working correctly. Users can now run multiple concurrent hydration operations.
+
+**Previous Session:** Windows Elastic Moduli Path Resolution Complete (October 28, 2025 - Session 14)
+
+### **🎉 SESSION 15 ACCOMPLISHMENTS:**
+
+#### **1. Temperature Profile Code Ordering Bug Fixed ✅**
+
+**Problem:** Temperature profile operations would start but show "Pending" status and fail quickly, despite temperature_profile.csv being generated correctly.
+
+**Root Cause:** In `backend/src/disrealnew.c`, the code checked `if (Adiaflag == 2)` to open the temperature profile file at lines 223-239, but Adiaflag wasn't actually read from the parameter file until line 3755 (inside `get_input()` function). This meant Adiaflag was still 0 (default) when checked, so the temperature profile file was never opened.
+
+**Fix Applied:**
+1. **Declared file-scope static global variables** (lines 121-122):
+   ```c
+   static FILE *thfile = NULL;
+   static float thtimelo = 0.0, thtimehi = 0.0, thtemplo = 0.0, thtemphi = 0.0;
+   ```
+   - Variables must be global because they're used throughout the simulation loop (lines 582-620)
+   - Static ensures they're only accessible within disrealnew.c
+
+2. **Removed duplicate local declarations** from `main()` (lines 134, 149)
+
+3. **Removed premature temperature profile opening code** (lines 223-239)
+
+4. **Added temperature profile opening code AFTER Adiaflag is read** (after line 3749 in `get_input()` function):
+   ```c
+   if (Adiaflag == 2) {
+       char *tmpstr;
+       sprintf(buff, "%stemperature_profile.csv", WorkingDirectory);
+       thfile = filehandler("disrealnew", buff, "READ");
+       if (!thfile) {
+           fprintf(stderr, "\nERROR: Could not open temperature profile file: %s", buff);
+           fflush(stderr);
+           freeallmem();
+           exit(1);
+       }
+       fread_string(thfile, buff1);
+       tmpstr = strtok(buff1, ",");
+       thtimelo = atof(tmpstr);
+       tmpstr = strtok(NULL, ",");
+       thtimehi = atof(tmpstr);
+       tmpstr = strtok(NULL, ",");
+       thtemplo = atof(tmpstr);
+       tmpstr = strtok(NULL, ",\n");
+       thtemphi = atof(tmpstr);
+       fprintf(Logfile, "\nTemperature profile file opened successfully");
+       fprintf(Logfile, "\nFirst interval: time %.1f-%.1f h, temp %.1f-%.1f C",
+               thtimelo, thtimehi, thtemplo, thtemphi);
+       fflush(Logfile);
+   }
+   ```
+
+**Compilation:** Successfully compiled new disrealnew binary and deployed to `backend/bin/disrealnew`
+
+#### **2. Temperature Interpolation strtok() Bug Fixed ✅**
+
+**Problem:** After first fix, operations still failed. Log files showed temperature profile file opened successfully but temperature became 0.0 during simulation.
+
+**Root Cause:** In temperature interpolation code at line 606, used `name = strtok(buff1, ",")` instead of `strtok(NULL, ",")`, which resets tokenization instead of continuing it. This caused thtemplo and thtemphi to be parsed incorrectly.
+
+**Evidence from Logs:**
+- Line 40-41: "Temperature profile file opened successfully, First interval: time 0.0-24.0 h, temp 15.0-16.0 C" ✅
+- Lines 304, 317, 323, 336: "Binder Temp = 0.000000" repeatedly ❌
+
+**Fix Applied:** Changed lines 606-609 to use `strtok(NULL, ",")` correctly:
+```c
+newstring = strtok(NULL, ",");
+thtimehi = atof(newstring);
+// ... validation code
+newstring = strtok(NULL, ",");  // ← FIXED! Was: name = strtok(buff1, ",")
+thtemplo = atof(newstring);
+newstring = strtok(NULL, ",\n");
+thtemphi = atof(newstring);
+```
+
+**Why This Fix Works:**
+- `strtok()` maintains internal state between calls
+- First call: `strtok(buff1, ",")` initializes tokenization
+- Subsequent calls: `strtok(NULL, ",")` continues from where it left off
+- Using `strtok(buff1, ",")` again would reset to beginning of string
+
+**Recompilation:** Recompiled disrealnew with strtok() fix and deployed
+
+#### **3. Button Re-enabling After Operation Completion Fixed ✅**
+
+**Problem:** After a hydration operation completed naturally (without pressing Stop), "Validate Parameters" and "Start Simulation" buttons remained disabled.
+
+**Root Cause:** In `src/app/windows/panels/hydration_panel.py`, the `_on_simulation_progress` callback (lines 1787-1794) only stored progress data but never detected when operations completed. This left `self.simulation_running = True`, keeping buttons disabled.
+
+**Fix Applied:** Added completion detection in `_on_simulation_progress` callback (lines 1794-1810):
+```python
+def _on_simulation_progress(self, operation_name: str, progress_data) -> None:
+    """Handle simulation progress updates - store data for Operations panel."""
+    if progress_data and operation_name == self.current_operation_name:
+        # Store latest progress for Operations panel tracking
+        self.latest_progress = progress_data
+
+        # Check if operation has completed
+        if hasattr(progress_data, 'status'):
+            from app.services.hydration_service import SimulationStatus
+            if progress_data.status in [SimulationStatus.COMPLETED, SimulationStatus.FAILED, SimulationStatus.CANCELLED]:
+                # Operation finished - reset UI state
+                self.simulation_running = False
+                self.current_operation_name = None
+                self.simulation_start_time = None
+                self._update_simulation_controls(False)
+                self._stop_progress_updates()
+
+                status_msg = {
+                    SimulationStatus.COMPLETED: "Simulation completed successfully",
+                    SimulationStatus.FAILED: "Simulation failed",
+                    SimulationStatus.CANCELLED: "Simulation was cancelled"
+                }.get(progress_data.status, "Simulation ended")
+                self._update_status(status_msg)
+                self.logger.info(f"Hydration simulation {progress_data.status.value}: {operation_name}")
+```
+
+#### **4. Concurrent Operations Support Enabled ✅**
+
+**User Request:** "I feel like I should be able to start another hydration operation even while an existing one is still running."
+
+**Fix Applied:** Modified `_update_simulation_controls` (lines 1959-1971) to always keep start/validate buttons enabled:
+```python
+def _update_simulation_controls(self, running: bool) -> None:
+    """Update simulation control button states.
+
+    Allow concurrent operations - start/validate buttons stay enabled.
+    Pause/stop buttons control the currently tracked operation only.
+    """
+    # Always keep start and validate buttons enabled for concurrent operations
+    self.start_button.set_sensitive(True)
+    self.validate_button.set_sensitive(True)
+
+    # Pause/stop buttons only apply to the currently tracked operation
+    self.pause_button.set_sensitive(running)
+    self.stop_button.set_sensitive(running)
+```
+
+**Why This Works:**
+- Backend already supports concurrent operations
+- UI was unnecessarily preventing new operations while one was running
+- Pause/stop buttons still control only the currently tracked operation
+- Users can now start multiple hydration operations simultaneously
+
+#### **5. macOS Application Build Complete ✅**
+
+**Build Details:**
+- **Location:** `dist/VCCTL.app`
+- **Size:** 1.1 GB
+- **Executable:** 30 MB (ARM64)
+- **Build Log:** `build-all-fixes.log`
+
+**All Fixes Included:**
+1. ✅ Temperature profile code ordering fix
+2. ✅ Temperature profile strtok() parsing fix
+3. ✅ Button re-enabling after completion
+4. ✅ Concurrent operations support
+
+**User Verification:** "Excellent. I can run two hydration operations at the same time, and I confirmed that both temperature profile (Adiaflag = 2) and adiabatic mode work without error."
+
+### **📋 SESSION 15 FILES MODIFIED:**
+
+**Backend C Code:**
+- `backend/src/disrealnew.c` - Two critical bug fixes (code ordering and strtok)
+- `backend/bin/disrealnew` - Recompiled binary with both fixes
+
+**Frontend Python Code:**
+- `src/app/windows/panels/hydration_panel.py` - Button re-enabling and concurrent operations
+
+**Build Output:**
+- `dist/VCCTL.app` - Complete macOS application with all fixes
+- `build-all-fixes.log` - Build log (successful)
+
+### **🔍 KEY TECHNICAL INSIGHTS:**
+
+#### **Variable Scope in C Simulation Code**
+**Problem:** Temperature profile values must persist throughout entire simulation to interpolate temperature at each time step.
+
+**Solution:** File-scope static globals accessible to both:
+- `get_input()` function (where values are read from CSV)
+- `main()` simulation loop (where interpolation happens lines 582-620)
+
+**Why Local Variables Failed:** Values would be destroyed when `get_input()` function returned, causing simulation to have no access to temperature data.
+
+#### **strtok() String Tokenization Pattern**
+**Correct Usage:**
+```c
+char *token = strtok(string, delimiters);  // First call - initializes
+while (token != NULL) {
+    token = strtok(NULL, delimiters);      // Subsequent calls - continues
+}
+```
+
+**Common Bug:**
+```c
+token = strtok(string, delimiters);        // First call
+token = strtok(string, delimiters);        // BUG! Resets instead of continuing
+```
+
+**Why It Fails:** `strtok()` maintains internal static pointer to track position in string. Passing the string again (instead of NULL) resets the pointer to the beginning.
+
+#### **GTK Button Sensitivity for Concurrent Operations**
+**Design Pattern:**
+- **Always Enabled:** Actions that create new operations (start, validate)
+- **Conditionally Enabled:** Actions that control specific operation (pause, stop)
+
+**Benefits:**
+- Users can start multiple operations in parallel
+- Pause/stop still work for tracked operation
+- Matches backend's concurrent operation support
+
+### **🎯 CURRENT STATUS:**
+
+**✅ TEMPERATURE PROFILE MODE FULLY WORKING ON MACOS**
+- Both critical bugs fixed in disrealnew.c
+- UI properly handles operation lifecycle
+- Concurrent operations supported
+- All modes tested: isothermal (flag 0), adiabatic (flag 1), temperature profile (flag 2)
+
+**📦 READY FOR WINDOWS TESTING**
+- All fixes are platform-independent (C standard library, Python GTK)
+- disrealnew.c changes will work on Windows after recompilation
+- hydration_panel.py changes will work on Windows (same GTK API)
+
+**⚠️ WINDOWS SESSION CHECKLIST:**
+1. Pull latest changes from git (use `pre-session-sync.sh`)
+2. Recompile disrealnew.exe on Windows with both fixes
+3. Test temperature profile mode on Windows
+4. Test concurrent operations on Windows
+5. Test button re-enabling after completion
+6. Build Windows package with PyInstaller
+7. Comprehensive testing of all hydration modes
+
+### **📊 PLATFORM STATUS:**
+
+| Platform | Temperature Profile | Concurrent Ops | Status |
+|----------|-------------------|----------------|--------|
+| macOS (ARM64) | ✅ Working | ✅ Working | **Tested & Verified** |
+| Windows (x64) | ⏳ Needs Testing | ⏳ Needs Testing | Ready for Windows session |
 
 ---
 

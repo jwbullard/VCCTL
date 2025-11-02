@@ -1790,8 +1790,28 @@ class HydrationPanel(Gtk.Box):
             # Store latest progress for Operations panel tracking
             self.latest_progress = progress_data
 
+            # Check if operation has completed
+            if hasattr(progress_data, 'status'):
+                from app.services.hydration_service import SimulationStatus
+                if progress_data.status in [SimulationStatus.COMPLETED, SimulationStatus.FAILED, SimulationStatus.CANCELLED]:
+                    # Operation finished - reset UI state
+                    self.simulation_running = False
+                    self.current_operation_name = None
+                    self.simulation_start_time = None
+                    self._update_simulation_controls(False)
+                    self._stop_progress_updates()
+
+                    status_msg = {
+                        SimulationStatus.COMPLETED: "Simulation completed successfully",
+                        SimulationStatus.FAILED: "Simulation failed",
+                        SimulationStatus.CANCELLED: "Simulation was cancelled"
+                    }.get(progress_data.status, "Simulation ended")
+                    self._update_status(status_msg)
+                    self.logger.info(f"Hydration simulation {progress_data.status.value}: {operation_name}")
+
             # The actual display of progress is handled by the Operations panel
             # We just need to maintain the progress data here
+
     def _on_pause_clicked(self, button) -> None:
         """Handle pause simulation button click."""
         # TODO: Implement pause functionality
@@ -1937,11 +1957,18 @@ class HydrationPanel(Gtk.Box):
         self.current_params = None
     
     def _update_simulation_controls(self, running: bool) -> None:
-        """Update simulation control button states."""
-        self.start_button.set_sensitive(not running)
+        """Update simulation control button states.
+
+        Allow concurrent operations - start/validate buttons stay enabled.
+        Pause/stop buttons control the currently tracked operation only.
+        """
+        # Always keep start and validate buttons enabled for concurrent operations
+        self.start_button.set_sensitive(True)
+        self.validate_button.set_sensitive(True)
+
+        # Pause/stop buttons only apply to the currently tracked operation
         self.pause_button.set_sensitive(running)
         self.stop_button.set_sensitive(running)
-        self.validate_button.set_sensitive(not running)
     
     def _start_progress_updates(self) -> None:
         """Start periodic progress updates - removed for UI consistency."""

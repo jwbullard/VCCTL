@@ -57,12 +57,10 @@ class UserConfig:
     @classmethod
     def from_dict(cls, data: Dict[str, Any], config_dir: Path) -> 'UserConfig':
         """Create user configuration from dictionary."""
-        # Convert app_directory string to Path if needed
-        app_dir = data.get('app_directory')
-        if app_dir:
-            app_dir = Path(app_dir).expanduser()
-        else:
-            app_dir = cls._get_default_app_directory()
+        # ALWAYS use platform-specific default app_directory (ignore any saved value)
+        # This was changed to fix the issue where app_directory was user-configurable
+        # but should always be in the standard platform location
+        app_dir = cls._get_default_app_directory()
         
         # Convert recent_projects strings to list
         recent_projects = data.get('recent_projects', [])
@@ -85,10 +83,21 @@ class UserConfig:
     
     @staticmethod
     def _get_default_app_directory() -> Path:
-        """Get default application directory as current working directory."""
-        # Use current working directory as the default app directory
-        # This makes the application portable and relative to where it's run from
-        return Path.cwd()
+        """Get default application directory using platform-specific user data directory."""
+        # Use platform-specific user data directories
+        # macOS: ~/Library/Application Support/VCCTL
+        # Windows: %LOCALAPPDATA%\VCCTL
+        # Linux: ~/.local/share/vcctl
+        import os
+
+        if platform.system() == 'Darwin':  # macOS
+            return Path.home() / 'Library' / 'Application Support' / 'VCCTL'
+        elif platform.system() == 'Windows':
+            # Use LOCALAPPDATA environment variable for robustness (same as app_info.py)
+            local_appdata = os.environ.get('LOCALAPPDATA', str(Path.home() / 'AppData' / 'Local'))
+            return Path(local_appdata) / 'VCCTL'
+        else:  # Linux
+            return Path.home() / '.local' / 'share' / 'vcctl'
     
     @staticmethod
     def _get_default_thread_count() -> int:

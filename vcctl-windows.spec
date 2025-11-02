@@ -88,6 +88,11 @@ if IS_WINDOWS:
     if os.path.exists(giowin32_typelib):
         gi_typelibs.append((giowin32_typelib, 'gi_typelibs'))
 
+    # Add GLib typelib (may not be collected automatically on some systems)
+    glib_typelib = r'C:\msys64\mingw64\lib\girepository-1.0\GLib-2.0.typelib'
+    if os.path.exists(glib_typelib):
+        gi_typelibs.append((glib_typelib, 'gi_typelibs'))
+
 # Hidden imports for GTK and other dependencies
 hiddenimports = [
     'gi',
@@ -154,8 +159,8 @@ a = Analysis(
         ('src/app/resources', 'app/resources'),  # Include application resources
         ('icons', 'icons'),  # Include Carbon icons
         ('src/data', 'data'),  # Include database and data files
-        ('particle_shape_set', 'data/particle_shape_set'),  # Include particle shape data
-        ('aggregate', 'data/aggregate'),  # Include aggregate shape data
+        ('particle_shape_set.tar.gz', 'data/'),  # Include compressed particle shape data (extracted on first launch)
+        ('aggregate.tar.gz', 'data/'),  # Include compressed aggregate shape data (extracted on first launch)
         ('colors', 'colors'),  # Include phase colors CSV file
     ] + gi_typelibs,
     hiddenimports=hiddenimports,

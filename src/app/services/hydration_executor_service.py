@@ -345,6 +345,7 @@ class HydrationExecutorService:
             
             # Create simulation info
             progress = HydrationProgress()
+            progress.end_time_hours = max_time_hours  # Set from user input, not hardcoded default
             simulation_info = {
                 'process': process,
                 'status': HydrationSimulationStatus.STARTING,
@@ -461,18 +462,16 @@ class HydrationExecutorService:
             progress.temperature_celsius = data.get('temperature_celsius', 25.0)
             progress.ph = data.get('ph', 12.0)
             
-            # Calculate percentage based on degree of hydration progress (most accurate)
-            # Hydration typically targets 80% degree of hydration (0.8)
-            target_alpha = progress.target_alpha if hasattr(progress, 'target_alpha') else 0.8
-            doh_progress = min((progress.degree_of_hydration / target_alpha) * 100.0, 100.0)
-            
-            # Also calculate cycle-based progress as fallback
-            cycle_progress = 0.0
-            if progress.max_cycles > 0:
-                cycle_progress = min((progress.cycle / progress.max_cycles) * 100.0, 100.0)
-            
-            # Use the higher of the two progress indicators (more accurate)
-            progress.percent_complete = max(doh_progress, cycle_progress)
+            # Calculate percentage based on simulation time (most accurate)
+            # Use time-based progress since users set max_time_hours as the primary stopping condition
+            # Note: alpha and cycles often complete before the time limit, causing premature 100% display
+            time_progress = 0.0
+            if progress.end_time_hours > 0:
+                time_progress = (progress.time_hours / progress.end_time_hours) * 100.0
+
+            # Cap at 99% to account for final I/O phase (~2 min after reaching time limit)
+            # Progress will reach 100% only when operation status changes to COMPLETED
+            progress.percent_complete = min(time_progress, 99.0)
             
             # Calculate remaining time based on wall-clock time and progress
             # Note: progress.time_hours is simulation time (hydration process time)
@@ -562,18 +561,16 @@ class HydrationExecutorService:
                 if ph_match:
                     progress.ph = float(ph_match.group(1))
                 
-                # Calculate percentage based on degree of hydration progress (most accurate)
-                # Hydration typically targets 80% degree of hydration (0.8)
-                target_alpha = progress.target_alpha if hasattr(progress, 'target_alpha') else 0.8
-                doh_progress = min((progress.degree_of_hydration / target_alpha) * 100.0, 100.0)
-                
-                # Also calculate cycle-based progress as fallback
-                cycle_progress = 0.0
-                if progress.max_cycles > 0:
-                    cycle_progress = min((progress.cycle / progress.max_cycles) * 100.0, 100.0)
-                
-                # Use the higher of the two progress indicators (more accurate)
-                progress.percent_complete = max(doh_progress, cycle_progress)
+                # Calculate percentage based on simulation time (most accurate)
+                # Use time-based progress since users set max_time_hours as the primary stopping condition
+                # Note: alpha and cycles often complete before the time limit, causing premature 100% display
+                time_progress = 0.0
+                if progress.end_time_hours > 0:
+                    time_progress = (progress.time_hours / progress.end_time_hours) * 100.0
+
+                # Cap at 99% to account for final I/O phase (~2 min after reaching time limit)
+                # Progress will reach 100% only when operation status changes to COMPLETED
+                progress.percent_complete = min(time_progress, 99.0)
                 
                 # Calculate remaining time based on wall-clock time and progress
                 # Note: progress.time_hours is simulation time (hydration process time)

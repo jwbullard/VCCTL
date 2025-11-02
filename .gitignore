@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Large archive files
+*.tar.gz
+
 # Distribution / packaging
 .Python
 build/

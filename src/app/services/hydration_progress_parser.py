@@ -145,24 +145,19 @@ class HydrationProgressParser:
                 if phase_counts:
                     progress.phase_counts.update(phase_counts)
                 
-                # Calculate progress percentage
-                if progress.max_cycles > 0:
-                    cycle_progress = (progress.cycle / progress.max_cycles) * 100.0
-                else:
-                    cycle_progress = 0.0
-                
-                if progress.target_alpha > 0:
-                    alpha_progress = (progress.degree_of_hydration / progress.target_alpha) * 100.0
-                else:
-                    alpha_progress = 0.0
-                
+                # Calculate progress percentage based on simulation time (primary metric)
+                # Note: We use time_progress as the primary indicator because:
+                #   - Users set max_time_hours as the stopping condition
+                #   - alpha (degree of hydration) often reaches target before time limit
+                #   - cycles are internal iteration steps not meaningful to users
                 if progress.end_time_hours > 0:
                     time_progress = (progress.time_hours / progress.end_time_hours) * 100.0
                 else:
                     time_progress = 0.0
-                
-                # Use the maximum of these progress indicators
-                progress.percent_complete = min(max(cycle_progress, alpha_progress, time_progress), 100.0)
+
+                # Cap at 99% to account for final I/O phase (~2 min after reaching time limit)
+                # Progress will reach 100% only when operation status changes to COMPLETED
+                progress.percent_complete = min(time_progress, 99.0)
                 
                 # Estimate cycles per second
                 if previous_progress and previous_progress.cycle > 0:

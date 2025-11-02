@@ -28,7 +28,7 @@ class PreferencesDialog(Gtk.Dialog):
         self.config_manager = config_manager
 
         # Store original values for cancel
-        self.original_app_directory = str(config_manager.user.app_directory)
+        # Note: app_directory is now fixed per platform, not user-configurable
 
         # Dialog setup
         self.set_default_size(600, 400)
@@ -76,50 +76,6 @@ class PreferencesDialog(Gtk.Dialog):
         grid.set_margin_right(20)
 
         row = 0
-
-        # Project Directory setting
-        label = Gtk.Label(label="Project Directory:")
-        label.set_halign(Gtk.Align.END)
-        grid.attach(label, 0, row, 1, 1)
-
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-
-        self.project_dir_entry = Gtk.Entry()
-        self.project_dir_entry.set_editable(False)
-        self.project_dir_entry.set_hexpand(True)
-        hbox.pack_start(self.project_dir_entry, True, True, 0)
-
-        browse_button = Gtk.Button(label="Browse...")
-        browse_button.connect("clicked", self._on_browse_project_dir)
-        hbox.pack_start(browse_button, False, False, 0)
-
-        reset_button = Gtk.Button(label="Reset to Default")
-        reset_button.connect("clicked", self._on_reset_project_dir)
-        hbox.pack_start(reset_button, False, False, 0)
-
-        grid.attach(hbox, 1, row, 2, 1)
-        row += 1
-
-        # Info label
-        info_label = Gtk.Label()
-        info_label.set_markup('<span size="small" foreground="gray">This is where your operations, database, and project data will be stored.</span>')
-        info_label.set_halign(Gtk.Align.START)
-        info_label.set_line_wrap(True)
-        grid.attach(info_label, 1, row, 2, 1)
-        row += 1
-
-        # Warning label
-        warning_label = Gtk.Label()
-        warning_label.set_markup('<span size="small" foreground="orange"><b>Note:</b> Changing this directory will require restarting the application.</span>')
-        warning_label.set_halign(Gtk.Align.START)
-        warning_label.set_line_wrap(True)
-        grid.attach(warning_label, 1, row, 2, 1)
-        row += 1
-
-        # Separator
-        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-        grid.attach(separator, 0, row, 3, 1)
-        row += 1
 
         # Auto-save setting
         self.auto_save_check = Gtk.CheckButton(label="Enable auto-save")
@@ -179,7 +135,6 @@ class PreferencesDialog(Gtk.Dialog):
     def _load_settings(self):
         """Load current settings into the UI."""
         # General settings
-        self.project_dir_entry.set_text(str(self.config_manager.user.app_directory))
         self.auto_save_check.set_active(self.config_manager.user.auto_save_enabled)
         self.confirm_actions_check.set_active(self.config_manager.user.confirm_destructive_actions)
 
@@ -188,44 +143,10 @@ class PreferencesDialog(Gtk.Dialog):
         self.memory_spin.set_value(self.config_manager.user.memory_limit_mb)
         self.cache_check.set_active(self.config_manager.user.cache_enabled)
 
-    def _on_browse_project_dir(self, button):
-        """Handle browse button click for project directory."""
-        dialog = Gtk.FileChooserDialog(
-            title="Select Project Directory",
-            parent=self,
-            action=Gtk.FileChooserAction.SELECT_FOLDER
-        )
-        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
-        dialog.add_button("Select", Gtk.ResponseType.OK)
-
-        # Set current directory
-        current_dir = self.project_dir_entry.get_text()
-        if current_dir:
-            dialog.set_current_folder(current_dir)
-
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            selected_dir = dialog.get_filename()
-            self.project_dir_entry.set_text(selected_dir)
-
-        dialog.destroy()
-
-    def _on_reset_project_dir(self, button):
-        """Reset project directory to default."""
-        from app.config.user_config import UserConfig
-        default_dir = UserConfig._get_default_app_directory()
-        self.project_dir_entry.set_text(str(default_dir))
 
     def apply_settings(self):
         """Apply the settings from the dialog."""
         # Update configuration
-        new_path = Path(self.project_dir_entry.get_text())
-
-        # Update both user and directories config
-        self.config_manager.user.app_directory = new_path
-        self.config_manager.directories.app_directory = new_path
-
         self.config_manager.user.auto_save_enabled = self.auto_save_check.get_active()
         self.config_manager.user.confirm_destructive_actions = self.confirm_actions_check.get_active()
         self.config_manager.user.max_worker_threads = int(self.threads_spin.get_value())
@@ -255,7 +176,9 @@ class PreferencesDialog(Gtk.Dialog):
 
     def has_changed(self):
         """Check if settings have changed."""
-        return self.project_dir_entry.get_text() != self.original_app_directory
+        # Since app_directory is now fixed, just return False
+        # (settings can still be saved, but no restart warning needed)
+        return False
 
     def run_dialog(self):
         """Run the dialog and handle responses."""

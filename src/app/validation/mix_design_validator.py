@@ -243,10 +243,10 @@ class MixDesignValidator:
                     powder_components.append(comp)
         
         total_powder = sum(c.mass_fraction for c in powder_components)
-        
-        # Convert water fraction from solids-basis to total-mass-basis for binder calculation
-        water_fraction_total_basis = total_water_content / (1.0 + total_water_content) if total_water_content > 0 else 0.0
-        total_binder = total_powder + water_fraction_total_basis
+
+        # Convert both powder and water from solids-basis to total-mass-basis for binder calculation
+        # Formula: (powder + water) / (1 + water) gives fraction of total mass that is binder
+        total_binder = (total_powder + total_water_content) / (1.0 + total_water_content) if (1.0 + total_water_content) > 0 else 0.0
         
         if total_binder > cls.MAX_BINDER_CONTENT:
             result.warnings.append(

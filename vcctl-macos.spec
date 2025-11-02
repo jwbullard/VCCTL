@@ -48,8 +48,14 @@ a = Analysis(
         # Include application icons
         ('icons/vcctl.icns', 'icons/'),
         ('icons/vcctl-icon-maroon.png', 'icons/'),
-        # Include particle shape sets (~23,000 files, critical for microstructure generation)
-        ('particle_shape_set/', 'particle_shape_set/'),
+        # Include system status icons
+        ('icons/48-database.svg', 'icons/'),
+        ('icons/48-floppy-disk.svg', 'icons/'),
+        ('icons/48-statistics.svg', 'icons/'),
+        # Include compressed particle shape sets (extracted on first launch, ~23,000 files)
+        ('particle_shape_set.tar.gz', 'data/'),
+        # Include compressed aggregate shape data (extracted on first launch)
+        ('aggregate.tar.gz', 'data/'),
         # Include hydration parameters (required for initialization)
         ('backend/examples/parameters.csv', 'backend/examples/'),
         # Include seed database with default materials (for fresh installations)
@@ -107,7 +113,7 @@ a = Analysis(
         # unittest modules (required by scipy)
         *unittest_submodules,
     ],
-    hookspath=['hooks'],
+    hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[

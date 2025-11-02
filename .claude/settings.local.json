@@ -35,7 +35,13 @@
       "Read(//c/gtk-build//**)",
       "Bash(git log:*)",
       "Bash(/c/msys64/mingw64/bin/python.exe -m PyInstaller:*)",
-      "Bash(./pre-session-sync.sh:*)"
+      "Bash(./pre-session-sync.sh:*)",
+      "Bash(./build_macos.sh:*)",
+      "Bash(python3:*)",
+      "Bash(xargs file:*)",
+      "Read(//tmp/**)",
+      "Read(//Users/jwbullard/Library/Application/**)",
+      "Bash(tar:*)"
     ],
     "deny": [],
     "ask": []

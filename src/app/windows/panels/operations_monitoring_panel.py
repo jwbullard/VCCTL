@@ -1715,11 +1715,15 @@ class OperationsMonitoringPanel(Gtk.Box):
                     if operation.process and operation.process.returncode is not None:
                         return_code = operation.process.returncode
                         self.logger.info(f"Process {operation.id} exit code: {return_code}")
-                        
+
                         if return_code == 0:
                             # For microstructure operations, verify output files exist before marking complete
                             # (This is a fallback in case genmic doesn't send progress messages)
-                            if self._verify_operation_completion(operation):
+                            self.logger.info(f"Attempting to verify completion for {operation.name} (type: {operation.operation_type})")
+                            verification_result = self._verify_operation_completion(operation)
+                            self.logger.info(f"Verification result for {operation.name}: {verification_result}")
+
+                            if verification_result:
                                 operation.status = OperationStatus.COMPLETED
                                 operation.progress = 1.0
                                 operation.current_step = "Process completed successfully (verified by output files)"
@@ -1729,10 +1733,26 @@ class OperationsMonitoringPanel(Gtk.Box):
                                 self.logger.info(f"Process {operation.id} returned 0 but output files not ready - continuing to monitor")
                                 continue
                         else:
-                            operation.status = OperationStatus.FAILED
-                            operation.error_message = f"Process exited with code {return_code}"
-                            operation.current_step = "Process failed"
-                            self.logger.warning(f"Process {operation.id} marked as FAILED with code {return_code}")
+                            self.logger.warning(f"Process {operation.id} ({operation.name}) exited with non-zero code: {return_code}")
+                            self.logger.warning(f"Operation working_directory: {getattr(operation, 'working_directory', 'NOT SET')}")
+                            # Before marking as failed, check if files actually exist (genmic might return non-zero but still succeed)
+                            if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
+                                verification_result = self._verify_operation_completion(operation)
+                                self.logger.warning(f"File verification despite non-zero exit: {verification_result}")
+                                if verification_result:
+                                    self.logger.warning(f"Files exist despite non-zero exit code - marking as COMPLETED anyway")
+                                    operation.status = OperationStatus.COMPLETED
+                                    operation.progress = 1.0
+                                    operation.current_step = "Process completed (files verified despite non-zero exit)"
+                                else:
+                                    operation.status = OperationStatus.FAILED
+                                    operation.error_message = f"Process exited with code {return_code}"
+                                    operation.current_step = "Process failed"
+                            else:
+                                operation.status = OperationStatus.FAILED
+                                operation.error_message = f"Process exited with code {return_code}"
+                                operation.current_step = "Process failed"
+                                self.logger.warning(f"Process {operation.id} marked as FAILED with code {return_code}")
                     else:
                         # Process ended without proper exit code tracking - verify completion
                         if self._verify_operation_completion(operation):
@@ -1830,37 +1850,35 @@ class OperationsMonitoringPanel(Gtk.Box):
         try:
             # For microstructure operations, check for expected output files
             if operation.operation_type == OperationType.MICROSTRUCTURE_GENERATION:
-                # Extract operation name and look for output directory
+                # Use working directory from operation
+                import os
+                output_dir = operation.working_directory if hasattr(operation, 'working_directory') and operation.working_directory else None
+
+                if not output_dir:
+                    # Fallback: try to get operation directory
+                    output_dir = self._get_operation_directory(operation)
+
+                if not output_dir or not os.path.exists(output_dir):
+                    self.logger.info(f"Output directory for {operation.name} not found - operation not complete")
+                    return False
+
+                self.logger.info(f"Verifying microstructure completion in: {output_dir}")
+
+                # Check for expected output files (.img and .pimg)
+                # Files are named with the operation name
                 operation_name = operation.name
-                if operation_name.endswith(" Microstructure"):
-                    base_name = operation_name.replace(" Microstructure", "")
-                    
-                    # Phase 2: Clean naming - operation name is already clean, use as-is
-                    folder_name = base_name
-                    
-                    # Look for output directory
-                    import os
-                    output_dir = os.path.join("Operations", folder_name)
-                    self.logger.info(f"Looking for output directory: {output_dir} (from operation: {operation.name})")
-                    
-                    if not os.path.exists(output_dir):
-                        self.logger.info(f"Output directory {output_dir} does not exist - operation not complete")
-                        return False
-                    
-                    # Check for expected output files (.img and .pimg)
-                    # Files are named with the folder name, not the full operation name
-                    img_file = os.path.join(output_dir, f"{folder_name}.img")
-                    pimg_file = os.path.join(output_dir, f"{folder_name}.pimg")
-                    
-                    img_exists = os.path.exists(img_file)
-                    pimg_exists = os.path.exists(pimg_file)
-                    
-                    if img_exists and pimg_exists:
-                        self.logger.info(f"Operation {operation.name} verified complete - output files exist")
-                        return True
-                    else:
-                        self.logger.info(f"Operation {operation.name} not complete - img:{img_exists}, pimg:{pimg_exists}")
-                        return False
+                img_file = os.path.join(output_dir, f"{operation_name}.img")
+                pimg_file = os.path.join(output_dir, f"{operation_name}.pimg")
+
+                img_exists = os.path.exists(img_file)
+                pimg_exists = os.path.exists(pimg_file)
+
+                if img_exists and pimg_exists:
+                    self.logger.info(f"Operation {operation.name} verified complete - output files exist")
+                    return True
+                else:
+                    self.logger.info(f"Operation {operation.name} not complete - img:{img_exists}, pimg:{pimg_exists}")
+                    return False
             
             # For hydration operations, check for actual completion indicators
             elif operation.operation_type == OperationType.HYDRATION_SIMULATION:

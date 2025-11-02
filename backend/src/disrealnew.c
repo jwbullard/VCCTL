@@ -116,6 +116,12 @@ void freeallmem(void);
 char *rfc8601_timespec(struct timespec *tv);
 
 /***
+ *    Temperature profile file-scope variables (used by get_input() and main())
+ ***/
+static FILE *thfile = NULL;
+static float thtimelo = 0.0, thtimehi = 0.0, thtemplo = 0.0, thtemphi = 0.0;
+
+/***
  *    Supplementary programs
  ***/
 #include "include/burn3d.h"     /* percolation of porosity assessment */
@@ -131,7 +137,6 @@ int main(int argc, char *argv[]) {
   int customentry;
   float pnucch, pscalech, pnuchg, pscalehg, pnucfh3, pscalefh3;
   float psfact, betfact, pnucgyp, pscalegyp;
-  float thtimelo, thtimehi, thtemplo, thtemphi;
   float kslag;
   float act_nrg, recip_Tdiff, tmod, smod;
   float dval, previousUncorrectedTime;
@@ -146,7 +151,7 @@ int main(int argc, char *argv[]) {
   clock_t begin, end;
   struct tm *local_time;
   struct timespec tv;
-  FILE *outfile, *thfile;
+  FILE *outfile;
 
   /* Get the simulation start time */
 
@@ -188,9 +193,6 @@ int main(int argc, char *argv[]) {
 
   cycflag = 0;
 
-  thtimelo = thtimehi = thtemplo = thtemphi = 0.0;
-  thfile = NULL;
-
   if (checkargs(argc, argv) != 0) {
     return (1);
   }
@@ -215,28 +217,6 @@ int main(int argc, char *argv[]) {
   ntimes = (int)Maxdiffsteps;
 
   init();
-
-  /***
-   *    Open and read temperature history file
-   ***/
-
-  if (Adiaflag == 2) {
-    sprintf(buff, "%stemperature_profile.csv", WorkingDirectory);
-    thfile = filehandler("disrealnew", buff, "READ");
-    if (!thfile) {
-      freeallmem();
-      exit(1);
-    }
-    fread_string(thfile, buff1);
-    name = strtok(buff1, ",");
-    thtimelo = atof(name);
-    newstring = strtok(NULL, ",");
-    thtimehi = atof(newstring);
-    name = strtok(buff1, ",");
-    thtemplo = atof(name);
-    newstring = strtok(NULL, ",\n");
-    thtemphi = atof(newstring);
-  }
 
   /***
    *    Set up names for output files, and
@@ -623,8 +603,8 @@ int main(int argc, char *argv[]) {
           freeallmem();
           exit(1);
         }
-        name = strtok(buff1, ",");
-        thtemplo = atof(name);
+        newstring = strtok(NULL, ",");
+        thtemplo = atof(newstring);
         newstring = strtok(NULL, ",\n");
         thtemphi = atof(newstring);
         if (Verbose_flag > 1) {
@@ -3768,6 +3748,36 @@ int get_input(float *pnucch, float *pscalech, float *pnuchg, float *pscalehg,
             name);
     freeallmem();
     exit(1);
+  }
+
+  /***
+   *    Open and read temperature history file if using temperature profile mode
+   ***/
+
+  if (Adiaflag == 2) {
+    char *tmpstr;
+
+    sprintf(buff, "%stemperature_profile.csv", WorkingDirectory);
+    thfile = filehandler("disrealnew", buff, "READ");
+    if (!thfile) {
+      fprintf(stderr, "\nERROR: Could not open temperature profile file: %s", buff);
+      fflush(stderr);
+      freeallmem();
+      exit(1);
+    }
+    fread_string(thfile, buff1);
+    tmpstr = strtok(buff1, ",");
+    thtimelo = atof(tmpstr);
+    tmpstr = strtok(NULL, ",");
+    thtimehi = atof(tmpstr);
+    tmpstr = strtok(NULL, ",");
+    thtemplo = atof(tmpstr);
+    tmpstr = strtok(NULL, ",\n");
+    thtemphi = atof(tmpstr);
+    fprintf(Logfile, "\nTemperature profile file opened successfully");
+    fprintf(Logfile, "\nFirst interval: time %.1f-%.1f h, temp %.1f-%.1f C",
+            thtimelo, thtimehi, thtemplo, thtemphi);
+    fflush(Logfile);
   }
 
   fread_string(fprmfile, buff1);

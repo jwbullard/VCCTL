@@ -246,9 +246,16 @@ class ConfigManager:
         """Save current configuration to files."""
         try:
             # Prepare main configuration
+            # Exclude app_directory from being saved - it's now platform-specific and computed
+            user_dict = asdict(self.user)
+            user_dict.pop('app_directory', None)  # Remove app_directory from user config
+
+            directories_dict = asdict(self.directories)
+            directories_dict.pop('app_directory', None)  # Remove app_directory from directories config
+
             main_config = {
-                'user': asdict(self.user),
-                'directories': asdict(self.directories),
+                'user': user_dict,
+                'directories': directories_dict,
                 'materials': asdict(self.materials),
                 'simulation': asdict(self.simulation),
                 'logging': asdict(self.logging_config)

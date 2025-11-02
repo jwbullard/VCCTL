@@ -729,8 +729,11 @@ class PyVistaViewer3D(Gtk.Box):
 
             self.logger.info(f"Loading voxel data: shape={voxel_data.shape}, dtype={voxel_data.dtype}, size={voxel_data.nbytes/1024/1024:.2f} MB")
 
+            # Track if we had previous data (to preserve camera on subsequent loads only)
+            had_previous_data = hasattr(self, 'voxel_data') and self.voxel_data is not None
+
             # Cleanup any existing data first to prevent memory leaks
-            if hasattr(self, 'voxel_data') and self.voxel_data is not None:
+            if had_previous_data:
                 self.logger.info("Cleaning up previous voxel data...")
                 self._cleanup_previous_data()
 
@@ -738,15 +741,15 @@ class PyVistaViewer3D(Gtk.Box):
             self.phase_mapping = phase_mapping or {}
             self.voxel_size = voxel_size
             self.source_file_path = source_file_path  # Store source file path for saving results
-            
+
             # Set volume bounds for cross-section calculations
             shape = voxel_data.shape
             self.volume_bounds = [
                 0, shape[0] * voxel_size[0],  # X min, max
-                0, shape[1] * voxel_size[1],  # Y min, max  
+                0, shape[1] * voxel_size[1],  # Y min, max
                 0, shape[2] * voxel_size[2]   # Z min, max
             ]
-            
+
             # Initialize phase visibility and opacity
             unique_phases = np.unique(voxel_data)
             for phase_id in unique_phases:
@@ -754,17 +757,39 @@ class PyVistaViewer3D(Gtk.Box):
                     self.show_phase[phase_id] = True
                 if phase_id not in self.phase_opacity:
                     self.phase_opacity[phase_id] = 0.8 if phase_id != 0 else 0.1  # Pores more transparent
-            
+
             # Create VTK meshes for each phase
             self._create_phase_meshes()
-            
-            # Update visualization  
+
+            # Save camera state before updating visualization (preserves zoom/rotation for time step changes)
+            # Only save camera state if this is a SUBSEQUENT load (not first load)
+            saved_camera = None
+            if had_previous_data and hasattr(self, 'camera') and self.camera is not None:
+                try:
+                    from vtkmodules.vtkRenderingCore import vtkCamera
+                    saved_camera = vtkCamera()
+                    saved_camera.DeepCopy(self.camera)
+                    self.logger.debug(f"Saved camera state for time step change")
+                except Exception as e:
+                    self.logger.debug(f"Could not save camera state: {e}")
+
+            # Update visualization
             self._update_visualization()
-            
+
+            # Restore camera state after visualization update (which calls ResetCamera)
+            if saved_camera:
+                try:
+                    self.camera.DeepCopy(saved_camera)
+                    self.renderer.ResetCameraClippingRange()
+                    self._render_to_gtk()  # Re-render with restored camera
+                    self.logger.debug("Restored camera state after time step change")
+                except Exception as e:
+                    self.logger.debug(f"Could not restore camera state: {e}")
+
             # Update phase controls if panel is visible
             if hasattr(self, 'phase_toggle') and self.phase_toggle.get_active():
                 self._update_phase_controls()
-            
+
             self.emit('data-loaded')
             self.logger.info(f"Loaded voxel data: {voxel_data.shape}, {len(unique_phases)} phases")
 
@@ -1849,8 +1874,30 @@ class PyVistaViewer3D(Gtk.Box):
         """Handle rendering mode change."""
         new_mode = combo.get_active_id()
         if new_mode != self.rendering_mode:
+            # Save camera state before updating visualization (preserves user's zoom/rotation)
+            saved_camera = None
+            if hasattr(self, 'camera') and self.camera is not None:
+                try:
+                    from vtkmodules.vtkRenderingCore import vtkCamera
+                    saved_camera = vtkCamera()
+                    saved_camera.DeepCopy(self.camera)
+                    self.logger.debug(f"Saved camera state for rendering mode change")
+                except Exception as e:
+                    self.logger.warning(f"Failed to save camera state: {e}")
+
             self.rendering_mode = new_mode
             self._update_visualization()
+
+            # Restore camera state after visualization update (which calls ResetCamera)
+            if saved_camera:
+                try:
+                    self.camera.DeepCopy(saved_camera)
+                    self.renderer.ResetCameraClippingRange()
+                    self._render_to_gtk()  # Re-render with restored camera
+                    self.logger.debug("Restored camera state after rendering mode change")
+                except Exception as e:
+                    self.logger.warning(f"Failed to restore camera state: {e}")
+
             self.emit('rendering-mode-changed', new_mode)
             self.logger.info(f"Rendering mode changed to: {new_mode}")
     

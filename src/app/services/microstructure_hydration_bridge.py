@@ -331,9 +331,9 @@ class MicrostructureHydrationBridge:
         elif thermal_mode == 'adiabatic':
             adiaflag = 1
         else:  # temperature_profile
-            # For temperature profile, use isothermal flag but temperature will be handled by profile
-            adiaflag = 0  # Could be 1 depending on profile requirements
-            
+            # For temperature profile, use flag 2 to enable temperature profile mode
+            adiaflag = 2
+
             # Generate temperature profile CSV file if profile data is provided
             temperature_profile_data = curing_conditions.get('temperature_profile_data')
             if temperature_profile_data and operation_name:
