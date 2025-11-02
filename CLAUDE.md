@@ -371,6 +371,49 @@ def _update_simulation_controls(self, running: bool) -> None:
 - `dist/VCCTL.app` - Complete macOS application with all fixes
 - `build-all-fixes.log` - Build log (successful)
 
+**Git LFS Setup (for large data files):**
+- `.gitattributes` - Git LFS tracking configuration
+- `aggregate.tar.gz` - Aggregate particle data (185 MB) tracked via LFS
+- `particle_shape_set.tar.gz` - Particle shape data (254 MB) tracked via LFS
+
+#### **6. Git LFS Setup for Large Data Files ✅**
+
+**Problem:** Application needs large data files (aggregate and particle shape sets) for packaging, but GitHub has 100 MB file size limit.
+
+**Solution:** Set up Git Large File Storage (Git LFS) to version control large binary files.
+
+**Setup Process:**
+```bash
+# Install Git LFS via Homebrew
+brew install git-lfs
+
+# Initialize Git LFS in repository
+git lfs install
+
+# Track all tar.gz files
+git lfs track "*.tar.gz"
+
+# Remove *.tar.gz from .gitignore
+# (was previously blocking these files)
+
+# Add LFS configuration and large files
+git add .gitattributes aggregate.tar.gz particle_shape_set.tar.gz
+
+# Commit and push
+git commit -m "Add large data files via Git LFS"
+git push origin main
+```
+
+**Upload Results:**
+- ✅ 460 MB uploaded to Git LFS at 11 MB/s
+- ✅ Files now version controlled and sync automatically
+- ✅ GitHub free tier: 1GB storage + 1GB/month bandwidth (sufficient)
+
+**Windows Setup Required:**
+- Download Git LFS from https://git-lfs.github.com/
+- Run `git lfs install` in Git Bash
+- Files will automatically download when pulling changes
+
 ### **🔍 KEY TECHNICAL INSIGHTS:**
 
 #### **Variable Scope in C Simulation Code**
@@ -423,13 +466,18 @@ token = strtok(string, delimiters);        // BUG! Resets instead of continuing
 - hydration_panel.py changes will work on Windows (same GTK API)
 
 **⚠️ WINDOWS SESSION CHECKLIST:**
-1. Pull latest changes from git (use `pre-session-sync.sh`)
-2. Recompile disrealnew.exe on Windows with both fixes
-3. Test temperature profile mode on Windows
-4. Test concurrent operations on Windows
-5. Test button re-enabling after completion
-6. Build Windows package with PyInstaller
-7. Comprehensive testing of all hydration modes
+1. **Install Git LFS on Windows** (CRITICAL - needed to download large data files):
+   - Download from: https://git-lfs.github.com/
+   - Run installer
+   - Open Git Bash and run: `git lfs install`
+2. Pull latest changes from git (use `pre-session-sync.sh`)
+   - Git LFS will automatically download aggregate.tar.gz (185 MB) and particle_shape_set.tar.gz (254 MB)
+3. Recompile disrealnew.exe on Windows with both fixes
+4. Test temperature profile mode on Windows
+5. Test concurrent operations on Windows
+6. Test button re-enabling after completion
+7. Build Windows package with PyInstaller
+8. Comprehensive testing of all hydration modes
 
 ### **📊 PLATFORM STATUS:**
 
