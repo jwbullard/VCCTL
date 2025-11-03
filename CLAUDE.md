@@ -184,13 +184,319 @@ git ls-files --error-unmatch filename
 
 ## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
 
-**Latest Session: Mac Temperature Profile & Concurrent Operations Complete (November 1, 2025 - Session 15)**
+**Latest Session: Windows Application Rebuilt with Mac Session 15 Fixes (November 3, 2025 - Session 16)**
 
-**Status: TEMPERATURE PROFILE MODE FULLY WORKING ✅ - Fixed critical code ordering bug in disrealnew.c where temperature profile file was checked before Adiaflag was read. Fixed strtok() tokenization bug in temperature interpolation. Enhanced UI to re-enable buttons after operation completion and support concurrent hydration operations. All fixes tested and verified working on macOS. Ready for Windows testing.**
+**Status: WINDOWS BUILD COMPLETE ✅ - Successfully synced Mac Session 15 temperature profile fixes to Windows. Recompiled disrealnew.exe with temperature fixes. Rebuilt Windows application with PyInstaller - launches successfully with new AppData\Local\VCCTL directory structure. Ready for testing temperature profile mode, concurrent operations, and button re-enabling on Windows.**
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Test all fixes on Windows - temperature profile mode, concurrent operations, button re-enabling**
+**⚠️ NEXT SESSION: Test all Mac Session 15 fixes on Windows - temperature profile, concurrent operations, button behavior**
+
+---
+
+## Session Status Update (November 3, 2025 - WINDOWS REBUILD WITH MAC SESSION 15 FIXES SESSION #16)
+
+### **Session Summary:**
+Successfully synchronized Mac Session 15 fixes to Windows and rebuilt application. Set up new standardized Windows directory structure at `C:\Users\jwbullard\AppData\Local\VCCTL`. Recompiled `disrealnew.exe` with temperature profile fixes from Mac. Rebuilt Windows application with PyInstaller including all Mac Session 15 enhancements. Application launches successfully and extracts particle/aggregate shape sets correctly. Ready for comprehensive testing.
+
+**Previous Session:** Mac Temperature Profile & Concurrent Operations Complete (November 1, 2025 - Session 15)
+
+### **🎉 MAJOR ACCOMPLISHMENTS:**
+
+#### **1. Cross-Platform Sync Complete ✅**
+
+**Pre-Session Sync Results:**
+- Fetched 5 new commits from Mac Session 15
+- Git LFS verified working (3.7.0) - large files downloaded correctly
+- All temperature profile fixes, UI enhancements, and platform-specific spec files synced
+- Created backup branch before pulling changes
+
+**Files Synced from Mac:**
+- `backend/src/disrealnew.c` - Temperature profile bug fixes
+- `src/app/windows/panels/hydration_panel.py` - Concurrent operations & button re-enabling
+- `vcctl-macos.spec`, `vcctl-windows.spec` - Platform-specific spec files
+- `.gitignore` - Added `*.tar.gz` exclusion for Git LFS files
+- `CLAUDE.md` - Mac Session 15 documentation
+
+#### **2. Windows Directory Structure Setup ✅**
+
+**New Standard Location:** `C:\Users\jwbullard\AppData\Local\VCCTL`
+
+**Created Subdirectories:**
+```
+C:\Users\jwbullard\AppData\Local\VCCTL\
+├── config/          ✓ Configuration files
+├── database/        ✓ User database (11 MB, already in use)
+├── operations/      ✓ Operations folders (newly created)
+├── logs/            ✓ Application logs (newly created)
+└── temp/            ✓ Temporary files (newly created)
+```
+
+**Benefits:**
+- ✅ Follows Windows conventions (`%LOCALAPPDATA%\VCCTL`)
+- ✅ Data persists across app uninstalls/reinstalls
+- ✅ Consistent with macOS (`~/Library/Application Support/VCCTL`) and Linux (`~/.local/share/vcctl`)
+- ✅ No longer using custom location (`Desktop\Arthur`)
+
+**Code Implementation:**
+- `user_config.py` lines 85-100: Platform-specific `_get_default_app_directory()`
+- `app_info.py` lines 30-37: Platform-specific `USER_DATA_DIR`
+- Both files now IGNORE any saved `app_directory` value and always use OS-standard location
+
+#### **3. Windows C Executable Compilation ✅**
+
+**Issue Encountered:**
+During first compilation attempt, encountered build system errors. Made critical mistake of assuming build system was broken instead of examining the actual error.
+
+**Root Cause:**
+- Build system (`build-mingw/`) was perfectly functional
+- I attempted to reconfigure CMake, which CORRUPTED the working Makefiles
+- This violated the "never make assumptions" rule in CLAUDE.md
+
+**Resolution:**
+```bash
+cd backend/build-mingw
+git restore .                    # Restored working build configuration
+mingw32-make                     # Compiled successfully
+cp disrealnew.exe ../bin/disrealnew  # Copied to bundling location
+```
+
+**Result:**
+- ✅ `disrealnew.exe` compiled successfully (713 KB)
+- ✅ Includes Mac Session 15 temperature profile fixes
+- ✅ Includes strtok() tokenization fix
+- ✅ Ready for PyInstaller bundling
+
+**Key Lesson:** The build system was already configured correctly. When git pulls code changes, the existing build system just needs to recompile - no reconfiguration necessary.
+
+#### **4. PyInstaller Windows Application Build ✅**
+
+**Challenge:**
+Initial PyInstaller build failed with:
+```
+ValueError: Could not resolve any shared library of Gio 2.0: ['libgio-2.0-0.dll']!
+```
+
+**Root Cause:**
+- PyInstaller's GTK hooks couldn't find `libgio-2.0-0.dll`
+- DLL exists at `/c/msys64/mingw64/bin/libgio-2.0-0.dll`
+- MSYS2 bin directory wasn't in PATH during PyInstaller execution
+
+**Solution:**
+```bash
+PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+```
+
+**Result:**
+- ✅ Build completed successfully
+- ✅ Application size: 22 MB (`dist/VCCTL/VCCTL.exe`)
+- ✅ Launches successfully
+- ✅ Extracts particle and aggregate shape sets correctly
+- ✅ Uses new `AppData\Local\VCCTL` directory structure
+
+**Build Time:** ~65 seconds (with --clean)
+
+**Files Modified This Session:**
+1. `backend/bin/disrealnew` - Updated with Mac Session 15 fixes (713 KB)
+2. `CLAUDE.md` - This session documentation
+
+**No new files created this session.**
+
+### **🔧 TECHNICAL LESSONS DOCUMENTED:**
+
+#### **Lesson 1: NEVER Make Assumptions When Encountering Errors**
+
+**Critical Rule from CLAUDE.md:**
+> "NEVER make assumptions when we run into problems. This has caused serious regressions in the past."
+
+**What Happened:**
+- Saw build error at 98% completion
+- Assumed build system was broken
+- Tried to reconfigure CMake
+- Actually broke a working build system
+
+**What Should Have Happened:**
+1. Capture the actual compilation error message
+2. Examine the C code at the failing line
+3. Check if it's a code issue vs. build system issue
+4. Only change build system if proven necessary
+
+**Result:** Build system was fine. Just needed to restore it from git and rebuild.
+
+#### **Lesson 2: Windows MinGW Build System is Persistent**
+
+**Build Configuration Files in Git:**
+- `backend/build-mingw/CMakeCache.txt`
+- `backend/build-mingw/CMakeFiles/` (directory structure)
+- `backend/build-mingw/Makefile`
+- All tracked in git and synced across platforms
+
+**Key Insight:**
+The build configuration is STABLE and PORTABLE. When you:
+1. Pull code changes from Mac
+2. Run `mingw32-make` in `build-mingw/`
+3. It just recompiles changed files
+
+**You do NOT need to:**
+- Reconfigure CMake
+- Regenerate Makefiles
+- Set compiler paths again
+
+**Recovery Pattern:**
+If build configuration gets corrupted:
+```bash
+cd backend/build-mingw
+git status                  # See what changed
+git restore .              # Restore working configuration
+mingw32-make               # Rebuild
+```
+
+#### **Lesson 3: PyInstaller GTK DLL Resolution on Windows**
+
+**Problem:**
+PyInstaller's GTK hooks use `ctypes.util.find_library()` which doesn't automatically search MSYS2 directories.
+
+**Solution Pattern:**
+```bash
+# Add MSYS2 bin to PATH before running PyInstaller
+PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+```
+
+**Why This Works:**
+- GTK DLLs in `/c/msys64/mingw64/bin/` become discoverable
+- PyInstaller hooks can resolve dependencies: `libgio-2.0-0.dll`, `libgtk-3-0.dll`, etc.
+- All collected DLLs bundled into `dist/VCCTL/`
+
+**Alternative Approach (Not Needed Here):**
+Could explicitly collect DLLs in spec file:
+```python
+# In vcctl-windows.spec
+mingw_bin = r'C:\msys64\mingw64\bin'
+gtk_dlls = glob.glob(os.path.join(mingw_bin, 'lib*.dll'))
+for dll in gtk_dlls:
+    platform_binaries.append((dll, '.'))
+```
+
+Current approach (PATH method) is cleaner because PyInstaller's hooks handle dependencies automatically.
+
+#### **Lesson 4: Cross-Platform Directory Structure Consistency**
+
+**Platform-Specific Paths:**
+- **macOS:** `~/Library/Application Support/VCCTL`
+- **Windows:** `%LOCALAPPDATA%\VCCTL` → `C:\Users\<username>\AppData\Local\VCCTL`
+- **Linux:** `~/.local/share/vcctl`
+
+**Code Pattern (from `user_config.py` lines 85-100):**
+```python
+@staticmethod
+def _get_default_app_directory() -> Path:
+    import os
+    if platform.system() == 'Darwin':  # macOS
+        return Path.home() / 'Library' / 'Application Support' / 'VCCTL'
+    elif platform.system() == 'Windows':
+        local_appdata = os.environ.get('LOCALAPPDATA', str(Path.home() / 'AppData' / 'Local'))
+        return Path(local_appdata) / 'VCCTL'
+    else:  # Linux
+        return Path.home() / '.local' / 'share' / 'vcctl'
+```
+
+**Critical: From Mac Session 15, lines 60-63:**
+```python
+# ALWAYS use platform-specific default app_directory (ignore any saved value)
+app_dir = cls._get_default_app_directory()
+```
+
+**This means:** User's old custom paths (like `Desktop\Arthur`) are ignored. Application ALWAYS uses OS-standard location.
+
+### **📊 PLATFORM STATUS AFTER SESSION 16:**
+
+| Platform | Sync Status | Directory Structure | Compilation | PyInstaller Build | Launch Status | Status |
+|----------|-------------|---------------------|-------------|-------------------|---------------|--------|
+| macOS (ARM64) | ✅ Session 15 | ✅ ~/Library/Application Support/VCCTL | ✅ Complete | ✅ Complete | ✅ Working | **Awaiting testing** |
+| Windows (x64) | ✅ Synced | ✅ AppData\Local\VCCTL | ✅ Complete | ✅ Complete | ✅ Launches | **Ready for testing** |
+| Linux (x64) | ⏳ Not started | ⏳ Not configured | ⏳ Not started | ⏳ Not started | ⏳ Not tested | Not started |
+
+### **📝 COMPLETE TODO LIST (All Sessions):**
+
+**Completed This Session:**
+1. ✅ Pre-session sync from Mac Session 15
+2. ✅ Set up Windows directory structure at AppData\Local\VCCTL
+3. ✅ Recompile disrealnew.exe with temperature profile fixes
+4. ✅ Rebuild Windows application with PyInstaller
+
+**High Priority (Testing Pending):**
+5. ⏳ **Test temperature profile mode on Windows** (Adiaflag = 2)
+6. ⏳ **Test concurrent operations functionality on Windows**
+7. ⏳ **Test button re-enabling after operation completion on Windows**
+
+**Medium Priority:**
+8. ⏳ **Fix phase color display** - phases 13,21,23,25,31,32,33 showing gray (Session 11)
+9. ⏳ **Fix blank console window** - set `console=False` in vcctl-windows.spec
+
+**Lower Priority:**
+10. ⏳ **Test operation folder deletion on Windows**
+11. ⏳ **Add cross-section clipping planes (VTK vtkPlane)** (Session 11)
+12. ⏳ **Optimize 3D rendering performance** (Session 11)
+
+### **🎯 CURRENT STATUS:**
+
+**✅ WINDOWS BUILD SYSTEM FULLY FUNCTIONAL**
+- MinGW build configuration stable and tracked in git
+- Restored from git when accidentally corrupted
+- Compiles all C executables including temperature profile fixes
+
+**✅ PYINSTALLER WINDOWS PACKAGING WORKING**
+- PATH environment variable solution for GTK DLL discovery
+- Clean builds in ~65 seconds
+- Application launches successfully
+
+**✅ NEW DIRECTORY STRUCTURE IN PLACE**
+- Platform-specific standard locations implemented
+- Windows using `AppData\Local\VCCTL`
+- Code ignores old custom paths
+
+**✅ READY FOR COMPREHENSIVE TESTING**
+- Temperature profile mode (Adiaflag = 2)
+- Concurrent hydration operations
+- Button re-enabling behavior
+
+### **💡 KEY RECOMMENDATIONS FOR FUTURE SESSIONS:**
+
+**1. Build System Management:**
+- Trust the existing build configuration in `build-mingw/`
+- Only restore from git if corrupted, never reconfigure
+- Always capture actual error messages before attempting fixes
+
+**2. PyInstaller on Windows:**
+- Always set PATH to include MSYS2 bin before running PyInstaller:
+  ```bash
+  PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+  ```
+
+**3. Cross-Platform Development:**
+- Continue using pre-session-sync.sh and post-session-sync.sh
+- Build configurations ARE tracked in git (they sync properly)
+- No need for separate git branches for platforms
+
+**4. Error Investigation Protocol:**
+- Read the actual error message completely
+- Examine code at the failing location
+- Verify it's not a simple compilation error before assuming infrastructure issues
+- Document the specific error before attempting fixes
+
+### **⏰ SESSION END:**
+
+User confirmed successful application launch with proper extraction of particle and aggregate shape sets. All Mac Session 15 fixes now ready for testing on Windows.
+
+**Files Modified This Session:**
+- `backend/bin/disrealnew` (updated with temperature fixes)
+- `CLAUDE.md` (this documentation)
+
+**Build Artifacts Created:**
+- `dist/VCCTL/VCCTL.exe` (22 MB Windows application)
+- `backend/build-mingw/disrealnew.exe` (713 KB compiled executable)
+
+**Git Status:** Ready for post-session sync.
 
 ---
 
