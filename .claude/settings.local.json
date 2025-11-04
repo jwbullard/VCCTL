@@ -41,7 +41,10 @@
       "Bash(xargs file:*)",
       "Read(//tmp/**)",
       "Read(//Users/jwbullard/Library/Application/**)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(xargs:*)",
+      "Bash(md5sum:*)",
+      "Bash(python.exe --version:*)"
     ],
     "deny": [],
     "ask": []
