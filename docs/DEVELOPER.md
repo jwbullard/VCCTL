@@ -226,7 +226,7 @@ class VCCTLApplication(Gtk.Application):
     """Main VCCTL application class."""
     
     def __init__(self):
-        super().__init__(application_id="gov.nist.vcctl")
+        super().__init__(application_id="edu.tamu.vcctl")
         self.main_window = None
         self.service_container = None
     

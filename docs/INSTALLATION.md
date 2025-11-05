@@ -763,8 +763,8 @@ rm -rf /Applications/VCCTL.app
 
 # Remove user data
 rm -rf ~/Library/Application\ Support/VCCTL
-rm -rf ~/Library/Preferences/gov.nist.vcctl.plist
-rm -rf ~/Library/Caches/gov.nist.vcctl
+rm -rf ~/Library/Preferences/edu.tamu.vcctl.plist
+rm -rf ~/Library/Caches/edu.tamu.vcctl
 ```
 
 #### Homebrew Installation

@@ -97,7 +97,7 @@ cp "$INFO_PLIST" "$INFO_PLIST.backup"
 # Update Info.plist using PlistBuddy
 /usr/libexec/PlistBuddy -c "Set :CFBundleName VCCTL" "$INFO_PLIST" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'Virtual Cement and Concrete Testing Laboratory'" "$INFO_PLIST" 2>/dev/null || true
-/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier gov.nist.vcctl" "$INFO_PLIST" 2>/dev/null || true
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier edu.tamu.vcctl" "$INFO_PLIST" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 1.0.0" "$INFO_PLIST" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.0" "$INFO_PLIST" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 10.14" "$INFO_PLIST" 2>/dev/null || true

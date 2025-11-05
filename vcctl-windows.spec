@@ -212,7 +212,7 @@ if IS_MACOS:
         coll,
         name='VCCTL.app',
         icon='src/app/resources/icon.icns' if os.path.exists('src/app/resources/icon.icns') else None,
-        bundle_identifier='gov.nist.vcctl',
+        bundle_identifier='edu.tamu.vcctl',
         info_plist={
             'CFBundleName': 'VCCTL',
             'CFBundleDisplayName': 'VCCTL',
