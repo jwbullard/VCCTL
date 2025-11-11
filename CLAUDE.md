@@ -182,15 +182,229 @@ git ls-files --error-unmatch filename
 
 ---
 
-## Current Status: VCCTL System Complete - Multi-Platform Packaging in Progress ✅
+## Current Status: VCCTL v10.0.0 Release Ready ✅
 
-**Latest Session: Windows Application Rebuilt with Mac Session 15 Fixes (November 3, 2025 - Session 16)**
+**Latest Activity: v10.0.0 Release Preparation Complete (November 4, 2025)**
 
-**Status: WINDOWS BUILD COMPLETE ✅ - Successfully synced Mac Session 15 temperature profile fixes to Windows. Recompiled disrealnew.exe with temperature fixes. Rebuilt Windows application with PyInstaller - launches successfully with new AppData\Local\VCCTL directory structure. Ready for testing temperature profile mode, concurrent operations, and button re-enabling on Windows.**
+**Status: RELEASE READY ✅ - All critical bugs fixed, both platforms tested and working. Temperature profile mode verified on Windows and macOS. Console window fixed. Bundle identifier updated to Texas A&M University (edu.tamu.vcctl). Distribution documentation complete. Windows executable ready. macOS application built (1.1 GB) ready for DMG packaging.**
+
+**macOS Build Status (November 10, 2025):**
+- ✅ Application: `dist/VCCTL.app` (1.1 GB)
+- ✅ Bundle Identifier: `edu.tamu.vcctl`
+- ✅ Executable: 30 MB (ARM64)
+- ✅ Ready for DMG creation
 
 **⚠️ CRITICAL: Use sync scripts before/after each cross-platform session**
 
-**⚠️ NEXT SESSION: Test all Mac Session 15 fixes on Windows - temperature profile, concurrent operations, button behavior**
+**⚠️ NEXT STEPS: Create macOS DMG for distribution (see docs/CREATE-DMG-MACOS.md)**
+
+---
+
+## v10.0.0 Release Preparation (November 4, 2025)
+
+### **Release Preparation Summary:**
+
+**Final Pre-Release Fixes:**
+1. ✅ Fixed console window appearing on Windows (vcctl-windows.spec: console=False)
+2. ✅ Updated bundle identifier from gov.nist.vcctl to edu.tamu.vcctl
+3. ✅ Created comprehensive distribution documentation
+
+**Documentation Added:**
+- `docs/CREATE-GITHUB-RELEASE.md` - Complete GitHub release workflow with templates
+- `docs/CREATE-DMG-MACOS.md` - macOS DMG creation guide (create-dmg and hdiutil methods)
+
+**Release Scope:**
+- Temperature profile hydration mode fully working (Mac Session 15, Windows Session 17)
+- Concurrent operations support
+- Button re-enabling after operation completion
+- Cross-platform directory structure (AppData\Local on Windows, ~/Library/Application Support on macOS)
+- Git LFS for large data files
+- All Session 15-17 fixes included
+
+---
+
+## Session Status Update (November 4, 2025 - WINDOWS SESSION #17: GCC COMPILATION & TEMPERATURE PROFILE FIXES)
+
+### **Session Summary:**
+Fixed critical GCC compilation failure on Windows and temperature profile bugs. Discovered GCC 15.2.0 requires MSYS2 bin directory in PATH for DLL resolution. Found Session 16 had bundled stale executable from Session 7 instead of recompiled version with Mac Session 15 fixes. Properly recompiled disrealnew.exe with temperature profile initialization code and rebuilt Windows application. User confirmed: "Great, the temperature profiles are now working flawlessly."
+
+**Previous Session:** Windows Rebuild with Mac Session 15 Fixes (November 3, 2025 - Session 16)
+
+### **🎉 SESSION 17 ACCOMPLISHMENTS:**
+
+#### **1. GCC 15.2.0 Compilation Failure Fixed ✅**
+
+**Problem:** GCC compiler failing silently with exit code 1 and zero output. All attempts to recompile C code failed.
+
+**Root Cause:**
+- GCC upgraded to 15.2.0 via MSYS2 auto-update between sessions
+- cc1.exe compiler backend requires DLLs from `/c/msys64/mingw64/bin`
+- Without MSYS2 bin in PATH, cc1.exe fails with exit code 127 (cannot execute binary)
+- GCC silently propagates failure with no diagnostic output
+
+**Investigation:**
+```bash
+# Direct test of cc1.exe revealed the issue
+/c/msys64/mingw64/libexec/gcc/x86_64-w64-mingw32/15.2.0/cc1.exe
+echo $?  # Returns 127 (cannot execute)
+
+# Check DLL dependencies
+objdump -p cc1.exe | grep "DLL Name"
+# Shows: libgcc_s_seh-1.dll, libgmp-10.dll, libmpfr-6.dll, libmpc-3.dll, libisl-23.dll, libwinpthread-1.dll
+
+# All DLLs exist in /c/msys64/mingw64/bin, but not in PATH
+```
+
+**Fix Applied:**
+```bash
+# Set PATH before running make
+PATH="/c/msys64/mingw64/bin:$PATH" mingw32-make
+
+# Same for PyInstaller
+PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+```
+
+**Result:** GCC compilation working again
+
+#### **2. Temperature Profile Stale Executable Bug Fixed ✅**
+
+**Problem:** Temperature profile operations reading incorrect values from temperature_profile.csv. User reported permuted/skipped values.
+
+**Root Cause Discovery:**
+- `backend/build-mingw/disrealnew.exe` had MD5 hash: `87c851467f80e0f91a5aa25fe2559f85`
+- This hash matched Session 7 executable from October (before Mac Session 15 fixes!)
+- Executable did NOT contain temperature profile initialization code from lines 3757-3781
+- Session 16 claimed to "recompile" but build system used cached executable from git
+- PyInstaller bundled the old executable
+
+**Evidence:**
+- **temperature_profile.csv:** `0.0,48.0,10.0,30.0` (correct input)
+- **disrealnew.log:** `48.000000 168.000000 48.000000 0.000000` (wrong - permuted values)
+- Missing "Temperature profile file opened successfully" message in log
+- All three copies of executable (build-mingw, bin-windows, dist) had identical MD5 from Session 7
+
+**Fix Applied:**
+1. Resolved GCC PATH issue (see above)
+2. Touched source file to force recompilation:
+   ```bash
+   touch backend/src/disrealnew.c
+   PATH="/c/msys64/mingw64/bin:$PATH" mingw32-make
+   ```
+3. New executable MD5: `187f0981daaabbf7ed2050af8868f4b2` (confirms Mac Session 15 code)
+4. Copied to `backend/bin-windows/disrealnew.exe`
+5. Rebuilt PyInstaller application with PATH set
+
+**User Verification:** "Great, the temperature profiles are now working flawlessly."
+
+### **📋 SESSION 17 FILES MODIFIED:**
+
+**Updated Executables:**
+- `backend/build-mingw/disrealnew.exe` - Recompiled with temperature fixes (713 KB, new hash)
+- `backend/bin-windows/disrealnew.exe` - Updated for PyInstaller bundling
+- `dist/VCCTL/VCCTL.exe` - Rebuilt Windows application (22 MB)
+
+**Build System:**
+- Multiple CMake dependency files regenerated due to recompilation
+
+### **🔧 TECHNICAL LESSONS DOCUMENTED:**
+
+#### **Lesson 1: MSYS2 GCC Version Upgrades Can Break PATH Dependencies**
+
+**Problem Pattern:**
+- Silent compiler failures with exit code 1
+- cc1.exe exit code 127 when run directly
+- Zero diagnostic output from GCC
+
+**Solution Pattern:**
+Always set PATH before compilation and PyInstaller on Windows:
+```bash
+PATH="/c/msys64/mingw64/bin:$PATH" mingw32-make
+PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller ...
+```
+
+**Why This Happened:** GCC 15.2.0 upgrade changed DLL dependency resolution behavior.
+
+#### **Lesson 2: Git-Tracked Build Artifacts Can Hide Stale Code**
+
+**Problem:**
+- `backend/build-mingw/disrealnew.exe` tracked in git from old session
+- Build system saw executable timestamp as "up to date" after source changes
+- `mingw32-make` skipped recompilation (make checked file timestamps, not content)
+- Result: Packaging old code without temperature profile fixes
+
+**Solution:**
+Touch source files to force recompilation:
+```bash
+touch backend/src/disrealnew.c
+mingw32-make  # Now recompiles
+```
+
+**Better Approach:** Consider adding build artifacts to .gitignore to prevent this issue.
+
+#### **Lesson 3: Always Verify Executable Content After "Recompilation"**
+
+**Verification Method:**
+```bash
+# Check MD5 hash to verify content changed
+md5sum backend/build-mingw/disrealnew.exe
+md5sum backend/bin-windows/disrealnew.exe
+
+# Check file modification time
+ls -lh backend/build-mingw/disrealnew.exe
+
+# Search for expected strings in binary
+strings disrealnew.exe | grep "Temperature profile file opened"
+```
+
+### **📊 PLATFORM STATUS AFTER SESSION 17:**
+
+| Platform | Temperature Profile | Concurrent Ops | Button Re-enabling | Status |
+|----------|-------------------|----------------|-------------------|--------|
+| macOS (ARM64) | ✅ Working | ✅ Working | ✅ Working | **Complete** |
+| Windows (x64) | ✅ Fixed & Tested | ✅ Working | ✅ Working | **Complete** |
+| Linux (x64) | ⏳ Not started | ⏳ Not started | ⏳ Not started | Not started |
+
+### **🎯 CURRENT STATUS:**
+
+**✅ ALL MAC SESSION 15 FIXES NOW WORKING ON WINDOWS**
+- Temperature profile mode (Adiaflag = 2) verified working
+- Adiabatic mode (Adiaflag = 1) verified working
+- Concurrent operations functional
+- Button re-enabling after completion functional
+
+**✅ GCC COMPILATION RESTORED**
+- PATH dependency identified and documented
+- All C executables can be recompiled
+- Build system fully functional
+
+**✅ READY FOR v10.0.0 RELEASE**
+- Both platforms tested and verified
+- All critical features working
+- Distribution ready
+
+### **💡 KEY RECOMMENDATIONS:**
+
+**1. Windows Build System:**
+- Always set PATH before make and PyInstaller:
+  ```bash
+  PATH="/c/msys64/mingw64/bin:$PATH"
+  ```
+- Touch source files if unsure about recompilation
+- Verify executable MD5 hash after compilation
+
+**2. Cross-Platform Executable Management:**
+- Consider moving build artifacts to .gitignore
+- Use separate directories for platform-specific builds (bin-windows/, bin-macos/)
+- Always verify content change after recompilation, not just timestamp
+
+**3. Temperature Profile Testing:**
+- Check disrealnew.log for "Temperature profile file opened successfully" message
+- Verify first interval values match temperature_profile.csv
+- Monitor "Binder Temp" values during simulation
+
+### **⏰ SESSION END:**
+
+User confirmed temperature profiles working flawlessly. All Mac Session 15 fixes verified on Windows. Ready for v10.0.0 release preparation.
 
 ---
 
