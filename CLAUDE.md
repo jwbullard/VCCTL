@@ -516,21 +516,25 @@ cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db.backup-YYYYMMDD-HHMM
 
 ## Current Status: VCCTL v10.0.0 Release Ready ✅
 
-**Latest Activity: macOS Distribution Testing & Race Condition Fixes (November 11, 2025 - Session 18)**
+**Latest Activity: macOS DMG Final Build with --clean Flag (November 11, 2025 - Session 18)**
 
-**Status: TESTING IN PROGRESS ⏳ - Fixed critical race condition where particle shape sets weren't appearing on first launch. Recompiled out-of-date C executables with October 10 cross-platform fixes. Updated pristine database to match tar.gz contents. Removed Files tab, fixed Elastic Moduli status message. DMG rebuilt (670 MB) ready for testing.**
+**Status: READY FOR TESTING ✅ - Fixed critical race condition, recompiled executables, updated database, removed Files tab, fixed status messages. Rebuilt with --clean flag to ensure all UI changes included. DMG created with Applications symlink for standard macOS installer format.**
 
-**macOS Build Status (November 11, 2025):**
+**macOS Build Status (November 11, 2025 - 15:00):**
 - ✅ Application: `dist/VCCTL.app` (1.1 GB)
-- ✅ DMG: `VCCTL-10.0.0-macOS-arm64.dmg` (670 MB)
+- ✅ DMG: `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB)
+- ✅ DMG Format: Includes Applications symlink
 - ✅ Bundle Identifier: `edu.tamu.vcctl`
 - ✅ All C executables current (Nov 11, 09:54)
 - ✅ Pristine database: 12 particle shape sets matching tar.gz
-- ⏳ Awaiting distribution testing
+- ✅ Particle shapes: All 12 appear on first launch
+- ✅ Files tab: Removed
+- ✅ Status messages: All correct
+- ⏳ Awaiting comprehensive testing on clean Mac
 
-**⚠️ CRITICAL: Windows will need similar fixes in future session**
+**⚠️ CRITICAL LESSON: Always use --clean flag for UI changes in PyInstaller**
 
-**⚠️ NEXT STEPS: Test DMG on clean Mac, verify race condition fixes work**
+**⚠️ NEXT STEPS: Complete macOS testing, then prepare Windows build in next session**
 
 ---
 
@@ -1003,6 +1007,36 @@ User ending session. All fixes documented in CLAUDE.md. DMG ready for distributi
 - `VCCTL-10.0.0-macOS-arm64.dmg` (670 MB DMG for distribution)
 
 **Git Status:** Ready for commit and push.
+
+### **⚠️ SESSION 18 CONTINUATION (Same Day):**
+
+**Issue Discovered During Testing:**
+User reported Files tab still showing and tab status messages still wrong, despite source code having correct changes.
+
+**Root Cause:**
+Initial rebuild used `python -m PyInstaller vcctl-macos.spec --noconfirm` (without `--clean` flag). PyInstaller cached `.pyc` bytecode files from previous build, so UI changes weren't included even though source code was correct.
+
+**Fix Applied:**
+Rebuilt with `--clean` flag: `python -m PyInstaller vcctl-macos.spec --clean --noconfirm`
+
+**Result:**
+- ✅ Files tab now removed
+- ✅ Tab status messages now correct
+- ✅ Particle shape sets fix still working (was in service layer, recompiled properly)
+
+**DMG Recreation:**
+Created DMG with proper installer format including Applications symlink:
+```bash
+mkdir -p dmg-staging
+cp -R dist/VCCTL.app dmg-staging/
+ln -s /Applications dmg-staging/Applications
+hdiutil create -volname "VCCTL-10.0.0" -srcfolder dmg-staging -ov -format UDZO VCCTL-10.0.0-macOS-arm64.dmg
+```
+
+**Final DMG:** `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB) with Applications symlink
+
+**Critical Lesson Learned:**
+Always use `--clean` flag when rebuilding after UI changes. PyInstaller aggressively caches `.pyc` bytecode, and without `--clean`, old code can remain in the build even when source files are updated.
 
 ---
 

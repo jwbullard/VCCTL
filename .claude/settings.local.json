@@ -50,7 +50,8 @@
       "Bash(python -m PyInstaller:*)",
       "Bash(open:*)",
       "Bash(if ps aux)",
-      "Bash(then echo '✅ App launched successfully!')"
+      "Bash(then echo '✅ App launched successfully!')",
+      "Bash(hdiutil create:*)"
     ],
     "deny": [],
     "ask": []
