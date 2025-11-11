@@ -195,3 +195,6 @@ Operations/
 # Additional venv directories
 venv-pyvista/
 venv-win-pyv/
+# SQLite temporary files
+*.db-shm
+*.db-wal

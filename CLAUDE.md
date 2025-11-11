@@ -182,6 +182,338 @@ git ls-files --error-unmatch filename
 
 ---
 
+## Distribution Preparation Procedures (CRITICAL - READ BEFORE PACKAGING)
+
+### **Overview**
+
+When preparing VCCTL for public distribution, the application must ship with a pristine database containing:
+- ✅ All standard materials (36 cements, 7 aggregates, 1 filler, 1 slag, 1 fly ash, 1 limestone)
+- ✅ All aggregate gradings (8 gradings)
+- ✅ All particle and aggregate shape sets
+- ❌ NO test operations (microstructure, hydration, elastic moduli)
+- ❌ NO test materials (like SuperFine-LS limestone)
+- ❌ NO operations folders on disk
+
+This procedure ensures new users start with a clean installation while preserving developer test data for future work.
+
+---
+
+### **macOS Distribution Preparation** ✅
+
+**Status: COMPLETED November 10, 2025**
+
+#### **Step 1: Backup Working Database**
+
+```bash
+# Backup current database with timestamp
+cp ~/Library/Application\ Support/VCCTL/database/vcctl.db \
+   ~/Library/Application\ Support/VCCTL/database/vcctl.db.backup-$(date +%Y%m%d-%H%M%S)
+
+# Verify backup
+ls -lh ~/Library/Application\ Support/VCCTL/database/
+```
+
+#### **Step 2: Clean Database of Test Data**
+
+```bash
+# Connect to working database
+sqlite3 ~/Library/Application\ Support/VCCTL/database/vcctl.db
+
+# Remove all operations
+DELETE FROM operations;
+DELETE FROM microstructure_operations;
+DELETE FROM hydration_operations;
+DELETE FROM elastic_moduli_operations;
+DELETE FROM saved_hydration_operations;
+DELETE FROM hydration_parameter_sets;
+DELETE FROM temperature_profiles;
+DELETE FROM mix_design;
+DELETE FROM results;
+
+# Remove test materials (example: SuperFine-LS limestone with id=2)
+DELETE FROM limestone WHERE id = 2;
+
+# Reset auto-increment sequences
+DELETE FROM sqlite_sequence WHERE name IN (
+    'operations', 'microstructure_operations', 'hydration_operations',
+    'elastic_moduli_operations', 'saved_hydration_operations',
+    'hydration_parameter_sets', 'temperature_profiles', 'mix_design',
+    'results', 'limestone'
+);
+
+# Vacuum to reclaim space
+VACUUM;
+
+# Verify clean state
+SELECT COUNT(*) FROM operations;  -- Should be 0
+SELECT COUNT(*) FROM limestone;   -- Should be 1 (NormalLimestone only)
+
+.quit
+```
+
+#### **Step 3: Create Pristine Seed Database**
+
+```bash
+# Create distribution directory if needed
+mkdir -p distribution
+
+# Copy cleaned database as pristine seed
+cp ~/Library/Application\ Support/VCCTL/database/vcctl.db \
+   distribution/vcctl-seed-database.db
+
+# Verify pristine database
+ls -lh distribution/vcctl-seed-database.db
+sqlite3 distribution/vcctl-seed-database.db "SELECT COUNT(*) FROM operations;"
+```
+
+**Result:** `distribution/vcctl-seed-database.db` (2.4 MB, 0 operations)
+
+#### **Step 4: Replace Bundled Seed Database**
+
+```bash
+# Replace old seed with pristine version
+cp distribution/vcctl-seed-database.db src/data/database/vcctl.db
+
+# Verify replacement
+ls -lh src/data/database/vcctl.db
+sqlite3 src/data/database/vcctl.db "SELECT COUNT(*) FROM operations;"
+```
+
+**Result:** `src/data/database/vcctl.db` now has 0 operations (was 8 orphaned operations)
+
+#### **Step 5: Backup Operations Folders**
+
+```bash
+# Backup operations folders with timestamp
+tar -czf ~/Library/Application\ Support/VCCTL/operations-backup-$(date +%Y%m%d-%H%M%S).tar.gz \
+    -C ~/Library/Application\ Support/VCCTL operations/
+
+# Verify backup
+ls -lh ~/Library/Application\ Support/VCCTL/operations-backup-*.tar.gz
+```
+
+#### **Step 6: Clean Operations Folders**
+
+```bash
+# Remove all test operation folders
+cd ~/Library/Application\ Support/VCCTL/operations/
+rm -rf *
+
+# Verify clean directory
+ls -la
+```
+
+**Result:** Operations directory empty (was 12 folders)
+
+#### **Step 7: Rebuild macOS Application**
+
+```bash
+# Activate virtual environment
+source vcctl-clean-env/bin/activate
+
+# Build with PyInstaller
+python -m PyInstaller vcctl-macos.spec --clean --noconfirm
+
+# Apply critical libharfbuzz fix
+rm -rf dist/VCCTL.app/Contents/Frameworks/PIL/__dot__dylibs/libharfbuzz.0.dylib
+rm -f dist/VCCTL.app/Contents/Frameworks/libharfbuzz.0.dylib
+cp /opt/homebrew/lib/libharfbuzz.0.dylib dist/VCCTL.app/Contents/Frameworks/
+
+echo "✅ Build complete with pristine database"
+```
+
+#### **Step 8: Verify Clean Application**
+
+```bash
+# Launch app
+open dist/VCCTL.app
+
+# Wait for app to start
+sleep 5
+
+# Verify app is running
+ps aux | grep "VCCTL.app/Contents/MacOS/vcctl" | grep -v grep
+
+# Verify bundled database is pristine
+sqlite3 "dist/VCCTL.app/Contents/Resources/data/database/vcctl.db" \
+    "SELECT COUNT(*) FROM operations;"
+# Should output: 0
+```
+
+**Manual Verification:**
+- Open app and check Operations panel → Should be empty
+- Check Results panel → Should be empty (no operations to display)
+- Check Materials tab → Should have 36 cements, 7 aggregates, etc. (no SuperFine-LS)
+
+#### **Step 9: Restore Test Data for Development (When Needed)**
+
+```bash
+# Restore operations folders
+tar -xzf ~/Library/Application\ Support/VCCTL/operations-backup-YYYYMMDD-HHMMSS.tar.gz \
+    -C ~/Library/Application\ Support/VCCTL/
+
+# Restore database
+cp ~/Library/Application\ Support/VCCTL/database/vcctl.db.backup-YYYYMMDD-HHMMSS \
+   ~/Library/Application\ Support/VCCTL/database/vcctl.db
+```
+
+---
+
+### **Windows Distribution Preparation** ⏳
+
+**Status: PENDING - To be completed in next Windows session**
+
+**CRITICAL:** Follow this exact procedure when preparing Windows distribution. All paths and commands adapted for Windows environment.
+
+#### **Step 1: Backup Working Database**
+
+```bash
+# Backup current database with timestamp
+cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db \
+   /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db.backup-$(date +%Y%m%d-%H%M%S)
+
+# Verify backup
+ls -lh /c/Users/jwbullard/AppData/Local/VCCTL/database/
+```
+
+#### **Step 2: Clean Database of Test Data**
+
+```bash
+# Connect to working database
+sqlite3 /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db
+
+# Execute same SQL commands as macOS (see Step 2 above)
+DELETE FROM operations;
+DELETE FROM microstructure_operations;
+# ... (all same SQL commands as macOS)
+
+.quit
+```
+
+#### **Step 3: Create Pristine Seed Database**
+
+```bash
+# Create distribution directory if needed
+mkdir -p distribution
+
+# Copy cleaned database as pristine seed
+cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db \
+   distribution/vcctl-seed-database.db
+
+# Verify pristine database
+ls -lh distribution/vcctl-seed-database.db
+sqlite3 distribution/vcctl-seed-database.db "SELECT COUNT(*) FROM operations;"
+```
+
+#### **Step 4: Replace Bundled Seed Database**
+
+```bash
+# Replace old seed with pristine version
+cp distribution/vcctl-seed-database.db src/data/database/vcctl.db
+
+# Verify replacement
+ls -lh src/data/database/vcctl.db
+sqlite3 src/data/database/vcctl.db "SELECT COUNT(*) FROM operations;"
+```
+
+#### **Step 5: Backup Operations Folders**
+
+```bash
+# Backup operations folders with timestamp
+tar -czf /c/Users/jwbullard/AppData/Local/VCCTL/operations-backup-$(date +%Y%m%d-%H%M%S).tar.gz \
+    -C /c/Users/jwbullard/AppData/Local/VCCTL operations/
+
+# Verify backup
+ls -lh /c/Users/jwbullard/AppData/Local/VCCTL/operations-backup-*.tar.gz
+```
+
+#### **Step 6: Clean Operations Folders**
+
+```bash
+# Remove all test operation folders
+cd /c/Users/jwbullard/AppData/Local/VCCTL/operations/
+rm -rf *
+
+# Verify clean directory
+ls -la
+```
+
+#### **Step 7: Rebuild Windows Application**
+
+```bash
+# Set PATH to include MSYS2 GTK libraries (CRITICAL for Windows)
+export PATH="/c/msys64/mingw64/bin:$PATH"
+
+# Build with PyInstaller
+python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+
+echo "✅ Build complete with pristine database"
+```
+
+**Note:** Windows build does NOT require libharfbuzz fix (that's macOS-specific).
+
+#### **Step 8: Verify Clean Application**
+
+```bash
+# Launch app
+./dist/VCCTL/VCCTL.exe &
+
+# Wait for app to start
+sleep 5
+
+# Verify app is running
+ps aux | grep "VCCTL.exe" | grep -v grep
+
+# Verify bundled database is pristine
+sqlite3 "dist/VCCTL/_internal/data/database/vcctl.db" \
+    "SELECT COUNT(*) FROM operations;"
+# Should output: 0
+```
+
+**Manual Verification:**
+- Open app and check Operations panel → Should be empty
+- Check Results panel → Should be empty
+- Check Materials tab → Should have standard materials only
+
+#### **Step 9: Restore Test Data for Development (When Needed)**
+
+```bash
+# Restore operations folders
+tar -xzf /c/Users/jwbullard/AppData/Local/VCCTL/operations-backup-YYYYMMDD-HHMMSS.tar.gz \
+    -C /c/Users/jwbullard/AppData/Local/VCCTL/
+
+# Restore database
+cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db.backup-YYYYMMDD-HHMMSS \
+   /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db
+```
+
+---
+
+### **Key Differences: macOS vs Windows**
+
+| Aspect | macOS | Windows |
+|--------|-------|---------|
+| Working Database | `~/Library/Application Support/VCCTL/database/` | `%LOCALAPPDATA%\VCCTL\database\` |
+| Operations Folders | `~/Library/Application Support/VCCTL/operations/` | `%LOCALAPPDATA%\VCCTL\operations\` |
+| Bundled Database | `dist/VCCTL.app/Contents/Resources/data/database/` | `dist/VCCTL/_internal/data/database/` |
+| Build Command | `python -m PyInstaller vcctl-macos.spec` | `PATH="/c/msys64/mingw64/bin:$PATH" python.exe -m PyInstaller vcctl-windows.spec` |
+| Post-Build Fix | **Required:** libharfbuzz fix | **Not Required** |
+| Package Format | `.app` bundle (DMG for distribution) | `.exe` executable (installer for distribution) |
+
+---
+
+### **Critical Reminders**
+
+1. **Always backup before cleaning** - Test data is valuable for future development
+2. **Verify pristine database** - Must have 0 operations after cleaning
+3. **Check both Operations and Results panels** - Results panel scans disk folders, not just database
+4. **Platform-specific paths** - Use correct paths for each OS
+5. **Restore capability** - Keep backups available for quick restoration
+6. **Git LFS files** - Ensure `aggregate.tar.gz` and `particle_shape_set.tar.gz` are downloaded before building
+7. **Post-build verification** - Launch app and manually check both panels before distribution
+
+---
+
 ## Current Status: VCCTL v10.0.0 Release Ready ✅
 
 **Latest Activity: v10.0.0 Release Preparation Complete (November 4, 2025)**
