@@ -320,7 +320,7 @@ class VCCTLMainWindow(Gtk.ApplicationWindow):
         # self._create_microstructure_tab()    # REMOVED - use Operations Panel for all microstructure viewing
         self._create_hydration_tab()         # RE-ENABLED - not the width issue
         self._create_elastic_moduli_tab()    # NEW - third stage after microstructure and hydration
-        self._create_file_management_tab()   # RE-ENABLED - testing file operations
+        # self._create_file_management_tab()   # REMOVED - no immediate functionality, reduces tab clutter
         self._create_operations_tab()        # RE-ENABLED - testing monitoring panel
         self._create_results_tab()           # RE-ENABLED - dedicated Results panel
         
@@ -1207,7 +1207,7 @@ This GTK3 desktop application provides an intuitive interface for:</span>
     
     def _on_tab_switched(self, notebook: Gtk.Notebook, page: Gtk.Widget, page_num: int) -> None:
         """Handle tab switch events."""
-        tab_names = ["Home", "Materials", "Mix Design", "Microstructure", "Hydration", "Files", "Operations", "Results"]
+        tab_names = ["Home", "Materials", "Mix Design", "Hydration", "Elastic Moduli", "Operations", "Results"]
         if page_num < len(tab_names):
             tab_name = tab_names[page_num]
             self.update_status(f"Switched to {tab_name} tab")

@@ -620,7 +620,20 @@ class MicrostructureService:
     def get_supported_shape_sets(self) -> Dict[str, str]:
         """Get list of supported particle shape sets."""
         return self.shape_sets.copy()
-    
+
+    def refresh_shape_sets(self) -> None:
+        """Refresh particle and aggregate shape sets from disk.
+
+        Call this after extraction completes to reload the available shape sets.
+        """
+        self.logger.info("Refreshing particle and aggregate shape sets from disk")
+        self._shape_sets = None
+        self._aggregate_shapes = None
+        # Force reload by accessing properties
+        _ = self.shape_sets
+        _ = self.aggregate_shapes
+        self.logger.info(f"Shape sets refreshed: {len(self._shape_sets)} particle sets, {len(self._aggregate_shapes)} aggregate sets")
+
     def get_default_phase_properties(self) -> Dict[PhaseType, PhaseProperties]:
         """Get default phase properties."""
         return self.default_phase_properties.copy()

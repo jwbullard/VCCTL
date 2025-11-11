@@ -29,14 +29,14 @@ a = Analysis(
         str(project_root)
     ],
     binaries=[
-        # Include C executables for VCCTL operations
-        ('backend/bin/genmic', 'backend/bin/'),
-        ('backend/bin/disrealnew', 'backend/bin/'),
-        ('backend/bin/elastic', 'backend/bin/'),
-        ('backend/bin/genaggpack', 'backend/bin/'),
-        ('backend/bin/perc3d', 'backend/bin/'),
-        ('backend/bin/stat3d', 'backend/bin/'),
-        ('backend/bin/oneimage', 'backend/bin/'),
+        # Include C executables for VCCTL operations (macOS builds from backend/build/)
+        ('backend/build/genmic', 'backend/bin/'),
+        ('backend/build/disrealnew', 'backend/bin/'),
+        ('backend/build/elastic', 'backend/bin/'),
+        ('backend/build/genaggpack', 'backend/bin/'),
+        ('backend/build/perc3d', 'backend/bin/'),
+        ('backend/build/stat3d', 'backend/bin/'),
+        ('backend/build/oneimage', 'backend/bin/'),
     ],
     datas=[
         # Include MkDocs built documentation

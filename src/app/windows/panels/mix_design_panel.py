@@ -498,11 +498,45 @@ class MixDesignPanel(Gtk.Box):
                 self.coarse_agg_combo.set_active(0)
             
             self.logger.info("Loaded material lists for mix design")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to load material lists: {e}")
             self.main_window.update_status(f"Error loading materials: {e}", "error", 5)
-    
+
+    def refresh_shape_sets(self) -> None:
+        """Refresh particle shape sets dropdown after extraction completes.
+
+        Called by DirectoriesService after first-launch extraction completes.
+        """
+        try:
+            self.logger.info("Refreshing particle shape sets dropdown")
+            # Get current selection to restore if possible
+            current_selection = self.cement_shape_combo.get_active_id()
+
+            # Clear existing items
+            self.cement_shape_combo.remove_all()
+
+            # Reload shape sets from service (cache was invalidated)
+            shape_sets = self.microstructure_service.get_supported_shape_sets()
+            for shape_id, shape_desc in shape_sets.items():
+                self.cement_shape_combo.append(shape_id, shape_desc)
+
+            # Restore previous selection if it still exists, otherwise select first item
+            if current_selection and current_selection in shape_sets:
+                for i in range(len(shape_sets)):
+                    if self.cement_shape_combo.get_active_id() == current_selection:
+                        self.cement_shape_combo.set_active(i)
+                        break
+            else:
+                self.cement_shape_combo.set_active(0)
+
+            self.logger.info(f"Refreshed cement shape combo with {len(shape_sets)} shape sets")
+
+        except Exception as e:
+            self.logger.error(f"Failed to refresh shape sets: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+
     def _connect_signals(self) -> None:
         """Connect widget signals."""
         # Header controls

@@ -133,7 +133,15 @@ class DirectoriesService:
                         # Extract aggregate (code continues below...)
                         self._extract_aggregate_in_background(aggregate_archive, aggregate_dest, needs_aggregate_extract, dialog, bundled_base)
 
-                        self.logger.info("Extraction complete, closing dialog")
+                        self.logger.info("Extraction complete, refreshing shape sets and closing dialog")
+
+                        # Refresh microstructure service shape sets after extraction
+                        try:
+                            from app.services.service_container import service_container
+                            GLib.idle_add(self._refresh_shape_sets_after_extraction, service_container)
+                        except Exception as e:
+                            self.logger.error(f"Failed to refresh shape sets after extraction: {e}")
+
                         # Close dialog when done
                         if dialog:
                             GLib.idle_add(self._close_dialog, dialog)
@@ -321,6 +329,47 @@ class DirectoriesService:
                     Gtk.main_iteration()
         except Exception as e:
             self.logger.warning(f"Failed to close dialog: {e}")
+
+    def _refresh_shape_sets_after_extraction(self, service_container):
+        """Refresh shape sets in microstructure service after extraction completes.
+
+        Called in main GTK thread via GLib.idle_add after background extraction finishes.
+        """
+        try:
+            self.logger.info("Refreshing microstructure service shape sets after extraction")
+
+            # Refresh service cache
+            if hasattr(service_container, 'microstructure_service') and service_container.microstructure_service:
+                service_container.microstructure_service.refresh_shape_sets()
+                self.logger.info("Shape sets cache refreshed in service")
+            else:
+                self.logger.warning("Microstructure service not available for refresh")
+
+            # Refresh UI dropdowns in Mix Design panel
+            try:
+                # Access the main window through GTK application
+                from gi.repository import Gtk
+                app = Gtk.Application.get_default()
+                if app and hasattr(app, 'main_window') and app.main_window:
+                    main_window = app.main_window
+                    if hasattr(main_window, 'panels') and 'mix_design' in main_window.panels:
+                        mix_panel = main_window.panels['mix_design']
+                        if hasattr(mix_panel, 'refresh_shape_sets'):
+                            mix_panel.refresh_shape_sets()
+                            self.logger.info("Mix Design panel dropdowns refreshed")
+                        else:
+                            self.logger.debug("Mix Design panel does not have refresh_shape_sets method")
+                    else:
+                        self.logger.debug("Mix Design panel not yet created or not in panels dict")
+                else:
+                    self.logger.debug("Main window not yet available for UI refresh")
+            except Exception as ui_error:
+                self.logger.warning(f"Failed to refresh UI dropdowns (non-critical): {ui_error}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to refresh shape sets: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
 
     def get_operation_dir(self, operation_name: str) -> Path:
         """

@@ -198,3 +198,4 @@ venv-win-pyv/
 # SQLite temporary files
 *.db-shm
 *.db-wal
+*.dmg

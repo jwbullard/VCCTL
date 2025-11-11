@@ -44,7 +44,13 @@
       "Bash(tar:*)",
       "Bash(xargs:*)",
       "Bash(md5sum:*)",
-      "Bash(python.exe --version:*)"
+      "Bash(python.exe --version:*)",
+      "Bash(sqlite3:*)",
+      "Bash(source vcctl-clean-env/bin/activate)",
+      "Bash(python -m PyInstaller:*)",
+      "Bash(open:*)",
+      "Bash(if ps aux)",
+      "Bash(then echo '✅ App launched successfully!')"
     ],
     "deny": [],
     "ask": []
