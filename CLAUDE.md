@@ -514,27 +514,29 @@ cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db.backup-YYYYMMDD-HHMM
 
 ---
 
-## Current Status: VCCTL v10.0.0 Release Ready ✅
+## Current Status: VCCTL v10.0.0 macOS Release Ready ✅
 
-**Latest Activity: macOS DMG Final Build with --clean Flag (November 11, 2025 - Session 18)**
+**Latest Activity: macOS Testing Complete (November 11, 2025 - Session 19)**
 
-**Status: READY FOR TESTING ✅ - Fixed critical race condition, recompiled executables, updated database, removed Files tab, fixed status messages. Rebuilt with --clean flag to ensure all UI changes included. DMG created with Applications symlink for standard macOS installer format.**
+**Status: macOS READY FOR RELEASE ✅ - All testing complete on clean Mac installation. Elastic Moduli filesystem-based refresh working perfectly. All 12 particle shapes appear on first launch. Elastic moduli calculations start successfully. No issues remaining.**
 
-**macOS Build Status (November 11, 2025 - 15:00):**
+**macOS Build Status (November 11, 2025 - 20:11):**
 - ✅ Application: `dist/VCCTL.app` (1.1 GB)
-- ✅ DMG: `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB)
+- ✅ DMG: `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB, MD5: 6591d22380f5091aece09b1cf250ed67)
 - ✅ DMG Format: Includes Applications symlink
 - ✅ Bundle Identifier: `edu.tamu.vcctl`
 - ✅ All C executables current (Nov 11, 09:54)
 - ✅ Pristine database: 12 particle shape sets matching tar.gz
-- ✅ Particle shapes: All 12 appear on first launch
-- ✅ Files tab: Removed
-- ✅ Status messages: All correct
-- ⏳ Awaiting comprehensive testing on clean Mac
+- ✅ Particle shapes: All 12 appear on first launch (**TESTED & VERIFIED**)
+- ✅ Files tab: Removed (**TESTED & VERIFIED**)
+- ✅ Status messages: All correct (**TESTED & VERIFIED**)
+- ✅ Filesystem-based refresh: Elastic Moduli matches Hydration panel (**TESTED & VERIFIED**)
+- ✅ Elastic moduli calculations: Start successfully (**TESTED & VERIFIED**)
+- ✅ **COMPREHENSIVE TESTING COMPLETE ON CLEAN MAC**
 
-**⚠️ CRITICAL LESSON: Always use --clean flag for UI changes in PyInstaller**
+**⚠️ KEY INSIGHT: Design consistency across panels is more important than fixing database timing issues**
 
-**⚠️ NEXT STEPS: Complete macOS testing, then prepare Windows build in next session**
+**⚠️ NEXT STEPS: Windows build with Sessions 18-19 fixes (Session 20 checklist ready)**
 
 ---
 
@@ -558,6 +560,405 @@ cp /c/Users/jwbullard/AppData/Local/VCCTL/database/vcctl.db.backup-YYYYMMDD-HHMM
 - Cross-platform directory structure (AppData\Local on Windows, ~/Library/Application Support on macOS)
 - Git LFS for large data files
 - All Session 15-17 fixes included
+
+---
+
+## Session Status Update (November 11, 2025 - MACOS SQLite WAL CHECKPOINT FIX SESSION #19)
+
+### **Session Summary:**
+Fixed critical issue where Elastic Moduli panel didn't recognize completed hydration operations until app restart. Initial diagnosis: SQLite WAL checkpoint issue. User insight: "Hydration panel refresh works on first launch, why not Elastic Moduli?" Root cause: Design mismatch - Hydration panel scans filesystem (immediate), Elastic Moduli queried database (delayed). Solution: Changed Elastic Moduli to filesystem-based refresh matching Hydration panel design. Now both panels scan operations directory for completion files, ensuring immediate visibility on first launch.
+
+**Previous Session:** macOS Distribution Testing & Race Condition Fixes (November 11, 2025 - Session 18)
+
+### **🎉 SESSION 19 ACCOMPLISHMENTS:**
+
+#### **1. SQLite WAL Checkpoint Fix - Elastic Moduli Panel Now Shows Operations ✅**
+
+**User Report:** "Elastic Moduli page does not recognize existing hydration operations during the first launch. If I close the app and reopen it, it works fine."
+
+**User Clarification:** Even clicking the refresh button on Elastic Moduli panel didn't help - operations only appeared after full app restart.
+
+**Root Cause Investigation:**
+
+**Initial Hypothesis (WRONG):** UI refresh timing issue similar to particle shapes race condition.
+- Tried adding tab-switching refresh to Elastic Moduli panel - didn't work
+- User emphasized testing burden: must wipe clean Mac, install DMG, create microstructure, run hydration, check Elastic Moduli
+
+**Actual Root Cause (CORRECT):** SQLite WAL mode checkpoint issue.
+
+**Database Flow Analysis:**
+1. User clicks "Start Simulation" → `hydration_panel._on_start_clicked()` (line 1568)
+2. Operation created in database with `QUEUED` status (line 3211)
+3. Session commits and closes (line 3217)
+4. Hydration executor starts simulation
+5. Executor updates status to `COMPLETED` (line 392 of hydration_executor_service.py)
+6. Session commits and closes (line 747)
+7. User clicks refresh on Elastic Moduli panel
+8. New session queries for `operation_type=HYDRATION AND status=COMPLETED`
+9. **Query returns 0 results** (operations invisible!)
+10. User restarts app → operations now visible
+
+**Why Restart Fixed It:** SQLite automatically checkpoints WAL file on database close, merging changes into main .db file.
+
+**SQLite WAL Mode Details:**
+- Database configured with `PRAGMA journal_mode=WAL` (database/service.py line 82)
+- Writes go to separate `.db-wal` file
+- Reads can see writes from same connection
+- **New connections might not see uncommitted WAL changes until checkpoint**
+- Checkpoint merges WAL file into main .db file
+
+**Fix Implemented in `hydration_executor_service.py` (lines 749-757):**
+```python
+session.commit()
+
+# Force SQLite WAL checkpoint after marking operation completed
+# This ensures changes are immediately visible to other connections
+if status == OperationStatus.COMPLETED:
+    try:
+        session.execute(text("PRAGMA wal_checkpoint(PASSIVE)"))
+        session.commit()
+        self.logger.info(f"WAL checkpoint completed for operation: {operation_name}")
+    except Exception as checkpoint_error:
+        self.logger.warning(f"WAL checkpoint failed (non-critical): {checkpoint_error}")
+```
+
+**Why This Works:**
+- `PRAGMA wal_checkpoint(PASSIVE)` forces SQLite to merge WAL file to main .db
+- PASSIVE mode won't block other operations (safe for concurrent access)
+- Executed after operation marked COMPLETED, before session closes
+- Non-critical: logs warning if fails but doesn't error out
+- New connections immediately see the completed operation
+
+**Import Added (line 25):**
+```python
+from sqlalchemy import text  # For PRAGMA statements
+```
+
+**Result:** This WAL checkpoint fix ensures database writes are immediately visible, but doesn't solve the fundamental design mismatch.
+
+#### **2. Filesystem-Based Refresh - Final Solution ✅**
+
+**User's Critical Insight:** "The Hydration page refresh works on first launch. They should function the same."
+
+**Design Comparison:**
+
+**Hydration Panel (WORKED on first launch):**
+```python
+# Scans operations directory for microstructure files
+for operation_name in os.listdir(operations_dir):
+    if os.path.exists(f"{operation_name}.img") and os.path.exists(f"{operation_name}.pimg"):
+        # Found microstructure - add to list
+```
+
+**Elastic Moduli Panel (BROKEN on first launch - database query):**
+```python
+# Old approach - queried database for COMPLETED operations
+session.query(Operation).filter(
+    Operation.operation_type == HYDRATION,
+    Operation.status == COMPLETED
+).all()
+```
+
+**The Problem:** Files exist on disk immediately, but database status update might not be visible due to WAL mode or transaction timing.
+
+**The Solution:** Make Elastic Moduli panel scan filesystem like Hydration panel.
+
+**Fix Implemented in `elastic_moduli_panel.py` (lines 575-653):**
+```python
+def _load_available_hydration_operations(self) -> None:
+    """Load available completed hydration operations by scanning filesystem."""
+    # Get operations directory
+    operations_dir = self.service_container.directories_service.get_operations_path()
+
+    # Scan filesystem for completed hydration operations
+    for operation_path in operations_dir.iterdir():
+        # Check for hydration output files (same as executor checks)
+        csv_files = list(operation_path.glob("HydrationOf_*.csv"))
+        mov_files = list(operation_path.glob("HydrationOf_*.mov"))
+        progress_file = operation_path / "progress.json"
+
+        # Consider it a hydration operation if at least 2 of 3 files exist
+        files_found = 0
+        if csv_files and any(f.stat().st_size > 0 for f in csv_files):
+            files_found += 1
+        if mov_files and any(f.stat().st_size > 0 for f in mov_files):
+            files_found += 1
+        if progress_file.exists() and progress_file.stat().st_size > 0:
+            files_found += 1
+
+        if files_found >= 2:
+            # Found completed hydration - add to list
+            hydration_operations.append({
+                'name': operation_name,
+                'path': operation_path,
+                'mtime': mtime
+            })
+```
+
+**Selection Handler Update (lines 673-713):**
+```python
+def _on_hydration_selection_changed(self, combo: Gtk.ComboBoxText) -> None:
+    """Hybrid approach: filesystem for discovery, database for metadata."""
+    operation_name = combo.get_active_id()  # Now stores name, not ID
+
+    # Find in filesystem list
+    hydration_operation = next(
+        (op for op in self.available_hydration_operations if op['name'] == operation_name),
+        None
+    )
+
+    # Look up in database for lineage metadata
+    with session:
+        db_operation = session.query(Operation).filter_by(name=operation_name).first()
+        if db_operation:
+            self._load_lineage_and_microstructures(db_operation.id)
+```
+
+**Benefits of Hybrid Approach:**
+1. ✅ **Filesystem scan**: Immediate discovery (works on first launch)
+2. ✅ **Database lookup**: Rich metadata (lineage, timestamps, parent operations)
+3. ✅ **Graceful degradation**: Works even if database is out of sync
+4. ✅ **Consistent design**: Matches Hydration panel behavior exactly
+
+**Result:** Elastic Moduli panel now sees completed hydration operations immediately on first launch, without needing app restart or database WAL checkpoint.
+
+#### **3. Int Conversion Bug Fix - Discovered During Testing ✅**
+
+**User Testing Report:** "Failed to start calculation: invalid literal for int() with base 10: 'HydrationOf-PLC-C109'"
+
+**Root Cause:** When I changed the combo box to store operation names instead of IDs, I missed updating the calculation startup code that tried to convert the value to an integer.
+
+**Location:** `elastic_moduli_panel.py` line 1293
+
+**Original Code (BROKEN):**
+```python
+hydration_id = int(self.hydration_combo.get_active_id())  # Tried to convert name to int!
+```
+
+**Fixed Code (lines 1293-1306):**
+```python
+# Get hydration operation name from combo box (now stores names, not IDs)
+hydration_name = self.hydration_combo.get_active_id()
+if not hydration_name:
+    self._show_error_dialog("Please select a hydration operation")
+    return
+
+# Look up hydration operation ID in database
+from app.models.operation import Operation
+with self.service_container.database_service.get_session() as session:
+    db_operation = session.query(Operation).filter_by(name=hydration_name).first()
+    if not db_operation:
+        self._show_error_dialog(f"Hydration operation '{hydration_name}' not found in database")
+        return
+    hydration_id = db_operation.id
+```
+
+**Result:** Elastic moduli calculations now start successfully.
+
+### **📋 SESSION 19 FILES MODIFIED:**
+
+**Backend Service (Initial WAL approach - kept for database consistency):**
+1. `src/app/services/hydration_executor_service.py`:
+   - Line 25: Added `from sqlalchemy import text`
+   - Lines 749-757: Added WAL checkpoint after operation completion
+
+**Frontend Panel (Final filesystem approach + int fix):**
+2. `src/app/windows/panels/elastic_moduli_panel.py`:
+   - Lines 575-653: Rewrote `_load_available_hydration_operations()` to scan filesystem
+   - Lines 673-713: Updated `_on_hydration_selection_changed()` for hybrid lookup
+   - Lines 1293-1306: Fixed int() conversion bug for calculation startup
+
+**Documentation:**
+3. `CLAUDE.md` - This session documentation
+
+### **🔧 TECHNICAL INSIGHTS:**
+
+#### **SQLite WAL Mode and Cross-Connection Visibility:**
+
+**Problem:**
+- SQLite WAL mode improves concurrency by writing changes to `.db-wal` file
+- Multiple readers can access database simultaneously
+- But new connections might not see recent writes until WAL is checkpointed
+
+**Checkpoint Types:**
+- **PASSIVE**: Non-blocking, merges if possible (used in this fix)
+- **FULL**: Blocks until all changes merged
+- **RESTART**: Resets WAL file after checkpoint
+- **TRUNCATE**: Resets and truncates WAL file
+
+**When Automatic Checkpointing Happens:**
+- Database close (why restart fixed it)
+- WAL file reaches size threshold (default 1000 pages)
+- Explicit checkpoint command
+
+**Our Solution:**
+Explicit PASSIVE checkpoint after critical operations (COMPLETED status) ensures immediate visibility without blocking concurrent access.
+
+#### **Why The Refresh Button Didn't Work:**
+
+The refresh button calls `_load_available_hydration_operations()` → `elastic_moduli_service.get_available_hydration_operations()` which creates a fresh session and queries the database. This SHOULD have worked if the data was visible.
+
+The fact that even a fresh query didn't see the data confirms the issue was WAL checkpointing, not session caching or UI refresh timing.
+
+### **💡 KEY LESSONS:**
+
+**Lesson 1: User Insights Trump Technical Diagnoses**
+- I diagnosed a WAL checkpoint issue (technically correct but incomplete)
+- User asked: "Why does Hydration refresh work but not Elastic Moduli?"
+- This question revealed the real issue: design inconsistency, not just database timing
+- Solution: Match the working design instead of fixing the broken one
+
+**Lesson 2: Filesystem vs Database for Operation Discovery**
+- **Filesystem advantages**: Immediate visibility, no transaction lag, simple scanning
+- **Database advantages**: Rich metadata, status tracking, lineage information
+- **Best approach**: Hybrid - scan filesystem for discovery, query database for metadata
+- Same pattern now used in both Hydration and Elastic Moduli panels
+
+**Lesson 3: Design Consistency Across Panels**
+- When two panels serve similar purposes (discovering operations), they should use the same mechanism
+- Inconsistent designs cause user confusion and hard-to-diagnose bugs
+- Matching successful patterns is often better than fixing failing patterns
+
+**Lesson 4: WAL Checkpoint Still Valuable**
+- Even though filesystem scan solved the UI issue, WAL checkpoint remains useful
+- Ensures database consistency for other parts of the application
+- Defensive programming: multiple layers of correctness
+
+**Lesson 5: "Works After Restart" Can Have Multiple Causes**
+- Session 18: Particle shapes - background extraction not finished (UI cache issue)
+- Session 19: Elastic Moduli - database query vs filesystem reality (design issue)
+- Both manifested identically to the user but required different solutions
+- Don't assume similar symptoms have the same root cause
+
+### **🎯 CURRENT STATUS:**
+
+**✅ FILESYSTEM-BASED REFRESH IMPLEMENTED**
+- Elastic Moduli panel now scans operations directory (same as Hydration panel)
+- Hybrid approach: filesystem for discovery, database for metadata
+- No dependency on WAL checkpoint timing
+- Consistent design across all panels
+
+**✅ MACOS DMG FINAL BUILD**
+- Application: `dist/VCCTL.app` (1.1 GB)
+- DMG: `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB)
+- MD5: `6591d22380f5091aece09b1cf250ed67`
+- Build time: November 11, 2025 - 20:11
+
+**✅ USER TESTING COMPLETE - ALL TESTS PASSED**
+- ✅ Hydration operations appear on first launch (filesystem scan working)
+- ✅ Elastic Moduli panel sees operations immediately (no restart needed)
+- ✅ Elastic moduli calculations start successfully (int conversion fixed)
+- ✅ All functionality working as expected
+- **User quote:** "I cannot think of anything else to test and there are no issues left for this version."
+
+### **📊 PLATFORM STATUS AFTER SESSION 19:**
+
+| Platform | Particle Shapes | Elastic Moduli Refresh | Filesystem Scan | Int Conversion Fix | Package Status | Status |
+|----------|-----------------|----------------------|-----------------|-------------------|----------------|--------|
+| macOS (ARM64) | ✅ Session 18 | ✅ Session 19 | ✅ Session 19 | ✅ Session 19 | ✅ Tested (672 MB) | **READY FOR RELEASE** |
+| Windows (x64) | ⏳ Not applied | ⏳ Not applied | ⏳ Not applied | ⏳ Not applied | ⏳ Rebuild needed | **Next session** |
+
+### **📝 WINDOWS SESSION 20 CHECKLIST:**
+
+**CRITICAL: Run pre-session sync first to get all Session 18 & 19 changes!**
+
+**Step 1: Verify Code Changes (All are cross-platform Python):**
+
+These files were modified in Sessions 18-19 and need to be included in Windows build:
+
+1. ✅ `src/app/services/microstructure_service.py` - Session 18: `refresh_shape_sets()` method
+2. ✅ `src/app/services/directories_service.py` - Session 18: Background extraction refresh trigger
+3. ✅ `src/app/windows/panels/mix_design_panel.py` - Session 18: `refresh_shape_sets()` method
+4. ✅ `src/app/windows/main_window.py` - Session 18: Tab names updated, Files tab removed
+5. ✅ `src/app/services/hydration_executor_service.py` - Session 19: WAL checkpoint after completion
+6. ✅ `src/app/windows/panels/elastic_moduli_panel.py` - Session 19: Filesystem scan + int fix
+
+**Step 2: Verify Database (Cross-platform):**
+
+7. ✅ `src/data/database/vcctl.db` - Session 18: 12 particle shape sets matching tar.gz
+8. ✅ Check `distribution/vcctl-seed-database.db` exists and matches
+
+**Step 3: Build Windows Package:**
+
+```bash
+# From Git Bash on Windows
+cd /c/Users/jwbullard/Software/vcctl-gtk
+
+# Set PATH for MSYS2 GTK libraries (CRITICAL!)
+export PATH="/c/msys64/mingw64/bin:$PATH"
+
+# Build with PyInstaller
+python.exe -m PyInstaller vcctl-windows.spec --clean --noconfirm
+```
+
+**Step 4: Test on Windows (Same tests as macOS):**
+
+**Test 1 - Particle Shapes (Session 18 fix):**
+- ✅ Launch app → extraction dialog appears
+- ✅ Go to Mix Design tab
+- ✅ **VERIFY:** All 12 particle shape sets appear in dropdown (not just Cement 140)
+- ✅ No restart needed
+
+**Test 2 - Elastic Moduli Refresh (Session 19 fix):**
+- ✅ Create microstructure
+- ✅ Run hydration operation → wait for completion
+- ✅ Go to Elastic Moduli tab
+- ✅ Click refresh button
+- ✅ **VERIFY:** Hydration operation appears in dropdown immediately (no restart needed)
+
+**Test 3 - Elastic Moduli Calculation (Session 19 int fix):**
+- ✅ Select the hydration operation
+- ✅ Fill in elastic moduli parameters
+- ✅ Click "Start Calculation"
+- ✅ **VERIFY:** No error about "invalid literal for int()"
+- ✅ **VERIFY:** Calculation starts successfully
+
+**Test 4 - UI Polish (Session 18 fixes):**
+- ✅ Click through all tabs
+- ✅ **VERIFY:** Files tab is gone (removed in Session 18)
+- ✅ Click on Elastic Moduli tab
+- ✅ **VERIFY:** Status bar says "Switched to Elastic Moduli tab" (not "Hydration")
+
+**Step 5: Known Windows-Specific Differences:**
+
+These are **expected differences** on Windows (not bugs):
+- ❌ No libharfbuzz fix needed (that's macOS-only)
+- ✅ Console window appears (this is normal, can be hidden later with `console=False` in spec)
+- ✅ Executables bundled from `backend/bin-windows/` (not `backend/build/`)
+
+**Step 6: If All Tests Pass:**
+
+```bash
+# Package is ready for distribution testing
+# Consider creating Windows installer with Inno Setup or similar
+```
+
+**Estimated Time:** 30-45 minutes (build ~5 min, testing ~25-40 min)
+
+### **⏰ SESSION END:**
+
+**✅ ALL macOS TESTING COMPLETE - READY FOR RELEASE**
+
+User tested on clean Mac installation:
+- ✅ Particle shapes (12/12 appear on first launch)
+- ✅ Elastic Moduli refresh (operations appear immediately)
+- ✅ Elastic Moduli calculations (start successfully)
+- ✅ All functionality verified working
+
+**Files Modified This Session (3 files):**
+- `src/app/services/hydration_executor_service.py` (WAL checkpoint - supplementary fix)
+- `src/app/windows/panels/elastic_moduli_panel.py` (Filesystem scan + int conversion fix)
+- `CLAUDE.md` (this documentation + Windows Session 20 checklist)
+
+**Final Build Artifacts:**
+- `dist/VCCTL.app` (1.1 GB macOS application)
+- `VCCTL-10.0.0-macOS-arm64.dmg` (672 MB DMG, MD5: 6591d22380f5091aece09b1cf250ed67)
+
+**Next Session:** Windows build with Sessions 18-19 fixes (comprehensive checklist added above)
+
+**Git Status:** Ready for commit and push. Will switch to Windows next session.
+
+**Key Takeaway:** User's insight about design consistency led to a better solution than the initial technical diagnosis. Filesystem-based refresh is simpler, more reliable, and matches existing panel behavior. Testing discovered additional int conversion bug, fixed immediately.
 
 ---
 

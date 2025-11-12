@@ -22,6 +22,8 @@ from typing import Optional, Dict, Any, List, Callable
 from datetime import datetime
 from enum import Enum
 
+from sqlalchemy import text
+
 from app.models.operation import Operation, OperationStatus, OperationType
 from app.services.hydration_parameters_service import HydrationParametersService
 from app.database.service import DatabaseService
@@ -721,7 +723,7 @@ class HydrationExecutorService:
         try:
             with self.database_service.get_session() as session:
                 operation = session.query(Operation).filter_by(name=operation_name).first()
-                
+
                 # Create operation if it doesn't exist
                 if not operation:
                     self.logger.info(f"Creating new operation: {operation_name}")
@@ -732,7 +734,7 @@ class HydrationExecutorService:
                     )
                     session.add(operation)
                     session.flush()  # Ensure operation gets an ID
-                
+
                 # Update status
                 operation.status = status.value
                 if status == OperationStatus.RUNNING:
@@ -743,8 +745,19 @@ class HydrationExecutorService:
                     operation.mark_error("Hydration simulation failed")
                 elif status == OperationStatus.CANCELLED:
                     operation.mark_cancelled()
-                    
+
                 session.commit()
+
+                # Force SQLite WAL checkpoint after marking operation completed
+                # This ensures changes are immediately visible to other connections
+                if status == OperationStatus.COMPLETED:
+                    try:
+                        session.execute(text("PRAGMA wal_checkpoint(PASSIVE)"))
+                        session.commit()
+                        self.logger.info(f"WAL checkpoint completed for operation: {operation_name}")
+                    except Exception as checkpoint_error:
+                        self.logger.warning(f"WAL checkpoint failed (non-critical): {checkpoint_error}")
+
         except Exception as e:
             self.logger.error(f"Error updating operation status for '{operation_name}': {e}")
     

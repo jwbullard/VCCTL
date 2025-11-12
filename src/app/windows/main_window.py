@@ -1217,6 +1217,9 @@ This GTK3 desktop application provides an intuitive interface for:</span>
             if tab_name == "Results" and hasattr(self, 'results_panel'):
                 # Refresh the results panel when it becomes visible
                 self.results_panel.on_show()
+            elif tab_name == "Elastic Moduli" and hasattr(self, 'panels') and 'elastic_moduli' in self.panels:
+                # Refresh the elastic moduli panel when it becomes visible
+                self.panels['elastic_moduli'].refresh()
     
     def switch_to_tab(self, tab_name: str) -> bool:
         """Switch to a specific tab by name."""

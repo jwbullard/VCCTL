@@ -573,28 +573,84 @@ class ElasticModuliPanel(Gtk.Box):
         parent.pack_start(button_box, False, False, 0)
 
     def _load_available_hydration_operations(self) -> None:
-        """Load available completed hydration operations."""
+        """Load available completed hydration operations by scanning filesystem."""
         try:
-            self.available_hydration_operations = (
-                self.elastic_moduli_service.get_available_hydration_operations()
-            )
+            import os
+            from pathlib import Path
 
-            # Clear and populate combo box
+            # Clear combo box
             self.hydration_combo.remove_all()
-            for operation in self.available_hydration_operations:
-                display_text = f"{operation.name} ({operation.completed_at.strftime('%m/%d %H:%M') if operation.completed_at else 'Unknown'})"
-                self.hydration_combo.append(str(operation.id), display_text)
 
-            if not self.available_hydration_operations:
-                self.hydration_combo.append(
-                    "", "No completed hydration operations found"
-                )
+            # Get operations directory from configuration
+            operations_dir = self.service_container.directories_service.get_operations_path()
+            if not operations_dir.exists():
+                self.logger.warning(f"Operations folder not found: {operations_dir}")
+                self.hydration_combo.append("", "No completed hydration operations found")
                 self.hydration_combo.set_sensitive(False)
+                self.available_hydration_operations = []
+                return
+
+            # Scan filesystem for completed hydration operations
+            hydration_operations = []
+
+            for operation_path in operations_dir.iterdir():
+                if not operation_path.is_dir():
+                    continue
+
+                operation_name = operation_path.name
+
+                # Check for hydration output files
+                # Look for HydrationOf_*.csv or HydrationOf_*.mov files
+                csv_files = list(operation_path.glob("HydrationOf_*.csv"))
+                mov_files = list(operation_path.glob("HydrationOf_*.mov"))
+                progress_file = operation_path / "progress.json"
+
+                # Consider it a hydration operation if it has at least 2 of the 3 expected files
+                files_found = 0
+                if csv_files and any(f.stat().st_size > 0 for f in csv_files):
+                    files_found += 1
+                if mov_files and any(f.stat().st_size > 0 for f in mov_files):
+                    files_found += 1
+                if progress_file.exists() and progress_file.stat().st_size > 0:
+                    files_found += 1
+
+                if files_found >= 2:
+                    # Get modification time for sorting
+                    mtime = operation_path.stat().st_mtime
+                    hydration_operations.append({
+                        'name': operation_name,
+                        'path': operation_path,
+                        'mtime': mtime
+                    })
+                    self.logger.debug(f"Found completed hydration operation: {operation_name}")
+
+            # Sort by modification time (most recent first)
+            hydration_operations.sort(key=lambda x: x['mtime'], reverse=True)
+
+            # Store for later use
+            self.available_hydration_operations = hydration_operations
+
+            # Populate combo box
+            for op in hydration_operations:
+                # Try to get timestamp from database for display, fallback to filesystem mtime
+                from datetime import datetime
+                timestamp_str = datetime.fromtimestamp(op['mtime']).strftime('%m/%d %H:%M')
+                display_text = f"{op['name']} ({timestamp_str})"
+                self.hydration_combo.append(op['name'], display_text)
+
+            if not hydration_operations:
+                self.hydration_combo.append("", "No completed hydration operations found")
+                self.hydration_combo.set_sensitive(False)
+            else:
+                self.hydration_combo.set_sensitive(True)
 
         except Exception as e:
             self.logger.error(f"Error loading hydration operations: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
             self.hydration_combo.append("", "Error loading operations")
             self.hydration_combo.set_sensitive(False)
+            self.available_hydration_operations = []
 
     def _on_refresh_hydration_operations(self, button: Gtk.Button) -> None:
         """Refresh the list of available hydration operations."""
@@ -626,19 +682,31 @@ class ElasticModuliPanel(Gtk.Box):
             return
 
         try:
-            hydration_id = int(active_id)
+            # active_id is now the operation name (filesystem-based)
+            operation_name = active_id
             hydration_operation = next(
                 (
                     op
                     for op in self.available_hydration_operations
-                    if op.id == hydration_id
+                    if op['name'] == operation_name
                 ),
                 None,
             )
 
             if hydration_operation:
-                # Phase 2: Load lineage and microstructures
-                self._load_lineage_and_microstructures(hydration_id)
+                # Look up the operation in the database to get its ID for lineage
+                from app.models.operation import Operation
+                with self.service_container.database_service.get_session() as session:
+                    db_operation = session.query(Operation).filter_by(name=operation_name).first()
+                    hydration_id = db_operation.id if db_operation else None
+
+                if hydration_id:
+                    # Phase 2: Load lineage and microstructures
+                    self._load_lineage_and_microstructures(hydration_id)
+                else:
+                    self.logger.warning(f"Hydration operation '{operation_name}' found on filesystem but not in database")
+                    # Still allow selection, but without lineage
+                    self.microstructure_combo.set_sensitive(True)
 
         except Exception as e:
             self.logger.error(f"Error handling hydration selection: {e}")
@@ -1222,7 +1290,20 @@ class ElasticModuliPanel(Gtk.Box):
                 self._show_error_dialog("Please select a hydrated microstructure")
                 return
 
-            hydration_id = int(self.hydration_combo.get_active_id())
+            # Get hydration operation name from combo box (now stores names, not IDs)
+            hydration_name = self.hydration_combo.get_active_id()
+            if not hydration_name:
+                self._show_error_dialog("Please select a hydration operation")
+                return
+
+            # Look up hydration operation ID in database
+            from app.models.operation import Operation
+            with self.service_container.database_service.get_session() as session:
+                db_operation = session.query(Operation).filter_by(name=hydration_name).first()
+                if not db_operation:
+                    self._show_error_dialog(f"Hydration operation '{hydration_name}' not found in database")
+                    return
+                hydration_id = db_operation.id
 
             # Phase 3: Capture UI parameters for storage
             ui_parameters = self._capture_elastic_ui_parameters()
