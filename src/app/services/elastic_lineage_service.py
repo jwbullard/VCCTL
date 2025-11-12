@@ -528,14 +528,24 @@ class ElasticLineageService:
         all_files = list(hydration_dir.glob("*"))
         
         img_files = []
+        # Valid combinations of Csh2flag (0-1), Adiaflag (0,1,2), Sealed (0-1)
+        valid_suffixes = [
+            '000', '001', '010', '011', '020', '021',
+            '100', '101', '110', '111', '120', '121'
+        ]
+
         for file_path in all_files:
             filename = file_path.name
             # Include hydrated microstructures but exclude original microstructure
-            # Pattern: filename.img.123.45h.XX.100 (where XX can be 23, 25, etc.)
-            if (filename.count('.') >= 3 and 
-                'h.' in filename and 
-                filename.endswith('.100') and
-                '.img.' in filename):
+            # Pattern: filename.img.{time}h.{temp}.{Csh2flag}{Adiaflag}{Sealed}
+            # Examples:
+            #   Isothermal (Adiaflag=0, Sealed=0): PLC-C109.img.24.00h.23.100
+            #   Temperature profile (Adiaflag=2, Sealed=1): PLC-C109.img.24.00h.15.121
+            #   Adiabatic (Adiaflag=1, Sealed=0): PLC-C109.img.24.00h.25.110
+            if (filename.count('.') >= 3 and
+                'h.' in filename and
+                '.img.' in filename and
+                any(filename.endswith('.' + suffix) for suffix in valid_suffixes)):
                 img_files.append(file_path)
             # Also include HydrationOf_* files
             elif filename.startswith('HydrationOf_') and '.img.' in filename:
