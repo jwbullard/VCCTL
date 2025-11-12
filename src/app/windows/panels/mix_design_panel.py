@@ -10,6 +10,7 @@ import gi
 import logging
 import random
 import os
+import sys
 import json
 import subprocess
 import threading
@@ -3459,16 +3460,20 @@ class MixDesignPanel(Gtk.Box):
                          open(stdout_log, 'w') as stdout_f, \
                          open(stderr_log, 'w') as stderr_f:
                         
-                        process = subprocess.Popen(
-                            [genmic_path],
-                            stdin=input_f,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            text=True,
-                            cwd=output_dir,
-                            bufsize=1,  # Line buffered
-                            universal_newlines=True
-                        )
+                        popen_kwargs = {
+                            'stdin': input_f,
+                            'stdout': subprocess.PIPE,
+                            'stderr': subprocess.PIPE,
+                            'text': True,
+                            'cwd': output_dir,
+                            'bufsize': 1,  # Line buffered
+                            'universal_newlines': True
+                        }
+                        # Hide console window on Windows
+                        if sys.platform == 'win32':
+                            popen_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+                        process = subprocess.Popen([genmic_path], **popen_kwargs)
                         
                         # Monitor progress in real-time
                         self._monitor_genmic_progress(process, stdout_f, stderr_f, operations_panel, operation_id, output_dir)

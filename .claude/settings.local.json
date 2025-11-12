@@ -51,7 +51,8 @@
       "Bash(open:*)",
       "Bash(if ps aux)",
       "Bash(then echo '✅ App launched successfully!')",
-      "Bash(hdiutil create:*)"
+      "Bash(hdiutil create:*)",
+      "Bash(PATH=\"/c/msys64/mingw64/bin:$PATH\" python.exe:*)"
     ],
     "deny": [],
     "ask": []

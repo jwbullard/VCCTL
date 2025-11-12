@@ -13,6 +13,7 @@ import time
 import threading
 import subprocess
 import signal
+import sys
 import os
 import psutil
 from datetime import datetime, timedelta
@@ -3454,16 +3455,20 @@ class OperationsMonitoringPanel(Gtk.Box):
             stderr_handle = open(stderr_file, 'w', encoding='utf-8', buffering=1)
             
             # Start the actual process with file redirection
-            process = subprocess.Popen(
-                command,
-                cwd=working_dir,
-                stdin=subprocess.PIPE if input_data else None,
-                stdout=stdout_handle,
-                stderr=stderr_handle,
-                text=True,
-                bufsize=1,
-                universal_newlines=True
-            )
+            popen_kwargs = {
+                'cwd': working_dir,
+                'stdin': subprocess.PIPE if input_data else None,
+                'stdout': stdout_handle,
+                'stderr': stderr_handle,
+                'text': True,
+                'bufsize': 1,
+                'universal_newlines': True
+            }
+            # Hide console window on Windows
+            if sys.platform == 'win32':
+                popen_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+            process = subprocess.Popen(command, **popen_kwargs)
             
             # Send input data if provided
             if input_data:

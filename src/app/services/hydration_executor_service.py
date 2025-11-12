@@ -319,24 +319,32 @@ class HydrationExecutorService:
             
             if self.json_progress_support:
                 # Future: Direct command-line execution
-                process = subprocess.Popen(
-                    cmd,
-                    cwd=str(operation_dir),
-                    stdout=open(stdout_log, 'w'),
-                    stderr=open(stderr_log, 'w'),
-                    text=True
-                )
+                popen_kwargs = {
+                    'cwd': str(operation_dir),
+                    'stdout': open(stdout_log, 'w'),
+                    'stderr': open(stderr_log, 'w'),
+                    'text': True
+                }
+                # Hide console window on Windows
+                if sys.platform == 'win32':
+                    popen_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+                process = subprocess.Popen(cmd, **popen_kwargs)
                 progress_file_path = str(operation_dir / "progress.json")
             else:
                 # Current: Interactive mode with parameter file input via stdin
-                process = subprocess.Popen(
-                    cmd,
-                    cwd=str(operation_dir),
-                    stdin=subprocess.PIPE,
-                    stdout=open(stdout_log, 'w'),
-                    stderr=open(stderr_log, 'w'),
-                    text=True
-                )
+                popen_kwargs = {
+                    'cwd': str(operation_dir),
+                    'stdin': subprocess.PIPE,
+                    'stdout': open(stdout_log, 'w'),
+                    'stderr': open(stderr_log, 'w'),
+                    'text': True
+                }
+                # Hide console window on Windows
+                if sys.platform == 'win32':
+                    popen_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
+                process = subprocess.Popen(cmd, **popen_kwargs)
                 
                 # Send parameter file name to stdin
                 process.stdin.write(f"{param_file.name}\\n")
