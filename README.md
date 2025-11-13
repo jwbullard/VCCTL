@@ -4,7 +4,7 @@ Virtual Cement and Concrete Testing Laboratory (VCCTL) - Native Desktop Applicat
 
 ## Overview
 
-This is the GTK3/Python desktop version of the VCCTL (Virtual Cement and Concrete Testing Laboratory) developed by NIST's Building and Fire Research Laboratory. The application provides a comprehensive virtual laboratory for modeling and simulating cement and concrete materials.
+This is the GTK3/Python desktop version of the VCCTL (Virtual Cement and Concrete Testing Laboratory) originally developed at NIST's Building and Fire Research Laboratory. The application provides a virtual laboratory for modeling and simulating cement and concrete materials.
 
 ## Features
 
@@ -63,7 +63,7 @@ See `requirements.txt` for complete list of dependencies.
 
 ### Production Installation
 
-Coming soon: AppImage (Linux), Windows installer, and macOS app bundle.
+Windows installer, and macOS app bundle.
 
 ## Project Structure
 
@@ -86,46 +86,41 @@ vcctl-gtk/
 └── README.md                  # This file
 ```
 
-## Development
-
-### Running Tests
-```bash
-pytest src/tests/
-```
-
-### Code Formatting
-```bash
-black src/
-```
-
-### Type Checking
-```bash
-mypy src/
-```
-
-### Linting
-```bash
-flake8 src/
-```
-
 ## Contributing
 
-This project follows NIST software development guidelines. Please ensure all code:
-- Follows PEP 8 style guidelines
-- Includes appropriate type hints
-- Has comprehensive test coverage
-- Is properly documented
+Contact the development team with suggestions for new or better features, including
+code to implement those features. The develpment team can be contacted at
+[jwbullard@tamu.edu](mailto:jwbullard@tamu.edu)
 
 ## License
 
-This software was developed by NIST employees and is not subject to copyright protection in the United States. This software may be subject to foreign copyright. The identification of certain commercial equipment, instruments, or materials does not imply recommendation or endorsement by NIST, nor does it imply that the materials or equipment identified are necessarily the best available for the purpose.
+Copyright (c) 2020-present Jeffrey W. Bullard
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the “Software”), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom
+the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Contact
 
-For questions or support, please contact the VCCTL development team at:
-- Email: vcctl@nist.gov
-- Website: https://vcctl.nist.gov/
+For questions or support, please contact the VCCTL development team at
+[jwbullard@tamu.edu](mailto:jwbullard@tamu.edu)
 
 ## Acknowledgments
 
-This desktop application is a conversion of the original VCCTL web application developed by NIST's Building and Fire Research Laboratory. The conversion maintains all functionality while providing a native desktop experience using GTK3 and Python.
+This desktop application is a conversion and augmentation of the original VCCTL web application originally developed by NIST's Building and Fire Research Laboratory. The conversion maintains much of the original functionality while adding new features and providing a native desktop experience using GTK3 and Python. VCCTL's principal developers are Dale P. Bentz (NIST, retired), Edward J. Garboczi (NIST, retired), and Jeffrey W. Bullard (formerly NIST, currently Texas A&M University).
