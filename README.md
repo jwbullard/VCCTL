@@ -89,7 +89,7 @@ vcctl-gtk/
 ## Contributing
 
 Contact the development team with suggestions for new or better features, including
-code to implement those features. The develpment team can be contacted at
+code to implement those features. The development team can be contacted at
 [jwbullard@tamu.edu](mailto:jwbullard@tamu.edu)
 
 ## License
