@@ -18,7 +18,7 @@ This is the GTK3/Python desktop version of the VCCTL (Virtual Cement and Concret
 ## Requirements
 
 ### System Requirements
-- **Operating System**: Linux (primary), Windows 10+, macOS 10.14+
+- **Operating System**: Windows 10+, macOS 10.14+
 - **Python**: 3.8+ (recommended 3.11+)
 - **GTK3**: 3.24+
 - **Memory**: 512MB RAM minimum, 1GB recommended
